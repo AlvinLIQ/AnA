@@ -2,7 +2,6 @@
 #include "Headers/AnA_Instance.h"
 
 #include <stdexcept>
-#include <vulkan/vulkan_core.h>
 
 using namespace AnA;
 
