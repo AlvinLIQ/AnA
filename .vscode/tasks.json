@@ -1,0 +1,21 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "clang++ build(linux)",
+            "type": "shell",
+            "command": "/usr/bin/clang++",
+            "args": ["-std=c++20", "-lvulkan", "-lglfw", "${workspaceFolder}/Src/Core/*.cpp", "-o", "${workspaceFolder}/${workspaceFolderBasename}"],
+            "options": {
+                "cwd": "/usr/bin"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Task genrated by Debugger."
+        }
+    ]
+}
