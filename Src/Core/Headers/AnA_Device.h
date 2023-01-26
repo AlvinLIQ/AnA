@@ -15,7 +15,7 @@ namespace AnA
         AnA_Device(VkInstance mInstance, VkSurfaceKHR mSurface);
         ~AnA_Device();
 
-        void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& deviceMemory);
+        void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &buffer, VkDeviceMemory &deviceMemory);
 
         struct QueueFamilyIndices
         {
@@ -29,8 +29,8 @@ namespace AnA
 
         QueueFamilyIndices GetQueueFamiliesForCurrent();
 
-        VkQueue& GetGraphicsQueue();
-        VkQueue& GetPresentQueue();
+        VkQueue &GetGraphicsQueue();
+        VkQueue &GetPresentQueue();
         
         QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
 
@@ -43,8 +43,8 @@ namespace AnA
 
         SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device);
 
-        VkDevice& GetLogicalDevice();
-        VkPhysicalDevice& GetPhysicalDevice();
+        VkDevice &GetLogicalDevice();
+        VkPhysicalDevice &GetPhysicalDevice();
     private:
         VkInstance instance;
         VkSurfaceKHR surface;

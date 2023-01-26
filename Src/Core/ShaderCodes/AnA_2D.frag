@@ -8,13 +8,11 @@ layout(push_constant) uniform Push {
     vec3 color;
 } push;
 
-float rect(vec2 uv, float l, float t, float r, float b, float blur)
+float rect(vec2 uv, float l, float t, float r, float b)
 {
-    float c;
-    c = smoothstep(uv.x, uv.x - blur, l) 
-        - smoothstep(uv.x, uv.x - blur, r)
-        - smoothstep(t, t - blur, uv.y)
-        - smoothstep(uv.y, uv.y - blur, b);
+    float c = 0.;
+    if (l <= uv.x && r >= uv.x && t <= uv.y && b >= uv.y)
+        c = 1.;
     return c;
 }
 
@@ -30,14 +28,17 @@ float circle(vec2 uv, vec2 center, float radius)
     return c;
 }
 
-float rounded_rect(vec2 uv, float l, float t, float r, float b, float blur, float radius)
+float rounded_rect(vec2 uv, float l, float t, float r, float b, float radius)
 {
     float c;
-    c = rect(uv, l, t, r, b, blur) - rect(uv, l, t, l + radius, t + radius, blur)
-    - rect(uv, r - radius, t, r, t + radius, blur) - rect(uv, l, b - radius, l + radius, b, blur)
-    - rect(uv, r - radius, b - radius, r, b, blur);
+    c = rect(uv, l, t, r, b) - rect(uv, l, t, l + radius, t + radius)
+        - rect(uv, l, b - radius, l + radius, b) - rect(uv, r - radius, t, r, t + radius)
+        - rect(uv, r - radius, b - radius, r, b);
+    
     c += circle(uv, vec2(l + radius, t + radius), radius) + circle(uv, vec2(r - radius, t + radius), radius)
-    + circle(uv, vec2(l + radius, b - radius), radius) + circle(uv, vec2(r - radius, b - radius), radius);
+        + circle(uv, vec2(l + radius, b - radius), radius) + circle(uv, vec2(r - radius, b - radius), radius);
+    if (c >= 1.)
+        c = 1.;
     return c;
 }
 
@@ -46,7 +47,7 @@ void main() {
     uv.x /= 3./4.;
     
     float c;
-    c = rect(uv, 0.4, 0.4, 0.6, 0.6, 0.005);
+    c = rounded_rect(uv, 0.4, 0.4, 0.6, 0.6, 0.03);
     vec3 color = c * push.color; 
     outColor = vec4(color, 1.0);
 }
