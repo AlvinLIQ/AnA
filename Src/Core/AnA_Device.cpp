@@ -17,7 +17,7 @@ AnA_Device::~AnA_Device()
     vkDestroyDevice(logicalDevice, nullptr);
 }
 
-void AnA_Device::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& deviceMemory)
+void AnA_Device::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &buffer, VkDeviceMemory &deviceMemory)
 {
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -70,7 +70,7 @@ AnA_Device::QueueFamilyIndices AnA_Device::FindQueueFamilies(VkPhysicalDevice de
     int i = 0;
     for (const auto &queueFamily : queueFamilies)
     {
-        if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+        if (queueFamily.queueFlags  &VK_QUEUE_GRAPHICS_BIT)
         {
             indices.graphicsFamily = i;
         }
@@ -172,10 +172,10 @@ bool AnA_Device::isDeviceSuitable(VkPhysicalDevice device)
     if (extSupported)
     {
         SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport(device);
-        swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
+        swapChainAdequate = !swapChainSupport.formats.empty() &&!swapChainSupport.presentModes.empty();
     }
 
-    return indices.isComplete() && extSupported && swapChainAdequate;
+    return indices.isComplete() &&extSupported &&swapChainAdequate;
 }
 
 void AnA_Device::createLogicalDevice()
@@ -230,8 +230,8 @@ uint32_t AnA_Device::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags p
     vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
     for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
     {
-      if ((typeFilter & (1 << i)) &&
-          (memProperties.memoryTypes[i].propertyFlags & properties) ==
+      if ((typeFilter  &(1 << i)) &&
+          (memProperties.memoryTypes[i].propertyFlags  &properties) ==
               properties)
         {
             return i;
