@@ -17,7 +17,7 @@ namespace AnA
     class AnA_SwapChain
     {
     public:
-        AnA_SwapChain(AnA_Device* mDevice, VkSurfaceKHR mSurface, GLFWwindow* mWindow);
+        AnA_SwapChain(AnA_Device *&mDevice, VkSurfaceKHR &mSurface, GLFWwindow *&mWindow);
         ~AnA_SwapChain();
 
         VkResult AcquireNextImage(uint32_t* pImageIndex);

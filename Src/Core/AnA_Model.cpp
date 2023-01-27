@@ -6,9 +6,8 @@
 
 using namespace AnA;
 
-AnA_Model::AnA_Model(AnA_Device* mDevice, const std::vector<Vertex> &vertices)
+AnA_Model::AnA_Model(AnA_Device *&mDevice, const std::vector<Vertex> &vertices) : aDevice{mDevice}
 {
-    aDevice = mDevice;
     createVertexBuffers(vertices);
 }
 

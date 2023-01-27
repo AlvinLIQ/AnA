@@ -25,7 +25,7 @@ namespace AnA
         AnA_Instance();
         ~AnA_Instance();
 
-        VkInstance GetInstance();
+        VkInstance &GetInstance();
     private:
         VkInstance instance;
         void createInstance();

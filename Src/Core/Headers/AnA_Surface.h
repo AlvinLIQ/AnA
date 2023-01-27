@@ -21,7 +21,7 @@ namespace AnA
             vkDestroySurfaceKHR(instance, surface, nullptr);
         }
 
-        VkSurfaceKHR GetSurface()
+        VkSurfaceKHR &GetSurface()
         {
             return surface;
         }

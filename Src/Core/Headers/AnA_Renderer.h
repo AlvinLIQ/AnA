@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AnA_Device.h"
 #include "AnA_Object.h"
 #include "AnA_Window.h"
 #include "AnA_SwapChain.h"
@@ -11,7 +12,7 @@ namespace AnA
     class AnA_Renderer
     {
     public:
-        AnA_Renderer();
+        AnA_Renderer(AnA_Window*& mWindow, AnA_Device*& mDevice);
         ~AnA_Renderer();
 
         void Cleanup();
@@ -22,8 +23,8 @@ namespace AnA
         }
 
     private:
-        AnA_Window* aWindow;
-        AnA_Device* aDevice;
+        AnA_Window*& aWindow;
+        AnA_Device*& aDevice;
         AnA_SwapChain* aSwapChain;
 
         void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);

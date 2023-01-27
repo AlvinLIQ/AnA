@@ -17,7 +17,7 @@ namespace AnA
         void StartLoop();
         void CloseLoop();
 
-        GLFWwindow* GetGLFWwindow()
+        GLFWwindow *&GetGLFWwindow()
         {
             return window;
         }
