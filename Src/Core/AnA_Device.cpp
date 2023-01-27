@@ -5,10 +5,8 @@
 
 using namespace AnA;
 
-AnA_Device::AnA_Device(VkInstance mInstance, VkSurfaceKHR mSurface)
+AnA_Device::AnA_Device(VkInstance &mInstance, VkSurfaceKHR &mSurface) : instance {mInstance}, surface {mSurface}
 {
-    instance = mInstance;
-    surface = mSurface;
     pickPhysicalDevice();
     createLogicalDevice();
 }

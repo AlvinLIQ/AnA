@@ -12,7 +12,7 @@ namespace AnA
     class AnA_Device
     {
     public:
-        AnA_Device(VkInstance mInstance, VkSurfaceKHR mSurface);
+        AnA_Device(VkInstance &mInstance, VkSurfaceKHR &mSurface);
         ~AnA_Device();
 
         void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &buffer, VkDeviceMemory &deviceMemory);
@@ -46,8 +46,8 @@ namespace AnA
         VkDevice &GetLogicalDevice();
         VkPhysicalDevice &GetPhysicalDevice();
     private:
-        VkInstance instance;
-        VkSurfaceKHR surface;
+        VkInstance& instance;
+        VkSurfaceKHR& surface;
         VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
         void pickPhysicalDevice();
 

@@ -2,11 +2,9 @@
 
 using namespace AnA;
 
-AnA_SwapChain::AnA_SwapChain(AnA_Device *mDevice, VkSurfaceKHR mSurface, GLFWwindow *mWindow)
+AnA_SwapChain::AnA_SwapChain(AnA_Device *&mDevice, 
+    VkSurfaceKHR &mSurface, GLFWwindow *&mWindow) : aDevice{mDevice}, surface {mSurface}, window {mWindow}
 {
-    aDevice = mDevice;
-    surface = mSurface;
-    window = mWindow;
     createSwapChain();
     createImageViews();
     createRenderPass();

@@ -2,11 +2,10 @@
 
 using namespace AnA;
 
-AnA_Pipeline::AnA_Pipeline(AnA_Device *mDevice, AnA_SwapChain *mSwapChain, VkPipelineLayout &mPipelineLayout)
+AnA_Pipeline::AnA_Pipeline(AnA_Device *&mDevice, 
+AnA_SwapChain *&mSwapChain, 
+VkPipelineLayout &mPipelineLayout) : aDevice {mDevice}, aSwapChain{mSwapChain}, pipelineLayout{mPipelineLayout}
 {
-    aDevice = mDevice;
-    aSwapChain = mSwapChain;
-    pipelineLayout = mPipelineLayout;
     createGraphicsPipeline("Shaders/vert.spv", "Shaders/frag.spv");
 }
 AnA_Pipeline::~AnA_Pipeline()

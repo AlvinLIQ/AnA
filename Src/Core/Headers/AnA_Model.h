@@ -23,7 +23,7 @@ namespace AnA
             static std::vector<VkVertexInputAttributeDescription> GetAttributeDescription();
         };
 
-        AnA_Model(AnA_Device* mDevice, const std::vector<Vertex> &vertices);
+        AnA_Model(AnA_Device *&mDevice, const std::vector<Vertex> &vertices);
         ~AnA_Model();
         
         void Bind(VkCommandBuffer commandBuffer);
@@ -31,7 +31,7 @@ namespace AnA
     private:
         void createVertexBuffers(const std::vector<Vertex> &vertices);
 
-        AnA_Device* aDevice;
+        AnA_Device *&aDevice;
         VkBuffer vertexBuffer;
         VkDeviceMemory vertexBufferMemory;
         uint32_t vertexCount;

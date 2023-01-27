@@ -137,16 +137,16 @@ namespace AnA
 
 
         };
-        AnA_Pipeline(AnA_Device* mDevice, AnA_SwapChain* mSwapChain, VkPipelineLayout &mPipelineLayout);
+        AnA_Pipeline(AnA_Device *&mDevice, AnA_SwapChain *&mSwapChain, VkPipelineLayout &mPipelineLayout);
         ~AnA_Pipeline();
 
         void Bind(VkCommandBuffer commandBuffer);
 
     private:
-        AnA_Device* aDevice;
-        AnA_SwapChain* aSwapChain;
+        AnA_Device *&aDevice;
+        AnA_SwapChain *&aSwapChain;
 
-        VkPipelineLayout pipelineLayout;
+        VkPipelineLayout& pipelineLayout;
         VkPipeline pipeline;//Graphics Pipeline
         void createGraphicsPipeline(const std::string &vertShaderFileName, const std::string &fragShaderFileName);
 

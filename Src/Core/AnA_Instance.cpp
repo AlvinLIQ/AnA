@@ -14,7 +14,7 @@ AnA_Instance::~AnA_Instance()
     vkDestroyInstance(instance, nullptr);
 }
 
-VkInstance AnA_Instance::GetInstance()
+VkInstance &AnA_Instance::GetInstance()
 {
     return instance;
 }
