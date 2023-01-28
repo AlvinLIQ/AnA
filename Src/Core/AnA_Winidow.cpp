@@ -1,12 +1,11 @@
 #include "Headers/AnA_Window.h"
-#include <GLFW/glfw3.h>
+#include <stdexcept>
 #include <thread>
 
 using namespace AnA;
 
 AnA_Window::AnA_Window()
 {
-    
 }
 
 AnA_Window::~AnA_Window()
@@ -16,7 +15,7 @@ AnA_Window::~AnA_Window()
     glfwTerminate();
 }
 
-int AnA_Window::Init(void* userPointer, GLFWframebuffersizefun framebufferResizeCallback)
+int AnA_Window::Init()
 {
     if (!glfwInit())
         return -1;
@@ -28,10 +27,11 @@ int AnA_Window::Init(void* userPointer, GLFWframebuffersizefun framebufferResize
     if (!window)
         return -1;
 
-    glfwSetWindowUserPointer(window, userPointer);
-    glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
+    glfwSetWindowUserPointer(window, this);
+    glfwSetFramebufferSizeCallback(window, AnA_Window::FramebufferResizeCallback);
         
     glfwMakeContextCurrent(window);
+    
     return 0;
 }
 
@@ -64,4 +64,10 @@ void AnA_Window::mainLoop()
     {
         glfwPollEvents();
     }
+}
+
+void AnA_Window::FramebufferResizeCallback(GLFWwindow* window, int width, int height)
+{
+    auto aWindow = reinterpret_cast<AnA_Window*>(glfwGetWindowUserPointer(window));
+    aWindow->FramebufferResized = true;
 }

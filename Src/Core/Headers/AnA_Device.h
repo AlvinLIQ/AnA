@@ -31,6 +31,11 @@ namespace AnA
 
         VkQueue &GetGraphicsQueue();
         VkQueue &GetPresentQueue();
+
+        VkCommandPool &GetCommandPool()
+        {
+            return commandPool;
+        }
         
         QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
 
@@ -66,5 +71,8 @@ namespace AnA
         void createLogicalDevice();
 
         uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+
+        VkCommandPool commandPool;
+        void createCommandPool();
     };
 }
