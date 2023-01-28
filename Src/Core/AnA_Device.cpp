@@ -2,6 +2,7 @@
 #include "Headers/AnA_Instance.h"
 
 #include <stdexcept>
+#include <vulkan/vulkan_core.h>
 
 using namespace AnA;
 
@@ -9,9 +10,11 @@ AnA_Device::AnA_Device(VkInstance &mInstance, VkSurfaceKHR &mSurface) : instance
 {
     pickPhysicalDevice();
     createLogicalDevice();
+    createCommandPool();
 }
 AnA_Device::~AnA_Device()
 {
+    vkDestroyCommandPool(logicalDevice, commandPool, nullptr);
     vkDestroyDevice(logicalDevice, nullptr);
 }
 
@@ -236,4 +239,18 @@ uint32_t AnA_Device::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags p
         }
     }
     throw std::runtime_error("Failed to find suitable memory type!");
+}
+
+void AnA_Device::createCommandPool()
+{
+    AnA_Device::QueueFamilyIndices queueFamilyIndices = GetQueueFamiliesForCurrent();
+
+    VkCommandPoolCreateInfo poolInfo{};
+    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+
+    if (vkCreateCommandPool(logicalDevice, &poolInfo, 
+    nullptr, &commandPool) != VK_SUCCESS)
+        throw std::runtime_error("Failed to create command pool!");
 }

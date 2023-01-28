@@ -1,11 +1,13 @@
 #pragma once
 
 #include "AnA_Device.h"
-#include "AnA_Object.h"
 #include "AnA_Window.h"
 #include "AnA_SwapChain.h"
+
+#include <cassert>
 #include <vector>
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 namespace AnA
 {
@@ -15,12 +17,30 @@ namespace AnA
         AnA_Renderer(AnA_Window*& mWindow, AnA_Device*& mDevice);
         ~AnA_Renderer();
 
-        void Cleanup();
-
         int GetFrameIndex() const
         {
             return currentFrameIndex;
         }
+
+        bool IsFrameInProgress() const
+        {
+            return isFrameStarted;
+        }
+
+        VkRenderPass GetSwapChainRenderPass() const 
+        {
+            return aSwapChain->GetRenderPass();
+        }
+        VkCommandBuffer GetCurrentCommandBuffer() const
+        {
+            assert(isFrameStarted && "Cannot get command buffer when frame not in progress!");
+            return commandBuffers[currentFrameIndex];
+        }
+
+        VkCommandBuffer BeginFrame();
+        void EndFrame();
+        void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer);
+        void EndSwapChainRenderPass(VkCommandBuffer commandBuffer);
 
     private:
         AnA_Window*& aWindow;
@@ -30,14 +50,11 @@ namespace AnA
         void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 
         std::vector<VkCommandBuffer> commandBuffers;
-        void createCommandBuffer();
+        void createCommandBuffers();
         void freeCommandBuffersMemory();
-
-        void drawFrame();
-
-        std::vector<AnA_Object*> objects;
 
         uint32_t currentImageIndex = 0;
         int currentFrameIndex = 0;
+        bool isFrameStarted = false;
     };
 }
