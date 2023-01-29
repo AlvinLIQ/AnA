@@ -37,6 +37,15 @@ namespace AnA
             return commandBuffers[currentFrameIndex];
         }
 
+        AnA_SwapChain *&GetSwapChain()
+        {
+            return aSwapChain;
+        }
+        VkExtent2D GetSwapChainExtent() const
+        {
+            return aSwapChain->GetExtent();
+        }
+
         VkCommandBuffer BeginFrame();
         void EndFrame();
         void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer);
