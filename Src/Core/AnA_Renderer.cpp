@@ -80,7 +80,7 @@ void AnA_Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer)
 {
     assert(isFrameStarted && "Can't call BeginSwapChainRenderPass while frame is not in progress!");
     assert(commandBuffer == GetCurrentCommandBuffer() && "Can't begin render pass on command buffer from a different frame!");
-    auto swapChainExtent = aSwapChain->GetExtend();
+    auto swapChainExtent = aSwapChain->GetExtent();
 
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;

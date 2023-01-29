@@ -17,6 +17,7 @@ struct SimplePushConstantData
 {
     glm::mat2 transform {1.f};
     glm::vec2 offset;
+    glm::vec2 resolution;
     alignas(16) glm::vec3 color;
 };
 
@@ -38,11 +39,10 @@ void AnA_App::Init()
     aInstance = new AnA_Instance;
     aWindow->CreateWindowSurface(aInstance);
     aDevice = new AnA_Device(aInstance->GetInstance(), aWindow->GetSurface());
-    aSwapChain = new AnA_SwapChain(aDevice, aWindow->GetSurface(), aWindow->GetGLFWwindow());
     loadObjects();
     aRenderer = new AnA_Renderer(aWindow, aDevice);
     createPipelineLayout();
-    aPipeline = new AnA_Pipeline(aDevice, aSwapChain, pipelineLayout);
+    aPipeline = new AnA_Pipeline(aDevice, aRenderer->GetSwapChain(), pipelineLayout);
 }
 
 void AnA_App::Run()
@@ -74,7 +74,6 @@ void AnA_App::Cleanup()
     {
         delete object;
     }
-    delete aSwapChain;
     delete aDevice;
     vkDestroySurfaceKHR(aInstance->GetInstance(), aWindow->GetSurface(), nullptr);
     delete aInstance;
@@ -110,6 +109,13 @@ void AnA_App::renderObjects(VkCommandBuffer commandBuffer)
         push.offset = object->Transform2D.translation;
         push.color = {0.6f, 0.6f, 0.6f};
         push.transform = object->Transform2D.mat2();
+
+/*        int width, height;
+        glfwGetFramebufferSize(aWindow->GetGLFWwindow(), &width, &height);
+        push.resolution = {(float)width, (float)height};*/
+
+        auto extent = aRenderer->GetSwapChainExtent();
+        push.resolution = {extent.width, extent.height};
 
         vkCmdPushConstants(commandBuffer, 
             pipelineLayout,

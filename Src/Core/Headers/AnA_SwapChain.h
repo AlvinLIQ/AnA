@@ -26,7 +26,7 @@ namespace AnA
 
         uint32_t CurrentFrame = 0;
 
-        VkExtent2D GetExtend();
+        VkExtent2D GetExtent();
 
         VkFormat GetFormat();
 

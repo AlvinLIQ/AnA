@@ -5,6 +5,7 @@ layout(location = 0) out vec4 outColor;
 layout(push_constant) uniform Push {
     mat2 transform;
     vec2 offset;
+    vec2 resolution;
     vec3 color;
 } push;
 
@@ -43,8 +44,8 @@ float rounded_rect(vec2 uv, float l, float t, float r, float b, float radius)
 }
 
 void main() {
-    vec2 uv = gl_FragCoord.xy / vec2(800, 600);
-    uv.x /= 3./4.;
+    vec2 uv = gl_FragCoord.xy / push.resolution;
+    uv.x /= push.resolution.y/push.resolution.x;
     
     float c;
     c = rounded_rect(uv, 0.4, 0.4, 0.6, 0.6, 0.03);

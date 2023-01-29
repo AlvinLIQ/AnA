@@ -5,7 +5,6 @@
 #include "AnA_Window.h"
 #include "AnA_Instance.h"
 #include "AnA_Device.h"
-#include "AnA_SwapChain.h"
 #include "AnA_Pipeline.h"
 #include <vector>
 #include <vulkan/vulkan.h>
@@ -27,7 +26,6 @@ namespace AnA
         AnA_Window* aWindow;
         AnA_Instance* aInstance;
         AnA_Device* aDevice;
-        AnA_SwapChain* aSwapChain;
         AnA_Pipeline* aPipeline;
         AnA_Renderer* aRenderer;
 

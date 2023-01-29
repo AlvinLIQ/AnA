@@ -5,6 +5,7 @@ layout(location = 0) in vec2 position;
 layout(push_constant) uniform Push {
     mat2 transform;
     vec2 offset;
+    vec2 resolution;
     vec3 color;
 } push;
 
