@@ -3,8 +3,8 @@
 using namespace AnA;
 
 AnA_Pipeline::AnA_Pipeline(AnA_Device *&mDevice, 
-AnA_SwapChain *&mSwapChain, 
-VkPipelineLayout &mPipelineLayout) : aDevice {mDevice}, aSwapChain{mSwapChain}, pipelineLayout{mPipelineLayout}
+VkRenderPass &mRenderPass, 
+VkPipelineLayout &mPipelineLayout) : aDevice {mDevice}, renderPass {mRenderPass}, pipelineLayout{mPipelineLayout}
 {
     createGraphicsPipeline("Shaders/vert.spv", "Shaders/frag.spv");
 }
@@ -27,7 +27,7 @@ void AnA_Pipeline::createGraphicsPipeline(const std::string &vertShaderFileName,
     VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
     VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
 
-    PipelineConfig pipelineConfig = pipelineConfig.GetDefault(vertShaderModule, fragShaderModule, pipelineLayout, aSwapChain->GetRenderPass()); 
+    PipelineConfig pipelineConfig = pipelineConfig.GetDefault(vertShaderModule, fragShaderModule, pipelineLayout, renderPass); 
 
     auto logicalDevice = aDevice->GetLogicalDevice();
 
