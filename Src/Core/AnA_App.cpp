@@ -3,6 +3,7 @@
 #include "Headers/AnA_Object.h"
 #include "Headers/AnA_Renderer.h"
 #include <GLFW/glfw3.h>
+#include <glm/detail/qualifier.hpp>
 #include <glm/fwd.hpp>
 #include <glm/gtc/constants.hpp>
 #include <iostream>
@@ -16,7 +17,9 @@ using namespace AnA;
 struct SimplePushConstantData
 {
     glm::mat2 transform {1.f};
-    glm::vec2 offset;
+    glm::uint32_t sType;
+    alignas(8) glm::vec2 offset;
+    glm::vec2 size;
     glm::vec2 resolution;
     alignas(16) glm::vec3 color;
 };
@@ -107,7 +110,7 @@ void AnA_App::renderObjects(VkCommandBuffer commandBuffer)
 
         SimplePushConstantData push{};
         push.offset = object->Transform2D.translation;
-        push.color = {0.6f, 0.6f, 0.6f};
+        push.color = object->Color;
         push.transform = object->Transform2D.mat2();
 
 /*        int width, height;
