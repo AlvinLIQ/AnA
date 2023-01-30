@@ -5,7 +5,7 @@
 #include "AnA_Window.h"
 #include "AnA_Instance.h"
 #include "AnA_Device.h"
-#include "AnA_Pipeline.h"
+#include "../RenderSystem/Headers/AnA_RenderSystem.h"
 #include <vector>
 #include <vulkan/vulkan.h>
 
@@ -26,14 +26,10 @@ namespace AnA
         AnA_Window* aWindow;
         AnA_Instance* aInstance;
         AnA_Device* aDevice;
-        AnA_Pipeline* aPipeline;
         AnA_Renderer* aRenderer;
-
-        VkPipelineLayout pipelineLayout;
-        void createPipelineLayout();
+        RenderSystems::AnA_RenderSystem* aRenderSystem;
 
         std::vector<AnA_Object*> objects;
         void loadObjects();
-        void renderObjects(VkCommandBuffer commandBuffer);
     };
 }

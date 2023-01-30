@@ -1,5 +1,4 @@
 #pragma once
-#include "AnA_SwapChain.h"
 #include "AnA_Model.h"
 
 #include <cstdint>
@@ -137,14 +136,14 @@ namespace AnA
 
 
         };
-        AnA_Pipeline(AnA_Device *&mDevice, AnA_SwapChain *&mSwapChain, VkPipelineLayout &mPipelineLayout);
+        AnA_Pipeline(AnA_Device *&mDevice, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayout);
         ~AnA_Pipeline();
 
         void Bind(VkCommandBuffer commandBuffer);
 
     private:
         AnA_Device *&aDevice;
-        AnA_SwapChain *&aSwapChain;
+        VkRenderPass &renderPass;
 
         VkPipelineLayout& pipelineLayout;
         VkPipeline pipeline;//Graphics Pipeline

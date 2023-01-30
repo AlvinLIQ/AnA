@@ -7,7 +7,7 @@
             "label": "clang++ build(linux)",
             "type": "shell",
             "command": "/usr/bin/clang++",
-            "args": ["-std=c++20", "-lvulkan", "-lglfw", "${workspaceFolder}/Src/Core/*.cpp", "-o", "${workspaceFolder}/${workspaceFolderBasename}"],
+            "args": ["-std=c++20", "-lvulkan", "-lglfw", "${workspaceFolder}/Src/Core/*.cpp", "${workspaceFolder}/Src/Core/RenderSystem/*.cpp", "-o", "${workspaceFolder}/${workspaceFolderBasename}"],
             "options": {
                 "cwd": "/usr/bin"
             },
