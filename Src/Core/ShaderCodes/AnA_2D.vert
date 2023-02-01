@@ -6,7 +6,6 @@ layout(push_constant) uniform Push {
     mat2 transform;
     uint sType;//0 Triangle 1 Rectangle 2 Circle
     vec2 offset;
-    vec2 size;
     vec2 resolution;
     vec3 color;
 } push;
