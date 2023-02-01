@@ -7,7 +7,6 @@ struct SimplePushConstantData
     glm::mat2 transform {1.f};
     glm::uint32_t sType;
     alignas(8) glm::vec2 offset;
-    glm::vec2 size;
     glm::vec2 resolution;
     alignas(16) glm::vec3 color;
 };
@@ -50,6 +49,7 @@ void AnA_RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, std::vector<
         object->Model->Bind(commandBuffer);
 
         SimplePushConstantData push{};
+        push.sType = 1;
         push.offset = object->Transform2D.translation;
         push.color = object->Color;
         push.transform = object->Transform2D.mat2();

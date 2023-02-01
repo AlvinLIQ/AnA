@@ -6,7 +6,6 @@ layout(push_constant) uniform Push {
     mat2 transform;
     uint sType;
     vec2 offset;
-    vec2 size;
     vec2 resolution;
     vec3 color;
 } push;
@@ -50,7 +49,8 @@ void main() {
     uv.x /= push.resolution.y/push.resolution.x;
     
     float c;
-    c = rounded_rect(uv, 0.4, 0.4, 0.6, 0.6, 0.03);
+    if (push.sType == 1)
+        c = 1.;
     vec3 color = c * push.color; 
     outColor = vec4(color, 1.0);
 }

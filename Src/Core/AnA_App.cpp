@@ -87,8 +87,8 @@ void AnA_App::loadObjects()
     auto rectangle = new AnA_Object;
     rectangle->Model = aModel;
     rectangle->Color = {0.8f, 0.8f, 0.8f};
-    rectangle->Transform2D.scale = {1.f, 1.f};
-    rectangle->Transform2D.rotation = 0.25f * glm::two_pi<float>();
+    rectangle->Transform2D.scale = {.3f, .2f};
+    rectangle->Transform2D.rotation = 0.f;//0.25f * glm::two_pi<float>();
     
     objects.push_back(rectangle);
 }

@@ -4,6 +4,11 @@
 #include "../../Headers/AnA_SwapChain.h"
 #include <vulkan/vulkan_core.h>
 
+#define ANA_TRIANGLE 0
+#define ANA_RECTANGLE 1
+#define ANA_CIRCLE 2
+#define ANA_CURVED_RECTANGLE 3
+
 namespace AnA
 {
     namespace RenderSystems
@@ -15,6 +20,8 @@ namespace AnA
             ~AnA_RenderSystem();
 
             void RenderObjects(VkCommandBuffer commandBuffer, std::vector<AnA_Object*> &objects);
+
+            //void CreateRectangleObject(glm::vec2 offset, glm::vec2 scalar, AnA_Object** object);
 
         private:
             AnA_Device *&aDevice;
