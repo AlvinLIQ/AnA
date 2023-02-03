@@ -2,15 +2,6 @@
 
 using namespace AnA::RenderSystems;
 
-struct SimplePushConstantData
-{
-    glm::mat2 transform {1.f};
-    glm::uint32_t sType;
-    alignas(8) glm::vec2 offset;
-    glm::vec2 resolution;
-    alignas(16) glm::vec3 color;
-};
-
 AnA_RenderSystem::AnA_RenderSystem(AnA_Device *&mDevice, AnA_SwapChain *&mSwapChain) : aDevice {mDevice}, aSwapChain {mSwapChain}
 {
     createPipelineLayout();
@@ -28,7 +19,7 @@ void AnA_RenderSystem::createPipelineLayout()
     VkPushConstantRange pushConstantRange{};
     pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
     pushConstantRange.offset = 0;
-    pushConstantRange.size = sizeof(SimplePushConstantData);
+    pushConstantRange.size = sizeof(ShapePushConstantData);
 
 
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
@@ -48,26 +39,26 @@ void AnA_RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, std::vector<
     {
         object->Model->Bind(commandBuffer);
 
-        SimplePushConstantData push{};
-        push.sType = 1;
-        push.offset = object->Transform2D.translation;
-        push.color = object->Color;
-        push.transform = object->Transform2D.mat2();
-
-/*        int width, height;
-        glfwGetFramebufferSize(aWindow->GetGLFWwindow(), &width, &height);
-        push.resolution = {(float)width, (float)height};*/
+        ShapePushConstantData push{};
 
         auto extent = aSwapChain->GetExtent();
         push.resolution = {extent.width, extent.height};
 
-        vkCmdPushConstants(commandBuffer, 
+        for (auto itemProperties : object->ItemsProperties)
+        {
+            push.sType = itemProperties.transform.sType;
+            push.offset = itemProperties.transform.translation;
+            push.transform = itemProperties.transform.mat2();
+            push.color = itemProperties.color.has_value() ? itemProperties.color.value() : object->Color;
+
+            vkCmdPushConstants(commandBuffer, 
             pipelineLayout,
             VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
             0,
-            sizeof(SimplePushConstantData),
+            sizeof(ShapePushConstantData),
             &push);
             
-        object->Model->Draw(commandBuffer);
+            object->Model->Draw(commandBuffer);
+        }
     }
 }

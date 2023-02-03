@@ -23,7 +23,7 @@ int AnA_Window::Init()
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
     
-    window = glfwCreateWindow(800, 600, "AnA", NULL, NULL);
+    window = glfwCreateWindow(1920, 1080, "AnA", NULL, NULL);
     if (!window)
         return -1;
 

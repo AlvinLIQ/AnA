@@ -18,6 +18,12 @@ float rect(vec2 uv, float l, float t, float r, float b)
     return c;
 }
 
+float rect2(vec2 uv, vec2 offset, vec2 size)
+{
+    float hw = size.x / 2., hh = size.y / 2.;
+    return rect(uv, offset.x - hw, offset.y - hh, offset.x + hw, offset.y + hh);
+}
+
 float circle(vec2 uv, vec2 center, float radius)
 {
     float c;
@@ -44,13 +50,30 @@ float rounded_rect(vec2 uv, float l, float t, float r, float b, float radius)
     return c;
 }
 
+float rounded_rect2(vec2 uv, vec2 offset, vec2 size, float radius)
+{
+    float hw = size.x / 2., hh = size.y / 2.;
+    return rounded_rect(uv, offset.x - hw, offset.y - hh, offset.x + hw, offset.y + hh, radius);
+}
+
 void main() {
     vec2 uv = gl_FragCoord.xy / push.resolution;
-    uv.x /= push.resolution.y/push.resolution.x;
-    
+    float ratio = push.resolution.y/push.resolution.x;
+    uv.x /= ratio;
     float c;
-    if (push.sType == 1)
+    switch (push.sType)
+    {
+    case 1:
         c = 1.;
+        break;
+    case 2:
+        c = circle(uv, push.offset + vec2(.5, .5), (push.resolution.y > push.resolution.x ? push.transform[0].x / ratio : push.transform[1].y) / 2);
+        break;
+    case 3:
+        c = rect2(uv, vec2(push.offset.x / ratio, push.offset.y) + vec2(.5, .5), vec2(push.transform[0].x / ratio, push.transform[1].y));
+        break;
+    }
+    
     vec3 color = c * push.color; 
     outColor = vec4(color, 1.0);
 }

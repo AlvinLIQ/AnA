@@ -44,7 +44,6 @@ void AnA_Model::Bind(VkCommandBuffer commandBuffer)
 void AnA_Model::Draw(VkCommandBuffer commandBuffer)
 {
     vkCmdDraw(commandBuffer, vertexCount, 1, 0, 0);
-
 }
 
 std::vector<VkVertexInputBindingDescription> AnA_Model::Vertex::GetBindingDescription()
