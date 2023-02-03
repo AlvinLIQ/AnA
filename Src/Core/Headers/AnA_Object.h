@@ -9,6 +9,7 @@
 #define ANA_RECTANGLE 1
 #define ANA_CIRCLE 2
 #define ANA_CURVED_RECTANGLE 3
+#define ANA_MODEL 4
 
 namespace AnA
 {
@@ -26,8 +27,6 @@ namespace AnA
         glm::vec2 scale{1.f, 1.f};
         float rotation;
 
-        uint32_t sType{ANA_RECTANGLE};
-
         glm::mat2 mat2()
         {
             const float s = glm::sin(rotation);
@@ -40,6 +39,7 @@ namespace AnA
     struct ItemProperties
     {
         Transform2D transform;
+        uint32_t sType{ANA_RECTANGLE};
         std::optional<glm::vec3> color;
     };
 
