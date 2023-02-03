@@ -89,10 +89,15 @@ void AnA_App::loadObjects()
     shapes->Color = {0.8f, 0.8f, 0.8f};
 
     ItemProperties itemProperties;
+    itemProperties.sType = ANA_RECTANGLE;
     itemProperties.color = {0.1f, 0.4f, 0.6f};
     itemProperties.transform.scale = {.2f, .4f};
     itemProperties.transform.rotation = 0.f;//0.25f * glm::two_pi<float>();
-    itemProperties.transform.translation = {.4f, .0f};
+    itemProperties.transform.translation = {.0f, .0f};
+    shapes->ItemsProperties.push_back(itemProperties);
+    itemProperties.sType = ANA_CURVED_RECTANGLE;
+    itemProperties.color = {0.6f, 0.1f, 0.4f};
+    itemProperties.transform.translation = {.1f, .0f};
     shapes->ItemsProperties.push_back(itemProperties);
     
     objects.push_back(shapes);
