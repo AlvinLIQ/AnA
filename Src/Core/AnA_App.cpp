@@ -84,11 +84,16 @@ void AnA_App::loadObjects()
     };
     auto aModel = new AnA_Model(aDevice, vertices);
 
-    auto rectangle = new AnA_Object;
-    rectangle->Model = aModel;
-    rectangle->Color = {0.8f, 0.8f, 0.8f};
-    rectangle->Transform2D.scale = {.3f, .2f};
-    rectangle->Transform2D.rotation = 0.f;//0.25f * glm::two_pi<float>();
+    auto shapes = new AnA_Object;
+    shapes->Model = aModel;
+    shapes->Color = {0.8f, 0.8f, 0.8f};
+
+    ItemProperties itemProperties;
+    itemProperties.color = {0.1f, 0.4f, 0.6f};
+    itemProperties.transform.scale = {.2f, .4f};
+    itemProperties.transform.rotation = 0.f;//0.25f * glm::two_pi<float>();
+    itemProperties.transform.translation = {.4f, .0f};
+    shapes->ItemsProperties.push_back(itemProperties);
     
-    objects.push_back(rectangle);
+    objects.push_back(shapes);
 }

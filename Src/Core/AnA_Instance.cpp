@@ -1,4 +1,5 @@
 #include "Headers/AnA_Instance.h"
+#include <GLFW/glfw3.h>
 
 using namespace AnA;
 

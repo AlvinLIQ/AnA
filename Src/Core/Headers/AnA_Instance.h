@@ -1,6 +1,5 @@
 #pragma once
 
-#include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
 #include <iostream>
 #include <vector>
@@ -14,7 +13,7 @@ namespace AnA
     };
 
     #ifdef NDEBUG
-            const bool enableValidationLayers = false;
+        const bool enableValidationLayers = false;
     #else
         const bool enableValidationLayers = true;
     #endif

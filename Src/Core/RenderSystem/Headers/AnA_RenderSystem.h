@@ -4,11 +4,6 @@
 #include "../../Headers/AnA_SwapChain.h"
 #include <vulkan/vulkan_core.h>
 
-#define ANA_TRIANGLE 0
-#define ANA_RECTANGLE 1
-#define ANA_CIRCLE 2
-#define ANA_CURVED_RECTANGLE 3
-
 namespace AnA
 {
     namespace RenderSystems

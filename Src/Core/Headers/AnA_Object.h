@@ -3,13 +3,30 @@
 #include "AnA_Model.h"
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
+#include <vector>
+
+#define ANA_TRIANGLE 0
+#define ANA_RECTANGLE 1
+#define ANA_CIRCLE 2
+#define ANA_CURVED_RECTANGLE 3
+
 namespace AnA
 {
-    struct Transform2DComponent
+    struct ShapePushConstantData
+    {
+        glm::mat2 transform {1.f};
+        glm::uint32_t sType;
+        alignas(8) glm::vec2 offset;
+        glm::vec2 resolution;
+        alignas(16) glm::vec3 color;
+    };
+    struct Transform2D
     {
         glm::vec2 translation{};
         glm::vec2 scale{1.f, 1.f};
         float rotation;
+
+        uint32_t sType{ANA_RECTANGLE};
 
         glm::mat2 mat2()
         {
@@ -20,6 +37,12 @@ namespace AnA
             return rotMatrix * scaleMat;
         }
     };
+    struct ItemProperties
+    {
+        Transform2D transform;
+        std::optional<glm::vec3> color;
+    };
+
     class AnA_Object
     {
     public:
@@ -35,7 +58,7 @@ namespace AnA
 
         AnA_Model* Model;
         glm::vec3 Color{};
-        Transform2DComponent Transform2D{};
+        std::vector<ItemProperties> ItemsProperties;
 
     private:
         id_t id;
