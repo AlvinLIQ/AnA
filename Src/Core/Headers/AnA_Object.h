@@ -43,6 +43,13 @@ namespace AnA
         std::optional<glm::vec3> color;
     };
 
+    static void CreateRectangleProperties(glm::vec2 offset, glm::vec2 size, std::optional<glm::vec3> color, ItemProperties* pRectangleProperties)
+    {
+        pRectangleProperties->sType = ANA_RECTANGLE;
+        pRectangleProperties->transform.translation = offset;
+        pRectangleProperties->transform.scale = size;
+    }
+
     class AnA_Object
     {
     public:

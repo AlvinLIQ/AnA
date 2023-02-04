@@ -1,5 +1,11 @@
 #version 450
 
+#define ANA_TRIANGLE 0
+#define ANA_RECTANGLE 1
+#define ANA_CIRCLE 2
+#define ANA_CURVED_RECTANGLE 3
+#define ANA_MODEL 4
+
 layout(location = 0) out vec4 outColor;
 
 layout(push_constant) uniform Push {
@@ -62,13 +68,13 @@ void main() {
     vec2 offset = vec2(push.offset.x + (1. - push.transform[0].x) / 2., push.offset.y + (1. - push.transform[1].y) / 2.);
     switch (push.sType)
     {
-    case 1:
+    case ANA_RECTANGLE:
         c = rect2(uv, offset, vec2(push.transform[0].x, push.transform[1].y));
         break;
-    case 2:
+    case ANA_CIRCLE:
         c = circle(uv, push.offset + vec2(.5, .5), (push.resolution.y > push.resolution.x ? push.transform[0].x : push.transform[1].y));
         break;
-    case 3:
+    case ANA_CURVED_RECTANGLE:
         c = rounded_rect2(uv, offset, vec2(push.transform[0].x, push.transform[1].y), 0.03);
         break;
     }

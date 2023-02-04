@@ -102,7 +102,13 @@ namespace AnA
 
                 dConfig.colorBlendAttachment.colorWriteMask =
                     VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-                dConfig.colorBlendAttachment.blendEnable = VK_FALSE;
+                dConfig.colorBlendAttachment.blendEnable = VK_TRUE;
+                dConfig.colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+                dConfig.colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+                dConfig.colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD; // Optional
+                dConfig.colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE; // Optional
+                dConfig.colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
+                dConfig.colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD; // Optional
 
                 dConfig.colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
                 dConfig.colorBlending.logicOpEnable = VK_FALSE;

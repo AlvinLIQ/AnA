@@ -97,7 +97,7 @@ void AnA_App::loadObjects()
     shapes->ItemsProperties.push_back(itemProperties);
     itemProperties.sType = ANA_CURVED_RECTANGLE;
     itemProperties.color = {0.6f, 0.1f, 0.4f};
-    itemProperties.transform.translation = {.1f, .0f};
+    itemProperties.transform.translation = {.1f, .1f};
     shapes->ItemsProperties.push_back(itemProperties);
     
     objects.push_back(shapes);
