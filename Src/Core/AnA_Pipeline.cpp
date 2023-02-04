@@ -2,6 +2,22 @@
 
 using namespace AnA;
 
+static std::vector<char> readFile(const std::string &filename)
+{
+    std::ifstream file(filename, std::ios::ate | std::ios::binary);
+    if (!file.is_open())
+    {
+        throw std::runtime_error("Failed to open " + filename + "!");
+    }
+    
+    size_t fs = (size_t)file.tellg();
+    std::vector<char> buffer(fs);
+    file.seekg(0);
+    file.read(buffer.data(), fs);
+    file.close();
+    return buffer;
+}
+
 AnA_Pipeline::AnA_Pipeline(AnA_Device *&mDevice, 
 VkRenderPass &mRenderPass, 
 VkPipelineLayout &mPipelineLayout) : aDevice {mDevice}, renderPass {mRenderPass}, pipelineLayout{mPipelineLayout}

@@ -72,7 +72,7 @@ void main() {
         c = rect2(uv, offset, vec2(push.transform[0].x, push.transform[1].y));
         break;
     case ANA_CIRCLE:
-        c = circle(uv, push.offset + vec2(.5, .5), (push.resolution.y > push.resolution.x ? push.transform[0].x : push.transform[1].y));
+        c = circle(uv, vec2(offset.x + push.transform[0].x / 2., offset.y + push.transform[1].y / 2.), push.transform[0].x / 2);
         break;
     case ANA_CURVED_RECTANGLE:
         c = rounded_rect2(uv, offset, vec2(push.transform[0].x, push.transform[1].y), 0.03);

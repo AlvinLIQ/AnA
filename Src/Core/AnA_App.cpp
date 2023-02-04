@@ -99,6 +99,10 @@ void AnA_App::loadObjects()
     itemProperties.color = {0.6f, 0.1f, 0.4f};
     itemProperties.transform.translation = {.1f, .1f};
     shapes->ItemsProperties.push_back(itemProperties);
+    itemProperties.sType = ANA_CIRCLE;
+    itemProperties.color = {0.1f, 0.6f, 0.4f};
+    itemProperties.transform.translation = {.2f, .2f};
+    shapes->ItemsProperties.push_back(itemProperties);
     
     objects.push_back(shapes);
 }
