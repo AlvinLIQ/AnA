@@ -3,11 +3,13 @@
 #include "AnA_Model.h"
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 
+#define ANA_SHAPE_TYPE uint32_t
 #define ANA_TRIANGLE 0
 #define ANA_RECTANGLE 1
-#define ANA_CIRCLE 2
+#define ANA_ELLIPSE 2
 #define ANA_CURVED_RECTANGLE 3
 #define ANA_MODEL 4
 
@@ -15,40 +17,35 @@ namespace AnA
 {
     struct ShapePushConstantData
     {
-        glm::mat2 transform {1.f};
+        glm::mat4 transform {1.f};
         glm::uint32_t sType;
-        alignas(8) glm::vec2 offset;
-        glm::vec2 resolution;
+        alignas(8) glm::vec2 resolution;
         alignas(16) glm::vec3 color;
     };
-    struct Transform2D
+    struct Transform
     {
-        glm::vec2 translation{};
-        glm::vec2 scale{1.f, 1.f};
-        float rotation;
+        glm::vec3 translation{};
+        glm::vec3 scale{1.f, 1.f, 1.f};
+        glm::vec3 rotation;
 
-        glm::mat2 mat2()
+        glm::mat4 mat4()
         {
-            const float s = glm::sin(rotation);
-            const float c = glm::cos(rotation);
-            glm::mat2 rotMatrix{{c, s}, {-s, c}};
-            glm::mat2 scaleMat{{scale.x, 0.0f}, {0.0f, scale.y}};
-            return rotMatrix * scaleMat;
+            auto transform = glm::translate(glm::mat4{1.f}, translation);
+
+            transform = glm::rotate(transform, rotation.y, {0.f, 1.f, 0.f});
+            transform = glm::rotate(transform, rotation.x, {1.f, 0.f, 0.f});
+            transform = glm::rotate(transform, rotation.z, {0.f, 1.f, 1.f});
+
+            transform = glm::scale(transform, scale);
+            return transform;
         }
     };
     struct ItemProperties
     {
-        Transform2D transform;
+        Transform transform;
         uint32_t sType{ANA_RECTANGLE};
         std::optional<glm::vec3> color;
     };
-
-    static void CreateRectangleProperties(glm::vec2 offset, glm::vec2 size, std::optional<glm::vec3> color, ItemProperties* pRectangleProperties)
-    {
-        pRectangleProperties->sType = ANA_RECTANGLE;
-        pRectangleProperties->transform.translation = offset;
-        pRectangleProperties->transform.scale = size;
-    }
 
     class AnA_Object
     {
@@ -66,6 +63,13 @@ namespace AnA
         AnA_Model* Model;
         glm::vec3 Color{};
         std::vector<ItemProperties> ItemsProperties;
+
+        static void CreateShape(ANA_SHAPE_TYPE sType,glm::vec2 offset, glm::vec2 size, std::optional<glm::vec3> color, ItemProperties* pRectangleProperties)
+        {
+            pRectangleProperties->sType = sType;
+            pRectangleProperties->transform.translation = {offset , 0.f};
+            pRectangleProperties->transform.scale = {size, 1.f};
+        }
 
     private:
         id_t id;

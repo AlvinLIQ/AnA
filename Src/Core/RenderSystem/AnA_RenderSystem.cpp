@@ -47,8 +47,7 @@ void AnA_RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, std::vector<
         for (auto itemProperties : object->ItemsProperties)
         {
             push.sType = itemProperties.sType;
-            push.offset = itemProperties.transform.translation;
-            push.transform = itemProperties.transform.mat2();
+            push.transform = itemProperties.transform.mat4();
             push.color = itemProperties.color.has_value() ? itemProperties.color.value() : object->Color;
 
             vkCmdPushConstants(commandBuffer, 
