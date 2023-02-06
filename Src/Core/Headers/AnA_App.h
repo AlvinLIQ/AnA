@@ -22,6 +22,8 @@ namespace AnA
         void Cleanup();
         void Exit();
 
+        static AnA_Model* Get2DModel();
+
     private:
         AnA_Window* aWindow;
         AnA_Instance* aInstance;
