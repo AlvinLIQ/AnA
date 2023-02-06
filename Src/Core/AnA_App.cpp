@@ -75,12 +75,12 @@ void AnA_App::loadObjects()
 {
     std::vector<AnA_Model::Vertex> vertices
     {
-        {{-1.0f, -1.0f}},
-        {{1.0f, -1.0f}},
-        {{-1.0f, 1.0f}},
-        {{-1.0f, 1.0f}},
-        {{1.0f, -1.0f}},
-        {{1.0f, 1.0f}}
+        {{-1.0f, -1.0f, 0.f}},
+        {{1.0f, -1.0f, 0.f}},
+        {{-1.0f, 1.0f, 0.f}},
+        {{-1.0f, 1.0f, 0.f}},
+        {{1.0f, -1.0f, 0.f}},
+        {{1.0f, 1.0f, 0.f}}
     };
     auto aModel = new AnA_Model(aDevice, vertices);
 
@@ -91,17 +91,17 @@ void AnA_App::loadObjects()
     ItemProperties itemProperties;
     itemProperties.sType = ANA_RECTANGLE;
     itemProperties.color = {0.1f, 0.4f, 0.6f};
-    itemProperties.transform.scale = {.2f, .4f};
-    itemProperties.transform.rotation = 0.f;//0.25f * glm::two_pi<float>();
-    itemProperties.transform.translation = {.0f, .0f};
+    itemProperties.transform.scale = {.2f, .4f, 1.f};
+    itemProperties.transform.rotation = {};//0.25f * glm::two_pi<float>();
+    itemProperties.transform.translation = {.0f, .0f , .0f};
     shapes->ItemsProperties.push_back(itemProperties);
     itemProperties.sType = ANA_CURVED_RECTANGLE;
     itemProperties.color = {0.6f, 0.1f, 0.4f};
-    itemProperties.transform.translation = {.1f, .1f};
+    itemProperties.transform.translation = {.1f, .1f, .0f};
     shapes->ItemsProperties.push_back(itemProperties);
-    itemProperties.sType = ANA_CIRCLE;
+    itemProperties.sType = ANA_ELLIPSE;
     itemProperties.color = {0.1f, 0.6f, 0.4f};
-    itemProperties.transform.translation = {.2f, .2f};
+    itemProperties.transform.translation = {.2f, .2f, .0f};
     shapes->ItemsProperties.push_back(itemProperties);
     
     objects.push_back(shapes);
