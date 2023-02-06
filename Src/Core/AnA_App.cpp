@@ -15,6 +15,9 @@
 
 using namespace AnA;
 
+AnA_Model* _2DModel = nullptr;
+AnA_Device* _aDevice;
+
 AnA_App::AnA_App()
 {
 
@@ -32,7 +35,7 @@ void AnA_App::Init()
         throw std::runtime_error("Failed to init window!");
     aInstance = new AnA_Instance;
     aWindow->CreateWindowSurface(aInstance);
-    aDevice = new AnA_Device(aInstance->GetInstance(), aWindow->GetSurface());
+    _aDevice = aDevice = new AnA_Device(aInstance->GetInstance(), aWindow->GetSurface());
     loadObjects();
     aRenderer = new AnA_Renderer(aWindow, aDevice);
     aRenderSystem = new RenderSystems::AnA_RenderSystem(aDevice, aRenderer->GetSwapChain());
@@ -71,21 +74,29 @@ void AnA_App::Cleanup()
     delete aWindow;
 }
 
+AnA_Model *AnA_App::Get2DModel()
+{
+    if (_2DModel == nullptr)
+    {
+        std::vector<AnA_Model::Vertex> vertices
+        {
+            {{-1.0f, -1.0f, 0.f}},
+            {{1.0f, -1.0f, 0.f}},
+            {{-1.0f, 1.0f, 0.f}},
+            {{-1.0f, 1.0f, 0.f}},
+            {{1.0f, -1.0f, 0.f}},
+            {{1.0f, 1.0f, 0.f}}
+        };
+        _2DModel = new AnA_Model(_aDevice, vertices);
+    }
+
+    return _2DModel;
+}
+
 void AnA_App::loadObjects()
 {
-    std::vector<AnA_Model::Vertex> vertices
-    {
-        {{-1.0f, -1.0f, 0.f}},
-        {{1.0f, -1.0f, 0.f}},
-        {{-1.0f, 1.0f, 0.f}},
-        {{-1.0f, 1.0f, 0.f}},
-        {{1.0f, -1.0f, 0.f}},
-        {{1.0f, 1.0f, 0.f}}
-    };
-    auto aModel = new AnA_Model(aDevice, vertices);
-
     auto shapes = new AnA_Object;
-    shapes->Model = aModel;
+    shapes->Model = Get2DModel();
     shapes->Color = {0.8f, 0.8f, 0.8f};
 
     ItemProperties itemProperties;

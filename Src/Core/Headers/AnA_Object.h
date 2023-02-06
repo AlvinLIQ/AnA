@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
+#include <stb_image.h>
 
 #define ANA_SHAPE_TYPE uint32_t
 #define ANA_TRIANGLE 0
@@ -44,6 +45,7 @@ namespace AnA
     {
         Transform transform;
         uint32_t sType{ANA_RECTANGLE};
+        std::optional<VkImage> texture;
         std::optional<glm::vec3> color;
     };
 
