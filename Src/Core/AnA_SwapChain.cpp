@@ -1,9 +1,10 @@
 #include "Headers/AnA_SwapChain.h"
 #include <iostream>
-/*
+
+#ifdef ANA_INCLUDE_STB_IMAGE
 #define STB_IMAGE_IMPLEMENTATION
 #include "../stb/stb_image.h"
-*/
+#endif
 
 using namespace AnA;
 
@@ -119,6 +120,16 @@ void AnA_SwapChain::RecreateSwapChain()
     createImageViews();
     createFramebuffers();
 }
+
+#ifdef ANA_INCLUDE_STB_IMAGE
+void AnA_SwapChain::CreateTextureImage(const char *imagePath, VkImage* pTexImage)
+{
+    int texWidth, texHeight, texChannels;
+    stbi_uc *pixels = stbi_load(imagePath, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+    VkDeviceSize imageSize = texWidth * texHeight * texChannels;
+    
+}
+#endif
 
 VkSurfaceFormatKHR AnA_SwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats)
 {
