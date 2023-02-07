@@ -15,8 +15,7 @@ namespace AnA
             ~AnA_RenderSystem();
 
             void RenderObjects(VkCommandBuffer commandBuffer, std::vector<AnA_Object*> &objects);
-
-            //void CreateRectangleObject(glm::vec2 offset, glm::vec2 scalar, AnA_Object** object);
+            void RenderObject(VkCommandBuffer commandBuffer, AnA_Object* &object);
 
         private:
             AnA_Device *&aDevice;

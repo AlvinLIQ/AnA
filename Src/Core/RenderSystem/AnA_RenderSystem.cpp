@@ -1,4 +1,5 @@
 #include "Headers/AnA_RenderSystem.h"
+#include <vulkan/vulkan_core.h>
 
 using namespace AnA::RenderSystems;
 
@@ -37,27 +38,30 @@ void AnA_RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, std::vector<
     aPipeline->Bind(commandBuffer);
     for (auto& object : objects)
     {
-        object->Model->Bind(commandBuffer);
+        RenderObject(commandBuffer, object);
+    }
+}
 
-        ShapePushConstantData push{};
+void AnA_RenderSystem::RenderObject(VkCommandBuffer commandBuffer, AnA_Object* &object)
+{
+    object->Model->Bind(commandBuffer);
 
-        auto extent = aSwapChain->GetExtent();
-        push.resolution = {extent.width, extent.height};
+    ShapePushConstantData push{};
+    auto extent = aSwapChain->GetExtent();
+    push.resolution = {extent.width, extent.height};
 
-        for (auto itemProperties : object->ItemsProperties)
-        {
-            push.sType = itemProperties.sType;
-            push.transform = itemProperties.transform.mat4();
-            push.color = itemProperties.color.has_value() ? itemProperties.color.value() : object->Color;
-
-            vkCmdPushConstants(commandBuffer, 
-            pipelineLayout,
-            VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-            0,
-            sizeof(ShapePushConstantData),
-            &push);
-            
-            object->Model->Draw(commandBuffer);
-        }
+    for (auto itemProperties : object->ItemsProperties)
+    {
+        push.sType = itemProperties.sType;
+        push.transform = itemProperties.transform.mat4();
+        push.color = itemProperties.color.has_value() ? itemProperties.color.value() : object->Color;
+        vkCmdPushConstants(commandBuffer, 
+        pipelineLayout,
+        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+        0,
+        sizeof(ShapePushConstantData),
+        &push);
+        
+        object->Model->Draw(commandBuffer);
     }
 }
