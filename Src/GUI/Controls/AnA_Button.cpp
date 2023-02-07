@@ -8,7 +8,7 @@ using namespace AnA::Controls;
 AnA_Button::AnA_Button() : AnA_Control()
 {
     ItemProperties itemProperties;
-    AnA_Object::CreateShape(ANA_CURVED_RECTANGLE, {}, {}, {}, &itemProperties);
+    AnA_Object::CreateShape(ANA_CURVED_RECTANGLE, {}, {40.f, 20.f}, glm::vec3(0.6f, 0.6f, 0.7f), &itemProperties);
     ItemsProperties.push_back(itemProperties);
 }
 
