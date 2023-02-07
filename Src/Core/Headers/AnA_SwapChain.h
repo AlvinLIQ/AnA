@@ -37,6 +37,10 @@ namespace AnA
         std::vector<VkFramebuffer> GetSwapChainFramebuffers();
 
         void RecreateSwapChain();
+
+        #ifdef ANA_INCLUDE_STB_IMAGE
+        void CreateTextureImage(const char *imagePath, VkImage* pTexImage);
+        #endif
     private:
         AnA_Device* aDevice;
         VkSurfaceKHR surface;
