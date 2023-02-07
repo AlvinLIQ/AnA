@@ -1,5 +1,6 @@
 #pragma once
 #include "../../../Core/Headers/AnA_Object.h"
+#include "../../../Core/Headers/AnA_SwapChain.h"
 #include <limits>
 
 namespace AnA
@@ -55,17 +56,17 @@ namespace AnA
             ANA_POS_F GetActualControlOffset(ANA_SIZE_F renderSize)
             {
                 ANA_POS_F actualOffset;
-                float *pOffset = &actualOffset.x;
-                float *pSize = &renderSize.Width;
+                float *pOffset = (float*)&actualOffset;
+                float *pSize = (float*)&renderSize;
                 AlignmentType Alignments[]{HorizontalAlignment, VerticalAlignment};
                 for (int i = 0; i < 2; i++)
                 {
                     if (Alignments[i] == AlignmentType::Start)
                         pOffset[i] = 0.f;
                     else if (Alignments[i] == AlignmentType::Center)
-                        pOffset[i] = 0.5f - renderSize.Width / 2.f;
+                        pOffset[i] = 0.5f - pSize[i] / 2.f;
                     else
-                        pOffset[i] = 1.f - renderSize.Width;
+                        pOffset[i] = 1.f - pSize[i];
                 }
                 
                 actualOffset.x += ControlOffset.x;
@@ -75,6 +76,14 @@ namespace AnA
 
             ANA_SIZE_F GetSizeForRender() const
             {
+                if (renderMode == AlignType::Absolute)
+                {
+                    ANA_SIZE_F renderSize;
+                    auto extent = GetSwapChainExtent();
+                    renderSize.Width = controlSize.Width / (float)extent.width;
+                    renderSize.Height = controlSize.Height / (float)extent.height;
+                    return renderSize;
+                }
                 return controlSize;
             }
             void SetSizeRequest(ANA_SIZE_F newSize)
@@ -94,11 +103,13 @@ namespace AnA
             {
                 if (newRenderMode == renderMode)
                     return;
-                if (newRenderMode == Absolute)
-                {
-                }
+                //
                 renderMode = newRenderMode;
             }
+
+            virtual void PrepareDraw();
+            static void InitControl(AnA_SwapChain *swapChain);
+            static VkExtent2D GetSwapChainExtent();
         private:
             AlignType renderMode {Absolute};
             ANA_SIZE_F controlSize {};
