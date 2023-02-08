@@ -39,6 +39,8 @@ namespace AnA
         
         QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
 
+        uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+
         struct SwapChainSupportDetails 
         {
             VkSurfaceCapabilitiesKHR capabilities;
@@ -69,8 +71,6 @@ namespace AnA
         VkQueue graphicsQueue;
         VkQueue presentQueue;
         void createLogicalDevice();
-
-        uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
         VkCommandPool commandPool;
         void createCommandPool();

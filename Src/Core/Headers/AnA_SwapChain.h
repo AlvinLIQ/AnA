@@ -10,6 +10,8 @@
 #include <algorithm>
 #include <vulkan/vulkan_core.h>
 
+#define ANA_INCLUDE_STB_IMAGE
+
 namespace AnA
 {
     const int MAX_FRAMES_IN_FLIGHT = 2;
@@ -38,18 +40,19 @@ namespace AnA
 
         void RecreateSwapChain();
 
+        void CreateImage(uint32_t width, uint32_t height, VkImage *pImage, VkDeviceMemory *pImageMemory);
         #ifdef ANA_INCLUDE_STB_IMAGE
-        void CreateTextureImage(const char *imagePath, VkImage* pTexImage);
+        void CreateTextureImage(const char *imagePath, VkImage* pTexImage, VkDeviceMemory *pTexMemory);
         #endif
     private:
-        AnA_Device* aDevice;
+        AnA_Device *&aDevice;
         VkSurfaceKHR surface;
 
         VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats);
 
         VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> &availablePresentModes);
 
-        GLFWwindow* window;
+        GLFWwindow *&window;
         VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
 
         VkSwapchainKHR swapChain;

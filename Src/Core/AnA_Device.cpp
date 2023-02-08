@@ -35,7 +35,7 @@ void AnA_Device::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMem
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
+    allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, properties);
 
     if (vkAllocateMemory(logicalDevice, &allocInfo, nullptr, &deviceMemory) != VK_SUCCESS)
         throw std::runtime_error("Failed to allocate device memory!");
@@ -225,7 +225,7 @@ void AnA_Device::createLogicalDevice()
     vkGetDeviceQueue(logicalDevice, indices.presentFamily.value(), 0, &presentQueue);
 }
 
-uint32_t AnA_Device::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+uint32_t AnA_Device::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
 {
     VkPhysicalDeviceMemoryProperties memProperties;
     vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
