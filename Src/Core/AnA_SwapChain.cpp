@@ -1,4 +1,5 @@
 #include "Headers/AnA_SwapChain.h"
+#include "Headers/AnA_Buffer.h"
 #include <iostream>
 
 #ifdef ANA_INCLUDE_STB_IMAGE
@@ -121,13 +122,68 @@ void AnA_SwapChain::RecreateSwapChain()
     createFramebuffers();
 }
 
+void AnA_SwapChain::CreateImage(uint32_t width, uint32_t height, VkImage *pImage, VkDeviceMemory *pImageMemory)
+{
+    VkImageCreateInfo createInfo = 
+    {
+        VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,  // VkStructureType        sType;
+        nullptr,                              // const void            *pNext
+        0,                                    // VkImageCreateFlags     flags
+        VK_IMAGE_TYPE_2D,                     // VkImageType            imageType
+        VK_FORMAT_R8G8B8A8_UNORM,             // VkFormat               format
+        {                                     // VkExtent3D             extent
+            width,                                // uint32_t               width
+            height,                               // uint32_t               height
+            1                                     // uint32_t               depth
+        },
+        1,                                    // uint32_t               mipLevels
+        1,                                    // uint32_t               arrayLayers
+        VK_SAMPLE_COUNT_1_BIT,                // VkSampleCountFlagBits  samples
+        VK_IMAGE_TILING_OPTIMAL,              // VkImageTiling          tiling
+        VK_IMAGE_USAGE_TRANSFER_DST_BIT |     // VkImageUsageFlags      usage
+        VK_IMAGE_USAGE_SAMPLED_BIT,
+        VK_SHARING_MODE_EXCLUSIVE,            // VkSharingMode          sharingMode
+        0,                                    // uint32_t               queueFamilyIndexCount
+        nullptr,                              // const uint32_t        *pQueueFamilyIndices
+        VK_IMAGE_LAYOUT_UNDEFINED             // VkImageLayout          initialLayout
+    };
+
+    if (vkCreateImage(aDevice->GetLogicalDevice(), &createInfo, nullptr, pImage) != VK_SUCCESS)
+        throw std::runtime_error("Failed to create Image!");
+
+    VkMemoryRequirements memRequirements;
+    vkGetImageMemoryRequirements(aDevice->GetLogicalDevice(), *pImage, &memRequirements);
+
+    VkMemoryAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex = aDevice->FindMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+    if (vkAllocateMemory(aDevice->GetLogicalDevice(), &allocInfo, nullptr, pImageMemory) != VK_SUCCESS) {
+        throw std::runtime_error("failed to allocate image memory!");
+    }
+
+    vkBindImageMemory(aDevice->GetLogicalDevice(), *pImage, *pImageMemory, 0);
+}
+
 #ifdef ANA_INCLUDE_STB_IMAGE
-void AnA_SwapChain::CreateTextureImage(const char *imagePath, VkImage* pTexImage)
+void AnA_SwapChain::CreateTextureImage(const char *imagePath, VkImage *pTexImage, VkDeviceMemory *pTexMemory)
 {
     int texWidth, texHeight, texChannels;
     stbi_uc *pixels = stbi_load(imagePath, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-    VkDeviceSize imageSize = texWidth * texHeight * texChannels;
+    VkDeviceSize imageSize = texWidth * texHeight * 4;
     
+    if (!pixels)
+        throw std::runtime_error("Failed to load texture image!");
+    
+    
+    AnA_Buffer aBuffer(aDevice, imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    aBuffer.Map(0, imageSize);
+        memcpy(aBuffer.GetMappedData(), pixels, static_cast<size_t>(imageSize));
+    aBuffer.Unmap();
+    stbi_image_free(pixels);
+
+    CreateImage(texWidth, texHeight, pTexImage, pTexMemory);
 }
 #endif
 
