@@ -47,13 +47,15 @@ void AnA_App::Run()
     AnA_Camera camera;
     //aWindow->StartLoop();
     auto window = aWindow->GetGLFWwindow();
-    camera.SetOrthographicProjection(-1, -1, 1, 1, -1, 1);
+    //camera.SetViewDirection({}, glm::vec3(0.5f, 0.f, 1.f));
+    //camera.SetViewTarget(glm::vec3(-1.f, -2.f, 2.f), glm::vec3(0.f, 0.f, 2.5f));
     while(!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
 
-        //float aspect = aRenderer->GetAspect();
-        //camera.SetPerspectiveProjection(-aspect, aspect, -1, 1);
+        float aspect = aRenderer->GetAspect();
+        //camera.SetOrthographicProjection(-aspect, -1, aspect, 1, -1, 1);
+        camera.SetPerspectiveProjection(glm::radians(50.f), aspect, -1.f, 1.f);
 
         if (auto commandBuffer = aRenderer->BeginFrame())
         {
@@ -109,17 +111,17 @@ void AnA_App::loadObjects()
     ItemProperties itemProperties;
     itemProperties.sType = ANA_RECTANGLE;
     itemProperties.color = {0.1f, 0.4f, 0.6f};
-    itemProperties.transform.scale = {.2f, .4f, 1.f};
+    itemProperties.transform.scale = {.2f, .2f, 1.f};
     itemProperties.transform.rotation = {};//0.25f * glm::two_pi<float>();
-    itemProperties.transform.translation = {.0f, .0f , .0f};
+    itemProperties.transform.translation = {.0f, .0f , 1.f};
     shapes->ItemsProperties.push_back(itemProperties);
     itemProperties.sType = ANA_CURVED_RECTANGLE;
     itemProperties.color = {0.6f, 0.1f, 0.4f};
-    itemProperties.transform.translation = {.1f, .1f, .0f};
+    itemProperties.transform.translation = {.1f, .1f, 1.f};
     shapes->ItemsProperties.push_back(itemProperties);
     itemProperties.sType = ANA_ELLIPSE;
     itemProperties.color = {0.1f, 0.6f, 0.4f};
-    itemProperties.transform.translation = {.2f, .2f, .0f};
+    itemProperties.transform.translation = {.2f, .2f, 1.f};
     shapes->ItemsProperties.push_back(itemProperties);
     
     objects.push_back(shapes);

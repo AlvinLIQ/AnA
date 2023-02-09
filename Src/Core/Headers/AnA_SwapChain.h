@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <vulkan/vulkan_core.h>
 
-#define ANA_INCLUDE_STB_IMAGE
+//#define ANA_INCLUDE_STB_IMAGE
 
 namespace AnA
 {
