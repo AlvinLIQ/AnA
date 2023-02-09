@@ -2,6 +2,7 @@
 #include "../../Headers/AnA_Object.h"
 #include "../../Headers/AnA_Pipeline.h"
 #include "../../Headers/AnA_SwapChain.h"
+#include "../../Headers/AnA_Camera.h"
 #include <vulkan/vulkan_core.h>
 
 namespace AnA
@@ -14,8 +15,8 @@ namespace AnA
             AnA_RenderSystem(AnA_Device *&mDevice, AnA_SwapChain *&mSwapChain);
             ~AnA_RenderSystem();
 
-            void RenderObjects(VkCommandBuffer commandBuffer, std::vector<AnA_Object*> &objects);
-            void RenderObject(VkCommandBuffer commandBuffer, AnA_Object* &object);
+            void RenderObjects(VkCommandBuffer commandBuffer, std::vector<AnA_Object*> &objects, AnA_Camera &camera);
+            void RenderObject(VkCommandBuffer commandBuffer, AnA_Object* &object, AnA_Camera &camera);
 
         private:
             AnA_Device *&aDevice;

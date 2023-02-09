@@ -45,6 +45,11 @@ namespace AnA
         {
             return aSwapChain->GetExtent();
         }
+        float GetAspect() const
+        {
+            auto swapChainextent = GetSwapChainExtent();
+            return static_cast<float>(swapChainextent.width) / static_cast<float>(swapChainextent.height);
+        }
 
         VkCommandBuffer BeginFrame();
         void EndFrame();

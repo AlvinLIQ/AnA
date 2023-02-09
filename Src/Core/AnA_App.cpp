@@ -2,6 +2,7 @@
 #include "Headers/AnA_Model.h"
 #include "Headers/AnA_Object.h"
 #include "Headers/AnA_Renderer.h"
+#include "Headers/AnA_Camera.h"
 #include "RenderSystem/Headers/AnA_RenderSystem.h"
 #include <GLFW/glfw3.h>
 #include <glm/detail/qualifier.hpp>
@@ -43,15 +44,21 @@ void AnA_App::Init()
 
 void AnA_App::Run()
 {
+    AnA_Camera camera;
     //aWindow->StartLoop();
     auto window = aWindow->GetGLFWwindow();
+    camera.SetOrthographicProjection(-1, -1, 1, 1, -1, 1);
     while(!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
+
+        //float aspect = aRenderer->GetAspect();
+        //camera.SetPerspectiveProjection(-aspect, aspect, -1, 1);
+
         if (auto commandBuffer = aRenderer->BeginFrame())
         {
             aRenderer->BeginSwapChainRenderPass(commandBuffer);
-            aRenderSystem->RenderObjects(commandBuffer, objects);
+            aRenderSystem->RenderObjects(commandBuffer, objects, camera);
             aRenderer->EndSwapChainRenderPass(commandBuffer);
             aRenderer->EndFrame();
         }

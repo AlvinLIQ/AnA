@@ -110,6 +110,11 @@ namespace AnA
             virtual void PrepareDraw();
             static void InitControl(AnA_SwapChain *swapChain);
             static VkExtent2D GetSwapChainExtent();
+
+            bool IsFocused();
+            void Focus();
+            void Unfocus();
+            
         private:
             AlignType renderMode {Absolute};
             ANA_SIZE_F controlSize {};

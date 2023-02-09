@@ -9,8 +9,9 @@
 layout(location = 0) out vec4 outColor;
 
 layout(push_constant) uniform Push {
-    mat4 transform;
-    uint sType;//0 Triangle 1 Rectangle 2 Circle
+//    mat4 projectionMatrix;
+    mat4 transformMatrix;
+    uint sType;
     vec2 resolution;
     vec3 color;
 } push;
@@ -64,17 +65,17 @@ void main() {
     //float ratio = push.resolution.y/push.resolution.x;
     //uv.x /= ratio;
     float c = 0.;
-    vec2 offset = vec2((push.transform[3].x + (1. - push.transform[0].x)) / 2., (push.transform[3].y + (1. - push.transform[1].y)) / 2.);
+    vec2 offset = vec2((push.transformMatrix[3].x + (1. - push.transformMatrix[0].x)) / 2., (push.transformMatrix[3].y + (1. - push.transformMatrix[1].y)) / 2.);
     switch (push.sType)
     {
     case ANA_RECTANGLE:
-        c = rect2(uv, offset, vec2(push.transform[0].x, push.transform[1].y));
+        c = rect2(uv, offset, vec2(push.transformMatrix[0].x, push.transformMatrix[1].y));
         break;
     case ANA_ELLIPSE:
-        c = ellipse(uv, vec2(offset.x + push.transform[0].x / 2., offset.y + push.transform[1].y / 2.), vec2(push.transform[0].x / 2, push.transform[1].y / 2));
+        c = ellipse(uv, vec2(offset.x + push.transformMatrix[0].x / 2., offset.y + push.transformMatrix[1].y / 2.), vec2(push.transformMatrix[0].x / 2, push.transformMatrix[1].y / 2));
         break;
     case ANA_CURVED_RECTANGLE:
-        c = rounded_rect2(uv, offset, vec2(push.transform[0].x, push.transform[1].y), vec2(0.03));
+        c = rounded_rect2(uv, offset, vec2(push.transformMatrix[0].x, push.transformMatrix[1].y), vec2(0.03));
         break;
     }
 
