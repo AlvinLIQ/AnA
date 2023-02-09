@@ -15,9 +15,10 @@
 
 namespace AnA
 {
-    struct ShapePushConstantData
+    struct ObjectPushConstantData
     {
-        glm::mat4 transform {1.f};
+//        glm::mat4 projectionMatrix {1.f};
+        glm::mat4 transformMatrix {1.f};
         glm::uint32_t sType;
         alignas(8) glm::vec2 resolution;
         alignas(16) glm::vec3 color;

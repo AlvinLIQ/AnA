@@ -20,7 +20,7 @@ void AnA_RenderSystem::createPipelineLayout()
     VkPushConstantRange pushConstantRange{};
     pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
     pushConstantRange.offset = 0;
-    pushConstantRange.size = sizeof(ShapePushConstantData);
+    pushConstantRange.size = sizeof(ObjectPushConstantData);
 
 
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
@@ -33,33 +33,34 @@ void AnA_RenderSystem::createPipelineLayout()
     }
 }
 
-void AnA_RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, std::vector<AnA_Object*> &objects)
+void AnA_RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, std::vector<AnA_Object*> &objects, AnA_Camera &camera)
 {
     aPipeline->Bind(commandBuffer);
     for (auto& object : objects)
     {
-        RenderObject(commandBuffer, object);
+        RenderObject(commandBuffer, object, camera);
     }
 }
 
-void AnA_RenderSystem::RenderObject(VkCommandBuffer commandBuffer, AnA_Object* &object)
+void AnA_RenderSystem::RenderObject(VkCommandBuffer commandBuffer, AnA_Object* &object, AnA_Camera &camera)
 {
     object->Model->Bind(commandBuffer);
 
-    ShapePushConstantData push{};
+    ObjectPushConstantData push{};
     auto extent = aSwapChain->GetExtent();
     push.resolution = {extent.width, extent.height};
 
     for (auto itemProperties : object->ItemsProperties)
     {
         push.sType = itemProperties.sType;
-        push.transform = itemProperties.transform.mat4();
+        //push.projectionMatrix = camera.GetProjectionMatrix();
+        push.transformMatrix = camera.GetProjectionMatrix() * itemProperties.transform.mat4();
         push.color = itemProperties.color.has_value() ? itemProperties.color.value() : object->Color;
         vkCmdPushConstants(commandBuffer, 
         pipelineLayout,
         VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
         0,
-        sizeof(ShapePushConstantData),
+        sizeof(ObjectPushConstantData),
         &push);
         
         object->Model->Draw(commandBuffer);
