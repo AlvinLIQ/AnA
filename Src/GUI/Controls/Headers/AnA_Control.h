@@ -80,7 +80,7 @@ namespace AnA
                 {
                     ANA_SIZE_F renderSize;
                     auto extent = GetSwapChainExtent();
-                    renderSize.Width = controlSize.Width / (float)extent.width;
+                    renderSize.Width = controlSize.Width / (float)extent.height;
                     renderSize.Height = controlSize.Height / (float)extent.height;
                     return renderSize;
                 }
