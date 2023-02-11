@@ -45,9 +45,7 @@ float ellipse(vec2 uv, vec2 center, vec2 radius)
 float rounded_rect(vec2 uv, float l, float t, float r, float b, vec2 radius)
 {
     float c;
-    c = rect(uv, l, t, r, b) - rect(uv, l, t, l + radius.x, t + radius.y)
-        - rect(uv, l, b - radius.x, l + radius.y, b) - rect(uv, r - radius.x, t, r, t + radius.y)
-        - rect(uv, r - radius.x, b - radius.y, r, b);
+    c = rect(uv, l + radius.x, t, r - radius.x, b) + rect(uv, l, t + radius.y, r, b - radius.y);
     
     c += ellipse(uv, vec2(l + radius.x, t + radius.y), radius) + ellipse(uv, vec2(r - radius.x, t + radius.y), radius)
         + ellipse(uv, vec2(l + radius.x, b - radius.y), radius) + ellipse(uv, vec2(r - radius.x, b - radius.y), radius);
@@ -85,5 +83,5 @@ void main() {
         break;
     }
 
-    outColor = vec4(c * push.color, 1.);
+    outColor = vec4(c * push.color, c);
 }

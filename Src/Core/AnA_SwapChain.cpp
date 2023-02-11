@@ -115,6 +115,14 @@ std::vector<VkFramebuffer> AnA_SwapChain::GetSwapChainFramebuffers()
 
 void AnA_SwapChain::RecreateSwapChain()
 {
+    int width, height;
+    do
+    {
+        glfwGetWindowSize(window, &width, &height);
+        glfwWaitEvents();
+    } while (width == 0 || height == 0);
+    
+
     vkDeviceWaitIdle(aDevice->GetLogicalDevice());
     cleanupSwapChain();
 

@@ -7,6 +7,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/detail/qualifier.hpp>
 #include <glm/fwd.hpp>
+#include <glm/gtc/constants.hpp>
 #include <iostream>
 #include <stdexcept>
 #include <vector>
@@ -46,15 +47,15 @@ void AnA_App::Run()
     AnA_Camera camera;
     //aWindow->StartLoop();
     auto window = aWindow->GetGLFWwindow();
-    //camera.SetViewDirection({}glm::vec3(0.5f, 0.f, 1.f));
+    //camera.SetViewDirection({}, glm::vec3(0.5f, 0.f, 1.f));
     //camera.SetViewTarget(glm::vec3(-1.f, -2.f, 2.f), glm::vec3(0.f, 0.f, 2.5f));
     while(!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
 
         float aspect = aRenderer->GetAspect();
-        camera.SetOrthographicProjection(-aspect, -1, aspect, 1, -1, 1);
-        //camera.SetPerspectiveProjection(glm::radians(70.f), aspect, 0.1f, 10.f);
+        //camera.SetOrthographicProjection(-aspect, -1, aspect, 1, -1, 1);
+        camera.SetPerspectiveProjection(glm::radians(50.f), aspect, .1f, 100.f);
 
         if (auto commandBuffer = aRenderer->BeginFrame())
         {
@@ -91,8 +92,6 @@ AnA_Model *AnA_App::Get2DModel()
             {{-1.0f, -1.0f, 0.f}, {}},
             {{1.0f, -1.0f, 0.f}, {}},
             {{-1.0f, 1.0f, 0.f}, {}},
-            {{-1.0f, 1.0f, 0.f}, {}},
-            {{1.0f, -1.0f, 0.f}, {}},
             {{1.0f, 1.0f, 0.f}, {}}
         };
         _2DModel = new AnA_Model(_aDevice, vertices);
@@ -101,78 +100,72 @@ AnA_Model *AnA_App::Get2DModel()
     return _2DModel;
 }
 
-AnA_Model *CreateCubeModel(glm::vec3 offset)
+AnA_Model *CreateCubeModel()
 {
     std::vector<AnA_Model::Vertex> vertices = 
     {
-        // left face (white)
-        {{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
-        {{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
-        {{-.5f, -.5f, .5f}, {.9f, .9f, .9f}},
-        {{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
+        // left (gray)
+        {{-.5f, -.5f, -.5f},{.5f, .5f, .5f}},
+        {{-.5f, -.5f, .5f}, {.5f, .5f, .5f}},
+        {{-.5f, .5f, -.5f}, {.5f, .5f, .5f}},
+        {{-.5f, -.5f, .5f}, {.5f, .5f, .5f}},
+        {{-.5f, .5f, -.5f}, {.5f, .5f, .5f}},
+        {{-.5f, .5f, .5f},  {.5f, .5f, .5f}},
+        // right (red)
+        {{.5f, -.5f, -.5f},{.9f, .2f, .2f}},
+        {{.5f, -.5f, .5f}, {.9f, .2f, .2f}},
+        {{.5f, .5f, -.5f}, {.9f, .2f, .2f}},
+        {{.5f, -.5f, .5f}, {.9f, .2f, .2f}},
+        {{.5f, .5f, -.5f}, {.9f, .2f, .2f}},
+        {{.5f, .5f, .5f},  {.9f, .2f, .2f}},
+        // top (yellow)
+        {{-.5f, -.5f, -.5f},{.9f, .9f, .2f}},
+        {{-.5f, -.5f, .5f}, {.9f, .9f, .2f}},
+        {{.5f, -.5f, -.5f}, {.9f, .9f, .2f}},
+        {{-.5f, -.5f, .5f}, {.9f, .9f, .2f}},
+        {{.5f, -.5f, -.5f}, {.9f, .9f, .2f}},
+        {{.5f, -.5f, .5f},  {.9f, .9f, .2f}},
+        // bottom (white)
         {{-.5f, .5f, -.5f}, {.9f, .9f, .9f}},
-        {{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
-    
-        // right face (yellow)
-        {{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
-        {{.5f, .5f, .5f}, {.8f, .8f, .1f}},
-        {{.5f, -.5f, .5f}, {.8f, .8f, .1f}},
-        {{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
-        {{.5f, .5f, -.5f}, {.8f, .8f, .1f}},
-        {{.5f, .5f, .5f}, {.8f, .8f, .1f}},
-    
-        // top face (orange, remember y axis points down)
-        {{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
-        {{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
-        {{-.5f, -.5f, .5f}, {.9f, .6f, .1f}},
-        {{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
-        {{.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
-        {{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
-    
-        // bottom face (red)
-        {{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
-        {{.5f, .5f, .5f}, {.8f, .1f, .1f}},
-        {{-.5f, .5f, .5f}, {.8f, .1f, .1f}},
-        {{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
-        {{.5f, .5f, -.5f}, {.8f, .1f, .1f}},
-        {{.5f, .5f, .5f}, {.8f, .1f, .1f}},
-    
-        // nose face (blue)
-        {{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
-        {{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
-        {{-.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
-        {{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
-        {{.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
-        {{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
-    
-        // tail face (green)
-        {{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-        {{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
-        {{-.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
-        {{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-        {{.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-        {{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
+        {{-.5f, .5f, .5f},  {.9f, .9f, .9f}},
+        {{.5f,  .5f, -.5f}, {.9f, .9f, .9f}},
+        {{-.5f, .5f, .5f},  {.9f, .9f, .9f}},
+        {{.5f,  .5f, -.5f}, {.9f, .9f, .9f}},
+        {{.5f,  .5f, .5f},  {.9f, .9f, .9f}},
+        // back (green)
+        {{-.5f, -.5f, .5f}, {.2f, .9f, .2f}},
+        {{-.5f, .5f, .5f},  {.2f, .9f, .2f}},
+        {{.5f,  -.5f, .5f}, {.2f, .9f, .2f}},
+        {{-.5f, .5f, .5f},  {.2f, .9f, .2f}},
+        {{.5f,  -.5f, .5f}, {.2f, .9f, .2f}},
+        {{.5f,  .5f, .5f},  {.2f, .9f, .2f}},
+        // front (blue)
+        {{-.5f, -.5f, -.5f}, {.2f, .2f, .9f}},
+        {{-.5f, .5f, -.5f},  {.2f, .2f, .9f}},
+        {{.5f,  -.5f, -.5f}, {.2f, .2f, .9f}},
+        {{-.5f, .5f, -.5f},  {.2f, .2f, .9f}},
+        {{.5f,  -.5f, -.5f}, {.2f, .2f, .9f}},
+        {{.5f,  .5f, -.5f},  {.2f, .2f, .9f}},
   };
 
-    for (auto &v : vertices)
-        v.position += offset;
     return new AnA_Model(_aDevice, vertices);
 }
 
 void AnA_App::loadObjects()
 {
+    
     auto cube = new AnA_Object;
     
     cube->Color = {0.1f, 0.2f, 0.3f};
-    cube->Model = CreateCubeModel({});
+    cube->Model = CreateCubeModel();
     ItemProperties cubeProperties;
     cubeProperties.sType = ANA_MODEL;
-    cubeProperties.transform.scale = {.5f, .5f, .5f};
-    cubeProperties.transform.rotation = {};
-    cubeProperties.transform.translation = {0.f, 0.f , .6f};
+    cubeProperties.transform.scale = {.4f, .4f, .4f};
+    cubeProperties.transform.rotation = glm::vec3(0.04f * glm::two_pi<float>(), 0.f, 0.f);
+    cubeProperties.transform.translation = {0.f, 0.f , 1.5f};
 
-    cube->ItemsProperties.push_back(cubeProperties);
-    objects.push_back(cube);
+    cube->ItemsProperties.push_back(std::move(cubeProperties));
+    objects.push_back(std::move(cube));
     /*
     auto shapes = new AnA_Object;
     shapes->Model = Get2DModel();
@@ -185,13 +178,13 @@ void AnA_App::loadObjects()
     itemProperties.transform.rotation = {};//0.25f * glm::two_pi<float>();
     itemProperties.transform.translation = {.0f, .0f , 0.f};
     shapes->ItemsProperties.push_back(itemProperties);
-    itemProperties.sType = ANA_CURVED_RECTANGLE;
-    itemProperties.color = {0.6f, 0.1f, 0.4f};
-    itemProperties.transform.translation = {.1f, .1f, 0.f};
-    shapes->ItemsProperties.push_back(itemProperties);
     itemProperties.sType = ANA_ELLIPSE;
     itemProperties.color = {0.1f, 0.6f, 0.4f};
-    itemProperties.transform.translation = {.2f, .2f, 0.f};
+    itemProperties.transform.translation = {.2f, .2f, 0.1f};
+    shapes->ItemsProperties.push_back(itemProperties);
+    itemProperties.sType = ANA_CURVED_RECTANGLE;
+    itemProperties.color = {0.6f, 0.1f, 0.4f};
+    itemProperties.transform.translation = {.1f, .1f, 0.0f};
     shapes->ItemsProperties.push_back(itemProperties);
     
     objects.push_back(shapes);
