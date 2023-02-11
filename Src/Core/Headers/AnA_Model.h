@@ -17,7 +17,8 @@ namespace AnA
     public:
         struct Vertex
         {
-            glm::vec3 postion;
+            glm::vec3 position;
+            glm::vec3 color;
 
             static std::vector<VkVertexInputBindingDescription> GetBindingDescription();
             static std::vector<VkVertexInputAttributeDescription> GetAttributeDescription();
