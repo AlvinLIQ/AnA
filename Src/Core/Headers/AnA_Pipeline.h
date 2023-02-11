@@ -28,6 +28,7 @@ namespace AnA
             VkPipelineMultisampleStateCreateInfo multiSampling{};
             VkPipelineColorBlendAttachmentState colorBlendAttachment{};
             VkPipelineColorBlendStateCreateInfo colorBlending{};
+            VkPipelineDepthStencilStateCreateInfo depthStencilInfo{};
             VkGraphicsPipelineCreateInfo pipelineInfo{};
             const std::vector<VkDynamicState> dynamicStates = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
             static PipelineConfig GetDefault(VkShaderModule vertexShaderModule, VkShaderModule fragShaderModule,
@@ -69,7 +70,7 @@ namespace AnA
                 dConfig.rasterizer.rasterizerDiscardEnable = VK_FALSE;
                 dConfig.rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
                 dConfig.rasterizer.lineWidth = 1.0f;
-                dConfig.rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+                dConfig.rasterizer.cullMode = VK_CULL_MODE_NONE;
                 dConfig.rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
                 dConfig.rasterizer.depthBiasEnable = VK_FALSE;
                 dConfig.rasterizer.depthBiasConstantFactor = 0.0f; // Optional
@@ -104,6 +105,17 @@ namespace AnA
                 dConfig.colorBlending.blendConstants[2] = 0.0f; // Optional
                 dConfig.colorBlending.blendConstants[3] = 0.0f; // Optional
 
+                dConfig.depthStencilInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+                dConfig.depthStencilInfo.depthTestEnable = VK_TRUE;
+                dConfig.depthStencilInfo.depthWriteEnable = VK_TRUE;
+                dConfig.depthStencilInfo.depthCompareOp = VK_COMPARE_OP_LESS;
+                dConfig.depthStencilInfo.depthBoundsTestEnable = VK_FALSE;
+                dConfig.depthStencilInfo.minDepthBounds = 0.0f; // Optional
+                dConfig.depthStencilInfo.maxDepthBounds = 1.0f; // Optional
+                dConfig.depthStencilInfo.stencilTestEnable = VK_FALSE;
+                dConfig.depthStencilInfo.front = {};            // Optional
+                dConfig.depthStencilInfo.back = {};             // Optional
+
                 dConfig.pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
                 dConfig.pipelineInfo.stageCount = 2;
                 dConfig.pipelineInfo.pStages = dConfig.shaderStages;
@@ -113,7 +125,7 @@ namespace AnA
                 dConfig.pipelineInfo.pViewportState = &dConfig.viewportState;
                 dConfig.pipelineInfo.pRasterizationState = &dConfig.rasterizer;
                 dConfig.pipelineInfo.pMultisampleState = &dConfig.multiSampling;
-                dConfig.pipelineInfo.pDepthStencilState = nullptr; // Optional
+                dConfig.pipelineInfo.pDepthStencilState = &dConfig.depthStencilInfo;
                 dConfig.pipelineInfo.pColorBlendState = &dConfig.colorBlending;
                 dConfig.pipelineInfo.pDynamicState = &dConfig.dynamicStateInfo;
 
