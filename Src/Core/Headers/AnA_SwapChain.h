@@ -40,7 +40,7 @@ namespace AnA
 
         void RecreateSwapChain();
 
-        void CreateImage(uint32_t width, uint32_t height, VkImage *pImage, VkDeviceMemory *pImageMemory);
+        void CreateImage(VkImageCreateInfo *pCreateInfo, VkImage *pImage, VkDeviceMemory *pImageMemory);
         #ifdef ANA_INCLUDE_STB_IMAGE
         void CreateTextureImage(const char *imagePath, VkImage* pTexImage, VkDeviceMemory *pTexMemory);
         #endif
@@ -63,6 +63,14 @@ namespace AnA
 
         std::vector<VkImageView> swapChainImageViews;
         void createImageViews();
+
+        VkFormat swapChainDepthFormat;
+        VkFormat findDepthFormat();
+        VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+        std::vector<VkImage> depthImages;
+        std::vector<VkDeviceMemory> depthImageMemorys;
+        std::vector<VkImageView> depthImageViews;
+        void createDepthResources();
 
         VkRenderPass renderPass;
         void createRenderPass();

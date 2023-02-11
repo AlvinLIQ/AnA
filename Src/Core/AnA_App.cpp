@@ -7,7 +7,6 @@
 #include <GLFW/glfw3.h>
 #include <glm/detail/qualifier.hpp>
 #include <glm/fwd.hpp>
-#include <glm/gtc/constants.hpp>
 #include <iostream>
 #include <stdexcept>
 #include <vector>
@@ -54,8 +53,8 @@ void AnA_App::Run()
         glfwPollEvents();
 
         float aspect = aRenderer->GetAspect();
-        //camera.SetOrthographicProjection(-aspect, -1, aspect, 1, -1, 1);
-        camera.SetPerspectiveProjection(glm::radians(70.f), aspect, 0.1f, 10.f);
+        camera.SetOrthographicProjection(-aspect, -1, aspect, 1, -1, 1);
+        //camera.SetPerspectiveProjection(glm::radians(70.f), aspect, 0.1f, 10.f);
 
         if (auto commandBuffer = aRenderer->BeginFrame())
         {
@@ -106,48 +105,53 @@ AnA_Model *CreateCubeModel(glm::vec3 offset)
 {
     std::vector<AnA_Model::Vertex> vertices = 
     {
-        // back face (blue)
-        {{-.5f, -.5f, .5f}, {.2f, .2f, .9f}},
-        {{.5f, -.5f, .5f},  {.2f, .2f, .9f}},
-        {{-.5f, .5f, .5f},  {.2f, .2f, .9f}},
-        {{-.5f, .5f, .5f}, {.2f, .2f, .9f}},
-        {{.5f, -.5f, .5f},  {.2f, .2f, .9f}},
-        {{.5f, .5f, .5f},  {.2f, .2f, .9f}},
         // left face (white)
-        {{-.5f, -.5f, -.5f},{.9f, .9f, .9f}},
+        {{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
+        {{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
         {{-.5f, -.5f, .5f}, {.9f, .9f, .9f}},
+        {{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
         {{-.5f, .5f, -.5f}, {.9f, .9f, .9f}},
-        {{-.5f, .5f, -.5f}, {.9f, .9f, .9f}},
-        {{-.5f, -.5f, .5f}, {.9f, .9f, .9f}},
-        {{-.5f, .5f, .5f},  {.9f, .9f, .9f}},
-        // top face (gray)
-        {{-.5f, -.5f, -.5f}, {.3f, .3f, .3f}},
-        {{-.5f, -.5f, .5f},   {.3f, .3f, .3f}},
-        {{.5f, -.5f, -.5f},  {.3f, .3f, .3f}},
-        {{-.5f, -.5f, .5f},   {.3f, .3f, .3f}},
-        {{.5f, -.5f, .5f},   {.3f, .3f, .3f}},
-        {{.5f, -.5f, -.5f},  {.3f, .3f, .3f}},
-        // bottom face (yellow)
-        {{-.5f, .5f, -.5f}, {.9f, .9f, .2f}},
-        {{-.5f, .5f, .5f},  {.9f, .9f, .2f}},
-        {{.5f, .5f, -.5f},   {.9f, .9f, .2f}},
-        {{-.5f, .5f, .5f},  {.9f, .9f, .2f}},
-        {{.5f, .5f, .5f},  {.9f, .9f, .2f}},
-        {{.5f, .5f, -.5f},  {.9f, .9f, .2f}},
-        // right face (red)
-        {{.5f, -.5f, -.5f}, {.9f, .2f, .2f}},
-        {{.5f, -.5f, .5f},  {.9f, .2f, .2f}},
-        {{.5f, .5f, -.5f},  {.9f, .2f, .2f}},
-        {{.5f, .5f, -.5f},  {.9f, .2f, .2f}},
-        {{.5f, -.5f, .5f},  {.9f, .2f, .2f}},
-        {{.5f, .5f, .5f},   {.9f, .2f, .2f}},
-        // back face (green)
-        {{-.5f, -.5f, -.5f}, {.2f, .9f, .2f}},
-        {{.5f, -.5f, -.5f},  {.2f, .9f, .2f}},
-        {{-.5f, .5f, -.5f},  {.2f, .9f, .2f}},
-        {{-.5f, .5f, -.5f},  {.2f, .9f, .2f}},
-        {{.5f, -.5f, -.5f},  {.2f, .9f, .2f}},
-        {{.5f, .5f, -.5f},   {.2f, .9f, .2f}},
+        {{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
+    
+        // right face (yellow)
+        {{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
+        {{.5f, .5f, .5f}, {.8f, .8f, .1f}},
+        {{.5f, -.5f, .5f}, {.8f, .8f, .1f}},
+        {{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
+        {{.5f, .5f, -.5f}, {.8f, .8f, .1f}},
+        {{.5f, .5f, .5f}, {.8f, .8f, .1f}},
+    
+        // top face (orange, remember y axis points down)
+        {{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
+        {{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
+        {{-.5f, -.5f, .5f}, {.9f, .6f, .1f}},
+        {{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
+        {{.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
+        {{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
+    
+        // bottom face (red)
+        {{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
+        {{.5f, .5f, .5f}, {.8f, .1f, .1f}},
+        {{-.5f, .5f, .5f}, {.8f, .1f, .1f}},
+        {{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
+        {{.5f, .5f, -.5f}, {.8f, .1f, .1f}},
+        {{.5f, .5f, .5f}, {.8f, .1f, .1f}},
+    
+        // nose face (blue)
+        {{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
+        {{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
+        {{-.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
+        {{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
+        {{.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
+        {{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
+    
+        // tail face (green)
+        {{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
+        {{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
+        {{-.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
+        {{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
+        {{.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
+        {{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
   };
 
     for (auto &v : vertices)
@@ -163,8 +167,8 @@ void AnA_App::loadObjects()
     cube->Model = CreateCubeModel({});
     ItemProperties cubeProperties;
     cubeProperties.sType = ANA_MODEL;
-    cubeProperties.transform.scale = {.2f, .2f, .2f};
-    cubeProperties.transform.rotation = glm::vec3(0.04 * glm::two_pi<float>(), 0.04 * glm::two_pi<float>(), 0.f);
+    cubeProperties.transform.scale = {.5f, .5f, .5f};
+    cubeProperties.transform.rotation = {};
     cubeProperties.transform.translation = {0.f, 0.f , .6f};
 
     cube->ItemsProperties.push_back(cubeProperties);

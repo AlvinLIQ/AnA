@@ -1,5 +1,6 @@
 #include "Headers/AnA_RenderSystem.h"
 #include <vulkan/vulkan_core.h>
+#include <glm/gtc/constants.hpp>
 
 using namespace AnA::RenderSystems;
 
@@ -51,15 +52,17 @@ void AnA_RenderSystem::RenderObject(VkCommandBuffer commandBuffer, AnA_Object* &
     push.resolution = {extent.width, extent.height};
 
     //auto projectionMatrix = camera.GetProjectionMatrix() * camera.GetView();
-    for (auto itemProperties : object->ItemsProperties)
+    for (auto itemProperties = object->ItemsProperties.begin(); itemProperties != object->ItemsProperties.end(); itemProperties++)
     {
-        push.sType = itemProperties.sType;
+        push.sType = itemProperties->sType;
         //push.projectionMatrix = camera.GetProjectionMatrix();
-        push.transformMatrix = itemProperties.transform.mat4();
+        itemProperties->transform.rotation.y = glm::mod(itemProperties->transform.rotation.y + 0.01f, glm::two_pi<float>());
+        itemProperties->transform.rotation.x = glm::mod(itemProperties->transform.rotation.x + 0.01f, glm::two_pi<float>());
+        push.transformMatrix = itemProperties->transform.mat4();
         //if (push.sType == ANA_MODEL)
         //   push.transformMatrix = projectionMatrix * push.transformMatrix;
 
-        push.color = itemProperties.color.has_value() ? itemProperties.color.value() : object->Color;
+        push.color = itemProperties->color.has_value() ? itemProperties->color.value() : object->Color;
         vkCmdPushConstants(commandBuffer, 
         pipelineLayout,
         VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
