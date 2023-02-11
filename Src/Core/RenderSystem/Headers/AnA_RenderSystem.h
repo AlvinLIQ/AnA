@@ -16,7 +16,6 @@ namespace AnA
             ~AnA_RenderSystem();
 
             void RenderObjects(VkCommandBuffer commandBuffer, std::vector<AnA_Object*> &objects, AnA_Camera &camera);
-            void RenderObject(VkCommandBuffer commandBuffer, AnA_Object* &object, AnA_Camera &camera);
 
         private:
             AnA_Device *&aDevice;

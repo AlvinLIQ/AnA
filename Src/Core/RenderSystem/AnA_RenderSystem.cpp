@@ -39,37 +39,35 @@ void AnA_RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, std::vector<
     aPipeline->Bind(commandBuffer);
     for (auto& object : objects)
     {
-        RenderObject(commandBuffer, object, camera);
-    }
-}
+        object->Model->Bind(commandBuffer);
 
-void AnA_RenderSystem::RenderObject(VkCommandBuffer commandBuffer, AnA_Object* &object, AnA_Camera &camera)
-{
-    object->Model->Bind(commandBuffer);
+        ObjectPushConstantData push{};
+        auto extent = aSwapChain->GetExtent();
+        push.resolution = {extent.width, extent.height};
 
-    ObjectPushConstantData push{};
-    auto extent = aSwapChain->GetExtent();
-    push.resolution = {extent.width, extent.height};
+        auto projectionMatrix = camera.GetProjectionMatrix() * camera.GetView();
+        for (auto itemProperties = object->ItemsProperties.begin(); itemProperties != object->ItemsProperties.end(); itemProperties++)
+        {
+            push.sType = itemProperties->sType;
+            //push.projectionMatrix = camera.GetProjectionMatrix();
+            if (push.sType == ANA_MODEL)
+            {
+                itemProperties->transform.rotation.y = glm::mod(itemProperties->transform.rotation.y + 0.01f, glm::two_pi<float>());
+                itemProperties->transform.translation.y = glm::sin(itemProperties->transform.rotation.y) * 0.1f;
+                push.transformMatrix = projectionMatrix * itemProperties->transform.mat4();
+            }
+            else // For 2D Objects
+                push.transformMatrix = itemProperties->transform.mat4();
 
-    //auto projectionMatrix = camera.GetProjectionMatrix() * camera.GetView();
-    for (auto itemProperties = object->ItemsProperties.begin(); itemProperties != object->ItemsProperties.end(); itemProperties++)
-    {
-        push.sType = itemProperties->sType;
-        //push.projectionMatrix = camera.GetProjectionMatrix();
-        itemProperties->transform.rotation.y = glm::mod(itemProperties->transform.rotation.y + 0.01f, glm::two_pi<float>());
-        itemProperties->transform.rotation.x = glm::mod(itemProperties->transform.rotation.x + 0.01f, glm::two_pi<float>());
-        push.transformMatrix = itemProperties->transform.mat4();
-        //if (push.sType == ANA_MODEL)
-        //   push.transformMatrix = projectionMatrix * push.transformMatrix;
-
-        push.color = itemProperties->color.has_value() ? itemProperties->color.value() : object->Color;
-        vkCmdPushConstants(commandBuffer, 
-        pipelineLayout,
-        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-        0,
-        sizeof(ObjectPushConstantData),
-        &push);
-        
-        object->Model->Draw(commandBuffer);
+            push.color = itemProperties->color.has_value() ? itemProperties->color.value() : object->Color;
+            vkCmdPushConstants(commandBuffer, 
+            pipelineLayout,
+            VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+            0,
+            sizeof(ObjectPushConstantData),
+            &push);
+            
+            object->Model->Draw(commandBuffer);
+        }
     }
 }
