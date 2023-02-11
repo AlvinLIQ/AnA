@@ -65,8 +65,8 @@ namespace AnA
     {
         Transform transform;
         uint32_t sType{ANA_RECTANGLE};
-        std::optional<VkImage> texture;
         std::optional<glm::vec3> color;
+        std::optional<VkImage> texture;
     };
 
     class AnA_Object

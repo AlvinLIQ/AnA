@@ -7,6 +7,7 @@
 #define ANA_MODEL 4
 
 layout(location = 0) out vec4 outColor;
+layout(location = 0) in vec3 fragColor;
 
 layout(push_constant) uniform Push {
 //    mat4 projectionMatrix;
@@ -61,6 +62,11 @@ float rounded_rect2(vec2 uv, vec2 offset, vec2 size, vec2 radius)
 }
 
 void main() {
+    if (push.sType == ANA_MODEL)
+    {
+        outColor = vec4(fragColor, 1.);
+        return;
+    }
     vec2 uv = gl_FragCoord.xy / push.resolution;
     //float ratio = push.resolution.y/push.resolution.x;
     //uv.x /= ratio;
@@ -79,6 +85,5 @@ void main() {
         break;
     }
 
-    vec3 color = c * push.color; 
-    outColor = vec4(color, c);
+    outColor = vec4(c * push.color, 1.);
 }

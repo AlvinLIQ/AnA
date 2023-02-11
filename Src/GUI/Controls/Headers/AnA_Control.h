@@ -61,12 +61,12 @@ namespace AnA
                 AlignmentType Alignments[]{HorizontalAlignment, VerticalAlignment};
                 for (int i = 0; i < 2; i++)
                 {
-                    if (Alignments[i] == AlignmentType::Start)
+                    if (Alignments[i] == AlignmentType::Center)
                         pOffset[i] = 0.f;
-                    else if (Alignments[i] == AlignmentType::Center)
+                    else if (Alignments[i] == AlignmentType::Start)
                         pOffset[i] = 0.5f - pSize[i] / 2.f;
                     else
-                        pOffset[i] = 1.f - pSize[i];
+                        pOffset[i] = 0.5f - pSize[i] / 2.f;
                 }
                 
                 actualOffset.x += ControlOffset.x;
@@ -76,15 +76,24 @@ namespace AnA
 
             ANA_SIZE_F GetSizeForRender() const
             {
-                if (renderMode == AlignType::Absolute)
+                ANA_SIZE_F renderSize;
+                if (renderMode == AlignType::Relative)
                 {
-                    ANA_SIZE_F renderSize;
                     auto extent = GetSwapChainExtent();
-                    renderSize.Width = controlSize.Width / (float)extent.height;
-                    renderSize.Height = controlSize.Height / (float)extent.height;
-                    return renderSize;
+                    renderSize.Width = controlSize.Width / (float)extent.width * (float)extent.height;
                 }
-                return controlSize;
+                else if (renderMode == AlignType::Absolute)
+                {
+                    auto extent = GetSwapChainExtent();
+                    renderSize.Width = controlSize.Width / (float)extent.width;
+                    renderSize.Height = controlSize.Height / (float)extent.height;
+                }
+                else if (renderMode == AlignType::Auto)
+                {
+                    auto scale = ItemsProperties.at(0).transform.scale;
+                    renderSize = {scale.x, scale.y};
+                }
+                return renderSize;
             }
             void SetSizeRequest(ANA_SIZE_F newSize)
             {

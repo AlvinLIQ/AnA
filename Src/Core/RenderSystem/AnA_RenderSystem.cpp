@@ -50,12 +50,15 @@ void AnA_RenderSystem::RenderObject(VkCommandBuffer commandBuffer, AnA_Object* &
     auto extent = aSwapChain->GetExtent();
     push.resolution = {extent.width, extent.height};
 
-    auto projectionMatrix = camera.GetProjectionMatrix() * camera.GetView();
+    //auto projectionMatrix = camera.GetProjectionMatrix() * camera.GetView();
     for (auto itemProperties : object->ItemsProperties)
     {
         push.sType = itemProperties.sType;
         //push.projectionMatrix = camera.GetProjectionMatrix();
-        push.transformMatrix = projectionMatrix * itemProperties.transform.mat4();
+        push.transformMatrix = itemProperties.transform.mat4();
+        //if (push.sType == ANA_MODEL)
+        //   push.transformMatrix = projectionMatrix * push.transformMatrix;
+
         push.color = itemProperties.color.has_value() ? itemProperties.color.value() : object->Color;
         vkCmdPushConstants(commandBuffer, 
         pipelineLayout,
