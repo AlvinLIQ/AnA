@@ -1,5 +1,4 @@
-#include "Headers/AnA.h"
-#include "Headers/AnA_App.h"
+#include "../Core/Headers/AnA_App.h"
 
 using namespace AnA;
 

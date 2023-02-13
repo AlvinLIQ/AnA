@@ -1,3 +1,6 @@
 [submodule "Src/stb"]
 	path = Src/stb
 	url = https://github.com/nothings/stb
+[submodule "Src/VertexLoader"]
+	path = Src/VertexLoader
+	url = https://github.com/AlvinLIQ/VertexLoader
