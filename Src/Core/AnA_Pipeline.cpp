@@ -2,7 +2,7 @@
 
 using namespace AnA;
 
-static std::vector<char> readFile(const std::string &filename)
+std::vector<char> AnA_Pipeline::ReadFile(const std::string &filename)
 {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
     if (!file.is_open())
@@ -37,8 +37,8 @@ void AnA_Pipeline::Bind(VkCommandBuffer commandBuffer)
 
 void AnA_Pipeline::createGraphicsPipeline(const std::string &vertShaderFileName, const std::string &fragShaderFileName)
 {
-    auto vertShaderCode = readFile(vertShaderFileName);
-    auto fragShaderCode = readFile(fragShaderFileName);
+    auto vertShaderCode = ReadFile(vertShaderFileName);
+    auto fragShaderCode = ReadFile(fragShaderFileName);
 
     VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
     VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);

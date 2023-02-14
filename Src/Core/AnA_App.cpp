@@ -100,6 +100,13 @@ AnA_Model *AnA_App::Get2DModel()
     return _2DModel;
 }
 
+void AnA_App::CreateModel(std::vector<AnA_Model::Vertex> vertices, AnA_Model** pModel)
+{
+    if (pModel == nullptr)
+        throw std::runtime_error("pModel is nullptr!");
+    *pModel = new AnA_Model(_aDevice, vertices);
+}
+
 AnA_Model *CreateCubeModel()
 {
     std::vector<AnA_Model::Vertex> vertices = 
@@ -153,7 +160,7 @@ AnA_Model *CreateCubeModel()
 
 void AnA_App::loadObjects()
 {
-    
+    /*
     auto cube = new AnA_Object;
     
     cube->Color = {0.1f, 0.2f, 0.3f};
@@ -165,7 +172,7 @@ void AnA_App::loadObjects()
     cubeProperties.transform.translation = {0.f, 0.f , 1.5f};
 
     cube->ItemsProperties.push_back(std::move(cubeProperties));
-    objects.push_back(std::move(cube));
+    objects.push_back(std::move(cube));*/
     /*
     auto shapes = new AnA_Object;
     shapes->Model = Get2DModel();
