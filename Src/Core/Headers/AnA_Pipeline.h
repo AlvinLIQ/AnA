@@ -143,6 +143,7 @@ namespace AnA
 
         void Bind(VkCommandBuffer commandBuffer);
 
+        static std::vector<char> ReadFile(const std::string &filename);
     private:
         AnA_Device *&aDevice;
         VkRenderPass &renderPass;

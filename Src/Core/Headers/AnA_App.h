@@ -22,7 +22,13 @@ namespace AnA
         void Cleanup();
         void Exit();
 
+        std::vector<AnA_Object*> &GetObjects()
+        {
+            return objects;
+        }
+
         static AnA_Model* Get2DModel();
+        static void CreateModel(std::vector<AnA_Model::Vertex> vertices, AnA_Model** pModel);
 
     private:
         AnA_Window* aWindow;
