@@ -1,9 +1,9 @@
 #include "Headers/AnA_SwapChain.h"
-#include "Headers/AnA_Buffer.h"
 #include <iostream>
 
 #ifdef ANA_INCLUDE_STB_IMAGE
 #define STB_IMAGE_IMPLEMENTATION
+#include "Headers/AnA_Buffer.h"
 #include "../stb/stb_image.h"
 #endif
 
