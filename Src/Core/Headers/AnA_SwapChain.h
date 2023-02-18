@@ -12,10 +12,10 @@
 
 //#define ANA_INCLUDE_STB_IMAGE
 
+#define MAX_FRAMES_IN_FLIGHT 2
+
 namespace AnA
 {
-    const int MAX_FRAMES_IN_FLIGHT = 2;
-
     class AnA_SwapChain
     {
     public:

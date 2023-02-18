@@ -12,6 +12,7 @@ int main()
     Vertex cube;
     int vCount;
     LoadVerticesFromStr(vData.data(), &cube, &vCount);
+
     std::vector<AnA_Model::Vertex> vertices(vCount);
     for (int i = 0; i < vCount; i++)
     {

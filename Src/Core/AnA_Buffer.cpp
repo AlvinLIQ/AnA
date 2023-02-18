@@ -48,3 +48,10 @@ void AnA_Buffer::Unmap()
         mappedData = nullptr;
     }
 }
+
+AnA_UniformBuffer::AnA_UniformBuffer(AnA_Device *&mDevice, VkDeviceSize size, 
+            VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, 
+            VkDescriptorSetLayout layout) : AnA_Buffer(mDevice, size, usage, properties)
+{
+
+}

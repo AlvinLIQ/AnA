@@ -30,4 +30,10 @@ namespace AnA
         VkBuffer buffer = VK_NULL_HANDLE;
         VkDeviceMemory bufferMemory = VK_NULL_HANDLE;
     };
+
+    class AnA_UniformBuffer : AnA_Buffer
+    {
+    public:
+        AnA_UniformBuffer(AnA_Device *&mDevice, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkDescriptorSetLayout layout);
+    };
 }

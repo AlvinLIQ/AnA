@@ -1,8 +1,25 @@
 #include "Headers/AnA_RenderSystem.h"
+#include <cstddef>
+#include <vector>
 #include <vulkan/vulkan_core.h>
 #include <glm/gtc/constants.hpp>
 
 using namespace AnA::RenderSystems;
+
+void CameraBufferObject::CreateBindingDescriptionSet(VkDescriptorSetLayoutBinding* pDescSet)
+{
+
+}
+
+VkDescriptorBufferInfo CameraBufferObject::GetBufferInfo(VkBuffer camBuffer)
+{
+    VkDescriptorBufferInfo bufferInfo{};
+    bufferInfo.buffer = camBuffer;
+    bufferInfo.offset = 0;
+    bufferInfo.range = sizeof(CameraBufferObject);
+
+    return bufferInfo;
+}
 
 AnA_RenderSystem::AnA_RenderSystem(AnA_Device *&mDevice, AnA_SwapChain *&mSwapChain) : aDevice {mDevice}, aSwapChain {mSwapChain}
 {
@@ -12,6 +29,9 @@ AnA_RenderSystem::AnA_RenderSystem(AnA_Device *&mDevice, AnA_SwapChain *&mSwapCh
 
 AnA_RenderSystem::~AnA_RenderSystem()
 {
+    for (auto &descriptionSetLayout : descriptionSetLayouts)
+        vkDestroyDescriptorSetLayout(aDevice->GetLogicalDevice(), descriptionSetLayout, nullptr);
+
     delete aPipeline;
     vkDestroyPipelineLayout(aDevice->GetLogicalDevice(), pipelineLayout, nullptr);
 }
