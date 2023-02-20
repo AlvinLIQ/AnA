@@ -3,6 +3,7 @@
 #include "../../Headers/AnA_Pipeline.h"
 #include "../../Headers/AnA_SwapChain.h"
 #include "../../Headers/AnA_Camera.h"
+#include "../../Headers/AnA_Buffer.h"
 #include <vector>
 #include <array>
 #include <vulkan/vulkan_core.h>
@@ -15,7 +16,7 @@ namespace AnA
         {
             glm::mat4 proj{1.f};
             glm::mat4 view{1.f};
-            static void CreateBindingDescriptionSet(VkDescriptorSetLayoutBinding* pDescSet);
+            static VkDescriptorSetLayoutBinding GetBindingDescriptionSet();
             static VkDescriptorBufferInfo GetBufferInfo(VkBuffer camBuffer);
         };
         
@@ -36,8 +37,15 @@ namespace AnA
             
             AnA_Pipeline *aPipeline;
 
-            CameraBufferObject cameraBuffer;
-            std::array<VkDescriptorSetLayout, MAX_FRAMES_IN_FLIGHT> descriptionSetLayouts;
+            std::vector<AnA_Buffer> cameraBuffers;
+
+            VkDescriptorPool descriptorPool;
+            void createDescriptorPool();
+            std::vector<VkDescriptorSet> descriptorSets;
+            void createDescriptorSets();
+
+            VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
+            void createDescriptorSetLayout();
         };
     }
 }
