@@ -20,7 +20,7 @@ int main()
         //printf("%f %f %f\n", cube[i].position[0], cube[i].position[1], cube[i].position[2]);
         vertices[i].color = glm::vec3(cube[i].color[0], cube[i].color[1], cube[i].color[2]);
     }
-    FreeVerticesMemory(&cube);
+    FreeVerticesMemory(reinterpret_cast<void**>(&cube));
     AnA_Object *object = new AnA_Object;
     object->Color = {0.1f, 0.2f, 0.3f};
 
