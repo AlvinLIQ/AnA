@@ -1,5 +1,5 @@
 #include "../Core/Headers/AnA_App.h"
-#include "../VertexLoader/Headers/VertexLoader.h"
+#include "../VertexLoader/Headers/VertexLoader.hpp"
 
 using namespace AnA;
 
@@ -11,7 +11,7 @@ int main()
     auto vData = AnA_Pipeline::ReadFile("Src/Demo/Cube_Vertices.txt");
     Vertex cube;
     int vCount;
-    LoadVerticesFromStr(vData.data(), &cube, &vCount);
+    LoadVerticesFromStr(vData.data(), (size_t)-1, &cube, &vCount);
 
     std::vector<AnA_Model::Vertex> vertices(vCount);
     for (int i = 0; i < vCount; i++)
