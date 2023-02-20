@@ -1,14 +1,22 @@
 #include "Headers/AnA_RenderSystem.h"
 #include <cstddef>
+#include <stdexcept>
 #include <vector>
 #include <vulkan/vulkan_core.h>
 #include <glm/gtc/constants.hpp>
 
 using namespace AnA::RenderSystems;
 
-void CameraBufferObject::CreateBindingDescriptionSet(VkDescriptorSetLayoutBinding* pDescSet)
+VkDescriptorSetLayoutBinding CameraBufferObject::GetBindingDescriptionSet()
 {
+    VkDescriptorSetLayoutBinding uboLayoutBinding{};
+    uboLayoutBinding.binding = 0;
+    uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    uboLayoutBinding.descriptorCount = 1;
 
+    uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+    return uboLayoutBinding;
 }
 
 VkDescriptorBufferInfo CameraBufferObject::GetBufferInfo(VkBuffer camBuffer)
@@ -29,9 +37,6 @@ AnA_RenderSystem::AnA_RenderSystem(AnA_Device *&mDevice, AnA_SwapChain *&mSwapCh
 
 AnA_RenderSystem::~AnA_RenderSystem()
 {
-    for (auto &descriptionSetLayout : descriptionSetLayouts)
-        vkDestroyDescriptorSetLayout(aDevice->GetLogicalDevice(), descriptionSetLayout, nullptr);
-
     delete aPipeline;
     vkDestroyPipelineLayout(aDevice->GetLogicalDevice(), pipelineLayout, nullptr);
 }
@@ -90,4 +95,53 @@ void AnA_RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, std::vector<
             object->Model->Draw(commandBuffer);
         }
     }
+}
+
+void AnA_RenderSystem::createDescriptorPool()
+{
+    VkDescriptorPoolSize poolSize{};
+    poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    poolSize.descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+    VkDescriptorPoolCreateInfo poolInfo{};
+    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    poolInfo.poolSizeCount = 1;
+    poolInfo.pPoolSizes = &poolSize;
+
+    if (vkCreateDescriptorPool(aDevice->GetLogicalDevice(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
+        throw std::runtime_error("Failed to create descriptor pool!");
+}
+
+void AnA_RenderSystem::createDescriptorSets()
+{
+    std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
+    VkDescriptorSetAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocInfo.descriptorPool = descriptorPool;
+    allocInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    allocInfo.pSetLayouts = layouts.data();
+    descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
+    if (vkAllocateDescriptorSets(aDevice->GetLogicalDevice(), &allocInfo, descriptorSets.data()) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to allocate descriptor sets!");
+    }
+    for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    {
+        VkDescriptorBufferInfo bufferInfo{};
+        bufferInfo.buffer = cameraBuffers[i].GetBuffer();
+        bufferInfo.offset = 0;
+        bufferInfo.range = sizeof(CameraBufferObject);
+    }
+}
+
+void AnA_RenderSystem::createDescriptorSetLayout()
+{
+    auto uboLayoutBinding = CameraBufferObject::GetBindingDescriptionSet();
+    VkDescriptorSetLayoutCreateInfo layoutInfo{};
+    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    layoutInfo.bindingCount = 1;
+    layoutInfo.pBindings = &uboLayoutBinding;
+
+    if (vkCreateDescriptorSetLayout(aDevice->GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
+        throw std::runtime_error("Failed to create the DescriptorSetLayout");
 }
