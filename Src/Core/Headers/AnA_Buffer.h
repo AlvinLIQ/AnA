@@ -1,5 +1,7 @@
 #pragma once
 #include "AnA_Device.h"
+#include <vulkan/vulkan_core.h>
+#include <cstring>
 
 namespace AnA
 {
@@ -22,6 +24,13 @@ namespace AnA
         void *GetMappedData()
         {
             return mappedData;
+        }
+
+        void CopyToBuffer(const void *data, VkDeviceSize bufferSize)
+        {
+            this->Map(0, bufferSize);
+            memcpy(this->GetMappedData(), data, bufferSize);
+            this->Unmap();
         }
     private:
         AnA_Device *&aDevice;
