@@ -16,6 +16,7 @@ namespace AnA
         ~AnA_Device();
 
         void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &buffer, VkDeviceMemory &deviceMemory);
+        void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer);
 
         struct QueueFamilyIndices
         {

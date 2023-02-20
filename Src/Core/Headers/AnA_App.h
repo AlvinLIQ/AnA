@@ -6,6 +6,7 @@
 #include "AnA_Instance.h"
 #include "AnA_Device.h"
 #include "../RenderSystem/Headers/AnA_RenderSystem.h"
+#include <cstdint>
 #include <vector>
 #include <vulkan/vulkan.h>
 
@@ -28,7 +29,7 @@ namespace AnA
         }
 
         static AnA_Model* Get2DModel();
-        static void CreateModel(std::vector<AnA_Model::Vertex> vertices, AnA_Model** pModel);
+        static void CreateModel(const std::vector<AnA_Model::Vertex> &vertices, const std::vector<uint16_t> &indices, AnA_Model** pModel);
 
     private:
         AnA_Window* aWindow;
