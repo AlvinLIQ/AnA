@@ -9,11 +9,14 @@
 
 using namespace AnA;
 
-AnA_Model::AnA_Model(AnA_Device *&mDevice, const std::vector<Vertex> &vertices, const std::vector<Index> &indices) : aDevice{mDevice}
+AnA_Model::AnA_Model(AnA_Device *&mDevice, const ModelInfo &modelInfo) : aDevice{mDevice}
 {
-    createVertexBuffers(vertices);
-    if ((hasIndexBuffer = indices.size() > 0))
-        createIndexBuffers(indices);
+    createVertexBuffers(modelInfo.vertices);
+    if ((hasIndexBuffer = modelInfo.indices.size() > 0))
+    {
+        createIndexBuffers(modelInfo.indices);
+        indexStep = modelInfo.indexStep;
+    }
 }
 
 AnA_Model::~AnA_Model()
@@ -67,7 +70,7 @@ void AnA_Model::Draw(VkCommandBuffer commandBuffer)
 {
     if (hasIndexBuffer)
     {
-        for (int i = 0; i < vertexCount; i += 4)
+        for (int i = 0; i < vertexCount; i += indexStep)
         {
             vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, i, 0);
         }
