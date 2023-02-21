@@ -16,7 +16,7 @@ namespace AnA
         ~AnA_Device();
 
         void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &buffer, VkDeviceMemory &deviceMemory);
-        void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer);
+        void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 
         struct QueueFamilyIndices
         {
@@ -75,5 +75,8 @@ namespace AnA
 
         VkCommandPool commandPool;
         void createCommandPool();
+
+        VkCommandBuffer beginSingleTimeCommands();
+        void endSingleTimeCommands(VkCommandBuffer commandBuffer);
     };
 }

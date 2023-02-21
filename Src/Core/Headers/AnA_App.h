@@ -29,7 +29,7 @@ namespace AnA
         }
 
         static AnA_Model* Get2DModel();
-        static void CreateModel(const std::vector<AnA_Model::Vertex> &vertices, const std::vector<uint16_t> &indices, AnA_Model** pModel);
+        static void CreateModel(const std::vector<AnA_Model::Vertex> &vertices, const std::vector<AnA_Model::Index> &indices, AnA_Model** pModel);
 
     private:
         AnA_Window* aWindow;

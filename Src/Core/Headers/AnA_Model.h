@@ -24,18 +24,20 @@ namespace AnA
             static std::vector<VkVertexInputBindingDescription> GetBindingDescription();
             static std::vector<VkVertexInputAttributeDescription> GetAttributeDescription();
         };
+        typedef uint32_t Index;
 
-        AnA_Model(AnA_Device *&mDevice, const std::vector<Vertex> &vertices, const std::vector<uint16_t> &indices);
+        AnA_Model(AnA_Device *&mDevice, const std::vector<Vertex> &vertices, const std::vector<Index> &indices);
         ~AnA_Model();
         
         void Bind(VkCommandBuffer commandBuffer);
         void Draw(VkCommandBuffer commandBuffer);
     private:
         void createVertexBuffers(const std::vector<Vertex> &vertices);
-        void createIndexBuffers(const std::vector<uint16_t> &indices);
+        void createIndexBuffers(const std::vector<Index> &indices);
 
         AnA_Device *&aDevice;
         AnA_Buffer *vertexBuffer;
+        bool hasIndexBuffer;
         AnA_Buffer *indexBuffer;
         uint32_t vertexCount;
         uint32_t indexCount;

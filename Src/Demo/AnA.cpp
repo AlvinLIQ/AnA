@@ -5,24 +5,26 @@ using namespace AnA;
 
 void CopyVertices(IndexedVertex &indexedVertex, std::vector<AnA_Model::Vertex> &dstVertices)
 {
+    /*
     auto &srcVertices = indexedVertex.vertices;
     for (int i = 0; i < indexedVertex.vertexCount; i++)
     {
         dstVertices[i].position = glm::vec3(srcVertices[i].position[0], srcVertices[i].position[1], srcVertices[i].position[2]);
         //printf("%f %f %f\n", srcVertices[i].position[0], srcVertices[i].position[1], srcVertices[i].position[2]);
         dstVertices[i].color = glm::vec3(srcVertices[i].color[0], srcVertices[i].color[1], srcVertices[i].color[2]);
-    }   
+    }*/
+    memcpy(dstVertices.data(), indexedVertex.vertices, sizeof(Vertex_T) * indexedVertex.vertexCount);
 }
 
 int main()
 {
     AnA_App* aApp = new AnA_App;
     aApp->Init();
-
     auto vData = AnA_Pipeline::ReadFile("Src/Demo/Cube_Vertices_Indexed.txt");
     IndexedVertex cube;
-    LoadVerticesFromStr(vData.data(), (size_t)-1, &cube.vertices, &cube.vertexCount);
-    cube.indices = {0, 1, 2, 1, 2, 3};
+    LoadIndexedVerticesFromStr(vData.data(), &cube);
+    //for (auto index : cube.indices)
+    //    std::cout<<index<<std::endl;
 
     std::vector<AnA_Model::Vertex> vertices(cube.vertexCount);
     CopyVertices(cube, vertices);
