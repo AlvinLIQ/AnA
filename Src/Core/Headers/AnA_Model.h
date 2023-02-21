@@ -26,14 +26,14 @@ namespace AnA
         };
         typedef uint32_t Index;
         
-        struct ModelProperties
+        struct ModelInfo
         {
             std::vector<Vertex> vertices;
-            
+            Index indexStep;
             std::vector<Index> indices;
         };
 
-        AnA_Model(AnA_Device *&mDevice, const std::vector<Vertex> &vertices, const std::vector<Index> &indices);
+        AnA_Model(AnA_Device *&mDevice, const ModelInfo &modelInfo);
         ~AnA_Model();
         
         void Bind(VkCommandBuffer commandBuffer);
@@ -48,5 +48,6 @@ namespace AnA
         AnA_Buffer *indexBuffer;
         uint32_t vertexCount;
         uint32_t indexCount;
+        Index indexStep;
     };
 }

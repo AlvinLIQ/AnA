@@ -39,7 +39,7 @@ int main()
     objectProperties.transform.translation = {0.f, 0.f , 1.5f};
     object->ItemsProperties.push_back(std::move(objectProperties));
     
-    AnA_App::CreateModel(vertices, cube.indices, &object->Model);
+    AnA_App::CreateModel({vertices, cube.indexType, cube.indices}, &object->Model);
     aApp->GetObjects().push_back(std::move(object));
 
     aApp->Run();

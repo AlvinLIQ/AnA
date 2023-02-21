@@ -94,17 +94,17 @@ AnA_Model *AnA_App::Get2DModel()
             {{-1.0f, 1.0f, 0.f}, {}},
             {{1.0f, 1.0f, 0.f}, {}}
         };
-        _2DModel = new AnA_Model(_aDevice, vertices, {0, 1, 2, 1, 2, 3});
+        _2DModel = new AnA_Model(_aDevice, {vertices, 4, {0, 1, 2, 1, 2, 3}});
     }
 
     return _2DModel;
 }
 
-void AnA_App::CreateModel(const std::vector<AnA_Model::Vertex> &vertices, const std::vector<AnA_Model::Index> &indices, AnA_Model** pModel)
+void AnA_App::CreateModel(const AnA_Model::ModelInfo &modelInfo, AnA_Model** pModel)
 {
     if (pModel == nullptr)
         throw std::runtime_error("pModel is nullptr!");
-    *pModel = new AnA_Model(_aDevice, vertices, indices);
+    *pModel = new AnA_Model(_aDevice, modelInfo);
 }
 
 AnA_Model *CreateCubeModel()
@@ -155,7 +155,7 @@ AnA_Model *CreateCubeModel()
         {{.5f,  .5f, -.5f},  {.2f, .2f, .9f}},
     };
 
-    return new AnA_Model(_aDevice, vertices, {0, 1, 2, 3, 4, 5});
+    return new AnA_Model(_aDevice, {vertices, 4, {0, 1, 2, 3, 4, 5}});
 }
 
 void AnA_App::loadObjects()
