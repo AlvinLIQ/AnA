@@ -25,6 +25,13 @@ namespace AnA
             static std::vector<VkVertexInputAttributeDescription> GetAttributeDescription();
         };
         typedef uint32_t Index;
+        
+        struct ModelProperties
+        {
+            std::vector<Vertex> vertices;
+            
+            std::vector<Index> indices;
+        };
 
         AnA_Model(AnA_Device *&mDevice, const std::vector<Vertex> &vertices, const std::vector<Index> &indices);
         ~AnA_Model();
