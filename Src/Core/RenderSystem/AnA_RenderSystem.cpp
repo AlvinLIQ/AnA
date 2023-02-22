@@ -1,4 +1,4 @@
-#include "Headers/AnA_RenderSystem.h"
+#include "Headers/AnA_RenderSystem.hpp"
 #include <cstddef>
 #include <stdexcept>
 #include <vector>
@@ -77,8 +77,8 @@ void AnA_RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, std::vector<
             //push.projectionMatrix = camera.GetProjectionMatrix();
             if (push.sType == ANA_MODEL)
             {
-                itemProperties->transform.rotation.y = glm::mod(itemProperties->transform.rotation.y + 0.01f, glm::two_pi<float>());
-                itemProperties->transform.translation.y = glm::sin(itemProperties->transform.rotation.y) * 0.1f;
+                //itemProperties->transform.rotation.y = glm::mod(itemProperties->transform.rotation.y + 0.01f, glm::two_pi<float>());
+                //itemProperties->transform.translation.y = glm::sin(itemProperties->transform.rotation.y) * 0.1f;
                 push.transformMatrix = projectionMatrix * itemProperties->transform.mat4();
             }
             else // For 2D Objects

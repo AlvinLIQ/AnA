@@ -1,5 +1,5 @@
-#include "Headers/AnA_Device.h"
-#include "Headers/AnA_Instance.h"
+#include "Headers/AnA_Device.hpp"
+#include "Headers/AnA_Instance.hpp"
 
 #include <stdexcept>
 #include <vulkan/vulkan_core.h>

@@ -1,4 +1,4 @@
-#include "../Core/Headers/AnA_App.h"
+#include "../Core/Headers/AnA_App.hpp"
 #include "../VertexLoader/Headers/VertexLoader.hpp"
 
 using namespace AnA;

@@ -1,4 +1,4 @@
-#include "Headers/AnA_SwapChain.h"
+#include "Headers/AnA_SwapChain.hpp"
 #include <iostream>
 
 #ifdef ANA_INCLUDE_STB_IMAGE

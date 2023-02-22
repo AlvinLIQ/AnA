@@ -1,5 +1,5 @@
-#include "Headers/AnA_Object.h"
-#include "Headers/AnA_Model.h"
+#include "Headers/AnA_Object.hpp"
+#include "Headers/AnA_Model.hpp"
 
 using namespace AnA;
 

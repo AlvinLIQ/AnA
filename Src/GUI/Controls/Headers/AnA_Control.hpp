@@ -1,6 +1,6 @@
 #pragma once
-#include "../../../Core/Headers/AnA_Object.h"
-#include "../../../Core/Headers/AnA_SwapChain.h"
+#include "../../../Core/Headers/AnA_Object.hpp"
+#include "../../../Core/Headers/AnA_SwapChain.hpp"
 #include <limits>
 
 namespace AnA

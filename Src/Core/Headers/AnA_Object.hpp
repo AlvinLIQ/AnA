@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AnA_Model.h"
+#include "AnA_Model.hpp"
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

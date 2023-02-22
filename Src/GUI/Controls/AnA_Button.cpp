@@ -1,6 +1,6 @@
 //b'\xd5I5f\x9do-\xc2\xeeTU\x08E\xaaM\xd3'
-#include "Headers/AnA_Button.h"
-#include "../../Core/Headers/AnA_Object.h"
+#include "Headers/AnA_Button.hpp"
+#include "../../Core/Headers/AnA_Object.hpp"
 
 using namespace AnA;
 using namespace AnA::Controls;

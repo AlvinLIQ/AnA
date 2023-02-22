@@ -1,5 +1,5 @@
-#include "Headers/AnA_Control.h"
-#include "../../Core/Headers/AnA_App.h"
+#include "Headers/AnA_Control.hpp"
+#include "../../Core/Headers/AnA_App.hpp"
 
 using namespace AnA;
 using namespace AnA::Controls;
