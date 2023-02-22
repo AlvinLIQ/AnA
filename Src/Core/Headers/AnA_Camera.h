@@ -4,7 +4,7 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 
-
+#define MOVESTEP 0.05
 namespace AnA
 {
     class AnA_Camera
@@ -26,6 +26,30 @@ namespace AnA
             return viewMatrix;
         }
 
+        void MoveForward()
+        {
+            viewMatrix[3].z -= MOVESTEP;
+        }
+        void MoveBack()
+        {
+            viewMatrix[3].z += MOVESTEP;
+        }
+        void MoveLeft()
+        {
+            viewMatrix[3].x += MOVESTEP;
+        }
+        void MoveRight()
+        {
+            viewMatrix[3].x -= MOVESTEP;
+        }
+        void MoveUp()
+        {
+            viewMatrix[3].y += MOVESTEP;
+        }
+        void MoveDown()
+        {
+            viewMatrix[3].y -= MOVESTEP;
+        }
     private:
         glm::mat4 projectionMatrix{1.f};
         glm::mat4 viewMatrix{1.f};

@@ -10,18 +10,27 @@
 #include <glm/gtc/constants.hpp>
 #include <iostream>
 #include <stdexcept>
-#include <vector>
+#include <thread>
 #include <vulkan/vulkan_core.h>
-#include <array>
 
 using namespace AnA;
 
-AnA_Model* _2DModel = nullptr;
-AnA_Device* _aDevice;
+AnA_Model *_2DModel = nullptr;
+AnA_Device *_aDevice;
+AnA_App *_aApp;
+
+#define UI_SIGNAL_EXIT 0
+#define UI_SIGNAL_KEY 2
+#define UI_SIGNAL_MOUSE 4
+#define UI_SIGNAL_WAIT 1
+
+bool _uiLoopShouldEnd = false;
+short _uiSignal;
+int _uiParam[2];
 
 AnA_App::AnA_App()
 {
-
+    _aApp = this;
 }
 
 AnA_App::~AnA_App()
@@ -34,6 +43,8 @@ void AnA_App::Init()
     aWindow = new AnA_Window();
     if (aWindow->Init())
         throw std::runtime_error("Failed to init window!");
+
+    glfwSetKeyCallback(aWindow->GetGLFWwindow(), AnA_App::keyCallback);
     aInstance = new AnA_Instance;
     aWindow->CreateWindowSurface(aInstance);
     _aDevice = aDevice = new AnA_Device(aInstance->GetInstance(), aWindow->GetSurface());
@@ -44,15 +55,12 @@ void AnA_App::Init()
 
 void AnA_App::Run()
 {
-    AnA_Camera camera;
-    //aWindow->StartLoop();
+    startUILoop(uiThread);
     auto window = aWindow->GetGLFWwindow();
     //camera.SetViewDirection({}, glm::vec3(0.5f, 0.f, 1.f));
     //camera.SetViewTarget(glm::vec3(-1.f, -2.f, 2.f), glm::vec3(0.f, 0.f, 2.5f));
     while(!glfwWindowShouldClose(window))
     {
-        glfwPollEvents();
-
         float aspect = aRenderer->GetAspect();
         //camera.SetOrthographicProjection(-aspect, -1, aspect, 1, -1, 1);
         camera.SetPerspectiveProjection(glm::radians(50.f), aspect, .1f, 100.f);
@@ -65,7 +73,7 @@ void AnA_App::Run()
             aRenderer->EndFrame();
         }
     }
-
+    waitUILoop(uiThread);
     vkDeviceWaitIdle(aDevice->GetLogicalDevice());
 }
 
@@ -160,7 +168,6 @@ AnA_Model *CreateCubeModel()
 
 void AnA_App::loadObjects()
 {
-    glm::vec<3, float> a;
     /*
     auto cube = new AnA_Object;
     
@@ -197,4 +204,57 @@ void AnA_App::loadObjects()
     
     objects.push_back(shapes);
     */
+}
+
+void AnA_App::startUILoop(std::thread &loopThread)
+{
+    _uiSignal = UI_SIGNAL_WAIT;
+    loopThread = std::thread(AnA_App::uiLoop);
+    loopThread.detach();
+}
+
+void AnA_App::waitUILoop(std::thread &loopThread)
+{
+    _uiLoopShouldEnd = true;
+    if (loopThread.joinable())
+        loopThread.join();
+}
+
+void AnA_App::uiLoop()
+{
+    while (!_uiLoopShouldEnd)
+    {
+        glfwPollEvents();
+        switch (_uiSignal)
+        {
+        case UI_SIGNAL_KEY:
+            {
+            auto &camera = _aApp->GetCamera();
+            auto &key = _uiParam[0];
+            if (key == GLFW_KEY_W)
+                camera.MoveForward();
+            else if (key == GLFW_KEY_S)
+                camera.MoveBack();
+            else if (key == GLFW_KEY_A)
+                camera.MoveLeft();
+            else if (key == GLFW_KEY_D)
+                camera.MoveRight();
+            else if (key == GLFW_KEY_SPACE)
+                camera.MoveUp();
+            else if (key == GLFW_KEY_C)
+                camera.MoveDown();
+            }
+            _uiSignal = UI_SIGNAL_WAIT;
+            break;
+        case UI_SIGNAL_EXIT:
+            return;
+        }
+    }
+}
+
+void AnA_App::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+    _uiParam[0] = key;
+    _uiParam[1] = action;
+    _uiSignal = UI_SIGNAL_KEY;
 }
