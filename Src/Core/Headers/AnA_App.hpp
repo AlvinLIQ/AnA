@@ -18,6 +18,9 @@ namespace AnA
     public:
         AnA_App();
         ~AnA_App();
+        
+        AnA_App(const AnA_App&) = delete;
+        AnA_App &operator=(const AnA_App&) = delete;
 
         void Init();
         void Run();

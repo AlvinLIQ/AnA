@@ -10,6 +10,8 @@ namespace AnA
     public:
         AnA_Buffer(AnA_Device *&mDevice, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties);
         ~AnA_Buffer();
+        AnA_Buffer(const AnA_Buffer&) = delete;
+        AnA_Buffer &operator=(const AnA_Buffer&) = delete;
         VkResult Map(VkDeviceSize offset, VkDeviceSize size);
         void Unmap();
 
