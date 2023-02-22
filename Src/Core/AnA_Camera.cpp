@@ -1,4 +1,4 @@
-#include "Headers/AnA_Camera.h"
+#include "Headers/AnA_Camera.hpp"
 
 #include <cassert>
 #include <limits>

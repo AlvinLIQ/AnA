@@ -1,10 +1,11 @@
-#include "Headers/AnA_App.h" 
-#include "Headers/AnA_Model.h"
-#include "Headers/AnA_Object.h"
-#include "Headers/AnA_Renderer.h"
-#include "Headers/AnA_Camera.h"
-#include "RenderSystem/Headers/AnA_RenderSystem.h"
+#include "Headers/AnA_App.hpp" 
+#include "Headers/AnA_Model.hpp"
+#include "Headers/AnA_Object.hpp"
+#include "Headers/AnA_Renderer.hpp"
+#include "Headers/AnA_Camera.hpp"
+#include "RenderSystem/Headers/AnA_RenderSystem.hpp"
 #include <GLFW/glfw3.h>
+#include <chrono>
 #include <glm/detail/qualifier.hpp>
 #include <glm/fwd.hpp>
 #include <glm/gtc/constants.hpp>
@@ -55,12 +56,19 @@ void AnA_App::Init()
 
 void AnA_App::Run()
 {
-    startUILoop(uiThread);
+    //startUILoop(uiThread);
     auto window = aWindow->GetGLFWwindow();
     //camera.SetViewDirection({}, glm::vec3(0.5f, 0.f, 1.f));
     //camera.SetViewTarget(glm::vec3(-1.f, -2.f, 2.f), glm::vec3(0.f, 0.f, 2.5f));
+    auto prevTime = std::chrono::high_resolution_clock::now();
     while(!glfwWindowShouldClose(window))
     {
+        glfwPollEvents();
+
+        auto curTime = std::chrono::high_resolution_clock::now();
+        float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(curTime - prevTime).count();
+        prevTime = curTime;
+
         float aspect = aRenderer->GetAspect();
         //camera.SetOrthographicProjection(-aspect, -1, aspect, 1, -1, 1);
         camera.SetPerspectiveProjection(glm::radians(50.f), aspect, .1f, 100.f);
@@ -73,7 +81,7 @@ void AnA_App::Run()
             aRenderer->EndFrame();
         }
     }
-    waitUILoop(uiThread);
+    //waitUILoop(uiThread);
     vkDeviceWaitIdle(aDevice->GetLogicalDevice());
 }
 
@@ -224,7 +232,6 @@ void AnA_App::uiLoop()
 {
     while (!_uiLoopShouldEnd)
     {
-        glfwPollEvents();
         switch (_uiSignal)
         {
         case UI_SIGNAL_KEY:
@@ -233,15 +240,15 @@ void AnA_App::uiLoop()
             auto &key = _uiParam[0];
             if (key == GLFW_KEY_W)
                 camera.MoveForward();
-            else if (key == GLFW_KEY_S)
+            if (key == GLFW_KEY_S)
                 camera.MoveBack();
-            else if (key == GLFW_KEY_A)
+            if (key == GLFW_KEY_A)
                 camera.MoveLeft();
-            else if (key == GLFW_KEY_D)
+            if (key == GLFW_KEY_D)
                 camera.MoveRight();
-            else if (key == GLFW_KEY_SPACE)
+            if (key == GLFW_KEY_SPACE)
                 camera.MoveUp();
-            else if (key == GLFW_KEY_C)
+            if (key == GLFW_KEY_C)
                 camera.MoveDown();
             }
             _uiSignal = UI_SIGNAL_WAIT;
@@ -254,7 +261,10 @@ void AnA_App::uiLoop()
 
 void AnA_App::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
+    /*
     _uiParam[0] = key;
     _uiParam[1] = action;
     _uiSignal = UI_SIGNAL_KEY;
+    */
+    //glfwGetKey
 }

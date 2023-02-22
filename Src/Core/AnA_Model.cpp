@@ -1,5 +1,5 @@
-#include "Headers/AnA_Model.h"
-#include "Headers/AnA_Buffer.h"
+#include "Headers/AnA_Model.hpp"
+#include "Headers/AnA_Buffer.hpp"
 #include <vulkan/vulkan_core.h>
 
 #include <cassert>

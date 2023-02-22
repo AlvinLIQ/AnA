@@ -1,13 +1,12 @@
 #pragma once
 
-#include "AnA_Device.h"
-#include "AnA_Window.h"
-#include "AnA_SwapChain.h"
+#include "AnA_Device.hpp"
+#include "AnA_Window.hpp"
+#include "AnA_SwapChain.hpp"
 
 #include <cassert>
 #include <vector>
 #include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
 
 namespace AnA
 {

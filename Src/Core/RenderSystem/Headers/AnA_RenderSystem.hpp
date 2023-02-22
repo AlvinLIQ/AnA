@@ -1,9 +1,9 @@
 #pragma once
-#include "../../Headers/AnA_Object.h"
-#include "../../Headers/AnA_Pipeline.h"
-#include "../../Headers/AnA_SwapChain.h"
-#include "../../Headers/AnA_Camera.h"
-#include "../../Headers/AnA_Buffer.h"
+#include "../../Headers/AnA_Object.hpp"
+#include "../../Headers/AnA_Pipeline.hpp"
+#include "../../Headers/AnA_SwapChain.hpp"
+#include "../../Headers/AnA_Camera.hpp"
+#include "../../Headers/AnA_Buffer.hpp"
 #include <vector>
 #include <array>
 #include <vulkan/vulkan_core.h>

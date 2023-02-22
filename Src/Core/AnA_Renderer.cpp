@@ -1,5 +1,5 @@
-#include "Headers/AnA_Renderer.h"
-#include "Headers/AnA_SwapChain.h"
+#include "Headers/AnA_Renderer.hpp"
+#include "Headers/AnA_SwapChain.hpp"
 
 #include <cassert>
 #include <array>

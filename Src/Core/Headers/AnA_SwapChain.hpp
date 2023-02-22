@@ -1,5 +1,5 @@
 #pragma once
-#include "AnA_Device.h"
+#include "AnA_Device.hpp"
 
 #include <GLFW/glfw3.h>
 #include <cstddef>

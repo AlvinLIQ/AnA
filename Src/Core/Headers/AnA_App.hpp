@@ -1,12 +1,12 @@
 #pragma once
 
-#include "AnA_Camera.h"
-#include "AnA_Object.h"
-#include "AnA_Renderer.h"
-#include "AnA_Window.h"
-#include "AnA_Instance.h"
-#include "AnA_Device.h"
-#include "../RenderSystem/Headers/AnA_RenderSystem.h"
+#include "AnA_Camera.hpp"
+#include "AnA_Object.hpp"
+#include "AnA_Renderer.hpp"
+#include "AnA_Window.hpp"
+#include "AnA_Instance.hpp"
+#include "AnA_Device.hpp"
+#include "../RenderSystem/Headers/AnA_RenderSystem.hpp"
 #include <cstdint>
 #include <vector>
 #include <thread>

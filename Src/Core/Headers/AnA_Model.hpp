@@ -1,7 +1,7 @@
 #pragma once
 
-#include "AnA_Buffer.h"
-#include "AnA_Device.h"
+#include "AnA_Buffer.hpp"
+#include "AnA_Device.hpp"
 #include <glm/fwd.hpp>
 #include <vulkan/vulkan_core.h>
 
