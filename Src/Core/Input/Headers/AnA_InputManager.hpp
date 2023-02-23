@@ -11,13 +11,15 @@ namespace AnA
         public:
             struct KeyMapConfig
             {
-                void(*callBack)();
+                void *param;
+                void(*callBack)(void *param);
                 int keyCode;
                 int action;
             };
             AnA_InputManager(AnA_Window *&mWindow);
+            ~AnA_InputManager();
 
-            const std::vector<KeyMapConfig> &GetKeyMapConfigs() const
+            std::vector<KeyMapConfig> &GetKeyMapConfigs()
             {
                 return keyMapConfigs;
             }

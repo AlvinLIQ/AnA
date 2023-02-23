@@ -2,7 +2,7 @@
 #include "../../Headers/AnA_Object.hpp"
 #include "../../Headers/AnA_Pipeline.hpp"
 #include "../../Headers/AnA_SwapChain.hpp"
-#include "../../Headers/AnA_Camera.hpp"
+#include "../../Camera/Headers/AnA_Camera.hpp"
 #include "../../Headers/AnA_Buffer.hpp"
 #include <vector>
 #include <array>
@@ -26,7 +26,7 @@ namespace AnA
             AnA_RenderSystem(AnA_Device *&mDevice, AnA_SwapChain *&mSwapChain);
             ~AnA_RenderSystem();
 
-            void RenderObjects(VkCommandBuffer commandBuffer, std::vector<AnA_Object*> &objects, AnA_Camera &camera);
+            void RenderObjects(VkCommandBuffer commandBuffer, std::vector<AnA_Object*> &objects, Camera::AnA_Camera &camera);
 
         private:
             AnA_Device *&aDevice;

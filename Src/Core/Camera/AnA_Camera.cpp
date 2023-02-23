@@ -4,6 +4,7 @@
 #include <limits>
 
 using namespace AnA;
+using namespace AnA::Camera;
 
 void AnA_Camera::SetOrthographicProjection(float left, float top, float right, float bottom, float near, float far)
 {
@@ -25,6 +26,13 @@ void AnA_Camera::SetPerspectiveProjection(float fovy, float aspect, float near, 
     projectionMatrix[2][2] = far / (far - near);
     projectionMatrix[2][3] = 1.f;
     projectionMatrix[3][2] = -(far * near) / (far - near);
+}
+
+void AnA_Camera::AddViewOffset(glm::vec3 position)
+{
+    viewMatrix[3][0] += -position.x;
+    viewMatrix[3][1] += -position.y;
+    viewMatrix[3][2] += -position.z;
 }
 
 void AnA_Camera::SetViewDirection(glm::vec3 position, glm::vec3 direction, glm::vec3 up)
