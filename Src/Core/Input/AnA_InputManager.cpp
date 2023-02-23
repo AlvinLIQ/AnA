@@ -19,15 +19,19 @@ AnA_InputManager::~AnA_InputManager()
     keyMapConfigs.clear();
 }
 
-void AnA_InputManager::CheckAndRunCallbacks()
+bool AnA_InputManager::CheckAndRunCallbacks()
 {
     auto &window = aWindow->GetGLFWwindow();
     auto &keyMapConfigs = _aInputManager->GetKeyMapConfigs();
-    for (auto &keyMapConfig : keyMapConfigs)
+    size_t configSize = keyMapConfigs.size();
+    for (size_t i = 0; i < configSize; i++)
     {
+        auto &keyMapConfig = keyMapConfigs[i];
         if (keyMapConfig.callBack != nullptr && glfwGetKey(window, keyMapConfig.keyCode) == GLFW_PRESS)
             keyMapConfig.callBack(keyMapConfig.param);
     }
+
+    return configSize > 0;
 }
 
 void AnA_InputManager::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
