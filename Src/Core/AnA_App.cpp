@@ -70,7 +70,7 @@ void AnA_App::Run()
         auto curTime = std::chrono::high_resolution_clock::now();
         float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(curTime - prevTime).count();
         prevTime = curTime;
-
+        cameraController.SetSpeedRatio(frameTime);
         aInputManager->CheckAndRunCallbacks();
         float aspect = aRenderer->GetAspect();
         //camera.SetOrthographicProjection(-aspect, -1, aspect, 1, -1, 1);
