@@ -6,6 +6,7 @@
 #include <glm/gtc/constants.hpp>
 
 using namespace AnA::RenderSystems;
+using namespace AnA::Camera;
 
 VkDescriptorSetLayoutBinding CameraBufferObject::GetBindingDescriptionSet()
 {

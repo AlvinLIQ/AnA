@@ -1,8 +1,6 @@
 #include "Headers/AnA_App.hpp" 
-#include "Headers/AnA_Model.hpp"
-#include "Headers/AnA_Object.hpp"
-#include "Headers/AnA_Renderer.hpp"
-#include "Headers/AnA_Camera.hpp"
+#include "Camera/Headers/AnA_CameraController.hpp"
+#include "Input/Headers/AnA_InputManager.hpp"
 #include "RenderSystem/Headers/AnA_RenderSystem.hpp"
 #include <GLFW/glfw3.h>
 #include <chrono>
@@ -12,6 +10,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <thread>
+#include <vector>
 #include <vulkan/vulkan_core.h>
 
 using namespace AnA;
@@ -44,8 +43,9 @@ void AnA_App::Init()
     aWindow = new AnA_Window();
     if (aWindow->Init())
         throw std::runtime_error("Failed to init window!");
+    aInputManager = new Input::AnA_InputManager(aWindow);
 
-    glfwSetKeyCallback(aWindow->GetGLFWwindow(), AnA_App::keyCallback);
+    //glfwSetKeyCallback(aWindow->GetGLFWwindow(), AnA_App::keyCallback);
     aInstance = new AnA_Instance;
     aWindow->CreateWindowSurface(aInstance);
     _aDevice = aDevice = new AnA_Device(aInstance->GetInstance(), aWindow->GetSurface());
@@ -56,6 +56,8 @@ void AnA_App::Init()
 
 void AnA_App::Run()
 {
+    Camera::AnA_CameraController cameraController{camera};
+    cameraController.GetCameraKeyMapConfigs(aInputManager->GetKeyMapConfigs());
     //startUILoop(uiThread);
     auto window = aWindow->GetGLFWwindow();
     //camera.SetViewDirection({}, glm::vec3(0.5f, 0.f, 1.f));
@@ -69,10 +71,11 @@ void AnA_App::Run()
         float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(curTime - prevTime).count();
         prevTime = curTime;
 
+        aInputManager->CheckAndRunCallbacks();
         float aspect = aRenderer->GetAspect();
         //camera.SetOrthographicProjection(-aspect, -1, aspect, 1, -1, 1);
         camera.SetPerspectiveProjection(glm::radians(50.f), aspect, .1f, 100.f);
-
+        
         if (auto commandBuffer = aRenderer->BeginFrame())
         {
             aRenderer->BeginSwapChainRenderPass(commandBuffer);
@@ -87,6 +90,7 @@ void AnA_App::Run()
 
 void AnA_App::Cleanup()
 {
+    delete aInputManager;
     delete aRenderer;
     delete aRenderSystem;
     for (auto& object : objects)
@@ -235,7 +239,7 @@ void AnA_App::uiLoop()
         switch (_uiSignal)
         {
         case UI_SIGNAL_KEY:
-            {
+            {/*
             auto &camera = _aApp->GetCamera();
             auto &key = _uiParam[0];
             if (key == GLFW_KEY_W)
@@ -249,7 +253,7 @@ void AnA_App::uiLoop()
             if (key == GLFW_KEY_SPACE)
                 camera.MoveUp();
             if (key == GLFW_KEY_C)
-                camera.MoveDown();
+                camera.MoveDown();*/
             }
             _uiSignal = UI_SIGNAL_WAIT;
             break;

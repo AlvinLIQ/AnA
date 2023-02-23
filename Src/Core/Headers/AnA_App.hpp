@@ -1,12 +1,13 @@
 #pragma once
 
-#include "AnA_Camera.hpp"
+#include "../Camera/Headers/AnA_Camera.hpp"
 #include "AnA_Object.hpp"
 #include "AnA_Renderer.hpp"
 #include "AnA_Window.hpp"
 #include "AnA_Instance.hpp"
 #include "AnA_Device.hpp"
 #include "../RenderSystem/Headers/AnA_RenderSystem.hpp"
+#include "../Input/Headers/AnA_InputManager.hpp"
 #include <cstdint>
 #include <vector>
 #include <thread>
@@ -32,25 +33,31 @@ namespace AnA
             return objects;
         }
 
-        static AnA_Model* Get2DModel();
-        static void CreateModel(const AnA_Model::ModelInfo &modelInfo, AnA_Model** pModel);
+        static AnA_Model *Get2DModel();
+        static void CreateModel(const AnA_Model::ModelInfo &modelInfo, AnA_Model* *pModel);
 
-        AnA_Camera &GetCamera()
+        Camera::AnA_Camera &GetCamera()
         {
             return camera;
         }
 
+        Input::AnA_InputManager *&GetInputManager()
+        {
+            return aInputManager;
+        }
+
     private:
-        AnA_Window* aWindow;
-        AnA_Instance* aInstance;
-        AnA_Device* aDevice;
-        AnA_Renderer* aRenderer;
-        RenderSystems::AnA_RenderSystem* aRenderSystem;
+        AnA_Window *aWindow;
+        AnA_Instance *aInstance;
+        AnA_Device *aDevice;
+        AnA_Renderer *aRenderer;
+        RenderSystems::AnA_RenderSystem *aRenderSystem;
+        Input::AnA_InputManager *aInputManager;
 
         std::vector<AnA_Object*> objects;
         void loadObjects();
 
-        AnA_Camera camera;
+        Camera::AnA_Camera camera;
 
         std::thread uiThread;
         static void startUILoop(std::thread &loopThread);

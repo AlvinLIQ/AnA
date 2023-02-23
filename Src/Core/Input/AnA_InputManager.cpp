@@ -14,6 +14,11 @@ AnA_InputManager::AnA_InputManager(AnA_Window *&mWindow) : aWindow {mWindow}
     glfwSetKeyCallback(window, AnA_InputManager::keyCallback);*/
 }
 
+AnA_InputManager::~AnA_InputManager()
+{
+    keyMapConfigs.clear();
+}
+
 void AnA_InputManager::CheckAndRunCallbacks()
 {
     auto &window = aWindow->GetGLFWwindow();
@@ -21,7 +26,7 @@ void AnA_InputManager::CheckAndRunCallbacks()
     for (auto &keyMapConfig : keyMapConfigs)
     {
         if (keyMapConfig.callBack != nullptr && glfwGetKey(window, keyMapConfig.keyCode) == GLFW_PRESS)
-            keyMapConfig.callBack();
+            keyMapConfig.callBack(keyMapConfig.param);
     }
 }
 
@@ -31,6 +36,6 @@ void AnA_InputManager::keyCallback(GLFWwindow *window, int key, int scancode, in
     for (auto &keyMapConfig : keyMapConfigs)
     {
         if (keyMapConfig.keyCode == key && keyMapConfig.callBack != nullptr)
-            keyMapConfig.callBack();
+            keyMapConfig.callBack(keyMapConfig.param);
     }
 }
