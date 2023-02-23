@@ -23,7 +23,7 @@ namespace AnA
             {
                 return keyMapConfigs;
             }
-            void CheckAndRunCallbacks();
+            bool CheckAndRunCallbacks();
         private:
             AnA_Window *&aWindow;
             std::vector<KeyMapConfig> keyMapConfigs;

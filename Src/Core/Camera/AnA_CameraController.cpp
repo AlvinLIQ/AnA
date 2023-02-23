@@ -4,6 +4,7 @@ using namespace AnA;
 using namespace AnA::Camera;
 
 const float moveStep = 1.0f;
+const float rotateStep = 0.8f;
 float speedRatio = 1.0f;
 
 #define MOVEMENTSIZE 6
@@ -41,10 +42,12 @@ void AnA_CameraController::SetSpeedRatio(float ratio)
 
 void AnA_CameraController::Move(AnA_CameraController::CameraCallbackParam *param)
 {
-    glm::vec3 position;
     int posIndex = param->id / 2;
-    position[(posIndex + 1) % 3] = 0;
-    position[(posIndex + 2) % 3] = 0;
-    position[posIndex] = (param->id & 1 ? -moveStep : moveStep) * speedRatio;
-    param->aCamera.AddViewOffset(position);
+    param->aCamera.CameraTransform.translation[posIndex] -= (param->id & 1 ? -moveStep : moveStep) * speedRatio;
+}
+
+void AnA_CameraController::Rotate(AnA_CameraController::CameraCallbackParam *param)
+{
+    int posIndex = param->id / 2;
+    param->aCamera.CameraTransform.rotation[posIndex] -= (param->id & 1 ? -rotateStep : rotateStep) * speedRatio * 6.283;
 }

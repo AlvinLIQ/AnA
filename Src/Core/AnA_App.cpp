@@ -71,7 +71,8 @@ void AnA_App::Run()
         float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(curTime - prevTime).count();
         prevTime = curTime;
         cameraController.SetSpeedRatio(frameTime);
-        aInputManager->CheckAndRunCallbacks();
+        if (aInputManager->CheckAndRunCallbacks())
+            camera.UpdateViewMatrix();
         float aspect = aRenderer->GetAspect();
         //camera.SetOrthographicProjection(-aspect, -1, aspect, 1, -1, 1);
         camera.SetPerspectiveProjection(glm::radians(50.f), aspect, .1f, 100.f);

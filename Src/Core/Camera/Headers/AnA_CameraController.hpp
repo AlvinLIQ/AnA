@@ -22,7 +22,7 @@ namespace AnA
             static void SetSpeedRatio(float ratio);
             
             static void Move(CameraCallbackParam *param);
-            static void Rotate();
+            static void Rotate(CameraCallbackParam *param);
 
         private:
             AnA_Camera &aCamera;

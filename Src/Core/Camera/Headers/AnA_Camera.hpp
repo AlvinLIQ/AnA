@@ -4,6 +4,8 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 
+#include "../../Headers/AnA_Types.hpp"
+
 #define MOVESTEP 0.05
 namespace AnA
 {
@@ -16,9 +18,6 @@ namespace AnA
             void SetPerspectiveProjection(float fovy, float aspect, float near, float far);
 
             void AddViewOffset(glm::vec3 position);
-            void SetViewDirection(glm::vec3 position, glm::vec3 direction, glm::vec3 up = glm::vec3(0.f, -1.f, 0.f));
-            void SetViewTarget(glm::vec3 position, glm::vec3 target, glm::vec3 up = glm::vec3(0.f, -1.f, 0.f));
-            void SetViewYXZ(glm::vec3 position, glm::vec3 rotation);
 
             const glm::mat4 &GetProjectionMatrix() const
             {
@@ -27,6 +26,12 @@ namespace AnA
             const glm::mat4 &GetView() const
             {
                 return viewMatrix;
+            }
+
+            Transform CameraTransform;
+            void UpdateViewMatrix()
+            {
+                viewMatrix = CameraTransform.mat4();
             }
         private:
             glm::mat4 projectionMatrix{1.f};
