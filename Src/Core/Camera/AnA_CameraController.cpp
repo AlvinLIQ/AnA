@@ -10,7 +10,7 @@ float speedRatio = 1.0f;
 
 #define MOVEMENTSIZE 6
 
-const int keyCodes[] = {GLFW_KEY_D, GLFW_KEY_A, GLFW_KEY_C, GLFW_KEY_SPACE, GLFW_KEY_W, GLFW_KEY_S};
+const int keyCodes[] = {GLFW_KEY_A, GLFW_KEY_D, GLFW_KEY_SPACE, GLFW_KEY_C, GLFW_KEY_S, GLFW_KEY_W};
 
 void AnA_CameraController::GetCameraKeyMapConfigs(std::vector<Input::AnA_InputManager::KeyMapConfig> &configs)
 {
@@ -52,7 +52,7 @@ void AnA_CameraController::SetSpeedRatio(float ratio)
 void AnA_CameraController::Move(AnA_CameraController::CameraCallbackParam *param)
 {
     int posIndex = param->id / 2;
-    param->aCamera.CameraTransform.translation[posIndex] -= (param->id & 1 ? -moveStep : moveStep) * speedRatio;
+    param->aCamera.offset[posIndex] -= (param->id & 1 ? -moveStep : moveStep) * speedRatio;
 }
 
 void AnA_CameraController::Rotate(AnA_CameraController::CameraCallbackParam *param)
@@ -64,7 +64,7 @@ void AnA_CameraController::Rotate(AnA_CameraController::CameraCallbackParam *par
 void AnA_CameraController::CursorMoved(AnA_Camera *camera, Input::AnA_InputManager::CursorPosition &duration)
 {
     const float rotateSpeed = speedRatio * 6.283 * 18.;
-    camera->CameraTransform.rotation.y -= duration.x * rotateSpeed;
+    camera->CameraTransform.rotation.y += duration.x * rotateSpeed;
     camera->CameraTransform.rotation.x -= duration.y * rotateSpeed;
     if (camera->CameraTransform.rotation.x > .25 * 6.283)
         camera->CameraTransform.rotation.x = .25 * 6.283;
