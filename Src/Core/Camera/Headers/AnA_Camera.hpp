@@ -28,10 +28,20 @@ namespace AnA
                 return viewMatrix;
             }
 
+            void SetViewDirection(glm::vec3 position, glm::vec3 direction, glm::vec3 up = glm::vec3{ 0.0f, -1.0f , 0.0f });
+            void SetViewTarget(glm::vec3 position, glm::vec3 target, glm::vec3 up = glm::vec3{ 0.0f, -1.0f , 0.0f });
+            void SetViewYXZ(glm::vec3 position, glm::vec3 rotation);
+
+            void ApplyRotation(glm::vec3 &position, glm::vec3 &rotation);
+
+            glm::vec3 offset{};
             Transform CameraTransform;
             void UpdateViewMatrix()
             {
-                viewMatrix = CameraTransform.mat4();
+                ApplyRotation(offset, CameraTransform.rotation);
+                CameraTransform.translation += offset;
+                offset = {};
+                SetViewYXZ(CameraTransform.translation, CameraTransform.rotation);
             }
         private:
             glm::mat4 projectionMatrix{1.f};
