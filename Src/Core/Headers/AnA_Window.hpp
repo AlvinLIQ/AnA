@@ -6,6 +6,8 @@
 #include <GLFW/glfw3.h>
 #include "AnA_Instance.hpp"
 
+#define DEFAULT_WINDOW_WIDTH 800
+#define DEFAULT_WINDOW_HEIGHT 600
 
 namespace AnA
 {
@@ -35,11 +37,15 @@ namespace AnA
             return surface;
         }
 
+        int Width = DEFAULT_WINDOW_WIDTH;
+        int Height = DEFAULT_WINDOW_HEIGHT;
+
         bool FramebufferResized = false;
         static void FramebufferResizeCallback(GLFWwindow* window, int width, int height);
     private:
         GLFWwindow* window;
         VkSurfaceKHR surface;
+
 
         void mainLoop();
     };

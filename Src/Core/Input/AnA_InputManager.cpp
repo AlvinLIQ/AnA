@@ -1,5 +1,6 @@
 #include "Headers/AnA_InputManager.hpp"
 #include <GLFW/glfw3.h>
+#include <cstdio>
 
 using namespace AnA;
 using namespace AnA::Input;
@@ -12,6 +13,7 @@ AnA_InputManager::AnA_InputManager(AnA_Window *&mWindow) : aWindow {mWindow}
 /*
     auto &window = aWindow->GetGLFWwindow();
     glfwSetKeyCallback(window, AnA_InputManager::keyCallback);*/
+    glfwGetCursorPos(aWindow->GetGLFWwindow(), &prevPos.x, &prevPos.y);
 }
 
 AnA_InputManager::~AnA_InputManager()
@@ -31,7 +33,17 @@ bool AnA_InputManager::CheckAndRunCallbacks()
             keyMapConfig.callBack(keyMapConfig.param);
     }
 
-    return configSize > 0;
+    glfwGetCursorPos(window, &curPos.x, &curPos.y);
+    CursorPosition duration = {(curPos.x - prevPos.x) / (double)aWindow->Width, (curPos.y - prevPos.y) / (double)aWindow->Height};
+    auto &cursorConfigs = _aInputManager->GetCursorConfigs();
+    for (auto &cursorConfig : cursorConfigs)
+    {
+        if (cursorConfig.callBack != nullptr)
+            cursorConfig.callBack(cursorConfig.param, duration);
+    }
+    prevPos = curPos;
+    //glfwSetCursorPos(window, centerX, centerY);
+    return configSize + cursorConfigs.size() > 0;
 }
 
 void AnA_InputManager::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)

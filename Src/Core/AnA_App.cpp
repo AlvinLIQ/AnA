@@ -58,6 +58,7 @@ void AnA_App::Run()
 {
     Camera::AnA_CameraController cameraController{camera};
     cameraController.GetCameraKeyMapConfigs(aInputManager->GetKeyMapConfigs());
+    cameraController.GetCameraCursorConfigs(aInputManager->GetCursorConfigs());
     //startUILoop(uiThread);
     auto window = aWindow->GetGLFWwindow();
     //camera.SetViewDirection({}, glm::vec3(0.5f, 0.f, 1.f));
