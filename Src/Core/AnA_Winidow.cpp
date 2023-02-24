@@ -1,4 +1,5 @@
 #include "Headers/AnA_Window.hpp"
+#include <GLFW/glfw3.h>
 #include <stdexcept>
 #include <thread>
 
@@ -23,13 +24,17 @@ int AnA_Window::Init()
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
     
-    window = glfwCreateWindow(800, 600, "AnA", NULL, NULL);
+    window = glfwCreateWindow(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, "AnA", NULL, NULL);
     if (!window)
         return -1;
 
     glfwSetWindowUserPointer(window, this);
     glfwSetFramebufferSizeCallback(window, AnA_Window::FramebufferResizeCallback);
-        
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    if (glfwRawMouseMotionSupported())
+        glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+
     glfwMakeContextCurrent(window);
     
     return 0;
@@ -70,4 +75,6 @@ void AnA_Window::FramebufferResizeCallback(GLFWwindow* window, int width, int he
 {
     auto aWindow = reinterpret_cast<AnA_Window*>(glfwGetWindowUserPointer(window));
     aWindow->FramebufferResized = true;
+    aWindow->Width = width;
+    aWindow->Height = height;
 }
