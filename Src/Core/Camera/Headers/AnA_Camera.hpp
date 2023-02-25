@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glm/fwd.hpp>
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
@@ -38,10 +39,12 @@ namespace AnA
             Transform CameraTransform;
             void UpdateViewMatrix()
             {
-                ApplyRotation(offset, CameraTransform.rotation);
-                CameraTransform.translation += offset;
+                //ApplyRotation(offset, CameraTransform.rotation);
+                CameraTransform.translation -= offset;
+                offset = CameraTransform.mat4()[3];
+                SetViewYXZ({}, CameraTransform.rotation);
+                viewMatrix[3] += glm::vec4(offset, 0.f);
                 offset = {};
-                SetViewYXZ(CameraTransform.translation, CameraTransform.rotation);
             }
         private:
             glm::mat4 projectionMatrix{1.f};
