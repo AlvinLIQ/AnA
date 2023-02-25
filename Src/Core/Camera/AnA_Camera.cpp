@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <glm/detail/qualifier.hpp>
+#include <glm/ext/matrix_transform.hpp>
 #include <limits>
 
 using namespace AnA;
@@ -90,5 +91,4 @@ void AnA_Camera::AddViewOffset(glm::vec3 position)
 
 void AnA_Camera::ApplyRotation(glm::vec3 &position, glm::vec3 &rotation)
 {
-    //position = glm::vec3(sin(rotation.x), cos(rotation.y), rotation.z) * position;
 }
