@@ -34,9 +34,9 @@ int main()
 
     ItemProperties objectProperties;
     objectProperties.sType = ANA_MODEL;
-    objectProperties.transform.scale = {.4f, .4f, .4f};
+    objectProperties.transform.scale = {1.f, 1.f, 1.f};
     objectProperties.transform.rotation = {};//glm::vec3(0.04f * glm::two_pi<float>(), 0.f, 0.f);
-    objectProperties.transform.translation = {0.f, 0.f , 1.5f};
+    objectProperties.transform.translation = {0.f, 0.f , 0.f};
     object->ItemsProperties.push_back(std::move(objectProperties));
     
     AnA_App::CreateModel({vertices, cube.indexType, cube.indices}, &object->Model);

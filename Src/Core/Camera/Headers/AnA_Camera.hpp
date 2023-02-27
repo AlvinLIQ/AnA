@@ -41,9 +41,9 @@ namespace AnA
             {
                 //ApplyRotation(offset, CameraTransform.rotation);
                 CameraTransform.translation -= offset;
-                offset = CameraTransform.mat4()[3];
+                auto camMatrix = CameraTransform.mat4();
                 SetViewYXZ({}, CameraTransform.rotation);
-                viewMatrix[3] += glm::vec4(offset, 0.f);
+                viewMatrix[3] += camMatrix[3];
                 offset = {};
             }
         private:
