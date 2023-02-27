@@ -80,7 +80,7 @@ void AnA_RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, std::vector<
             {
                 //itemProperties->transform.rotation.y = glm::mod(itemProperties->transform.rotation.y + 0.01f, glm::two_pi<float>());
                 //itemProperties->transform.translation.y = glm::sin(itemProperties->transform.rotation.y) * 0.1f;
-                push.transformMatrix = projectionMatrix * itemProperties->transform.mat4();
+                push.transformMatrix = itemProperties->transform.mat4();//projectionMatrix * itemProperties->transform.mat4();
             }
             else // For 2D Objects
                 push.transformMatrix = itemProperties->transform.mat4();
