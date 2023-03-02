@@ -27,6 +27,7 @@ namespace AnA
             ~AnA_RenderSystem();
 
             void RenderObjects(VkCommandBuffer commandBuffer, std::vector<AnA_Object*> &objects, Camera::AnA_Camera &camera);
+            void UpdateCameraBuffer(Camera::AnA_Camera &camera);
 
         private:
             AnA_Device *&aDevice;
@@ -37,7 +38,8 @@ namespace AnA
             
             AnA_Pipeline *aPipeline;
 
-            std::vector<AnA_Buffer> cameraBuffers;
+            std::vector<AnA_Buffer*> cameraBuffers;
+            void createCameraBuffers();
 
             VkDescriptorPool descriptorPool;
             void createDescriptorPool();

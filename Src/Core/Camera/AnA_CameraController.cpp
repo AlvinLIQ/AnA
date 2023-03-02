@@ -61,9 +61,7 @@ void AnA_CameraController::Move(AnA_CameraController::CameraCallbackParam *param
     {
         moveDirection = {sin(roY), 0.f, cos(roY)};
     }
-    if (param->id & 1)
-        moveDirection = -moveDirection;
-    param->aCamera.offset -= moveDirection;
+    param->aCamera.offset -= param->id & 1 ? -moveDirection : moveDirection;
 }
 
 void AnA_CameraController::Rotate(AnA_CameraController::CameraCallbackParam *param)
