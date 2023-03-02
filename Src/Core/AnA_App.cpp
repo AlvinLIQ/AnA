@@ -71,7 +71,7 @@ void AnA_App::Run()
         auto curTime = std::chrono::high_resolution_clock::now();
         float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(curTime - prevTime).count();
         prevTime = curTime;
-        cameraController.SetSpeedRatio(frameTime);
+        camera.SetSpeedRatio(frameTime);
         if (aInputManager->CheckAndRunCallbacks())
             camera.UpdateViewMatrix();
         float aspect = aRenderer->GetAspect();

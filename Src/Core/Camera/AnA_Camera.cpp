@@ -90,12 +90,9 @@ void AnA_Camera::AddViewOffset(glm::vec3 position)
     viewMatrix[2] += -position.z;
 }
 
-void AnA_Camera::ApplyRotation(glm::vec3 &position, glm::vec3 &rotation)
+void AnA_Camera::UpdateViewMatrix()
 {
-    float c1 = cos(rotation.y);
-    float s1 = sin(rotation.y);
-    float c2 = cos(rotation.x);
-    float s2 = sin(rotation.x);
-    position.x = -glm::dot(position, glm::vec3(c1, s1, 1.f));
-    position.x = -glm::dot(position, glm::vec3(c1, s1, 1.f));
+    CameraTransform.translation += offset * moveStep * speedRatio;
+    SetViewYXZ(CameraTransform.translation, CameraTransform.rotation);
+    offset = {};
 }
