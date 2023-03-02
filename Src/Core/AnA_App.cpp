@@ -76,7 +76,7 @@ void AnA_App::Run()
             camera.UpdateViewMatrix();
         float aspect = aRenderer->GetAspect();
         //camera.SetOrthographicProjection(-aspect, -1, aspect, 1, -1, 1);
-        camera.SetPerspectiveProjection(glm::radians(50.f), aspect, .1f, 100.f);
+        camera.SetPerspectiveProjection(glm::radians(60.f), aspect, .1f, 100.f);
         
         if (auto commandBuffer = aRenderer->BeginFrame())
         {

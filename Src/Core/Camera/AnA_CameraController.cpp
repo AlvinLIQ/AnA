@@ -1,6 +1,10 @@
 #include "Headers/AnA_CameraController.hpp"
 #include "Headers/AnA_Camera.hpp"
 
+#include <glm/detail/qualifier.hpp>
+#include <glm/fwd.hpp>
+#include <glm/gtc/constants.hpp>
+
 using namespace AnA;
 using namespace AnA::Camera;
 
@@ -52,7 +56,23 @@ void AnA_CameraController::SetSpeedRatio(float ratio)
 void AnA_CameraController::Move(AnA_CameraController::CameraCallbackParam *param)
 {
     int posIndex = param->id / 2;
-    param->aCamera.offset[posIndex] -= (param->id & 1 ? -moveStep : moveStep) * speedRatio;
+    auto &roY = param->aCamera.CameraTransform.rotation.y;
+    glm::vec3 moveDirection;
+    if (posIndex == 0)
+    {
+        float cY = cos(roY);
+        moveDirection = {cY, 0.f, -cY};
+    }
+    else if (posIndex == 1)
+    {
+        moveDirection = {0.f, 1.f, 0.f};
+    }
+    else if (posIndex == 2)
+    {
+        moveDirection = {sin(roY), 0.f, cos(roY)};
+    }
+    param->aCamera.offset -= moveDirection;
+    param->aCamera.offset *= (param->id & 1 ? -moveStep : moveStep) * speedRatio;
 }
 
 void AnA_CameraController::Rotate(AnA_CameraController::CameraCallbackParam *param)
@@ -64,10 +84,11 @@ void AnA_CameraController::Rotate(AnA_CameraController::CameraCallbackParam *par
 void AnA_CameraController::CursorMoved(AnA_Camera *camera, Input::AnA_InputManager::CursorPosition &duration)
 {
     const float rotateSpeed = speedRatio * 6.283 * 18.;
-    camera->CameraTransform.rotation.y += duration.x * rotateSpeed;
-    camera->CameraTransform.rotation.x -= duration.y * rotateSpeed;
-    if (camera->CameraTransform.rotation.x > .25 * 6.283)
+    camera->CameraTransform.rotation.y = glm::mod(camera->CameraTransform.rotation.y + (float)duration.x * rotateSpeed, glm::two_pi<float>());
+    camera->CameraTransform.rotation.x -= (float)duration.y * rotateSpeed, glm::two_pi<float>();
+    camera->CameraTransform.rotation.x = glm::mod(camera->CameraTransform.rotation.x, glm::two_pi<float>());
+    /*if (camera->CameraTransform.rotation.x > .25 * 6.283)
         camera->CameraTransform.rotation.x = .25 * 6.283;
     else if (camera->CameraTransform.rotation.x < -.25 * 6.283)
-        camera->CameraTransform.rotation.x = -.25 * 6.283;
+        camera->CameraTransform.rotation.x = -.25 * 6.283;*/
 }
