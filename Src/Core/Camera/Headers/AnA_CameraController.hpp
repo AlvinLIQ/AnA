@@ -20,8 +20,6 @@ namespace AnA
             void GetCameraKeyMapConfigs(std::vector<Input::AnA_InputManager::KeyMapConfig> &configs);
             void GetCameraCursorConfigs(std::vector<Input::AnA_InputManager::CursorConfig> &configs);
             AnA_CameraController(AnA_Camera &mCamera);
-
-            static void SetSpeedRatio(float ratio);
             
             static void Move(CameraCallbackParam *param);
             static void Rotate(CameraCallbackParam *param);

@@ -1,13 +1,13 @@
 #pragma once
 
-#include <glm/fwd.hpp>
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 
 #include "../../Headers/AnA_Types.hpp"
 
-#define MOVESTEP 0.05
+#define moveStep 1.0f
+#define rotateStep 0.8f
 namespace AnA
 {
     namespace Camera
@@ -33,22 +33,23 @@ namespace AnA
             void SetViewTarget(glm::vec3 position, glm::vec3 target, glm::vec3 up = glm::vec3{ 0.0f, -1.0f , 0.0f });
             void SetViewYXZ(glm::vec3 position, glm::vec3 rotation);
 
-            void ApplyRotation(glm::vec3 &position, glm::vec3 &rotation);
+            void SetSpeedRatio(float newRatio)
+            {
+                speedRatio = newRatio;
+            }
+            const float GetSpeedRatio() const
+            {
+                return speedRatio;
+            }
 
             glm::vec3 offset{};
             Transform CameraTransform;
-            void UpdateViewMatrix()
-            {
-                //ApplyRotation(offset, CameraTransform.rotation);
-                CameraTransform.translation += offset;
-                //auto camMatrix = CameraTransform.mat4();
-                SetViewYXZ(CameraTransform.translation, CameraTransform.rotation);
-                //viewMatrix[3] += camMatrix[3];
-                offset = {};
-            }
+            void UpdateViewMatrix();
         private:
             glm::mat4 projectionMatrix{1.f};
             glm::mat4 viewMatrix{1.f};
+
+            float speedRatio = 1.0f;
         };
     }
 }
