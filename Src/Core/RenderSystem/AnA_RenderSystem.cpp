@@ -32,6 +32,10 @@ VkDescriptorBufferInfo CameraBufferObject::GetBufferInfo(VkBuffer camBuffer)
 
 AnA_RenderSystem::AnA_RenderSystem(AnA_Device *&mDevice, AnA_SwapChain *&mSwapChain) : aDevice {mDevice}, aSwapChain {mSwapChain}
 {
+    createCameraBuffers();
+    createDescriptorPool();
+    createDescriptorSetLayout();
+    createDescriptorSets();
     createPipelineLayout();
     aPipeline = new AnA_Pipeline(aDevice, aSwapChain->GetRenderPass(), pipelineLayout);
 }
@@ -40,6 +44,11 @@ AnA_RenderSystem::~AnA_RenderSystem()
 {
     delete aPipeline;
     vkDestroyPipelineLayout(aDevice->GetLogicalDevice(), pipelineLayout, nullptr);
+
+    vkDestroyDescriptorPool(aDevice->GetLogicalDevice(), descriptorPool, nullptr);
+    vkDestroyDescriptorSetLayout(aDevice->GetLogicalDevice(), descriptorSetLayout, nullptr);
+    for (auto &cameraBuffer : cameraBuffers)
+        delete cameraBuffer;
 }
 
 void AnA_RenderSystem::createPipelineLayout()
@@ -52,6 +61,8 @@ void AnA_RenderSystem::createPipelineLayout()
 
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    pipelineLayoutInfo.setLayoutCount = 1;
+    pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
     pipelineLayoutInfo.pushConstantRangeCount = 1;
     pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
     if (vkCreatePipelineLayout(aDevice->GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
@@ -60,18 +71,35 @@ void AnA_RenderSystem::createPipelineLayout()
     }
 }
 
+void AnA_RenderSystem::createCameraBuffers()
+{
+    VkDeviceSize bufferSize = sizeof(CameraBufferObject);
+    cameraBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+    for (auto &cameraBuffer : cameraBuffers)
+    {
+        cameraBuffer = new AnA_Buffer(aDevice, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        cameraBuffer->Map(0, bufferSize);
+    }
+}
+
 void AnA_RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, std::vector<AnA_Object*> &objects, AnA_Camera &camera)
 {
     aPipeline->Bind(commandBuffer);
+
+    UpdateCameraBuffer(camera);
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+        pipelineLayout, 0, 1,
+        &descriptorSets[aSwapChain->CurrentFrame], 0, nullptr);
+
     for (auto& object : objects)
     {
         object->Model->Bind(commandBuffer);
-
         ObjectPushConstantData push{};
         auto extent = aSwapChain->GetExtent();
         push.resolution = {extent.width, extent.height};
 
-        auto projectionMatrix = camera.GetProjectionMatrix() * camera.GetView();
+        //auto projectionMatrix = camera.GetProjectionMatrix() * camera.GetView();
         for (auto itemProperties = object->ItemsProperties.begin(); itemProperties != object->ItemsProperties.end(); itemProperties++)
         {
             push.sType = itemProperties->sType;
@@ -80,7 +108,7 @@ void AnA_RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, std::vector<
             {
                 //itemProperties->transform.rotation.y = glm::mod(itemProperties->transform.rotation.y + 0.01f, glm::two_pi<float>());
                 //itemProperties->transform.translation.y = glm::sin(itemProperties->transform.rotation.y) * 0.1f;
-                push.transformMatrix = projectionMatrix * itemProperties->transform.mat4();
+                push.transformMatrix = itemProperties->transform.mat4();//projectionMatrix * itemProperties->transform.mat4();
             }
             else // For 2D Objects
                 push.transformMatrix = itemProperties->transform.mat4();
@@ -98,6 +126,15 @@ void AnA_RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, std::vector<
     }
 }
 
+void AnA_RenderSystem::UpdateCameraBuffer(Camera::AnA_Camera &camera)
+{
+    CameraBufferObject cbo;
+    cbo.proj = camera.GetProjectionMatrix();
+    cbo.view = camera.GetView();
+
+    memcpy(cameraBuffers[aSwapChain->CurrentFrame]->GetMappedData(), &cbo, sizeof(cbo));
+}
+
 void AnA_RenderSystem::createDescriptorPool()
 {
     VkDescriptorPoolSize poolSize{};
@@ -108,6 +145,7 @@ void AnA_RenderSystem::createDescriptorPool()
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     poolInfo.poolSizeCount = 1;
     poolInfo.pPoolSizes = &poolSize;
+    poolInfo.maxSets = poolSize.descriptorCount;
 
     if (vkCreateDescriptorPool(aDevice->GetLogicalDevice(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
         throw std::runtime_error("Failed to create descriptor pool!");
@@ -121,17 +159,34 @@ void AnA_RenderSystem::createDescriptorSets()
     allocInfo.descriptorPool = descriptorPool;
     allocInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
     allocInfo.pSetLayouts = layouts.data();
+
     descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
     if (vkAllocateDescriptorSets(aDevice->GetLogicalDevice(), &allocInfo, descriptorSets.data()) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to allocate descriptor sets!");
     }
+
     for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
         VkDescriptorBufferInfo bufferInfo{};
-        bufferInfo.buffer = cameraBuffers[i].GetBuffer();
+        bufferInfo.buffer = cameraBuffers[i]->GetBuffer();
         bufferInfo.offset = 0;
         bufferInfo.range = sizeof(CameraBufferObject);
+
+        VkWriteDescriptorSet descriptorWrite{};
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = descriptorSets[i];
+        descriptorWrite.dstBinding = 0;
+        descriptorWrite.dstArrayElement = 0;
+
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptorWrite.descriptorCount = 1;
+
+        descriptorWrite.pBufferInfo = &bufferInfo;
+
+        vkUpdateDescriptorSets(aDevice->GetLogicalDevice(), 1,
+            &descriptorWrite, 0, nullptr);
+        
     }
 }
 
