@@ -2,6 +2,7 @@
 
 #include "AnA_Camera.hpp"
 #include "../../Input/Headers/AnA_InputManager.hpp"
+#include <glm/detail/qualifier.hpp>
 #include <vector>
 namespace AnA
 {

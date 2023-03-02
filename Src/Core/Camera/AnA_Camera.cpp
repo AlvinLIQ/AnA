@@ -3,6 +3,7 @@
 #include <cassert>
 #include <glm/detail/qualifier.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/fwd.hpp>
 #include <limits>
 
 using namespace AnA;
@@ -91,4 +92,10 @@ void AnA_Camera::AddViewOffset(glm::vec3 position)
 
 void AnA_Camera::ApplyRotation(glm::vec3 &position, glm::vec3 &rotation)
 {
+    float c1 = cos(rotation.y);
+    float s1 = sin(rotation.y);
+    float c2 = cos(rotation.x);
+    float s2 = sin(rotation.x);
+    position.x = -glm::dot(position, glm::vec3(c1, s1, 1.f));
+    position.x = -glm::dot(position, glm::vec3(c1, s1, 1.f));
 }

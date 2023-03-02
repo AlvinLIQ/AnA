@@ -40,10 +40,10 @@ namespace AnA
             void UpdateViewMatrix()
             {
                 //ApplyRotation(offset, CameraTransform.rotation);
-                CameraTransform.translation -= offset;
-                auto camMatrix = CameraTransform.mat4();
-                SetViewYXZ({}, CameraTransform.rotation);
-                viewMatrix[3] += camMatrix[3];
+                CameraTransform.translation += offset;
+                //auto camMatrix = CameraTransform.mat4();
+                SetViewYXZ(CameraTransform.translation, CameraTransform.rotation);
+                //viewMatrix[3] += camMatrix[3];
                 offset = {};
             }
         private:
