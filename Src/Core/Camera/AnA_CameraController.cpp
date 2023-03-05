@@ -72,12 +72,10 @@ void AnA_CameraController::Rotate(AnA_CameraController::CameraCallbackParam *par
 
 void AnA_CameraController::CursorMoved(AnA_Camera *camera, Input::AnA_InputManager::CursorPosition &duration)
 {
-    const float rotateSpeed = camera->GetSpeedRatio() * 6.283 * 18.;
+    const float rotateSpeed = camera->GetSpeedRatio() * 6.283 * 80.;
     camera->CameraTransform.rotation.y = glm::mod(camera->CameraTransform.rotation.y + (float)duration.x * rotateSpeed, glm::two_pi<float>());
     camera->CameraTransform.rotation.x -= (float)duration.y * rotateSpeed, glm::two_pi<float>();
-    camera->CameraTransform.rotation.x = glm::mod(camera->CameraTransform.rotation.x, glm::two_pi<float>());
-    /*if (camera->CameraTransform.rotation.x > .25 * 6.283)
-        camera->CameraTransform.rotation.x = .25 * 6.283;
-    else if (camera->CameraTransform.rotation.x < -.25 * 6.283)
-        camera->CameraTransform.rotation.x = -.25 * 6.283;*/
+
+    const float yLock = .2f * glm::two_pi<float>();
+    camera->CameraTransform.rotation.x = glm::clamp(camera->CameraTransform.rotation.x, -yLock, yLock);
 }
