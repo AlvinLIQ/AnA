@@ -19,6 +19,7 @@ AnA_InputManager::AnA_InputManager(AnA_Window *&mWindow) : aWindow {mWindow}
 AnA_InputManager::~AnA_InputManager()
 {
     keyMapConfigs.clear();
+    cursorConfigs.clear();
 }
 
 bool AnA_InputManager::CheckAndRunCallbacks()
@@ -34,16 +35,13 @@ bool AnA_InputManager::CheckAndRunCallbacks()
     }
     prevPos = curPos;
 
-    auto &keyMapConfigs = _aInputManager->GetKeyMapConfigs();
-    size_t configSize = keyMapConfigs.size();
-    for (size_t i = 0; i < configSize; i++)
+    for (auto &keyMapConfig : keyMapConfigs)
     {
-        auto &keyMapConfig = keyMapConfigs[i];
         if (keyMapConfig.callBack != nullptr && glfwGetKey(window, keyMapConfig.keyCode) == GLFW_PRESS)
             keyMapConfig.callBack(keyMapConfig.param);
     }
     //glfwSetCursorPos(window, centerX, centerY);
-    return configSize + cursorConfigs.size() > 0;
+    return keyMapConfigs.size() + cursorConfigs.size() > 0;
 }
 
 void AnA_InputManager::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
