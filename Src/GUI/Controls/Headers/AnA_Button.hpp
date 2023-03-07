@@ -7,8 +7,8 @@ namespace AnA
     {
         class AnA_Button : public AnA_Control
         {
+        public:
             AnA_Button();
-            ~AnA_Button();
         };
     }
 }

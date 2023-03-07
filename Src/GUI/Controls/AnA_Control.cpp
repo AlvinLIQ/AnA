@@ -13,11 +13,6 @@ AnA_Control::AnA_Control() : AnA_Object()
     this->Model = AnA_App::Get2DModel();
 }
 
-AnA_Control::~AnA_Control()
-{
-    
-}
-
 void AnA_Control::PrepareDraw()
 {
     auto renderSize = GetSizeForRender();
