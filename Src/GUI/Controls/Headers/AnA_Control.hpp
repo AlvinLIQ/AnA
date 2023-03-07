@@ -47,7 +47,6 @@ namespace AnA
         {
         public:
             AnA_Control();
-            ~AnA_Control();
             
             AlignmentType HorizontalAlignment {Center};
             AlignmentType VerticalAlignment {Center};
@@ -125,7 +124,7 @@ namespace AnA
             void Unfocus();
             
         private:
-            AlignType renderMode {Absolute};
+            AlignType renderMode {Auto};
             ANA_SIZE_F controlSize {};
             ANA_SIZE_F minSize {};
             ANA_SIZE_F maxSize {std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};

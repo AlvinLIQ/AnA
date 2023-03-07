@@ -52,6 +52,8 @@ namespace AnA
             pRectangleProperties->sType = sType;
             pRectangleProperties->transform.translation = {offset , 0.f};
             pRectangleProperties->transform.scale = {size, 1.f};
+            if (color.has_value())
+                pRectangleProperties->color = color;
         }
 
     private:

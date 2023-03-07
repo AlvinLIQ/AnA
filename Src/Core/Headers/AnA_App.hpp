@@ -3,6 +3,7 @@
 #include "../Camera/Headers/AnA_Camera.hpp"
 #include "AnA_Object.hpp"
 #include "AnA_Renderer.hpp"
+#include "AnA_SwapChain.hpp"
 #include "AnA_Window.hpp"
 #include "AnA_Instance.hpp"
 #include "AnA_Device.hpp"
@@ -46,6 +47,10 @@ namespace AnA
             return aInputManager;
         }
 
+        AnA_SwapChain *&GetSwapChain()
+        {
+            return aRenderer->GetSwapChain();
+        }
     private:
         AnA_Window *aWindow;
         AnA_Instance *aInstance;

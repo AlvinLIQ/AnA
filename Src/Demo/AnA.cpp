@@ -1,7 +1,9 @@
 #include "../Core/Headers/AnA_App.hpp"
+//#include "../GUI/Controls/Headers/AnA_Button.hpp"
 #include "../VertexLoader/Headers/VertexLoader.hpp"
 
 using namespace AnA;
+//using namespace AnA::Controls;
 
 void CopyVertices(IndexedVertex &indexedVertex, std::vector<AnA_Model::Vertex> &dstVertices)
 {
@@ -42,6 +44,12 @@ int main()
     AnA_App::CreateModel({vertices, cube.indexType, cube.indices}, &object->Model);
     aApp->GetObjects().push_back(std::move(object));
 
+/*
+    AnA_Control::InitControl(aApp->GetSwapChain());
+    AnA_Button *button = new AnA_Button;
+    button->PrepareDraw();
+    button->Model = AnA_App::Get2DModel();
+    aApp->GetObjects().push_back(std::move(button));*/
     aApp->Run();
     delete aApp;
     aApp = nullptr;
