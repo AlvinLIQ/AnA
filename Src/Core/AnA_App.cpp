@@ -1,5 +1,6 @@
 #include "Headers/AnA_App.hpp" 
 #include "Camera/Headers/AnA_CameraController.hpp"
+#include "Headers/AnA_Model.hpp"
 #include "Input/Headers/AnA_InputManager.hpp"
 #include "RenderSystem/Headers/AnA_RenderSystem.hpp"
 #include <GLFW/glfw3.h>
@@ -9,13 +10,13 @@
 #include <glm/gtc/constants.hpp>
 #include <iostream>
 #include <stdexcept>
-#include <thread>
+#include <memory>
 #include <vector>
 #include <vulkan/vulkan_core.h>
 
 using namespace AnA;
 
-AnA_Model *_2DModel = nullptr;
+std::shared_ptr<AnA_Model> _2DModel;
 AnA_Device *_aDevice;
 AnA_App *_aApp;
 
@@ -49,7 +50,6 @@ void AnA_App::Init()
     aInstance = new AnA_Instance;
     aWindow->CreateWindowSurface(aInstance);
     _aDevice = aDevice = new AnA_Device(aInstance->GetInstance(), aWindow->GetSurface());
-    loadObjects();
     aRenderer = new AnA_Renderer(aWindow, aDevice);
     aRenderSystem = new RenderSystems::AnA_RenderSystem(aDevice, aRenderer->GetSwapChain());
 }
@@ -99,13 +99,14 @@ void AnA_App::Cleanup()
     {
         delete object;
     }
+    _2DModel.reset();
     delete aDevice;
     vkDestroySurfaceKHR(aInstance->GetInstance(), aWindow->GetSurface(), nullptr);
     delete aInstance;
     delete aWindow;
 }
 
-AnA_Model *AnA_App::Get2DModel()
+std::shared_ptr<AnA_Model> &AnA_App::Get2DModel()
 {
     if (_2DModel == nullptr)
     {
@@ -116,17 +117,17 @@ AnA_Model *AnA_App::Get2DModel()
             {{-1.0f, 1.0f, 0.f}, {}},
             {{1.0f, 1.0f, 0.f}, {}}
         };
-        _2DModel = new AnA_Model(_aDevice, {vertices, 4, {0, 1, 2, 1, 2, 3}});
+        std::make_shared<int>(10);
+        AnA_Model::ModelInfo modelInfo{vertices, 4, {0, 1, 2, 1, 2, 3}};
+        _2DModel = std::make_shared<AnA_Model>(_aDevice, modelInfo);
     }
 
     return _2DModel;
 }
 
-void AnA_App::CreateModel(const AnA_Model::ModelInfo &modelInfo, AnA_Model** pModel)
+void AnA_App::CreateModel(const AnA_Model::ModelInfo &modelInfo, std::shared_ptr<AnA_Model> &model)
 {
-    if (pModel == nullptr)
-        throw std::runtime_error("pModel is nullptr!");
-    *pModel = new AnA_Model(_aDevice, modelInfo);
+    model = std::make_shared<AnA_Model>(_aDevice, modelInfo);
 }
 
 AnA_Model *CreateCubeModel()
@@ -178,46 +179,6 @@ AnA_Model *CreateCubeModel()
     };
 
     return new AnA_Model(_aDevice, {vertices, 4, {0, 1, 2, 3, 4, 5}});
-}
-
-void AnA_App::loadObjects()
-{
-    /*
-    auto cube = new AnA_Object;
-    
-    cube->Color = {0.1f, 0.2f, 0.3f};
-    cube->Model = CreateCubeModel();
-    ItemProperties cubeProperties;
-    cubeProperties.sType = ANA_MODEL;
-    cubeProperties.transform.scale = {.4f, .4f, .4f};
-    cubeProperties.transform.rotation = glm::vec3(0.04f * glm::two_pi<float>(), 0.f, 0.f);
-    cubeProperties.transform.translation = {0.f, 0.f , 1.5f};
-
-    cube->ItemsProperties.push_back(std::move(cubeProperties));
-    objects.push_back(std::move(cube));*/
-    /*
-    auto shapes = new AnA_Object;
-    shapes->Model = Get2DModel();
-    shapes->Color = {0.8f, 0.8f, 0.8f};
-
-    ItemProperties itemProperties;
-    itemProperties.sType = ANA_RECTANGLE;
-    itemProperties.color = {0.1f, 0.4f, 0.6f};
-    itemProperties.transform.scale = {.2f, .2f, 1.f};
-    itemProperties.transform.rotation = {};//0.25f * glm::two_pi<float>();
-    itemProperties.transform.translation = {.0f, .0f , 0.f};
-    shapes->ItemsProperties.push_back(itemProperties);
-    itemProperties.sType = ANA_ELLIPSE;
-    itemProperties.color = {0.1f, 0.6f, 0.4f};
-    itemProperties.transform.translation = {.2f, .2f, 0.1f};
-    shapes->ItemsProperties.push_back(itemProperties);
-    itemProperties.sType = ANA_CURVED_RECTANGLE;
-    itemProperties.color = {0.6f, 0.1f, 0.4f};
-    itemProperties.transform.translation = {.1f, .1f, 0.0f};
-    shapes->ItemsProperties.push_back(itemProperties);
-    
-    objects.push_back(shapes);
-    */
 }
 
 void AnA_App::startUILoop(std::thread &loopThread)

@@ -1,5 +1,4 @@
 #include "Headers/AnA_Object.hpp"
-#include "Headers/AnA_Model.hpp"
 
 using namespace AnA;
 
@@ -14,7 +13,12 @@ AnA_Object::~AnA_Object()
 {
     if (Model != nullptr)
     {
-        delete Model;
-        Model = nullptr;
+        Model.reset();
+        //Model = nullptr;
     }
+}
+
+void AnA_Object::PrepareDraw()
+{
+
 }

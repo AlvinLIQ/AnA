@@ -34,8 +34,8 @@ namespace AnA
             return objects;
         }
 
-        static AnA_Model *Get2DModel();
-        static void CreateModel(const AnA_Model::ModelInfo &modelInfo, AnA_Model* *pModel);
+        static std::shared_ptr<AnA_Model> &Get2DModel();
+        static void CreateModel(const AnA_Model::ModelInfo &modelInfo, std::shared_ptr<AnA_Model> &model);
 
         Camera::AnA_Camera &GetCamera()
         {
@@ -60,7 +60,6 @@ namespace AnA
         Input::AnA_InputManager *aInputManager;
 
         std::vector<AnA_Object*> objects;
-        void loadObjects();
 
         Camera::AnA_Camera camera;
 
