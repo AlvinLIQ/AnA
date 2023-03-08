@@ -1,3 +1,3 @@
 # AnA Game Engine
 
-[![AnA_Logo](/AlvinLIQ/AnA_Docs/Img/AnA_Logo.png "AnA")](https://github.com)
+![AnA_Logo](https://github.com/AlvinLIQ/AnA_Docs/tree/main/Img/AnA_Logo.png "AnA")
