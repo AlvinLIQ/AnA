@@ -66,7 +66,7 @@ void AnA_CameraController::Move(AnA_CameraController::CameraCallbackParam *param
 
 void AnA_CameraController::Rotate(AnA_CameraController::CameraCallbackParam *param)
 {
-    int posIndex = param->id / 2;
+    int posIndex = param->id >> 1;
     param->aCamera.CameraTransform.rotation[posIndex] -= (param->id & 1 ? -rotateStep : rotateStep) * param->aCamera.GetSpeedRatio() * 6.283;
 }
 
