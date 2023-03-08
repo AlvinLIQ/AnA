@@ -2,6 +2,7 @@
 
 #include "AnA_Model.hpp"
 #include "AnA_Types.hpp"
+#include <memory>
 #include <vector>
 
 #define ANA_SHAPE_TYPE uint32_t
@@ -43,9 +44,9 @@ namespace AnA
             return id;
         }
 
-        AnA_Model* Model;
+        std::shared_ptr<AnA_Model> Model;
         glm::vec3 Color{};
-        std::vector<ItemProperties> ItemsProperties;
+        ItemProperties Properties;
 
         static void CreateShape(ANA_SHAPE_TYPE sType,glm::vec2 offset, glm::vec2 size, std::optional<glm::vec3> color, ItemProperties* pRectangleProperties)
         {
@@ -55,6 +56,8 @@ namespace AnA
             if (color.has_value())
                 pRectangleProperties->color = color;
         }
+
+        virtual void PrepareDraw();
 
     private:
         id_t id;

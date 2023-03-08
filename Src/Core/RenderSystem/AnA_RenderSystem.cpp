@@ -100,29 +100,27 @@ void AnA_RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, std::vector<
         push.resolution = {extent.width, extent.height};
 
         //auto projectionMatrix = camera.GetProjectionMatrix() * camera.GetView();
-        for (auto itemProperties = object->ItemsProperties.begin(); itemProperties != object->ItemsProperties.end(); itemProperties++)
+        object->PrepareDraw();
+        auto &itemProperties = object->Properties;
+        push.sType = itemProperties.sType;
+        //push.projectionMatrix = camera.GetProjectionMatrix();
+        if (push.sType == ANA_MODEL)
         {
-            push.sType = itemProperties->sType;
-            //push.projectionMatrix = camera.GetProjectionMatrix();
-            if (push.sType == ANA_MODEL)
-            {
-                //itemProperties->transform.rotation.y = glm::mod(itemProperties->transform.rotation.y + 0.01f, glm::two_pi<float>());
-                //itemProperties->transform.translation.y = glm::sin(itemProperties->transform.rotation.y) * 0.1f;
-                push.transformMatrix = itemProperties->transform.mat4();//projectionMatrix * itemProperties->transform.mat4();
-            }
-            else // For 2D Objects
-                push.transformMatrix = itemProperties->transform.mat4();
-
-            push.color = itemProperties->color.has_value() ? itemProperties->color.value() : object->Color;
-            vkCmdPushConstants(commandBuffer, 
-            pipelineLayout,
-            VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-            0,
-            sizeof(ObjectPushConstantData),
-            &push);
-            
-            object->Model->Draw(commandBuffer);
+            //itemProperties->transform.rotation.y = glm::mod(itemProperties->transform.rotation.y + 0.01f, glm::two_pi<float>());
+            //itemProperties->transform.translation.y = glm::sin(itemProperties->transform.rotation.y) * 0.1f;
+            push.transformMatrix = itemProperties.transform.mat4();//projectionMatrix * itemProperties->transform.mat4();
         }
+        else // For 2D Objects
+            push.transformMatrix = itemProperties.transform.mat4();
+        push.color = itemProperties.color.has_value() ? itemProperties.color.value() : object->Color;
+        vkCmdPushConstants(commandBuffer, 
+        pipelineLayout,
+        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+        0,
+        sizeof(ObjectPushConstantData),
+        &push);
+
+        object->Model->Draw(commandBuffer);
     }
 }
 

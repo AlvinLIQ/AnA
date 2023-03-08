@@ -16,10 +16,10 @@ AnA_Control::AnA_Control() : AnA_Object()
 void AnA_Control::PrepareDraw()
 {
     auto renderSize = GetSizeForRender();
-    ItemsProperties[0].transform.scale = {renderSize.Width, renderSize.Height, 0.f};
-
+    Properties.transform.scale = {renderSize.Width, renderSize.Height, 1.f};
+    
     auto renderOffset = GetActualControlOffset(renderSize);
-    ItemsProperties[0].transform.translation = {renderOffset.x, renderOffset.y, 0.f};
+    Properties.transform.translation = {renderOffset.x, renderOffset.y, 0.f};
 }
 
 void AnA_Control::InitControl(AnA_SwapChain *swapChain)

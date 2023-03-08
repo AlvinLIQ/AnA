@@ -34,14 +34,13 @@ int main()
     AnA_Object *object = new AnA_Object;
     object->Color = {0.1f, 0.2f, 0.3f};
 
-    ItemProperties objectProperties;
+    auto &objectProperties = object->Properties;
     objectProperties.sType = ANA_MODEL;
     objectProperties.transform.scale = {.7f, .7f, .7f};
     objectProperties.transform.rotation = glm::vec3(0.04f * glm::two_pi<float>(), 0.f, 0.f);
     objectProperties.transform.translation = {0.f, 0.f , 1.5f};
-    object->ItemsProperties.push_back(std::move(objectProperties));
     
-    AnA_App::CreateModel({vertices, cube.indexType, cube.indices}, &object->Model);
+    AnA_App::CreateModel({vertices, cube.indexType, cube.indices}, object->Model);
     aApp->GetObjects().push_back(std::move(object));
 
 /*
@@ -50,6 +49,7 @@ int main()
     button->PrepareDraw();
     button->Model = AnA_App::Get2DModel();
     aApp->GetObjects().push_back(std::move(button));*/
+
     aApp->Run();
     delete aApp;
     aApp = nullptr;

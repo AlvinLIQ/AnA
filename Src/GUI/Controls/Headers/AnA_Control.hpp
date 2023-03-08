@@ -89,7 +89,7 @@ namespace AnA
                 }
                 else if (renderMode == AlignType::Auto)
                 {
-                    auto scale = ItemsProperties.at(0).transform.scale;
+                    auto scale = Properties.transform.scale;
                     renderSize = {scale.x, scale.y};
                 }
                 return renderSize;
@@ -124,7 +124,8 @@ namespace AnA
             void Unfocus();
             
         private:
-            AlignType renderMode {Auto};
+            AlignType renderMode {Absolute};
+        protected:
             ANA_SIZE_F controlSize {};
             ANA_SIZE_F minSize {};
             ANA_SIZE_F maxSize {std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
