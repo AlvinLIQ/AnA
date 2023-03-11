@@ -117,7 +117,6 @@ std::shared_ptr<AnA_Model> &AnA_App::Get2DModel()
             {{-1.0f, 1.0f, 0.f}, {}},
             {{1.0f, 1.0f, 0.f}, {}}
         };
-        std::make_shared<int>(10);
         AnA_Model::ModelInfo modelInfo{vertices, 4, {0, 1, 2, 1, 2, 3}};
         _2DModel = std::make_shared<AnA_Model>(_aDevice, modelInfo);
     }
