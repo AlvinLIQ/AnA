@@ -37,7 +37,7 @@ namespace AnA
         using id_t = unsigned int;
 
         AnA_Object();
-        ~AnA_Object();
+        virtual ~AnA_Object();
 
         id_t GetId()
         {
