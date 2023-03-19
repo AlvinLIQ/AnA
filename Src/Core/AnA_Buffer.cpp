@@ -1,4 +1,5 @@
 #include "Headers/AnA_Buffer.hpp"
+#include <cstring>
 #include <stdexcept>
 #include <cassert>
 
@@ -48,3 +49,4 @@ void AnA_Buffer::Unmap()
         mappedData = nullptr;
     }
 }
+
