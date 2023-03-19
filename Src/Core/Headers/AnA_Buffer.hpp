@@ -15,6 +15,8 @@ namespace AnA
         VkResult Map(VkDeviceSize offset, VkDeviceSize size);
         void Unmap();
 
+        void UpdateData(void *newData, size_t dataSize);
+
         VkBuffer GetBuffer()
         {
             return buffer;
