@@ -1,3 +1,5 @@
+#define ANA_INCLUDE_STB_IMAGE
+
 #include "../Core/Headers/AnA_App.hpp"
 //#include "../GUI/Controls/Headers/AnA_Button.hpp"
 #include "../VertexLoader/Headers/VertexLoader.hpp"

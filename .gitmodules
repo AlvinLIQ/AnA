@@ -4,3 +4,6 @@
 [submodule "Src/VertexLoader"]
 	path = Src/VertexLoader
 	url = https://github.com/AlvinLIQ/VertexLoader
+[submodule "Src/tinyobjloader"]
+	path = Src/tinyobjloader
+	url = https://github.com/tinyobjloader/tinyobjloader
