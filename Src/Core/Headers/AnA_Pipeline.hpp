@@ -138,7 +138,7 @@ namespace AnA
 
 
         };
-        AnA_Pipeline(AnA_Device *&mDevice, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayout);
+        AnA_Pipeline(AnA_Device *&mDevice, const char *vertShaderFileName, const char *fragShaderFileName, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayout);
         ~AnA_Pipeline();
 
         void Bind(VkCommandBuffer commandBuffer);

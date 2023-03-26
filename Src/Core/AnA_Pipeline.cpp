@@ -18,11 +18,12 @@ std::vector<char> AnA_Pipeline::ReadFile(const std::string &filename)
     return buffer;
 }
 
-AnA_Pipeline::AnA_Pipeline(AnA_Device *&mDevice, 
+AnA_Pipeline::AnA_Pipeline(AnA_Device *&mDevice,
+const char *vertShaderFileName, const char *fragShaderFileName,
 VkRenderPass &mRenderPass, 
 VkPipelineLayout &mPipelineLayout) : aDevice {mDevice}, renderPass {mRenderPass}, pipelineLayout{mPipelineLayout}
 {
-    createGraphicsPipeline("Shaders/vert.spv", "Shaders/frag.spv");
+    createGraphicsPipeline(vertShaderFileName, fragShaderFileName);
 }
 AnA_Pipeline::~AnA_Pipeline()
 {
