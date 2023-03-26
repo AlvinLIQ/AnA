@@ -37,7 +37,7 @@ AnA_RenderSystem::AnA_RenderSystem(AnA_Device *&mDevice, AnA_SwapChain *&mSwapCh
     createDescriptorSetLayout();
     createDescriptorSets();
     createPipelineLayout();
-    aPipeline = new AnA_Pipeline(aDevice, aSwapChain->GetRenderPass(), pipelineLayout);
+    aPipeline = new AnA_Pipeline(aDevice, "Shaders/vert.spv", "Shaders/frag.spv", aSwapChain->GetRenderPass(), pipelineLayout);
 }
 
 AnA_RenderSystem::~AnA_RenderSystem()
@@ -106,8 +106,8 @@ void AnA_RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, std::vector<
         //push.projectionMatrix = camera.GetProjectionMatrix();
         if (push.sType == ANA_MODEL)
         {
-            //itemProperties->transform.rotation.y = glm::mod(itemProperties->transform.rotation.y + 0.01f, glm::two_pi<float>());
-            //itemProperties->transform.translation.y = glm::sin(itemProperties->transform.rotation.y) * 0.1f;
+            itemProperties.transform.rotation.y = glm::mod(itemProperties.transform.rotation.y + 1.f * camera.GetSpeedRatio(), glm::two_pi<float>());
+            itemProperties.transform.translation.y = glm::sin(itemProperties.transform.rotation.y) * 0.1f;
             push.transformMatrix = itemProperties.transform.mat4();//projectionMatrix * itemProperties->transform.mat4();
         }
         else // For 2D Objects
