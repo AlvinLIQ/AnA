@@ -21,7 +21,7 @@ namespace AnA
             glm::vec3 position;
             glm::vec3 color;
             glm::vec3 normal{};
-            glm::vec3 uv{};
+            glm::vec2 uv{};
 
             static std::vector<VkVertexInputBindingDescription> GetBindingDescription();
             static std::vector<VkVertexInputAttributeDescription> GetAttributeDescription();
@@ -38,7 +38,7 @@ namespace AnA
         AnA_Model(AnA_Device *&mDevice, const ModelInfo &modelInfo);
         ~AnA_Model();
 
-        static std::unique_ptr<AnA_Model> CreateModelFromFile(AnA_Device *&mDevice, const char *filePath);
+        static std::shared_ptr<AnA_Model> CreateModelFromFile(AnA_Device *&mDevice, const char *filePath);
         
         void Bind(VkCommandBuffer commandBuffer);
         void Draw(VkCommandBuffer commandBuffer);
