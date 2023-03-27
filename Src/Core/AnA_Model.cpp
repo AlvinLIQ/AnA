@@ -2,6 +2,9 @@
 #include "Headers/AnA_Buffer.hpp"
 #include <vulkan/vulkan_core.h>
 
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "../tinyobjloader/tiny_obj_loader.h"
+
 #include <cassert>
 #include <cstring>
 #include <iostream>
@@ -25,6 +28,11 @@ AnA_Model::~AnA_Model()
         delete indexBuffer;
 
     delete vertexBuffer;
+}
+
+std::unique_ptr<AnA_Model> AnA_Model::CreateModelFromFile(AnA_Device *&mDevice, const char *filePath)
+{
+
 }
 
 void AnA_Model::createVertexBuffers(const std::vector<Vertex> &vertices)
