@@ -30,9 +30,51 @@ AnA_Model::~AnA_Model()
     delete vertexBuffer;
 }
 
-std::unique_ptr<AnA_Model> AnA_Model::CreateModelFromFile(AnA_Device *&mDevice, const char *filePath)
+std::shared_ptr<AnA_Model> AnA_Model::CreateModelFromFile(AnA_Device *&mDevice, const char *filePath)
 {
+    ModelInfo modelInfo{};
+    tinyobj::attrib_t attrib;
+    std::vector<tinyobj::shape_t> shapes;
+    std::vector<tinyobj::material_t> materials;
+    std::string warn, err;
 
+    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filePath))
+        throw std::runtime_error(warn + err);
+
+    for (const auto &shape : shapes)
+    {
+        for (const auto &index : shape.mesh.indices)
+        {
+            Vertex vertex{};
+
+            if (index.vertex_index >= 0)
+            {
+                vertex.position =
+                {
+                    attrib.vertices[3 * index.vertex_index],
+                    attrib.vertices[3 * index.vertex_index + 1],
+                    attrib.vertices[3 * index.vertex_index + 2]
+                };
+            }
+            if (index.normal_index >= 0)
+            {
+                vertex.normal =
+                {
+                    attrib.normals[3 * index.normal_index],
+                    attrib.normals[3 * index.normal_index + 1],
+                    attrib.normals[3 * index.normal_index + 2]
+                };
+            }
+            if (index.texcoord_index >= 0)
+            {
+                vertex.uv =
+                {
+                    attrib.texcoords[2 * index.texcoord_index],
+                    attrib.texcoords[2 * index.texcoord_index + 1],
+                };
+            }
+        }
+    }
 }
 
 void AnA_Model::createVertexBuffers(const std::vector<Vertex> &vertices)
