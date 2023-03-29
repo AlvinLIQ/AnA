@@ -24,6 +24,7 @@ int main()
 {
     AnA_App* aApp = new AnA_App;
     aApp->Init();
+    /*
     auto vData = AnA_Pipeline::ReadFile("Src/Demo/Cube_Vertices_Indexed.txt");
     IndexedVertex cube;
     LoadIndexedVerticesFromStr(vData.data(), &cube);
@@ -44,7 +45,7 @@ int main()
     
     AnA_App::CreateModel({vertices, cube.indexType, cube.indices}, object->Model);
     aApp->GetObjects().push_back(std::move(object));
-
+*/
 /*
     AnA_Control::InitControl(aApp->GetSwapChain());
     AnA_Button *button = new AnA_Button;
