@@ -1,5 +1,6 @@
 #include "Headers/AnA_Model.hpp"
 #include "Headers/AnA_Buffer.hpp"
+#include <memory>
 #include <vulkan/vulkan_core.h>
 
 #define TINYOBJLOADER_IMPLEMENTATION
@@ -75,6 +76,8 @@ std::shared_ptr<AnA_Model> AnA_Model::CreateModelFromFile(AnA_Device *&mDevice, 
             }
         }
     }
+
+    return std::make_shared<AnA_Model>(mDevice, modelInfo);
 }
 
 void AnA_Model::createVertexBuffers(const std::vector<Vertex> &vertices)
@@ -143,15 +146,11 @@ std::vector<VkVertexInputBindingDescription> AnA_Model::Vertex::GetBindingDescri
 
 std::vector<VkVertexInputAttributeDescription> AnA_Model::Vertex::GetAttributeDescription()
 {
-    std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
-    attributeDescriptions[0].binding = 0;
-    attributeDescriptions[0].location = 0;
-    attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-    attributeDescriptions[0].offset = offsetof(Vertex, position);
+    std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
+    attributeDescriptions.push_back({0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, position)});
+    attributeDescriptions.push_back({1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, color)});
+    attributeDescriptions.push_back({2, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, normal)});
+    attributeDescriptions.push_back({3, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, uv)});
 
-    attributeDescriptions[1].binding = 0;
-    attributeDescriptions[1].location = 1;
-    attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-    attributeDescriptions[1].offset = offsetof(Vertex, color);
     return attributeDescriptions;
 }

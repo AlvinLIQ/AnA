@@ -1,6 +1,7 @@
 #include "Headers/AnA_App.hpp" 
 #include "Camera/Headers/AnA_CameraController.hpp"
 #include "Headers/AnA_Model.hpp"
+#include "Headers/AnA_Object.hpp"
 #include "Input/Headers/AnA_InputManager.hpp"
 #include "RenderSystem/Headers/AnA_RenderSystem.hpp"
 #include <GLFW/glfw3.h>
@@ -37,6 +38,46 @@ AnA_App::AnA_App()
 AnA_App::~AnA_App()
 {
     Cleanup();
+}
+
+void CreateCubeModel(std::shared_ptr<AnA_Model>& model)
+{
+    std::vector<AnA_Model::Vertex> vertices = 
+    {
+        // left (gray)
+        {{-.5f, -.5f, -.5f},{.5f, .5f, .5f}},
+        {{-.5f, -.5f, .5f}, {.5f, .5f, .5f}},
+        {{-.5f, .5f, -.5f}, {.5f, .5f, .5f}},
+        {{-.5f, .5f, .5f},  {.5f, .5f, .5f}},
+        // right (red)
+        {{.5f, -.5f, -.5f},{.9f, .2f, .2f}},
+        {{.5f, -.5f, .5f}, {.9f, .2f, .2f}},
+        {{.5f, .5f, -.5f}, {.9f, .2f, .2f}},
+        {{.5f, .5f, .5f},  {.9f, .2f, .2f}},
+        // top (yellow)
+        {{-.5f, -.5f, -.5f},{.9f, .9f, .2f}},
+        {{-.5f, -.5f, .5f}, {.9f, .9f, .2f}},
+        {{.5f, -.5f, -.5f}, {.9f, .9f, .2f}},
+        {{.5f, -.5f, .5f},  {.9f, .9f, .2f}},
+        // bottom (white)
+        {{-.5f, .5f, -.5f}, {.9f, .9f, .9f}},
+        {{-.5f, .5f, .5f},  {.9f, .9f, .9f}},
+        {{.5f,  .5f, -.5f}, {.9f, .9f, .9f}},
+        {{.5f,  .5f, .5f},  {.9f, .9f, .9f}},
+        // back (green)
+        {{-.5f, -.5f, .5f}, {.2f, .9f, .2f}},
+        {{-.5f, .5f, .5f},  {.2f, .9f, .2f}},
+        {{.5f,  -.5f, .5f}, {.2f, .9f, .2f}},
+        {{.5f,  .5f, .5f},  {.2f, .9f, .2f}},
+        // front (blue)
+        {{-.5f, -.5f, -.5f}, {.2f, .2f, .9f}},
+        {{-.5f, .5f, -.5f},  {.2f, .2f, .9f}},
+        {{.5f,  -.5f, -.5f}, {.2f, .2f, .9f}},
+        {{.5f,  .5f, -.5f},  {.2f, .2f, .9f}},
+    };
+
+    AnA_Model::ModelInfo modelInfo = {vertices, 4, {0, 1, 2, 1, 2, 3}};
+    model = std::make_shared<AnA_Model>(_aDevice, modelInfo);
 }
 
 void AnA_App::Init()
@@ -127,57 +168,6 @@ std::shared_ptr<AnA_Model> &AnA_App::Get2DModel()
 void AnA_App::CreateModel(const AnA_Model::ModelInfo &modelInfo, std::shared_ptr<AnA_Model> &model)
 {
     model = std::make_shared<AnA_Model>(_aDevice, modelInfo);
-}
-
-AnA_Model *CreateCubeModel()
-{
-    std::vector<AnA_Model::Vertex> vertices = 
-    {
-        // left (gray)
-        {{-.5f, -.5f, -.5f},{.5f, .5f, .5f}},
-        {{-.5f, -.5f, .5f}, {.5f, .5f, .5f}},
-        {{-.5f, .5f, -.5f}, {.5f, .5f, .5f}},
-        {{-.5f, -.5f, .5f}, {.5f, .5f, .5f}},
-        {{-.5f, .5f, -.5f}, {.5f, .5f, .5f}},
-        {{-.5f, .5f, .5f},  {.5f, .5f, .5f}},
-        // right (red)
-        {{.5f, -.5f, -.5f},{.9f, .2f, .2f}},
-        {{.5f, -.5f, .5f}, {.9f, .2f, .2f}},
-        {{.5f, .5f, -.5f}, {.9f, .2f, .2f}},
-        {{.5f, -.5f, .5f}, {.9f, .2f, .2f}},
-        {{.5f, .5f, -.5f}, {.9f, .2f, .2f}},
-        {{.5f, .5f, .5f},  {.9f, .2f, .2f}},
-        // top (yellow)
-        {{-.5f, -.5f, -.5f},{.9f, .9f, .2f}},
-        {{-.5f, -.5f, .5f}, {.9f, .9f, .2f}},
-        {{.5f, -.5f, -.5f}, {.9f, .9f, .2f}},
-        {{-.5f, -.5f, .5f}, {.9f, .9f, .2f}},
-        {{.5f, -.5f, -.5f}, {.9f, .9f, .2f}},
-        {{.5f, -.5f, .5f},  {.9f, .9f, .2f}},
-        // bottom (white)
-        {{-.5f, .5f, -.5f}, {.9f, .9f, .9f}},
-        {{-.5f, .5f, .5f},  {.9f, .9f, .9f}},
-        {{.5f,  .5f, -.5f}, {.9f, .9f, .9f}},
-        {{-.5f, .5f, .5f},  {.9f, .9f, .9f}},
-        {{.5f,  .5f, -.5f}, {.9f, .9f, .9f}},
-        {{.5f,  .5f, .5f},  {.9f, .9f, .9f}},
-        // back (green)
-        {{-.5f, -.5f, .5f}, {.2f, .9f, .2f}},
-        {{-.5f, .5f, .5f},  {.2f, .9f, .2f}},
-        {{.5f,  -.5f, .5f}, {.2f, .9f, .2f}},
-        {{-.5f, .5f, .5f},  {.2f, .9f, .2f}},
-        {{.5f,  -.5f, .5f}, {.2f, .9f, .2f}},
-        {{.5f,  .5f, .5f},  {.2f, .9f, .2f}},
-        // front (blue)
-        {{-.5f, -.5f, -.5f}, {.2f, .2f, .9f}},
-        {{-.5f, .5f, -.5f},  {.2f, .2f, .9f}},
-        {{.5f,  -.5f, -.5f}, {.2f, .2f, .9f}},
-        {{-.5f, .5f, -.5f},  {.2f, .2f, .9f}},
-        {{.5f,  -.5f, -.5f}, {.2f, .2f, .9f}},
-        {{.5f,  .5f, -.5f},  {.2f, .2f, .9f}},
-    };
-
-    return new AnA_Model(_aDevice, {vertices, 4, {0, 1, 2, 3, 4, 5}});
 }
 
 void AnA_App::startUILoop(std::thread &loopThread)
