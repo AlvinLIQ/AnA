@@ -13,7 +13,6 @@ layout(location = 3) in vec2 uv;
 layout(location = 0) out vec3 fragColor;
 
 layout(push_constant) uniform Push {
-//    mat4 projectionMatrix;
     mat4 transformMatrix;
     uint sType;
     vec2 resolution;
