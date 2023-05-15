@@ -17,7 +17,7 @@ namespace AnA
 
         void UpdateData(void *newData, size_t dataSize);
 
-        VkBuffer GetBuffer()
+        VkBuffer &GetBuffer()
         {
             return buffer;
         }

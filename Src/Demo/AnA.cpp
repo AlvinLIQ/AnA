@@ -24,16 +24,7 @@ int main()
 {
     AnA_App* aApp = new AnA_App;
     aApp->Init();
-    /*
-    auto vData = AnA_Pipeline::ReadFile("Src/Demo/Cube_Vertices_Indexed.txt");
-    IndexedVertex cube;
-    LoadIndexedVerticesFromStr(vData.data(), &cube);
-    //for (auto index : cube.indices)
-    //    std::cout<<index<<std::endl;
 
-    std::vector<AnA_Model::Vertex> vertices(cube.vertexCount);
-    CopyVertices(cube, vertices);
-    FreeVerticesMemory(reinterpret_cast<void**>(&cube));
     AnA_Object *object = new AnA_Object;
     object->Color = {0.1f, 0.2f, 0.3f};
 
@@ -42,10 +33,12 @@ int main()
     objectProperties.transform.scale = {.7f, .7f, .7f};
     objectProperties.transform.rotation = glm::vec3(0.04f * glm::two_pi<float>(), 0.f, 0.f);
     objectProperties.transform.translation = {0.f, 0.f , 1.5f};
+
+    //object->Model = AnA_App::Get2DModel();
+    AnA_Model::CreateModelFromFile(aApp->GetDevice(), "Models/cube.obj", object->Model);
     
-    AnA_App::CreateModel({vertices, cube.indexType, cube.indices}, object->Model);
     aApp->GetObjects().push_back(std::move(object));
-*/
+
 /*
     AnA_Control::InitControl(aApp->GetSwapChain());
     AnA_Button *button = new AnA_Button;
