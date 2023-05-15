@@ -51,6 +51,11 @@ namespace AnA
         {
             return aRenderer->GetSwapChain();
         }
+
+        AnA_Device *&GetDevice()
+        {
+            return aDevice;
+        }
     private:
         AnA_Window *aWindow;
         AnA_Instance *aInstance;

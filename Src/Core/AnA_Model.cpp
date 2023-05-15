@@ -1,14 +1,18 @@
 #include "Headers/AnA_Model.hpp"
 #include "Headers/AnA_Buffer.hpp"
+#include <cstdint>
 #include <memory>
 #include <vulkan/vulkan_core.h>
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "../tinyobjloader/tiny_obj_loader.h"
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
+
 #include <cassert>
 #include <cstring>
-#include <iostream>
+#include <unordered_map>
 
 
 using namespace AnA;
@@ -31,7 +35,7 @@ AnA_Model::~AnA_Model()
     delete vertexBuffer;
 }
 
-std::shared_ptr<AnA_Model> AnA_Model::CreateModelFromFile(AnA_Device *&mDevice, const char *filePath)
+void AnA_Model::CreateModelFromFile(AnA_Device *&mDevice, const char *filePath, std::shared_ptr<AnA_Model> &model)
 {
     ModelInfo modelInfo{};
     tinyobj::attrib_t attrib;
@@ -42,6 +46,9 @@ std::shared_ptr<AnA_Model> AnA_Model::CreateModelFromFile(AnA_Device *&mDevice, 
     if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filePath))
         throw std::runtime_error(warn + err);
 
+    modelInfo.vertices.clear();
+    modelInfo.indices.clear();
+    
     for (const auto &shape : shapes)
     {
         for (const auto &index : shape.mesh.indices)
@@ -56,6 +63,17 @@ std::shared_ptr<AnA_Model> AnA_Model::CreateModelFromFile(AnA_Device *&mDevice, 
                     attrib.vertices[3 * index.vertex_index + 1],
                     attrib.vertices[3 * index.vertex_index + 2]
                 };
+
+                auto colorIndex = 3 * index.vertex_index + 2;
+                if (colorIndex < attrib.colors.size())
+                {
+                    vertex.color = 
+                    {
+                        attrib.colors[colorIndex - 2],
+                        attrib.colors[colorIndex - 1],
+                        attrib.colors[colorIndex],
+                    };
+                }
             }
             if (index.normal_index >= 0)
             {
@@ -74,10 +92,12 @@ std::shared_ptr<AnA_Model> AnA_Model::CreateModelFromFile(AnA_Device *&mDevice, 
                     attrib.texcoords[2 * index.texcoord_index + 1],
                 };
             }
+            //if (index.normal_index + index.vertex_index + index.texcoord_index >= 0)
+            modelInfo.vertices.push_back(vertex);
         }
     }
 
-    return std::make_shared<AnA_Model>(mDevice, modelInfo);
+    model = std::make_shared<AnA_Model>(mDevice, modelInfo);
 }
 
 void AnA_Model::createVertexBuffers(const std::vector<Vertex> &vertices)
@@ -116,17 +136,15 @@ void AnA_Model::Bind(VkCommandBuffer commandBuffer)
     VkBuffer buffers[] = {vertexBuffer->GetBuffer()};
     VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
-    vkCmdBindIndexBuffer(commandBuffer, indexBuffer->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+    if (hasIndexBuffer)
+        vkCmdBindIndexBuffer(commandBuffer, indexBuffer->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
 }
 
 void AnA_Model::Draw(VkCommandBuffer commandBuffer)
 {
     if (hasIndexBuffer)
     {
-        for (int i = 0; i < vertexCount; i += indexStep)
-        {
-            vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, i, 0);
-        }
+        vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0);
     }
     else
     {

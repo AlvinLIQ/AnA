@@ -14,7 +14,7 @@
 #include <vector>
 
 namespace AnA
-{
+{   
     class AnA_Model
     {
     public:
@@ -40,7 +40,7 @@ namespace AnA
         AnA_Model(AnA_Device *&mDevice, const ModelInfo &modelInfo);
         ~AnA_Model();
 
-        static std::shared_ptr<AnA_Model> CreateModelFromFile(AnA_Device *&mDevice, const char *filePath);
+        static void CreateModelFromFile(AnA_Device *&mDevice, const char *filePath, std::shared_ptr<AnA_Model> &model);
         
         void Bind(VkCommandBuffer commandBuffer);
         void Draw(VkCommandBuffer commandBuffer);
