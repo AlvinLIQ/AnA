@@ -44,7 +44,7 @@ CameraController::CameraController(Camera &mCamera) : aCamera {mCamera}
     }
 }
 
-void CameraController::Move(CameraController::CameraCallbackParam *param)
+void CameraController::Move(CameraController::CameraCallbackParam* param)
 {
     int posIndex = param->id >> 1;
     auto &roY = param->aCamera.CameraTransform.rotation.y;
@@ -64,18 +64,18 @@ void CameraController::Move(CameraController::CameraCallbackParam *param)
     param->aCamera.offset -= param->id & 1 ? -moveDirection : moveDirection;
 }
 
-void CameraController::Rotate(CameraController::CameraCallbackParam *param)
+void CameraController::Rotate(CameraController::CameraCallbackParam* param)
 {
     int posIndex = param->id >> 1;
-    param->aCamera.CameraTransform.rotation[posIndex] -= (param->id & 1 ? -rotateStep : rotateStep) * param->aCamera.GetSpeedRatio() * 6.283;
+    param->aCamera.CameraTransform.rotation[posIndex] -= (param->id & 1 ? -rotateStep : rotateStep)*  param->aCamera.GetSpeedRatio()*  6.283;
 }
 
-void CameraController::CursorMoved(Camera *camera, Input::InputManager::CursorPosition &duration)
+void CameraController::CursorMoved(Camera* camera, Input::InputManager::CursorPosition &duration)
 {
-    const float rotateSpeed = camera->GetSpeedRatio() * 6.283 * 80.;
-    camera->CameraTransform.rotation.y = glm::mod(camera->CameraTransform.rotation.y + (float)duration.x * rotateSpeed, glm::two_pi<float>());
-    camera->CameraTransform.rotation.x -= (float)duration.y * rotateSpeed, glm::two_pi<float>();
+    const float rotateSpeed = camera->GetSpeedRatio()*  6.283*  80.;
+    camera->CameraTransform.rotation.y = glm::mod(camera->CameraTransform.rotation.y + (float)duration.x*  rotateSpeed, glm::two_pi<float>());
+    camera->CameraTransform.rotation.x -= (float)duration.y*  rotateSpeed, glm::two_pi<float>();
 
-    const float yLock = .2f * glm::two_pi<float>();
+    const float yLock = .2f*  glm::two_pi<float>();
     camera->CameraTransform.rotation.x = glm::clamp(camera->CameraTransform.rotation.x, -yLock, yLock);
 }

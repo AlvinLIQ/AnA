@@ -11,8 +11,8 @@ namespace AnA
         public:
             struct KeyMapConfig
             {
-                void *param;
-                void(*callBack)(void *param);
+                void* param;
+                void(*callBack)(void* param);
                 int keyCode;
                 int action;
             };
@@ -23,11 +23,11 @@ namespace AnA
             };
             struct CursorConfig
             {
-                void *param;
+                void* param;
                 void(*callBack)(void* pParam, CursorPosition &curPos);
                 int action;
             };
-            InputManager(Window *&mWindow);
+            InputManager(Window*& mWindow);
             ~InputManager();
 
             std::vector<KeyMapConfig> &GetKeyMapConfigs()
@@ -41,9 +41,9 @@ namespace AnA
             
             bool CheckAndRunCallbacks();
         private:
-            Window *&aWindow;
+            Window*& aWindow;
             std::vector<KeyMapConfig> keyMapConfigs;
-            static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
+            static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
             std::vector<CursorConfig> cursorConfigs;
 

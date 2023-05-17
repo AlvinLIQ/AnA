@@ -27,7 +27,7 @@ namespace AnA
                 throw std::runtime_error("Failed to create window surface!");
         }
 
-        GLFWwindow *&GetGLFWwindow()
+        GLFWwindow*& GetGLFWwindow()
         {
             return window;
         }

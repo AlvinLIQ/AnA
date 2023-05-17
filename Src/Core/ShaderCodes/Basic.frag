@@ -34,7 +34,7 @@ float ellipse(vec2 uv, vec2 center, vec2 radius)
 {
     float c;
     vec2 t = center - uv;
-    if (t.x * t.x / (radius.x * radius.x) + t.y * t.y / (radius.y * radius.y) <= 1)
+    if (t.x*  t.x / (radius.x*  radius.x) + t.y*  t.y / (radius.y*  radius.y) <= 1)
         c = 1.;
     else
         c = .0;
@@ -83,5 +83,5 @@ void main() {
         break;
     }
 
-    outColor = vec4(c * push.color, c);
+    outColor = vec4(c*  push.color, c);
 }

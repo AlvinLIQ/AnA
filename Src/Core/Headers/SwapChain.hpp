@@ -19,7 +19,7 @@ namespace AnA
     class SwapChain
     {
     public:
-        SwapChain(Device *&mDevice, VkSurfaceKHR &mSurface, GLFWwindow *&mWindow);
+        SwapChain(Device*& mDevice, VkSurfaceKHR &mSurface, GLFWwindow*& mWindow);
         ~SwapChain();
 
         VkResult AcquireNextImage(uint32_t* pImageIndex);
@@ -40,19 +40,19 @@ namespace AnA
 
         void RecreateSwapChain();
 
-        void CreateImage(VkImageCreateInfo *pCreateInfo, VkImage *pImage, VkDeviceMemory *pImageMemory);
+        void CreateImage(VkImageCreateInfo* pCreateInfo, VkImage* pImage, VkDeviceMemory* pImageMemory);
         #ifdef INCLUDE_STB_IMAGE
-        void CreateTextureImage(const char *imagePath, VkImage* pTexImage, VkDeviceMemory *pTexMemory);
+        void CreateTextureImage(const char* imagePath, VkImage* pTexImage, VkDeviceMemory* pTexMemory);
         #endif
     private:
-        Device *&aDevice;
+        Device*& aDevice;
         VkSurfaceKHR surface;
 
         VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats);
 
         VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> &availablePresentModes);
 
-        GLFWwindow *&window;
+        GLFWwindow*& window;
         VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
 
         VkSwapchainKHR swapChain;

@@ -24,5 +24,5 @@ layout(push_constant) uniform Push {
 
 void main()
 {
-    gl_Position = cbo.proj * cbo.view * vec4(position, 1.0);
+    gl_Position = cbo.proj*  cbo.view*  vec4(position, 1.0);
 }

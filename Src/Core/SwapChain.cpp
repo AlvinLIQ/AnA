@@ -9,8 +9,8 @@
 
 using namespace AnA;
 
-SwapChain::SwapChain(Device *&mDevice,
-                             VkSurfaceKHR &mSurface, GLFWwindow *&mWindow) : aDevice{mDevice}, surface{mSurface}, window{mWindow}
+SwapChain::SwapChain(Device*& mDevice,
+                             VkSurfaceKHR &mSurface, GLFWwindow*& mWindow) : aDevice{mDevice}, surface{mSurface}, window{mWindow}
 {
     createSwapChain();
     createImageViews();
@@ -32,7 +32,7 @@ SwapChain::~SwapChain()
     cleanupSwapChain();
 }
 
-VkResult SwapChain::AcquireNextImage(uint32_t *pImageIndex)
+VkResult SwapChain::AcquireNextImage(uint32_t* pImageIndex)
 {
     vkWaitForFences(aDevice->GetLogicalDevice(), 1, &inFlightFences[CurrentFrame], VK_TRUE, UINT64_MAX);
 
@@ -40,7 +40,7 @@ VkResult SwapChain::AcquireNextImage(uint32_t *pImageIndex)
                                  imageAvailableSemaphores[CurrentFrame], VK_NULL_HANDLE, pImageIndex);
 }
 
-VkResult SwapChain::SubmitCommandBuffers(VkCommandBuffer *pCommandBuffers, uint32_t *pImageIndex)
+VkResult SwapChain::SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint32_t* pImageIndex)
 {
     if (imagesInFlight[*pImageIndex] != VK_NULL_HANDLE)
         vkWaitForFences(aDevice->GetLogicalDevice(), 1, &imagesInFlight[*pImageIndex], VK_TRUE, UINT64_MAX);
@@ -132,13 +132,13 @@ void SwapChain::RecreateSwapChain()
     createFramebuffers();
 }
 
-void SwapChain::CreateImage(VkImageCreateInfo *pCreateInfo, VkImage *pImage, VkDeviceMemory *pImageMemory)
+void SwapChain::CreateImage(VkImageCreateInfo* pCreateInfo, VkImage* pImage, VkDeviceMemory* pImageMemory)
 {
     if (vkCreateImage(aDevice->GetLogicalDevice(), pCreateInfo, nullptr, pImage) != VK_SUCCESS)
         throw std::runtime_error("Failed to create Image!");
 
     VkMemoryRequirements memRequirements;
-    vkGetImageMemoryRequirements(aDevice->GetLogicalDevice(), *pImage, &memRequirements);
+    vkGetImageMemoryRequirements(aDevice->GetLogicalDevice(),* pImage, &memRequirements);
 
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -150,15 +150,15 @@ void SwapChain::CreateImage(VkImageCreateInfo *pCreateInfo, VkImage *pImage, VkD
         throw std::runtime_error("failed to allocate image memory!");
     }
 
-    vkBindImageMemory(aDevice->GetLogicalDevice(), *pImage, *pImageMemory, 0);
+    vkBindImageMemory(aDevice->GetLogicalDevice(),* pImage,* pImageMemory, 0);
 }
 
 #ifdef INCLUDE_STB_IMAGE
-void SwapChain::CreateTextureImage(const char *imagePath, VkImage *pTexImage, VkDeviceMemory *pTexMemory)
+void SwapChain::CreateTextureImage(const char* imagePath, VkImage* pTexImage, VkDeviceMemory* pTexMemory)
 {
     int texWidth, texHeight, texChannels;
-    stbi_uc *pixels = stbi_load(imagePath, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-    VkDeviceSize imageSize = texWidth * texHeight * 4;
+    stbi_uc* pixels = stbi_load(imagePath, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+    VkDeviceSize imageSize = texWidth*  texHeight*  4;
 
     if (!pixels)
         throw std::runtime_error("Failed to load texture image!");

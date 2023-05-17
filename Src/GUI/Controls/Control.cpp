@@ -4,9 +4,9 @@
 using namespace AnA;
 using namespace AnA::Controls;
 
-SwapChain *aSwapChain = nullptr;
-Control *pressedControl = nullptr;
-Control *focusedControl = nullptr;
+SwapChain* aSwapChain = nullptr;
+Control* pressedControl = nullptr;
+Control* focusedControl = nullptr;
 
 Control::Control() : Object()
 {
@@ -22,7 +22,7 @@ void Control::PrepareDraw()
     Properties.transform.translation = {renderOffset.x, renderOffset.y, 0.f};
 }
 
-void Control::InitControl(SwapChain *swapChain)
+void Control::InitControl(SwapChain* swapChain)
 {
     aSwapChain = swapChain;
 }

@@ -18,8 +18,8 @@
 using namespace AnA;
 
 std::shared_ptr<Model> _2DModel;
-Device *_aDevice;
-App *_aApp;
+Device* _aDevice;
+App* _aApp;
 
 #define UI_SIGNAL_EXIT 0
 #define UI_SIGNAL_KEY 2
@@ -215,12 +215,12 @@ void App::uiLoop()
     }
 }
 
-void App::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+void App::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     /*
     _uiParam[0] = key;
     _uiParam[1] = action;
     _uiSignal = UI_SIGNAL_KEY;
-    */
+   */
     //glfwGetKey
 }

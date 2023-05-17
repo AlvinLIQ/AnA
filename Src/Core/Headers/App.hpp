@@ -42,27 +42,27 @@ namespace AnA
             return camera;
         }
 
-        Input::InputManager *&GetInputManager()
+        Input::InputManager*& GetInputManager()
         {
             return aInputManager;
         }
 
-        SwapChain *&GetSwapChain()
+        SwapChain*& GetSwapChain()
         {
             return aRenderer->GetSwapChain();
         }
 
-        Device *&GetDevice()
+        Device*& GetDevice()
         {
             return aDevice;
         }
     private:
-        Window *aWindow;
-        Instance *aInstance;
-        Device *aDevice;
-        Renderer *aRenderer;
-        RenderSystems::RenderSystem *aRenderSystem;
-        Input::InputManager *aInputManager;
+        Window* aWindow;
+        Instance* aInstance;
+        Device* aDevice;
+        Renderer* aRenderer;
+        RenderSystems::RenderSystem* aRenderSystem;
+        Input::InputManager* aInputManager;
 
         std::vector<Object*> objects;
 
@@ -72,6 +72,6 @@ namespace AnA
         static void startUILoop(std::thread &loopThread);
         static void waitUILoop(std::thread &loopThread);
         static void uiLoop();
-        static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
+        static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
     };
 }
