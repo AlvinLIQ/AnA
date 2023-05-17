@@ -1,13 +1,13 @@
-#define ANA_INCLUDE_STB_IMAGE
+#define INCLUDE_STB_IMAGE
 
-#include "../Core/Headers/AnA_App.hpp"
-//#include "../GUI/Controls/Headers/AnA_Button.hpp"
+#include "../Core/Headers/App.hpp"
+//#include "../GUI/Controls/Headers/Button.hpp"
 #include "../VertexLoader/Headers/VertexLoader.hpp"
 
 using namespace AnA;
 //using namespace AnA::Controls;
 
-void CopyVertices(IndexedVertex &indexedVertex, std::vector<AnA_Model::Vertex> &dstVertices)
+void CopyVertices(IndexedVertex &indexedVertex, std::vector<Model::Vertex> &dstVertices)
 {
     /*
     auto &srcVertices = indexedVertex.vertices;
@@ -22,10 +22,10 @@ void CopyVertices(IndexedVertex &indexedVertex, std::vector<AnA_Model::Vertex> &
 
 int main()
 {
-    AnA_App* aApp = new AnA_App;
+    App* aApp = new App;
     aApp->Init();
 
-    AnA_Object *object = new AnA_Object;
+    Object *object = new Object;
     object->Color = {0.1f, 0.2f, 0.3f};
 
     auto &objectProperties = object->Properties;
@@ -34,16 +34,16 @@ int main()
     objectProperties.transform.rotation = glm::vec3(0.04f * glm::two_pi<float>(), 0.f, 0.f);
     objectProperties.transform.translation = {0.f, 0.f , 1.5f};
 
-    //object->Model = AnA_App::Get2DModel();
-    AnA_Model::CreateModelFromFile(aApp->GetDevice(), "Models/cube.obj", object->Model);
+    //object->Model = App::Get2DModel();
+    Model::CreateModelFromFile(aApp->GetDevice(), "Models/cube.obj", object->Model);
     
     aApp->GetObjects().push_back(std::move(object));
 
 /*
-    AnA_Control::InitControl(aApp->GetSwapChain());
-    AnA_Button *button = new AnA_Button;
+    Control::InitControl(aApp->GetSwapChain());
+    Button *button = new Button;
     button->PrepareDraw();
-    button->Model = AnA_App::Get2DModel();
+    button->Model = App::Get2DModel();
     aApp->GetObjects().push_back(std::move(button));*/
 
     aApp->Run();
