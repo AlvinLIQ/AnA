@@ -37,19 +37,19 @@ namespace AnA
             std::vector<Index> indices;
         };
 
-        Model(Device*& mDevice, const ModelInfo &modelInfo);
+        Model(Device& mDevice, const ModelInfo& modelInfo);
         ~Model();
 
-        static void CreateModelFromFile(Device*& mDevice, const char* filePath, std::shared_ptr<Model> &model);
+        static void CreateModelFromFile(Device& mDevice, const char* filePath, std::shared_ptr<Model>& model);
         void LoadMaterialFromFile(const char* filePath);
         
         void Bind(VkCommandBuffer commandBuffer);
         void Draw(VkCommandBuffer commandBuffer);
     private:
-        void createVertexBuffers(const std::vector<Vertex> &vertices);
-        void createIndexBuffers(const std::vector<Index> &indices);
+        void createVertexBuffers(const std::vector<Vertex>& vertices);
+        void createIndexBuffers(const std::vector<Index>& indices);
 
-        Device*& aDevice;
+        Device& aDevice;
         Buffer* vertexBuffer;
         bool hasIndexBuffer;
         Buffer* indexBuffer;

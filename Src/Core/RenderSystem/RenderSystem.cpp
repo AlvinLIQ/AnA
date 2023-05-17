@@ -30,23 +30,23 @@ VkDescriptorBufferInfo CameraBufferObject::GetBufferInfo(VkBuffer camBuffer)
     return bufferInfo;
 }
 
-RenderSystem::RenderSystem(Device*& mDevice, SwapChain*& mSwapChain) : aDevice {mDevice}, aSwapChain {mSwapChain}
+RenderSystem::RenderSystem(Device& mDevice, SwapChain& mSwapChain) : aDevice {mDevice}, aSwapChain {mSwapChain}
 {
     createCameraBuffers();
     createDescriptorPool();
     createDescriptorSetLayout();
     createDescriptorSets();
     createPipelineLayout();
-    aPipeline = new Pipeline(aDevice, "Shaders/vert.spv", "Shaders/frag.spv", aSwapChain->GetRenderPass(), pipelineLayout);
+    aPipeline = new Pipeline(aDevice, "Shaders/vert.spv", "Shaders/frag.spv", aSwapChain.GetRenderPass(), pipelineLayout);
 }
 
 RenderSystem::~RenderSystem()
 {
     delete aPipeline;
-    vkDestroyPipelineLayout(aDevice->GetLogicalDevice(), pipelineLayout, nullptr);
+    vkDestroyPipelineLayout(aDevice.GetLogicalDevice(), pipelineLayout, nullptr);
 
-    vkDestroyDescriptorPool(aDevice->GetLogicalDevice(), descriptorPool, nullptr);
-    vkDestroyDescriptorSetLayout(aDevice->GetLogicalDevice(), descriptorSetLayout, nullptr);
+    vkDestroyDescriptorPool(aDevice.GetLogicalDevice(), descriptorPool, nullptr);
+    vkDestroyDescriptorSetLayout(aDevice.GetLogicalDevice(), descriptorSetLayout, nullptr);
     for (auto &cameraBuffer : cameraBuffers)
         delete cameraBuffer;
 }
@@ -65,7 +65,7 @@ void RenderSystem::createPipelineLayout()
     pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
     pipelineLayoutInfo.pushConstantRangeCount = 1;
     pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
-    if (vkCreatePipelineLayout(aDevice->GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
+    if (vkCreatePipelineLayout(aDevice.GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create pipeline layout!");
     }
@@ -90,13 +90,13 @@ void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, std::vector<Obje
     UpdateCameraBuffer(camera);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
         pipelineLayout, 0, 1,
-        &descriptorSets[aSwapChain->CurrentFrame], 0, nullptr);
+        &descriptorSets[aSwapChain.CurrentFrame], 0, nullptr);
 
     for (auto& object : objects)
     {
         object->Model->Bind(commandBuffer);
         ObjectPushConstantData push{};
-        auto extent = aSwapChain->GetExtent();
+        auto extent = aSwapChain.GetExtent();
         push.resolution = {extent.width, extent.height};
 
         //auto projectionMatrix = camera.GetProjectionMatrix()*  camera.GetView();
@@ -130,7 +130,7 @@ void RenderSystem::UpdateCameraBuffer(Cameras::Camera &camera)
     cbo.proj = camera.GetProjectionMatrix();
     cbo.view = camera.GetView();
 
-    memcpy(cameraBuffers[aSwapChain->CurrentFrame]->GetMappedData(), &cbo, sizeof(cbo));
+    memcpy(cameraBuffers[aSwapChain.CurrentFrame]->GetMappedData(), &cbo, sizeof(cbo));
 }
 
 void RenderSystem::createDescriptorPool()
@@ -145,7 +145,7 @@ void RenderSystem::createDescriptorPool()
     poolInfo.pPoolSizes = &poolSize;
     poolInfo.maxSets = poolSize.descriptorCount;
 
-    if (vkCreateDescriptorPool(aDevice->GetLogicalDevice(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
+    if (vkCreateDescriptorPool(aDevice.GetLogicalDevice(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
         throw std::runtime_error("Failed to create descriptor pool!");
 }
 
@@ -159,7 +159,7 @@ void RenderSystem::createDescriptorSets()
     allocInfo.pSetLayouts = layouts.data();
 
     descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
-    if (vkAllocateDescriptorSets(aDevice->GetLogicalDevice(), &allocInfo, descriptorSets.data()) != VK_SUCCESS)
+    if (vkAllocateDescriptorSets(aDevice.GetLogicalDevice(), &allocInfo, descriptorSets.data()) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to allocate descriptor sets!");
     }
@@ -182,7 +182,7 @@ void RenderSystem::createDescriptorSets()
 
         descriptorWrite.pBufferInfo = &bufferInfo;
 
-        vkUpdateDescriptorSets(aDevice->GetLogicalDevice(), 1,
+        vkUpdateDescriptorSets(aDevice.GetLogicalDevice(), 1,
             &descriptorWrite, 0, nullptr);
         
     }
@@ -196,6 +196,6 @@ void RenderSystem::createDescriptorSetLayout()
     layoutInfo.bindingCount = 1;
     layoutInfo.pBindings = &uboLayoutBinding;
 
-    if (vkCreateDescriptorSetLayout(aDevice->GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
+    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
         throw std::runtime_error("Failed to create the DescriptorSetLayout");
 }

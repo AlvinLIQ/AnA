@@ -9,17 +9,17 @@
 
 using namespace AnA;
 
-Renderer::Renderer(Window*& mWindow, Device*& mDevice) : aWindow {mWindow}, aDevice {mDevice}
+Renderer::Renderer(Window& mWindow, Device& mDevice) : aWindow {mWindow}, aDevice {mDevice}
 {
-    aSwapChain = new SwapChain(aDevice, aWindow->GetSurface(), aWindow->GetGLFWwindow());
+    aSwapChain = new SwapChain(aDevice, aWindow.GetSurface(), aWindow.GetGLFWwindow());
     createCommandBuffers();
 }
 
 Renderer::~Renderer()
 {
     delete aSwapChain;
-    vkFreeCommandBuffers(aDevice->GetLogicalDevice(), 
-        aDevice->GetCommandPool(), 
+    vkFreeCommandBuffers(aDevice.GetLogicalDevice(), 
+        aDevice.GetCommandPool(), 
         static_cast<uint32_t>(commandBuffers.size()), 
         commandBuffers.data());
 
@@ -62,9 +62,9 @@ void Renderer::EndFrame()
     }
     auto result = aSwapChain->SubmitCommandBuffers(&commandBuffer,  &currentImageIndex); 
 
-    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || aWindow->FramebufferResized)
+    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || aWindow.FramebufferResized)
     {
-        aWindow->FramebufferResized = false;
+        aWindow.FramebufferResized = false;
         aSwapChain->RecreateSwapChain();
     }
     else if (result != VK_SUCCESS)
@@ -124,9 +124,9 @@ void Renderer::createCommandBuffers()
     commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = aDevice->GetCommandPool();
+    allocInfo.commandPool = aDevice.GetCommandPool();
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
-    if (vkAllocateCommandBuffers(aDevice->GetLogicalDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) 
+    if (vkAllocateCommandBuffers(aDevice.GetLogicalDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) 
         throw std::runtime_error("Failed to allocate command buffers!");
 }

@@ -8,7 +8,7 @@ namespace AnA
     class Buffer
     {
     public:
-        Buffer(Device*& mDevice, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties);
+        Buffer(Device& mDevice, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties);
         ~Buffer();
         Buffer(const Buffer&) = delete;
         Buffer &operator=(const Buffer&) = delete;
@@ -37,7 +37,7 @@ namespace AnA
             this->Unmap();
         }
     private:
-        Device*& aDevice;
+        Device& aDevice;
 
         void* mappedData = nullptr;
         VkBuffer buffer = VK_NULL_HANDLE;

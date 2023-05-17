@@ -18,7 +18,7 @@ std::vector<char> Pipeline::ReadFile(const std::string &filename)
     return buffer;
 }
 
-Pipeline::Pipeline(Device*& mDevice,
+Pipeline::Pipeline(Device& mDevice,
 const char* vertShaderFileName, const char* fragShaderFileName,
 VkRenderPass &mRenderPass, 
 VkPipelineLayout &mPipelineLayout) : aDevice {mDevice}, renderPass {mRenderPass}, pipelineLayout{mPipelineLayout}
@@ -27,7 +27,7 @@ VkPipelineLayout &mPipelineLayout) : aDevice {mDevice}, renderPass {mRenderPass}
 }
 Pipeline::~Pipeline()
 {
-    auto logicalDevice = aDevice->GetLogicalDevice();
+    auto logicalDevice = aDevice.GetLogicalDevice();
     vkDestroyPipeline(logicalDevice, pipeline, nullptr);
 }
 
@@ -46,7 +46,7 @@ void Pipeline::createGraphicsPipeline(const std::string &vertShaderFileName, con
 
     PipelineConfig pipelineConfig = pipelineConfig.GetDefault(vertShaderModule, fragShaderModule, pipelineLayout, renderPass); 
 
-    auto logicalDevice = aDevice->GetLogicalDevice();
+    auto logicalDevice = aDevice.GetLogicalDevice();
 
     if (vkCreateGraphicsPipelines(logicalDevice, VK_NULL_HANDLE, 1, &pipelineConfig.pipelineInfo, nullptr, &pipeline) != VK_SUCCESS)
         throw std::runtime_error("Failed to create pipeline!");
@@ -63,7 +63,7 @@ VkShaderModule Pipeline::createShaderModule(const std::vector<char> &code)
     createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
     VkShaderModule shaderModule;
-    if (vkCreateShaderModule(aDevice->GetLogicalDevice(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+    if (vkCreateShaderModule(aDevice.GetLogicalDevice(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create shader module!");
     }
