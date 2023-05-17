@@ -77,7 +77,7 @@ void CreateCubeModel(std::shared_ptr<Model>& model)
     };
 
     Model::ModelInfo modelInfo = {vertices, 4, {0, 1, 2, 1, 2, 3}};
-    model = std::make_shared<Model>(_aDevice, modelInfo);
+    model = std::make_shared<Model>(*_aDevice, modelInfo);
 }
 
 void App::Init()
@@ -85,14 +85,14 @@ void App::Init()
     aWindow = new Window();
     if (aWindow->Init())
         throw std::runtime_error("Failed to init window!");
-    aInputManager = new Input::InputManager(aWindow);
+    aInputManager = new Input::InputManager(*aWindow);
 
     //glfwSetKeyCallback(aWindow->GetGLFWwindow(), App::keyCallback);
     aInstance = new Instance;
     aWindow->CreateWindowSurface(aInstance);
     _aDevice = aDevice = new Device(aInstance->GetInstance(), aWindow->GetSurface());
-    aRenderer = new Renderer(aWindow, aDevice);
-    aRenderSystem = new RenderSystems::RenderSystem(aDevice, aRenderer->GetSwapChain());
+    aRenderer = new Renderer(*aWindow, *aDevice);
+    aRenderSystem = new RenderSystems::RenderSystem(*aDevice, aRenderer->GetSwapChain());
 }
 
 void App::Run()
@@ -159,7 +159,7 @@ std::shared_ptr<Model> &App::Get2DModel()
             {{1.0f, 1.0f, 0.f}, {}}
         };
         Model::ModelInfo modelInfo{vertices, 4, {0, 1, 2, 1, 2, 3}};
-        _2DModel = std::make_shared<Model>(_aDevice, modelInfo);
+        _2DModel = std::make_shared<Model>(*_aDevice, modelInfo);
     }
 
     return _2DModel;
@@ -167,7 +167,7 @@ std::shared_ptr<Model> &App::Get2DModel()
 
 void App::CreateModel(const Model::ModelInfo &modelInfo, std::shared_ptr<Model> &model)
 {
-    model = std::make_shared<Model>(_aDevice, modelInfo);
+    model = std::make_shared<Model>(*_aDevice, modelInfo);
 }
 
 void App::startUILoop(std::thread &loopThread)

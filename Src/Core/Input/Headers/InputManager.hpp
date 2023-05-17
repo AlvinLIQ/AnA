@@ -27,7 +27,7 @@ namespace AnA
                 void(*callBack)(void* pParam, CursorPosition &curPos);
                 int action;
             };
-            InputManager(Window*& mWindow);
+            InputManager(Window& mWindow);
             ~InputManager();
 
             std::vector<KeyMapConfig> &GetKeyMapConfigs()
@@ -41,7 +41,7 @@ namespace AnA
             
             bool CheckAndRunCallbacks();
         private:
-            Window*& aWindow;
+            Window& aWindow;
             std::vector<KeyMapConfig> keyMapConfigs;
             static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 

@@ -13,7 +13,7 @@ namespace AnA
     class Renderer
     {
     public:
-        Renderer(Window*& mWindow, Device*& mDevice);
+        Renderer(Window& mWindow, Device& mDevice);
         ~Renderer();
 
         int GetFrameIndex() const
@@ -36,9 +36,9 @@ namespace AnA
             return commandBuffers[currentFrameIndex];
         }
 
-        SwapChain*& GetSwapChain()
+        SwapChain& GetSwapChain()
         {
-            return aSwapChain;
+            return *aSwapChain;
         }
         VkExtent2D GetSwapChainExtent() const
         {
@@ -56,8 +56,8 @@ namespace AnA
         void EndSwapChainRenderPass(VkCommandBuffer commandBuffer);
 
     private:
-        Window*& aWindow;
-        Device*& aDevice;
+        Window& aWindow;
+        Device& aDevice;
         SwapChain* aSwapChain;
 
         void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);

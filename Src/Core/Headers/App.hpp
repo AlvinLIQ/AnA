@@ -42,19 +42,19 @@ namespace AnA
             return camera;
         }
 
-        Input::InputManager*& GetInputManager()
+        Input::InputManager& GetInputManager()
         {
-            return aInputManager;
+            return *aInputManager;
         }
 
-        SwapChain*& GetSwapChain()
+        SwapChain& GetSwapChain()
         {
             return aRenderer->GetSwapChain();
         }
 
-        Device*& GetDevice()
+        Device& GetDevice()
         {
-            return aDevice;
+            return *aDevice;
         }
     private:
         Window* aWindow;

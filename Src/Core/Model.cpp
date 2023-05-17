@@ -17,7 +17,7 @@
 
 using namespace AnA;
 
-Model::Model(Device *&mDevice, const ModelInfo &modelInfo) : aDevice{mDevice}
+Model::Model(Device& mDevice, const ModelInfo& modelInfo) : aDevice{mDevice}
 {
     createVertexBuffers(modelInfo.vertices);
     if ((hasIndexBuffer = modelInfo.indices.size() > 0))
@@ -35,7 +35,7 @@ Model::~Model()
     delete vertexBuffer;
 }
 
-void Model::CreateModelFromFile(Device *&mDevice, const char *filePath, std::shared_ptr<Model> &model)
+void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shared_ptr<Model>& model)
 {
     ModelInfo modelInfo{};
     tinyobj::attrib_t attrib;
@@ -43,15 +43,15 @@ void Model::CreateModelFromFile(Device *&mDevice, const char *filePath, std::sha
     std::vector<tinyobj::material_t> materials;
     std::string warn, err;
 
-    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filePath))
+    if (!tinyobj::LoadObj(&attrib,& shapes,& materials,& warn,& err, filePath))
         throw std::runtime_error(warn + err);
 
     modelInfo.vertices.clear();
     modelInfo.indices.clear();
     
-    for (const auto &shape : shapes)
+    for (const auto& shape : shapes)
     {
-        for (const auto &index : shape.mesh.indices)
+        for (const auto& index : shape.mesh.indices)
         {
             Vertex vertex{};
 
@@ -100,7 +100,7 @@ void Model::CreateModelFromFile(Device *&mDevice, const char *filePath, std::sha
     model = std::make_shared<Model>(mDevice, modelInfo);
 }
 
-void Model::createVertexBuffers(const std::vector<Vertex> &vertices)
+void Model::createVertexBuffers(const std::vector<Vertex>& vertices)
 {
     vertexCount = static_cast<uint32_t>(vertices.size());
     assert(vertexCount >= 3 && "Vertex count must be at least 3");
@@ -113,10 +113,10 @@ void Model::createVertexBuffers(const std::vector<Vertex> &vertices)
     vertexBuffer = new Buffer(aDevice, bufferSize, 
         VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    aDevice->CopyBuffer(stagingBuffer.GetBuffer(), vertexBuffer->GetBuffer(), bufferSize);
+    aDevice.CopyBuffer(stagingBuffer.GetBuffer(), vertexBuffer->GetBuffer(), bufferSize);
 }
 
-void Model::createIndexBuffers(const std::vector<Index> &indices)
+void Model::createIndexBuffers(const std::vector<Index>& indices)
 {
     indexCount = static_cast<uint32_t>(indices.size());
     VkDeviceSize bufferSize = sizeof(indices[0]) * indexCount;
@@ -128,7 +128,7 @@ void Model::createIndexBuffers(const std::vector<Index> &indices)
     indexBuffer = new Buffer(aDevice, bufferSize, 
         VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-        aDevice->CopyBuffer(stagingBuffer.GetBuffer(), indexBuffer->GetBuffer(), bufferSize);
+        aDevice.CopyBuffer(stagingBuffer.GetBuffer(), indexBuffer->GetBuffer(), bufferSize);
 }
 
 void Model::Bind(VkCommandBuffer commandBuffer)
