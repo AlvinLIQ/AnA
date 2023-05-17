@@ -55,8 +55,8 @@ namespace AnA
             POS_F GetActualControlOffset(SIZE_F renderSize)
             {
                 POS_F actualOffset;
-                float *pOffset = (float*)&actualOffset;
-                float *pSize = (float*)&renderSize;
+                float* pOffset = (float*)&actualOffset;
+                float* pSize = (float*)&renderSize;
                 AlignmentType Alignments[]{HorizontalAlignment, VerticalAlignment};
                 for (int i = 0; i < 2; i++)
                 {
@@ -79,7 +79,7 @@ namespace AnA
                 if (renderMode == AlignType::Relative)
                 {
                     auto extent = GetSwapChainExtent();
-                    renderSize.Width = controlSize.Width / (float)extent.width * (float)extent.height;
+                    renderSize.Width = controlSize.Width / (float)extent.width*  (float)extent.height;
                 }
                 else if (renderMode == AlignType::Absolute)
                 {
@@ -116,7 +116,7 @@ namespace AnA
             }
 
             virtual void PrepareDraw();
-            static void InitControl(SwapChain *swapChain);
+            static void InitControl(SwapChain* swapChain);
             static VkExtent2D GetSwapChainExtent();
 
             bool IsFocused();

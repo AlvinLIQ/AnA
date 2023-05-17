@@ -18,8 +18,8 @@ std::vector<char> Pipeline::ReadFile(const std::string &filename)
     return buffer;
 }
 
-Pipeline::Pipeline(Device *&mDevice,
-const char *vertShaderFileName, const char *fragShaderFileName,
+Pipeline::Pipeline(Device*& mDevice,
+const char* vertShaderFileName, const char* fragShaderFileName,
 VkRenderPass &mRenderPass, 
 VkPipelineLayout &mPipelineLayout) : aDevice {mDevice}, renderPass {mRenderPass}, pipelineLayout{mPipelineLayout}
 {
@@ -60,7 +60,7 @@ VkShaderModule Pipeline::createShaderModule(const std::vector<char> &code)
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     createInfo.codeSize = code.size();
-    createInfo.pCode = reinterpret_cast<const uint32_t *>(code.data());
+    createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
     VkShaderModule shaderModule;
     if (vkCreateShaderModule(aDevice->GetLogicalDevice(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS)

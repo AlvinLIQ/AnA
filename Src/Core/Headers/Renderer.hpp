@@ -36,7 +36,7 @@ namespace AnA
             return commandBuffers[currentFrameIndex];
         }
 
-        SwapChain *&GetSwapChain()
+        SwapChain*& GetSwapChain()
         {
             return aSwapChain;
         }

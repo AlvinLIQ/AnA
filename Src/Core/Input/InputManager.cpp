@@ -5,9 +5,9 @@
 using namespace AnA;
 using namespace AnA::Input;
 
-InputManager *_aInputManager;
+InputManager* _aInputManager;
 
-InputManager::InputManager(Window *&mWindow) : aWindow {mWindow}
+InputManager::InputManager(Window*& mWindow) : aWindow {mWindow}
 {
     _aInputManager = this;
 /*
@@ -44,7 +44,7 @@ bool InputManager::CheckAndRunCallbacks()
     return keyMapConfigs.size() + cursorConfigs.size() > 0;
 }
 
-void InputManager::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+void InputManager::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     auto &keyMapConfigs = _aInputManager->GetKeyMapConfigs();
     for (auto &keyMapConfig : keyMapConfigs)

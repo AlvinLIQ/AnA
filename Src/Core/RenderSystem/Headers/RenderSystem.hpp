@@ -23,20 +23,20 @@ namespace AnA
         class RenderSystem
         {
         public:
-            RenderSystem(Device *&mDevice, SwapChain *&mSwapChain);
+            RenderSystem(Device*& mDevice, SwapChain*& mSwapChain);
             ~RenderSystem();
 
             void RenderObjects(VkCommandBuffer commandBuffer, std::vector<Object*> &objects, Cameras::Camera &camera);
             void UpdateCameraBuffer(Cameras::Camera &camera);
 
         private:
-            Device *&aDevice;
-            SwapChain *&aSwapChain;
+            Device*& aDevice;
+            SwapChain*& aSwapChain;
             
             VkPipelineLayout pipelineLayout;
             void createPipelineLayout();
             
-            Pipeline *aPipeline;
+            Pipeline* aPipeline;
 
             std::vector<Buffer*> cameraBuffers;
             void createCameraBuffers();

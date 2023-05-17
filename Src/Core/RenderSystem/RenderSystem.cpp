@@ -30,7 +30,7 @@ VkDescriptorBufferInfo CameraBufferObject::GetBufferInfo(VkBuffer camBuffer)
     return bufferInfo;
 }
 
-RenderSystem::RenderSystem(Device *&mDevice, SwapChain *&mSwapChain) : aDevice {mDevice}, aSwapChain {mSwapChain}
+RenderSystem::RenderSystem(Device*& mDevice, SwapChain*& mSwapChain) : aDevice {mDevice}, aSwapChain {mSwapChain}
 {
     createCameraBuffers();
     createDescriptorPool();
@@ -99,16 +99,16 @@ void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, std::vector<Obje
         auto extent = aSwapChain->GetExtent();
         push.resolution = {extent.width, extent.height};
 
-        //auto projectionMatrix = camera.GetProjectionMatrix() * camera.GetView();
+        //auto projectionMatrix = camera.GetProjectionMatrix()*  camera.GetView();
         object->PrepareDraw();
         auto &itemProperties = object->Properties;
         push.sType = itemProperties.sType;
         //push.projectionMatrix = camera.GetProjectionMatrix();
         if (push.sType == ANA_MODEL)
         {
-            itemProperties.transform.rotation.y = glm::mod(itemProperties.transform.rotation.y + 1.f * camera.GetSpeedRatio(), glm::two_pi<float>());
-            itemProperties.transform.translation.y = glm::sin(itemProperties.transform.rotation.y) * 0.1f;
-            push.transformMatrix = itemProperties.transform.mat4();//projectionMatrix * itemProperties->transform.mat4();
+            //itemProperties.transform.rotation.y = glm::mod(itemProperties.transform.rotation.y + 1.f*  camera.GetSpeedRatio(), glm::two_pi<float>());
+            //itemProperties.transform.translation.y = glm::sin(itemProperties.transform.rotation.y)*  0.1f;
+            push.transformMatrix = itemProperties.transform.mat4();//projectionMatrix*  itemProperties->transform.mat4();
         }
         else // For 2D Objects
             push.transformMatrix = itemProperties.transform.mat4();

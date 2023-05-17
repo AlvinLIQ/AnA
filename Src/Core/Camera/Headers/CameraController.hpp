@@ -21,10 +21,10 @@ namespace AnA
             void GetCameraCursorConfigs(std::vector<Input::InputManager::CursorConfig> &configs);
             CameraController(Camera &mCamera);
             
-            static void Move(CameraCallbackParam *param);
-            static void Rotate(CameraCallbackParam *param);
+            static void Move(CameraCallbackParam* param);
+            static void Rotate(CameraCallbackParam* param);
 
-            static void CursorMoved(Camera *camera, Input::InputManager::CursorPosition &duration);
+            static void CursorMoved(Camera* camera, Input::InputManager::CursorPosition &duration);
 
         private:
             Camera &aCamera;
