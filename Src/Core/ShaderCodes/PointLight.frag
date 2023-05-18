@@ -1,6 +1,6 @@
 #version 450
 
-
+layout(location = 0) in vec3 fragColor;
 layout(location = 0) out vec4 outColor;
 
 layout(binding = 0) uniform CameraBufferObject {
@@ -22,6 +22,5 @@ layout(push_constant) uniform Push {
 
 void main()
 {
-    vec3 lightPosition = vec3(cbo.view[0].x, cbo.view[1].y, cbo.view[2].z);
-    outColor = vec4(lightPosition, 1.f);
+    outColor = vec4(fragColor, 1.f);
 }
