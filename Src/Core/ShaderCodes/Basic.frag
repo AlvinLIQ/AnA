@@ -7,6 +7,7 @@
 #define ANA_MODEL 4
 
 layout(location = 0) in vec3 fragColor;
+layout(location = 1) in vec2 texCoord;
 layout(location = 0) out vec4 outColor;
 
 layout(push_constant) uniform Push {
@@ -16,6 +17,8 @@ layout(push_constant) uniform Push {
     vec2 resolution;
     vec3 color;
 } push;
+
+layout(binding = 1) uniform sampler2D texSampler;
 
 float rect(vec2 uv, float l, float t, float r, float b)
 {
@@ -83,5 +86,5 @@ void main() {
         break;
     }
 
-    outColor = vec4(c*  push.color, c);
+    outColor = vec4(c * push.color, c) * texture(texSampler, texCoord);
 }

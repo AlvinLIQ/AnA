@@ -1,12 +1,6 @@
 #include "Headers/SwapChain.hpp"
 #include <iostream>
 
-#ifdef INCLUDE_STB_IMAGE
-#define STB_IMAGE_IMPLEMENTATION
-#include "Headers/Buffer.h"
-#include "../stb/stb_image.h"
-#endif
-
 using namespace AnA;
 
 SwapChain::SwapChain(Device& mDevice,
@@ -14,6 +8,9 @@ SwapChain::SwapChain(Device& mDevice,
 {
     createSwapChain();
     createImageViews();
+    createTextureImage();
+    createTextureImageView();
+    createTextureSampler();
     createDepthResources();
     createRenderPass();
     createFramebuffers();
@@ -30,6 +27,12 @@ SwapChain::~SwapChain()
         vkDestroyFence(device, inFlightFences[i], nullptr);
     }
     cleanupSwapChain();
+
+    vkDestroySampler(device, textureSampler, nullptr);
+    vkDestroyImageView(device, textureImageView, nullptr);
+
+    vkDestroyImage(device, textureImage, nullptr);
+    vkFreeMemory(device, textureImageMemory, nullptr);
 }
 
 VkResult SwapChain::AcquireNextImage(uint32_t* pImageIndex)
@@ -113,6 +116,15 @@ std::vector<VkFramebuffer> SwapChain::GetSwapChainFramebuffers()
     return swapChainFramebuffers;
 }
 
+VkImageView& SwapChain::GetTextureImageView()
+{
+    return textureImageView;
+}
+VkSampler& SwapChain::GetTextureSampler()
+{
+    return textureSampler;
+}
+
 void SwapChain::RecreateSwapChain()
 {
     int width, height;
@@ -131,47 +143,6 @@ void SwapChain::RecreateSwapChain()
     createDepthResources();
     createFramebuffers();
 }
-
-void SwapChain::CreateImage(VkImageCreateInfo* pCreateInfo, VkImage* pImage, VkDeviceMemory* pImageMemory)
-{
-    if (vkCreateImage(aDevice.GetLogicalDevice(), pCreateInfo, nullptr, pImage) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create Image!");
-
-    VkMemoryRequirements memRequirements;
-    vkGetImageMemoryRequirements(aDevice.GetLogicalDevice(),* pImage, &memRequirements);
-
-    VkMemoryAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = aDevice.FindMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-    if (vkAllocateMemory(aDevice.GetLogicalDevice(), &allocInfo, nullptr, pImageMemory) != VK_SUCCESS)
-    {
-        throw std::runtime_error("failed to allocate image memory!");
-    }
-
-    vkBindImageMemory(aDevice.GetLogicalDevice(),* pImage,* pImageMemory, 0);
-}
-
-#ifdef INCLUDE_STB_IMAGE
-void SwapChain::CreateTextureImage(const char* imagePath, VkImage* pTexImage, VkDeviceMemory* pTexMemory)
-{
-    int texWidth, texHeight, texChannels;
-    stbi_uc* pixels = stbi_load(imagePath, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-    VkDeviceSize imageSize = texWidth*  texHeight*  4;
-
-    if (!pixels)
-        throw std::runtime_error("Failed to load texture image!");
-
-    Buffer aBuffer(aDevice, imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    aBuffer.Map(0, imageSize);
-    memcpy(aBuffer.GetMappedData(), pixels, static_cast<size_t>(imageSize));
-    aBuffer.Unmap();
-    stbi_image_free(pixels);
-
-    CreateImage(texWidth, texHeight, pTexImage, pTexMemory);
-}
-#endif
 
 VkSurfaceFormatKHR SwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats)
 {
@@ -283,27 +254,46 @@ void SwapChain::createImageViews()
     swapChainImageViews.resize(swapChainImages.size());
     for (size_t i = 0; i < swapChainImages.size(); i++)
     {
-        VkImageViewCreateInfo createInfo{};
-        createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        createInfo.image = swapChainImages[i];
-
-        createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        createInfo.format = swapChainImageFormat;
-
-        createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-        createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-        createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-        createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-
-        createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        createInfo.subresourceRange.baseMipLevel = 0;
-        createInfo.subresourceRange.levelCount = 1;
-        createInfo.subresourceRange.baseArrayLayer = 0;
-        createInfo.subresourceRange.layerCount = 1;
-
-        if (vkCreateImageView(aDevice.GetLogicalDevice(), &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS)
-            throw std::runtime_error("failed to create image views!");
+        swapChainImageViews[i] = aDevice.CreateImageView(swapChainImages[i], swapChainImageFormat);
     }
+}
+
+void SwapChain::createTextureImage()
+{
+    aDevice.CreateTextureImage("Textures/texture.png", &textureImage, &textureImageMemory);
+}
+
+void SwapChain::createTextureImageView()
+{
+    textureImageView = aDevice.CreateImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
+}
+
+void SwapChain::createTextureSampler()
+{
+    VkSamplerCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    createInfo.magFilter = VK_FILTER_LINEAR;
+    createInfo.minFilter = VK_FILTER_LINEAR;
+
+    createInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    createInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    createInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+
+    createInfo.anisotropyEnable = VK_FALSE;
+
+    VkPhysicalDeviceProperties properties{};
+    vkGetPhysicalDeviceProperties(aDevice.GetPhysicalDevice(), &properties);
+    createInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+
+    createInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+    createInfo.unnormalizedCoordinates = VK_FALSE;
+
+    createInfo.compareEnable = VK_FALSE;
+    createInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+
+    createInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+    
+    vkCreateSampler(aDevice.GetLogicalDevice(), &createInfo, nullptr, &textureSampler);
 }
 
 VkFormat SwapChain::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
@@ -366,7 +356,7 @@ void SwapChain::createDepthResources()
         imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         imageInfo.flags = 0;
 
-        CreateImage(&imageInfo, &depthImages[i], &depthImageMemorys[i]);
+        aDevice.CreateImage(&imageInfo, &depthImages[i], &depthImageMemorys[i]);
 
         VkImageViewCreateInfo viewInfo{};
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
