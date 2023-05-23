@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <vulkan/vulkan_core.h>
 
-//#define INCLUDE_STB_IMAGE
+#define INCLUDE_STB_IMAGE
 
 #define MAX_FRAMES_IN_FLIGHT 2
 
@@ -34,16 +34,15 @@ namespace AnA
 
         uint32_t GetImageCount();
 
-        VkRenderPass &GetRenderPass();
+        VkRenderPass& GetRenderPass();
 
         std::vector<VkFramebuffer> GetSwapChainFramebuffers();
 
+        VkImageView& GetTextureImageView();
+        VkSampler& GetTextureSampler();
+
         void RecreateSwapChain();
 
-        void CreateImage(VkImageCreateInfo* pCreateInfo, VkImage* pImage, VkDeviceMemory* pImageMemory);
-        #ifdef INCLUDE_STB_IMAGE
-        void CreateTextureImage(const char* imagePath, VkImage* pTexImage, VkDeviceMemory* pTexMemory);
-        #endif
     private:
         Device& aDevice;
         VkSurfaceKHR surface;
@@ -63,6 +62,14 @@ namespace AnA
 
         std::vector<VkImageView> swapChainImageViews;
         void createImageViews();
+
+        VkImage textureImage;
+        VkDeviceMemory textureImageMemory;
+        void createTextureImage();
+        VkImageView textureImageView;
+        void createTextureImageView();
+        VkSampler textureSampler;
+        void createTextureSampler();
 
         VkFormat swapChainDepthFormat;
         VkFormat findDepthFormat();
