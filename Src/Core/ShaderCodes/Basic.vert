@@ -10,7 +10,6 @@ layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 color;
 layout(location = 2) in vec3 normal;
 layout(location = 3) in vec2 uv;
-layout(location = 4) in vec2 texCoord;
 layout(location = 0) out vec3 fragColor;
 layout(location = 1) out vec2 outTexCoord;
 
@@ -33,7 +32,7 @@ void main() {
     if (push.sType == ANA_MODEL)
     {
         gl_Position = cbo.proj*  cbo.view*  push.transformMatrix * vec4(position, 1.0);
-        vec3 normalWorldSpace = normalize(mat3(push.transformMatrix)*  normal);
+        vec3 normalWorldSpace = normalize(mat3(push.transformMatrix) * normal);
 
         float lightIntensity = max(dot(normalWorldSpace, LIGHT_DIRECTION), 0);
         fragColor = lightIntensity * color + 0.077;
@@ -43,6 +42,6 @@ void main() {
         gl_Position = push.transformMatrix * vec4(position, 1.0);
         fragColor = color;
     }
-    outTexCoord = texCoord;
+    outTexCoord = uv;
     //gl_Position = push.projectionMatrix * push.transformMatrix*  vec4(position, 1.0);
 }

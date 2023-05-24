@@ -43,7 +43,7 @@ void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shar
     std::vector<tinyobj::material_t> materials;
     std::string warn, err;
 
-    if (!tinyobj::LoadObj(&attrib,& shapes,& materials,& warn,& err, filePath))
+    if (!tinyobj::LoadObj(&attrib,& shapes,& materials,& warn,& err, filePath, "Models/"))
         throw std::runtime_error(warn + err);
 
     modelInfo.vertices.clear();
@@ -63,7 +63,7 @@ void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shar
                     attrib.vertices[3 * index.vertex_index + 1],
                     attrib.vertices[3 * index.vertex_index + 2]
                 };
-
+                /*
                 auto colorIndex = 3 * index.vertex_index + 2;
                 if (colorIndex < attrib.colors.size())
                 {
@@ -72,6 +72,15 @@ void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shar
                         attrib.colors[colorIndex - 2],
                         attrib.colors[colorIndex - 1],
                         attrib.colors[colorIndex],
+                    };
+                }*/ 
+                if (materials.size())
+                {
+                    vertex.color = 
+                    {
+                        materials[0].diffuse[0],
+                        materials[0].diffuse[1],
+                        materials[0].diffuse[2]
                     };
                 }
             }
@@ -96,7 +105,6 @@ void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shar
             modelInfo.vertices.push_back(vertex);
         }
     }
-
     model = std::make_shared<Model>(mDevice, modelInfo);
 }
 
@@ -169,7 +177,6 @@ std::vector<VkVertexInputAttributeDescription> Model::Vertex::GetAttributeDescri
     attributeDescriptions.push_back({1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, color)});
     attributeDescriptions.push_back({2, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, normal)});
     attributeDescriptions.push_back({3, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, uv)});
-    attributeDescriptions.push_back({4, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, texCoord)});
 
     return attributeDescriptions;
 }

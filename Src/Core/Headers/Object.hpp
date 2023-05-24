@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Model.hpp"
+#include "Texture.hpp"
 #include "Types.hpp"
 #include <memory>
 #include <vector>
@@ -45,6 +46,7 @@ namespace AnA
         }
 
         std::shared_ptr<Model> Model;
+        std::shared_ptr<Texture> Texture;
         glm::vec3 Color{};
         ItemProperties Properties;
 

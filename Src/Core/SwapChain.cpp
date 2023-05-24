@@ -8,9 +8,6 @@ SwapChain::SwapChain(Device& mDevice,
 {
     createSwapChain();
     createImageViews();
-    createTextureImage();
-    createTextureImageView();
-    createTextureSampler();
     createDepthResources();
     createRenderPass();
     createFramebuffers();
@@ -27,12 +24,6 @@ SwapChain::~SwapChain()
         vkDestroyFence(device, inFlightFences[i], nullptr);
     }
     cleanupSwapChain();
-
-    vkDestroySampler(device, textureSampler, nullptr);
-    vkDestroyImageView(device, textureImageView, nullptr);
-
-    vkDestroyImage(device, textureImage, nullptr);
-    vkFreeMemory(device, textureImageMemory, nullptr);
 }
 
 VkResult SwapChain::AcquireNextImage(uint32_t* pImageIndex)
@@ -114,15 +105,6 @@ VkRenderPass &SwapChain::GetRenderPass()
 std::vector<VkFramebuffer> SwapChain::GetSwapChainFramebuffers()
 {
     return swapChainFramebuffers;
-}
-
-VkImageView& SwapChain::GetTextureImageView()
-{
-    return textureImageView;
-}
-VkSampler& SwapChain::GetTextureSampler()
-{
-    return textureSampler;
 }
 
 void SwapChain::RecreateSwapChain()
@@ -256,44 +238,6 @@ void SwapChain::createImageViews()
     {
         swapChainImageViews[i] = aDevice.CreateImageView(swapChainImages[i], swapChainImageFormat);
     }
-}
-
-void SwapChain::createTextureImage()
-{
-    aDevice.CreateTextureImage("Textures/texture.png", &textureImage, &textureImageMemory);
-}
-
-void SwapChain::createTextureImageView()
-{
-    textureImageView = aDevice.CreateImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
-}
-
-void SwapChain::createTextureSampler()
-{
-    VkSamplerCreateInfo createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-    createInfo.magFilter = VK_FILTER_LINEAR;
-    createInfo.minFilter = VK_FILTER_LINEAR;
-
-    createInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    createInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    createInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-
-    createInfo.anisotropyEnable = VK_FALSE;
-
-    VkPhysicalDeviceProperties properties{};
-    vkGetPhysicalDeviceProperties(aDevice.GetPhysicalDevice(), &properties);
-    createInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
-
-    createInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-    createInfo.unnormalizedCoordinates = VK_FALSE;
-
-    createInfo.compareEnable = VK_FALSE;
-    createInfo.compareOp = VK_COMPARE_OP_ALWAYS;
-
-    createInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-    
-    vkCreateSampler(aDevice.GetLogicalDevice(), &createInfo, nullptr, &textureSampler);
 }
 
 VkFormat SwapChain::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)

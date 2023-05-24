@@ -33,7 +33,6 @@ VkDescriptorBufferInfo CameraBufferObject::GetBufferInfo(VkBuffer camBuffer)
 RenderSystem::RenderSystem(Device& mDevice, SwapChain& mSwapChain) : aDevice {mDevice}, aSwapChain {mSwapChain}
 {
     createCameraBuffers();
-    createSamplerBuffers();
     createDescriptorPool();
     createDescriptorSetLayout();
     createDescriptorSets();
@@ -50,8 +49,6 @@ RenderSystem::~RenderSystem()
     vkDestroyDescriptorSetLayout(aDevice.GetLogicalDevice(), descriptorSetLayout, nullptr);
     for (auto &cameraBuffer : cameraBuffers)
         delete cameraBuffer;
-    for (auto &samplerBuffer : samplerBuffers)
-        delete samplerBuffer;
 }
 
 void RenderSystem::createPipelineLayout()
@@ -86,29 +83,20 @@ void RenderSystem::createCameraBuffers()
     }
 }
 
-void RenderSystem::createSamplerBuffers()
-{
-    VkDeviceSize bufferSize = sizeof(VkSampler);
-    samplerBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-    for (auto &samplerBuffer : samplerBuffers)
-    {
-        samplerBuffer = new Buffer(aDevice, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
-            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        samplerBuffer->Map(0, bufferSize);
-    }
-}
-
 void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, std::vector<Object*> &objects, Camera &camera)
 {
     aPipeline->Bind(commandBuffer);
 
     UpdateCameraBuffer(camera);
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //UpdateSamplerBuffer();
+    
+    for (auto& object : objects)
+    {
+        UpdateTexture(object->Texture.get());
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
         pipelineLayout, 0, 1,
         &descriptorSets[aSwapChain.CurrentFrame], 0, nullptr);
 
-    for (auto& object : objects)
-    {
         object->Model->Bind(commandBuffer);
         ObjectPushConstantData push{};
         auto extent = aSwapChain.GetExtent();
@@ -148,6 +136,31 @@ void RenderSystem::UpdateCameraBuffer(Cameras::Camera &camera)
     memcpy(cameraBuffers[aSwapChain.CurrentFrame]->GetMappedData(), &cbo, sizeof(cbo));
 }
 
+void RenderSystem::UpdateTexture(AnA::Texture* texture)
+{
+    if (oldTexture == texture)
+        return;
+    for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    {
+        VkDescriptorImageInfo imageInfo{};
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        imageInfo.imageView = texture->GetImageView();
+        imageInfo.sampler = texture->GetSampler();
+        
+        descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrites[1].dstSet = descriptorSets[i];
+        descriptorWrites[1].dstBinding = 1;
+        descriptorWrites[1].dstArrayElement = 0;
+        descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        descriptorWrites[1].descriptorCount = 1;
+        descriptorWrites[1].pImageInfo = &imageInfo;
+    
+        vkUpdateDescriptorSets(aDevice.GetLogicalDevice(), 1,
+            &descriptorWrites[1], 0, nullptr);
+    }
+    oldTexture = texture;
+}
+
 void RenderSystem::createDescriptorPool()
 {
     std::array<VkDescriptorPoolSize, 2> poolSizes{};
@@ -166,7 +179,7 @@ void RenderSystem::createDescriptorPool()
         throw std::runtime_error("Failed to create descriptor pool!");
 }
 
-void RenderSystem::createDescriptorSets()
+void RenderSystem::createDescriptorSets(AnA::Texture* texture)
 {
     std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
     VkDescriptorSetAllocateInfo allocInfo{};
@@ -188,12 +201,6 @@ void RenderSystem::createDescriptorSets()
         bufferInfo.offset = 0;
         bufferInfo.range = sizeof(CameraBufferObject);
 
-        VkDescriptorImageInfo imageInfo{};
-        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        imageInfo.imageView = aSwapChain.GetTextureImageView();
-        imageInfo.sampler = aSwapChain.GetTextureSampler();
-
-        std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
         descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrites[0].dstSet = descriptorSets[i];
         descriptorWrites[0].dstBinding = 0;
@@ -204,17 +211,28 @@ void RenderSystem::createDescriptorSets()
 
         descriptorWrites[0].pBufferInfo = &bufferInfo;
 
-        descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[1].dstSet = descriptorSets[i];
-        descriptorWrites[1].dstBinding = 1;
-        descriptorWrites[1].dstArrayElement = 0;
-        descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        descriptorWrites[1].descriptorCount = 1;
-        descriptorWrites[1].pImageInfo = &imageInfo;
+        if (texture != nullptr)
+        {
+            VkDescriptorImageInfo imageInfo{};
+            imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            imageInfo.imageView = texture->GetImageView();
+            imageInfo.sampler = texture->GetSampler();
+            descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[1].dstSet = descriptorSets[i];
+            descriptorWrites[1].dstBinding = 1;
+            descriptorWrites[1].dstArrayElement = 0;
+            descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            descriptorWrites[1].descriptorCount = 1;
+            descriptorWrites[1].pImageInfo = &imageInfo;
 
-        vkUpdateDescriptorSets(aDevice.GetLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()),
-            descriptorWrites.data(), 0, nullptr);
-        
+            vkUpdateDescriptorSets(aDevice.GetLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()),
+                descriptorWrites.data(), 0, nullptr);
+        }
+        else
+        {
+            vkUpdateDescriptorSets(aDevice.GetLogicalDevice(), 1,
+                descriptorWrites.data(), 0, nullptr);
+        }
     }
 }
 
