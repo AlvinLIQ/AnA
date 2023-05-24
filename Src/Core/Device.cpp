@@ -137,7 +137,7 @@ void Device::CreateTextureImage(const char* imagePath, VkImage* pTexImage, VkDev
 {
     int texWidth, texHeight, texChannels;
     stbi_uc* pixels = stbi_load(imagePath, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-    VkDeviceSize imageSize = texWidth*  texHeight*  4;
+    VkDeviceSize imageSize = texWidth * texHeight * 4;
 
     if (!pixels)
         throw std::runtime_error("Failed to load texture image!");
@@ -357,7 +357,10 @@ bool Device::isDeviceSuitable(VkPhysicalDevice device)
         swapChainAdequate = !swapChainSupport.formats.empty() &&!swapChainSupport.presentModes.empty();
     }
 
-    return indices.isComplete() &&extSupported &&swapChainAdequate;
+    VkPhysicalDeviceFeatures supportedFeatures;
+    vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
+
+    return indices.isComplete() && extSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
 }
 
 void Device::createLogicalDevice()
@@ -379,6 +382,7 @@ void Device::createLogicalDevice()
     }
 
     VkPhysicalDeviceFeatures deviceFeatures{};
+    deviceFeatures.samplerAnisotropy = VK_TRUE;
 
     VkDeviceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;

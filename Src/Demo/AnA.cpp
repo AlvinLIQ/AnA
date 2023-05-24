@@ -36,6 +36,7 @@ int main()
 
     //object->Model = App::Get2DModel();
     Model::CreateModelFromFile(aApp->GetDevice(), "Models/torus.obj", object->Model);
+    object->Texture = std::make_shared<Texture>("Textures/texture.png", aApp->GetDevice());
     
     aApp->GetObjects().push_back(std::move(object));
 

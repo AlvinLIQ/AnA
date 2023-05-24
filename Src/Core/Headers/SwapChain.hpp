@@ -38,9 +38,6 @@ namespace AnA
 
         std::vector<VkFramebuffer> GetSwapChainFramebuffers();
 
-        VkImageView& GetTextureImageView();
-        VkSampler& GetTextureSampler();
-
         void RecreateSwapChain();
 
     private:
@@ -62,14 +59,6 @@ namespace AnA
 
         std::vector<VkImageView> swapChainImageViews;
         void createImageViews();
-
-        VkImage textureImage;
-        VkDeviceMemory textureImageMemory;
-        void createTextureImage();
-        VkImageView textureImageView;
-        void createTextureImageView();
-        VkSampler textureSampler;
-        void createTextureSampler();
 
         VkFormat swapChainDepthFormat;
         VkFormat findDepthFormat();
