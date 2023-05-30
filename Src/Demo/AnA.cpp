@@ -36,9 +36,16 @@ int main()
 
     //object->Model = App::Get2DModel();
     Model::CreateModelFromFile(aApp->GetDevice(), "Models/torus.obj", object->Model);
-    object->Texture = std::make_shared<Texture>("Textures/texture.png", aApp->GetDevice());
-    
+    object->SetTexture(std::make_shared<Texture>("Textures/texture.png", aApp->GetDevice()));
+
     aApp->GetObjects().push_back(std::move(object));
+
+    Object* nObj = new Object;
+    nObj->Properties = objectProperties;
+    nObj->Properties.transform.translation = {-.4, -.5, 1.5};
+    Model::CreateModelFromFile(aApp->GetDevice(), "Models/cube.obj", nObj->Model);
+    nObj->SetTexture(std::make_shared<Texture>("Textures/cube.png", aApp->GetDevice()));
+    aApp->GetObjects().push_back(nObj);
 
 /*
     Control::InitControl(aApp->GetSwapChain());

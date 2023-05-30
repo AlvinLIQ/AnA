@@ -28,6 +28,11 @@ VkSampler& Texture::GetSampler()
     return textureSampler;
 }
 
+Device& Texture::GetDevice()
+{
+    return aDevice;
+}
+
 void Texture::createTextureSampler()
 {
     VkPhysicalDeviceProperties properties{};

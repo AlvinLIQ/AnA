@@ -12,6 +12,8 @@ namespace AnA
 
         VkImageView& GetImageView();
         VkSampler& GetSampler();
+
+        Device& GetDevice();
     private:
         Device& aDevice;
 
