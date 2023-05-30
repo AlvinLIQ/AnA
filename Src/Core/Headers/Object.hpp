@@ -29,7 +29,6 @@ namespace AnA
         Transform transform;
         uint32_t sType{ANA_RECTANGLE};
         std::optional<glm::vec3> color;
-        std::optional<VkImage> texture;
     };
 
     class Object
@@ -46,10 +45,17 @@ namespace AnA
         }
 
         std::shared_ptr<Model> Model;
-        std::shared_ptr<Texture> Texture;
         glm::vec3 Color{};
         ItemProperties Properties;
 
+        Texture* GetTexture();
+        void SetTexture(std::shared_ptr<Texture> newTexture);
+
+        VkDescriptorSet& GetDescriptorSet(int index)
+        {
+            return descriptorSets[index];
+        }
+        
         static void CreateShape(SHAPE_TYPE sType,glm::vec2 offset, glm::vec2 size, std::optional<glm::vec3> color, ItemProperties* pRectangleProperties)
         {
             pRectangleProperties->sType = sType;
@@ -60,8 +66,9 @@ namespace AnA
         }
 
         virtual void PrepareDraw();
-
     private:
         id_t id;
+        std::shared_ptr<Texture> texture;
+        std::vector<VkDescriptorSet> descriptorSets;
     };
 }

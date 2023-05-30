@@ -30,12 +30,15 @@ VkDescriptorBufferInfo CameraBufferObject::GetBufferInfo(VkBuffer camBuffer)
     return bufferInfo;
 }
 
+RenderSystem* currentRenderSystem = nullptr;
+
 RenderSystem::RenderSystem(Device& mDevice, SwapChain& mSwapChain) : aDevice {mDevice}, aSwapChain {mSwapChain}
 {
+    currentRenderSystem = this;
     createCameraBuffers();
     createDescriptorPool();
     createDescriptorSetLayout();
-    createDescriptorSets();
+    //createDescriptorSets();
     createPipelineLayout();
     aPipeline = new Pipeline(aDevice, "Shaders/vert.spv", "Shaders/frag.spv", aSwapChain.GetRenderPass(), pipelineLayout);
 }
@@ -49,6 +52,11 @@ RenderSystem::~RenderSystem()
     vkDestroyDescriptorSetLayout(aDevice.GetLogicalDevice(), descriptorSetLayout, nullptr);
     for (auto &cameraBuffer : cameraBuffers)
         delete cameraBuffer;
+}
+
+RenderSystem* RenderSystem::GetCurrent()
+{
+    return currentRenderSystem;
 }
 
 void RenderSystem::createPipelineLayout()
@@ -88,15 +96,12 @@ void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, std::vector<Obje
     aPipeline->Bind(commandBuffer);
 
     UpdateCameraBuffer(camera);
-    //UpdateSamplerBuffer();
     
     for (auto& object : objects)
     {
-        UpdateTexture(object->Texture.get());
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
         pipelineLayout, 0, 1,
-        &descriptorSets[aSwapChain.CurrentFrame], 0, nullptr);
-
+        &object->GetDescriptorSet(aSwapChain.CurrentFrame), 0, nullptr);
         object->Model->Bind(commandBuffer);
         ObjectPushConstantData push{};
         auto extent = aSwapChain.GetExtent();
@@ -136,50 +141,26 @@ void RenderSystem::UpdateCameraBuffer(Cameras::Camera &camera)
     memcpy(cameraBuffers[aSwapChain.CurrentFrame]->GetMappedData(), &cbo, sizeof(cbo));
 }
 
-void RenderSystem::UpdateTexture(AnA::Texture* texture)
-{
-    if (oldTexture == texture)
-        return;
-    for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-    {
-        VkDescriptorImageInfo imageInfo{};
-        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        imageInfo.imageView = texture->GetImageView();
-        imageInfo.sampler = texture->GetSampler();
-        
-        descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[1].dstSet = descriptorSets[i];
-        descriptorWrites[1].dstBinding = 1;
-        descriptorWrites[1].dstArrayElement = 0;
-        descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        descriptorWrites[1].descriptorCount = 1;
-        descriptorWrites[1].pImageInfo = &imageInfo;
-    
-        vkUpdateDescriptorSets(aDevice.GetLogicalDevice(), 1,
-            &descriptorWrites[1], 0, nullptr);
-    }
-    oldTexture = texture;
-}
-
 void RenderSystem::createDescriptorPool()
 {
     std::array<VkDescriptorPoolSize, 2> poolSizes{};
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSizes[0].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    poolSizes[0].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT) * 2;
     poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    poolSizes[1].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    poolSizes[1].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT) * 2;
 
     VkDescriptorPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
     poolInfo.pPoolSizes = poolSizes.data();
-    poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT) * 2;
+    poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 
     if (vkCreateDescriptorPool(aDevice.GetLogicalDevice(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
         throw std::runtime_error("Failed to create descriptor pool!");
 }
 
-void RenderSystem::createDescriptorSets(AnA::Texture* texture)
+void RenderSystem::CreateDescriptorSets(std::vector<VkDescriptorSet>& descriptorSets, AnA::Texture* texture)
 {
     std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
     VkDescriptorSetAllocateInfo allocInfo{};
@@ -190,9 +171,7 @@ void RenderSystem::createDescriptorSets(AnA::Texture* texture)
 
     descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
     if (vkAllocateDescriptorSets(aDevice.GetLogicalDevice(), &allocInfo, descriptorSets.data()) != VK_SUCCESS)
-    {
         throw std::runtime_error("Failed to allocate descriptor sets!");
-    }
 
     for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
@@ -201,6 +180,7 @@ void RenderSystem::createDescriptorSets(AnA::Texture* texture)
         bufferInfo.offset = 0;
         bufferInfo.range = sizeof(CameraBufferObject);
 
+        std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
         descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrites[0].dstSet = descriptorSets[i];
         descriptorWrites[0].dstBinding = 0;

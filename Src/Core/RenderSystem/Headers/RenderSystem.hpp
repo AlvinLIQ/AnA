@@ -28,8 +28,10 @@ namespace AnA
 
             void RenderObjects(VkCommandBuffer commandBuffer, std::vector<Object*> &objects, Cameras::Camera &camera);
             void UpdateCameraBuffer(Cameras::Camera &camera);
-            void UpdateTexture(AnA::Texture* texture);
 
+            void CreateDescriptorSets(std::vector<VkDescriptorSet>& descriptorSets, AnA::Texture* texture = nullptr);
+
+            static RenderSystem* GetCurrent();
         private:
             Device& aDevice;
             SwapChain& aSwapChain;
@@ -44,14 +46,9 @@ namespace AnA
 
             VkDescriptorPool descriptorPool;
             void createDescriptorPool();
-            std::vector<VkDescriptorSet> descriptorSets;
-            std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
-            void createDescriptorSets(AnA::Texture* texture = nullptr);
 
             VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
             void createDescriptorSetLayout();
-
-            Texture* oldTexture = nullptr;
         };
     }
 }
