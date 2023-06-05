@@ -18,7 +18,7 @@ layout(push_constant) uniform Push {
     vec3 color;
 } push;
 
-layout(binding = 1) uniform sampler2D texSampler;
+layout(set = 1, binding = 1) uniform sampler2D texSampler;
 
 float rect(vec2 uv, float l, float t, float r, float b)
 {

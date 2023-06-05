@@ -20,7 +20,7 @@ layout(push_constant) uniform Push {
     vec3 color;
 } push;
 
-layout(binding = 0) uniform CameraBufferObject {
+layout(set = 0, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
 } cbo;

@@ -14,6 +14,7 @@ namespace AnA
         VkSampler& GetSampler();
 
         Device& GetDevice();
+        VkDescriptorSet& GetDescriptorSet();
     private:
         Device& aDevice;
 
@@ -22,5 +23,10 @@ namespace AnA
         VkImageView textureImageView;
         VkSampler textureSampler;
         void createTextureSampler();
+
+        VkDescriptorPool descriptorPool;
+        void createDescriptorPool();
+        VkDescriptorSet descriptorSet;
+        void createDescriptorSet();
     };
 }
