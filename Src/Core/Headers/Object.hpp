@@ -48,13 +48,7 @@ namespace AnA
         glm::vec3 Color{};
         ItemProperties Properties;
 
-        Texture* GetTexture();
-        void SetTexture(std::shared_ptr<Texture> newTexture);
-
-        VkDescriptorSet& GetDescriptorSet(int index)
-        {
-            return descriptorSets[index];
-        }
+        std::shared_ptr<Texture> Texture;
         
         static void CreateShape(SHAPE_TYPE sType,glm::vec2 offset, glm::vec2 size, std::optional<glm::vec3> color, ItemProperties* pRectangleProperties)
         {
@@ -68,7 +62,5 @@ namespace AnA
         virtual void PrepareDraw();
     private:
         id_t id;
-        std::shared_ptr<Texture> texture;
-        std::vector<VkDescriptorSet> descriptorSets;
     };
 }
