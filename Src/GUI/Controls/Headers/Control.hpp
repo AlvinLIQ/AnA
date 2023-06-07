@@ -63,9 +63,9 @@ namespace AnA
                     if (Alignments[i] == AlignmentType::Center)
                         pOffset[i] = 0.f;
                     else if (Alignments[i] == AlignmentType::Start)
-                        pOffset[i] = 0.5f - pSize[i] / 2.f;
+                        pOffset[i] = pSize[i] / 2.f - 1.0f;
                     else
-                        pOffset[i] = 0.5f - pSize[i] / 2.f;
+                        pOffset[i] = 1.0f - pSize[i] / 2.f;
                 }
                 
                 actualOffset.x += ControlOffset.x;
@@ -123,6 +123,7 @@ namespace AnA
             void Focus();
             void Unfocus();
             
+            bool IsInside(POS_F pos);
         private:
             AlignType renderMode {Absolute};
         protected:
