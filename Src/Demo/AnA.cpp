@@ -42,17 +42,21 @@ int main()
 
     Object* nObj = new Object;
     nObj->Properties = objectProperties;
-    nObj->Properties.transform.translation = {-.8, -.5, 1.5};
+    nObj->Properties.transform.translation = {-1.5, -.5, 1.5};
     Model::CreateModelFromFile(aApp->GetDevice(), "Models/cube.obj", nObj->Model);
     nObj->Texture = std::make_shared<Texture>("Textures/cube.png", aApp->GetDevice());
     aApp->GetObjects().push_back(nObj);
 
-/*
-    Control::InitControl(aApp->GetSwapChain());
+    /*
+    Control::InitControl(&aApp->GetSwapChain());
     Button* button = new Button;
     button->PrepareDraw();
     button->Model = App::Get2DModel();
-    aApp->GetObjects().push_back(std::move(button));*/
+    button->HorizontalAlignment = AlignmentType::Start;
+    button->VerticalAlignment = AlignmentType::End;
+    button->Texture = nObj->Texture;
+    aApp->GetObjects().push_back(std::move(button));
+    */
 
     aApp->Run();
     delete aApp;

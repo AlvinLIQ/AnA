@@ -47,3 +47,10 @@ void Control::Unfocus()
     if (IsFocused())
         focusedControl = nullptr;
 }
+
+bool Control::IsInside(POS_F pos)
+{
+    auto size = GetSizeForRender();
+    auto offset = GetActualControlOffset(size);
+    return pos.x >= offset.x && pos.y >= offset.y && pos.x <= offset.x + size.Width && pos.y <= offset.y + size.Height;
+}
