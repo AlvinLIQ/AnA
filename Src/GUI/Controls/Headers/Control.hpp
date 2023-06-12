@@ -30,7 +30,7 @@ namespace AnA
             PointerEventType EventType;
             PointerTriggerType TriggerType;
         };
-        //typedef void (*)(Control* control) PointerEventHandler;
+        typedef void (*PointerEventHandler)(void* control, PointerEventArgs args);
         struct SIZE_F
         {
             float Width;
@@ -118,6 +118,8 @@ namespace AnA
             virtual void PrepareDraw();
             static void InitControl(SwapChain* swapChain);
             static VkExtent2D GetSwapChainExtent();
+
+            std::vector<PointerEventHandler> PointerEvents[PointerEventType::Moving + 1];
 
             bool IsFocused();
             void Focus();
