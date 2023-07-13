@@ -8,6 +8,7 @@ using namespace AnA::Controls;
 
 Button::Button() : Control()
 {
-    controlSize = {40.f, 20.f};
+    SetRenderMode(ButtonRenderMode);
+    controlSize = ButtonMinSize;
     Object::CreateShape(ANA_CURVED_RECTANGLE, {}, {}, glm::vec3(0.6f, 0.6f, 0.7f), &Properties);
 }
