@@ -1,55 +1,21 @@
 #pragma once
 #include "../../../Core/Headers/Object.hpp"
 #include "../../../Core/Headers/SwapChain.hpp"
+#include "Types.hpp"
+#include "../Styles/Default/ControlStyle.hpp"
 #include <limits>
 
 namespace AnA
 {
     namespace Controls
     {
-        enum AlignType
-        {
-            Absolute, Relative, Auto
-        };
-        enum AlignmentType
-        {
-            Start, Center, End
-        };
-
-        enum PointerEventType
-        {
-            Pressed, Entered, Released, Exited, Moved, Moving
-        };
-        enum PointerTriggerType
-        {
-            Touch, Mouse
-        };
-        struct PointerEventArgs
-        {
-            uint32_t Position[2];
-            PointerEventType EventType;
-            PointerTriggerType TriggerType;
-        };
-        typedef void (*PointerEventHandler)(void* control, PointerEventArgs args);
-        struct SIZE_F
-        {
-            float Width;
-            float Height;
-        };
-        struct POS_F
-        {
-            float x;
-            float y;
-        };
-
-
         class Control : public Object
         {
         public:
             Control();
             
-            AlignmentType HorizontalAlignment {Center};
-            AlignmentType VerticalAlignment {Center};
+            AlignmentType HorizontalAlignment {ControlHorizontalAlignment};
+            AlignmentType VerticalAlignment {ControlVerticalAlignment};
 
             POS_F ControlOffset {};
             POS_F GetActualControlOffset(SIZE_F renderSize)
@@ -127,10 +93,10 @@ namespace AnA
             
             bool IsInside(POS_F pos);
         private:
-            AlignType renderMode {Absolute};
+            AlignType renderMode {ControlRenderMode};
         protected:
-            SIZE_F controlSize {};
-            SIZE_F minSize {};
+            SIZE_F controlSize {ControlSize};
+            SIZE_F minSize {ControlMinSize};
             SIZE_F maxSize {std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
         };
     }
