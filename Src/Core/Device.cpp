@@ -252,9 +252,10 @@ Device::QueueFamilyIndices Device::FindQueueFamilies(VkPhysicalDevice device)
     int i = 0;
     for (const auto &queueFamily : queueFamilies)
     {
-        if (queueFamily.queueFlags  &VK_QUEUE_GRAPHICS_BIT)
+        //if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+        if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT && (queueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT))
         {
-            indices.graphicsFamily = i;
+            indices.graphicsAndComputeFamily = i;
         }
         VkBool32 presentSupport = false;
         vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
@@ -368,7 +369,7 @@ void Device::createLogicalDevice()
     QueueFamilyIndices indices = FindQueueFamilies(physicalDevice);
 
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-    std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
+    std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsAndComputeFamily.value(), indices.presentFamily.value()};
 
     float queuePriority = 1.0f; // 0.0~1.0
     for (uint32_t queueFamily : uniqueQueueFamilies)
@@ -406,7 +407,7 @@ void Device::createLogicalDevice()
     if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &logicalDevice) != VK_SUCCESS)
         throw std::runtime_error("Failed to create logical device!");
 
-    vkGetDeviceQueue(logicalDevice, indices.graphicsFamily.value(), 0, &graphicsQueue);
+    vkGetDeviceQueue(logicalDevice, indices.graphicsAndComputeFamily.value(), 0, &graphicsQueue);
     vkGetDeviceQueue(logicalDevice, indices.presentFamily.value(), 0, &presentQueue);
 }
 
@@ -433,7 +434,7 @@ void Device::createCommandPool()
     VkCommandPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+    poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsAndComputeFamily.value();
 
     if (vkCreateCommandPool(logicalDevice, &poolInfo, 
     nullptr, &commandPool) != VK_SUCCESS)

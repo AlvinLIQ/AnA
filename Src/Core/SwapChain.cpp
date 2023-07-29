@@ -198,9 +198,9 @@ void SwapChain::createSwapChain()
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
     Device::QueueFamilyIndices indices = aDevice.FindQueueFamilies(aDevice.GetPhysicalDevice());
-    uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
+    uint32_t queueFamilyIndices[] = {indices.graphicsAndComputeFamily.value(), indices.presentFamily.value()};
 
-    if (indices.graphicsFamily != indices.presentFamily)
+    if (indices.graphicsAndComputeFamily != indices.presentFamily)
     {
         createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
         createInfo.queueFamilyIndexCount = 2;
