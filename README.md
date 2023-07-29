@@ -4,7 +4,7 @@
 
 ### Currently working on
 
-* Texture Loading
+* Collision Detection(runs in GPU)
 * GUI Control
 
 ### To do
