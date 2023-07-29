@@ -139,6 +139,8 @@ namespace AnA
 
         };
         Pipeline(Device& mDevice, const char* vertShaderFileName, const char* fragShaderFileName, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayout);
+        Pipeline(Device& mDevice, const char* computeShaderFile, VkPipelineLayout &mPipelineLayout);
+
         ~Pipeline();
 
         void Bind(VkCommandBuffer commandBuffer);
@@ -146,11 +148,12 @@ namespace AnA
         static std::vector<char> ReadFile(const std::string &filename);
     private:
         Device& aDevice;
-        VkRenderPass &renderPass;
+        VkRenderPass renderPass;
 
         VkPipelineLayout& pipelineLayout;
         VkPipeline pipeline;//Graphics Pipeline
         void createGraphicsPipeline(const std::string &vertShaderFileName, const std::string &fragShaderFileName);
+        void createComputePipeline(const std::string &computeShaderFileName);
 
         VkShaderModule createShaderModule(const std::vector<char> &code);
     };
