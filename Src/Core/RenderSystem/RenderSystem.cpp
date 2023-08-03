@@ -40,12 +40,12 @@ RenderSystem::RenderSystem(Device& mDevice, SwapChain& mSwapChain) : aDevice {mD
     createDescriptorSetLayout();
     createDescriptorSets();
     createPipelineLayout();
-    aPipeline = new Pipeline(aDevice, "Shaders/vert.spv", "Shaders/frag.spv", aSwapChain.GetRenderPass(), pipelineLayout);
+    aGraphicsPipeline = new Pipeline(aDevice, "Shaders/vert.spv", "Shaders/frag.spv", aSwapChain.GetRenderPass(), pipelineLayout);
 }
 
 RenderSystem::~RenderSystem()
 {
-    delete aPipeline;
+    delete aGraphicsPipeline;
     vkDestroyPipelineLayout(aDevice.GetLogicalDevice(), pipelineLayout, nullptr);
 
     vkDestroyDescriptorPool(aDevice.GetLogicalDevice(), descriptorPool, nullptr);
@@ -99,7 +99,7 @@ void RenderSystem::createCameraBuffers()
 
 void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, std::vector<Object*> &objects, Camera &camera)
 {
-    aPipeline->Bind(commandBuffer);
+    aGraphicsPipeline->Bind(commandBuffer);
 
     UpdateCameraBuffer(camera);
     

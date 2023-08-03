@@ -38,7 +38,7 @@ namespace AnA
             VkPipelineLayout pipelineLayout;
             void createPipelineLayout();
             
-            Pipeline* aPipeline;
+            Pipeline* aGraphicsPipeline;
 
             std::vector<Buffer*> cameraBuffers;
             void createCameraBuffers();
