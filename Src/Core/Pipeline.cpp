@@ -81,6 +81,8 @@ void Pipeline::createComputePipeline(const std::string& computeShaderFileName)
     {
         throw std::runtime_error("Failed to create compute pipeline!");
     }
+
+    vkDestroyShaderModule(aDevice.GetLogicalDevice(), computeShaderModule, nullptr);
 }
 
 VkShaderModule Pipeline::createShaderModule(const std::vector<char> &code)

@@ -15,7 +15,7 @@ VkDescriptorSetLayoutBinding CameraBufferObject::GetBindingDescriptionSet()
     uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     uboLayoutBinding.descriptorCount = 1;
 
-    uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
 
     return uboLayoutBinding;
 }
@@ -39,18 +39,22 @@ RenderSystem::RenderSystem(Device& mDevice, SwapChain& mSwapChain) : aDevice {mD
     createDescriptorPool();
     createDescriptorSetLayout();
     createDescriptorSets();
-    createPipelineLayout();
+    createPipelineLayouts();
     aGraphicsPipeline = new Pipeline(aDevice, "Shaders/vert.spv", "Shaders/frag.spv", aSwapChain.GetRenderPass(), pipelineLayout);
+    aComputePipeline = new Pipeline(aDevice, "Shaders/compute.spv", computePipelineLayout);
 }
 
 RenderSystem::~RenderSystem()
 {
+    delete aComputePipeline;
+    vkDestroyPipelineLayout(aDevice.GetLogicalDevice(), computePipelineLayout, nullptr);
     delete aGraphicsPipeline;
     vkDestroyPipelineLayout(aDevice.GetLogicalDevice(), pipelineLayout, nullptr);
 
     vkDestroyDescriptorPool(aDevice.GetLogicalDevice(), descriptorPool, nullptr);
     for (auto descriptorSetLayout : descriptorSetLayouts)
         vkDestroyDescriptorSetLayout(aDevice.GetLogicalDevice(), descriptorSetLayout, nullptr);
+    vkDestroyDescriptorSetLayout(aDevice.GetLogicalDevice(), computeDescriptorSetLayout, nullptr);
     for (auto &cameraBuffer : cameraBuffers)
         delete cameraBuffer;
 }
@@ -65,7 +69,7 @@ std::array<VkDescriptorSetLayout, 2>& RenderSystem::GetDescriptorSetLayouts()
     return descriptorSetLayouts;
 }
 
-void RenderSystem::createPipelineLayout()
+void RenderSystem::createPipelineLayouts()
 {
     VkPushConstantRange pushConstantRange{};
     pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
@@ -82,6 +86,15 @@ void RenderSystem::createPipelineLayout()
     if (vkCreatePipelineLayout(aDevice.GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create pipeline layout!");
+    }
+    
+    VkPipelineLayoutCreateInfo computePipelineLayoutInfo{};
+    computePipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    computePipelineLayoutInfo.setLayoutCount = 1;
+    computePipelineLayoutInfo.pSetLayouts = &computeDescriptorSetLayout;
+    if (vkCreatePipelineLayout(aDevice.GetLogicalDevice(), &computePipelineLayoutInfo, nullptr, &computePipelineLayout) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create compute pipeline layout!");
     }
 }
 
@@ -215,6 +228,9 @@ void RenderSystem::createDescriptorSetLayout()
 
     if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[0]) != VK_SUCCESS)
         throw std::runtime_error("Failed to create the DescriptorSetLayout");
+
+    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &computeDescriptorSetLayout) != VK_SUCCESS)
+        throw std::runtime_error("Failed to create the ComputeDescriptorSetLayout");
 
     VkDescriptorSetLayoutBinding samplerLayoutBinding{};
     samplerLayoutBinding.binding = 1;
