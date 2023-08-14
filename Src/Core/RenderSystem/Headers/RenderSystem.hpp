@@ -36,9 +36,11 @@ namespace AnA
             SwapChain& aSwapChain;
             
             VkPipelineLayout pipelineLayout;
-            void createPipelineLayout();
+            VkPipelineLayout computePipelineLayout;
+            void createPipelineLayouts();
             
             Pipeline* aGraphicsPipeline;
+            Pipeline* aComputePipeline;
 
             std::vector<Buffer*> cameraBuffers;
             void createCameraBuffers();
@@ -47,6 +49,7 @@ namespace AnA
             void createDescriptorPool();
 
             std::array<VkDescriptorSetLayout, 2> descriptorSetLayouts = {};
+            VkDescriptorSetLayout computeDescriptorSetLayout;
             void createDescriptorSetLayout();
             std::vector<VkDescriptorSet> descriptorSets;
             void createDescriptorSets();

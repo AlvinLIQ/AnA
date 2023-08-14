@@ -1,0 +1,18 @@
+#version 450
+
+layout(push_constant) uniform Push {
+    mat4 transformMatrix;
+    uint sType;
+    vec2 resolution;
+    vec3 color;
+} push;
+
+layout(set = 0, binding = 0) uniform CameraBufferObject {
+    mat4 proj;
+    mat4 view;
+} cbo;
+
+void main()
+{
+
+}
