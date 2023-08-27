@@ -7,10 +7,21 @@ layout(push_constant) uniform Push {
     vec3 color;
 } push;
 
-layout(set = 0, binding = 0) uniform CameraBufferObject {
-    mat4 proj;
-    mat4 view;
-} cbo;
+struct Item
+{
+    vec3 position;
+    vec3 color;
+};
+
+layout(std140, binding = 1) readonly buffer ItemIn
+{
+    Item itemsIn[];
+};
+
+layout(std140, binding = 2) buffer ItemOut
+{
+    Item itemsOut[];
+};
 
 void main()
 {
