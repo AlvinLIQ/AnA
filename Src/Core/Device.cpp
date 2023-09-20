@@ -8,6 +8,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "Headers/Buffer.hpp"
 #include "../stb/stb_image.h"
+#define STB_TRUETYPE_IMPLEMENTATION
+#include "../stb/stb_truetype.h"
 #endif
 
 
@@ -168,6 +170,66 @@ void Device::CreateTextureImage(const char* imagePath, VkImage* pTexImage, VkDev
     TransitionImageLayout(*pTexImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
     CopyBufferToImage(aBuffer.GetBuffer(), *pTexImage, imageInfo.extent);
     TransitionImageLayout(*pTexImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+}
+
+void Device::CreateTextImage(const char* text, int width, int height, VkImage* pTextImage, VkDeviceMemory* pTextMemory)
+{
+    auto fontData = ReadFile("Fonts/SourceCodePro-Black.otf");
+    stbtt_fontinfo info{};
+    if (!stbtt_InitFont(&info, (const unsigned char*)fontData.data(), 0))
+        throw std::runtime_error("failed to init font");
+    
+    int imageSize = width * height;
+    std::vector<unsigned char> textBitmap(imageSize);
+    float scale = stbtt_ScaleForPixelHeight(&info, 64.0f);
+
+    int ascent, descent, lineGap;
+    stbtt_GetFontVMetrics(&info, &ascent, &descent, &lineGap);
+
+    ascent *= scale;
+    descent *= scale;
+    for (int i = 0, x = 0; i < strlen(text); i++)
+    {
+        int l, t, r, b;
+        stbtt_GetCodepointBitmapBox(&info, text[i], scale, scale, &l, &t, &r, &b);
+        
+        int y = ascent + t;
+
+        int byteOffset = x + (y * width);
+        stbtt_MakeCodepointBitmap(&info, &textBitmap[byteOffset], r - l, b - t, width, scale, scale, text[i]);
+
+        int ax;
+        stbtt_GetCodepointHMetrics(&info, text[i], &ax, 0);
+        x += ax * scale;
+
+        x += stbtt_GetCodepointKernAdvance(&info, text[i], text[i + 1]) * scale;
+    }
+
+    Buffer aBuffer(*this, imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    aBuffer.Map(0, imageSize);
+    memcpy(aBuffer.GetMappedData(), textBitmap.data(), static_cast<size_t>(imageSize));
+    aBuffer.Unmap();
+
+    VkImageCreateInfo imageInfo{};
+    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    imageInfo.imageType = VK_IMAGE_TYPE_2D;
+    imageInfo.extent.width = static_cast<uint32_t>(width);
+    imageInfo.extent.height = static_cast<uint32_t>(height);
+    imageInfo.extent.depth = 1;
+    imageInfo.mipLevels = 1;
+    imageInfo.arrayLayers = 1;
+    imageInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+    imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+    imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    imageInfo.flags = 0;
+    CreateImage(&imageInfo, pTextImage, pTextMemory);
+
+    TransitionImageLayout(*pTextImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    CopyBufferToImage(aBuffer.GetBuffer(), *pTextImage, imageInfo.extent);
+    TransitionImageLayout(*pTextImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 #endif
 

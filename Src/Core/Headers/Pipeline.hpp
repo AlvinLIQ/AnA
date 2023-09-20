@@ -2,7 +2,6 @@
 #include "Model.hpp"
 
 #include <cstdint>
-#include <fstream>
 #include <ios>
 #include <stdexcept>
 #include <vulkan/vulkan.h>
@@ -145,7 +144,6 @@ namespace AnA
 
         void Bind(VkCommandBuffer commandBuffer);
 
-        static std::vector<char> ReadFile(const std::string &filename);
     private:
         Device& aDevice;
         VkRenderPass renderPass;
