@@ -2,22 +2,6 @@
 
 using namespace AnA;
 
-std::vector<char> Pipeline::ReadFile(const std::string &filename)
-{
-    std::ifstream file(filename, std::ios::ate | std::ios::binary);
-    if (!file.is_open())
-    {
-        throw std::runtime_error("Failed to open " + filename + "!");
-    }
-    
-    size_t fs = (size_t)file.tellg();
-    std::vector<char> buffer(fs);
-    file.seekg(0);
-    file.read(buffer.data(), fs);
-    file.close();
-    return buffer;
-}
-
 Pipeline::Pipeline(Device& mDevice,
 const char* vertShaderFileName, const char* fragShaderFileName,
 VkRenderPass &mRenderPass, 

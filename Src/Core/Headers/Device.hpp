@@ -4,6 +4,7 @@
 #include <optional>
 #include <set>
 #include <vector>
+#include <fstream>
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
 
@@ -11,6 +12,22 @@
 
 namespace AnA
 {
+    inline std::vector<char> ReadFile(const std::string &filename)
+    {
+        std::ifstream file(filename, std::ios::ate | std::ios::binary);
+        if (!file.is_open())
+        {
+            throw std::runtime_error("Failed to open " + filename + "!");
+        }
+        
+        size_t fs = (size_t)file.tellg();
+        std::vector<char> buffer(fs);
+        file.seekg(0);
+        file.read(buffer.data(), fs);
+        file.close();
+        return buffer;
+    }
+
     class Device
     {
     public:
@@ -25,6 +42,7 @@ namespace AnA
         VkImageView CreateImageView(VkImage& image, VkFormat format);
         #ifdef INCLUDE_STB_IMAGE
         void CreateTextureImage(const char* imagePath, VkImage* pTexImage, VkDeviceMemory* pTexMemory);
+        void CreateTextImage(const char* text, int width, int height, VkImage* pTextImage, VkDeviceMemory* pTextMemory);
         #endif
 
         void TransitionImageLayout(VkImage& image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
