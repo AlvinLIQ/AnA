@@ -44,7 +44,9 @@ int main()
     nObj->Properties = objectProperties;
     nObj->Properties.transform.translation = {-1.5, -.5, 1.5};
     Model::CreateModelFromFile(aApp->GetDevice(), "Models/cube.obj", nObj->Model);
-    nObj->Texture = std::make_shared<Texture>("Textures/qr.jpg", aApp->GetDevice());
+    //nObj->Texture = std::make_shared<Texture>("Textures/qr.jpg", aApp->GetDevice());
+    nObj->Texture = std::make_shared<Texture>("AnA Game Engine", 1000, 600, 64, aApp->GetDevice());
+    //auto test = std::make_shared<Texture>("AnA Game Engine", 1000, 600, 64, aApp->GetDevice());
     aApp->GetObjects().push_back(nObj);
 
     /*

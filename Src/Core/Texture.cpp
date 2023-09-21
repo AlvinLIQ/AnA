@@ -14,6 +14,16 @@ Texture::Texture(const char* filename, Device& mDevice) : aDevice { mDevice }
     createDescriptorSet();
 }
 
+Texture::Texture(const char* text, const int width, const int height, const int lineHeight, Device& mDevice) : aDevice { mDevice }
+{
+    aDevice.CreateTextImage(text, width, height, &textureImage, &textureImageMemory);
+    textureImageView = aDevice.CreateImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
+    createTextureSampler();
+
+    createDescriptorPool();
+    createDescriptorSet();
+}
+
 Texture::~Texture()
 {
     auto& device = aDevice.GetLogicalDevice();
