@@ -205,9 +205,28 @@ void Device::CreateTextImage(const char* text, int width, int height, VkImage* p
         x += stbtt_GetCodepointKernAdvance(&info, text[i], text[i + 1]) * scale;
     }
 
-    Buffer aBuffer(*this, imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    aBuffer.Map(0, imageSize);
-    memcpy(aBuffer.GetMappedData(), textBitmap.data(), static_cast<size_t>(imageSize));
+    int bufSize = imageSize * 4;
+    Buffer aBuffer(*this, bufSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    aBuffer.Map(0, bufSize);
+    //memcpy(aBuffer.GetMappedData(), textBitmap.data(), static_cast<size_t>(imageSize));
+    auto bufData = (unsigned char*)aBuffer.GetMappedData();
+    for (int i = 0, j = 0; i < bufSize; i += 4, j++)
+    {
+        if (textBitmap[j])
+        {
+            bufData[i] = 0xFF;
+            bufData[i + 1] = 0xFF;
+            bufData[i + 2] = 0xFF;
+            bufData[i + 3] = 0xFF;
+        }
+        else
+        {
+            bufData[i] = 0x00;
+            bufData[i + 1] = 0x00;
+            bufData[i + 2] = 0x00;
+            bufData[i + 3] = 0xFF;
+        }
+    }
     aBuffer.Unmap();
 
     VkImageCreateInfo imageInfo{};
