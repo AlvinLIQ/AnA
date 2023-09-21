@@ -1,5 +1,6 @@
 #include "Headers/Texture.hpp"
 #include "RenderSystem/Headers/RenderSystem.hpp"
+#include "vulkan/vulkan_core.h"
 #include <stdexcept>
 
 using namespace AnA;
@@ -18,7 +19,7 @@ Texture::Texture(const char* text, const int width, const int height, const int 
 {
     aDevice.CreateTextImage(text, width, height, &textureImage, &textureImageMemory);
     textureImageView = aDevice.CreateImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
-    createTextureSampler();
+    createTextureSampler(VK_SAMPLER_ADDRESS_MODE_REPEAT);
 
     createDescriptorPool();
     createDescriptorSet();
@@ -55,7 +56,7 @@ VkDescriptorSet& Texture::GetDescriptorSet()
     return descriptorSet;
 }
 
-void Texture::createTextureSampler()
+void Texture::createTextureSampler(enum VkSamplerAddressMode samplerAddressMode)
 {
     VkPhysicalDeviceProperties properties{};
     vkGetPhysicalDeviceProperties(aDevice.GetPhysicalDevice(), &properties);
@@ -64,9 +65,9 @@ void Texture::createTextureSampler()
     samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
     samplerInfo.magFilter = VK_FILTER_LINEAR;
     samplerInfo.minFilter = VK_FILTER_LINEAR;
-    samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    samplerInfo.addressModeU = samplerAddressMode;
+    samplerInfo.addressModeV = samplerAddressMode;
+    samplerInfo.addressModeW = samplerAddressMode;
     samplerInfo.anisotropyEnable = VK_TRUE;
     samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
     samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;

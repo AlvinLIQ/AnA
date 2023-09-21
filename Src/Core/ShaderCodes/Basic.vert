@@ -35,7 +35,7 @@ void main() {
         vec3 normalWorldSpace = normalize(mat3(push.transformMatrix) * normal);
 
         float lightIntensity = max(dot(normalWorldSpace, LIGHT_DIRECTION), 0);
-        fragColor = lightIntensity * color + 0.077;
+        fragColor = lightIntensity * vec3(1.0) + 0.077;
     }
     else
     {

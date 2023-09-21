@@ -44,11 +44,17 @@ int main()
     nObj->Properties = objectProperties;
     nObj->Properties.transform.translation = {-1.5, -.5, 1.5};
     Model::CreateModelFromFile(aApp->GetDevice(), "Models/cube.obj", nObj->Model);
-    //nObj->Texture = std::make_shared<Texture>("Textures/qr.jpg", aApp->GetDevice());
-    nObj->Texture = std::make_shared<Texture>("AnA Game Engine", 1000, 600, 64, aApp->GetDevice());
-    //auto test = std::make_shared<Texture>("AnA Game Engine", 1000, 600, 64, aApp->GetDevice());
+    nObj->Texture = std::make_shared<Texture>("Textures/cube.png", aApp->GetDevice());
     aApp->GetObjects().push_back(nObj);
 
+    nObj = new Object;
+    nObj->Model = App::Get2DModel();
+    nObj->Texture = std::make_shared<Texture>("AnA Game Engine", 800, 450, 64, aApp->GetDevice());
+    nObj->Color = {1.0f, 1.0f, 1.0f};
+    nObj->Properties.transform.scale = {1.0f, 1.0f, 0.0};
+//    nObj->Properties.transform.rotation.y = 0.75 * glm::two_pi<float>();
+    nObj->Properties.sType = ANA_MODEL;
+    aApp->GetObjects().push_back(nObj);
     /*
     Control::InitControl(&aApp->GetSwapChain());
     Button* button = new Button;
