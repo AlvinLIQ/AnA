@@ -23,7 +23,7 @@ namespace AnA
         VkDeviceMemory textureImageMemory;
         VkImageView textureImageView;
         VkSampler textureSampler;
-        void createTextureSampler();
+        void createTextureSampler(enum VkSamplerAddressMode samplerAddressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT);
 
         VkDescriptorPool descriptorPool;
         void createDescriptorPool();

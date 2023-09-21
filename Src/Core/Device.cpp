@@ -221,9 +221,9 @@ void Device::CreateTextImage(const char* text, int width, int height, VkImage* p
         }
         else
         {
-            bufData[i] = 0x00;
-            bufData[i + 1] = 0x00;
-            bufData[i + 2] = 0x00;
+            bufData[i] = 0x66;
+            bufData[i + 1] = 0x66;
+            bufData[i + 2] = 0x66;
             bufData[i + 3] = 0xFF;
         }
     }
