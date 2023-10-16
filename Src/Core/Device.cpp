@@ -214,17 +214,17 @@ void Device::CreateTextImage(const char* text, int width, int height, VkImage* p
     {
         if (textBitmap[j])
         {
-            bufData[i] = 0xFF;
-            bufData[i + 1] = 0xFF;
-            bufData[i + 2] = 0xFF;
+            bufData[i] = textBitmap[j];
+            bufData[i + 1] = bufData[i];
+            bufData[i + 2] = bufData[i];
             bufData[i + 3] = 0xFF;
         }
         else
         {
-            bufData[i] = 0x66;
-            bufData[i + 1] = 0x66;
-            bufData[i + 2] = 0x66;
-            bufData[i + 3] = 0xFF;
+            bufData[i] = 0x00;
+            bufData[i + 1] = 0x00;
+            bufData[i + 2] = 0x00;
+            bufData[i + 3] = 0x00;
         }
     }
     aBuffer.Unmap();
