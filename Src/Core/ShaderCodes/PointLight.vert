@@ -26,9 +26,9 @@ layout(push_constant) uniform Push {
 void main()
 {
     vec3 lightDirection = normalize(lbo.lightPos - position);
-    vec3 normalWorldSpace = normalize(mat3(push.transformMatrix)*  normal);
+    vec3 normalWorldSpace = normalize(mat3(push.transformMatrix) * normal);
     float lightIntensity = max(dot(normalWorldSpace, lightDirection), 0);
 
     fragColor = lightIntensity * color + 0.077;
-    gl_Position = cbo.proj*  cbo.view*  vec4(position, 1.0);
+    gl_Position = cbo.proj * cbo.view * vec4(position, 1.0);
 }

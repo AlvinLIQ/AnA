@@ -28,10 +28,10 @@ layout(set = 0, binding = 0) uniform CameraBufferObject {
 const vec3 LIGHT_DIRECTION = normalize(vec3(1., -3., -1.));
 
 void main() {
-    //gl_Position = vec4(push.transform*  position + push.offset * 2, 0.0, 1.0);
+    //gl_Position = vec4(push.transform * position + push.offset * 2, 0.0, 1.0);
     if (push.sType == ANA_MODEL)
     {
-        gl_Position = cbo.proj*  cbo.view*  push.transformMatrix * vec4(position, 1.0);
+        gl_Position = cbo.proj * cbo.view * push.transformMatrix * vec4(position, 1.0);
         vec3 normalWorldSpace = normalize(mat3(push.transformMatrix) * normal);
 
         float lightIntensity = max(dot(normalWorldSpace, LIGHT_DIRECTION), 0);
@@ -43,5 +43,5 @@ void main() {
         fragColor = color;
     }
     outTexCoord = uv;
-    //gl_Position = push.projectionMatrix * push.transformMatrix*  vec4(position, 1.0);
+    //gl_Position = push.projectionMatrix * push.transformMatrix * vec4(position, 1.0);
 }
