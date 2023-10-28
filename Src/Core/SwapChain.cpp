@@ -126,6 +126,11 @@ void SwapChain::RecreateSwapChain()
     createFramebuffers();
 }
 
+Device& SwapChain::GetDevice()
+{
+    return aDevice;
+}
+
 VkSurfaceFormatKHR SwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats)
 {
     for (const auto &availableFormat : availableFormats)

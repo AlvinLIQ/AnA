@@ -40,6 +40,7 @@ namespace AnA
 
         void RecreateSwapChain();
 
+        Device& GetDevice();
     private:
         Device& aDevice;
         VkSurfaceKHR surface;
