@@ -84,6 +84,7 @@ namespace AnA
             virtual void PrepareDraw();
             static void InitControl(SwapChain* swapChain);
             static VkExtent2D GetSwapChainExtent();
+            static Device& GetDevice();
 
             std::vector<PointerEventHandler> PointerEvents[PointerEventType::Moving + 1];
 

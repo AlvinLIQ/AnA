@@ -44,7 +44,7 @@ int main()
     nObj->Properties = objectProperties;
     nObj->Properties.transform.translation = {-1.5, -.5, 1.5};
     Model::CreateModelFromFile(aApp->GetDevice(), "Models/cube.obj", nObj->Model);
-    nObj->Texture = std::make_shared<Texture>("Textures/cube.png", aApp->GetDevice());
+    nObj->Texture = std::make_shared<Texture>("Textures/test.jpg", aApp->GetDevice());
     aApp->GetObjects().push_back(nObj);
 
     nObj = new Object;
