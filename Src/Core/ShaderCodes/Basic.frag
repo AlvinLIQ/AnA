@@ -5,6 +5,7 @@
 #define ANA_ELLIPSE 2
 #define ANA_CURVED_RECTANGLE 3
 #define ANA_MODEL 4
+#define ANA_TEXT 5
 
 layout(location = 0) in vec3 fragColor;
 layout(location = 1) in vec2 texCoord;
@@ -63,7 +64,7 @@ float rounded_rect2(vec2 uv, vec2 offset, vec2 size, vec2 radius)
 }
 
 void main() {
-    if (push.sType == ANA_MODEL)
+    if (push.sType == ANA_MODEL || push.sType == ANA_TEXT)
     {
         outColor = texture(texSampler, texCoord) * vec4(fragColor, 1.);
         return;
