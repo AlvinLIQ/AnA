@@ -25,5 +25,5 @@ layout(std140, binding = 2) buffer ItemOut
 
 void main()
 {
-    vec3 test = ItemIn.itemsIn.position * vec3(2.f);
+    //vec3 test = ItemIn.itemsIn.position * vec3(2.f);
 }

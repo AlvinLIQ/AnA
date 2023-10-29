@@ -2,10 +2,11 @@
 
 #include "../Core/Headers/App.hpp"
 //#include "../GUI/Controls/Headers/Button.hpp"
+#include "../GUI/Controls/Headers/TextBlock.hpp"
 #include "../VertexLoader/Headers/VertexLoader.hpp"
 
 using namespace AnA;
-//using namespace AnA::Controls;
+using namespace AnA::Controls;
 
 void CopyVertices(IndexedVertex &indexedVertex, std::vector<Model::Vertex> &dstVertices)
 {
@@ -55,8 +56,9 @@ int main()
 //    nObj->Properties.transform.rotation.y = 0.75 * glm::two_pi<float>();
     nObj->Properties.sType = ANA_MODEL;
     aApp->GetObjects().push_back(nObj);
-    /*
+    
     Control::InitControl(&aApp->GetSwapChain());
+    /*
     Button* button = new Button;
     button->PrepareDraw();
     button->Model = App::Get2DModel();
@@ -64,7 +66,15 @@ int main()
     button->VerticalAlignment = AlignmentType::End;
     button->Texture = nObj->Texture;
     aApp->GetObjects().push_back(std::move(button));
-    */
+*/
+    TextBlock* textBlock = new TextBlock;
+    textBlock->Model = App::Get2DModel();
+    textBlock->Text("Test123");
+    textBlock->Properties.transform.scale = glm::vec3(0.3);
+    textBlock->Properties.color = glm::vec3(1.0);
+
+    aApp->GetObjects().push_back(std::move(textBlock));
+    
 
     aApp->Run();
     delete aApp;

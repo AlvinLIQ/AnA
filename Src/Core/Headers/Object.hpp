@@ -12,6 +12,7 @@
 #define ANA_ELLIPSE 2
 #define ANA_CURVED_RECTANGLE 3
 #define ANA_MODEL 4
+#define ANA_TEXT 5
 
 namespace AnA
 {
