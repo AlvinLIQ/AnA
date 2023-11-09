@@ -3,6 +3,8 @@
 #include "vulkan/vulkan_core.h"
 #include <stdexcept>
 
+#define DEFAULT_FONT_SIZE 32.0f
+
 using namespace AnA;
 
 Texture::Texture(const char* filename, Device& mDevice) : aDevice { mDevice }
@@ -15,9 +17,9 @@ Texture::Texture(const char* filename, Device& mDevice) : aDevice { mDevice }
     createDescriptorSet();
 }
 
-Texture::Texture(const char* text, const int width, const int height, const int lineHeight, Device& mDevice) : aDevice { mDevice }
+Texture::Texture(const char* text, const int width, const int height, const float lineHeight, Device& mDevice) : aDevice { mDevice }
 {
-    aDevice.CreateTextImage(text, width, height, &textureImage, &textureImageMemory);
+    aDevice.CreateTextImage(text, width, height, lineHeight, &textureImage, &textureImageMemory);
     textureImageView = aDevice.CreateImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
     createTextureSampler(VK_SAMPLER_ADDRESS_MODE_REPEAT);
 

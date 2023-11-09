@@ -172,7 +172,7 @@ void Device::CreateTextureImage(const char* imagePath, VkImage* pTexImage, VkDev
     TransitionImageLayout(*pTexImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
-void Device::CreateTextImage(const char* text, int width, int height, VkImage* pTextImage, VkDeviceMemory* pTextMemory)
+void Device::CreateTextImage(const char* text, int width, int height, float lineHeight, VkImage* pTextImage, VkDeviceMemory* pTextMemory)
 {
     auto fontData = ReadFile("Fonts/SourceCodePro-Black.otf");
     stbtt_fontinfo info{};
@@ -181,7 +181,7 @@ void Device::CreateTextImage(const char* text, int width, int height, VkImage* p
     
     int imageSize = width * height;
     std::vector<unsigned char> textBitmap(imageSize);
-    float scale = stbtt_ScaleForPixelHeight(&info, 64.0f);
+    float scale = stbtt_ScaleForPixelHeight(&info, lineHeight);
 
     int ascent, descent, lineGap;
     stbtt_GetFontVMetrics(&info, &ascent, &descent, &lineGap);
@@ -208,7 +208,7 @@ void Device::CreateTextImage(const char* text, int width, int height, VkImage* p
     int bufSize = imageSize * 4;
     Buffer aBuffer(*this, bufSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
     aBuffer.Map(0, bufSize);
-    //memcpy(aBuffer.GetMappedData(), textBitmap.data(), static_cast<size_t>(imageSize));
+    //memcpy(aBuffer.Getconst stbtt_fontinfo *infoMappedData(), textBitmap.data(), static_cast<size_t>(imageSize));
     auto bufData = (unsigned char*)aBuffer.GetMappedData();
     for (int i = 0, j = 0; i < bufSize; i += 4, j++)
     {
@@ -250,6 +250,23 @@ void Device::CreateTextImage(const char* text, int width, int height, VkImage* p
     CopyBufferToImage(aBuffer.GetBuffer(), *pTextImage, imageInfo.extent);
     TransitionImageLayout(*pTextImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
+
+void Device::CreateTextImage(const char* text, VkImage* pTextImage, VkDeviceMemory* pTextMemory)
+{
+    auto fontData = ReadFile("Fonts/SourceCodePro-Black.otf");
+    stbtt_fontinfo info{};
+    if (!stbtt_InitFont(&info, (const unsigned char*)fontData.data(), 0))
+        throw std::runtime_error("failed to init font");
+
+    float scale = stbtt_ScaleForMappingEmToPixels(&info, 16);
+
+    int ascent, descent, lineGap;
+    stbtt_GetFontVMetrics(&info, &ascent, &descent, &lineGap);
+    int glyphWidth, left;
+
+    //stbtt_GetGlyphHMetrics(const stbtt_fontinfo *info, int glyph_index, int *advanceWidth, int *leftSideBearing)
+}
+
 #endif
 
 void Device::TransitionImageLayout(VkImage &image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
