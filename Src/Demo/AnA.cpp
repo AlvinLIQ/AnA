@@ -49,7 +49,7 @@ int main()
     aApp->GetObjects().push_back(nObj);
 
     nObj = new Object;
-    nObj->Model = App::Get2DModel();
+    nObj->Model  = App::Get2DModel();
     nObj->Texture = std::make_shared<Texture>("AnA Game Engine", 800, 450, 64, aApp->GetDevice());
     nObj->Color = {1.0f, 1.0f, 1.0f};
     nObj->Properties.transform.scale = {1.0f, 1.0f, 0.0};
@@ -75,7 +75,7 @@ int main()
 
     aApp->GetObjects().push_back(std::move(textBlock));
     
-
+    aApp->GetDevice().CreateTextImage("Test", NULL, NULL);
     aApp->Run();
     delete aApp;
     aApp = nullptr;

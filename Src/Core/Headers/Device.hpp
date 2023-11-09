@@ -42,7 +42,8 @@ namespace AnA
         VkImageView CreateImageView(VkImage& image, VkFormat format);
         #ifdef INCLUDE_STB_IMAGE
         void CreateTextureImage(const char* imagePath, VkImage* pTexImage, VkDeviceMemory* pTexMemory);
-        void CreateTextImage(const char* text, int width, int height, VkImage* pTextImage, VkDeviceMemory* pTextMemory);
+        void CreateTextImage(const char* text, int width, int height, float lineHeight, VkImage* pTextImage, VkDeviceMemory* pTextMemory);
+        void CreateTextImage(const char* text, VkImage* pTextImage, VkDeviceMemory* pTexMemory);
         #endif
 
         void TransitionImageLayout(VkImage& image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
