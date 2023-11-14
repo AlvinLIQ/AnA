@@ -31,7 +31,7 @@ namespace AnA
             VkGraphicsPipelineCreateInfo pipelineInfo{};
             const std::vector<VkDynamicState> dynamicStates = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
             static PipelineConfig GetDefault(VkShaderModule vertexShaderModule, VkShaderModule fragShaderModule,
-                VkPipelineLayout &pipelineLayout, VkRenderPass &renderPass)
+                VkPipelineLayout &pipelineLayout, VkRenderPass &renderPass, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
             {
                 PipelineConfig dConfig;
                 dConfig.shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -55,7 +55,7 @@ namespace AnA
                 dConfig.vertexInputInfo.pVertexAttributeDescriptions = dConfig.attributeDescriptions.data();
 
                 dConfig.inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-                dConfig.inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+                dConfig.inputAssembly.topology = vertexTopology;
                 dConfig.inputAssembly.primitiveRestartEnable = VK_FALSE;
 
                 dConfig.viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -137,7 +137,7 @@ namespace AnA
 
 
         };
-        Pipeline(Device& mDevice, const char* vertShaderFileName, const char* fragShaderFileName, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayout);
+        Pipeline(Device& mDevice, const char* vertShaderFileName, const char* fragShaderFileName, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
         Pipeline(Device& mDevice, const char* computeShaderFile, VkPipelineLayout &mPipelineLayout);
 
         ~Pipeline();
@@ -150,7 +150,7 @@ namespace AnA
 
         VkPipelineLayout& pipelineLayout;
         VkPipeline pipeline;//Graphics Pipeline
-        void createGraphicsPipeline(const std::string &vertShaderFileName, const std::string &fragShaderFileName);
+        void createGraphicsPipeline(const std::string &vertShaderFileName, const std::string &fragShaderFileName, const VkPrimitiveTopology vertexTopology);
         void createComputePipeline(const std::string &computeShaderFileName);
 
         VkShaderModule createShaderModule(const std::vector<char> &code);

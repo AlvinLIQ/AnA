@@ -5,9 +5,10 @@ using namespace AnA;
 Pipeline::Pipeline(Device& mDevice,
 const char* vertShaderFileName, const char* fragShaderFileName,
 VkRenderPass &mRenderPass, 
-VkPipelineLayout &mPipelineLayout) : aDevice {mDevice}, renderPass {mRenderPass}, pipelineLayout{mPipelineLayout}
+VkPipelineLayout &mPipelineLayout,
+const VkPrimitiveTopology vertexTopology) : aDevice {mDevice}, renderPass {mRenderPass}, pipelineLayout{mPipelineLayout}
 {
-    createGraphicsPipeline(vertShaderFileName, fragShaderFileName);
+    createGraphicsPipeline(vertShaderFileName, fragShaderFileName, vertexTopology);
 }
 Pipeline::Pipeline(Device& mDevice, const char* computeShaderFile, VkPipelineLayout &mPipelineLayout) : aDevice {mDevice}, pipelineLayout {mPipelineLayout}
 {
@@ -25,7 +26,7 @@ void Pipeline::Bind(VkCommandBuffer commandBuffer)
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 }
 
-void Pipeline::createGraphicsPipeline(const std::string &vertShaderFileName, const std::string &fragShaderFileName)
+void Pipeline::createGraphicsPipeline(const std::string &vertShaderFileName, const std::string &fragShaderFileName, const VkPrimitiveTopology vertexTopology)
 {
     auto vertShaderCode = ReadFile(vertShaderFileName);
     auto fragShaderCode = ReadFile(fragShaderFileName);
@@ -33,7 +34,7 @@ void Pipeline::createGraphicsPipeline(const std::string &vertShaderFileName, con
     VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
     VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
 
-    PipelineConfig pipelineConfig = pipelineConfig.GetDefault(vertShaderModule, fragShaderModule, pipelineLayout, renderPass); 
+    PipelineConfig pipelineConfig = pipelineConfig.GetDefault(vertShaderModule, fragShaderModule, pipelineLayout, renderPass, vertexTopology); 
 
     auto logicalDevice = aDevice.GetLogicalDevice();
 

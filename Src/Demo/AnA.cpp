@@ -50,9 +50,11 @@ int main()
 
     nObj = new Object;
     nObj->Model  = App::Get2DModel();
+    nObj->Properties.sType = ANA_TEXT;
     nObj->Texture = std::make_shared<Texture>("AnA Game Engine", 800, 450, 64, aApp->GetDevice());
     nObj->Color = {1.0f, 1.0f, 1.0f};
     nObj->Properties.transform.scale = {1.0f, 1.0f, 0.0};
+    nObj->Properties.transform.translation = {0.5f, 0.5f, 1.0f};
 //    nObj->Properties.transform.rotation.y = 0.75 * glm::two_pi<float>();
     nObj->Properties.sType = ANA_MODEL;
     aApp->GetObjects().push_back(nObj);
@@ -74,8 +76,6 @@ int main()
     textBlock->Properties.color = glm::vec3(1.0);
 
     aApp->GetObjects().push_back(std::move(textBlock));
-    
-    aApp->GetDevice().CreateTextImage("Test", NULL, NULL);
     aApp->Run();
     delete aApp;
     aApp = nullptr;

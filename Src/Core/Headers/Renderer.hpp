@@ -60,8 +60,6 @@ namespace AnA
         Device& aDevice;
         SwapChain* aSwapChain;
 
-        void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
-
         std::vector<VkCommandBuffer> commandBuffers;
         void createCommandBuffers();
         void freeCommandBuffersMemory();

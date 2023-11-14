@@ -60,7 +60,7 @@ void Renderer::EndFrame()
     {
         throw std::runtime_error("Failed to record command buffer!");
     }
-    auto result = aSwapChain->SubmitCommandBuffers(&commandBuffer,  &currentImageIndex); 
+    auto result = aSwapChain->SubmitCommandBuffers(&commandBuffer, 1,  &currentImageIndex); 
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || aWindow.FramebufferResized)
     {
