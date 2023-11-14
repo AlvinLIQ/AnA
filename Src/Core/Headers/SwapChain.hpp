@@ -24,7 +24,7 @@ namespace AnA
 
         VkResult AcquireNextImage(uint32_t* pImageIndex);
 
-        VkResult SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint32_t* pImageIndex);
+        VkResult SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint32_t commandBufferCount, uint32_t* pImageIndex);
 
         uint32_t CurrentFrame = 0;
 

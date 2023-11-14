@@ -34,7 +34,7 @@ VkResult SwapChain::AcquireNextImage(uint32_t* pImageIndex)
                                  imageAvailableSemaphores[CurrentFrame], VK_NULL_HANDLE, pImageIndex);
 }
 
-VkResult SwapChain::SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint32_t* pImageIndex)
+VkResult SwapChain::SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint32_t commandBufferCount, uint32_t* pImageIndex)
 {
     if (imagesInFlight[*pImageIndex] != VK_NULL_HANDLE)
         vkWaitForFences(aDevice.GetLogicalDevice(), 1, &imagesInFlight[*pImageIndex], VK_TRUE, UINT64_MAX);
@@ -50,7 +50,7 @@ VkResult SwapChain::SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint3
     submitInfo.pWaitSemaphores = waitSemaphores;
     submitInfo.pWaitDstStageMask = waitStages;
 
-    submitInfo.commandBufferCount = 1;
+    submitInfo.commandBufferCount = commandBufferCount;
     submitInfo.pCommandBuffers = pCommandBuffers;
 
     VkSemaphore signalSemaphores[] = {renderFinishedSemaphores[CurrentFrame]};
