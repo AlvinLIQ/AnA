@@ -122,7 +122,8 @@ void App::Run()
         if (auto commandBuffer = aRenderer->BeginFrame())
         {
             aRenderer->BeginSwapChainRenderPass(commandBuffer);
-            aRenderSystem->RenderObjects(commandBuffer, objects, camera);
+            aRenderSystem->UpdateCameraBuffer(camera);
+            aRenderSystem->RenderObjects(commandBuffer, objects);
             aRenderer->EndSwapChainRenderPass(commandBuffer);
             aRenderer->EndFrame();
         }

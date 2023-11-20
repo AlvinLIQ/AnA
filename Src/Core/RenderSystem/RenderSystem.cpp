@@ -110,12 +110,10 @@ void RenderSystem::createCameraBuffers()
     }
 }
 
-void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, std::vector<Object*> &objects, Camera &camera)
+void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, std::vector<Object*> &objects)
 {
     aGraphicsPipeline->Bind(commandBuffer);
 
-    UpdateCameraBuffer(camera);
-    
     std::array<VkDescriptorSet, 2> sets;
     sets[0] = descriptorSets[aSwapChain.CurrentFrame];
     for (auto& object : objects)
