@@ -112,6 +112,7 @@ void App::Run()
         auto curTime = std::chrono::high_resolution_clock::now();
         float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(curTime - prevTime).count();
         prevTime = curTime;
+        printf("FPS:%.2f\r", 1.0f / frameTime);
         camera.SetSpeedRatio(frameTime);
         if (aInputManager->CheckAndRunCallbacks())
             camera.UpdateViewMatrix();
