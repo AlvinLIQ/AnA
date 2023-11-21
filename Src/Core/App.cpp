@@ -118,12 +118,20 @@ void App::Run()
         float aspect = aRenderer->GetAspect();
         //camera.SetOrthographicProjection(-aspect, -1, aspect, 1, -1, 1);
         camera.SetPerspectiveProjection(glm::radians(60.f), aspect, .1f, 100.f);
+        aRenderSystem->UpdateCameraBuffer(camera);
         
+        if (SceneObjects.BeginUpdate())
+        {
+            aRenderer->RecordSecondaryCommandBuffers([](VkCommandBuffer secondaryCommandBuffer)
+            {
+                RenderSystems::RenderSystem::GetCurrent()->RenderObjects(secondaryCommandBuffer, _aApp->SceneObjects.Get());
+            });
+            SceneObjects.EndUpdate();
+        }
         if (auto commandBuffer = aRenderer->BeginFrame())
         {
             aRenderer->BeginSwapChainRenderPass(commandBuffer);
-            aRenderSystem->UpdateCameraBuffer(camera);
-            aRenderSystem->RenderObjects(commandBuffer, SceneObjects.Get());
+            aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer);
             aRenderer->EndSwapChainRenderPass(commandBuffer);
             aRenderer->EndFrame();
         }

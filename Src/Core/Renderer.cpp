@@ -24,6 +24,13 @@ Renderer::~Renderer()
         commandBuffers.data());
 
     commandBuffers.clear();
+
+    vkFreeCommandBuffers(aDevice.GetLogicalDevice(), 
+        aDevice.GetCommandPool(), 
+        static_cast<uint32_t>(secondaryCommandBuffers.size()), 
+        secondaryCommandBuffers.data());
+
+    secondaryCommandBuffers.clear();
 }
 
 VkCommandBuffer Renderer::BeginFrame()
@@ -46,10 +53,54 @@ VkCommandBuffer Renderer::BeginFrame()
 
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
     if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
         throw std::runtime_error("Failed to begin recording buffer!");
 
     return commandBuffer;
+}
+
+void Renderer::RecordSecondaryCommandBuffers(void(*recordCallBack)(VkCommandBuffer commandBuffer))
+{
+    VkCommandBufferInheritanceInfo inheritanceInfo{};
+    inheritanceInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
+    inheritanceInfo.renderPass = aSwapChain->GetRenderPass();
+
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
+    beginInfo.pInheritanceInfo = &inheritanceInfo;
+
+    auto swapChainExtent = aSwapChain->GetExtent();
+    for (auto& secondaryCommandBuffer : secondaryCommandBuffers)
+    {
+        if (vkBeginCommandBuffer(secondaryCommandBuffer, &beginInfo) != VK_SUCCESS)
+            throw std::runtime_error("Failed to begin recording secondary buffer!");
+
+        VkViewport viewport{};
+        viewport.x = 0.0f;
+        viewport.y = 0.0f;
+        viewport.width = (float)swapChainExtent.width;
+        viewport.height = (float)swapChainExtent.height;
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+        vkCmdSetViewport(secondaryCommandBuffer, 0, 1, &viewport);
+        
+        VkRect2D scissor{};
+        scissor.extent = swapChainExtent;
+        scissor.offset = {0, 0};
+
+        vkCmdSetScissor(secondaryCommandBuffer, 0, 1, &scissor);
+        recordCallBack(secondaryCommandBuffer);
+
+        vkEndCommandBuffer(secondaryCommandBuffer);
+    }
+
+}
+
+void Renderer::ExcuteSecondaryCommandBuffer(VkCommandBuffer commandBuffer)
+{
+    vkCmdExecuteCommands(commandBuffer, 1, &secondaryCommandBuffers[currentFrameIndex]);
 }
 
 void Renderer::EndFrame()
@@ -93,22 +144,7 @@ void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer)
     clearValues[1].depthStencil = {1.0f, 0};
     renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
     renderPassInfo.pClearValues = clearValues.data();
-    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-    VkViewport viewport{};
-    viewport.x = 0.0f;
-    viewport.y = 0.0f;
-    viewport.width = (float) swapChainExtent.width;
-    viewport.height = (float) swapChainExtent.height;
-    viewport.minDepth = 0.0f;
-    viewport.maxDepth = 1.0f;
-    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-    
-    VkRect2D scissor{};
-    scissor.extent = swapChainExtent;
-    scissor.offset = {0, 0};
-
-    vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
 }
 
 void Renderer::EndSwapChainRenderPass(VkCommandBuffer commandBuffer)
@@ -129,4 +165,9 @@ void Renderer::createCommandBuffers()
     allocInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
     if (vkAllocateCommandBuffers(aDevice.GetLogicalDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) 
         throw std::runtime_error("Failed to allocate command buffers!");
+
+    secondaryCommandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
+    if (vkAllocateCommandBuffers(aDevice.GetLogicalDevice(), &allocInfo, secondaryCommandBuffers.data()) != VK_SUCCESS) 
+        throw std::runtime_error("Failed to allocate secondary command buffers!");
 }
