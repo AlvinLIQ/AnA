@@ -3,6 +3,7 @@
 #include "Device.hpp"
 #include "Window.hpp"
 #include "SwapChain.hpp"
+#include "vulkan/vulkan_core.h"
 
 #include <cassert>
 #include <vector>
@@ -51,6 +52,10 @@ namespace AnA
         }
 
         VkCommandBuffer BeginFrame();
+
+        void RecordSecondaryCommandBuffers(void(*recordCallBack)(VkCommandBuffer commandBuffer));
+        void ExcuteSecondaryCommandBuffer(VkCommandBuffer commandBuffer);
+
         void EndFrame();
         void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer);
         void EndSwapChainRenderPass(VkCommandBuffer commandBuffer);
@@ -61,6 +66,7 @@ namespace AnA
         SwapChain* aSwapChain;
 
         std::vector<VkCommandBuffer> commandBuffers;
+        std::vector<VkCommandBuffer> secondaryCommandBuffers;
         void createCommandBuffers();
         void freeCommandBuffersMemory();
 
