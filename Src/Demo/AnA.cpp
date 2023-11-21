@@ -39,14 +39,14 @@ int main()
     Model::CreateModelFromFile(aApp->GetDevice(), "Models/torus.obj", object->Model);
     object->Texture = std::make_shared<Texture>("Textures/texture.png", aApp->GetDevice());
 
-    aApp->GetObjects().push_back(std::move(object));
+    aApp->SceneObjects.Append(std::move(object));
 
     Object* nObj = new Object;
     nObj->Properties = objectProperties;
     nObj->Properties.transform.translation = {-1.5, -.5, 1.5};
     Model::CreateModelFromFile(aApp->GetDevice(), "Models/cube.obj", nObj->Model);
     nObj->Texture = std::make_shared<Texture>("Textures/test.jpg", aApp->GetDevice());
-    aApp->GetObjects().push_back(nObj);
+    aApp->SceneObjects.Append(nObj);
 
     nObj = new Object;
     nObj->Model  = App::Get2DModel();
@@ -57,7 +57,7 @@ int main()
     nObj->Properties.transform.translation = {0.5f, 0.5f, 1.0f};
 //    nObj->Properties.transform.rotation.y = 0.75 * glm::two_pi<float>();
     nObj->Properties.sType = ANA_MODEL;
-    aApp->GetObjects().push_back(nObj);
+    aApp->SceneObjects.Append(nObj);
     
     Control::InitControl(&aApp->GetSwapChain());
     /*
@@ -75,7 +75,7 @@ int main()
     textBlock->Properties.transform.scale = glm::vec3(0.3);
     textBlock->Properties.color = glm::vec3(1.0);
 
-    aApp->GetObjects().push_back(std::move(textBlock));
+    aApp->SceneObjects.Append(std::move(textBlock));
     aApp->Run();
     delete aApp;
     aApp = nullptr;

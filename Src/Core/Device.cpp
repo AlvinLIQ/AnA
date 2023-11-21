@@ -251,22 +251,6 @@ void Device::CreateTextImage(const char* text, int width, int height, float line
     TransitionImageLayout(*pTextImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
-void Device::CreateTextImage(const char* text, VkImage* pTextImage, VkDeviceMemory* pTextMemory)
-{
-    auto fontData = ReadFile("Fonts/SourceCodePro-Black.otf");
-    stbtt_fontinfo info{};
-    if (!stbtt_InitFont(&info, (const unsigned char*)fontData.data(), 0))
-        throw std::runtime_error("failed to init font");
-
-    float scale = stbtt_ScaleForMappingEmToPixels(&info, 16);
-
-    int ascent, descent, lineGap;
-    stbtt_GetFontVMetrics(&info, &ascent, &descent, &lineGap);
-    int glyphWidth, left;
-
-    //stbtt_GetGlyphHMetrics(const stbtt_fontinfo *info, int glyph_index, int *advanceWidth, int *leftSideBearing)
-}
-
 #endif
 
 void Device::TransitionImageLayout(VkImage &image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)

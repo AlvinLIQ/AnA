@@ -26,7 +26,7 @@ namespace AnA
             RenderSystem(Device& mDevice, SwapChain& mSwapChain);
             ~RenderSystem();
 
-            void RenderObjects(VkCommandBuffer commandBuffer, std::vector<Object*> &objects);
+            void RenderObjects(VkCommandBuffer commandBuffer, const std::vector<Object*> &objects);
             void UpdateCameraBuffer(Cameras::Camera &camera);
             static RenderSystem* GetCurrent();
 

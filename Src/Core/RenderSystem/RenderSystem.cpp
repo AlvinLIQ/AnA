@@ -110,7 +110,7 @@ void RenderSystem::createCameraBuffers()
     }
 }
 
-void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, std::vector<Object*> &objects)
+void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, const std::vector<Object*> &objects)
 {
     aGraphicsPipeline->Bind(commandBuffer);
 

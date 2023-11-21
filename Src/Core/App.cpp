@@ -123,7 +123,7 @@ void App::Run()
         {
             aRenderer->BeginSwapChainRenderPass(commandBuffer);
             aRenderSystem->UpdateCameraBuffer(camera);
-            aRenderSystem->RenderObjects(commandBuffer, objects);
+            aRenderSystem->RenderObjects(commandBuffer, SceneObjects.Get());
             aRenderer->EndSwapChainRenderPass(commandBuffer);
             aRenderer->EndFrame();
         }
@@ -137,10 +137,8 @@ void App::Cleanup()
     delete aInputManager;
     delete aRenderer;
     delete aRenderSystem;
-    for (auto& object : objects)
-    {
-        delete object;
-    }
+    SceneObjects.Destroy();
+
     _2DModel.reset();
     delete aDevice;
     vkDestroySurfaceKHR(aInstance->GetInstance(), aWindow->GetSurface(), nullptr);
