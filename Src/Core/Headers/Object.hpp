@@ -64,4 +64,53 @@ namespace AnA
     private:
         id_t id;
     };
+
+    class Objects
+    {
+    public:
+        void Destroy()
+        {
+            for (auto& object : objects)
+                delete object;
+        }
+        const std::vector<Object*>& Get() const
+        {
+            return objects;
+        }
+
+        const bool BeginUpdate()
+        {
+            return needUpdate;
+        }
+
+        void EndUpdate()
+        {
+            needUpdate = false;
+        }
+
+        void Append(Object* newObject)
+        {
+            objects.push_back(newObject);
+            needUpdate = true;
+        }
+
+        void RemoveAt(int index)
+        {
+            int i = 0;
+            for (auto obj = objects.begin(); obj < objects.end(); obj++)
+            {
+                if (i == index)
+                {
+                    objects.erase(obj);
+                    needUpdate = true;
+                    break;
+                }
+
+                i++;
+            }
+        }
+    private:
+        std::vector<Object*> objects;
+        bool needUpdate = false;
+    };
 }

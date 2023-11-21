@@ -29,10 +29,7 @@ namespace AnA
         void Cleanup();
         void Exit();
 
-        std::vector<Object*> &GetObjects()
-        {
-            return objects;
-        }
+        Objects SceneObjects;
 
         static std::shared_ptr<Model> &Get2DModel();
         static void CreateModel(const Model::ModelInfo &modelInfo, std::shared_ptr<Model> &model);
@@ -63,8 +60,6 @@ namespace AnA
         Renderer* aRenderer;
         RenderSystems::RenderSystem* aRenderSystem;
         Input::InputManager* aInputManager;
-
-        std::vector<Object*> objects;
 
         Cameras::Camera camera;
 
