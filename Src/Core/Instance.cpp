@@ -27,15 +27,14 @@ void Instance::createInstance()
         throw std::runtime_error("One or More ValidationLayer Not supported!");
     }
     VkApplicationInfo appInfo = {
-        VK_STRUCTURE_TYPE_APPLICATION_INFO, nullptr,           "AnA", VK_MAKE_VERSION(1, 0, 0), "AnA Engine",
-        VK_MAKE_VERSION(1, 0, 0),           VK_API_VERSION_1_3};
+        VK_STRUCTURE_TYPE_APPLICATION_INFO, nullptr, "AnA", VK_MAKE_VERSION(1, 0, 0), "AnA Engine",
+        VK_MAKE_VERSION(1, 0, 0), VK_API_VERSION_1_3};
 
     auto glfwExtensions = getGLFWExtensions();
     if (!checkExtensions(glfwExtensions))
     {
         throw std::runtime_error("One or More Extensions Not supported!");
     }
-
     VkInstanceCreateInfo instanceCreateInfo = {VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
                                                nullptr,
                                                0,

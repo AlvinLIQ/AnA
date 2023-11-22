@@ -464,8 +464,18 @@ void Device::createLogicalDevice()
         queueCreateInfos.push_back(queueCreateInfo);
     }
 
-    VkPhysicalDeviceFeatures deviceFeatures{};
-    deviceFeatures.samplerAnisotropy = VK_TRUE;
+    //VkPhysicalDeviceFeatures deviceFeatures1{};
+    //vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures1);
+    VkPhysicalDeviceDescriptorIndexingFeatures indexingFeatures{};
+    indexingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
+    indexingFeatures.descriptorBindingPartiallyBound = VK_TRUE;
+    indexingFeatures.descriptorBindingVariableDescriptorCount = VK_TRUE;
+
+    VkPhysicalDeviceFeatures2 deviceFeatures2{};
+    deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    //vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
+    deviceFeatures2.features.samplerAnisotropy = VK_TRUE;
+    deviceFeatures2.pNext = &indexingFeatures;
 
     VkDeviceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -473,7 +483,8 @@ void Device::createLogicalDevice()
     createInfo.pQueueCreateInfos = queueCreateInfos.data();
     createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
 
-    createInfo.pEnabledFeatures = &deviceFeatures;
+    //createInfo.pEnabledFeatures = &deviceFeatures2.features;
+    createInfo.pNext = &deviceFeatures2;
 
     createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
     createInfo.ppEnabledExtensionNames = deviceExtensions.data();

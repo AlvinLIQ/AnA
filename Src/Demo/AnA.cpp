@@ -1,7 +1,7 @@
 #define INCLUDE_STB_IMAGE
 
 #include "../Core/Headers/App.hpp"
-//#include "../GUI/Controls/Headers/Button.hpp"
+#include "../GUI/Controls/Headers/Button.hpp"
 #include "../GUI/Controls/Headers/TextBlock.hpp"
 #include "../VertexLoader/Headers/VertexLoader.hpp"
 
@@ -60,15 +60,15 @@ int main()
     aApp->SceneObjects.Append(nObj);
     
     Control::InitControl(&aApp->GetSwapChain());
-    /*
+    
     Button* button = new Button;
     button->PrepareDraw();
     button->Model = App::Get2DModel();
     button->HorizontalAlignment = AlignmentType::Start;
     button->VerticalAlignment = AlignmentType::End;
-    button->Texture = nObj->Texture;
-    aApp->GetObjects().push_back(std::move(button));
-*/
+    //button->Texture = nObj->Texture;
+    aApp->SceneObjects.Append(std::move(button));
+
     TextBlock* textBlock = new TextBlock;
     textBlock->Model = App::Get2DModel();
     textBlock->Text("Test123");
