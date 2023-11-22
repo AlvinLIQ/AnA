@@ -40,15 +40,17 @@ RenderSystem::RenderSystem(Device& mDevice, SwapChain& mSwapChain) : aDevice {mD
     createDescriptorSetLayout();
     createDescriptorSets();
     createPipelineLayouts();
-    aGraphicsPipeline = new Pipeline(aDevice, "Shaders/vert.spv", "Shaders/frag.spv", aSwapChain.GetRenderPass(), pipelineLayout);
-    aComputePipeline = new Pipeline(aDevice, "Shaders/compute.spv", computePipelineLayout);
+    pipelines[TRIANGLE_LIST_PIPELINE] = new Pipeline(aDevice, "Shaders/vert.spv", "Shaders/frag.spv", aSwapChain.GetRenderPass(), pipelineLayout);
+    pipelines[LINE_LIST_PIPELINE] = new Pipeline(aDevice, "Shaders/lineVert.spv", "Shaders/lineFrag.spv", aSwapChain.GetRenderPass(), pipelineLayout, VK_PRIMITIVE_TOPOLOGY_LINE_LIST);
+    pipelines[COMPUTE_PIPELINE] = new Pipeline(aDevice, "Shaders/compute.spv", computePipelineLayout);
 }
 
 RenderSystem::~RenderSystem()
 {
-    delete aComputePipeline;
+    delete pipelines[COMPUTE_PIPELINE];
     vkDestroyPipelineLayout(aDevice.GetLogicalDevice(), computePipelineLayout, nullptr);
-    delete aGraphicsPipeline;
+    delete pipelines[TRIANGLE_LIST_PIPELINE];
+    delete pipelines[LINE_LIST_PIPELINE];
     vkDestroyPipelineLayout(aDevice.GetLogicalDevice(), pipelineLayout, nullptr);
 
     vkDestroyDescriptorPool(aDevice.GetLogicalDevice(), descriptorPool, nullptr);
@@ -110,18 +112,30 @@ void RenderSystem::createCameraBuffers()
     }
 }
 
-void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, const std::vector<Object*> &objects)
+void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, const std::vector<Object*> &objects, int pipeLineIndex)
 {
-    aGraphicsPipeline->Bind(commandBuffer);
+    pipelines[pipeLineIndex]->Bind(commandBuffer);
 
     std::array<VkDescriptorSet, 2> sets;
     sets[0] = descriptorSets[aSwapChain.CurrentFrame];
     for (auto& object : objects)
     {
-        sets[1] = object->Texture->GetDescriptorSet();
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-        pipelineLayout, 0, static_cast<uint32_t>(sets.size()),
-        sets.data(), 0, nullptr);
+        if (object->Texture.use_count())
+        {
+            sets[1] = object->Texture->GetDescriptorSet();
+            vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+            pipelineLayout, 0, static_cast<uint32_t>(sets.size()),
+            sets.data(), 0, nullptr);
+        }
+        else
+        {
+            sets[1] = nullptr;
+            vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+            pipelineLayout, 0, 1,
+            sets.data(), 0, nullptr);
+        }
+        
+
         object->Model->Bind(commandBuffer);
         ObjectPushConstantData push{};
         auto extent = aSwapChain.GetExtent();

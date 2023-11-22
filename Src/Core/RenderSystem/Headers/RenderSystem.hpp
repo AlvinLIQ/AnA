@@ -8,6 +8,12 @@
 #include <array>
 #include <vulkan/vulkan_core.h>
 
+#define TRIANGLE_LIST_PIPELINE 0
+#define LINE_LIST_PIPELINE 1
+#define COMPUTE_PIPELINE 2
+
+#define PIPELINE_COUNT 3
+
 namespace AnA
 {
     namespace RenderSystems
@@ -26,7 +32,7 @@ namespace AnA
             RenderSystem(Device& mDevice, SwapChain& mSwapChain);
             ~RenderSystem();
 
-            void RenderObjects(VkCommandBuffer commandBuffer, const std::vector<Object*> &objects);
+            void RenderObjects(VkCommandBuffer commandBuffer, const std::vector<Object*> &objects, int pipeLineIndex = TRIANGLE_LIST_PIPELINE);
             void UpdateCameraBuffer(Cameras::Camera &camera);
             static RenderSystem* GetCurrent();
 
@@ -38,9 +44,8 @@ namespace AnA
             VkPipelineLayout pipelineLayout;
             VkPipelineLayout computePipelineLayout;
             void createPipelineLayouts();
-            
-            Pipeline* aGraphicsPipeline;
-            Pipeline* aComputePipeline;
+
+            std::array<Pipeline*, PIPELINE_COUNT> pipelines{};
 
             std::vector<Buffer*> cameraBuffers;
             void createCameraBuffers();
