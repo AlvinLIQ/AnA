@@ -125,7 +125,7 @@ void App::Run()
         {
             aRenderer->RecordSecondaryCommandBuffers([](VkCommandBuffer secondaryCommandBuffer)
             {
-                RenderSystems::RenderSystem::GetCurrent()->RenderObjects(secondaryCommandBuffer, _aApp->SceneObjects.Get());
+                RenderSystems::RenderSystem::GetCurrent()->RenderObjects(secondaryCommandBuffer, _aApp->SceneObjects.Get(), LINE_LIST_PIPELINE);
             });
             SceneObjects.EndUpdate();
         }
