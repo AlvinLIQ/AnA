@@ -87,5 +87,5 @@ void main() {
         break;
     }
 
-    outColor = vec4(c * push.color, c);
+    outColor = vec4(c * texture(texSampler, texCoord));
 }

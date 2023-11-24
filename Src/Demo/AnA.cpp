@@ -1,12 +1,12 @@
 #define INCLUDE_STB_IMAGE
 
 #include "../Core/Headers/App.hpp"
-#include "../GUI/Controls/Headers/Button.hpp"
-#include "../GUI/Controls/Headers/TextBlock.hpp"
+//#include "../GUI/Controls/Headers/Button.hpp"
+//#include "../GUI/Controls/Headers/TextBlock.hpp"
 #include "../VertexLoader/Headers/VertexLoader.hpp"
 
 using namespace AnA;
-using namespace AnA::Controls;
+//using namespace AnA::Controls;
 
 void CopyVertices(IndexedVertex &indexedVertex, std::vector<Model::Vertex> &dstVertices)
 {
@@ -37,7 +37,7 @@ int main()
 
     //object->Model = App::Get2DModel();
     Model::CreateModelFromFile(aApp->GetDevice(), "Models/torus.obj", object->Model);
-    object->Texture = std::make_shared<Texture>("Textures/texture.png", aApp->GetDevice());
+    object->Texture = std::make_unique<Texture>("Textures/texture.png", aApp->GetDevice());
 
     aApp->SceneObjects.Append(std::move(object));
 
@@ -45,20 +45,20 @@ int main()
     nObj->Properties = objectProperties;
     nObj->Properties.transform.translation = {-1.5, -.5, 1.5};
     Model::CreateModelFromFile(aApp->GetDevice(), "Models/cube.obj", nObj->Model);
-    nObj->Texture = std::make_shared<Texture>("Textures/test.jpg", aApp->GetDevice());
+    nObj->Texture = std::make_unique<Texture>("Textures/test.jpg", aApp->GetDevice());
     aApp->SceneObjects.Append(nObj);
 
     nObj = new Object;
     nObj->Model  = App::Get2DModel();
     nObj->Properties.sType = ANA_TEXT;
-    nObj->Texture = std::make_shared<Texture>("AnA Game Engine", 800, 450, 64, aApp->GetDevice());
+    nObj->Texture = std::make_unique<Texture>("AnA Game Engine", 800, 450, 64, aApp->GetDevice());
     nObj->Color = {1.0f, 1.0f, 1.0f};
     nObj->Properties.transform.scale = {1.0f, 1.0f, 0.0};
     nObj->Properties.transform.translation = {0.5f, 0.5f, 1.0f};
 //    nObj->Properties.transform.rotation.y = 0.75 * glm::two_pi<float>();
     nObj->Properties.sType = ANA_MODEL;
     aApp->SceneObjects.Append(nObj);
-    
+    /*
     Control::InitControl(&aApp->GetSwapChain());
     
     Button* button = new Button;
@@ -66,6 +66,8 @@ int main()
     button->Model = App::Get2DModel();
     button->HorizontalAlignment = AlignmentType::Start;
     button->VerticalAlignment = AlignmentType::End;
+    button->Color = glm::vec3(1.0f);
+    button->Properties.color = glm::vec3(1.0f);
     //button->Texture = nObj->Texture;
     aApp->SceneObjects.Append(std::move(button));
 
@@ -75,7 +77,7 @@ int main()
     textBlock->Properties.transform.scale = glm::vec3(0.3);
     textBlock->Properties.color = glm::vec3(1.0);
 
-    aApp->SceneObjects.Append(std::move(textBlock));
+    aApp->SceneObjects.Append(std::move(textBlock));*/
     aApp->Run();
     delete aApp;
     aApp = nullptr;

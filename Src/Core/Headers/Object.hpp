@@ -49,7 +49,7 @@ namespace AnA
         glm::vec3 Color{};
         ItemProperties Properties;
 
-        std::shared_ptr<Texture> Texture;
+        std::unique_ptr<Texture> Texture;
         
         static void CreateShape(SHAPE_TYPE sType,glm::vec2 offset, glm::vec2 size, std::optional<glm::vec3> color, ItemProperties* pRectangleProperties)
         {

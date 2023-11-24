@@ -120,21 +120,15 @@ void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, const std::vecto
     sets[0] = descriptorSets[aSwapChain.CurrentFrame];
     for (auto& object : objects)
     {
-        if (object->Texture.use_count())
+        if (object->Texture.get() == nullptr)
         {
-            sets[1] = object->Texture->GetDescriptorSet();
-            vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-            pipelineLayout, 0, static_cast<uint32_t>(sets.size()),
-            sets.data(), 0, nullptr);
+            uint32_t color = ((uint32_t)(object->Color.r * 255.0f) << 24) ^ ((uint32_t)(object->Color.g * 255.0f) << 16) ^ ((uint32_t)(object->Color.b * 255.0f) << 8) ^ (uint32_t)0xFF;
+            object->Texture = std::make_unique<Texture>(color, aDevice);
         }
-        else
-        {
-            sets[1] = nullptr;
-            vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-            pipelineLayout, 0, 1,
-            sets.data(), 0, nullptr);
-        }
-        
+        sets[1] = object->Texture->GetDescriptorSet();
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+        pipelineLayout, 0, static_cast<uint32_t>(sets.size()),
+        sets.data(), 0, nullptr);
 
         object->Model->Bind(commandBuffer);
         ObjectPushConstantData push{};
