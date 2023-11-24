@@ -40,6 +40,9 @@ namespace AnA
 
         void CreateImage(VkImageCreateInfo* pCreateInfo, VkImage* pImage, VkDeviceMemory* pImageMemory);
         VkImageView CreateImageView(VkImage& image, VkFormat format);
+
+        void CreateColorImage(const uint32_t color, VkImage* pTexImage, VkDeviceMemory* pTexMemory);
+
         #ifdef INCLUDE_STB_IMAGE
         void CreateTextureImage(const char* imagePath, VkImage* pTexImage, VkDeviceMemory* pTexMemory);
         void CreateTextImage(const char* text, int width, int height, float lineHeight, VkImage* pTextImage, VkDeviceMemory* pTextMemory);
