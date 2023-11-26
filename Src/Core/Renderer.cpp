@@ -60,32 +60,37 @@ VkCommandBuffer Renderer::BeginFrame()
     return commandBuffer;
 }
 
-void Renderer::RecordSecondaryCommandBuffers(void(*recordCallBack)(VkCommandBuffer commandBuffer), VkViewport& viewport)
+void Renderer::RecordSecondaryCommandBuffers(void(*recordCallBack)(VkCommandBuffer commandBuffer))
 {
-    VkCommandBufferInheritanceViewportScissorInfoNV inheritanceViewportInfo{};
-    inheritanceViewportInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_VIEWPORT_SCISSOR_INFO_NV;
-    inheritanceViewportInfo.viewportScissor2D = VK_TRUE;
-    inheritanceViewportInfo.viewportDepthCount = 1;
-    inheritanceViewportInfo.pViewportDepths = &viewport;
-
     VkCommandBufferInheritanceInfo inheritanceInfo{};
     inheritanceInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
     inheritanceInfo.renderPass = aSwapChain->GetRenderPass();
-    inheritanceInfo.pNext = &inheritanceViewportInfo;
 
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
     beginInfo.pInheritanceInfo = &inheritanceInfo;
 
+    auto swapChainExtent = aSwapChain->GetExtent();
     for (auto& secondaryCommandBuffer : secondaryCommandBuffers)
     {
         if (vkBeginCommandBuffer(secondaryCommandBuffer, &beginInfo) != VK_SUCCESS)
             throw std::runtime_error("Failed to begin recording secondary buffer!");
 
-        //vkCmdSetViewport(secondaryCommandBuffer, 0, 1, &viewport);
-        //vkCmdSetScissor(secondaryCommandBuffer, 0, 1, &scissor);
+        VkViewport viewport{};
+        viewport.x = 0.0f;
+        viewport.y = 0.0f;
+        viewport.width = (float)swapChainExtent.width;
+        viewport.height = (float)swapChainExtent.height;
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+        vkCmdSetViewport(secondaryCommandBuffer, 0, 1, &viewport);
+        
+        VkRect2D scissor{};
+        scissor.extent = swapChainExtent;
+        scissor.offset = {0, 0};
 
+        vkCmdSetScissor(secondaryCommandBuffer, 0, 1, &scissor);
         recordCallBack(secondaryCommandBuffer);
 
         vkEndCommandBuffer(secondaryCommandBuffer);

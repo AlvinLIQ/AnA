@@ -500,16 +500,11 @@ void Device::createLogicalDevice()
     indexingFeatures.descriptorBindingPartiallyBound = VK_TRUE;
     indexingFeatures.descriptorBindingVariableDescriptorCount = VK_TRUE;
 
-    VkPhysicalDeviceInheritedViewportScissorFeaturesNV inheritedViewportFeatures{};
-    inheritedViewportFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INHERITED_VIEWPORT_SCISSOR_FEATURES_NV;
-    inheritedViewportFeatures.inheritedViewportScissor2D = VK_TRUE;
-    inheritedViewportFeatures.pNext = &indexingFeatures;
-
     VkPhysicalDeviceFeatures2 deviceFeatures2{};
     deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
     //vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
     deviceFeatures2.features.samplerAnisotropy = VK_TRUE;
-    deviceFeatures2.pNext = &inheritedViewportFeatures;
+    deviceFeatures2.pNext = &indexingFeatures;
 
     VkDeviceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;

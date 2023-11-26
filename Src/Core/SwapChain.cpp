@@ -1,5 +1,4 @@
 #include "Headers/SwapChain.hpp"
-#include "vulkan/vulkan_core.h"
 #include <iostream>
 
 using namespace AnA;
@@ -156,7 +155,7 @@ VkPresentModeKHR SwapChain::chooseSwapPresentMode(const std::vector<VkPresentMod
         }
     }
 
-    return VK_PRESENT_MODE_IMMEDIATE_KHR;
+    return VK_PRESENT_MODE_FIFO_KHR;
 }
 
 VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
