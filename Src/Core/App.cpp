@@ -105,6 +105,19 @@ void App::Run()
     //camera.SetViewDirection({}, glm::vec3(0.5f, 0.f, 1.f));
     //camera.SetViewTarget(glm::vec3(-1.f, -2.f, 2.f), glm::vec3(0.f, 0.f, 2.5f));
     auto prevTime = std::chrono::high_resolution_clock::now();
+
+    auto swapChainExtent = aRenderer->GetSwapChainExtent();
+    VkViewport viewport{};
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
+    viewport.width = (float)swapChainExtent.width;
+    viewport.height = (float)swapChainExtent.height;
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+        
+    VkRect2D scissor{};
+    scissor.extent = swapChainExtent;
+    scissor.offset = {0, 0};
     while(!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -125,12 +138,18 @@ void App::Run()
         {
             aRenderer->RecordSecondaryCommandBuffers([](VkCommandBuffer secondaryCommandBuffer)
             {
-                RenderSystems::RenderSystem::GetCurrent()->RenderObjects(secondaryCommandBuffer, _aApp->SceneObjects.Get(), LINE_LIST_PIPELINE);
-            });
+                RenderSystems::RenderSystem::GetCurrent()->RenderObjects(secondaryCommandBuffer, _aApp->SceneObjects.Get());
+            }, viewport);
             SceneObjects.EndUpdate();
         }
         if (auto commandBuffer = aRenderer->BeginFrame())
         {
+            swapChainExtent = aRenderer->GetSwapChainExtent();
+            viewport.width = (float)swapChainExtent.width;
+            viewport.height = (float)swapChainExtent.height;
+            scissor.extent = swapChainExtent;
+            vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+            vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
             aRenderer->BeginSwapChainRenderPass(commandBuffer);
             aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer);
             aRenderer->EndSwapChainRenderPass(commandBuffer);
