@@ -121,11 +121,11 @@ void App::Run()
         camera.SetPerspectiveProjection(glm::radians(60.f), aspect, .1f, 100.f);
         aRenderSystem->UpdateCameraBuffer(camera);
         
-        if (SceneObjects.BeginUpdate())
+        if (aRenderer->NeedUpdate() || SceneObjects.BeginUpdate())
         {
             aRenderer->RecordSecondaryCommandBuffers([](VkCommandBuffer secondaryCommandBuffer)
             {
-                RenderSystems::RenderSystem::GetCurrent()->RenderObjects(secondaryCommandBuffer, _aApp->SceneObjects.Get(), LINE_LIST_PIPELINE);
+                RenderSystems::RenderSystem::GetCurrent()->RenderObjects(secondaryCommandBuffer, _aApp->SceneObjects.Get());
             });
             SceneObjects.EndUpdate();
         }
@@ -135,6 +135,10 @@ void App::Run()
             aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer);
             aRenderer->EndSwapChainRenderPass(commandBuffer);
             aRenderer->EndFrame();
+        }
+        else
+        {
+            SceneObjects.RequestUpdate();
         }
     }
     //waitUILoop(uiThread);

@@ -78,6 +78,11 @@ namespace AnA
             return objects;
         }
 
+        void RequestUpdate()
+        {
+            needUpdate = true;
+        }
+
         const bool BeginUpdate()
         {
             return needUpdate;
@@ -91,7 +96,7 @@ namespace AnA
         void Append(Object* newObject)
         {
             objects.push_back(newObject);
-            needUpdate = true;
+            RequestUpdate();
         }
 
         void RemoveAt(int index)
@@ -102,7 +107,7 @@ namespace AnA
                 if (i == index)
                 {
                     objects.erase(obj);
-                    needUpdate = true;
+                    RequestUpdate();
                     break;
                 }
 

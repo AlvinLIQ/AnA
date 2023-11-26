@@ -27,6 +27,11 @@ namespace AnA
             return isFrameStarted;
         }
 
+        bool NeedUpdate() const
+        {
+            return needUpdate;
+        }
+
         VkRenderPass GetSwapChainRenderPass() const 
         {
             return aSwapChain->GetRenderPass();
@@ -73,5 +78,7 @@ namespace AnA
         uint32_t currentImageIndex = 0;
         int currentFrameIndex = 0;
         bool isFrameStarted = false;
+
+        bool needUpdate = false;
     };
 }
