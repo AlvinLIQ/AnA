@@ -40,13 +40,14 @@ VkCommandBuffer Renderer::BeginFrame()
     if (result == VK_ERROR_OUT_OF_DATE_KHR)
     {
         aSwapChain->RecreateSwapChain();
+        needUpdate = true;
         return nullptr;
     }
     else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
     {
         throw std::runtime_error("Failed to acquire swap chain image!");
     }
-
+    needUpdate = false;
     isFrameStarted = true;
     
     auto commandBuffer = GetCurrentCommandBuffer();
@@ -117,6 +118,7 @@ void Renderer::EndFrame()
     {
         aWindow.FramebufferResized = false;
         aSwapChain->RecreateSwapChain();
+        needUpdate = true;
     }
     else if (result != VK_SUCCESS)
     {
