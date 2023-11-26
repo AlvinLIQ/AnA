@@ -53,7 +53,7 @@ namespace AnA
 
         VkCommandBuffer BeginFrame();
 
-        void RecordSecondaryCommandBuffers(void(*recordCallBack)(VkCommandBuffer commandBuffer));
+        void RecordSecondaryCommandBuffers(void(*recordCallBack)(VkCommandBuffer commandBuffer), VkViewport& viewport);
         void ExcuteSecondaryCommandBuffer(VkCommandBuffer commandBuffer);
 
         void EndFrame();
