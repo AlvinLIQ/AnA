@@ -10,6 +10,8 @@
 
 #define INCLUDE_STB_IMAGE
 
+#define numsof(A) sizeof(A) / sizeof(*A)
+
 namespace AnA
 {
     inline std::vector<char> ReadFile(const std::string &filename)
