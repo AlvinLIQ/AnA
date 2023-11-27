@@ -80,5 +80,6 @@ namespace AnA
         bool isFrameStarted = false;
 
         bool needUpdate = false;
+        VkClearValue clearValues[2] = {{.color={0.2f, 0.2f, 0.2f, 1.0f}}, {.depthStencil = {1.0f, 0}}};
     };
 }
