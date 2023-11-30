@@ -3,11 +3,22 @@
   "configurations": [
     {
       "name": "C/C++ Runner: Debug Session",
-      "type": "lldb",
+      "type": "cppdbg",
       "request": "launch",
       "args": [],
-      "cwd": "/home/alvin/Documents/AnA",
-      "program": "/home/alvin/Documents/AnA/AnA",
+      "stopAtEntry": false,
+      "externalConsole": false,
+      "cwd": "/home/alvin/Documents/AnA/Src/Core/RenderSystem",
+      "program": "/home/alvin/Documents/AnA/Src/Core/RenderSystem/build/Debug/outDebug",
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
     }
   ]
 }

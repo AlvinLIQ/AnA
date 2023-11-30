@@ -42,10 +42,14 @@ int main()
     aApp->SceneObjects.Append(std::move(object));
 
     Object* nObj = new Object;
+    nObj->Color = {1.0, 1.0, 0.0};
     nObj->Properties = objectProperties;
+    nObj->Properties.transform.scale = {.0001, .0001, .0001};
+    nObj->Properties.transform.rotation = {glm::two_pi<float>() / 4, 0.f, 0.f};
+    
     nObj->Properties.transform.translation = {-1.5, -.5, 1.5};
-    Model::CreateModelFromFile(aApp->GetDevice(), "Models/cube.obj", nObj->Model);
-    nObj->Texture = std::make_unique<Texture>("Textures/test.jpg", aApp->GetDevice());
+    Model::CreateModelFromFile(aApp->GetDevice(), "Models/agv.obj", nObj->Model);
+    //nObj->Texture = std::make_unique<Texture>("Textures/test.jpg", aApp->GetDevice());
     aApp->SceneObjects.Append(nObj);
 
     nObj = new Object;

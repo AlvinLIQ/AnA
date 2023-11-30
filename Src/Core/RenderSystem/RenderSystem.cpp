@@ -122,7 +122,7 @@ void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, const std::vecto
     {
         if (object->Texture.get() == nullptr)
         {
-            uint32_t color = ((uint32_t)(object->Color.r * 255.0f) << 24) ^ ((uint32_t)(object->Color.g * 255.0f) << 16) ^ ((uint32_t)(object->Color.b * 255.0f) << 8) ^ (uint32_t)0xFF;
+            uint32_t color = (uint32_t)0xFF000000 ^ ((uint32_t)(object->Color.b * 255.0f) << 16) ^ ((uint32_t)(object->Color.g * 255.0f) << 8) ^ ((uint32_t)(object->Color.r * 255.0f));
             object->Texture = std::make_unique<Texture>(color, aDevice);
         }
         sets[1] = object->Texture->GetDescriptorSet();
