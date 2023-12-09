@@ -118,8 +118,11 @@ void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, const std::vecto
 
     std::array<VkDescriptorSet, 2> sets;
     sets[0] = descriptorSets[aSwapChain.CurrentFrame];
-    for (auto& object : objects)
+
+    Object* object;
+    for (int i = 0; i < objects.size(); i++)
     {
+        object = objects[i];
         if (object->Texture.get() == nullptr)
         {
             uint32_t color = (uint32_t)0xFF000000 ^ ((uint32_t)(object->Color.b * 255.0f) << 16) ^ ((uint32_t)(object->Color.g * 255.0f) << 8) ^ ((uint32_t)(object->Color.r * 255.0f));
@@ -133,19 +136,14 @@ void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, const std::vecto
         object->Model->Bind(commandBuffer);
         ObjectPushConstantData push{};
 
-        //auto projectionMatrix = camera.GetProjectionMatrix() * camera.GetView();
         object->PrepareDraw();
         auto &itemProperties = object->Properties;
         push.sType = itemProperties.sType;
-        //push.projectionMatrix = camera.GetProjectionMatrix();
         if (push.sType == ANA_MODEL)
-        {
-            //itemProperties.transform.rotation.y = glm::mod(itemProperties.transform.rotation.y + 1.f * camera.GetSpeedRatio(), glm::two_pi<float>());
-            //itemProperties.transform.translation.y = glm::sin(itemProperties.transform.rotation.y) * 0.1f;
-            push.transformMatrix = itemProperties.transform.mat4();//projectionMatrix * itemProperties->transform.mat4();
-        }
+            push.transformMatrix = itemProperties.transform.mat4();
         else // For 2D Objects
             push.transformMatrix = itemProperties.transform.mat4();
+            
         push.color = itemProperties.color.has_value() ? itemProperties.color.value() : object->Color;
         vkCmdPushConstants(commandBuffer, 
         pipelineLayout,

@@ -1,5 +1,6 @@
 #pragma once
 #include "Device.hpp"
+#include <stdint.h>
 #include <vulkan/vulkan_core.h>
 #include <cstring>
 
@@ -28,6 +29,16 @@ namespace AnA
         void* GetMappedData()
         {
             return mappedData;
+        }
+
+        void CopyToBuffer(Buffer& dstBuffer, VkDeviceSize bufferSize)
+        {
+            aDevice.CopyBuffer(dstBuffer.GetBuffer(), buffer, bufferSize);
+        }
+
+        void CopyToBuffer(Buffer& dstBuffer, uint32_t regionCount, const VkBufferCopy regions, VkCommandBuffer commandBuffer)
+        {
+            vkCmdCopyBuffer(commandBuffer, buffer, dstBuffer.GetBuffer(), regionCount, &regions);
         }
 
         void CopyToBuffer(const void* data, VkDeviceSize bufferSize)

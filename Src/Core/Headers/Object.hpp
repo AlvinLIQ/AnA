@@ -3,6 +3,7 @@
 #include "Model.hpp"
 #include "Texture.hpp"
 #include "Types.hpp"
+#include "vulkan/vulkan_core.h"
 #include <memory>
 #include <vector>
 
@@ -18,7 +19,6 @@ namespace AnA
 {
     struct ObjectPushConstantData
     {
-//        glm::mat4 projectionMatrix {1.f};
         glm::mat4 transformMatrix {1.f};
         glm::uint32_t sType;
         alignas(16) glm::vec3 color;
@@ -47,10 +47,6 @@ namespace AnA
         std::shared_ptr<Model> Model;
         glm::vec3 Color{};
         ItemProperties Properties;
-        VkDescriptorSet& GetPropertiesDescriptorSet()
-        {
-            return descriptorSet;
-        }
 
         std::unique_ptr<Texture> Texture;
         
@@ -66,10 +62,6 @@ namespace AnA
         virtual void PrepareDraw();
     private:
         id_t id;
-        VkDescriptorPool descriptorPool;
-        void createDescriptorPool();
-        VkDescriptorSet descriptorSet;
-        void createDescriptorSet();
     };
 
     typedef char ANA_OBJECTS_UPDATE_FLAG_BIT;
@@ -80,10 +72,19 @@ namespace AnA
     class Objects
     {
     public:
+        void Init(Device* mDevice)
+        {
+            aDevice = mDevice;
+            createObjectsBuffers();
+        }
+
         void Destroy()
         {
             for (auto& object : objects)
                 delete object;
+            objects.clear();
+            for (auto& objectsBuffer : objectsBuffers)
+                delete objectsBuffer;
         }
         const std::vector<Object*>& Get() const
         {
@@ -140,8 +141,27 @@ namespace AnA
             }
         }
     private:
-        std::vector<Object*> objects;
         bool commandBufferNeedUpdate = false;
         bool uniformBufferNeedUpdate = false;
+
+        Device* aDevice;
+
+        std::vector<Object*> objects;
+        std::vector<Buffer*> objectsBuffers;
+        void createObjectsBuffers()
+        {
+            objectsBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+            for (auto& objectsBuffer : objectsBuffers)
+            {
+                objectsBuffer = new Buffer(*aDevice, 128,
+                 VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+            }
+        }
+        
+        VkDescriptorPool descriptorPool;
+        void createDescriptorPool();
+        VkDescriptorSet descriptorSet;
+        void createDescriptorSet();
     };
 }

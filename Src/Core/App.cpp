@@ -91,6 +91,7 @@ void App::Init()
     aInstance = new Instance;
     aWindow->CreateWindowSurface(aInstance);
     _aDevice = aDevice = new Device(aInstance->GetInstance(), aWindow->GetSurface());
+    SceneObjects.Init(aDevice);
     aRenderer = new Renderer(*aWindow, *aDevice);
     aRenderSystem = new RenderSystems::RenderSystem(*aDevice, aRenderer->GetSwapChain());
 }
