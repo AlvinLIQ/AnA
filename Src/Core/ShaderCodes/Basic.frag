@@ -12,12 +12,16 @@ layout(location = 1) in vec2 texCoord;
 layout(location = 0) out vec4 outColor;
 
 layout(push_constant) uniform Push {
-//    mat4 projectionMatrix;
     mat4 transformMatrix;
     uint sType;
-    vec2 resolution;
     vec3 color;
 } push;
+
+layout(set = 0, binding = 0) uniform CameraBufferObject {
+    mat4 proj;
+    mat4 view;
+    vec2 resolution;
+} cbo;
 
 layout(set = 1, binding = 1) uniform sampler2D texSampler;
 
@@ -69,8 +73,8 @@ void main() {
         outColor = texture(texSampler, texCoord) * vec4(fragColor, 1.);
         return;
     }
-    vec2 uv = gl_FragCoord.xy / push.resolution;
-    //float ratio = push.resolution.y/push.resolution.x;
+    vec2 uv = gl_FragCoord.xy / cbo.resolution;
+    //float ratio = cbo.resolution.y/cbo.resolution.x;
     //uv.x /= ratio;
     float c = 0.;
     vec2 offset = vec2((push.transformMatrix[3].x + (1. - push.transformMatrix[0].x)) / 2., (push.transformMatrix[3].y + (1. - push.transformMatrix[1].y)) / 2.);

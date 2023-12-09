@@ -22,3 +22,13 @@ void Object::PrepareDraw()
 {
 
 }
+
+void Object::createDescriptorPool()
+{
+    
+}
+
+void Object::createDescriptorSet()
+{
+    
+}
