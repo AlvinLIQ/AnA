@@ -121,7 +121,7 @@ void Model::createVertexBuffers(const std::vector<Vertex>& vertices)
     vertexBuffer = new Buffer(aDevice, bufferSize, 
         VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    aDevice.CopyBuffer(stagingBuffer.GetBuffer(), vertexBuffer->GetBuffer(), bufferSize);
+    vertexBuffer->CopyToBuffer(stagingBuffer, bufferSize);
 }
 
 void Model::createIndexBuffers(const std::vector<Index>& indices)
@@ -136,7 +136,7 @@ void Model::createIndexBuffers(const std::vector<Index>& indices)
     indexBuffer = new Buffer(aDevice, bufferSize, 
         VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-        aDevice.CopyBuffer(stagingBuffer.GetBuffer(), indexBuffer->GetBuffer(), bufferSize);
+    indexBuffer->CopyToBuffer(stagingBuffer, bufferSize);
 }
 
 void Model::Bind(VkCommandBuffer commandBuffer)

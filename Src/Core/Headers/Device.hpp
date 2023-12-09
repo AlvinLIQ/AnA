@@ -10,6 +10,8 @@
 
 #define INCLUDE_STB_IMAGE
 
+#define MAX_FRAMES_IN_FLIGHT 2
+
 #define numsof(A) sizeof(A) / sizeof(*A)
 
 namespace AnA
