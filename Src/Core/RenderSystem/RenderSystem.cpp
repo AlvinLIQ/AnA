@@ -15,7 +15,7 @@ VkDescriptorSetLayoutBinding CameraBufferObject::GetBindingDescriptionSet()
     uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     uboLayoutBinding.descriptorCount = 1;
 
-    uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
+    uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
 
     return uboLayoutBinding;
 }
@@ -132,8 +132,6 @@ void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, const std::vecto
 
         object->Model->Bind(commandBuffer);
         ObjectPushConstantData push{};
-        auto extent = aSwapChain.GetExtent();
-        push.resolution = {extent.width, extent.height};
 
         //auto projectionMatrix = camera.GetProjectionMatrix() * camera.GetView();
         object->PrepareDraw();
@@ -165,6 +163,8 @@ void RenderSystem::UpdateCameraBuffer(Cameras::Camera &camera)
     CameraBufferObject cbo;
     cbo.proj = camera.GetProjectionMatrix();
     cbo.view = camera.GetView();
+    auto extent = aSwapChain.GetExtent();
+    cbo.resolution = {(float)extent.width, (float)extent.height};
 
     memcpy(cameraBuffers[aSwapChain.CurrentFrame]->GetMappedData(), &cbo, sizeof(cbo));
 }

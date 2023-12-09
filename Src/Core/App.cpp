@@ -120,14 +120,19 @@ void App::Run()
         //camera.SetOrthographicProjection(-aspect, -1, aspect, 1, -1, 1);
         camera.SetPerspectiveProjection(glm::radians(60.f), aspect, .01f, 100.f);
         aRenderSystem->UpdateCameraBuffer(camera);
-        
-        if (aRenderer->NeedUpdate() || SceneObjects.BeginUpdate())
+
+        if (SceneObjects.BeginUniformBufferUpdate())
+        {
+
+            SceneObjects.EndUniformBufferUpdate();
+        }
+        if (aRenderer->NeedUpdate() || SceneObjects.BeginCommandBufferUpdate())
         {
             aRenderer->RecordSecondaryCommandBuffers([](VkCommandBuffer secondaryCommandBuffer)
             {
                 RenderSystems::RenderSystem::GetCurrent()->RenderObjects(secondaryCommandBuffer, _aApp->SceneObjects.Get());
             });
-            SceneObjects.EndUpdate();
+            SceneObjects.EndCommandBufferUpdate();
         }
         if (auto commandBuffer = aRenderer->BeginFrame())
         {

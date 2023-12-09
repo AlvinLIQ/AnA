@@ -17,7 +17,6 @@ layout(location = 1) out vec2 outTexCoord;
 layout(push_constant) uniform Push {
     mat4 transformMatrix;
     uint sType;
-    vec2 resolution;
     vec3 color;
 } push;
 

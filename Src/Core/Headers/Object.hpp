@@ -21,7 +21,6 @@ namespace AnA
 //        glm::mat4 projectionMatrix {1.f};
         glm::mat4 transformMatrix {1.f};
         glm::uint32_t sType;
-        alignas(8) glm::vec2 resolution;
         alignas(16) glm::vec3 color;
     };
 
@@ -48,6 +47,10 @@ namespace AnA
         std::shared_ptr<Model> Model;
         glm::vec3 Color{};
         ItemProperties Properties;
+        VkDescriptorSet& GetPropertiesDescriptorSet()
+        {
+            return descriptorSet;
+        }
 
         std::unique_ptr<Texture> Texture;
         
@@ -63,7 +66,16 @@ namespace AnA
         virtual void PrepareDraw();
     private:
         id_t id;
+        VkDescriptorPool descriptorPool;
+        void createDescriptorPool();
+        VkDescriptorSet descriptorSet;
+        void createDescriptorSet();
     };
+
+    typedef char ANA_OBJECTS_UPDATE_FLAG_BIT;
+    static const ANA_OBJECTS_UPDATE_FLAG_BIT ANA_OBJECTS_UPDATE_COMMAND_BUFFER = 1;
+    static const ANA_OBJECTS_UPDATE_FLAG_BIT ANA_OBJECTS_UPDATE_UNIFORM_BUFFER = 2;
+    static const ANA_OBJECTS_UPDATE_FLAG_BIT ANA_OBJECTS_UPDATE_ALL = 3;
 
     class Objects
     {
@@ -78,19 +90,32 @@ namespace AnA
             return objects;
         }
 
-        void RequestUpdate()
+        void RequestUpdate(ANA_OBJECTS_UPDATE_FLAG_BIT flag = ANA_OBJECTS_UPDATE_ALL)
         {
-            needUpdate = true;
+            if (flag & ANA_OBJECTS_UPDATE_COMMAND_BUFFER)
+                commandBufferNeedUpdate = true;
+            if (flag & ANA_OBJECTS_UPDATE_UNIFORM_BUFFER)
+                uniformBufferNeedUpdate = true;
         }
 
-        const bool BeginUpdate()
+        const bool BeginCommandBufferUpdate()
         {
-            return needUpdate;
+            return commandBufferNeedUpdate;
         }
 
-        void EndUpdate()
+        void EndCommandBufferUpdate()
         {
-            needUpdate = false;
+            commandBufferNeedUpdate = false;
+        }
+
+        const bool BeginUniformBufferUpdate()
+        {
+            return uniformBufferNeedUpdate;
+        }
+
+        void EndUniformBufferUpdate()
+        {
+            uniformBufferNeedUpdate = false;
         }
 
         void Append(Object* newObject)
@@ -116,6 +141,7 @@ namespace AnA
         }
     private:
         std::vector<Object*> objects;
-        bool needUpdate = false;
+        bool commandBufferNeedUpdate = false;
+        bool uniformBufferNeedUpdate = false;
     };
 }
