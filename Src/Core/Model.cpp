@@ -187,7 +187,7 @@ VkDescriptorSetLayoutBinding Model::ModelStorageBufferObject::GetBindingDescript
     ssboLayoutBinding.binding = 1;
     ssboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     ssboLayoutBinding.descriptorCount = 1;
-    ssboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    ssboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 
     return ssboLayoutBinding;
 }
