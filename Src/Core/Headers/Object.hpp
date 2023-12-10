@@ -8,7 +8,6 @@
 #include <memory>
 #include <stdint.h>
 #include <unordered_map>
-#include <vcruntime_string.h>
 #include <vector>
 
 #define SHAPE_TYPE uint32_t
