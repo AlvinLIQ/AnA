@@ -50,7 +50,7 @@ void main() {
     else
     {
         gl_Position = objectBuffer.objects[index].model * vec4(position, 1.0);
-        fragColor = color;
+        fragColor = push.color;
     }
     outTexCoord = uv;
     //gl_Position = push.projectionMatrix * push.transformMatrix * vec4(position, 1.0);
