@@ -36,9 +36,9 @@ RenderSystem::RenderSystem(Device& mDevice, SwapChain& mSwapChain) : aDevice {mD
 {
     currentRenderSystem = this;
     createCameraBuffers();
-    createDescriptorPool();
+    aDevice.CreateDescriptorPool(MAX_FRAMES_IN_FLIGHT, descriptorPool);
     createDescriptorSetLayout();
-    createDescriptorSets();
+    aDevice.CreateDescriptorSets((std::vector<void*>&)cameraBuffers, sizeof(CameraBufferObject), 0, MAX_FRAMES_IN_FLIGHT, descriptorPool, descriptorSetLayouts[0], VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, descriptorSets);
     createPipelineLayouts();
     pipelines[TRIANGLE_LIST_PIPELINE] = new Pipeline(aDevice, "Shaders/vert.spv", "Shaders/frag.spv", aSwapChain.GetRenderPass(), pipelineLayout);
     pipelines[LINE_LIST_PIPELINE] = new Pipeline(aDevice, "Shaders/lineVert.spv", "Shaders/lineFrag.spv", aSwapChain.GetRenderPass(), pipelineLayout, VK_PRIMITIVE_TOPOLOGY_LINE_LIST);
@@ -66,7 +66,7 @@ RenderSystem* RenderSystem::GetCurrent()
     return currentRenderSystem;
 }
 
-std::array<VkDescriptorSetLayout, 2>& RenderSystem::GetDescriptorSetLayouts()
+std::array<VkDescriptorSetLayout, 3>& RenderSystem::GetDescriptorSetLayouts()
 {
     return descriptorSetLayouts;
 }
@@ -112,38 +112,35 @@ void RenderSystem::createCameraBuffers()
     }
 }
 
-void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, const std::vector<Object*> &objects, int pipeLineIndex)
+void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, Objects &objects, int pipeLineIndex)
 {
     pipelines[pipeLineIndex]->Bind(commandBuffer);
 
-    std::array<VkDescriptorSet, 2> sets;
+    std::array<VkDescriptorSet, 3> sets;
     sets[0] = descriptorSets[aSwapChain.CurrentFrame];
+    sets[1] = objects.GetDescriptorSets()[aSwapChain.CurrentFrame];
 
     Object* object;
-    for (int i = 0; i < objects.size(); i++)
+    auto objectArray = objects.Get();
+    for (int i = 0; i < objectArray.size(); i++)
     {
-        object = objects[i];
+        object = objectArray[i];
         if (object->Texture.get() == nullptr)
         {
             uint32_t color = (uint32_t)0xFF000000 ^ ((uint32_t)(object->Color.b * 255.0f) << 16) ^ ((uint32_t)(object->Color.g * 255.0f) << 8) ^ ((uint32_t)(object->Color.r * 255.0f));
             object->Texture = std::make_unique<Texture>(color, aDevice);
         }
-        sets[1] = object->Texture->GetDescriptorSet();
+        sets[2] = object->Texture->GetDescriptorSet();
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
         pipelineLayout, 0, static_cast<uint32_t>(sets.size()),
         sets.data(), 0, nullptr);
 
         object->Model->Bind(commandBuffer);
         ObjectPushConstantData push{};
-
+        push.index = i;
         object->PrepareDraw();
         auto &itemProperties = object->Properties;
         push.sType = itemProperties.sType;
-        if (push.sType == ANA_MODEL)
-            push.transformMatrix = itemProperties.transform.mat4();
-        else // For 2D Objects
-            push.transformMatrix = itemProperties.transform.mat4();
-            
         push.color = itemProperties.color.has_value() ? itemProperties.color.value() : object->Color;
         vkCmdPushConstants(commandBuffer, 
         pipelineLayout,
@@ -167,61 +164,6 @@ void RenderSystem::UpdateCameraBuffer(Cameras::Camera &camera)
     memcpy(cameraBuffers[aSwapChain.CurrentFrame]->GetMappedData(), &cbo, sizeof(cbo));
 }
 
-void RenderSystem::createDescriptorPool()
-{
-    std::array<VkDescriptorPoolSize, 1> poolSizes{};
-    poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSizes[0].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
-
-    VkDescriptorPoolCreateInfo poolInfo{};
-    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
-    poolInfo.pPoolSizes = poolSizes.data();
-    poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
-    poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-
-    if (vkCreateDescriptorPool(aDevice.GetLogicalDevice(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create descriptor pool!");
-}
-
-void RenderSystem::createDescriptorSets()
-{
-    std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, descriptorSetLayouts[0]);
-    VkDescriptorSetAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorPool = descriptorPool;
-    allocInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
-    allocInfo.pSetLayouts = layouts.data();
-
-    descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
-    if (vkAllocateDescriptorSets(aDevice.GetLogicalDevice(), &allocInfo, descriptorSets.data()) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to allocate descriptor sets!");
-    }
-
-    for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-    {
-        VkDescriptorBufferInfo bufferInfo{};
-        bufferInfo.buffer = cameraBuffers[i]->GetBuffer();
-        bufferInfo.offset = 0;
-        bufferInfo.range = sizeof(CameraBufferObject);
-
-        VkWriteDescriptorSet descriptorWrite{};
-        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrite.dstSet = descriptorSets[i];
-        descriptorWrite.dstBinding = 0;
-        descriptorWrite.dstArrayElement = 0;
-
-        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        descriptorWrite.descriptorCount = 1;
-
-        descriptorWrite.pBufferInfo = &bufferInfo;
-
-        vkUpdateDescriptorSets(aDevice.GetLogicalDevice(), 1,
-            &descriptorWrite, 0, nullptr);
-    }
-}
-
 void RenderSystem::createDescriptorSetLayout()
 {
     auto uboLayoutBinding = CameraBufferObject::GetBindingDescriptionSet();
@@ -231,20 +173,25 @@ void RenderSystem::createDescriptorSetLayout()
     layoutInfo.pBindings = &uboLayoutBinding;
 
     if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[0]) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create the DescriptorSetLayout");
+        throw std::runtime_error("Failed to create the DescriptorSetLayout 1");
 
     if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &computeDescriptorSetLayout) != VK_SUCCESS)
         throw std::runtime_error("Failed to create the ComputeDescriptorSetLayout");
 
+    auto ssboLayoutBinding = Model::ModelStorageBufferObject::GetBindingDescriptionSet();
+    layoutInfo.pBindings = &ssboLayoutBinding;
+    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[1]) != VK_SUCCESS)
+        throw std::runtime_error("Failed to create the DescriptorSetLayout 2");
+
     VkDescriptorSetLayoutBinding samplerLayoutBinding{};
-    samplerLayoutBinding.binding = 1;
     samplerLayoutBinding.descriptorCount = 1;
     samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     samplerLayoutBinding.pImmutableSamplers = nullptr;
     samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    samplerLayoutBinding.binding = 2;
 
     layoutInfo.pBindings = &samplerLayoutBinding;
 
-    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[1]) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create the DescriptorSetLayout");
+    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[2]) != VK_SUCCESS)
+        throw std::runtime_error("Failed to create the DescriptorSetLayout 3");
 }

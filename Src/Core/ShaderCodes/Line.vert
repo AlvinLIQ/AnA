@@ -8,19 +8,28 @@ layout(location = 3) in vec2 uv;
 layout(location = 0) out vec3 fragColor;
 
 layout(push_constant) uniform Push {
-    mat4 transformMatrix;
     uint sType;
-    vec2 resolution;
+    uint index;
     vec3 color;
 } push;
 
 layout(set = 0, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
+    vec2 resolution;
 } cbo;
+
+struct Object{
+    mat4 model;
+};
+
+layout(std140, set = 1, binding = 1) readonly buffer ObjectBuffer {
+    Object objects[];
+};
 
 void main()
 {
-    gl_Position = cbo.proj * cbo.view * push.transformMatrix * vec4(position, 1.0);
+    uint index = push.index;
+    gl_Position = cbo.proj * cbo.view * objects[index].model * vec4(position, 1.0);
     fragColor = color;
 }

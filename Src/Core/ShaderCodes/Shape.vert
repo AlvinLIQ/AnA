@@ -6,9 +6,8 @@ layout(location = 1) vec3 color;
 layout(location = 0) out fragColor;
 
 layout(push_constant) uniform Push {
-    mat4 transformMatrix;
     uint sType;
-    vec2 resolution;
+    uint index;
     vec3 color;
 } push;
 

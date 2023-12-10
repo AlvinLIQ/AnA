@@ -31,14 +31,19 @@ namespace AnA
             return mappedData;
         }
 
-        void CopyToBuffer(Buffer& dstBuffer, VkDeviceSize bufferSize)
+        void CopyToBuffer(Buffer& srcBuffer, VkDeviceSize bufferSize)
         {
-            aDevice.CopyBuffer(dstBuffer.GetBuffer(), buffer, bufferSize);
+            aDevice.CopyBuffer(srcBuffer.GetBuffer(), buffer, bufferSize);
         }
 
-        void CopyToBuffer(Buffer& dstBuffer, uint32_t regionCount, const VkBufferCopy regions, VkCommandBuffer commandBuffer)
+        void CopyToBuffer(Buffer& srcBuffer, uint32_t regionCount, const VkBufferCopy* regions)
         {
-            vkCmdCopyBuffer(commandBuffer, buffer, dstBuffer.GetBuffer(), regionCount, &regions);
+            aDevice.CopyBuffer(srcBuffer.GetBuffer(), buffer, regionCount, regions);
+        }
+
+        void CopyToBuffer(Buffer& srcBuffer, uint32_t regionCount, const VkBufferCopy* regions, VkCommandBuffer commandBuffer)
+        {
+            vkCmdCopyBuffer(commandBuffer, srcBuffer.GetBuffer(), buffer, regionCount, regions);
         }
 
         void CopyToBuffer(const void* data, VkDeviceSize bufferSize)

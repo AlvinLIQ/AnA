@@ -91,9 +91,9 @@ void App::Init()
     aInstance = new Instance;
     aWindow->CreateWindowSurface(aInstance);
     _aDevice = aDevice = new Device(aInstance->GetInstance(), aWindow->GetSurface());
-    SceneObjects.Init(aDevice);
     aRenderer = new Renderer(*aWindow, *aDevice);
     aRenderSystem = new RenderSystems::RenderSystem(*aDevice, aRenderer->GetSwapChain());
+    SceneObjects.Init(aDevice, aRenderSystem->GetDescriptorSetLayouts()[1]);
 }
 
 void App::Run()
@@ -122,21 +122,21 @@ void App::Run()
         camera.SetPerspectiveProjection(glm::radians(60.f), aspect, .01f, 100.f);
         aRenderSystem->UpdateCameraBuffer(camera);
 
-        if (SceneObjects.BeginUniformBufferUpdate())
-        {
-
-            SceneObjects.EndUniformBufferUpdate();
-        }
         if (aRenderer->NeedUpdate() || SceneObjects.BeginCommandBufferUpdate())
         {
             aRenderer->RecordSecondaryCommandBuffers([](VkCommandBuffer secondaryCommandBuffer)
             {
-                RenderSystems::RenderSystem::GetCurrent()->RenderObjects(secondaryCommandBuffer, _aApp->SceneObjects.Get());
+                RenderSystems::RenderSystem::GetCurrent()->RenderObjects(secondaryCommandBuffer, _aApp->SceneObjects);
             });
             SceneObjects.EndCommandBufferUpdate();
         }
         if (auto commandBuffer = aRenderer->BeginFrame())
         {
+            if (SceneObjects.BeginStorageBufferUpdate())
+            {
+                SceneObjects.CommitStorageBufferUpdate(commandBuffer);
+                SceneObjects.EndStorageBufferUpdate();
+            }
             aRenderer->BeginSwapChainRenderPass(commandBuffer);
             aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer);
             aRenderer->EndSwapChainRenderPass(commandBuffer);

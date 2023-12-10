@@ -15,31 +15,41 @@ layout(location = 0) out vec3 fragColor;
 layout(location = 1) out vec2 outTexCoord;
 
 layout(push_constant) uniform Push {
-    mat4 transformMatrix;
     uint sType;
+    uint index;
     vec3 color;
 } push;
 
 layout(set = 0, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
+    vec2 resolution;
 } cbo;
+
+struct Object{
+    mat4 model;
+};
+
+layout(std140, set = 1, binding = 1) buffer ObjectBuffer {
+    Object objects[];
+} objectBuffer;
 
 const vec3 LIGHT_DIRECTION = normalize(vec3(1., -3., -1.));
 
 void main() {
     //gl_Position = vec4(push.transform * position + push.offset * 2, 0.0, 1.0);
+    uint index = push.index;
     if (push.sType == ANA_MODEL)
     {
-        gl_Position = cbo.proj * cbo.view * push.transformMatrix * vec4(position, 1.0);
-        vec3 normalWorldSpace = normalize(mat3(push.transformMatrix) * normal);
+        gl_Position = cbo.proj * cbo.view * objectBuffer.objects[index].model * vec4(position, 1.0);
+        vec3 normalWorldSpace = normalize(mat3(objectBuffer.objects[index].model) * normal);
 
         float lightIntensity = max(dot(normalWorldSpace, LIGHT_DIRECTION), 0);
         fragColor = lightIntensity * vec3(1.0) + 0.077;
     }
     else
     {
-        gl_Position = push.transformMatrix * vec4(position, 1.0);
+        gl_Position = objectBuffer.objects[index].model * vec4(position, 1.0);
         fragColor = color;
     }
     outTexCoord = uv;
