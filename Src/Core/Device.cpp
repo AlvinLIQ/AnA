@@ -63,6 +63,15 @@ void Device::CopyBuffer(VkBuffer& srcBuffer, VkBuffer& dstBuffer, VkDeviceSize s
     endSingleTimeCommands(commandBuffer);
 }
 
+void Device::CopyBuffer(VkBuffer& srcBuffer, VkBuffer& dstBuffer, uint32_t regionCount, const VkBufferCopy* copyRegions)
+{
+    VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+
+    vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, regionCount, copyRegions);
+
+    endSingleTimeCommands(commandBuffer);
+}
+
 void Device::CopyBufferToImage(VkBuffer& srcBuffer, VkImage& dstImage, VkExtent3D extent)
 {
     VkCommandBuffer commandBuffer = beginSingleTimeCommands();
@@ -281,6 +290,56 @@ void Device::CreateTextImage(const char* text, int width, int height, float line
 }
 
 #endif
+
+void Device::CreateDescriptorPool(int descriptorCount, VkDescriptorPool& descriptorPool)
+{
+    VkDescriptorPoolSize poolSizes[1];
+    poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    poolSizes[0].descriptorCount = static_cast<uint32_t>(descriptorCount);
+
+    VkDescriptorPoolCreateInfo poolInfo{};
+    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    poolInfo.poolSizeCount = numsof(poolSizes);
+    poolInfo.pPoolSizes = poolSizes;
+    poolInfo.maxSets = static_cast<uint32_t>(descriptorCount);
+    poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+    
+    if (vkCreateDescriptorPool(logicalDevice, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
+        throw std::runtime_error("Failed to create descriptor pool!");
+}
+
+void Device::CreateDescriptorSets(std::vector<void*>& buffers, VkDeviceSize bufferSize, uint32_t binding, int descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets)
+{
+    std::vector<VkDescriptorSetLayout> layouts(descriptorSetCount, descriptorSetLayout);
+    VkDescriptorSetAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocInfo.descriptorPool = descriptorPool;
+    allocInfo.descriptorSetCount = static_cast<uint32_t>(descriptorSetCount);
+    allocInfo.pSetLayouts = layouts.data();
+    descriptorSets.resize(descriptorSetCount);
+    
+    if (vkAllocateDescriptorSets(logicalDevice, &allocInfo, descriptorSets.data()) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to allocate descriptor sets!");
+    }
+    for (int i = 0; i < descriptorSetCount; i++)
+    {
+        VkDescriptorBufferInfo bufferInfo{};
+        bufferInfo.buffer = ((Buffer*)buffers[i])->GetBuffer();
+        bufferInfo.offset = 0;
+        bufferInfo.range = bufferSize;
+        VkWriteDescriptorSet descriptorWrite{};
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = descriptorSets[i];
+        descriptorWrite.dstBinding = binding;
+        descriptorWrite.dstArrayElement = 0;
+        descriptorWrite.descriptorType = descriptorType;
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.pBufferInfo = &bufferInfo;
+        vkUpdateDescriptorSets(logicalDevice, 1,
+            &descriptorWrite, 0, nullptr);
+    }
+}
 
 void Device::TransitionImageLayout(VkImage &image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
 {

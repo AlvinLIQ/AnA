@@ -12,8 +12,8 @@ layout(location = 1) in vec2 texCoord;
 layout(location = 0) out vec4 outColor;
 
 layout(push_constant) uniform Push {
-    mat4 transformMatrix;
     uint sType;
+    uint index;
     vec3 color;
 } push;
 
@@ -23,7 +23,7 @@ layout(set = 0, binding = 0) uniform CameraBufferObject {
     vec2 resolution;
 } cbo;
 
-layout(set = 1, binding = 1) uniform sampler2D texSampler;
+layout(set = 2, binding = 2) uniform sampler2D texSampler;
 
 float rect(vec2 uv, float l, float t, float r, float b)
 {
@@ -73,6 +73,7 @@ void main() {
         outColor = texture(texSampler, texCoord) * vec4(fragColor, 1.);
         return;
     }
+    /*
     vec2 uv = gl_FragCoord.xy / cbo.resolution;
     //float ratio = cbo.resolution.y/cbo.resolution.x;
     //uv.x /= ratio;
@@ -91,5 +92,5 @@ void main() {
         break;
     }
 
-    outColor = vec4(c * texture(texSampler, texCoord));
+    outColor = vec4(c * texture(texSampler, texCoord));*/
 }

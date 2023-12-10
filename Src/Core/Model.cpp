@@ -180,3 +180,14 @@ std::vector<VkVertexInputAttributeDescription> Model::Vertex::GetAttributeDescri
 
     return attributeDescriptions;
 }
+
+VkDescriptorSetLayoutBinding Model::ModelStorageBufferObject::GetBindingDescriptionSet()
+{
+    VkDescriptorSetLayoutBinding ssboLayoutBinding{};
+    ssboLayoutBinding.binding = 1;
+    ssboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    ssboLayoutBinding.descriptorCount = 1;
+    ssboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+    return ssboLayoutBinding;
+}

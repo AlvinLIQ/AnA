@@ -1,9 +1,8 @@
 #version 450
 
 layout(push_constant) uniform Push {
-    mat4 transformMatrix;
     uint sType;
-    vec2 resolution;
+    uint index;
     vec3 color;
 } push;
 
@@ -25,5 +24,5 @@ layout(std140, binding = 2) buffer ItemOut
 
 void main()
 {
-    //vec3 test = ItemIn.itemsIn.position * vec3(2.f);
+    //vec3 test = itemsIn[0].position * vec3(2.f);
 }

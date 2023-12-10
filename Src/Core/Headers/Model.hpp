@@ -14,7 +14,7 @@
 #include <vector>
 
 namespace AnA
-{   
+{
     class Model
     {
     public:
@@ -35,6 +35,12 @@ namespace AnA
             std::vector<Vertex> vertices;
             Index indexStep;
             std::vector<Index> indices;
+        };
+
+        struct ModelStorageBufferObject
+        {
+            glm::mat4 model;
+            static VkDescriptorSetLayoutBinding GetBindingDescriptionSet();
         };
 
         Model(Device& mDevice, const ModelInfo& modelInfo);

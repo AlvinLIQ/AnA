@@ -33,11 +33,11 @@ namespace AnA
             RenderSystem(Device& mDevice, SwapChain& mSwapChain);
             ~RenderSystem();
 
-            void RenderObjects(VkCommandBuffer commandBuffer, const std::vector<Object*> &objects, int pipeLineIndex = TRIANGLE_LIST_PIPELINE);
+            void RenderObjects(VkCommandBuffer commandBuffer, Objects &objects, int pipeLineIndex = TRIANGLE_LIST_PIPELINE);
             void UpdateCameraBuffer(Cameras::Camera &camera);
             static RenderSystem* GetCurrent();
 
-            std::array<VkDescriptorSetLayout, 2>& GetDescriptorSetLayouts();
+            std::array<VkDescriptorSetLayout, 3>& GetDescriptorSetLayouts();
         private:
             Device& aDevice;
             SwapChain& aSwapChain;
@@ -52,13 +52,11 @@ namespace AnA
             void createCameraBuffers();
 
             VkDescriptorPool descriptorPool;
-            void createDescriptorPool();
 
-            std::array<VkDescriptorSetLayout, 2> descriptorSetLayouts = {};
+            std::array<VkDescriptorSetLayout, 3> descriptorSetLayouts = {};
             VkDescriptorSetLayout computeDescriptorSetLayout;
             void createDescriptorSetLayout();
             std::vector<VkDescriptorSet> descriptorSets;
-            void createDescriptorSets();
         };
     }
 }

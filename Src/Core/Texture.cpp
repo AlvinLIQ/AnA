@@ -114,7 +114,7 @@ void Texture::createDescriptorSet()
     allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     allocInfo.descriptorPool = descriptorPool;
     allocInfo.descriptorSetCount = 1;
-    allocInfo.pSetLayouts = &RenderSystems::RenderSystem::GetCurrent()->GetDescriptorSetLayouts()[1];
+    allocInfo.pSetLayouts = &RenderSystems::RenderSystem::GetCurrent()->GetDescriptorSetLayouts()[2];
 
     if (vkAllocateDescriptorSets(aDevice.GetLogicalDevice(), &allocInfo, &descriptorSet) != VK_SUCCESS)
         throw std::runtime_error("Failed to allocate descriptor sets!");
@@ -127,7 +127,7 @@ void Texture::createDescriptorSet()
     VkWriteDescriptorSet descriptorWrite{};
     descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     descriptorWrite.dstSet = descriptorSet;
-    descriptorWrite.dstBinding = 1;
+    descriptorWrite.dstBinding = 2;
     descriptorWrite.dstArrayElement = 0;
     descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     descriptorWrite.descriptorCount = 1;

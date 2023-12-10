@@ -17,16 +17,24 @@ layout(binding = 1) uniform LightingObject
 }lbo;
 
 layout(push_constant) uniform Push {
-    mat4 transformMatrix;
     uint sType;
-    vec2 resolution;
+    uint index;
     vec3 color;
 } push;
 
+struct Object{
+    mat4 model;
+};
+
+layout(std140, set = 1, binding = 0) readonly buffer ObjectBuffer {
+    Object objects[];
+};
+
 void main()
 {
+    uint index = push.index;
     vec3 lightDirection = normalize(lbo.lightPos - position);
-    vec3 normalWorldSpace = normalize(mat3(push.transformMatrix) * normal);
+    vec3 normalWorldSpace = normalize(mat3(objects[index].model) * normal);
     float lightIntensity = max(dot(normalWorldSpace, lightDirection), 0);
 
     fragColor = lightIntensity * color + 0.077;
