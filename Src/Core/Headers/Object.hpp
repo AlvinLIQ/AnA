@@ -26,7 +26,7 @@ namespace AnA
     {
         glm::uint32_t sType;
         alignas(4) glm::uint32_t index;
-        glm::vec3 color;
+        alignas(16) glm::vec3 color;
     };
 
     struct ItemProperties
