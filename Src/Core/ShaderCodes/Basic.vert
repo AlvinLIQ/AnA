@@ -30,7 +30,7 @@ struct Object{
     mat4 model;
 };
 
-layout(std140, set = 1, binding = 1) buffer ObjectBuffer {
+layout(std140, set = 1, binding = 0) buffer ObjectBuffer {
     Object objects[];
 } objectBuffer;
 

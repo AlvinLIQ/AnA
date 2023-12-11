@@ -138,7 +138,6 @@ void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, Objects &objects
         object->Model->Bind(commandBuffer);
         ObjectPushConstantData push{};
         push.index = i;
-        object->PrepareDraw();
         auto &itemProperties = object->Properties;
         push.sType = itemProperties.sType;
         push.color = itemProperties.color.has_value() ? itemProperties.color.value() : object->Color;
@@ -188,7 +187,7 @@ void RenderSystem::createDescriptorSetLayout()
     samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     samplerLayoutBinding.pImmutableSamplers = nullptr;
     samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    samplerLayoutBinding.binding = 2;
+    samplerLayoutBinding.binding = 0;
 
     layoutInfo.pBindings = &samplerLayoutBinding;
 

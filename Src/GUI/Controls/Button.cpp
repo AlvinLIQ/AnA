@@ -2,6 +2,7 @@
 #include "Headers/Button.hpp"
 #include "../../Core/Headers/Object.hpp"
 #include "Headers/Control.hpp"
+#include "Styles/Default/ControlStyle.hpp"
 
 using namespace AnA;
 using namespace AnA::Controls;

@@ -27,11 +27,11 @@ struct Object{
     mat4 model;
 };
 
-layout(std140, set = 1, binding = 1) buffer ObjectBuffer {
+layout(std140, set = 1, binding = 0) buffer ObjectBuffer {
     Object objects[];
 } objectBuffer;
 
-layout(set = 2, binding = 2) uniform sampler2D texSampler;
+layout(set = 2, binding = 0) uniform sampler2D texSampler;
 
 float rect(vec2 uv, float l, float t, float r, float b)
 {
@@ -84,8 +84,6 @@ void main() {
     
     uint index = push.index;
     vec2 uv = gl_FragCoord.xy / cbo.resolution;
-    //float ratio = cbo.resolution.y/cbo.resolution.x;
-    //uv.x /= ratio;
     float c = 0.;
     vec2 offset = vec2((objectBuffer.objects[index].model[3].x + (1. - objectBuffer.objects[index].model[0].x)) / 2., (objectBuffer.objects[index].model[3].y + (1. - objectBuffer.objects[index].model[1].y)) / 2.);
     switch (push.sType)
@@ -101,5 +99,5 @@ void main() {
         break;
     }
 
-    outColor = vec4(c * texture(texSampler, texCoord));
+    outColor = vec4(c * texture(texSampler, texCoord) * vec4(push.color, 1.0));
 }
