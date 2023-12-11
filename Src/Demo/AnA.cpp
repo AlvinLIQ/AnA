@@ -1,12 +1,12 @@
 #define INCLUDE_STB_IMAGE
 
 #include "../Core/Headers/App.hpp"
-//#include "../GUI/Controls/Headers/Button.hpp"
-//#include "../GUI/Controls/Headers/TextBlock.hpp"
+#include "../GUI/Controls/Headers/Button.hpp"
+#include "../GUI/Controls/Headers/TextBlock.hpp"
 #include "../VertexLoader/Headers/VertexLoader.hpp"
 
 using namespace AnA;
-//using namespace AnA::Controls;
+using namespace AnA::Controls;
 
 void CopyVertices(IndexedVertex &indexedVertex, std::vector<Model::Vertex> &dstVertices)
 {
@@ -55,32 +55,31 @@ int main()
     nObj = new Object;
     nObj->Model  = App::Get2DModel();
     nObj->Properties.sType = ANA_TEXT;
-    nObj->Texture = std::make_unique<Texture>("AnA Game Engine", 800, 450, 64, aApp->GetDevice());
+    nObj->Texture = std::make_unique<Texture>("AnA Game Engine", 800, 600, 64, aApp->GetDevice());
     nObj->Color = {.68f, .68f, 1.0f};
     nObj->Properties.transform.scale = {1.0f, 1.0f, 0.0};
     nObj->Properties.transform.translation = {};
 //    nObj->Properties.transform.rotation.y = 0.75 * glm::two_pi<float>();
     aApp->SceneObjects.Append(nObj);
-    /*
+  
     Control::InitControl(&aApp->GetSwapChain());
     
     Button* button = new Button;
-    button->PrepareDraw();
     button->Model = App::Get2DModel();
     button->HorizontalAlignment = AlignmentType::Start;
-    button->VerticalAlignment = AlignmentType::End;
+    button->VerticalAlignment = AlignmentType::Start;
     button->Color = glm::vec3(1.0f);
     button->Properties.color = glm::vec3(1.0f);
     //button->Texture = nObj->Texture;
-    aApp->SceneObjects.Append(std::move(button));
+    aApp->SceneObjects.Append(button);
 
     TextBlock* textBlock = new TextBlock;
     textBlock->Model = App::Get2DModel();
     textBlock->Text("Test123");
-    textBlock->Properties.transform.scale = glm::vec3(0.3);
+    textBlock->Properties.transform.scale = glm::vec3(.3f);
     textBlock->Properties.color = glm::vec3(1.0);
 
-    aApp->SceneObjects.Append(std::move(textBlock));*/
+    aApp->SceneObjects.Append(textBlock);
     aApp->Run();
     delete aApp;
     aApp = nullptr;

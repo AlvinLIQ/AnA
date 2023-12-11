@@ -84,7 +84,7 @@ namespace AnA
             aDevice = mDevice;
             createObjectsBuffers();
             aDevice->CreateDescriptorPool(MAX_FRAMES_IN_FLIGHT, descriptorPool);
-            aDevice->CreateDescriptorSets((std::vector<void*>&)objectsBuffers, MAX_OBJECTS_COUNT * sizeof(Model::ModelStorageBufferObject), 1, MAX_FRAMES_IN_FLIGHT, descriptorPool, descriptorSetLayout, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, descriptorSets);
+            aDevice->CreateDescriptorSets((std::vector<void*>&)objectsBuffers, MAX_OBJECTS_COUNT * sizeof(Model::ModelStorageBufferObject), 0, MAX_FRAMES_IN_FLIGHT, descriptorPool, descriptorSetLayout, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, descriptorSets);
         }
 
         void Destroy()
@@ -188,6 +188,7 @@ namespace AnA
                 region.size = updateRange.y * sizeof(Model::ModelStorageBufferObject);
                 for (uint32_t i = 0; i < updateRange.y; i++)
                 {
+                    objects[updateRange.x + i]->PrepareDraw();
                     staggingBufferData[updateRange.x + i] = {objects[updateRange.x + i]->Properties.transform.mat4()};
                 }
                 regions.push_back(region);
