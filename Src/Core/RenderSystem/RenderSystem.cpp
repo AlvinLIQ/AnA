@@ -127,6 +127,7 @@ void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, Objects &objects
         object = objectArray[i];
         if (object->Texture.get() == nullptr)
         {
+            printf("%d\n", i);
             uint32_t color = (uint32_t)0xFF000000 ^ ((uint32_t)(object->Color.b * 255.0f) << 16) ^ ((uint32_t)(object->Color.g * 255.0f) << 8) ^ ((uint32_t)(object->Color.r * 255.0f));
             object->Texture = std::make_unique<Texture>(color, aDevice);
         }
