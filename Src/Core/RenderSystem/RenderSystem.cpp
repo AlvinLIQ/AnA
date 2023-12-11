@@ -42,6 +42,7 @@ RenderSystem::RenderSystem(Device& mDevice, SwapChain& mSwapChain) : aDevice {mD
     createPipelineLayouts();
     pipelines[TRIANGLE_LIST_PIPELINE] = new Pipeline(aDevice, "Shaders/vert.spv", "Shaders/frag.spv", aSwapChain.GetRenderPass(), pipelineLayout);
     pipelines[LINE_LIST_PIPELINE] = new Pipeline(aDevice, "Shaders/lineVert.spv", "Shaders/lineFrag.spv", aSwapChain.GetRenderPass(), pipelineLayout, VK_PRIMITIVE_TOPOLOGY_LINE_LIST);
+    pipelines[POINT_LIST_PIPELINE] = new Pipeline(aDevice, "Shaders/lineVert.spv", "Shaders/lineFrag.spv", aSwapChain.GetRenderPass(), pipelineLayout, VK_PRIMITIVE_TOPOLOGY_POINT_LIST);
     pipelines[COMPUTE_PIPELINE] = new Pipeline(aDevice, "Shaders/compute.spv", computePipelineLayout);
 }
 
@@ -51,6 +52,7 @@ RenderSystem::~RenderSystem()
     vkDestroyPipelineLayout(aDevice.GetLogicalDevice(), computePipelineLayout, nullptr);
     delete pipelines[TRIANGLE_LIST_PIPELINE];
     delete pipelines[LINE_LIST_PIPELINE];
+    delete pipelines[POINT_LIST_PIPELINE];
     vkDestroyPipelineLayout(aDevice.GetLogicalDevice(), pipelineLayout, nullptr);
 
     vkDestroyDescriptorPool(aDevice.GetLogicalDevice(), descriptorPool, nullptr);
