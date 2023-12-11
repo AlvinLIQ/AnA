@@ -48,7 +48,8 @@ void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shar
 
     modelInfo.vertices.clear();
     modelInfo.indices.clear();
-    
+
+    int planeIndex = 0;
     for (const auto& shape : shapes)
     {
         for (const auto& index : shape.mesh.indices)
@@ -63,7 +64,7 @@ void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shar
                     attrib.vertices[3 * index.vertex_index + 1],
                     attrib.vertices[3 * index.vertex_index + 2]
                 };
-                /*
+                
                 auto colorIndex = 3 * index.vertex_index + 2;
                 if (colorIndex < attrib.colors.size())
                 {
@@ -73,7 +74,7 @@ void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shar
                         attrib.colors[colorIndex - 1],
                         attrib.colors[colorIndex],
                     };
-                }*/ 
+                }
                 if (materials.size())
                 {
                     vertex.color = 

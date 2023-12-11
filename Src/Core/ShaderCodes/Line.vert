@@ -29,6 +29,7 @@ layout(std140, set = 1, binding = 0) readonly buffer ObjectBuffer {
 
 void main()
 {
+    gl_PointSize = 10;
     uint index = push.index;
     gl_Position = cbo.proj * cbo.view * objects[index].model * vec4(position, 1.0);
     fragColor = color;
