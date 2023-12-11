@@ -49,7 +49,7 @@ int main()
     
     nObj->Properties.transform.translation = {-1.5, -.5, 1.5};
     Model::CreateModelFromFile(aApp->GetDevice(), "Models/agv.obj", nObj->Model);
-    //nObj->Texture = std::make_unique<Texture>("Textures/test.jpg", aApp->GetDevice());
+    nObj->Texture = std::make_unique<Texture>("Textures/test.jpg", aApp->GetDevice());
     aApp->SceneObjects.Append(nObj);
 
     nObj = new Object;
@@ -61,7 +61,7 @@ int main()
     nObj->Properties.transform.translation = {};
 //    nObj->Properties.transform.rotation.y = 0.75 * glm::two_pi<float>();
     aApp->SceneObjects.Append(nObj);
-  
+/*  
     Control::InitControl(&aApp->GetSwapChain());
     
     Button* button = new Button;
@@ -80,6 +80,7 @@ int main()
     textBlock->Properties.color = glm::vec3(1.0);
 
     aApp->SceneObjects.Append(textBlock);
+    */
     aApp->Run();
     delete aApp;
     aApp = nullptr;

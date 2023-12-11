@@ -76,15 +76,16 @@ float rounded_rect2(vec2 uv, vec2 offset, vec2 size, vec2 radius)
 }
 
 void main() {
-    if (push.sType == ANA_MODEL || push.sType == ANA_TEXT)
+    if (push.sType == ANA_MODEL)
     {
-        outColor = texture(texSampler, texCoord) * vec4(fragColor, 1.0);
+        outColor = texture(texSampler, gl_FragCoord.xy / cbo.resolution) * vec4(fragColor, 1.0);
         return;
     }
     
     uint index = push.index;
     vec2 uv = gl_FragCoord.xy / cbo.resolution;
     float c = 0.;
+    vec4 color = texture(texSampler, texCoord);
     vec2 offset = vec2((objectBuffer.objects[index].model[3].x + (1. - objectBuffer.objects[index].model[0].x)) / 2., (objectBuffer.objects[index].model[3].y + (1. - objectBuffer.objects[index].model[1].y)) / 2.);
     switch (push.sType)
     {
@@ -97,7 +98,12 @@ void main() {
     case ANA_CURVED_RECTANGLE:
         c = rounded_rect2(uv, offset, vec2(objectBuffer.objects[index].model[0].x, objectBuffer.objects[index].model[1].y), vec2(0.03));
         break;
+    case ANA_TEXT:
+        if (color.a == 0.)
+            discard;
+        c = 1.;
+        break;
     }
 
-    outColor = vec4(c * texture(texSampler, texCoord) * vec4(push.color, 1.0));
+    outColor = vec4(c * color * vec4(fragColor, 1.0));
 }
