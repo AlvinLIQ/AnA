@@ -48,8 +48,7 @@ void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shar
 
     modelInfo.vertices.clear();
     modelInfo.indices.clear();
-
-    int planeIndex = 0;
+    
     for (const auto& shape : shapes)
     {
         for (const auto& index : shape.mesh.indices)
@@ -104,6 +103,17 @@ void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shar
             }
             //if (index.normal_index + index.vertex_index + index.texcoord_index >= 0)
             modelInfo.vertices.push_back(vertex);
+        }
+    }
+    for (int i = 0, j; i < modelInfo.vertices.size(); i += 2)
+    {
+        glm::vec4 currentProjection{};
+        glm::vec3 currentPlane = (modelInfo.vertices[1].position - modelInfo.vertices[0].position);
+        glm::mat4 transform{1.0f};
+        transform = glm::rotate(transform, glm::radians(-90.0f), currentPlane);
+        for (j = 0; j < modelInfo.vertices.size(); j++)
+        {
+            //if (modelInfo.vertices[0])
         }
     }
     model = std::make_shared<Model>(mDevice, modelInfo);
