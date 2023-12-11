@@ -78,7 +78,7 @@ float rounded_rect2(vec2 uv, vec2 offset, vec2 size, vec2 radius)
 void main() {
     if (push.sType == ANA_MODEL)
     {
-        outColor = texture(texSampler, gl_FragCoord.xy / cbo.resolution) * vec4(fragColor, 1.0);
+        outColor = texture(texSampler, texCoord) * vec4(fragColor, 1.0);
         return;
     }
     
