@@ -1,6 +1,10 @@
 #include "Headers/Model.hpp"
 #include "Headers/Buffer.hpp"
 #include <cstdint>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/fwd.hpp>
+#include <glm/geometric.hpp>
+#include <glm/trigonometric.hpp>
 #include <memory>
 #include <vulkan/vulkan_core.h>
 
@@ -105,15 +109,32 @@ void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shar
             modelInfo.vertices.push_back(vertex);
         }
     }
-    for (int i = 0, j; i < modelInfo.vertices.size(); i += 2)
+    const glm::vec<2, int> sets[] = {{0, 1}, {0, 2}, {1, 2}};
+    for (int i = 0, j, k = 0; i < modelInfo.vertices.size(); i += k)
     {
-        glm::vec4 currentProjection{};
-        glm::vec3 currentPlane = (modelInfo.vertices[1].position - modelInfo.vertices[0].position);
-        glm::mat4 transform{1.0f};
-        transform = glm::rotate(transform, glm::radians(-90.0f), currentPlane);
-        for (j = 0; j < modelInfo.vertices.size(); j++)
+        for (k = 0; k < 3; k++)
         {
-            //if (modelInfo.vertices[0])
+            glm::vec4 currentProjection{modelInfo.vertices[i + sets[k].x].position.x, modelInfo.vertices[i + sets[k].x].position.y, modelInfo.vertices[i + sets[k].x].position.x, modelInfo.vertices[i + sets[k].x].position.y};
+            glm::vec2 currentPlane = glm::vec2(modelInfo.vertices[i +  + sets[k].y].position - modelInfo.vertices[i + sets[k].x].position);
+            glm::vec2 yBase = glm::mat2(glm::vec2(.0, -1.0), glm::vec2(1.0, 0.0)) * currentPlane;
+            glm::mat3 transform{glm::vec3(currentPlane.x, currentPlane.y, 0.0), glm::vec3(yBase.x, yBase.y, 0.0), {}};
+            //1.0
+            //glm::length(currentPlane);
+            for (j = 1; j < modelInfo.vertices.size(); j++)
+            {
+                if (modelInfo.vertices[j].position.x < currentProjection.x)
+                {
+                    currentProjection[0] = modelInfo.vertices[j].position.x;
+                    currentProjection[1] = modelInfo.vertices[j].position.y;
+                }
+                else if (modelInfo.vertices[j].position.x > currentProjection.z)
+                {
+                    currentProjection[2] = modelInfo.vertices[j].position.x;
+                    currentProjection[3] = modelInfo.vertices[j].position.y;
+                }
+            }
+
+            modelInfo.vertexProjections.push_back(currentProjection);
         }
     }
     model = std::make_shared<Model>(mDevice, modelInfo);

@@ -86,6 +86,8 @@ void main() {
     vec2 uv = gl_FragCoord.xy / cbo.resolution;
     float c = 0.;
     vec4 color = texture(texSampler, texCoord);
+    if (color.a == 0.)
+            discard;
     vec2 offset = vec2((objectBuffer.objects[index].model[3].x + (1. - objectBuffer.objects[index].model[0].x)) / 2., (objectBuffer.objects[index].model[3].y + (1. - objectBuffer.objects[index].model[1].y)) / 2.);
     switch (push.sType)
     {
@@ -98,9 +100,7 @@ void main() {
     case ANA_CURVED_RECTANGLE:
         c = rounded_rect2(uv, offset, vec2(objectBuffer.objects[index].model[0].x, objectBuffer.objects[index].model[1].y), vec2(0.03));
         break;
-    case ANA_TEXT:
-        if (color.a == 0.)
-            discard;
+    default:
         c = 1.;
         break;
     }
