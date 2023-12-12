@@ -6,23 +6,31 @@ layout(push_constant) uniform Push {
     vec3 color;
 } push;
 
-struct Item
+struct Projection
 {
-    vec3 position;
-    vec3 color;
+    vec2 pos1;
+    vec2 pos2;
 };
 
-layout(std140, binding = 1) readonly buffer ItemIn
-{
-    Item itemsIn[];
+struct Object{
+    mat4 model;
 };
 
-layout(std140, binding = 2) buffer ItemOut
+layout(std140, set = 0, binding = 0) buffer ObjectBuffer {
+    Object objects[];
+} objectBuffer;
+
+layout(std140, binding = 1) readonly buffer SSBOIn
 {
-    Item itemsOut[];
+    Projection projectionsIn[];
+};
+
+layout(std140, binding = 2) buffer SSBOOut
+{
+    Projection projectionsOut[];
 };
 
 void main()
 {
-    //vec3 test = itemsIn[0].position * vec3(2.f);
+    
 }

@@ -33,7 +33,7 @@ namespace AnA
         struct ModelInfo
         {
             std::vector<Vertex> vertices;
-            std::vector<glm::vec4> vertexProjections;
+            std::vector<glm::vec2> vertexProjections;
             Index indexStep;
             std::vector<Index> indices;
         };
