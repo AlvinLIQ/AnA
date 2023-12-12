@@ -114,7 +114,7 @@ void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shar
     {
         for (k = 0; k < 3; k++)
         {
-            glm::vec4 currentProjection{modelInfo.vertices[i + sets[k].x].position.x, modelInfo.vertices[i + sets[k].x].position.y, modelInfo.vertices[i + sets[k].x].position.x, modelInfo.vertices[i + sets[k].x].position.y};
+            glm::vec2 currentProjection{modelInfo.vertices[i + sets[k].x].position.x, modelInfo.vertices[i + sets[k].x].position.x};
             glm::vec2 currentPlane = glm::vec2(modelInfo.vertices[i +  + sets[k].y].position - modelInfo.vertices[i + sets[k].x].position);
             glm::vec2 yBase = glm::mat2(glm::vec2(.0, -1.0), glm::vec2(1.0, 0.0)) * currentPlane;
             glm::mat3 transform{glm::vec3(currentPlane.x, currentPlane.y, 0.0), glm::vec3(yBase.x, yBase.y, 0.0), {}};
@@ -125,12 +125,10 @@ void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shar
                 if (modelInfo.vertices[j].position.x < currentProjection.x)
                 {
                     currentProjection[0] = modelInfo.vertices[j].position.x;
-                    currentProjection[1] = modelInfo.vertices[j].position.y;
                 }
-                else if (modelInfo.vertices[j].position.x > currentProjection.z)
+                else if (modelInfo.vertices[j].position.x > currentProjection.y)
                 {
-                    currentProjection[2] = modelInfo.vertices[j].position.x;
-                    currentProjection[3] = modelInfo.vertices[j].position.y;
+                    currentProjection[1] = modelInfo.vertices[j].position.x;
                 }
             }
 
