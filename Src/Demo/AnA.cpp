@@ -49,7 +49,7 @@ int main()
     
     nObj->Properties.transform.translation = {-1.5, -.5, 1.5};
     Model::CreateModelFromFile(aApp->GetDevice(), "Models/agv.obj", nObj->Model);
-    nObj->Texture = std::make_unique<Texture>("Textures/test.jpg", aApp->GetDevice());
+    //nObj->Texture = std::make_unique<Texture>("Textures/test.jpg", aApp->GetDevice());
     aApp->SceneObjects.Append(nObj);
 
     nObj = new Object;
