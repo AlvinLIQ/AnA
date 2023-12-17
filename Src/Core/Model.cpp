@@ -52,11 +52,13 @@ void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shar
 
     modelInfo.vertices.clear();
     modelInfo.indices.clear();
-    
+
+    std::unordered_map<glm::vec3, Index> verticesMap;
     for (const auto& shape : shapes)
     {
-        for (const auto& index : shape.mesh.indices)
+        for (int i = 0; i < shape.mesh.indices.size(); i++)
         {
+            const auto& index = shape.mesh.indices[i];
             Vertex vertex{};
 
             if (index.vertex_index >= 0)
@@ -106,7 +108,17 @@ void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shar
                 };
             }
             //if (index.normal_index + index.vertex_index + index.texcoord_index >= 0)
-            modelInfo.vertices.push_back(vertex);
+            auto result = verticesMap.find(vertex.position);
+            if (result != verticesMap.end())
+            {
+                modelInfo.indices.push_back(result->second);
+            }
+            else
+            {
+                verticesMap.insert(std::pair<glm::vec3, Index>(vertex.position, modelInfo.vertices.size()));
+                modelInfo.indices.push_back(static_cast<Index>(modelInfo.vertices.size()));
+                modelInfo.vertices.push_back(vertex);
+            }
         }
     }
     const glm::vec<2, int> sets[] = {{0, 1}, {0, 2}, {1, 2}};
@@ -178,15 +190,15 @@ void Model::Bind(VkCommandBuffer commandBuffer)
         vkCmdBindIndexBuffer(commandBuffer, indexBuffer->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
 }
 
-void Model::Draw(VkCommandBuffer commandBuffer)
+void Model::Draw(VkCommandBuffer commandBuffer, Index instanceIndex)
 {
     if (hasIndexBuffer)
     {
-        vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0);
+        vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, instanceIndex);
     }
     else
     {
-        vkCmdDraw(commandBuffer, vertexCount, 1, 0, 0);
+        vkCmdDraw(commandBuffer, vertexCount, 1, 0, instanceIndex);
     }
 }
 

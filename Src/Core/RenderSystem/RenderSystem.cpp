@@ -40,7 +40,7 @@ RenderSystem::RenderSystem(Device& mDevice, SwapChain& mSwapChain) : aDevice {mD
     createDescriptorSetLayout();
     aDevice.CreateDescriptorSets((std::vector<void*>&)cameraBuffers, sizeof(CameraBufferObject), 0, MAX_FRAMES_IN_FLIGHT, descriptorPool, descriptorSetLayouts[0], VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, descriptorSets);
     createPipelineLayouts();
-    pipelines[TRIANGLE_LIST_PIPELINE] = new Pipeline(aDevice, "Shaders/vert.spv", "Shaders/frag.spv", aSwapChain.GetRenderPass(), pipelineLayout);
+    pipelines[TRIANGLE_LIST_PIPELINE] = new Pipeline(aDevice, "Shaders/vert.spv", "Shaders/frag.spv", aSwapChain.GetRenderPass(), pipelineLayout, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
     pipelines[LINE_LIST_PIPELINE] = new Pipeline(aDevice, "Shaders/lineVert.spv", "Shaders/lineFrag.spv", aSwapChain.GetRenderPass(), pipelineLayout, VK_PRIMITIVE_TOPOLOGY_LINE_LIST);
     pipelines[POINT_LIST_PIPELINE] = new Pipeline(aDevice, "Shaders/lineVert.spv", "Shaders/lineFrag.spv", aSwapChain.GetRenderPass(), pipelineLayout, VK_PRIMITIVE_TOPOLOGY_POINT_LIST);
     pipelines[COMPUTE_PIPELINE] = new Pipeline(aDevice, "Shaders/compute.spv", computePipelineLayout);
@@ -139,7 +139,6 @@ void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, Objects &objects
 
         object->Model->Bind(commandBuffer);
         ObjectPushConstantData push{};
-        push.index = i;
         auto &itemProperties = object->Properties;
         push.sType = itemProperties.sType;
         push.color = itemProperties.color.has_value() ? itemProperties.color.value() : object->Color;
@@ -150,7 +149,7 @@ void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, Objects &objects
         sizeof(ObjectPushConstantData),
         &push);
 
-        object->Model->Draw(commandBuffer);
+        object->Model->Draw(commandBuffer, i);
     }
 }
 

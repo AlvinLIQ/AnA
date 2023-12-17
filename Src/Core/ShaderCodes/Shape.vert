@@ -1,4 +1,4 @@
-#version 450
+#version 460
 
 layout(location = 0) vec3 position;
 layout(location = 1) vec3 color;
@@ -7,7 +7,6 @@ layout(location = 0) out fragColor;
 
 layout(push_constant) uniform Push {
     uint sType;
-    uint index;
     vec3 color;
 } push;
 

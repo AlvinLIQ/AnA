@@ -1,4 +1,4 @@
-#version 450
+#version 460
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 color;
@@ -9,7 +9,6 @@ layout(location = 0) out vec3 fragColor;
 
 layout(push_constant) uniform Push {
     uint sType;
-    uint index;
     vec3 color;
 } push;
 
@@ -30,7 +29,6 @@ layout(std140, set = 1, binding = 0) readonly buffer ObjectBuffer {
 void main()
 {
     gl_PointSize = 10;
-    uint index = push.index;
-    gl_Position = cbo.proj * cbo.view * objects[index].model * vec4(position, 1.0);
+    gl_Position = cbo.proj * cbo.view * objects[gl_BaseInstance].model * vec4(position, 1.0);
     fragColor = color;
 }

@@ -51,7 +51,7 @@ namespace AnA
         void LoadMaterialFromFile(const char* filePath);
         
         void Bind(VkCommandBuffer commandBuffer);
-        void Draw(VkCommandBuffer commandBuffer);
+        void Draw(VkCommandBuffer commandBuffer, Index instanceIndex = 0);
     private:
         void createVertexBuffers(const std::vector<Vertex>& vertices);
         void createIndexBuffers(const std::vector<Index>& indices);
