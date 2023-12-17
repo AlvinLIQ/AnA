@@ -1,4 +1,4 @@
-#version 450
+#version 460
 
 #define ANA_TRIANGLE 0
 #define ANA_RECTANGLE 1
@@ -9,11 +9,12 @@
 
 layout(location = 0) in vec3 fragColor;
 layout(location = 1) in vec2 texCoord;
+layout(location = 2) flat in uint objectIndex;
+
 layout(location = 0) out vec4 outColor;
 
 layout(push_constant) uniform Push {
     uint sType;
-    uint index;
     vec3 color;
 } push;
 
@@ -82,23 +83,22 @@ void main() {
         return;
     }
     
-    uint index = push.index;
     vec2 uv = gl_FragCoord.xy / cbo.resolution;
     float c = 0.;
     vec4 color = texture(texSampler, texCoord);
     if (color.a == 0.)
             discard;
-    vec2 offset = vec2((objectBuffer.objects[index].model[3].x + (1. - objectBuffer.objects[index].model[0].x)) / 2., (objectBuffer.objects[index].model[3].y + (1. - objectBuffer.objects[index].model[1].y)) / 2.);
+    vec2 offset = vec2((objectBuffer.objects[objectIndex].model[3].x + (1. - objectBuffer.objects[objectIndex].model[0].x)) / 2., (objectBuffer.objects[objectIndex].model[3].y + (1. - objectBuffer.objects[objectIndex].model[1].y)) / 2.);
     switch (push.sType)
     {
     case ANA_RECTANGLE:
-        c = rect2(uv, offset, vec2(objectBuffer.objects[index].model[0].x, objectBuffer.objects[index].model[1].y));
+        c = rect2(uv, offset, vec2(objectBuffer.objects[objectIndex].model[0].x, objectBuffer.objects[objectIndex].model[1].y));
         break;
     case ANA_ELLIPSE:
-        c = ellipse(uv, vec2(offset.x + objectBuffer.objects[index].model[0].x / 2., offset.y + objectBuffer.objects[index].model[1].y / 2.), vec2(objectBuffer.objects[index].model[0].x / 2, objectBuffer.objects[index].model[1].y / 2));
+        c = ellipse(uv, vec2(offset.x + objectBuffer.objects[objectIndex].model[0].x / 2., offset.y + objectBuffer.objects[objectIndex].model[1].y / 2.), vec2(objectBuffer.objects[objectIndex].model[0].x / 2, objectBuffer.objects[objectIndex].model[1].y / 2));
         break;
     case ANA_CURVED_RECTANGLE:
-        c = rounded_rect2(uv, offset, vec2(objectBuffer.objects[index].model[0].x, objectBuffer.objects[index].model[1].y), vec2(0.03));
+        c = rounded_rect2(uv, offset, vec2(objectBuffer.objects[objectIndex].model[0].x, objectBuffer.objects[objectIndex].model[1].y), vec2(0.03));
         break;
     default:
         c = 1.;

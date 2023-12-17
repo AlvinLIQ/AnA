@@ -25,7 +25,6 @@ namespace AnA
     struct ObjectPushConstantData
     {
         glm::uint32_t sType;
-        alignas(4) glm::uint32_t index;
         alignas(16) glm::vec3 color;
     };
 

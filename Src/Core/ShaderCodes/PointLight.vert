@@ -1,4 +1,4 @@
-#version 450
+#version 460
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 color;
@@ -18,7 +18,6 @@ layout(binding = 1) uniform LightingObject
 
 layout(push_constant) uniform Push {
     uint sType;
-    uint index;
     vec3 color;
 } push;
 
@@ -32,9 +31,8 @@ layout(std140, set = 1, binding = 0) readonly buffer ObjectBuffer {
 
 void main()
 {
-    uint index = push.index;
     vec3 lightDirection = normalize(lbo.lightPos - position);
-    vec3 normalWorldSpace = normalize(mat3(objects[index].model) * normal);
+    vec3 normalWorldSpace = normalize(mat3(objects[gl_BaseInstance].model) * normal);
     float lightIntensity = max(dot(normalWorldSpace, lightDirection), 0);
 
     fragColor = lightIntensity * color + 0.077;
