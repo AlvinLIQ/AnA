@@ -15,7 +15,6 @@
 #include <glm/gtx/hash.hpp>
 
 #include <cassert>
-#include <cstring>
 #include <unordered_map>
 
 
@@ -121,26 +120,27 @@ void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shar
             }
         }
     }
+    //printf("%llu:%llu\n", modelInfo.indices.size(), modelInfo.vertices.size());
     const glm::vec<2, int> sets[] = {{0, 1}, {0, 2}, {1, 2}};
-    for (int i = 0, j, k = 0; i < modelInfo.vertices.size(); i += k)
+    for (int i = 0, j, k = 0; i < modelInfo.indices.size(); i += k)
     {
         for (k = 0; k < 3; k++)
         {
-            glm::vec2 currentProjection{modelInfo.vertices[i + sets[k].x].position.x, modelInfo.vertices[i + sets[k].x].position.x};
-            glm::vec2 currentPlane = glm::vec2(modelInfo.vertices[i +  + sets[k].y].position - modelInfo.vertices[i + sets[k].x].position);
+            glm::vec2 currentProjection{modelInfo.vertices[modelInfo.indices[i + sets[k].x]].position.x, modelInfo.vertices[modelInfo.indices[i + sets[k].x]].position.x};
+            glm::vec2 currentPlane = glm::vec2(modelInfo.vertices[modelInfo.indices[i + sets[k].y]].position - modelInfo.vertices[modelInfo.indices[i + sets[k].x]].position);
             glm::vec2 yBase = glm::mat2(glm::vec2(.0, -1.0), glm::vec2(1.0, 0.0)) * currentPlane;
             glm::mat3 transform{glm::vec3(currentPlane.x, currentPlane.y, 0.0), glm::vec3(yBase.x, yBase.y, 0.0), {}};
             //1.0
             //glm::length(currentPlane);
-            for (j = 1; j < modelInfo.vertices.size(); j++)
+            for (j = 1; j < modelInfo.indices.size(); j++)
             {
-                if (modelInfo.vertices[j].position.x < currentProjection.x)
+                if (modelInfo.vertices[modelInfo.indices[j]].position.x < currentProjection.x)
                 {
-                    currentProjection[0] = modelInfo.vertices[j].position.x;
+                    currentProjection[0] = modelInfo.vertices[modelInfo.indices[j]].position.x;
                 }
-                else if (modelInfo.vertices[j].position.x > currentProjection.y)
+                else if (modelInfo.vertices[modelInfo.indices[j]].position.x > currentProjection.y)
                 {
-                    currentProjection[1] = modelInfo.vertices[j].position.x;
+                    currentProjection[1] = modelInfo.vertices[modelInfo.indices[j]].position.x;
                 }
             }
 
