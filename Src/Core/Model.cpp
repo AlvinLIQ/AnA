@@ -53,7 +53,7 @@ void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shar
     modelInfo.vertices.clear();
     modelInfo.indices.clear();
 
-    std::unordered_map<glm::vec3, Index> verticesMap;
+    std::unordered_map<Vertex, Index, VertexHash> verticesMap;
     for (const auto& shape : shapes)
     {
         for (int i = 0; i < shape.mesh.indices.size(); i++)
@@ -108,14 +108,14 @@ void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shar
                 };
             }
             //if (index.normal_index + index.vertex_index + index.texcoord_index >= 0)
-            auto result = verticesMap.find(vertex.position);
+            auto result = verticesMap.find(vertex);
             if (result != verticesMap.end())
             {
                 modelInfo.indices.push_back(result->second);
             }
             else
             {
-                verticesMap.insert(std::pair<glm::vec3, Index>(vertex.position, modelInfo.vertices.size()));
+                verticesMap.insert(std::pair<Vertex, Index>(vertex, modelInfo.vertices.size()));
                 modelInfo.indices.push_back(static_cast<Index>(modelInfo.vertices.size()));
                 modelInfo.vertices.push_back(vertex);
             }

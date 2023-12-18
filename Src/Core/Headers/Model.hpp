@@ -2,6 +2,7 @@
 
 #include "Buffer.hpp"
 #include "Device.hpp"
+#include <functional>
 #include <glm/fwd.hpp>
 #include <vulkan/vulkan_core.h>
 
@@ -25,8 +26,24 @@ namespace AnA
             glm::vec3 normal{};
             glm::vec2 uv{};
 
+            bool operator==(const Vertex& vertex) const
+            {
+                return position == vertex.position && normal == vertex.normal && uv == vertex.uv;
+            }
             static std::vector<VkVertexInputBindingDescription> GetBindingDescription();
             static std::vector<VkVertexInputAttributeDescription> GetAttributeDescription();
+        };
+        struct VertexHash
+        {
+            std::size_t operator() (const Vertex& vertex) const
+            {
+                return std::hash<float>()(vertex.position.x) ^ std::hash<float>()(vertex.position.y) ^ std::hash<float>()(vertex.position.z)
+                    ^ std::hash<float>()(vertex.normal.x)
+                    ^ std::hash<float>()(vertex.normal.y)
+                    ^ std::hash<float>()(vertex.normal.z)
+                    ^ std::hash<float>()(vertex.uv.x)
+                    ^ std::hash<float>()(vertex.uv.y);
+            }
         };
         typedef uint32_t Index;
         
