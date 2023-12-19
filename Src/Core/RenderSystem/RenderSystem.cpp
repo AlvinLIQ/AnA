@@ -1,5 +1,4 @@
 #include "Headers/RenderSystem.hpp"
-#include <cstddef>
 #include <stdexcept>
 #include <vector>
 #include <vulkan/vulkan_core.h>
