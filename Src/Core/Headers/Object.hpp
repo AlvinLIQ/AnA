@@ -4,10 +4,8 @@
 #include "Texture.hpp"
 #include "Types.hpp"
 #include "glm/fwd.hpp"
-#include "vulkan/vulkan_core.h"
 #include <memory>
 #include <stdint.h>
-#include <unordered_map>
 #include <vector>
 
 #define SHAPE_TYPE uint32_t

@@ -1,5 +1,6 @@
 #include "Headers/Instance.hpp"
 #include <GLFW/glfw3.h>
+#include <iostream>
 
 using namespace AnA;
 

@@ -2,7 +2,6 @@
 #include "Device.hpp"
 #include <stdint.h>
 #include <vulkan/vulkan_core.h>
-#include <cstring>
 
 namespace AnA
 {

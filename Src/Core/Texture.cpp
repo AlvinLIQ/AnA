@@ -1,6 +1,5 @@
 #include "Headers/Texture.hpp"
 #include "RenderSystem/Headers/RenderSystem.hpp"
-#include "vulkan/vulkan_core.h"
 #include <stdexcept>
 
 #define DEFAULT_FONT_SIZE 32.0f

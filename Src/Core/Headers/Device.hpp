@@ -2,11 +2,9 @@
 
 #include <cstdint>
 #include <optional>
-#include <set>
 #include <vector>
 #include <fstream>
 #include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
 
 #define INCLUDE_STB_IMAGE
 

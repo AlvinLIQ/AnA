@@ -4,7 +4,6 @@
 #include <cassert>
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
-#include <vulkan/vulkan_core.h>
 
 using namespace AnA;
 
