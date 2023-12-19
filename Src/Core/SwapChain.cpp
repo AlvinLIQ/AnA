@@ -1,5 +1,4 @@
 #include "Headers/SwapChain.hpp"
-#include "vulkan/vulkan_core.h"
 
 using namespace AnA;
 

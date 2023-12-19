@@ -1,5 +1,4 @@
 #include "Headers/Buffer.hpp"
-#include <cstring>
 #include <stdexcept>
 #include <cassert>
 

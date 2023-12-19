@@ -9,8 +9,6 @@
 #include "Device.hpp"
 #include "../RenderSystem/Headers/RenderSystem.hpp"
 #include "../Input/Headers/InputManager.hpp"
-#include <cstdint>
-#include <vector>
 #include <thread>
 
 namespace AnA

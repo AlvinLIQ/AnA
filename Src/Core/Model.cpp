@@ -1,12 +1,10 @@
 #include "Headers/Model.hpp"
 #include "Headers/Buffer.hpp"
-#include <cstdint>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
 #include <glm/trigonometric.hpp>
 #include <memory>
-#include <vulkan/vulkan_core.h>
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "../tinyobjloader/tiny_obj_loader.h"

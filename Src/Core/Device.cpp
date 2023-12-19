@@ -1,8 +1,8 @@
 #include "Headers/Device.hpp"
 #include "Headers/Instance.hpp"
 
+#include <set>
 #include <stdexcept>
-#include <vulkan/vulkan_core.h>
 
 #ifdef INCLUDE_STB_IMAGE
 #define STB_IMAGE_IMPLEMENTATION
