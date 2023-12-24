@@ -71,8 +71,6 @@ namespace AnA
     static const ANA_OBJECTS_UPDATE_FLAG_BIT ANA_OBJECTS_UPDATE_STORAGE_BUFFER = 2;
     static const ANA_OBJECTS_UPDATE_FLAG_BIT ANA_OBJECTS_UPDATE_ALL = 3;
 
-    typedef glm::vec<2, uint32_t> Range;
-
     class Objects
     {
     public:

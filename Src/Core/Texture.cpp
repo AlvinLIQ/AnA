@@ -1,5 +1,5 @@
 #include "Headers/Texture.hpp"
-#include "RenderSystem/Headers/RenderSystem.hpp"
+#include "Headers/Pipeline.hpp"
 #include <stdexcept>
 
 #define DEFAULT_FONT_SIZE 32.0f
@@ -113,7 +113,7 @@ void Texture::createDescriptorSet()
     allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     allocInfo.descriptorPool = descriptorPool;
     allocInfo.descriptorSetCount = 1;
-    allocInfo.pSetLayouts = &RenderSystems::RenderSystem::GetCurrent()->GetDescriptorSetLayouts()[2];
+    allocInfo.pSetLayouts = &Pipelines::GetCurrent()->GetDescriptorSetLayouts()[SAMPLER_LAYOUT];
 
     if (vkAllocateDescriptorSets(aDevice.GetLogicalDevice(), &allocInfo, &descriptorSet) != VK_SUCCESS)
         throw std::runtime_error("Failed to allocate descriptor sets!");

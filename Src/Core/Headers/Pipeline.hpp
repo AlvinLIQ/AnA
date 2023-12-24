@@ -5,6 +5,19 @@
 #include <vector>
 #include <string>
 
+#define TRIANGLE_LIST_PIPELINE 0
+#define LINE_LIST_PIPELINE 1
+#define POINT_LIST_PIPELINE 2
+#define COMPUTE_PIPELINE 3
+
+#define PIPELINE_COUNT 4
+
+#define UBO_LAYOUT 0
+#define SSBO_LAYOUT 1
+#define SAMPLER_LAYOUT 2
+
+#define DESCRIPTOR_SET_LAYOUT_COUNT 3
+
 namespace AnA
 {
     class Pipeline
@@ -140,6 +153,11 @@ namespace AnA
 
         void Bind(VkCommandBuffer commandBuffer);
 
+        VkPipelineLayout& GetLayout()
+        {
+            return pipelineLayout;
+        }
+
     private:
         Device& aDevice;
         VkRenderPass renderPass;
@@ -150,5 +168,35 @@ namespace AnA
         void createComputePipeline(const std::string &computeShaderFileName);
 
         VkShaderModule createShaderModule(const std::vector<char> &code);
+    };
+
+    class Pipelines
+    {
+    public:
+        Pipelines(Device& mDevice, VkRenderPass renderPass, VkDescriptorSetLayoutBinding uboLayoutBinding, VkPushConstantRange pushConstantRange);
+        ~Pipelines();
+
+        static Pipelines* GetCurrent();
+
+        const std::vector<Pipeline*>& Get() const
+        {
+            return pipelines;
+        }
+
+        VkDescriptorSetLayout* GetDescriptorSetLayouts()
+        {
+            return descriptorSetLayouts;
+        }
+    private:
+        Device& aDevice;
+
+        std::vector<Pipeline*> pipelines;
+        VkPipelineLayout pipelineLayout;
+        VkPipelineLayout computePipelineLayout;
+        void createPipelineLayouts(VkPushConstantRange pushConstantRange);
+
+        VkDescriptorSetLayout descriptorSetLayouts[DESCRIPTOR_SET_LAYOUT_COUNT] = {};
+        VkDescriptorSetLayout computeDescriptorSetLayout;
+        void createDescriptorSetLayouts(VkDescriptorSetLayoutBinding uboLayoutBinding);
     };
 }

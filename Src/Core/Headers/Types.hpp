@@ -44,4 +44,6 @@ namespace AnA
             };
         }
     };
+
+    typedef glm::vec<2, uint32_t> Range;
 }

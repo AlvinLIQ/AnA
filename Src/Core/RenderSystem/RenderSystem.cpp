@@ -1,5 +1,4 @@
 #include "Headers/RenderSystem.hpp"
-#include <stdexcept>
 #include <vector>
 #include <vulkan/vulkan_core.h>
 #include <glm/gtc/constants.hpp>
@@ -35,29 +34,19 @@ RenderSystem::RenderSystem(Device& mDevice, SwapChain& mSwapChain) : aDevice {mD
 {
     currentRenderSystem = this;
     createCameraBuffers();
+    pipelines = new Pipelines(aDevice, aSwapChain.GetRenderPass(), 
+        CameraBufferObject::GetBindingDescriptionSet(), 
+        {VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(ObjectPushConstantData)});
     aDevice.CreateDescriptorPool(MAX_FRAMES_IN_FLIGHT, descriptorPool);
-    createDescriptorSetLayout();
-    aDevice.CreateDescriptorSets((std::vector<void*>&)cameraBuffers, sizeof(CameraBufferObject), 0, MAX_FRAMES_IN_FLIGHT, descriptorPool, descriptorSetLayouts[0], VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, descriptorSets);
-    createPipelineLayouts();
-    pipelines[TRIANGLE_LIST_PIPELINE] = new Pipeline(aDevice, "Shaders/vert.spv", "Shaders/frag.spv", aSwapChain.GetRenderPass(), pipelineLayout, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-    pipelines[LINE_LIST_PIPELINE] = new Pipeline(aDevice, "Shaders/lineVert.spv", "Shaders/lineFrag.spv", aSwapChain.GetRenderPass(), pipelineLayout, VK_PRIMITIVE_TOPOLOGY_LINE_LIST);
-    pipelines[POINT_LIST_PIPELINE] = new Pipeline(aDevice, "Shaders/lineVert.spv", "Shaders/lineFrag.spv", aSwapChain.GetRenderPass(), pipelineLayout, VK_PRIMITIVE_TOPOLOGY_POINT_LIST);
-    pipelines[COMPUTE_PIPELINE] = new Pipeline(aDevice, "Shaders/compute.spv", computePipelineLayout);
+    aDevice.CreateDescriptorSets((std::vector<void*>&)cameraBuffers, sizeof(CameraBufferObject), 0, MAX_FRAMES_IN_FLIGHT, descriptorPool, pipelines->GetDescriptorSetLayouts()[UBO_LAYOUT], VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, descriptorSets);
 }
 
 RenderSystem::~RenderSystem()
 {
-    delete pipelines[COMPUTE_PIPELINE];
-    vkDestroyPipelineLayout(aDevice.GetLogicalDevice(), computePipelineLayout, nullptr);
-    delete pipelines[TRIANGLE_LIST_PIPELINE];
-    delete pipelines[LINE_LIST_PIPELINE];
-    delete pipelines[POINT_LIST_PIPELINE];
-    vkDestroyPipelineLayout(aDevice.GetLogicalDevice(), pipelineLayout, nullptr);
+    delete pipelines;
 
     vkDestroyDescriptorPool(aDevice.GetLogicalDevice(), descriptorPool, nullptr);
-    for (auto descriptorSetLayout : descriptorSetLayouts)
-        vkDestroyDescriptorSetLayout(aDevice.GetLogicalDevice(), descriptorSetLayout, nullptr);
-    vkDestroyDescriptorSetLayout(aDevice.GetLogicalDevice(), computeDescriptorSetLayout, nullptr);
+
     for (auto &cameraBuffer : cameraBuffers)
         delete cameraBuffer;
 }
@@ -65,40 +54,6 @@ RenderSystem::~RenderSystem()
 RenderSystem* RenderSystem::GetCurrent()
 {
     return currentRenderSystem;
-}
-
-std::array<VkDescriptorSetLayout, 3>& RenderSystem::GetDescriptorSetLayouts()
-{
-    return descriptorSetLayouts;
-}
-
-void RenderSystem::createPipelineLayouts()
-{
-    VkPushConstantRange pushConstantRange{};
-    pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-    pushConstantRange.offset = 0;
-    pushConstantRange.size = sizeof(ObjectPushConstantData);
-
-
-    VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-    pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
-    pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
-    pipelineLayoutInfo.pushConstantRangeCount = 1;
-    pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
-    if (vkCreatePipelineLayout(aDevice.GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to create pipeline layout!");
-    }
-    
-    VkPipelineLayoutCreateInfo computePipelineLayoutInfo{};
-    computePipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    computePipelineLayoutInfo.setLayoutCount = 1;
-    computePipelineLayoutInfo.pSetLayouts = &computeDescriptorSetLayout;
-    if (vkCreatePipelineLayout(aDevice.GetLogicalDevice(), &computePipelineLayoutInfo, nullptr, &computePipelineLayout) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to create compute pipeline layout!");
-    }
 }
 
 void RenderSystem::createCameraBuffers()
@@ -115,11 +70,11 @@ void RenderSystem::createCameraBuffers()
 
 void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, Objects &objects, int pipeLineIndex)
 {
-    pipelines[pipeLineIndex]->Bind(commandBuffer);
+    pipelines->Get()[pipeLineIndex]->Bind(commandBuffer);
 
-    std::array<VkDescriptorSet, 3> sets;
-    sets[0] = descriptorSets[aSwapChain.CurrentFrame];
-    sets[1] = objects.GetDescriptorSets()[aSwapChain.CurrentFrame];
+    VkDescriptorSet sets[DESCRIPTOR_SET_LAYOUT_COUNT];
+    sets[UBO_LAYOUT] = descriptorSets[aSwapChain.CurrentFrame];
+    sets[SSBO_LAYOUT] = objects.GetDescriptorSets()[aSwapChain.CurrentFrame];
 
     Object* object;
     auto objectArray = objects.Get();
@@ -131,10 +86,10 @@ void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, Objects &objects
             uint32_t color = (uint32_t)0xFF000000 ^ ((uint32_t)(object->Color.b * 255.0f) << 16) ^ ((uint32_t)(object->Color.g * 255.0f) << 8) ^ ((uint32_t)(object->Color.r * 255.0f));
             object->Texture = std::make_unique<Texture>(color, aDevice);
         }
-        sets[2] = object->Texture->GetDescriptorSet();
+        sets[SAMPLER_LAYOUT] = object->Texture->GetDescriptorSet();
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-        pipelineLayout, 0, static_cast<uint32_t>(sets.size()),
-        sets.data(), 0, nullptr);
+        pipelines->Get()[pipeLineIndex]->GetLayout(), 0, DESCRIPTOR_SET_LAYOUT_COUNT,
+        sets, 0, nullptr);
 
         object->Model->Bind(commandBuffer);
         ObjectPushConstantData push{};
@@ -142,7 +97,7 @@ void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, Objects &objects
         push.sType = itemProperties.sType;
         push.color = itemProperties.color.has_value() ? itemProperties.color.value() : object->Color;
         vkCmdPushConstants(commandBuffer, 
-        pipelineLayout,
+        pipelines->Get()[pipeLineIndex]->GetLayout(),
         VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
         0,
         sizeof(ObjectPushConstantData),
@@ -161,36 +116,4 @@ void RenderSystem::UpdateCameraBuffer(Cameras::Camera &camera)
     cbo.resolution = {(float)extent.width, (float)extent.height};
 
     memcpy(cameraBuffers[aSwapChain.CurrentFrame]->GetMappedData(), &cbo, sizeof(cbo));
-}
-
-void RenderSystem::createDescriptorSetLayout()
-{
-    auto uboLayoutBinding = CameraBufferObject::GetBindingDescriptionSet();
-    VkDescriptorSetLayoutCreateInfo layoutInfo{};
-    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = 1;
-    layoutInfo.pBindings = &uboLayoutBinding;
-
-    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[0]) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create the DescriptorSetLayout 1");
-
-    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &computeDescriptorSetLayout) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create the ComputeDescriptorSetLayout");
-
-    auto ssboLayoutBinding = Model::ModelStorageBufferObject::GetBindingDescriptionSet();
-    layoutInfo.pBindings = &ssboLayoutBinding;
-    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[1]) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create the DescriptorSetLayout 2");
-
-    VkDescriptorSetLayoutBinding samplerLayoutBinding{};
-    samplerLayoutBinding.descriptorCount = 1;
-    samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    samplerLayoutBinding.pImmutableSamplers = nullptr;
-    samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    samplerLayoutBinding.binding = 0;
-
-    layoutInfo.pBindings = &samplerLayoutBinding;
-
-    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[2]) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create the DescriptorSetLayout 3");
 }

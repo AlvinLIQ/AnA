@@ -10,7 +10,7 @@
 
 #define MAX_FRAMES_IN_FLIGHT 2
 
-#define numsof(A) sizeof(A) / sizeof(*A)
+#define numsof(A) sizeof(A) / sizeof(A[0])
 
 namespace AnA
 {
