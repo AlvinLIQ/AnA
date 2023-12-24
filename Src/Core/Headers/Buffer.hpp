@@ -1,5 +1,6 @@
 #pragma once
 #include "Device.hpp"
+#include <string.h>
 #include <stdint.h>
 #include <vulkan/vulkan_core.h>
 
