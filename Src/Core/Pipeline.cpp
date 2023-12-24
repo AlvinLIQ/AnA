@@ -1,4 +1,5 @@
 #include "Headers/Pipeline.hpp"
+#include "Headers/ShaderCodes.hpp"
 
 using namespace AnA;
 
@@ -10,9 +11,24 @@ const VkPrimitiveTopology vertexTopology) : aDevice {mDevice}, renderPass {mRend
 {
     createGraphicsPipeline(vertShaderFileName, fragShaderFileName, vertexTopology);
 }
+
+Pipeline::Pipeline(Device& mDevice,
+const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode,
+VkRenderPass &mRenderPass, 
+VkPipelineLayout &mPipelineLayout,
+const VkPrimitiveTopology vertexTopology) : aDevice {mDevice}, renderPass {mRenderPass}, pipelineLayout{mPipelineLayout}
+{
+    createGraphicsPipeline(vertShaderCode, fragShaderCode, vertexTopology);
+}
+
 Pipeline::Pipeline(Device& mDevice, const char* computeShaderFile, VkPipelineLayout &mPipelineLayout) : aDevice {mDevice}, pipelineLayout {mPipelineLayout}
 {
     createComputePipeline(computeShaderFile);
+}
+
+Pipeline::Pipeline(Device& mDevice, const std::vector<unsigned char>& computeShaderCode, VkPipelineLayout &mPipelineLayout) : aDevice {mDevice}, pipelineLayout {mPipelineLayout}
+{
+    createComputePipeline(computeShaderCode);
 }
 
 Pipeline::~Pipeline()
@@ -31,6 +47,11 @@ void Pipeline::createGraphicsPipeline(const std::string &vertShaderFileName, con
     auto vertShaderCode = ReadFile(vertShaderFileName);
     auto fragShaderCode = ReadFile(fragShaderFileName);
 
+    createGraphicsPipeline(vertShaderCode, fragShaderCode, vertexTopology);
+}
+
+void Pipeline::createGraphicsPipeline(const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, const VkPrimitiveTopology vertexTopology)
+{
     VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
     VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
 
@@ -48,7 +69,11 @@ void Pipeline::createGraphicsPipeline(const std::string &vertShaderFileName, con
 void Pipeline::createComputePipeline(const std::string& computeShaderFileName)
 {
     auto computeShaderCode = ReadFile(computeShaderFileName);
+    createComputePipeline(computeShaderCode);
+}
 
+void Pipeline::createComputePipeline(const std::vector<unsigned char>& computeShaderCode)
+{
     VkShaderModule computeShaderModule = createShaderModule(computeShaderCode);
 
     VkPipelineShaderStageCreateInfo computeShaderStageInfo{};
@@ -70,7 +95,7 @@ void Pipeline::createComputePipeline(const std::string& computeShaderFileName)
     vkDestroyShaderModule(aDevice.GetLogicalDevice(), computeShaderModule, nullptr);
 }
 
-VkShaderModule Pipeline::createShaderModule(const std::vector<char> &code)
+VkShaderModule Pipeline::createShaderModule(const std::vector<unsigned char> &code)
 {
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -94,10 +119,10 @@ Pipelines::Pipelines(Device& mDevice, VkRenderPass renderPass, VkDescriptorSetLa
     createDescriptorSetLayouts(uboLayoutBinding);
     createPipelineLayouts(pushConstantRange);
     pipelines.resize(PIPELINE_COUNT);
-    pipelines[TRIANGLE_LIST_PIPELINE] = new Pipeline(aDevice, "Shaders/vert.spv", "Shaders/frag.spv", renderPass, pipelineLayout, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-    pipelines[LINE_LIST_PIPELINE] = new Pipeline(aDevice, "Shaders/lineVert.spv", "Shaders/lineFrag.spv", renderPass, pipelineLayout, VK_PRIMITIVE_TOPOLOGY_LINE_LIST);
-    pipelines[POINT_LIST_PIPELINE] = new Pipeline(aDevice, "Shaders/lineVert.spv", "Shaders/lineFrag.spv", renderPass, pipelineLayout, VK_PRIMITIVE_TOPOLOGY_POINT_LIST);
-    pipelines[COMPUTE_PIPELINE] = new Pipeline(aDevice, "Shaders/compute.spv", computePipelineLayout);
+    pipelines[TRIANGLE_LIST_PIPELINE] = new Pipeline(aDevice, Shaders_Basic_vert_spv, Shaders_Basic_frag_spv, renderPass, pipelineLayout, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+    pipelines[LINE_LIST_PIPELINE] = new Pipeline(aDevice, Shaders_Line_vert_spv, Shaders_Line_frag_spv, renderPass, pipelineLayout, VK_PRIMITIVE_TOPOLOGY_LINE_LIST);
+    pipelines[POINT_LIST_PIPELINE] = new Pipeline(aDevice, Shaders_Line_vert_spv, Shaders_Line_frag_spv, renderPass, pipelineLayout, VK_PRIMITIVE_TOPOLOGY_POINT_LIST);
+    //pipelines[COMPUTE_PIPELINE] = new Pipeline(aDevice, Shaders_CollisionDetect_comp_spv, computePipelineLayout);
 }
 
 Pipelines::~Pipelines()

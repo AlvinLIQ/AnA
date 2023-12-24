@@ -1,8 +1,9 @@
 /.vs
-/.clangd
 /AnA
 /AnA.exe
+/xxdi.exe
 /push.sh
 /Shaders/
 
+.clangd
 *.o
