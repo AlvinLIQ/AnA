@@ -147,7 +147,9 @@ namespace AnA
 
         };
         Pipeline(Device& mDevice, const char* vertShaderFileName, const char* fragShaderFileName, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+        Pipeline(Device& mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
         Pipeline(Device& mDevice, const char* computeShaderFile, VkPipelineLayout &mPipelineLayout);
+        Pipeline(Device& mDevice, const std::vector<unsigned char>& computeShaderCode, VkPipelineLayout &mPipelineLayout);
 
         ~Pipeline();
 
@@ -165,9 +167,11 @@ namespace AnA
         VkPipelineLayout& pipelineLayout;
         VkPipeline pipeline;//Graphics Pipeline
         void createGraphicsPipeline(const std::string &vertShaderFileName, const std::string &fragShaderFileName, const VkPrimitiveTopology vertexTopology);
+        void createGraphicsPipeline(const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, const VkPrimitiveTopology vertexTopology);
         void createComputePipeline(const std::string &computeShaderFileName);
+        void createComputePipeline(const std::vector<unsigned char>& computeShaderCode);
 
-        VkShaderModule createShaderModule(const std::vector<char> &code);
+        VkShaderModule createShaderModule(const std::vector<unsigned char> &code);
     };
 
     class Pipelines

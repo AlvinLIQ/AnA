@@ -14,7 +14,7 @@
 
 namespace AnA
 {
-    inline std::vector<char> ReadFile(const std::string &filename)
+    inline std::vector<unsigned char> ReadFile(const std::string &filename)
     {
         std::ifstream file(filename, std::ios::ate | std::ios::binary);
         if (!file.is_open())
@@ -23,9 +23,9 @@ namespace AnA
         }
         
         size_t fs = (size_t)file.tellg();
-        std::vector<char> buffer(fs);
+        std::vector<unsigned char> buffer(fs);
         file.seekg(0);
-        file.read(buffer.data(), fs);
+        file.read((char*)buffer.data(), fs);
         file.close();
         return buffer;
     }
