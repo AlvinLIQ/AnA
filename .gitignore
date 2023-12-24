@@ -4,3 +4,5 @@
 /AnA.exe
 /push.sh
 /Shaders/
+
+*.o
