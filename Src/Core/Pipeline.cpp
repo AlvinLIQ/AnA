@@ -85,3 +85,90 @@ VkShaderModule Pipeline::createShaderModule(const std::vector<char> &code)
 
     return shaderModule;
 }
+
+Pipelines* _pipelines = nullptr;
+
+Pipelines::Pipelines(Device& mDevice, VkRenderPass renderPass, VkDescriptorSetLayoutBinding uboLayoutBinding, VkPushConstantRange pushConstantRange) : aDevice{mDevice}
+{
+    _pipelines = this;
+    createDescriptorSetLayouts(uboLayoutBinding);
+    createPipelineLayouts(pushConstantRange);
+    pipelines.resize(PIPELINE_COUNT);
+    pipelines[TRIANGLE_LIST_PIPELINE] = new Pipeline(aDevice, "Shaders/vert.spv", "Shaders/frag.spv", renderPass, pipelineLayout, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+    pipelines[LINE_LIST_PIPELINE] = new Pipeline(aDevice, "Shaders/lineVert.spv", "Shaders/lineFrag.spv", renderPass, pipelineLayout, VK_PRIMITIVE_TOPOLOGY_LINE_LIST);
+    pipelines[POINT_LIST_PIPELINE] = new Pipeline(aDevice, "Shaders/lineVert.spv", "Shaders/lineFrag.spv", renderPass, pipelineLayout, VK_PRIMITIVE_TOPOLOGY_POINT_LIST);
+    pipelines[COMPUTE_PIPELINE] = new Pipeline(aDevice, "Shaders/compute.spv", computePipelineLayout);
+}
+
+Pipelines::~Pipelines()
+{
+    delete pipelines[COMPUTE_PIPELINE];
+    vkDestroyPipelineLayout(aDevice.GetLogicalDevice(), computePipelineLayout, nullptr);
+    delete pipelines[TRIANGLE_LIST_PIPELINE];
+    delete pipelines[LINE_LIST_PIPELINE];
+    delete pipelines[POINT_LIST_PIPELINE];
+    vkDestroyPipelineLayout(aDevice.GetLogicalDevice(), pipelineLayout, nullptr);
+
+    for (auto descriptorSetLayout : descriptorSetLayouts)
+        vkDestroyDescriptorSetLayout(aDevice.GetLogicalDevice(), descriptorSetLayout, nullptr);
+    vkDestroyDescriptorSetLayout(aDevice.GetLogicalDevice(), computeDescriptorSetLayout, nullptr);
+}
+
+Pipelines* Pipelines::GetCurrent()
+{
+    return _pipelines;
+}
+
+void Pipelines::createPipelineLayouts(VkPushConstantRange pushConstantRange)
+{
+    VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+    pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    pipelineLayoutInfo.setLayoutCount = numsof(descriptorSetLayouts);
+    pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts;
+    if (pushConstantRange.size)
+    {
+        pipelineLayoutInfo.pushConstantRangeCount = 1;
+        pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
+    }
+    if (vkCreatePipelineLayout(aDevice.GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create pipeline layout!");
+    }
+    
+    VkPipelineLayoutCreateInfo computePipelineLayoutInfo{};
+    computePipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    computePipelineLayoutInfo.setLayoutCount = 1;
+    computePipelineLayoutInfo.pSetLayouts = &computeDescriptorSetLayout;
+    if (vkCreatePipelineLayout(aDevice.GetLogicalDevice(), &computePipelineLayoutInfo, nullptr, &computePipelineLayout) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create compute pipeline layout!");
+    }
+}
+
+void Pipelines::createDescriptorSetLayouts(VkDescriptorSetLayoutBinding uboLayoutBinding)
+{
+    VkDescriptorSetLayoutCreateInfo layoutInfo{};
+    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    layoutInfo.bindingCount = 1;
+    layoutInfo.pBindings = &uboLayoutBinding;
+
+    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[UBO_LAYOUT]) != VK_SUCCESS)
+        throw std::runtime_error("Failed to create the DescriptorSetLayout 1");
+    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &computeDescriptorSetLayout) != VK_SUCCESS)
+        throw std::runtime_error("Failed to create the ComputeDescriptorSetLayout");
+    
+    auto ssboLayoutBinding = Model::ModelStorageBufferObject::GetBindingDescriptionSet();
+    layoutInfo.pBindings = &ssboLayoutBinding;
+    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[SSBO_LAYOUT]) != VK_SUCCESS)
+        throw std::runtime_error("Failed to create the DescriptorSetLayout 2");
+
+    VkDescriptorSetLayoutBinding samplerLayoutBinding{};
+    samplerLayoutBinding.descriptorCount = 1;
+    samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    samplerLayoutBinding.pImmutableSamplers = nullptr;
+    samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    samplerLayoutBinding.binding = 0;
+    layoutInfo.pBindings = &samplerLayoutBinding;
+    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[SAMPLER_LAYOUT]) != VK_SUCCESS)
+        throw std::runtime_error("Failed to create the DescriptorSetLayout 3");
+}

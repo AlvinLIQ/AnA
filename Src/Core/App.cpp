@@ -9,7 +9,6 @@
 #include <glm/detail/qualifier.hpp>
 #include <glm/fwd.hpp>
 #include <glm/gtc/constants.hpp>
-#include <iostream>
 #include <stdexcept>
 #include <memory>
 #include <vector>
@@ -93,7 +92,7 @@ void App::Init()
     _aDevice = aDevice = new Device(aInstance->GetInstance(), aWindow->GetSurface());
     aRenderer = new Renderer(*aWindow, *aDevice);
     aRenderSystem = new RenderSystems::RenderSystem(*aDevice, aRenderer->GetSwapChain());
-    SceneObjects.Init(aDevice, aRenderSystem->GetDescriptorSetLayouts()[1]);
+    SceneObjects.Init(aDevice, Pipelines::GetCurrent()->GetDescriptorSetLayouts()[SSBO_LAYOUT]);
 }
 
 void App::Run()
