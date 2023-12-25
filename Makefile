@@ -27,3 +27,6 @@ $(ana): $(objects)
 
 %.o : %.cpp
 	$(cpp) $(cflags) -c $< -o $@ -std=c++20
+
+clean:
+	rm $(objects)
