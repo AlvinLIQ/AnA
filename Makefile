@@ -17,7 +17,6 @@ endif
 sources := $(wildcard Src/Core/*.cpp Src/Core/*/*.cpp Src/GUI/Controls/*.cpp Src/Demo/*.cpp)
 objects = $(sources:.cpp=.o)
 
-
 all: shader $(ana)
 
 shader:
