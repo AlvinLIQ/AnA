@@ -1,18 +1,12 @@
 #include "Headers/App.hpp" 
 #include "Camera/Headers/CameraController.hpp"
-#include "Headers/Model.hpp"
-#include "Headers/Object.hpp"
 #include "Input/Headers/InputManager.hpp"
-#include "RenderSystem/Headers/RenderSystem.hpp"
-#include <GLFW/glfw3.h>
 #include <chrono>
 #include <glm/detail/qualifier.hpp>
 #include <glm/fwd.hpp>
 #include <glm/gtc/constants.hpp>
 #include <stdexcept>
 #include <memory>
-#include <vector>
-#include <vulkan/vulkan_core.h>
 
 using namespace AnA;
 
