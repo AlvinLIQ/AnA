@@ -120,7 +120,7 @@ Pipelines::Pipelines(Device& mDevice, VkRenderPass renderPass, VkDescriptorSetLa
     createPipelineLayouts(pushConstantRange);
     pipelines.resize(PIPELINE_COUNT);
     pipelines[TRIANGLE_LIST_PIPELINE] = new Pipeline(aDevice, Shaders_Basic_vert_spv, Shaders_Basic_frag_spv, renderPass, pipelineLayout, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-    pipelines[LINE_LIST_PIPELINE] = new Pipeline(aDevice, Shaders_Line_vert_spv, Shaders_Line_frag_spv, renderPass, pipelineLayout, VK_PRIMITIVE_TOPOLOGY_LINE_LIST);
+    pipelines[LINE_LIST_PIPELINE] = new Pipeline(aDevice, Shaders_Line_vert_spv, Shaders_Line_frag_spv, renderPass, pipelineLayout, VK_PRIMITIVE_TOPOLOGY_LINE_STRIP);
     pipelines[POINT_LIST_PIPELINE] = new Pipeline(aDevice, Shaders_Line_vert_spv, Shaders_Line_frag_spv, renderPass, pipelineLayout, VK_PRIMITIVE_TOPOLOGY_POINT_LIST);
     //pipelines[COMPUTE_PIPELINE] = new Pipeline(aDevice, Shaders_CollisionDetect_comp_spv, computePipelineLayout);
 }
