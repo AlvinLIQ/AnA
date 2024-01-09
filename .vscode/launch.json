@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": false,
-      "cwd": "/home/alvin/Documents/AnA/Src/Core/RenderSystem",
-      "program": "/home/alvin/Documents/AnA/Src/Core/RenderSystem/build/Debug/outDebug",
+      "cwd": "/home/alvin/Documents/AnA/",
+      "program": "/home/alvin/Documents/AnA/AnA",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
