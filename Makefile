@@ -23,10 +23,10 @@ shader:
 	$(cc) Src/Core/ShaderCodes/ShaderCodes.c -o $(shader) -std=c2x
 	./compile.sh
 $(ana): $(objects)
-	$(cpp) $^ $(libs) -o $@ -std=c++20
+	$(cpp) $^ $(libs) -g -o $@ -std=c++20
 
 %.o : %.cpp
-	$(cpp) $(cflags) -c $< -o $@ -std=c++20
+	$(cpp) $(cflags) -g -c $< -o $@ -std=c++20
 
 clean:
 	rm $(objects)
