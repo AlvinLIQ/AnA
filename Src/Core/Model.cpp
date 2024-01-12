@@ -124,10 +124,11 @@ void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shar
     {
         for (k = 0; k < 3; k++)
         {
-            glm::vec2 currentProjection{modelInfo.vertices[modelInfo.indices[i + sets[k].x]].position.x, modelInfo.vertices[modelInfo.indices[i + sets[k].x]].position.x};
-            glm::vec2 currentPlane = glm::vec2(modelInfo.vertices[modelInfo.indices[i + sets[k].y]].position - modelInfo.vertices[modelInfo.indices[i + sets[k].x]].position);
-            glm::vec2 yBase = glm::mat2(glm::vec2(.0, -1.0), glm::vec2(1.0, 0.0)) * currentPlane;
-            glm::mat3 transform{glm::vec3(currentPlane.x, currentPlane.y, 0.0), glm::vec3(yBase.x, yBase.y, 0.0), {}};
+            glm::vec3 xBase = modelInfo.vertices[modelInfo.indices[i + sets[k].y]].position - modelInfo.vertices[modelInfo.indices[i + sets[k].x]].position;
+            glm::vec3 yBase = glm::mat3({0.0, -1.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 0.0, 1.0}) * xBase;
+            glm::vec3 zBase = glm::mat3({1.0, 0.0, 0.0}, {0.0, 0.0, 1.0}, {0.0, -1.0, 0.0}) * xBase;
+            glm::mat3 transform{xBase, yBase, zBase};
+            glm::vec2 currentProjection{(transform * modelInfo.vertices[modelInfo.indices[0]].position).x};
             //1.0
             //glm::length(currentPlane);
             for (j = 1; j < modelInfo.indices.size(); j++)
