@@ -128,18 +128,18 @@ void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shar
             glm::vec3 yBase = glm::mat3({0.0, -1.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 0.0, 1.0}) * xBase;
             glm::vec3 zBase = glm::mat3({1.0, 0.0, 0.0}, {0.0, 0.0, 1.0}, {0.0, -1.0, 0.0}) * xBase;
             glm::mat3 transform{xBase, yBase, zBase};
-            glm::vec2 currentProjection{(transform * modelInfo.vertices[modelInfo.indices[0]].position).x};
+            glm::vec2 currentProjection{(transform * modelInfo.vertices[modelInfo.indices[0]].position).y};
             //1.0
             //glm::length(currentPlane);
             for (j = 1; j < modelInfo.indices.size(); j++)
             {
-                if (modelInfo.vertices[modelInfo.indices[j]].position.x < currentProjection.x)
+                if (modelInfo.vertices[modelInfo.indices[j]].position.y < currentProjection.x)
                 {
-                    currentProjection[0] = modelInfo.vertices[modelInfo.indices[j]].position.x;
+                    currentProjection[0] = modelInfo.vertices[modelInfo.indices[j]].position.y;
                 }
-                else if (modelInfo.vertices[modelInfo.indices[j]].position.x > currentProjection.y)
+                else if (modelInfo.vertices[modelInfo.indices[j]].position.y > currentProjection.y)
                 {
-                    currentProjection[1] = modelInfo.vertices[modelInfo.indices[j]].position.x;
+                    currentProjection[1] = modelInfo.vertices[modelInfo.indices[j]].position.y;
                 }
             }
 
