@@ -26,6 +26,9 @@ Model::Model(Device& mDevice, const ModelInfo& modelInfo) : aDevice{mDevice}
         createIndexBuffers(modelInfo.indices);
         indexStep = modelInfo.indexStep;
     }
+    transforms = modelInfo.transforms;
+    vertexProjections = modelInfo.vertexProjections;
+    vertices = modelInfo.vertices;
 }
 
 Model::~Model()
@@ -142,7 +145,7 @@ void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shar
                     currentProjection[1] = modelInfo.vertices[modelInfo.indices[j]].position.y;
                 }
             }
-
+            modelInfo.transforms.push_back(transform);
             modelInfo.vertexProjections.push_back(currentProjection);
         }
     }

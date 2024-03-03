@@ -12,6 +12,9 @@
 
 #define numsof(A) sizeof(A) / sizeof(A[0])
 
+#define ANA_TEXT_DEFAULT_LINE_HEIGHT 32
+#define IS_ASCII_CHAR(A) (A) <= 127
+
 namespace AnA
 {
     inline std::vector<unsigned char> ReadFile(const std::string &filename)

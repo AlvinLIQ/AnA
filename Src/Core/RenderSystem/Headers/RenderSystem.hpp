@@ -23,7 +23,7 @@ namespace AnA
         class RenderSystem
         {
         public:
-            RenderSystem(Device& mDevice, SwapChain& mSwapChain);
+            RenderSystem(Device& mDevice, SwapChain& mSwapChain, Cameras::Camera& mCamera);
             ~RenderSystem();
 
             void RenderObjects(VkCommandBuffer commandBuffer, Objects &objects, int pipeLineIndex = TRIANGLE_LIST_PIPELINE);
@@ -35,6 +35,7 @@ namespace AnA
 
             Pipelines* pipelines;
 
+            Cameras::Camera& camera;
             std::vector<Buffer*> cameraBuffers;
             void createCameraBuffers();
 
