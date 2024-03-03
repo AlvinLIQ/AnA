@@ -30,7 +30,7 @@ VkDescriptorBufferInfo CameraBufferObject::GetBufferInfo(VkBuffer camBuffer)
 
 RenderSystem* currentRenderSystem = nullptr;
 
-RenderSystem::RenderSystem(Device& mDevice, SwapChain& mSwapChain) : aDevice {mDevice}, aSwapChain {mSwapChain}
+RenderSystem::RenderSystem(Device& mDevice, SwapChain& mSwapChain, Camera& mCamera) : aDevice {mDevice}, aSwapChain {mSwapChain}, camera {mCamera}
 {
     currentRenderSystem = this;
     createCameraBuffers();
