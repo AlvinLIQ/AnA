@@ -51,7 +51,7 @@ int main()
     Model::CreateModelFromFile(aApp->GetDevice(), "Models/agv.obj", nObj->Model);
     //nObj->Texture = std::make_unique<Texture>("Textures/test.jpg", aApp->GetDevice());
     aApp->SceneObjects.Append(nObj);
-
+/*
     nObj = new Object;
     nObj->Model  = App::Get2DModel();
     nObj->Properties.sType = ANA_TEXT;
@@ -60,7 +60,7 @@ int main()
     nObj->Properties.transform.scale = {1.0f, 1.0f, 0.0};
     nObj->Properties.transform.translation = {};
 //    nObj->Properties.transform.rotation.y = 0.75 * glm::two_pi<float>();
-    aApp->SceneObjects.Append(nObj);
+    aApp->SceneObjects.Append(nObj);*/
 /*  
     Control::InitControl(&aApp->GetSwapChain());
     

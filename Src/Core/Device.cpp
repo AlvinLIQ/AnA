@@ -218,8 +218,26 @@ void Device::CreateTextImage(const char* text, int width, int height, float line
         throw std::runtime_error("failed to init font");
     
     int imageSize = width * height;
+    if (!lineHeight)
+    {
+        lineHeight = ANA_TEXT_DEFAULT_LINE_HEIGHT;
+    }
+    if (!imageSize)
+    {
+        if (!width)
+            width = ((int)-1) >> 1;
+        
+        imageSize = width * lineHeight;
+    }
+
     std::vector<unsigned char> textBitmap(imageSize);
     float scale = stbtt_ScaleForPixelHeight(&info, lineHeight);
+
+    int hCharWidth, wCharWidth;
+    stbtt_GetCodepointHMetrics(&info, L'a', &hCharWidth, NULL);
+    stbtt_GetCodepointHMetrics(&info, L'里', &wCharWidth, NULL);
+    hCharWidth *= scale;
+    wCharWidth *= scale;
 
     int ascent, descent, lineGap;
     stbtt_GetFontVMetrics(&info, &ascent, &descent, &lineGap);
@@ -236,10 +254,11 @@ void Device::CreateTextImage(const char* text, int width, int height, float line
         int byteOffset = x + (y * width);
         stbtt_MakeCodepointBitmap(&info, &textBitmap[byteOffset], r - l, b - t, width, scale, scale, text[i]);
 
-        int ax;
-        stbtt_GetCodepointHMetrics(&info, text[i], &ax, 0);
-        x += ax * scale;
-
+        //int ax;
+        //stbtt_GetCodepointHMetrics(&info, text[i], &ax, 0);
+        //x += ax * scale;
+        x += (IS_ASCII_CHAR(text[i]) ? hCharWidth : wCharWidth);
+        
         x += stbtt_GetCodepointKernAdvance(&info, text[i], text[i + 1]) * scale;
     }
 
