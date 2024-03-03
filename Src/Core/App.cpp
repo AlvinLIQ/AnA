@@ -69,7 +69,7 @@ void CreateCubeModel(std::shared_ptr<Model>& model)
         {{.5f,  .5f, -.5f},  {.2f, .2f, .9f}},
     };
 
-    Model::ModelInfo modelInfo = {vertices, {}, 4, {0, 1, 2, 1, 2, 3}};
+    Model::ModelInfo modelInfo = {vertices, {}, {}, 4, {0, 1, 2, 1, 2, 3}};
     model = std::make_shared<Model>(*_aDevice, modelInfo);
 }
 
@@ -85,7 +85,7 @@ void App::Init()
     aWindow->CreateWindowSurface(aInstance);
     _aDevice = aDevice = new Device(aInstance->GetInstance(), aWindow->GetSurface());
     aRenderer = new Renderer(*aWindow, *aDevice);
-    aRenderSystem = new RenderSystems::RenderSystem(*aDevice, aRenderer->GetSwapChain());
+    aRenderSystem = new RenderSystems::RenderSystem(*aDevice, aRenderer->GetSwapChain(), camera);
     SceneObjects.Init(aDevice, Pipelines::GetCurrent()->GetDescriptorSetLayouts()[SSBO_LAYOUT]);
 }
 
@@ -106,7 +106,7 @@ void App::Run()
         auto curTime = std::chrono::high_resolution_clock::now();
         float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(curTime - prevTime).count();
         prevTime = curTime;
-        printf("FPS:%.2f\r", 1.0f / frameTime);
+        //printf("FPS:%.2f\r", 1.0f / frameTime);
         camera.SetSpeedRatio(frameTime);
         if (aInputManager->CheckAndRunCallbacks())
             camera.UpdateViewMatrix();
@@ -139,6 +139,33 @@ void App::Run()
         {
             SceneObjects.RequestUpdate();
         }
+        printf("\r");
+        for (int i = 0, j; i < SceneObjects.Get().size(); i++)
+        {
+            auto& object = SceneObjects.Get()[i];
+            if (object->Properties.sType != ANA_MODEL)
+                continue;
+
+            for (j = 0; j < object->Model->GetVertexProjections().size(); j++)
+            {
+                auto transform = object->Model->GetTransforms()[j];
+                auto proj = object->Model->GetVertexProjections()[j] + glm::vec2((transform * object->Properties.transform.translation).y);
+                auto camTrans = transform * camera.CameraTransform.translation;
+                
+                if (proj.x > camTrans.y || proj.y < camTrans.y)
+                {
+                    break;
+                }
+            }
+            if (j >= object->Model->GetVertexProjections().size())
+            {
+                printf("%d:Yes", i);
+            }
+            else
+            {
+                printf("%d:No ", i);
+            }
+        }
     }
     //waitUILoop(uiThread);
     vkDeviceWaitIdle(aDevice->GetLogicalDevice());
@@ -169,7 +196,7 @@ std::shared_ptr<Model> &App::Get2DModel()
             {{-1.0f, 1.0f, 0.f}, {}, {}, {0.0f, 1.0f}},
             {{1.0f, 1.0f, 0.f}, {}, {}, {1.0f, 1.0f}}
         };
-        Model::ModelInfo modelInfo{vertices, {}, 4, {0, 1, 2, 1, 2, 3}};
+        Model::ModelInfo modelInfo{vertices, {}, {}, 4, {0, 1, 2, 1, 2, 3}};
         _2DModel = std::make_shared<Model>(*_aDevice, modelInfo);
     }
 

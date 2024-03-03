@@ -50,6 +50,7 @@ namespace AnA
         struct ModelInfo
         {
             std::vector<Vertex> vertices;
+            std::vector<glm::mat3> transforms;
             std::vector<glm::vec2> vertexProjections;
             Index indexStep;
             std::vector<Index> indices;
@@ -64,6 +65,21 @@ namespace AnA
         Model(Device& mDevice, const ModelInfo& modelInfo);
         ~Model();
 
+        std::vector<Vertex>& GetVertices()
+        {
+            return vertices;
+        }
+
+        std::vector<glm::mat3>& GetTransforms()
+        {
+            return transforms;
+        }
+
+        std::vector<glm::vec2>& GetVertexProjections()
+        {
+            return vertexProjections;
+        }
+
         static void CreateModelFromFile(Device& mDevice, const char* filePath, std::shared_ptr<Model>& model);
         void LoadMaterialFromFile(const char* filePath);
         
@@ -72,6 +88,10 @@ namespace AnA
     private:
         void createVertexBuffers(const std::vector<Vertex>& vertices);
         void createIndexBuffers(const std::vector<Index>& indices);
+
+        std::vector<Vertex> vertices;
+        std::vector<glm::mat3> transforms;
+        std::vector<glm::vec2> vertexProjections;
 
         Device& aDevice;
         Buffer* vertexBuffer;
