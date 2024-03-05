@@ -1,12 +1,12 @@
 #define INCLUDE_STB_IMAGE
 
 #include "../Core/Headers/App.hpp"
-#include "../GUI/Controls/Headers/Button.hpp"
-#include "../GUI/Controls/Headers/TextBlock.hpp"
+//#include "../GUI/Controls/Headers/Button.hpp"
+//#include "../GUI/Controls/Headers/TextBlock.hpp"
 #include "../VertexLoader/Headers/VertexLoader.hpp"
 
 using namespace AnA;
-using namespace AnA::Controls;
+//using namespace AnA::Controls;
 
 void CopyVertices(IndexedVertex &indexedVertex, std::vector<Model::Vertex> &dstVertices)
 {
@@ -48,7 +48,7 @@ int main()
     nObj->Properties.transform.rotation = {glm::two_pi<float>() / 4, 0.f, 0.f};
     
     nObj->Properties.transform.translation = {-1.5, -.5, 1.5};
-    Model::CreateModelFromFile(aApp->GetDevice(), "Models/agv.obj", nObj->Model);
+    Model::CreateModelFromFile(aApp->GetDevice(), "Models/cube.obj", nObj->Model);
     //nObj->Texture = std::make_unique<Texture>("Textures/test.jpg", aApp->GetDevice());
     aApp->SceneObjects.Append(nObj);
 /*
