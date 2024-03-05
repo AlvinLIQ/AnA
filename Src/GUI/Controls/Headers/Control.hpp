@@ -88,6 +88,13 @@ namespace AnA
             static Device& GetDevice();
 
             std::vector<PointerEventHandler> PointerEvents[PointerEventType::Moving + 1];
+            void PointerEventTrigger(PointerEventArgs& args)
+            {
+                for (auto event : PointerEvents[args.EventType])
+                {
+                    event(this, args);
+                }
+            }
 
             bool IsFocused();
             void Focus();
