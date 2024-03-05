@@ -85,7 +85,7 @@ void App::Init()
     aWindow->CreateWindowSurface(aInstance);
     _aDevice = aDevice = new Device(aInstance->GetInstance(), aWindow->GetSurface());
     aRenderer = new Renderer(*aWindow, *aDevice);
-    aRenderSystem = new RenderSystems::RenderSystem(*aDevice, aRenderer->GetSwapChain(), camera);
+    aRenderSystem = new RenderSystems::RenderSystem(*aDevice, aRenderer->GetSwapChain());
     SceneObjects.Init(aDevice, Pipelines::GetCurrent()->GetDescriptorSetLayouts()[SSBO_LAYOUT]);
 }
 
