@@ -8,3 +8,5 @@
 
 .clangd
 *.o
+*.pdb
+*.ilk
