@@ -127,22 +127,23 @@ void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shar
     {
         for (k = 0; k < 3; k++)
         {
-            glm::vec3 xBase = modelInfo.vertices[modelInfo.indices[i + sets[k].y]].position - modelInfo.vertices[modelInfo.indices[i + sets[k].x]].position;
+            glm::vec3 xBase = glm::normalize(modelInfo.vertices[modelInfo.indices[i + sets[k].y]].position - modelInfo.vertices[modelInfo.indices[i + sets[k].x]].position);
             glm::vec3 yBase = glm::mat3({0.0, -1.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 0.0, 1.0}) * xBase;
-            glm::vec3 zBase = glm::mat3({1.0, 0.0, 0.0}, {0.0, 0.0, 1.0}, {0.0, -1.0, 0.0}) * xBase;
+            glm::vec3 zBase = glm::mat3({1.0, 0.0, 0.0}, {0.0, 0.0, 1.0}, {0.0, 1.0, 0.0}) * xBase;
             glm::mat3 transform{xBase, yBase, zBase};
             glm::vec2 currentProjection{(transform * modelInfo.vertices[modelInfo.indices[0]].position).y};
             //1.0
             //glm::length(currentPlane);
             for (j = 1; j < modelInfo.indices.size(); j++)
             {
-                if (modelInfo.vertices[modelInfo.indices[j]].position.y < currentProjection.x)
+                auto positionY = (transform * modelInfo.vertices[modelInfo.indices[j]].position).y;
+                if (positionY < currentProjection.x)
                 {
-                    currentProjection[0] = modelInfo.vertices[modelInfo.indices[j]].position.y;
+                    currentProjection[0] = positionY;
                 }
-                else if (modelInfo.vertices[modelInfo.indices[j]].position.y > currentProjection.y)
+                else if (positionY > currentProjection.y)
                 {
-                    currentProjection[1] = modelInfo.vertices[modelInfo.indices[j]].position.y;
+                    currentProjection[1] = positionY;
                 }
             }
             modelInfo.transforms.push_back(transform);
