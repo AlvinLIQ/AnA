@@ -160,11 +160,11 @@ void App::Run()
             }
             if (j >= object->Model->GetVertexProjections().size())
             {
-                printf("%d:Yes", i);
+                printf("model%d:Collided             ", i);
             }
             else
             {
-                printf("%d:No ", i);
+                printf("model%d:No Collision happens ", i);
             }
         }
     }
