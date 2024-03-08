@@ -139,34 +139,6 @@ void App::Run()
         {
             SceneObjects.RequestUpdate();
         }
-        
-        printf("\r");
-        for (int i = 0, j; i < SceneObjects.Get().size(); i++)
-        {
-            auto& object = SceneObjects.Get()[i];
-            if (object->Properties.sType != ANA_MODEL)
-                continue;
-
-            for (j = 0; j < object->Model->GetVertexProjections().size(); j++)
-            {
-                auto transform = object->Model->GetTransforms()[j];
-                auto proj = object->Model->GetVertexProjections()[j] * object->Properties.transform.scale.y + glm::vec2((transform * object->Properties.transform.translation).y);
-                auto camTrans = transform * camera.CameraTransform.translation;
-
-                if ((proj.x > camTrans.y || proj.y < camTrans.y))
-                {
-                    break;
-                }
-            }
-            if (j >= object->Model->GetVertexProjections().size())
-            {
-                printf("model%d:Collided             ", i);
-            }
-            else
-            {
-                printf("model%d:No Collision happens ", i);
-            }
-        }
     }
     //waitUILoop(uiThread);
     vkDeviceWaitIdle(aDevice->GetLogicalDevice());
