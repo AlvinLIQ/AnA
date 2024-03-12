@@ -24,6 +24,7 @@ shader:
 	./compile.sh
 $(ana): $(objects)
 	$(cpp) $^ $(libs) -g -o $@ -std=c++20
+	rm Src/Core/Pipeline.o
 
 %.o : %.cpp
 	$(cpp) $(cflags) -g -c $< -o $@ -std=c++20

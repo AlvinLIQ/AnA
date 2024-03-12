@@ -6,6 +6,7 @@
 #define ANA_CURVED_RECTANGLE 3
 #define ANA_MODEL 4
 #define ANA_TEXT 5
+#define ANA_SPHERE 6
 
 layout(location = 0) in vec3 fragColor;
 layout(location = 1) in vec2 texCoord;
@@ -34,6 +35,11 @@ layout(std140, set = 1, binding = 0) buffer ObjectBuffer {
 
 layout(set = 2, binding = 0) uniform sampler2D texSampler;
 
+struct Ray{
+    vec3 center;
+    vec3 direction;
+}
+
 float rect(vec2 uv, float l, float t, float r, float b)
 {
     float c = 0.;
@@ -59,6 +65,24 @@ float ellipse(vec2 uv, vec2 center, vec2 radius)
     return c;
 }
 
+float circle(vec2 uv, vec2 center, float radius)
+{
+    float c;
+    float d = length(center - uv);
+    c = smoothstep(radius, radius - 0.006, d);
+
+    return c;
+}
+
+vec4 sphere(vec2 uv, vec2 center, float radius, vec3 lightDirection, vec3 sColor)
+{
+    float c = circle(uv, center, radius);
+
+    vec2 normalXY = uv - center;
+    vec3 normal = normalize(vec3(normalXY, sqrt(radius * radius - length(normalXY) * length(normalXY))));
+    return vec4(c * 0.4 * (dot(normal, lightDirection) + 1.0) * sColor, c);
+}
+
 float rounded_rect(vec2 uv, float l, float t, float r, float b, vec2 radius)
 {
     float c;
@@ -82,21 +106,25 @@ void main() {
         outColor = texture(texSampler, texCoord) * vec4(fragColor, 1.0);
         return;
     }
-    
+    float aspect = cbo.resolution.x / cbo.resolution.y;
     vec2 uv = gl_FragCoord.xy / cbo.resolution;
+    uv.x *= aspect;
     float c = 0.;
     vec4 color = texture(texSampler, texCoord);
     if (color.a == 0.)
             discard;
     vec2 offset = vec2((objectBuffer.objects[objectIndex].model[3].x + (1. - objectBuffer.objects[objectIndex].model[0].x)) / 2., (objectBuffer.objects[objectIndex].model[3].y + (1. - objectBuffer.objects[objectIndex].model[1].y)) / 2.);
+    offset.x *= aspect;
     switch (push.sType)
     {
     case ANA_RECTANGLE:
         c = rect2(uv, offset, vec2(objectBuffer.objects[objectIndex].model[0].x, objectBuffer.objects[objectIndex].model[1].y));
         break;
-    case ANA_ELLIPSE:
-        c = ellipse(uv, vec2(offset.x + objectBuffer.objects[objectIndex].model[0].x / 2., offset.y + objectBuffer.objects[objectIndex].model[1].y / 2.), vec2(objectBuffer.objects[objectIndex].model[0].x / 2, objectBuffer.objects[objectIndex].model[1].y / 2));
-        break;
+    case ANA_SPHERE:
+        vec2 center = vec2(offset.x + objectBuffer.objects[objectIndex].model[0].x / 2., offset.y + objectBuffer.objects[objectIndex].model[1].y / 2.);
+        vec2 radius = vec2(objectBuffer.objects[objectIndex].model[0].x / 2, objectBuffer.objects[objectIndex].model[1].y / 2);
+        outColor = sphere(uv, center, radius.x, normalize(mat3(cbo.view) * vec3(0.5, -3.0, 0.4)), fragColor);
+        return;
     case ANA_CURVED_RECTANGLE:
         c = rounded_rect2(uv, offset, vec2(objectBuffer.objects[objectIndex].model[0].x, objectBuffer.objects[objectIndex].model[1].y), vec2(0.03));
         break;
