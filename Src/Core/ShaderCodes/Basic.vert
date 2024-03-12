@@ -38,7 +38,7 @@ layout(std140, set = 1, binding = 0) buffer ObjectBuffer {
 struct Ray{
     vec3 center;
     vec3 direction;
-}
+};
 
 const vec3 LIGHT_DIRECTION = normalize(vec3(1., -3., 1.));
 

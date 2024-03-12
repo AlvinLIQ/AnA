@@ -38,6 +38,11 @@ layout(set = 2, binding = 0) uniform sampler2D texSampler;
 struct Ray{
     vec3 center;
     vec3 direction;
+};
+
+vec3 GetPointOfRay(Ray ray, float len)
+{
+    return ray.center + len * ray.direction;
 }
 
 float rect(vec2 uv, float l, float t, float r, float b)
