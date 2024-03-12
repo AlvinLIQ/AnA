@@ -6,6 +6,7 @@
 #define ANA_CURVED_RECTANGLE 3
 #define ANA_MODEL 4
 #define ANA_TEXT 5
+#define ANA_SPHERE 6
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 color;
@@ -34,7 +35,12 @@ layout(std140, set = 1, binding = 0) buffer ObjectBuffer {
     Object objects[];
 } objectBuffer;
 
-const vec3 LIGHT_DIRECTION = normalize(vec3(1., -3., -1.));
+struct Ray{
+    vec3 center;
+    vec3 direction;
+}
+
+const vec3 LIGHT_DIRECTION = normalize(vec3(1., -3., 1.));
 
 void main() {
     //gl_Position = vec4(push.transform * position + push.offset * 2, 0.0, 1.0);
@@ -44,7 +50,7 @@ void main() {
         vec3 normalWorldSpace = normalize(mat3(objectBuffer.objects[gl_BaseInstance].model) * normal);
 
         float lightIntensity = max(dot(normalWorldSpace, LIGHT_DIRECTION), 0);
-        fragColor = lightIntensity * vec3(1.0) + 0.077;
+        fragColor = lightIntensity * vec3(1.0) + 0.033;
     }
     else
     {

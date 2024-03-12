@@ -51,16 +51,23 @@ int main()
     Model::CreateModelFromFile(aApp->GetDevice(), "Models/cube.obj", nObj->Model);
     //nObj->Texture = std::make_unique<Texture>("Textures/test.jpg", aApp->GetDevice());
     aApp->SceneObjects.Append(nObj);
-/*
+
     nObj = new Object;
-    nObj->Model  = App::Get2DModel();
-    nObj->Properties.sType = ANA_TEXT;
-    nObj->Texture = std::make_unique<Texture>("AnA Game Engine", 800, 600, 64, aApp->GetDevice());
+    Model::CreateModelFromFile(aApp->GetDevice(), "Models/sphere.obj", nObj->Model);
+    nObj->Properties.sType = ANA_MODEL;
     nObj->Color = {.68f, .68f, 1.0f};
-    nObj->Properties.transform.scale = {1.0f, 1.0f, 0.0};
-    nObj->Properties.transform.translation = {};
-//    nObj->Properties.transform.rotation.y = 0.75 * glm::two_pi<float>();
-    aApp->SceneObjects.Append(nObj);*/
+    nObj->Properties.transform.scale = {11.4f, 11.4f, 11.4};
+    nObj->Properties.transform.translation = {3.0, 11.2, 0.0};
+    aApp->SceneObjects.Append(nObj);
+
+    nObj = new Object;
+    Model::CreateModelFromFile(aApp->GetDevice(), "Models/sphere.obj", nObj->Model);
+    nObj->Properties.sType = ANA_MODEL;
+    nObj->Color = {1.0F, 1.0f, 1.0f};
+    nObj->Properties.transform.scale = {0.4f, 0.4f, 0.4};
+    nObj->Properties.transform.translation = {0.0, -0.2, 0.0};
+    aApp->SceneObjects.Append(nObj);
+
 /*  
     Control::InitControl(&aApp->GetSwapChain());
     

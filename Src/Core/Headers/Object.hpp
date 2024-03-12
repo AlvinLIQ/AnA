@@ -15,6 +15,7 @@
 #define ANA_CURVED_RECTANGLE 3
 #define ANA_MODEL 4
 #define ANA_TEXT 5
+#define ANA_SPHERE 6
 
 #define MAX_OBJECTS_COUNT 100
 
