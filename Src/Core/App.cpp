@@ -33,7 +33,7 @@ App::~App()
     Cleanup();
 }
 
-void CreateCubeModel(std::shared_ptr<Model>& model)
+void App::CreateCubeModel(std::shared_ptr<Model>& model)
 {
     std::vector<Model::Vertex> vertices = 
     {

@@ -1,12 +1,12 @@
 #version 460
 
-#define ANA_TRIANGLE 0
-#define ANA_RECTANGLE 1
-#define ANA_ELLIPSE 2
-#define ANA_CURVED_RECTANGLE 3
-#define ANA_MODEL 4
-#define ANA_TEXT 5
-#define ANA_SPHERE 6
+#define ANA_MODEL 1
+#define ANA_TRIANGLE 2
+#define ANA_RECTANGLE 4
+#define ANA_ELLIPSE 8
+#define ANA_CURVED_RECTANGLE 16
+#define ANA_TEXT 32
+#define ANA_SPHERE 64
 
 layout(location = 0) in vec3 fragColor;
 layout(location = 1) in vec2 texCoord;
@@ -137,6 +137,8 @@ void main() {
         c = 1.;
         break;
     }
-
+    if (c == 0)
+        discard;
+    
     outColor = vec4(c * color * vec4(fragColor, 1.0));
 }

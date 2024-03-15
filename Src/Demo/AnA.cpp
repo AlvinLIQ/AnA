@@ -59,13 +59,21 @@ int main()
     nObj->Properties.transform.scale = {11.4f, 11.4f, 11.4};
     nObj->Properties.transform.translation = {3.0, 11.2, 0.0};
     aApp->SceneObjects.Append(nObj);
-
+/*
     nObj = new Object;
     Model::CreateModelFromFile(aApp->GetDevice(), "Models/sphere.obj", nObj->Model);
     nObj->Properties.sType = ANA_MODEL;
     nObj->Color = {1.0F, 1.0f, 1.0f};
     nObj->Properties.transform.scale = {0.4f, 0.4f, 0.4};
     nObj->Properties.transform.translation = {0.0, -0.2, 0.0};
+    aApp->SceneObjects.Append(nObj);*/
+
+    nObj = new Object;
+    App::CreateCubeModel(nObj->Model);
+    nObj->Properties.sType = ANA_MODEL;
+    nObj->Color = {1.0F, 1.0f, 1.0f};
+    nObj->Properties.transform.scale = {0.4f, 0.4f, 0.4};
+    nObj->Properties.transform.translation = {0.0, 0.0, 0.0};
     aApp->SceneObjects.Append(nObj);
 
 /*  

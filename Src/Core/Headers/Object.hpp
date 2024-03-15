@@ -9,13 +9,13 @@
 #include <vector>
 
 #define SHAPE_TYPE uint32_t
-#define ANA_TRIANGLE 0
-#define ANA_RECTANGLE 1
-#define ANA_ELLIPSE 2
-#define ANA_CURVED_RECTANGLE 3
-#define ANA_MODEL 4
-#define ANA_TEXT 5
-#define ANA_SPHERE 6
+#define ANA_MODEL 1
+#define ANA_TRIANGLE 2
+#define ANA_RECTANGLE 4
+#define ANA_ELLIPSE 8
+#define ANA_CURVED_RECTANGLE 16
+#define ANA_TEXT 32
+#define ANA_SPHERE 64
 
 #define MAX_OBJECTS_COUNT 100
 
