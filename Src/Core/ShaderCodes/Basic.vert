@@ -1,12 +1,12 @@
 #version 460
 
-#define ANA_TRIANGLE 0
-#define ANA_RECTANGLE 1
-#define ANA_ELLIPSE 2
-#define ANA_CURVED_RECTANGLE 3
-#define ANA_MODEL 4
-#define ANA_TEXT 5
-#define ANA_SPHERE 6
+#define ANA_MODEL 1
+#define ANA_TRIANGLE 2
+#define ANA_RECTANGLE 4
+#define ANA_ELLIPSE 8
+#define ANA_CURVED_RECTANGLE 16
+#define ANA_TEXT 32
+#define ANA_SPHERE 64
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 color;
@@ -46,15 +46,19 @@ void main() {
     //gl_Position = vec4(push.transform * position + push.offset * 2, 0.0, 1.0);
     if (push.sType == ANA_MODEL)
     {
-        gl_Position = cbo.proj * cbo.view * objectBuffer.objects[gl_BaseInstance].model * vec4(position, 1.0);
+        vec4 vertex = objectBuffer.objects[gl_BaseInstance].model * vec4(position, 1.0);
+        gl_Position = cbo.proj * cbo.view * vertex;
         vec3 normalWorldSpace = normalize(mat3(objectBuffer.objects[gl_BaseInstance].model) * normal);
 
-        float lightIntensity = max(dot(normalWorldSpace, LIGHT_DIRECTION), 0);
+        float lightIntensity = max(dot(normalWorldSpace, normalize(LIGHT_DIRECTION - vec3(vertex))), 0);
         fragColor = lightIntensity * vec3(1.0) + 0.033;
     }
     else
     {
-        gl_Position = objectBuffer.objects[gl_BaseInstance].model * vec4(position, 1.0);
+        mat4 model = objectBuffer.objects[gl_BaseInstance].model;
+        float aspect = cbo.resolution.x / cbo.resolution.y;
+        model[0] *= aspect;
+        gl_Position = model * vec4(position, 1.0);
         fragColor = push.color;
     }
     outTexCoord = uv;

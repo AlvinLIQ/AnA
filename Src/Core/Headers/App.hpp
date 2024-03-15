@@ -29,6 +29,7 @@ namespace AnA
 
         Objects SceneObjects;
 
+        static void CreateCubeModel(std::shared_ptr<Model>& model);
         static std::shared_ptr<Model> &Get2DModel();
         static void CreateModel(const Model::ModelInfo &modelInfo, std::shared_ptr<Model> &model);
 

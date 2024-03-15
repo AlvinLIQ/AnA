@@ -150,6 +150,7 @@ void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shar
             modelInfo.vertexProjections.push_back(currentProjection);
         }
     }
+    modelInfo.indexStep = modelInfo.vertices.size();
     model = std::make_shared<Model>(mDevice, modelInfo);
 }
 
@@ -197,7 +198,8 @@ void Model::Draw(VkCommandBuffer commandBuffer, Index instanceIndex)
 {
     if (hasIndexBuffer)
     {
-        vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, instanceIndex);
+        for (int i = 0; i < vertices.size(); i += indexStep)
+            vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, i, instanceIndex);
     }
     else
     {
