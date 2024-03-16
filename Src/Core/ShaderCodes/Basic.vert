@@ -15,6 +15,8 @@ layout(location = 3) in vec2 uv;
 layout(location = 0) out vec3 fragColor;
 layout(location = 1) out vec2 outTexCoord;
 layout(location = 2) out uint outObjectID;
+layout(location = 3) out vec3 outNormalSpace;
+layout(location = 4) out vec3 outVertex;
 
 layout(push_constant) uniform Push {
     uint sType;
@@ -48,10 +50,9 @@ void main() {
     {
         vec4 vertex = objectBuffer.objects[gl_BaseInstance].model * vec4(position, 1.0);
         gl_Position = cbo.proj * cbo.view * vertex;
-        vec3 normalWorldSpace = normalize(mat3(objectBuffer.objects[gl_BaseInstance].model) * normal);
-
-        float lightIntensity = max(dot(normalWorldSpace, normalize(LIGHT_DIRECTION - vec3(vertex))), 0);
-        fragColor = lightIntensity * vec3(1.0) + 0.033;
+        outNormalSpace = normalize(mat3(objectBuffer.objects[gl_BaseInstance].model) * normal);
+        outVertex = vertex.xyz;        
+        fragColor = color;
     }
     else
     {

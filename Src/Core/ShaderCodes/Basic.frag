@@ -11,6 +11,8 @@
 layout(location = 0) in vec3 fragColor;
 layout(location = 1) in vec2 texCoord;
 layout(location = 2) flat in uint objectIndex;
+layout(location = 3) in vec3 normalSpace;
+layout(location = 4) in vec3 vertex;
 
 layout(location = 0) out vec4 outColor;
 
@@ -39,6 +41,8 @@ struct Ray{
     vec3 center;
     vec3 direction;
 };
+
+const vec3 LIGHT_DIRECTION = normalize(vec3(1., -3., 1.));
 
 vec3 GetPointOfRay(Ray ray, float len)
 {
@@ -105,40 +109,8 @@ float rounded_rect2(vec2 uv, vec2 offset, vec2 size, vec2 radius)
     return rounded_rect(uv, offset.x, offset.y, offset.x + size.x, offset.y + size.y, radius);
 }
 
-void main() {
-    if (push.sType == ANA_MODEL)
-    {
-        outColor = texture(texSampler, texCoord) * vec4(fragColor, 1.0);
-        return;
-    }
-    float aspect = cbo.resolution.x / cbo.resolution.y;
-    vec2 uv = gl_FragCoord.xy / cbo.resolution;
-    uv.x *= aspect;
-    float c = 0.;
-    vec4 color = texture(texSampler, texCoord);
-    if (color.a == 0.)
-            discard;
-    vec2 offset = vec2((objectBuffer.objects[objectIndex].model[3].x + (1. - objectBuffer.objects[objectIndex].model[0].x)) / 2., (objectBuffer.objects[objectIndex].model[3].y + (1. - objectBuffer.objects[objectIndex].model[1].y)) / 2.);
-    offset.x *= aspect;
-    switch (push.sType)
-    {
-    case ANA_RECTANGLE:
-        c = rect2(uv, offset, vec2(objectBuffer.objects[objectIndex].model[0].x, objectBuffer.objects[objectIndex].model[1].y));
-        break;
-    case ANA_SPHERE:
-        vec2 center = vec2(offset.x + objectBuffer.objects[objectIndex].model[0].x / 2., offset.y + objectBuffer.objects[objectIndex].model[1].y / 2.);
-        vec2 radius = vec2(objectBuffer.objects[objectIndex].model[0].x / 2, objectBuffer.objects[objectIndex].model[1].y / 2);
-        outColor = sphere(uv, center, radius.x, normalize(mat3(cbo.view) * vec3(0.5, -3.0, 0.4)), fragColor);
-        return;
-    case ANA_CURVED_RECTANGLE:
-        c = rounded_rect2(uv, offset, vec2(objectBuffer.objects[objectIndex].model[0].x, objectBuffer.objects[objectIndex].model[1].y), vec2(0.03));
-        break;
-    default:
-        c = 1.;
-        break;
-    }
-    if (c == 0)
-        discard;
-    
-    outColor = vec4(c * color * vec4(fragColor, 1.0));
+void main()
+{
+    float lightIntensity = max(dot(normalSpace, normalize(LIGHT_DIRECTION - vec3(vertex))), 0);
+    outColor = texture(texSampler, texCoord) * (vec4(lightIntensity * vec3(1.) + 0.033, 1.0));
 }
