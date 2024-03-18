@@ -38,35 +38,35 @@ void App::CreateCubeModel(std::shared_ptr<Model>& model)
     std::vector<Model::Vertex> vertices = 
     {
         // left (gray)
-        {{-.5f, -.5f, -.5f},{.5f, .5f, .5f}},
-        {{-.5f, -.5f, .5f}, {.5f, .5f, .5f}},
-        {{-.5f, .5f, -.5f}, {.5f, .5f, .5f}},
-        {{-.5f, .5f, .5f},  {.5f, .5f, .5f}},
+        {{-.5f, -.5f, -.5f},{.5f, .5f, .5f}, {-1.0f, 0.0f, 0.0f}},
+        {{-.5f, -.5f, .5f}, {.5f, .5f, .5f}, {-1.0f, 0.0f, 0.0f}},
+        {{-.5f, .5f, -.5f}, {.5f, .5f, .5f}, {-1.0f, 0.0f, 0.0f}},
+        {{-.5f, .5f, .5f},  {.5f, .5f, .5f}, {-1.0f, 0.0f, 0.0f}},
         // right (red)
-        {{.5f, -.5f, -.5f},{.9f, .2f, .2f}},
-        {{.5f, -.5f, .5f}, {.9f, .2f, .2f}},
-        {{.5f, .5f, -.5f}, {.9f, .2f, .2f}},
-        {{.5f, .5f, .5f},  {.9f, .2f, .2f}},
+        {{.5f, -.5f, -.5f},{.9f, .2f, .2f}, {1.0f, 0.0f, 0.0f}},
+        {{.5f, -.5f, .5f}, {.9f, .2f, .2f}, {1.0f, 0.0f, 0.0f}},
+        {{.5f, .5f, -.5f}, {.9f, .2f, .2f}, {1.0f, 0.0f, 0.0f}},
+        {{.5f, .5f, .5f},  {.9f, .2f, .2f}, {1.0f, 0.0f, 0.0f}},
         // top (yellow)
-        {{-.5f, -.5f, -.5f},{.9f, .9f, .2f}},
-        {{-.5f, -.5f, .5f}, {.9f, .9f, .2f}},
-        {{.5f, -.5f, -.5f}, {.9f, .9f, .2f}},
-        {{.5f, -.5f, .5f},  {.9f, .9f, .2f}},
+        {{-.5f, -.5f, -.5f},{.9f, .9f, .2f}, {0.0f, -1.0f, 0.0f}},
+        {{-.5f, -.5f, .5f}, {.9f, .9f, .2f}, {0.0f, -1.0f, 0.0f}},
+        {{.5f, -.5f, -.5f}, {.9f, .9f, .2f}, {0.0f, -1.0f, 0.0f}},
+        {{.5f, -.5f, .5f},  {.9f, .9f, .2f}, {0.0f, -1.0f, 0.0f}},
         // bottom (white)
-        {{-.5f, .5f, -.5f}, {.9f, .9f, .9f}},
-        {{-.5f, .5f, .5f},  {.9f, .9f, .9f}},
-        {{.5f,  .5f, -.5f}, {.9f, .9f, .9f}},
-        {{.5f,  .5f, .5f},  {.9f, .9f, .9f}},
+        {{-.5f, .5f, -.5f}, {.9f, .9f, .9f}, {0.0f, 1.0f, 0.0f}},
+        {{-.5f, .5f, .5f},  {.9f, .9f, .9f}, {0.0f, 1.0f, 0.0f}},
+        {{.5f,  .5f, -.5f}, {.9f, .9f, .9f}, {0.0f, 1.0f, 0.0f}},
+        {{.5f,  .5f, .5f},  {.9f, .9f, .9f}, {0.0f, 1.0f, 0.0f}},
         // back (green)
-        {{-.5f, -.5f, .5f}, {.2f, .9f, .2f}},
-        {{-.5f, .5f, .5f},  {.2f, .9f, .2f}},
-        {{.5f,  -.5f, .5f}, {.2f, .9f, .2f}},
-        {{.5f,  .5f, .5f},  {.2f, .9f, .2f}},
+        {{-.5f, -.5f, .5f}, {.2f, .9f, .2f}, {0.0f, 0.0f, -1.0f}},
+        {{-.5f, .5f, .5f},  {.2f, .9f, .2f}, {0.0f, 0.0f, -1.0f}},
+        {{.5f,  -.5f, .5f}, {.2f, .9f, .2f}, {0.0f, 0.0f, -1.0f}},
+        {{.5f,  .5f, .5f},  {.2f, .9f, .2f}, {0.0f, 0.0f, -1.0f}},
         // front (blue)
-        {{-.5f, -.5f, -.5f}, {.2f, .2f, .9f}},
-        {{-.5f, .5f, -.5f},  {.2f, .2f, .9f}},
-        {{.5f,  -.5f, -.5f}, {.2f, .2f, .9f}},
-        {{.5f,  .5f, -.5f},  {.2f, .2f, .9f}},
+        {{-.5f, -.5f, -.5f}, {.2f, .2f, .9f}, {0.0f, 0.0f, 1.0f}},
+        {{-.5f, .5f, -.5f},  {.2f, .2f, .9f}, {0.0f, 0.0f, 1.0f}},
+        {{.5f,  -.5f, -.5f}, {.2f, .2f, .9f}, {0.0f, 0.0f, 1.0f}},
+        {{.5f,  .5f, -.5f},  {.2f, .2f, .9f}, {0.0f, 0.0f, 1.0f}},
     };
 
     Model::ModelInfo modelInfo = {vertices, {}, {}, 4, {0, 1, 2, 1, 2, 3}};
@@ -85,7 +85,7 @@ void App::Init()
     aWindow->CreateWindowSurface(aInstance);
     _aDevice = aDevice = new Device(aInstance->GetInstance(), aWindow->GetSurface());
     aRenderer = new Renderer(*aWindow, *aDevice);
-    aRenderSystem = new RenderSystems::RenderSystem(*aDevice, aRenderer->GetSwapChain());
+    aRenderSystem = new Systems::RenderSystem(*aDevice, aRenderer->GetSwapChain());
     SceneObjects.Init(aDevice, Pipelines::GetCurrent()->GetDescriptorSetLayouts()[SSBO_LAYOUT]);
 }
 
@@ -119,7 +119,7 @@ void App::Run()
         {
             aRenderer->RecordSecondaryCommandBuffers([](VkCommandBuffer secondaryCommandBuffer)
             {
-                RenderSystems::RenderSystem::GetCurrent()->RenderObjects(secondaryCommandBuffer, _aApp->SceneObjects);
+                Systems::RenderSystem::GetCurrent()->RenderObjects(secondaryCommandBuffer, _aApp->SceneObjects);
             });
             SceneObjects.EndCommandBufferUpdate();
         }
