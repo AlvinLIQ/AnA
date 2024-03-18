@@ -1,4 +1,5 @@
 #include "Headers/SwapChain.hpp"
+#include <algorithm>
 
 using namespace AnA;
 

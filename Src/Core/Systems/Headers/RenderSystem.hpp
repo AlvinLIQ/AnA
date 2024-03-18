@@ -9,7 +9,7 @@
 
 namespace AnA
 {
-    namespace RenderSystems
+    namespace Systems
     {
         struct CameraBufferObject
         {

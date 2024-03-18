@@ -7,7 +7,7 @@
 #include "Window.hpp"
 #include "Instance.hpp"
 #include "Device.hpp"
-#include "../RenderSystem/Headers/RenderSystem.hpp"
+#include "../Systems/Headers/RenderSystem.hpp"
 #include "../Input/Headers/InputManager.hpp"
 #include <thread>
 
@@ -57,7 +57,7 @@ namespace AnA
         Instance* aInstance;
         Device* aDevice;
         Renderer* aRenderer;
-        RenderSystems::RenderSystem* aRenderSystem;
+        Systems::RenderSystem* aRenderSystem;
         Input::InputManager* aInputManager;
 
         Cameras::Camera camera;

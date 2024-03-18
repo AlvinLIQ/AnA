@@ -3,7 +3,7 @@
 #include <vulkan/vulkan_core.h>
 #include <glm/gtc/constants.hpp>
 
-using namespace AnA::RenderSystems;
+using namespace AnA::Systems;
 using namespace AnA::Cameras;
 
 VkDescriptorSetLayoutBinding CameraBufferObject::GetBindingDescriptionSet()

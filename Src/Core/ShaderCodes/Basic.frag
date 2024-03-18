@@ -43,6 +43,7 @@ struct Ray{
 };
 
 const vec3 LIGHT_DIRECTION = normalize(vec3(1., -3., 1.));
+const vec3 LIGHT_COLOR = vec3(0.9, 0.9, 0.2);
 
 vec3 GetPointOfRay(Ray ray, float len)
 {
@@ -52,5 +53,5 @@ vec3 GetPointOfRay(Ray ray, float len)
 void main()
 {
     float lightIntensity = max(dot(normalSpace, normalize(LIGHT_DIRECTION - vec3(vertex))), 0);
-    outColor = texture(texSampler, texCoord) * (vec4(lightIntensity * vec3(1.) + 0.033, 1.0));
+    outColor = texture(texSampler, texCoord) * (vec4(lightIntensity * LIGHT_COLOR + 0.033, 1.0));
 }
