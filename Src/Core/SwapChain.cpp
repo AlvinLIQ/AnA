@@ -1,5 +1,6 @@
 #include "Headers/SwapChain.hpp"
 #include <algorithm>
+#include <limits>
 
 using namespace AnA;
 
