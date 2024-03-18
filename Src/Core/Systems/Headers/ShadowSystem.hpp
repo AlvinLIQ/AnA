@@ -29,13 +29,10 @@ namespace AnA
             SwapChain* swapChain;
             Pipeline* shadowPipeline;
             
-            VkFormat shadowFormat{VK_FORMAT_UNDEFINED};
             VkImage image;
             VkDeviceMemory imageMemory;
             VkImageView imageView;
             void createImageView();
-            VkRenderPass renderPass;
-            void createShadowRenderPass();
             VkFramebuffer shadowFrameBuffer;
             void createShadowFrameBuffer();
         };

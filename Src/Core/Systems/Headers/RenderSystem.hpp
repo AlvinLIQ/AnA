@@ -28,6 +28,10 @@ namespace AnA
 
             void RenderObjects(VkCommandBuffer commandBuffer, Objects &objects, int pipeLineIndex = TRIANGLE_LIST_PIPELINE);
             void UpdateCameraBuffer(Cameras::Camera &camera);
+            Pipelines* GetPipelines() const
+            {
+                return pipelines;
+            }
             static RenderSystem* GetCurrent();
         private:
             Device& aDevice;

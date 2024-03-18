@@ -27,19 +27,23 @@ int main(int argc, char* argv[])
         }
         ++pos;
     }
-    printf ("const std::vector<unsigned char> %s = {", argv[1]);
+    //printf ("static unsigned char[] %s = {", argv[1]);
+    printf ("static std::vector<unsigned char> %s = {", argv[1]);
     int byte;
     size_t fs = 0;
     byte = fgetc(file);
     if (byte != EOF)
     {
         printf ("%#x", byte);
+        fs++;
         while ((byte = fgetc(file)) != EOF)
         {
             printf (", %#x", byte);
+            fs++;
         }
     }
     printf("};\n");
+    //printf("static size_t %s_size = %llu;\n", argv[1], fs);
     fclose(file);
     return 0;
 }

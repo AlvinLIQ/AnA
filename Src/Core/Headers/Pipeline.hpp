@@ -9,8 +9,9 @@
 #define LINE_LIST_PIPELINE 1
 #define POINT_LIST_PIPELINE 2
 #define COMPUTE_PIPELINE 3
+#define SHADOW_MAPPING_PIPELINE 4
 
-#define PIPELINE_COUNT 4
+#define PIPELINE_COUNT 5
 
 #define UBO_LAYOUT 0
 #define SSBO_LAYOUT 1
@@ -38,7 +39,7 @@ namespace AnA
             VkPipelineColorBlendStateCreateInfo colorBlending{};
             VkPipelineDepthStencilStateCreateInfo depthStencilInfo{};
             VkGraphicsPipelineCreateInfo pipelineInfo{};
-            const std::vector<VkDynamicState> dynamicStates = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
+            std::vector<VkDynamicState> dynamicStates = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
             static PipelineConfig GetDefault(VkShaderModule vertexShaderModule, VkShaderModule fragShaderModule,
                 VkPipelineLayout &pipelineLayout, VkRenderPass &renderPass, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
             {
@@ -125,7 +126,7 @@ namespace AnA
                 dConfig.depthStencilInfo.back = {};             // Optional
 
                 dConfig.pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-                dConfig.pipelineInfo.stageCount = 2;
+                dConfig.pipelineInfo.stageCount = fragShaderModule == nullptr ? 1 : 2;
                 dConfig.pipelineInfo.pStages = dConfig.shaderStages;
 
                 dConfig.pipelineInfo.pVertexInputState = &dConfig.vertexInputInfo;
@@ -148,6 +149,7 @@ namespace AnA
         };
         Pipeline(Device& mDevice, const char* vertShaderFileName, const char* fragShaderFileName, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
         Pipeline(Device& mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+        Pipeline(Device& mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
         Pipeline(Device& mDevice, const char* computeShaderFile, VkPipelineLayout &mPipelineLayout);
         Pipeline(Device& mDevice, const std::vector<unsigned char>& computeShaderCode, VkPipelineLayout &mPipelineLayout);
 
@@ -168,6 +170,7 @@ namespace AnA
         VkPipeline pipeline;//Graphics Pipeline
         void createGraphicsPipeline(const std::string &vertShaderFileName, const std::string &fragShaderFileName, const VkPrimitiveTopology vertexTopology);
         void createGraphicsPipeline(const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, const VkPrimitiveTopology vertexTopology);
+        void createGraphicsPipeline(const std::vector<unsigned char>& vertShaderCode, const VkPrimitiveTopology vertexTopology);
         void createComputePipeline(const std::string &computeShaderFileName);
         void createComputePipeline(const std::vector<unsigned char>& computeShaderCode);
 
@@ -177,7 +180,7 @@ namespace AnA
     class Pipelines
     {
     public:
-        Pipelines(Device& mDevice, VkRenderPass renderPass, VkDescriptorSetLayoutBinding uboLayoutBinding, VkPushConstantRange pushConstantRange);
+        Pipelines(Device& mDevice, VkRenderPass renderPass, VkRenderPass offscreenRenderPass, VkDescriptorSetLayoutBinding uboLayoutBinding, VkPushConstantRange pushConstantRange);
         ~Pipelines();
 
         static Pipelines* GetCurrent();

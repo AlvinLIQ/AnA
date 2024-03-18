@@ -34,7 +34,7 @@ RenderSystem::RenderSystem(Device& mDevice, SwapChain& mSwapChain) : aDevice {mD
 {
     currentRenderSystem = this;
     createCameraBuffers();
-    pipelines = new Pipelines(aDevice, aSwapChain.GetRenderPass(), 
+    pipelines = new Pipelines(aDevice, aSwapChain.GetRenderPass(), aSwapChain.GetOffscreenRenderPass(),
         CameraBufferObject::GetBindingDescriptionSet(), 
         {VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(ObjectPushConstantData)});
     aDevice.CreateDescriptorPool(MAX_FRAMES_IN_FLIGHT, descriptorPool);
