@@ -11,12 +11,14 @@ SwapChain::SwapChain(Device& mDevice,
     createImageViews();
     createDepthResources();
     createRenderPass();
+    createOffscreenRenderPass();
     createFramebuffers();
     createSyncObjects();
 }
 SwapChain::~SwapChain()
 {
     auto device = aDevice.GetLogicalDevice();
+    vkDestroyRenderPass(device, offscreenRenderPass, nullptr);
     vkDestroyRenderPass(device, renderPass, nullptr);
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
@@ -93,6 +95,11 @@ VkFormat SwapChain::GetFormat()
     return swapChainImageFormat;
 }
 
+VkFormat SwapChain::GetDepthFormat()
+{
+    return swapChainDepthFormat;
+}
+
 uint32_t SwapChain::GetImageCount()
 {
     return static_cast<uint32_t>(swapChainImageViews.size());
@@ -101,6 +108,11 @@ uint32_t SwapChain::GetImageCount()
 VkRenderPass &SwapChain::GetRenderPass()
 {
     return renderPass;
+}
+
+VkRenderPass &SwapChain::GetOffscreenRenderPass()
+{
+    return offscreenRenderPass;
 }
 
 std::vector<VkFramebuffer> SwapChain::GetSwapChainFramebuffers()
@@ -387,6 +399,57 @@ void SwapChain::createRenderPass()
 
     if (vkCreateRenderPass(aDevice.GetLogicalDevice(), &createInfo, nullptr, &renderPass) != VK_SUCCESS)
         throw std::runtime_error("Failed to create render pass!");
+}
+
+void SwapChain::createOffscreenRenderPass()
+{
+    VkAttachmentDescription attachmentDescription{};
+	attachmentDescription.format = swapChainDepthFormat;
+	attachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
+	attachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;							// Clear depth at beginning of the render pass
+	attachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;						// We will read from depth, so it's important to store the depth attachment results
+	attachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	attachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	attachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;					// We don't care about initial layout of the attachment
+	attachmentDescription.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;// Attachment will be transitioned to shader read at render pass end
+
+	VkAttachmentReference depthReference = {};
+	depthReference.attachment = 0;
+	depthReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;			// Attachment will be used as depth/stencil during render pass
+
+	VkSubpassDescription subpass = {};
+	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpass.colorAttachmentCount = 0;													// No color attachments
+	subpass.pDepthStencilAttachment = &depthReference;									// Reference to our depth attachment
+
+	// Use subpass dependencies for layout transitions
+	std::vector<VkSubpassDependency> dependencies(2);
+
+	dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+	dependencies[0].dstSubpass = 0;
+	dependencies[0].srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	dependencies[0].dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+	dependencies[0].srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+	dependencies[0].dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+	dependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+	dependencies[1].srcSubpass = 0;
+	dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
+	dependencies[1].srcStageMask = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+	dependencies[1].dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	dependencies[1].srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+	dependencies[1].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+	dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+    VkRenderPassCreateInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    renderPassInfo.attachmentCount = 1;
+	renderPassInfo.pAttachments = &attachmentDescription;
+	renderPassInfo.subpassCount = 1;
+	renderPassInfo.pSubpasses = &subpass;
+	renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
+	renderPassInfo.pDependencies = dependencies.data();
+    vkCreateRenderPass(aDevice.GetLogicalDevice(), &renderPassInfo, nullptr, &offscreenRenderPass);
 }
 
 void SwapChain::createFramebuffers()

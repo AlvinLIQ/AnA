@@ -21,6 +21,15 @@ const VkPrimitiveTopology vertexTopology) : aDevice {mDevice}, renderPass {mRend
     createGraphicsPipeline(vertShaderCode, fragShaderCode, vertexTopology);
 }
 
+Pipeline::Pipeline(Device& mDevice,
+const std::vector<unsigned char>& vertShaderCode,
+VkRenderPass &mRenderPass, 
+VkPipelineLayout &mPipelineLayout,
+const VkPrimitiveTopology vertexTopology) : aDevice {mDevice}, renderPass {mRenderPass}, pipelineLayout{mPipelineLayout}
+{
+    createGraphicsPipeline(vertShaderCode, vertexTopology);
+}
+
 Pipeline::Pipeline(Device& mDevice, const char* computeShaderFile, VkPipelineLayout &mPipelineLayout) : aDevice {mDevice}, pipelineLayout {mPipelineLayout}
 {
     createComputePipeline(computeShaderFile);
@@ -63,6 +72,26 @@ void Pipeline::createGraphicsPipeline(const std::vector<unsigned char>& vertShad
         throw std::runtime_error("Failed to create pipeline!");
 
     vkDestroyShaderModule(logicalDevice, fragShaderModule, nullptr);
+    vkDestroyShaderModule(logicalDevice, vertShaderModule, nullptr);
+}
+
+void Pipeline::createGraphicsPipeline(const std::vector<unsigned char>& vertShaderCode, const VkPrimitiveTopology vertexTopology)
+{
+    VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
+
+    PipelineConfig pipelineConfig = pipelineConfig.GetDefault(vertShaderModule, nullptr, pipelineLayout, renderPass, vertexTopology); 
+    pipelineConfig.colorBlending.attachmentCount = 0;
+    pipelineConfig.rasterizer.cullMode = VK_CULL_MODE_NONE;
+    pipelineConfig.depthStencilInfo.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+    pipelineConfig.rasterizer.depthBiasEnable = VK_TRUE;
+    pipelineConfig.dynamicStates.push_back(VK_DYNAMIC_STATE_DEPTH_BIAS);
+    pipelineConfig.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(pipelineConfig.dynamicStates.size());
+    pipelineConfig.dynamicStateInfo.pDynamicStates = pipelineConfig.dynamicStates.data();
+    auto logicalDevice = aDevice.GetLogicalDevice();
+
+    if (vkCreateGraphicsPipelines(logicalDevice, VK_NULL_HANDLE, 1, &pipelineConfig.pipelineInfo, nullptr, &pipeline) != VK_SUCCESS)
+        throw std::runtime_error("Failed to create pipeline!");
+
     vkDestroyShaderModule(logicalDevice, vertShaderModule, nullptr);
 }
 
@@ -113,7 +142,7 @@ VkShaderModule Pipeline::createShaderModule(const std::vector<unsigned char> &co
 
 Pipelines* _pipelines = nullptr;
 
-Pipelines::Pipelines(Device& mDevice, VkRenderPass renderPass, VkDescriptorSetLayoutBinding uboLayoutBinding, VkPushConstantRange pushConstantRange) : aDevice{mDevice}
+Pipelines::Pipelines(Device& mDevice, VkRenderPass renderPass, VkRenderPass offscreenRenderPass, VkDescriptorSetLayoutBinding uboLayoutBinding, VkPushConstantRange pushConstantRange) : aDevice{mDevice}
 {
     _pipelines = this;
     createDescriptorSetLayouts(uboLayoutBinding);
@@ -123,12 +152,14 @@ Pipelines::Pipelines(Device& mDevice, VkRenderPass renderPass, VkDescriptorSetLa
     pipelines[LINE_LIST_PIPELINE] = new Pipeline(aDevice, Shaders_Line_vert_spv, Shaders_Line_frag_spv, renderPass, pipelineLayout, VK_PRIMITIVE_TOPOLOGY_LINE_STRIP);
     pipelines[POINT_LIST_PIPELINE] = new Pipeline(aDevice, Shaders_Line_vert_spv, Shaders_Line_frag_spv, renderPass, pipelineLayout, VK_PRIMITIVE_TOPOLOGY_POINT_LIST);
     pipelines[COMPUTE_PIPELINE] = new Pipeline(aDevice, Shaders_CollisionDetect_comp_spv, computePipelineLayout);
+    pipelines[SHADOW_MAPPING_PIPELINE] = new Pipeline(aDevice, Shaders_ShadowMapping_vert_spv, offscreenRenderPass, pipelineLayout, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
 }
 
 Pipelines::~Pipelines()
 {
     delete pipelines[COMPUTE_PIPELINE];
     vkDestroyPipelineLayout(aDevice.GetLogicalDevice(), computePipelineLayout, nullptr);
+    delete pipelines[SHADOW_MAPPING_PIPELINE];
     delete pipelines[TRIANGLE_LIST_PIPELINE];
     delete pipelines[LINE_LIST_PIPELINE];
     delete pipelines[POINT_LIST_PIPELINE];

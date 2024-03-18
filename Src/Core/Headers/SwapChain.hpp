@@ -25,10 +25,12 @@ namespace AnA
         VkExtent2D GetExtent();
 
         VkFormat GetFormat();
+        VkFormat GetDepthFormat();
 
         uint32_t GetImageCount();
 
         VkRenderPass& GetRenderPass();
+        VkRenderPass& GetOffscreenRenderPass();
 
         std::vector<VkFramebuffer> GetSwapChainFramebuffers();
 
@@ -65,6 +67,8 @@ namespace AnA
 
         VkRenderPass renderPass;
         void createRenderPass();
+        VkRenderPass offscreenRenderPass;
+        void createOffscreenRenderPass();
 
         std::vector<VkFramebuffer> swapChainFramebuffers;
         void createFramebuffers();

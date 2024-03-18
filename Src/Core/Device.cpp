@@ -310,6 +310,29 @@ void Device::CreateTextImage(const char* text, int width, int height, float line
 
 #endif
 
+void Device::CreateSampler(VkSampler* pSampler, enum VkSamplerAddressMode samplerAddressMode)
+{
+    VkPhysicalDeviceProperties properties{};
+    vkGetPhysicalDeviceProperties(physicalDevice, &properties);
+
+    VkSamplerCreateInfo samplerInfo{};
+    samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    samplerInfo.magFilter = VK_FILTER_LINEAR;
+    samplerInfo.minFilter = VK_FILTER_LINEAR;
+    samplerInfo.addressModeU = samplerAddressMode;
+    samplerInfo.addressModeV = samplerAddressMode;
+    samplerInfo.addressModeW = samplerAddressMode;
+    samplerInfo.anisotropyEnable = VK_TRUE;
+    samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+    samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+    samplerInfo.unnormalizedCoordinates = VK_FALSE;
+    samplerInfo.compareEnable = VK_FALSE;
+    samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+    samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+
+    vkCreateSampler(logicalDevice, &samplerInfo, nullptr, pSampler);
+}
+
 void Device::CreateDescriptorPool(int descriptorCount, VkDescriptorPool& descriptorPool)
 {
     VkDescriptorPoolSize poolSizes[1];
