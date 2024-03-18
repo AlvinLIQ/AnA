@@ -2,12 +2,8 @@
 #include "Device.hpp"
 
 #include <GLFW/glfw3.h>
-#include <cstddef>
-#include <stdexcept>
 #include <sys/types.h>
 #include <vector>
-#include <limits>
-#include <algorithm>
 #include <vulkan/vulkan_core.h>
 
 #define INCLUDE_STB_IMAGE
