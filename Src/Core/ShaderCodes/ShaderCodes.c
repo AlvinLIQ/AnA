@@ -3,47 +3,52 @@
 #endif
 
 #include <stdio.h>
+#include <string.h>
 
 int main(int argc, char* argv[])
 {
-    if (argc != 2)
+    if (argc < 3)
     {
         printf("wrong args count\n");
         return -1;
     }
-    FILE* file = fopen(argv[1], "rb+");
-    if (!file)
+    printf("#pragma once\n#include <vector>\n");
+
+    char path[512] = "";
+    size_t pathLen = strlen(argv[1]);
+    memcpy(path, argv[1], pathLen);
+    size_t fileNameLen;
+    for (int i = 2; i < argc; i++)
     {
-        printf("Failed to open \"%s\"!", argv[1]);
-        return -2;
-    }
-    
-    int pos = 0;
-    while (argv[1][pos])
-    {
-        if (argv[1][pos] == '/' || argv[1][pos] == '\\' || argv[1][pos] == '.')
+        fileNameLen = strlen(argv[i]);
+        memcpy(&path[pathLen], argv[i], fileNameLen);
+        path[pathLen + fileNameLen] = '\0';
+        FILE* file = fopen(path, "rb+");
+        if (!file)
         {
-            argv[1][pos] = '_';
+            printf("Failed to open \"%s\"!", path);
+            return -2;
         }
-        ++pos;
-    }
-    //printf ("static unsigned char[] %s = {", argv[1]);
-    printf ("static const std::vector<unsigned char> %s = {", argv[1]);
-    int byte;
-    size_t fs = 0;
-    byte = fgetc(file);
-    if (byte != EOF)
-    {
-        printf ("%#x", byte);
-        fs++;
-        while ((byte = fgetc(file)) != EOF)
+        
+        //printf ("static unsigned char[] %s = {", argv[1]);
+        argv[i][fileNameLen - 4] = '\0';
+        printf ("static const std::vector<unsigned char> %s = {", argv[i]);
+        int byte;
+        size_t fs = 0;
+        byte = fgetc(file);
+        if (byte != EOF)
         {
-            printf (", %#x", byte);
+            printf ("%#x", byte);
             fs++;
+            while ((byte = fgetc(file)) != EOF)
+            {
+                printf (", %#x", byte);
+                fs++;
+            }
         }
+        printf("};\n");
+        //printf("static size_t %s_size = %llu;\n", argv[1], fs);
+        fclose(file);
     }
-    printf("};\n");
-    //printf("static size_t %s_size = %llu;\n", argv[1], fs);
-    fclose(file);
     return 0;
 }
