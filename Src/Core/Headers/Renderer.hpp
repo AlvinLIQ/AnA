@@ -58,7 +58,7 @@ namespace AnA
 
         VkCommandBuffer BeginFrame();
 
-        void RecordSecondaryCommandBuffers(void(*recordCallBack)(VkCommandBuffer commandBuffer));
+        void RecordSecondaryCommandBuffers(void(*recordCallBack)(VkCommandBuffer commandBuffer), const VkRenderPass& renderPass);
         void ExcuteSecondaryCommandBuffer(VkCommandBuffer commandBuffer);
 
         void EndFrame();

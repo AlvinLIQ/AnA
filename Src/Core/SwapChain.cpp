@@ -404,7 +404,7 @@ void SwapChain::createRenderPass()
 void SwapChain::createOffscreenRenderPass()
 {
     VkAttachmentDescription attachmentDescription{};
-	attachmentDescription.format = swapChainDepthFormat;
+	attachmentDescription.format = VK_FORMAT_D16_UNORM;
 	attachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
 	attachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;							// Clear depth at beginning of the render pass
 	attachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;						// We will read from depth, so it's important to store the depth attachment results

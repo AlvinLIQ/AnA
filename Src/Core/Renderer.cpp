@@ -59,11 +59,11 @@ VkCommandBuffer Renderer::BeginFrame()
     return commandBuffer;
 }
 
-void Renderer::RecordSecondaryCommandBuffers(void(*recordCallBack)(VkCommandBuffer commandBuffer))
+void Renderer::RecordSecondaryCommandBuffers(void(*recordCallBack)(VkCommandBuffer commandBuffer), const VkRenderPass& renderPass)
 {
     VkCommandBufferInheritanceInfo inheritanceInfo{};
     inheritanceInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
-    inheritanceInfo.renderPass = aSwapChain->GetRenderPass();
+    inheritanceInfo.renderPass = renderPass;
 
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;

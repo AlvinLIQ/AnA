@@ -310,7 +310,7 @@ void Device::CreateTextImage(const char* text, int width, int height, float line
 
 #endif
 
-void Device::CreateSampler(VkSampler* pSampler, enum VkSamplerAddressMode samplerAddressMode)
+void Device::CreateSampler(VkSampler* pSampler, enum VkSamplerAddressMode samplerAddressMode, VkBorderColor borderColor)
 {
     VkPhysicalDeviceProperties properties{};
     vkGetPhysicalDeviceProperties(physicalDevice, &properties);
@@ -324,7 +324,7 @@ void Device::CreateSampler(VkSampler* pSampler, enum VkSamplerAddressMode sample
     samplerInfo.addressModeW = samplerAddressMode;
     samplerInfo.anisotropyEnable = VK_TRUE;
     samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
-    samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+    samplerInfo.borderColor = borderColor;
     samplerInfo.unnormalizedCoordinates = VK_FALSE;
     samplerInfo.compareEnable = VK_FALSE;
     samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;

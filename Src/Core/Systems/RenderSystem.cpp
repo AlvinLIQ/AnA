@@ -1,4 +1,5 @@
 #include "Headers/RenderSystem.hpp"
+#include "Headers/ShadowSystem.hpp"
 #include <vector>
 #include <vulkan/vulkan_core.h>
 #include <glm/gtc/constants.hpp>
@@ -75,6 +76,7 @@ void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, Objects &objects
     VkDescriptorSet sets[DESCRIPTOR_SET_LAYOUT_COUNT];
     sets[UBO_LAYOUT] = descriptorSets[aSwapChain.CurrentFrame];
     sets[SSBO_LAYOUT] = objects.GetDescriptorSets()[aSwapChain.CurrentFrame];
+    sets[SHADOW_SAMPLER_LAYOUT] = ShadowSystem::GetCurrent()->GetShadowSamplerSet();
 
     Object* object;
     auto objectArray = objects.Get();
