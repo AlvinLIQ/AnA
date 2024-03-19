@@ -79,7 +79,7 @@ void Pipeline::createGraphicsPipeline(const std::vector<unsigned char>& vertShad
 {
     VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
 
-    PipelineConfig pipelineConfig = pipelineConfig.GetDefault(vertShaderModule, nullptr, pipelineLayout, renderPass, vertexTopology); 
+    PipelineConfig pipelineConfig = pipelineConfig.GetDefault(vertShaderModule, 0, pipelineLayout, renderPass, vertexTopology); 
     pipelineConfig.colorBlending.attachmentCount = 0;
     pipelineConfig.rasterizer.cullMode = VK_CULL_MODE_NONE;
     pipelineConfig.depthStencilInfo.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
@@ -116,7 +116,7 @@ void Pipeline::createComputePipeline(const std::vector<unsigned char>& computeSh
     computePipelineInfo.layout = pipelineLayout;
     computePipelineInfo.stage = computeShaderStageInfo;
     
-    if (vkCreateComputePipelines(aDevice.GetLogicalDevice(), nullptr, 1, &computePipelineInfo, nullptr, &pipeline) != VK_SUCCESS)
+    if (vkCreateComputePipelines(aDevice.GetLogicalDevice(), NULL, 1, &computePipelineInfo, nullptr, &pipeline) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create compute pipeline!");
     }
@@ -148,11 +148,11 @@ Pipelines::Pipelines(Device& mDevice, VkRenderPass renderPass, VkRenderPass offs
     createDescriptorSetLayouts(uboLayoutBinding);
     createPipelineLayouts(pushConstantRange);
     pipelines.resize(PIPELINE_COUNT);
-    pipelines[TRIANGLE_LIST_PIPELINE] = new Pipeline(aDevice, Shaders_Basic_vert_spv, Shaders_Basic_frag_spv, renderPass, pipelineLayout, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-    pipelines[LINE_LIST_PIPELINE] = new Pipeline(aDevice, Shaders_Line_vert_spv, Shaders_Line_frag_spv, renderPass, pipelineLayout, VK_PRIMITIVE_TOPOLOGY_LINE_STRIP);
-    pipelines[POINT_LIST_PIPELINE] = new Pipeline(aDevice, Shaders_Line_vert_spv, Shaders_Line_frag_spv, renderPass, pipelineLayout, VK_PRIMITIVE_TOPOLOGY_POINT_LIST);
-    pipelines[COMPUTE_PIPELINE] = new Pipeline(aDevice, Shaders_CollisionDetect_comp_spv, computePipelineLayout);
-    pipelines[SHADOW_MAPPING_PIPELINE] = new Pipeline(aDevice, Shaders_ShadowMapping_vert_spv, offscreenRenderPass, pipelineLayout, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+    pipelines[TRIANGLE_LIST_PIPELINE] = new Pipeline(aDevice, Basic_vert, Basic_frag, renderPass, pipelineLayout, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+    pipelines[LINE_LIST_PIPELINE] = new Pipeline(aDevice, Line_vert, Line_frag, renderPass, pipelineLayout, VK_PRIMITIVE_TOPOLOGY_LINE_STRIP);
+    pipelines[POINT_LIST_PIPELINE] = new Pipeline(aDevice, Line_vert, Line_frag, renderPass, pipelineLayout, VK_PRIMITIVE_TOPOLOGY_POINT_LIST);
+    pipelines[COMPUTE_PIPELINE] = new Pipeline(aDevice, CollisionDetect_comp, computePipelineLayout);
+    pipelines[SHADOW_MAPPING_PIPELINE] = new Pipeline(aDevice, ShadowMapping_vert, offscreenRenderPass, pipelineLayout, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
 }
 
 Pipelines::~Pipelines()

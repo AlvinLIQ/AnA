@@ -127,7 +127,7 @@ namespace AnA
                 dConfig.depthStencilInfo.back = {};             // Optional
 
                 dConfig.pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-                dConfig.pipelineInfo.stageCount = fragShaderModule == nullptr ? 1 : 2;
+                dConfig.pipelineInfo.stageCount = fragShaderModule == NULL ? 1 : 2;
                 dConfig.pipelineInfo.pStages = dConfig.shaderStages;
 
                 dConfig.pipelineInfo.pVertexInputState = &dConfig.vertexInputInfo;
