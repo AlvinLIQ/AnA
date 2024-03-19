@@ -1,19 +1,9 @@
 #pragma once
-#include "../../Headers/Pipeline.hpp"
 #include "../../Headers/SwapChain.hpp"
+#include "../../Headers/Object.hpp"
 
 namespace AnA
 {
-    struct PointLight
-    {
-        glm::vec3 position;
-        glm::vec3 color;
-    };
-    struct Ray
-    {
-        glm::vec3 center;
-        glm::vec3 direction;
-    };
     namespace Systems
     {
         class ShadowSystem
@@ -21,20 +11,29 @@ namespace AnA
         public:
             ShadowSystem(Device& mDevice, SwapChain* pSwapchain);
             ~ShadowSystem();
+            static ShadowSystem* GetCurrent();
 
             VkExtent2D GetExtent();
-            void RenderShadows();
+            void RenderShadows(VkCommandBuffer commandBuffer, Objects &objects);
+            VkDescriptorSet& GetShadowSamplerSet();
         private:
             Device& aDevice;
             SwapChain* swapChain;
-            Pipeline* shadowPipeline;
             
             VkImage image;
             VkDeviceMemory imageMemory;
             VkImageView imageView;
             void createImageView();
+            
             VkFramebuffer shadowFrameBuffer;
             void createShadowFrameBuffer();
+
+            VkSampler shadowSampler;
+            void createShadowSampler();
+
+            VkDescriptorPool descriptorPool;
+            VkDescriptorSet descriptorSet;
+            void createDescriptorSet();
         };
     }
 }

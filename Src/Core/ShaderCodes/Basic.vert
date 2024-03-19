@@ -17,6 +17,7 @@ layout(location = 1) out vec2 outTexCoord;
 layout(location = 2) out uint outObjectID;
 layout(location = 3) out vec3 outNormalSpace;
 layout(location = 4) out vec3 outVertex;
+layout(location = 5) out vec4 outShadowCoord;
 
 layout(push_constant) uniform Push {
     uint sType;
@@ -44,6 +45,12 @@ struct Ray{
 
 const vec3 LIGHT_DIRECTION = normalize(vec3(1., -3., 1.));
 
+const mat4 biasMat = mat4( 
+	0.5, 0.0, 0.0, 0.0,
+	0.0, 0.5, 0.0, 0.0,
+	0.0, 0.0, 1.0, 0.0,
+	0.5, 0.5, 0.0, 1.0 );
+
 void main() {
     //gl_Position = vec4(push.transform * position + push.offset * 2, 0.0, 1.0);
     if (push.sType == ANA_MODEL)
@@ -51,7 +58,8 @@ void main() {
         vec4 vertex = objectBuffer.objects[gl_BaseInstance].model * vec4(position, 1.0);
         gl_Position = cbo.proj * cbo.view * vertex;
         outNormalSpace = normalize(mat3(objectBuffer.objects[gl_BaseInstance].model) * normal);
-        outVertex = vertex.xyz;        
+        outVertex = vertex.xyz;
+        outShadowCoord = biasMat * vertex;
         fragColor = color;
     }
     else

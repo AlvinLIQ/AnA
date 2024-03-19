@@ -8,6 +8,7 @@
 #include "Instance.hpp"
 #include "Device.hpp"
 #include "../Systems/Headers/RenderSystem.hpp"
+#include "../Systems/Headers/ShadowSystem.hpp"
 #include "../Input/Headers/InputManager.hpp"
 #include <thread>
 
@@ -58,6 +59,7 @@ namespace AnA
         Device* aDevice;
         Renderer* aRenderer;
         Systems::RenderSystem* aRenderSystem;
+        Systems::ShadowSystem* aShadowSystem;
         Input::InputManager* aInputManager;
 
         Cameras::Camera camera;

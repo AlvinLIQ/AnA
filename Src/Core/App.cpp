@@ -87,6 +87,7 @@ void App::Init()
     aRenderer = new Renderer(*aWindow, *aDevice);
     aRenderSystem = new Systems::RenderSystem(*aDevice, aRenderer->GetSwapChain());
     SceneObjects.Init(aDevice, Pipelines::GetCurrent()->GetDescriptorSetLayouts()[SSBO_LAYOUT]);
+    aShadowSystem = new Systems::ShadowSystem(*aDevice, &aRenderer->GetSwapChain());
 }
 
 void App::Run()
@@ -119,8 +120,12 @@ void App::Run()
         {
             aRenderer->RecordSecondaryCommandBuffers([](VkCommandBuffer secondaryCommandBuffer)
             {
+                Systems::ShadowSystem::GetCurrent()->RenderShadows(secondaryCommandBuffer, _aApp->SceneObjects);
+            }, aRenderer->GetSwapChain().GetOffscreenRenderPass());
+            aRenderer->RecordSecondaryCommandBuffers([](VkCommandBuffer secondaryCommandBuffer)
+            {
                 Systems::RenderSystem::GetCurrent()->RenderObjects(secondaryCommandBuffer, _aApp->SceneObjects);
-            });
+            }, aRenderer->GetSwapChainRenderPass());
             SceneObjects.EndCommandBufferUpdate();
         }
         if (auto commandBuffer = aRenderer->BeginFrame())
@@ -149,6 +154,7 @@ void App::Cleanup()
     delete aInputManager;
     delete aRenderer;
     delete aRenderSystem;
+    delete aShadowSystem;
     SceneObjects.Destroy();
 
     _2DModel.reset();

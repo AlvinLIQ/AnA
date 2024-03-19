@@ -227,4 +227,14 @@ void Pipelines::createDescriptorSetLayouts(VkDescriptorSetLayoutBinding uboLayou
     layoutInfo.pBindings = &samplerLayoutBinding;
     if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[SAMPLER_LAYOUT]) != VK_SUCCESS)
         throw std::runtime_error("Failed to create the DescriptorSetLayout 3");
+
+    VkDescriptorSetLayoutBinding shadowSamplerLayoutBinding{};
+    shadowSamplerLayoutBinding.descriptorCount = 1;
+    shadowSamplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    shadowSamplerLayoutBinding.pImmutableSamplers = nullptr;
+    shadowSamplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    shadowSamplerLayoutBinding.binding = 1;
+    layoutInfo.pBindings = &shadowSamplerLayoutBinding;
+    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[SHADOW_SAMPLER_LAYOUT]) != VK_SUCCESS)
+        throw std::runtime_error("Failed to create the DescriptorSetLayout 4");
 }

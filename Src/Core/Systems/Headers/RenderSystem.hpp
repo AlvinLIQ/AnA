@@ -32,6 +32,10 @@ namespace AnA
             {
                 return pipelines;
             }
+            VkDescriptorSet& GetDescriptorSet()
+            {
+                return descriptorSets[aSwapChain.CurrentFrame];
+            }
             static RenderSystem* GetCurrent();
         private:
             Device& aDevice;
