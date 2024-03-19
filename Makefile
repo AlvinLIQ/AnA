@@ -33,7 +33,7 @@ vert:
 
 shader: $(shaderspv)
 	$(cc) Src/Core/ShaderCodes/ShaderCodes.c -o $(shader) -std=c2x
-	xxdi Shaders/ $(^F) > Src/Core/Headers/ShaderCodes.hpp
+	./xxdi Shaders/ $(^F) > Src/Core/Headers/ShaderCodes.hpp
 %_frag.spv : %.frag
 	glslc $< -o Shaders/$(@F)
 %_vert.spv : %.vert
