@@ -68,7 +68,7 @@ void ShadowSystem::createImageView()
     VkImageCreateInfo imageInfo{};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 	imageInfo.imageType = VK_IMAGE_TYPE_2D;
-	imageInfo.format = VK_FORMAT_D16_UNORM;
+	imageInfo.format = swapChain->GetDepthFormat();
     auto extent = GetExtent();
 	imageInfo.extent = { extent.width, extent.height, 1 };
 	imageInfo.mipLevels = 1;
@@ -77,6 +77,7 @@ void ShadowSystem::createImageView()
 	imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 	imageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
     aDevice.CreateImage(&imageInfo, &image, &imageMemory);
+    //aDevice.TransitionImageLayout(image, swapChain->GetDepthFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL);
 
     VkImageViewCreateInfo imageViewInfo{};
     imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -141,7 +142,7 @@ void ShadowSystem::createDescriptorSet()
     VkWriteDescriptorSet descriptorWrite{};
     descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     descriptorWrite.dstSet = descriptorSet;
-    descriptorWrite.dstBinding = 1;
+    descriptorWrite.dstBinding = 0;
     descriptorWrite.dstArrayElement = 0;
     descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     descriptorWrite.descriptorCount = 1;
