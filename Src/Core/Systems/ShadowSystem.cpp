@@ -51,11 +51,79 @@ void ShadowSystem::RenderShadows(VkCommandBuffer commandBuffer, Objects &objects
     for (int i = 0; i < objectArray.size(); i++)
     {
         object = objectArray[i];
-        
 
         object->Model->Bind(commandBuffer);
         object->Model->Draw(commandBuffer, i);
     }
+}
+
+void ShadowSystem::BeginRenderPass(VkCommandBuffer& commandBuffer)
+{
+    vkDeviceWaitIdle(aDevice.GetLogicalDevice());
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+    vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+    VkClearValue clearValues[1];
+    clearValues[0].depthStencil.depth = 1.0f;
+    clearValues[0].depthStencil.stencil = 0;
+
+    auto extent = swapChain->GetExtent();
+
+    VkRenderPassBeginInfo renderPassBegin;
+    renderPassBegin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassBegin.pNext = NULL;
+    renderPassBegin.renderPass = swapChain->GetOffscreenRenderPass();
+    renderPassBegin.framebuffer = shadowFrameBuffer;
+    renderPassBegin.renderArea.offset.x = 0;
+    renderPassBegin.renderArea.offset.y = 0;
+    renderPassBegin.renderArea.extent = extent;
+    renderPassBegin.clearValueCount = 1;
+    renderPassBegin.pClearValues = clearValues;
+    
+    vkCmdBeginRenderPass(commandBuffer,
+                        &renderPassBegin,
+                        VK_SUBPASS_CONTENTS_INLINE);
+
+    VkViewport viewport;
+    viewport.height = extent.height;
+    viewport.width = extent.width;
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+    viewport.x = 0;
+    viewport.y = 0;
+    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+    
+    VkRect2D scissor;
+    scissor.extent.width = extent.width;
+    scissor.extent.height = extent.height;
+    scissor.offset.x = 0;
+    scissor.offset.y = 0;
+    vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+}
+
+void ShadowSystem::EndRenderPass(VkCommandBuffer& commandBuffer)
+{
+    vkCmdEndRenderPass(commandBuffer);
+    vkEndCommandBuffer(commandBuffer);
+
+    VkPipelineStageFlags shadow_map_wait_stages = 0;
+    VkSubmitInfo submit_info = { };
+    submit_info.pNext = NULL;
+    submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submit_info.waitSemaphoreCount = 0;
+    submit_info.pWaitSemaphores = NULL;
+    submit_info.signalSemaphoreCount = 0;
+    submit_info.pSignalSemaphores = NULL;
+    submit_info.pWaitDstStageMask = 0;
+    submit_info.commandBufferCount = 1;
+    submit_info.pCommandBuffers = &commandBuffer;
+    
+    vkQueueSubmit(aDevice.GetGraphicsQueue(), 1, &submit_info, NULL);
+
+    //swapChain->CurrentFrame = (swapChain->CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+    //vkQueueWaitIdle(aDevice.GetGraphicsQueue());
 }
 
 VkDescriptorSet& ShadowSystem::GetShadowSamplerSet()

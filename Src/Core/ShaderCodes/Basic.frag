@@ -60,4 +60,6 @@ void main()
 	//float shadow = texture(shadowSampler, shadowCoord.xy).r;
     float lightIntensity = max(dot(normalSpace, normalize(LIGHT_DIRECTION - vec3(vertex))), 0);
     outColor = texture(texSampler, texCoord) * (vec4(lightIntensity * LIGHT_COLOR + 0.033, 1.0));
+    //float depth = texture(shadowSampler, texCoord).r;
+    //outColor = vec4(1.0 - (1.0 - depth) * 100.0);
 }
