@@ -23,7 +23,7 @@ void CopyVertices(IndexedVertex &indexedVertex, std::vector<Model::Vertex> &dstV
 
 int main()
 {
-    App* aApp = new App;
+    App* aApp = new App();
     aApp->Init();
 
     Object* object = new Object;

@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
         ++pos;
     }
     //printf ("static unsigned char[] %s = {", argv[1]);
-    printf ("static std::vector<unsigned char> %s = {", argv[1]);
+    printf ("static const std::vector<unsigned char> %s = {", argv[1]);
     int byte;
     size_t fs = 0;
     byte = fgetc(file);
