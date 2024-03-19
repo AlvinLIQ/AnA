@@ -19,9 +19,13 @@ layout(std140, set = 1, binding = 0) buffer ObjectBuffer {
     Object objects[];
 } objectBuffer;
 
-const vec3 LIGHT_DIRECTION = normalize(vec3(1., -3., 1.));
-
+const vec3 LIGHT_DIRECTION = vec3(0., -1., 0.);
+const mat4 dView = mat4(1.0, 0.0, 0.0, 0.0,
+                        0.0, 1.0, 0.0, 0.0,
+                        0.0, 0.0, 1.0, 0.0,
+                        0.0, 0.0, 0.0, 1.0);
 void main()
 {
-    gl_Position = cbo.proj * (vec4(LIGHT_DIRECTION, 1.0) * (objectBuffer.objects[gl_BaseInstance].model * vec4(position, 1.0)));
+    mat4 invView = inverse(cbo.view);
+    gl_Position = cbo.proj * invView * (objectBuffer.objects[gl_BaseInstance].model * vec4(position, 1.0));
 }

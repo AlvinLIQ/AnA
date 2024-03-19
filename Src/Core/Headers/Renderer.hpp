@@ -41,6 +41,10 @@ namespace AnA
             assert(isFrameStarted && "Cannot get command buffer when frame not in progress!");
             return commandBuffers[currentFrameIndex];
         }
+        VkCommandBuffer GetOffscreenCommandBuffer() const
+        {
+            return offscreenCommandBuffers[currentFrameIndex];
+        }
 
         SwapChain& GetSwapChain()
         {
@@ -58,7 +62,7 @@ namespace AnA
 
         VkCommandBuffer BeginFrame();
 
-        void RecordSecondaryCommandBuffers(void(*recordCallBack)(VkCommandBuffer commandBuffer), const VkRenderPass& renderPass);
+        void RecordSecondaryCommandBuffers(void(*recordCallBack)(VkCommandBuffer commandBuffer));
         void ExcuteSecondaryCommandBuffer(VkCommandBuffer commandBuffer);
 
         void EndFrame();
@@ -72,6 +76,7 @@ namespace AnA
 
         std::vector<VkCommandBuffer> commandBuffers;
         std::vector<VkCommandBuffer> secondaryCommandBuffers;
+        std::vector<VkCommandBuffer> offscreenCommandBuffers;
         void createCommandBuffers();
         void freeCommandBuffersMemory();
 

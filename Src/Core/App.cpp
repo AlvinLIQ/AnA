@@ -115,19 +115,21 @@ void App::Run()
         //camera.SetOrthographicProjection(-aspect, -1, aspect, 1, -1, 1);
         camera.SetPerspectiveProjection(glm::radians(60.f), aspect, .01f, 100.f);
         aRenderSystem->UpdateCameraBuffer(camera);
-
+        //Render Shadow Map
+        auto offscreenCommandBuffer = aRenderer->GetOffscreenCommandBuffer();
+        aShadowSystem->BeginRenderPass(offscreenCommandBuffer);
+        aShadowSystem->RenderShadows(offscreenCommandBuffer, _aApp->SceneObjects);
+        aShadowSystem->EndRenderPass(offscreenCommandBuffer);
         if (aRenderer->NeedUpdate() || SceneObjects.BeginCommandBufferUpdate())
         {
-            aRenderer->RecordSecondaryCommandBuffers([](VkCommandBuffer secondaryCommandBuffer)
-            {
-                Systems::ShadowSystem::GetCurrent()->RenderShadows(secondaryCommandBuffer, _aApp->SceneObjects);
-            }, aRenderer->GetSwapChain().GetOffscreenRenderPass());
+            //Record Objects
             aRenderer->RecordSecondaryCommandBuffers([](VkCommandBuffer secondaryCommandBuffer)
             {
                 Systems::RenderSystem::GetCurrent()->RenderObjects(secondaryCommandBuffer, _aApp->SceneObjects);
-            }, aRenderer->GetSwapChainRenderPass());
+            });
             SceneObjects.EndCommandBufferUpdate();
         }
+        
         if (auto commandBuffer = aRenderer->BeginFrame())
         {
             if (SceneObjects.BeginStorageBufferUpdate())
