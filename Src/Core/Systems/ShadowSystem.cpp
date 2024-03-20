@@ -51,6 +51,8 @@ void ShadowSystem::RenderShadows(VkCommandBuffer commandBuffer, Objects &objects
     for (int i = 0; i < objectArray.size(); i++)
     {
         object = objectArray[i];
+        if (object->Properties.sType != ANA_MODEL)
+            continue;
 
         object->Model->Bind(commandBuffer);
         object->Model->Draw(commandBuffer, i);

@@ -26,7 +26,7 @@ depends = $(sources:.cpp=.d)
 shadercodes := $(wildcard Src/Core/ShaderCodes/*.frag Src/Core/ShaderCodes/*.vert Src/Core/ShaderCodes/*.comp)
 temp = $(shadercodes:.vert=_vert.spv)
 temp2 = $(temp:.comp=_comp.spv)
-shaderspv = $(temp2:.frag=_framake g.spv)
+shaderspv = $(temp2:.frag=_frag.spv)
 
 all: shader $(ana)
 
