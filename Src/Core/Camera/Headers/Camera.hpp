@@ -28,6 +28,10 @@ namespace AnA
             {
                 return viewMatrix;
             }
+            const glm::mat4 &GetInverseView() const
+            {
+                return inverseViewMatrix;
+            }
 
             void SetViewDirection(glm::vec3 position, glm::vec3 direction, glm::vec3 up = glm::vec3{ 0.0f, -1.0f , 0.0f });
             void SetViewTarget(glm::vec3 position, glm::vec3 target, glm::vec3 up = glm::vec3{ 0.0f, -1.0f , 0.0f });
@@ -48,6 +52,7 @@ namespace AnA
         private:
             glm::mat4 projectionMatrix{1.f};
             glm::mat4 viewMatrix{1.f};
+            glm::mat4 inverseViewMatrix;
 
             float speedRatio = 1.0f;
         };

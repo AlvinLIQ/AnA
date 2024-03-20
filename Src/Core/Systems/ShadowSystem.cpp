@@ -61,12 +61,13 @@ void ShadowSystem::RenderShadows(VkCommandBuffer commandBuffer, Objects &objects
 
 void ShadowSystem::BeginRenderPass(VkCommandBuffer& commandBuffer)
 {
+    /*
     vkDeviceWaitIdle(aDevice.GetLogicalDevice());
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
     vkBeginCommandBuffer(commandBuffer, &beginInfo);
-
+*/
     VkClearValue clearValues[1];
     clearValues[0].depthStencil.depth = 1.0f;
     clearValues[0].depthStencil.stencil = 0;
@@ -108,7 +109,7 @@ void ShadowSystem::BeginRenderPass(VkCommandBuffer& commandBuffer)
 void ShadowSystem::EndRenderPass(VkCommandBuffer& commandBuffer)
 {
     vkCmdEndRenderPass(commandBuffer);
-    vkEndCommandBuffer(commandBuffer);
+ /*   vkEndCommandBuffer(commandBuffer);
 
     VkPipelineStageFlags shadow_map_wait_stages = 0;
     VkSubmitInfo submit_info = { };
@@ -123,7 +124,7 @@ void ShadowSystem::EndRenderPass(VkCommandBuffer& commandBuffer)
     submit_info.pCommandBuffers = &commandBuffer;
     
     vkQueueSubmit(aDevice.GetGraphicsQueue(), 1, &submit_info, NULL);
-
+*/
     //swapChain->CurrentFrame = (swapChain->CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     //vkQueueWaitIdle(aDevice.GetGraphicsQueue());
 }

@@ -29,13 +29,6 @@ Renderer::~Renderer()
         secondaryCommandBuffers.data());
 
     secondaryCommandBuffers.clear();
-
-    vkFreeCommandBuffers(aDevice.GetLogicalDevice(), 
-        aDevice.GetCommandPool(), 
-        static_cast<uint32_t>(offscreenCommandBuffers.size()), 
-        offscreenCommandBuffers.data());
-
-    offscreenCommandBuffers.clear();
 }
 
 VkCommandBuffer Renderer::BeginFrame()
@@ -168,10 +161,6 @@ void Renderer::createCommandBuffers()
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
     if (vkAllocateCommandBuffers(aDevice.GetLogicalDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) 
-        throw std::runtime_error("Failed to allocate command buffers!");
-
-    offscreenCommandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-    if (vkAllocateCommandBuffers(aDevice.GetLogicalDevice(), &allocInfo, offscreenCommandBuffers.data()) != VK_SUCCESS) 
         throw std::runtime_error("Failed to allocate command buffers!");
 
     secondaryCommandBuffers.resize(MAX_FRAMES_IN_FLIGHT);

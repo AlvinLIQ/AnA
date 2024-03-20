@@ -26,6 +26,7 @@ layout(push_constant) uniform Push {
 layout(set = 0, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
+    mat4 invView;
     vec2 resolution;
 } cbo;
 
@@ -53,6 +54,12 @@ vec3 GetPointOfRay(Ray ray, float len)
     return ray.center + len * ray.direction;
 }
 
+const mat4 biasMat = mat4( 
+	0.5, 0.0, 0.0, 0.0,
+	0.0, 0.5, 0.0, 0.0,
+	0.0, 0.0, 1.0, 0.0,
+	0.5, 0.5, 0.0, 1.0 );
+
 void main()
 {
     //float shadow = textureProj(shadowCoord / shadowCoord.w, vec2(0.0));
@@ -62,9 +69,18 @@ void main()
     //outColor = texture(texSampler, texCoord) * (vec4(lightIntensity * LIGHT_COLOR + 0.033, 1.0));
     if (push.sType == ANA_MODEL)
     {
-        outColor = vec4(0.);
+        float pointLightIntensity = max(dot(normalSpace, normalize(LIGHT_DIRECTION - vertex)), 0);
+        float diffuseLightItensity = max(dot(normalSpace, normalize(LIGHT_DIRECTION)), 0);
+        float visibility = 1.0;
+        vec3 shadowProj = (vec3(shadowCoord.xyz / shadowCoord.w) + 0.5) * 0.5;
+        if (texture(shadowSampler, shadowProj.xy).r < shadowCoord.z)
+        {
+            visibility = 0.3;
+        }
+        vec3 finalLight = (diffuseLightItensity * vec3(0.2) + 0.037 + pointLightIntensity * LIGHT_COLOR) * visibility;
+        outColor = texture(texSampler, texCoord) * vec4(vec3(finalLight), 1.0);
         return;
     }
     float depth = texture(shadowSampler, texCoord).r;
-    outColor = vec4(1.0 - (1.0 - depth) * 100.0);
+    outColor = biasMat * vec4(1.0 - (1.0 - depth) * 100.0);
 }
