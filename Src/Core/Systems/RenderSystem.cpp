@@ -114,6 +114,15 @@ void RenderSystem::UpdateCameraBuffer(Cameras::Camera &camera)
     CameraBufferObject cbo;
     cbo.proj = camera.GetProjectionMatrix();
     cbo.view = camera.GetView();
+    cbo.invView = camera.GetInverseView();
+    glm::vec3 lightDirection = glm::normalize(glm::vec3(1.0f, -3.0f, 1.0f)); // Example light direction
+    glm::vec3 upVector = glm::vec3(0.0f, -1.0f, 0.0f); // Up vector (usually positive y-axis)
+    glm::vec3 referencePoint = glm::vec3(0.0f, -1.5f, 5.7f); // Reference point in the scene
+    glm::mat4 viewMatrix = glm::lookAt(referencePoint, referencePoint + lightDirection, upVector);
+
+    Camera lightCam;
+    lightCam.SetPerspectiveProjection(45.0f, 4.0f / 3.0f, 1.25f, 1.75f);
+    cbo.lightView = lightCam.GetProjectionMatrix() * viewMatrix;//glm::perspective(45.0f, 4.0f/3.0f, 1.0f, 96.0f);// * viewMatrix;
     auto extent = aSwapChain.GetExtent();
     cbo.resolution = {(float)extent.width, (float)extent.height};
 

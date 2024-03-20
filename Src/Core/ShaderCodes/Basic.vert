@@ -27,6 +27,8 @@ layout(push_constant) uniform Push {
 layout(set = 0, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
+    mat4 invView;
+    mat4 lightView;
     vec2 resolution;
 } cbo;
 
@@ -51,6 +53,33 @@ const mat4 biasMat = mat4(
 	0.0, 0.0, 1.0, 0.0,
 	0.5, 0.5, 0.0, 1.0 );
 
+#define PI 3.14
+
+mat4 transform(vec3 scale, vec3 rotation, vec3 transition)
+{
+    float c3 = cos(rotation.z);
+    float s3 = sin(rotation.z);
+    float c2 = cos(rotation.x);
+    float s2 = sin(rotation.x);
+    float c1 = cos(rotation.y);
+    float s1 = sin(rotation.y);
+    return mat4(
+            scale.x * (c1 * c3 + s1 * s2 * s3),
+            scale.x * (c2 * s3),
+            scale.x * (c1 * s2 * s3 - c3 * s1),
+            0.0f,
+            scale.y * (c3 * s1 * s2 - c1 * s3),
+            scale.y * (c2 * c3),
+            scale.y * (c1 * c3 * s2 + s1 * s3),
+            0.0f,
+            scale.z * (c2 * s1),
+            scale.z * (-s2),
+            scale.z * (c1 * c2),
+            0.0f,
+            vec4(transition, 1.0)
+    );
+}
+
 void main() {
     //gl_Position = vec4(push.transform * position + push.offset * 2, 0.0, 1.0);
     if (push.sType == ANA_MODEL)
@@ -58,8 +87,9 @@ void main() {
         vec4 vertex = objectBuffer.objects[gl_BaseInstance].model * vec4(position, 1.0);
         gl_Position = cbo.proj * cbo.view * vertex;
         outNormalSpace = normalize(mat3(objectBuffer.objects[gl_BaseInstance].model) * normal);
-        outVertex = vertex.xyz;
-        outShadowCoord = biasMat * vertex;
+        outVertex = vertex.xyz / vertex.w;
+
+        outShadowCoord = cbo.lightView * vertex;
         fragColor = color;
     }
     else
