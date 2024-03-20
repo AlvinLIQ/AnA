@@ -76,6 +76,14 @@ int main()
     nObj->Properties.transform.translation = {1.5, -2.0, 0.0};
     aApp->SceneObjects.Append(nObj);
 
+    nObj = new Object;
+    nObj->Properties.sType = ANA_SPHERE;
+    nObj->Model = aApp->Get2DModel();
+    nObj->Color = {1.0F, 1.0f, 1.0f};
+    nObj->Properties.transform.scale = {1.0f, 1.0f, 1.0f};
+    nObj->Properties.transform.translation = {0.0f, 0.0f, 0.0f};
+    aApp->SceneObjects.Append(nObj);
+
 /*  
     Control::InitControl(&aApp->GetSwapChain());
     

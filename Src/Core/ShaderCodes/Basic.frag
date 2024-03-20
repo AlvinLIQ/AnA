@@ -58,8 +58,13 @@ void main()
     //float shadow = textureProj(shadowCoord / shadowCoord.w, vec2(0.0));
     //outColor = shadow * vec4(1.);
 	//float shadow = texture(shadowSampler, shadowCoord.xy).r;
-    float lightIntensity = max(dot(normalSpace, normalize(LIGHT_DIRECTION - vec3(vertex))), 0);
-    outColor = texture(texSampler, texCoord) * (vec4(lightIntensity * LIGHT_COLOR + 0.033, 1.0));
-    //float depth = texture(shadowSampler, texCoord).r;
-    //outColor = vec4(1.0 - (1.0 - depth) * 100.0);
+    //float lightIntensity = max(dot(normalSpace, normalize(LIGHT_DIRECTION - vec3(vertex))), 0);
+    //outColor = texture(texSampler, texCoord) * (vec4(lightIntensity * LIGHT_COLOR + 0.033, 1.0));
+    if (push.sType == ANA_MODEL)
+    {
+        outColor = vec4(0.);
+        return;
+    }
+    float depth = texture(shadowSampler, texCoord).r;
+    outColor = vec4(1.0 - (1.0 - depth) * 100.0);
 }
