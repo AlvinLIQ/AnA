@@ -26,6 +26,5 @@ const mat4 dView = mat4(1.0, 0.0, 0.0, 0.0,
                         0.0, 0.0, 0.0, 1.0);
 void main()
 {
-    mat4 invView = inverse(cbo.view);
-    gl_Position = cbo.proj * invView * (objectBuffer.objects[gl_BaseInstance].model * vec4(position, 1.0));
+    gl_Position = cbo.proj * cbo.view * (objectBuffer.objects[gl_BaseInstance].model * vec4(position, 1.0));
 }

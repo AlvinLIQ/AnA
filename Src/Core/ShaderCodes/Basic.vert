@@ -65,8 +65,8 @@ void main() {
     else
     {
         mat4 model = objectBuffer.objects[gl_BaseInstance].model;
-        float aspect = cbo.resolution.x / cbo.resolution.y;
-        model[0] *= aspect;
+        //float aspect = cbo.resolution.x / cbo.resolution.y;
+        //model[0] *= aspect;
         gl_Position = model * vec4(position, 1.0);
         fragColor = push.color;
     }

@@ -1,0 +1,14 @@
+<Window>
+    <Canvas>
+        <RenderingArea/>
+        <Button Text="Text"/>
+        <MenuBar>
+            <Menu Text="File">
+                <MenuItem Text="New Project"/>
+                <MenuItem Text="Open Project"/>
+                <MenuItem Text="Close Project"/>
+                <MenuItem Text="Exit"/>
+            </Menu>
+        </MenuBar>
+    </Canvas>
+</window>
