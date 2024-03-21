@@ -4,6 +4,7 @@
 #include "../../Headers/SwapChain.hpp"
 #include "../../Camera/Headers/Camera.hpp"
 #include "../../Headers/Buffer.hpp"
+#include "../../Headers/Descriptor.hpp"
 #include <vector>
 #include <vulkan/vulkan_core.h>
 
@@ -16,10 +17,7 @@ namespace AnA
             glm::mat4 proj{1.f};
             glm::mat4 view{1.f};
             glm::mat4 invView{1.f};
-            glm::mat4 lightView{1.f};
             glm::vec2 resolution{};
-            static VkDescriptorSetLayoutBinding GetBindingDescriptionSet();
-            static VkDescriptorBufferInfo GetBufferInfo(VkBuffer camBuffer);
         };
         
         class RenderSystem
@@ -36,7 +34,7 @@ namespace AnA
             }
             VkDescriptorSet& GetDescriptorSet()
             {
-                return descriptorSets[aSwapChain.CurrentFrame];
+                return descriptor->GetSets()[aSwapChain.CurrentFrame];
             }
             static RenderSystem* GetCurrent();
         private:
@@ -48,9 +46,7 @@ namespace AnA
             std::vector<Buffer*> cameraBuffers;
             void createCameraBuffers();
 
-            VkDescriptorPool descriptorPool;
-
-            std::vector<VkDescriptorSet> descriptorSets;
+            Descriptor* descriptor;
         };
     }
 }

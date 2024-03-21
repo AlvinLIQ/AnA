@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Device.hpp"
+#include "Descriptor.hpp"
 
 namespace AnA
 {
@@ -26,9 +27,6 @@ namespace AnA
         VkSampler textureSampler;
         void createTextureSampler(enum VkSamplerAddressMode samplerAddressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT);
 
-        VkDescriptorPool descriptorPool;
-        void createDescriptorPool();
-        VkDescriptorSet descriptorSet;
-        void createDescriptorSet();
+        Descriptor* descriptor;
     };
 }
