@@ -28,7 +28,6 @@ layout(set = 0, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
     mat4 invView;
-    mat4 lightView;
     vec2 resolution;
 } cbo;
 
@@ -39,6 +38,14 @@ struct Object{
 layout(std140, set = 1, binding = 0) buffer ObjectBuffer {
     Object objects[];
 } objectBuffer;
+
+layout(set = 2, binding = 0) uniform LightBufferObject {
+    mat4 proj;
+    mat4 view;
+    vec3 direction;
+    vec3 color;
+    float ambient;
+} lbo;
 
 struct Ray{
     vec3 center;
@@ -89,7 +96,10 @@ void main() {
         outNormalSpace = normalize(mat3(objectBuffer.objects[gl_BaseInstance].model) * normal);
         outVertex = vertex.xyz / vertex.w;
 
-        outShadowCoord = cbo.lightView * vertex;
+        mat4 dView = lbo.view;
+        dView[3].xyz = mat3(cbo.invView) * cbo.view[3].xyz;
+        dView[3].yz -= 0.4;
+        outShadowCoord = lbo.proj * dView * vertex;
         fragColor = color;
     }
     else

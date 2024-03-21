@@ -52,6 +52,7 @@ void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, Objects &objects
     sets[UBO_LAYOUT] = descriptor->GetSets()[aSwapChain.CurrentFrame];
     sets[SSBO_LAYOUT] = objects.GetDescriptorSets()[aSwapChain.CurrentFrame];
     sets[SHADOW_SAMPLER_LAYOUT] = ShadowSystem::GetCurrent()->GetShadowSamplerSets()[aSwapChain.CurrentFrame];
+    sets[LIGHT_LAYOUT] = ShadowSystem::GetCurrent()->GetLightSets()[aSwapChain.CurrentFrame];
 
     Object* object;
     auto objectArray = objects.Get();
@@ -65,7 +66,7 @@ void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, Objects &objects
         }
         sets[SAMPLER_LAYOUT] = object->Texture->GetDescriptorSet();
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-        pipelines->Get()[pipeLineIndex]->GetLayout(), 0, DESCRIPTOR_SET_LAYOUT_COUNT,
+        pipelines->Get()[pipeLineIndex]->GetLayout(), 0, numsof(sets),
         sets, 0, nullptr);
 
         object->Model->Bind(commandBuffer);

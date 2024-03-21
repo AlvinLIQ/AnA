@@ -38,8 +38,16 @@ layout(std140, set = 1, binding = 0) buffer ObjectBuffer {
     Object objects[];
 } objectBuffer;
 
-layout(set = 2, binding = 0) uniform sampler2D texSampler;
-layout(set = 3, binding = 0) uniform sampler2D shadowSampler;
+layout(set = 3, binding = 0) uniform sampler2D texSampler;
+layout(set = 4, binding = 0) uniform sampler2D shadowSampler;
+
+layout(set = 2, binding = 0) uniform LightBufferObject {
+    mat4 proj;
+    mat4 view;
+    vec3 direction;
+    vec3 color;
+    float ambient;
+} lbo;
 
 struct Ray{
     vec3 center;
@@ -70,14 +78,14 @@ void main()
     if (push.sType == ANA_MODEL)
     {
         float pointLightIntensity = max(dot(normalSpace, normalize(LIGHT_DIRECTION - vertex)), 0);
-        float diffuseLightItensity = max(dot(normalSpace, normalize(LIGHT_DIRECTION)), 0);
+        float diffuseLightItensity = max(dot(normalSpace, normalize(lbo.direction)), 0);
         float visibility = 1.0;
         vec3 shadowProj = (vec3(shadowCoord.xyz / shadowCoord.w) + 0.5) * 0.5;
         if (texture(shadowSampler, shadowProj.xy).r < shadowCoord.z)
         {
-            visibility = 0.3;
+            visibility = 1.0;
         }
-        vec3 finalLight = (diffuseLightItensity * vec3(0.2) + 0.037 + pointLightIntensity * LIGHT_COLOR) * visibility;
+        vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient + pointLightIntensity * LIGHT_COLOR) * visibility;
         outColor = texture(texSampler, texCoord) * vec4(vec3(finalLight), 1.0);
         return;
     }

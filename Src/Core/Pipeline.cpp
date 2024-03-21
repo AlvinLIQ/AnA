@@ -206,7 +206,7 @@ void Pipelines::createDescriptorSetLayouts()
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     layoutInfo.bindingCount = 1;
-    auto uboLayoutBinding = Device::CreateLayoutBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL);
+    auto uboLayoutBinding = Device::CreateLayoutBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS);
     layoutInfo.pBindings = &uboLayoutBinding;
 
     if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[UBO_LAYOUT]) != VK_SUCCESS)
@@ -238,4 +238,9 @@ void Pipelines::createDescriptorSetLayouts()
     layoutInfo.pBindings = &shadowSamplerLayoutBinding;
     if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[SHADOW_SAMPLER_LAYOUT]) != VK_SUCCESS)
         throw std::runtime_error("Failed to create the DescriptorSetLayout 4");
+
+    VkDescriptorSetLayoutBinding lightLayoutBinding = Device::CreateLayoutBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS);
+    layoutInfo.pBindings = &lightLayoutBinding;
+    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[LIGHT_LAYOUT]) != VK_SUCCESS)
+        throw std::runtime_error("Failed to create the DescriptorSetLayout 5");
 }
