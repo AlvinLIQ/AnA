@@ -11,14 +11,14 @@ ShadowSystem::ShadowSystem(Device& mDevice, SwapChain* pSwapchain) : aDevice(mDe
     swapChain = pSwapchain;
     createImageView();
     createShadowSampler();
-    createDescriptorSet();
+    descriptor = new Descriptor(mDevice, shadowSampler, imageView, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL, 0, MAX_FRAMES_IN_FLIGHT, Pipelines::GetCurrent()->GetDescriptorSetLayouts()[SHADOW_SAMPLER_LAYOUT], VK_SHADER_STAGE_FRAGMENT_BIT, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
     createShadowFrameBuffer();
     _shadowSystem = this;
 }
 
 ShadowSystem::~ShadowSystem()
 {
-    vkDestroyDescriptorPool(aDevice.GetLogicalDevice(), descriptorPool, nullptr);
+    delete descriptor;
     vkDestroySampler(aDevice.GetLogicalDevice(), shadowSampler, nullptr);
     vkDestroyImageView(aDevice.GetLogicalDevice(), imageView, nullptr);
     vkDestroyImage(aDevice.GetLogicalDevice(), image, nullptr);
@@ -129,9 +129,9 @@ void ShadowSystem::EndRenderPass(VkCommandBuffer& commandBuffer)
     //vkQueueWaitIdle(aDevice.GetGraphicsQueue());
 }
 
-VkDescriptorSet& ShadowSystem::GetShadowSamplerSet()
+std::vector<VkDescriptorSet>& ShadowSystem::GetShadowSamplerSets()
 {
-    return descriptorSet; 
+    return descriptor->GetSets(); 
 }
 
 void ShadowSystem::createImageView()
@@ -179,46 +179,4 @@ void ShadowSystem::createShadowFrameBuffer()
 void ShadowSystem::createShadowSampler()
 {
     aDevice.CreateSampler(&shadowSampler, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE);
-}
-
-void ShadowSystem::createDescriptorSet()
-{
-    VkDescriptorPoolSize poolSize;
-    poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    poolSize.descriptorCount = 1;
-
-    VkDescriptorPoolCreateInfo poolInfo{};
-    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = 1;
-    poolInfo.pPoolSizes = &poolSize;
-    poolInfo.maxSets = 2;
-    poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-
-    if (vkCreateDescriptorPool(aDevice.GetLogicalDevice(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create descriptor pool!");
-
-    VkDescriptorSetAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorSetCount = 1;
-    allocInfo.descriptorPool = descriptorPool;
-    allocInfo.pSetLayouts = &Pipelines::GetCurrent()->GetDescriptorSetLayouts()[SHADOW_SAMPLER_LAYOUT];
-    if (vkAllocateDescriptorSets(aDevice.GetLogicalDevice(), &allocInfo, &descriptorSet) != VK_SUCCESS)
-        throw std::runtime_error("Failed to allocate descriptor set!");
-
-    VkDescriptorImageInfo imageInfo{};
-    imageInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-    imageInfo.imageView = imageView;
-    imageInfo.sampler = shadowSampler;
-
-    VkWriteDescriptorSet descriptorWrite{};
-    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    descriptorWrite.dstSet = descriptorSet;
-    descriptorWrite.dstBinding = 0;
-    descriptorWrite.dstArrayElement = 0;
-    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    descriptorWrite.descriptorCount = 1;
-    descriptorWrite.pImageInfo = &imageInfo;
-
-    vkUpdateDescriptorSets(aDevice.GetLogicalDevice(), 1,
-        &descriptorWrite, 0, nullptr);
 }

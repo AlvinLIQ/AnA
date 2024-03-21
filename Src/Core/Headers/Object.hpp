@@ -3,6 +3,7 @@
 #include "Model.hpp"
 #include "Texture.hpp"
 #include "Types.hpp"
+#include "Descriptor.hpp"
 #include "glm/fwd.hpp"
 #include <memory>
 #include <stdint.h>
@@ -79,8 +80,7 @@ namespace AnA
         {
             aDevice = mDevice;
             createObjectsBuffers();
-            aDevice->CreateDescriptorPool(MAX_FRAMES_IN_FLIGHT, descriptorPool);
-            aDevice->CreateDescriptorSets((std::vector<void*>&)objectsBuffers, MAX_OBJECTS_COUNT * sizeof(Model::ModelStorageBufferObject), 0, MAX_FRAMES_IN_FLIGHT, descriptorPool, descriptorSetLayout, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, descriptorSets);
+            descriptor = new Descriptor(*mDevice, (void**)objectsBuffers.data(), MAX_OBJECTS_COUNT * sizeof(Model::ModelStorageBufferObject), 0, MAX_FRAMES_IN_FLIGHT, descriptorSetLayout, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
         }
 
         void Destroy()
@@ -92,7 +92,7 @@ namespace AnA
                 delete objectsBuffer;
             delete staggingBuffer;
 
-            vkDestroyDescriptorPool(aDevice->GetLogicalDevice(), descriptorPool, nullptr);
+            delete descriptor;
         }
 
         const std::vector<Object*>& Get() const
@@ -102,7 +102,7 @@ namespace AnA
         
         std::vector<VkDescriptorSet>& GetDescriptorSets()
         {
-            return descriptorSets;
+            return descriptor->GetSets();
         }
 
         void RequestUpdate(ANA_OBJECTS_UPDATE_FLAG_BIT flag = ANA_OBJECTS_UPDATE_ALL)
@@ -246,8 +246,7 @@ namespace AnA
                  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         }
         
-        VkDescriptorPool descriptorPool;
-        std::vector<VkDescriptorSet> descriptorSets;
+        Descriptor* descriptor;
         
     };
 }

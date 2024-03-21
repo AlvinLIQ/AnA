@@ -7,46 +7,21 @@
 using namespace AnA::Systems;
 using namespace AnA::Cameras;
 
-VkDescriptorSetLayoutBinding CameraBufferObject::GetBindingDescriptionSet()
-{
-    VkDescriptorSetLayoutBinding uboLayoutBinding{};
-    uboLayoutBinding.binding = 0;
-    uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    uboLayoutBinding.descriptorCount = 1;
-
-    uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
-
-    return uboLayoutBinding;
-}
-
-VkDescriptorBufferInfo CameraBufferObject::GetBufferInfo(VkBuffer camBuffer)
-{
-    VkDescriptorBufferInfo bufferInfo{};
-    bufferInfo.buffer = camBuffer;
-    bufferInfo.offset = 0;
-    bufferInfo.range = sizeof(CameraBufferObject);
-
-    return bufferInfo;
-}
-
 RenderSystem* currentRenderSystem = nullptr;
 
 RenderSystem::RenderSystem(Device& mDevice, SwapChain& mSwapChain) : aDevice {mDevice}, aSwapChain {mSwapChain}
 {
     currentRenderSystem = this;
     createCameraBuffers();
-    pipelines = new Pipelines(aDevice, aSwapChain.GetRenderPass(), aSwapChain.GetOffscreenRenderPass(),
-        CameraBufferObject::GetBindingDescriptionSet(), 
+    pipelines = new Pipelines(aDevice, aSwapChain.GetRenderPass(), aSwapChain.GetOffscreenRenderPass(), 
         {VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(ObjectPushConstantData)});
-    aDevice.CreateDescriptorPool(MAX_FRAMES_IN_FLIGHT, descriptorPool);
-    aDevice.CreateDescriptorSets((std::vector<void*>&)cameraBuffers, sizeof(CameraBufferObject), 0, MAX_FRAMES_IN_FLIGHT, descriptorPool, pipelines->GetDescriptorSetLayouts()[UBO_LAYOUT], VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, descriptorSets);
+    descriptor = new Descriptor(mDevice, (void**)cameraBuffers.data(), sizeof(CameraBufferObject), 0, MAX_FRAMES_IN_FLIGHT, pipelines->GetDescriptorSetLayouts()[UBO_LAYOUT], VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
 }
 
 RenderSystem::~RenderSystem()
 {
+    delete descriptor;
     delete pipelines;
-
-    vkDestroyDescriptorPool(aDevice.GetLogicalDevice(), descriptorPool, nullptr);
 
     for (auto &cameraBuffer : cameraBuffers)
         delete cameraBuffer;
@@ -74,9 +49,9 @@ void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, Objects &objects
     pipelines->Get()[pipeLineIndex]->Bind(commandBuffer);
 
     VkDescriptorSet sets[DESCRIPTOR_SET_LAYOUT_COUNT];
-    sets[UBO_LAYOUT] = descriptorSets[aSwapChain.CurrentFrame];
+    sets[UBO_LAYOUT] = descriptor->GetSets()[aSwapChain.CurrentFrame];
     sets[SSBO_LAYOUT] = objects.GetDescriptorSets()[aSwapChain.CurrentFrame];
-    sets[SHADOW_SAMPLER_LAYOUT] = ShadowSystem::GetCurrent()->GetShadowSamplerSet();
+    sets[SHADOW_SAMPLER_LAYOUT] = ShadowSystem::GetCurrent()->GetShadowSamplerSets()[aSwapChain.CurrentFrame];
 
     Object* object;
     auto objectArray = objects.Get();
@@ -111,20 +86,13 @@ void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, Objects &objects
 
 void RenderSystem::UpdateCameraBuffer(Cameras::Camera &camera)
 {
-    CameraBufferObject cbo;
+    CameraBufferObject& cbo = *(CameraBufferObject*)cameraBuffers[aSwapChain.CurrentFrame]->GetMappedData();
     cbo.proj = camera.GetProjectionMatrix();
     cbo.view = camera.GetView();
     cbo.invView = camera.GetInverseView();
-    glm::vec3 lightDirection = glm::normalize(glm::vec3(1.0f, -3.0f, 1.0f)); // Example light direction
-    glm::vec3 upVector = glm::vec3(0.0f, -1.0f, 0.0f); // Up vector (usually positive y-axis)
-    glm::vec3 referencePoint = glm::vec3(0.0f, -1.5f, 5.7f); // Reference point in the scene
-    glm::mat4 viewMatrix = glm::lookAt(referencePoint, referencePoint + lightDirection, upVector);
 
-    Camera lightCam;
-    lightCam.SetPerspectiveProjection(45.0f, 4.0f / 3.0f, 1.25f, 1.75f);
-    cbo.lightView = lightCam.GetProjectionMatrix() * viewMatrix;//glm::perspective(45.0f, 4.0f/3.0f, 1.0f, 96.0f);// * viewMatrix;
     auto extent = aSwapChain.GetExtent();
     cbo.resolution = {(float)extent.width, (float)extent.height};
 
-    memcpy(cameraBuffers[aSwapChain.CurrentFrame]->GetMappedData(), &cbo, sizeof(cbo));
+    //memcpy(cameraBuffers[aSwapChain.CurrentFrame]->GetMappedData(), &cbo, sizeof(cbo));
 }

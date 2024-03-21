@@ -142,10 +142,10 @@ VkShaderModule Pipeline::createShaderModule(const std::vector<unsigned char> &co
 
 Pipelines* _pipelines = nullptr;
 
-Pipelines::Pipelines(Device& mDevice, VkRenderPass renderPass, VkRenderPass offscreenRenderPass, VkDescriptorSetLayoutBinding uboLayoutBinding, VkPushConstantRange pushConstantRange) : aDevice{mDevice}
+Pipelines::Pipelines(Device& mDevice, VkRenderPass renderPass, VkRenderPass offscreenRenderPass, VkPushConstantRange pushConstantRange) : aDevice{mDevice}
 {
     _pipelines = this;
-    createDescriptorSetLayouts(uboLayoutBinding);
+    createDescriptorSetLayouts();
     createPipelineLayouts(pushConstantRange);
     pipelines.resize(PIPELINE_COUNT);
     pipelines[TRIANGLE_LIST_PIPELINE] = new Pipeline(aDevice, Basic_vert, Basic_frag, renderPass, pipelineLayout, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
@@ -201,11 +201,12 @@ void Pipelines::createPipelineLayouts(VkPushConstantRange pushConstantRange)
     }
 }
 
-void Pipelines::createDescriptorSetLayouts(VkDescriptorSetLayoutBinding uboLayoutBinding)
+void Pipelines::createDescriptorSetLayouts()
 {
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     layoutInfo.bindingCount = 1;
+    auto uboLayoutBinding = Device::CreateLayoutBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL);
     layoutInfo.pBindings = &uboLayoutBinding;
 
     if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[UBO_LAYOUT]) != VK_SUCCESS)

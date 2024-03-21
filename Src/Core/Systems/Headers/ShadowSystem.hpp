@@ -4,6 +4,14 @@
 
 namespace AnA
 {
+    struct LightBufferObject
+    {
+        glm::mat4 proj{1.f};
+        glm::mat4 view{1.f};
+        glm::vec3 direction{0.0f};
+        glm::vec3 lightColor{};
+        glm::vec2 resolution{};
+    };
     namespace Systems
     {
         class ShadowSystem
@@ -15,7 +23,7 @@ namespace AnA
 
             VkExtent2D GetExtent();
             void RenderShadows(VkCommandBuffer commandBuffer, Objects &objects);
-            VkDescriptorSet& GetShadowSamplerSet();
+            std::vector<VkDescriptorSet>& GetShadowSamplerSets();
 
             void BeginRenderPass(VkCommandBuffer& commandBuffer);
             void EndRenderPass(VkCommandBuffer& commandBuffer);
@@ -34,9 +42,7 @@ namespace AnA
             VkSampler shadowSampler;
             void createShadowSampler();
 
-            VkDescriptorPool descriptorPool;
-            VkDescriptorSet descriptorSet;
-            void createDescriptorSet();
+            Descriptor* descriptor;
         };
     }
 }

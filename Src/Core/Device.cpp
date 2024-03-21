@@ -333,10 +333,10 @@ void Device::CreateSampler(VkSampler* pSampler, enum VkSamplerAddressMode sample
     vkCreateSampler(logicalDevice, &samplerInfo, nullptr, pSampler);
 }
 
-void Device::CreateDescriptorPool(int descriptorCount, VkDescriptorPool& descriptorPool)
+void Device::CreateDescriptorPool(int descriptorCount, VkDescriptorPool& descriptorPool, VkDescriptorType descriptorType)
 {
     VkDescriptorPoolSize poolSizes[1];
-    poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    poolSizes[0].type = descriptorType;
     poolSizes[0].descriptorCount = static_cast<uint32_t>(descriptorCount);
 
     VkDescriptorPoolCreateInfo poolInfo{};
@@ -350,7 +350,7 @@ void Device::CreateDescriptorPool(int descriptorCount, VkDescriptorPool& descrip
         throw std::runtime_error("Failed to create descriptor pool!");
 }
 
-void Device::CreateDescriptorSets(std::vector<void*>& buffers, VkDeviceSize bufferSize, uint32_t binding, int descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets)
+void Device::CreateDescriptorSets(void** buffers, VkDeviceSize bufferSize, uint32_t binding, int descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets)
 {
     std::vector<VkDescriptorSetLayout> layouts(descriptorSetCount, descriptorSetLayout);
     VkDescriptorSetAllocateInfo allocInfo{};
@@ -367,7 +367,7 @@ void Device::CreateDescriptorSets(std::vector<void*>& buffers, VkDeviceSize buff
     for (int i = 0; i < descriptorSetCount; i++)
     {
         VkDescriptorBufferInfo bufferInfo{};
-        bufferInfo.buffer = ((Buffer*)buffers[i])->GetBuffer();
+        bufferInfo.buffer = (((Buffer**)buffers)[i])->GetBuffer();
         bufferInfo.offset = 0;
         bufferInfo.range = bufferSize;
         VkWriteDescriptorSet descriptorWrite{};
@@ -381,6 +381,46 @@ void Device::CreateDescriptorSets(std::vector<void*>& buffers, VkDeviceSize buff
         vkUpdateDescriptorSets(logicalDevice, 1,
             &descriptorWrite, 0, nullptr);
     }
+}
+
+void Device::CreateDescriptorSets(VkDescriptorImageInfo* pImageInfo, uint32_t binding, int descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets)
+{
+    std::vector<VkDescriptorSetLayout> layouts(descriptorSetCount, descriptorSetLayout);
+    VkDescriptorSetAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocInfo.descriptorPool = descriptorPool;
+    allocInfo.descriptorSetCount = static_cast<uint32_t>(descriptorSetCount);
+    allocInfo.pSetLayouts = layouts.data();
+    descriptorSets.resize(descriptorSetCount);
+    
+    if (vkAllocateDescriptorSets(logicalDevice, &allocInfo, descriptorSets.data()) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to allocate descriptor sets!");
+    }
+    for (int i = 0; i < descriptorSetCount; i++)
+    {
+        VkWriteDescriptorSet descriptorWrite{};
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = descriptorSets[i];
+        descriptorWrite.dstBinding = binding;
+        descriptorWrite.dstArrayElement = 0;
+        descriptorWrite.descriptorType = descriptorType;
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.pImageInfo = pImageInfo;
+        vkUpdateDescriptorSets(logicalDevice, 1,
+            &descriptorWrite, 0, nullptr);
+    }
+}
+
+VkDescriptorSetLayoutBinding Device::CreateLayoutBinding(uint32_t binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags)
+{
+    VkDescriptorSetLayoutBinding layoutBinding{};
+    layoutBinding.descriptorCount = 1;
+    layoutBinding.descriptorType = descriptorType;
+    layoutBinding.pImmutableSamplers = nullptr;
+    layoutBinding.stageFlags = stageFlags;
+    layoutBinding.binding = binding;
+    return layoutBinding;
 }
 
 void Device::TransitionImageLayout(VkImage &image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)

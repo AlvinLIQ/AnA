@@ -181,7 +181,7 @@ namespace AnA
     class Pipelines
     {
     public:
-        Pipelines(Device& mDevice, VkRenderPass renderPass, VkRenderPass offscreenRenderPass, VkDescriptorSetLayoutBinding uboLayoutBinding, VkPushConstantRange pushConstantRange);
+        Pipelines(Device& mDevice, VkRenderPass renderPass, VkRenderPass offscreenRenderPass, VkPushConstantRange pushConstantRange);
         ~Pipelines();
 
         static Pipelines* GetCurrent();
@@ -205,6 +205,6 @@ namespace AnA
 
         VkDescriptorSetLayout descriptorSetLayouts[DESCRIPTOR_SET_LAYOUT_COUNT] = {};
         VkDescriptorSetLayout computeDescriptorSetLayout;
-        void createDescriptorSetLayouts(VkDescriptorSetLayoutBinding uboLayoutBinding);
+        void createDescriptorSetLayouts();
     };
 }

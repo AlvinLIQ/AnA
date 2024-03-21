@@ -1,6 +1,5 @@
 #include "Headers/Texture.hpp"
 #include "Headers/Pipeline.hpp"
-#include <stdexcept>
 
 #define DEFAULT_FONT_SIZE 32.0f
 
@@ -12,8 +11,7 @@ Texture::Texture(const char* filename, Device& mDevice) : aDevice { mDevice }
     textureImageView = aDevice.CreateImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
     createTextureSampler();
 
-    createDescriptorPool();
-    createDescriptorSet();
+    descriptor = new Descriptor(mDevice, textureSampler, textureImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 0, 1, Pipelines::GetCurrent()->GetDescriptorSetLayouts()[SAMPLER_LAYOUT], VK_SHADER_STAGE_FRAGMENT_BIT, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
 }
 
 Texture::Texture(const uint32_t color, Device& mDevice) : aDevice { mDevice }
@@ -22,8 +20,7 @@ Texture::Texture(const uint32_t color, Device& mDevice) : aDevice { mDevice }
     textureImageView = aDevice.CreateImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
     createTextureSampler();
 
-    createDescriptorPool();
-    createDescriptorSet();
+    descriptor = new Descriptor(mDevice, textureSampler, textureImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 0, 1, Pipelines::GetCurrent()->GetDescriptorSetLayouts()[SAMPLER_LAYOUT], VK_SHADER_STAGE_FRAGMENT_BIT, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
 }
 
 Texture::Texture(const char* text, const int width, const int height, const float lineHeight, Device& mDevice) : aDevice { mDevice }
@@ -32,14 +29,13 @@ Texture::Texture(const char* text, const int width, const int height, const floa
     textureImageView = aDevice.CreateImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
     createTextureSampler(VK_SAMPLER_ADDRESS_MODE_REPEAT);
 
-    createDescriptorPool();
-    createDescriptorSet();
+    descriptor = new Descriptor(mDevice, textureSampler, textureImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 0, 1, Pipelines::GetCurrent()->GetDescriptorSetLayouts()[SAMPLER_LAYOUT], VK_SHADER_STAGE_FRAGMENT_BIT, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
 }
 
 Texture::~Texture()
 {
+    delete descriptor;
     auto& device = aDevice.GetLogicalDevice();
-    vkDestroyDescriptorPool(device, descriptorPool, nullptr);
 
     vkDestroySampler(device, textureSampler, nullptr);
     vkDestroyImageView(device, textureImageView, nullptr);
@@ -64,7 +60,7 @@ Device& Texture::GetDevice()
 
 VkDescriptorSet& Texture::GetDescriptorSet()
 {
-    return descriptorSet;
+    return descriptor->GetSets()[0];
 }
 
 void Texture::createTextureSampler(enum VkSamplerAddressMode samplerAddressMode)
@@ -88,50 +84,4 @@ void Texture::createTextureSampler(enum VkSamplerAddressMode samplerAddressMode)
     samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 
     vkCreateSampler(aDevice.GetLogicalDevice(), &samplerInfo, nullptr, &textureSampler);
-}
-
-void Texture::createDescriptorPool()
-{
-    VkDescriptorPoolSize poolSize;
-    poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    poolSize.descriptorCount = 1;
-
-    VkDescriptorPoolCreateInfo poolInfo{};
-    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = 1;
-    poolInfo.pPoolSizes = &poolSize;
-    poolInfo.maxSets = 1;
-    poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-
-    if (vkCreateDescriptorPool(aDevice.GetLogicalDevice(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create descriptor pool!");
-}
-
-void Texture::createDescriptorSet()
-{
-    VkDescriptorSetAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorPool = descriptorPool;
-    allocInfo.descriptorSetCount = 1;
-    allocInfo.pSetLayouts = &Pipelines::GetCurrent()->GetDescriptorSetLayouts()[SAMPLER_LAYOUT];
-
-    if (vkAllocateDescriptorSets(aDevice.GetLogicalDevice(), &allocInfo, &descriptorSet) != VK_SUCCESS)
-        throw std::runtime_error("Failed to allocate descriptor sets!");
-
-    VkDescriptorImageInfo imageInfo{};
-    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageInfo.imageView = GetImageView();
-    imageInfo.sampler = GetSampler();
-
-    VkWriteDescriptorSet descriptorWrite{};
-    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    descriptorWrite.dstSet = descriptorSet;
-    descriptorWrite.dstBinding = 0;
-    descriptorWrite.dstArrayElement = 0;
-    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    descriptorWrite.descriptorCount = 1;
-    descriptorWrite.pImageInfo = &imageInfo;
-
-    vkUpdateDescriptorSets(aDevice.GetLogicalDevice(), 1,
-        &descriptorWrite, 0, nullptr);
 }
