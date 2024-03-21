@@ -5,10 +5,12 @@ layout(location = 1) in vec3 color;
 layout(location = 2) in vec3 normal;
 layout(location = 3) in vec2 uv;
 
-layout(set = 0, binding = 0) uniform LightBufferObject {
+layout(set = 0, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
-} lbo;
+    mat4 invView;
+    vec2 resolution;
+} cbo;
 
 struct Object{
     mat4 model;
@@ -17,6 +19,14 @@ struct Object{
 layout(std140, set = 1, binding = 0) buffer ObjectBuffer {
     Object objects[];
 } objectBuffer;
+
+layout(set = 2, binding = 0) uniform LightBufferObject {
+    mat4 proj;
+    mat4 view;
+    vec3 direction;
+    vec3 color;
+    float ambient;
+} lbo;
 
 #define PI 3.14
 
@@ -70,5 +80,8 @@ const mat4 biasMat = mat4(
 const vec3 LIGHT_DIRECTION = vec3(1., -3., 1.);
 void main()
 {
-    gl_Position = lbo.proj * lbo.view * (objectBuffer.objects[gl_BaseInstance].model * vec4(position, 1.0));
+    mat4 dView = lbo.view;
+    dView[3].xyz = mat3(cbo.invView) * cbo.view[3].xyz;
+    dView[3].yz -= 0.4;
+    gl_Position = lbo.proj * dView * (objectBuffer.objects[gl_BaseInstance].model * vec4(position, 1.0));
 }

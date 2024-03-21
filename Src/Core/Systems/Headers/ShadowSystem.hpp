@@ -8,9 +8,9 @@ namespace AnA
     {
         glm::mat4 proj{1.f};
         glm::mat4 view{1.f};
-        glm::vec3 direction{0.0f};
-        glm::vec3 lightColor{};
-        glm::vec2 resolution{};
+        alignas(16) glm::vec3 direction{0.0f};
+        alignas(16) glm::vec3 color{};
+        float ambient{0.0f};
     };
     namespace Systems
     {
@@ -24,9 +24,12 @@ namespace AnA
             VkExtent2D GetExtent();
             void RenderShadows(VkCommandBuffer commandBuffer, Objects &objects);
             std::vector<VkDescriptorSet>& GetShadowSamplerSets();
+            std::vector<VkDescriptorSet>& GetLightSets();
 
             void BeginRenderPass(VkCommandBuffer& commandBuffer);
             void EndRenderPass(VkCommandBuffer& commandBuffer);
+
+            void UpdateLightBuffer();
         private:
             Device& aDevice;
             SwapChain* swapChain;
@@ -42,7 +45,10 @@ namespace AnA
             VkSampler shadowSampler;
             void createShadowSampler();
 
-            Descriptor* descriptor;
+            Descriptor* shadowDescriptor, *lightDescriptor;
+            
+            std::vector<Buffer*> lightBuffers;
+            void createLightBuffers();
         };
     }
 }

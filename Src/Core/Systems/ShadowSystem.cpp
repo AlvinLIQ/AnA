@@ -6,19 +6,28 @@ using namespace Systems;
 
 ShadowSystem* _shadowSystem;
 
+Cameras::Camera _lightCam;
+
 ShadowSystem::ShadowSystem(Device& mDevice, SwapChain* pSwapchain) : aDevice(mDevice)
 {
     swapChain = pSwapchain;
     createImageView();
     createShadowSampler();
-    descriptor = new Descriptor(mDevice, shadowSampler, imageView, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL, 0, MAX_FRAMES_IN_FLIGHT, Pipelines::GetCurrent()->GetDescriptorSetLayouts()[SHADOW_SAMPLER_LAYOUT], VK_SHADER_STAGE_FRAGMENT_BIT, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+    shadowDescriptor = new Descriptor(mDevice, shadowSampler, imageView, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL, 0, MAX_FRAMES_IN_FLIGHT, Pipelines::GetCurrent()->GetDescriptorSetLayouts()[SHADOW_SAMPLER_LAYOUT], VK_SHADER_STAGE_FRAGMENT_BIT, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+    createLightBuffers();
+    lightDescriptor = new Descriptor(mDevice, (void**)lightBuffers.data(), sizeof(LightBufferObject), 0, MAX_FRAMES_IN_FLIGHT, Pipelines::GetCurrent()->GetDescriptorSetLayouts()[LIGHT_LAYOUT], VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
     createShadowFrameBuffer();
     _shadowSystem = this;
+    _lightCam.SetPerspectiveProjection(45, 4.0f / 3.0f, 0.01f, 100.0f);
+    _lightCam.SetViewDirection(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, -3.0f, 1.0f));
 }
 
 ShadowSystem::~ShadowSystem()
 {
-    delete descriptor;
+    delete shadowDescriptor;
+    delete lightDescriptor;
+    for (auto& lightBuffer : lightBuffers)
+        delete lightBuffer;
     vkDestroySampler(aDevice.GetLogicalDevice(), shadowSampler, nullptr);
     vkDestroyImageView(aDevice.GetLogicalDevice(), imageView, nullptr);
     vkDestroyImage(aDevice.GetLogicalDevice(), image, nullptr);
@@ -44,7 +53,7 @@ void ShadowSystem::RenderShadows(VkCommandBuffer commandBuffer, Objects &objects
     Object* object;
     auto objectArray = objects.Get();
 
-    std::vector<VkDescriptorSet> sets{RenderSystem::GetCurrent()->GetDescriptorSet(), objects.GetDescriptorSets()[swapChain->CurrentFrame]};
+    std::vector<VkDescriptorSet> sets{RenderSystem::GetCurrent()->GetDescriptorSet(), objects.GetDescriptorSets()[swapChain->CurrentFrame], lightDescriptor->GetSets()[swapChain->CurrentFrame]};
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
         pipelines->Get()[SHADOW_MAPPING_PIPELINE]->GetLayout(), 0, static_cast<uint32_t>(sets.size()),
         sets.data(), 0, nullptr);
@@ -131,7 +140,12 @@ void ShadowSystem::EndRenderPass(VkCommandBuffer& commandBuffer)
 
 std::vector<VkDescriptorSet>& ShadowSystem::GetShadowSamplerSets()
 {
-    return descriptor->GetSets(); 
+    return shadowDescriptor->GetSets(); 
+}
+
+std::vector<VkDescriptorSet>& ShadowSystem::GetLightSets()
+{
+    return lightDescriptor->GetSets();
 }
 
 void ShadowSystem::createImageView()
@@ -179,4 +193,31 @@ void ShadowSystem::createShadowFrameBuffer()
 void ShadowSystem::createShadowSampler()
 {
     aDevice.CreateSampler(&shadowSampler, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE);
+}
+
+void ShadowSystem::createLightBuffers()
+{
+    VkDeviceSize bufferSize = sizeof(LightBufferObject);
+    lightBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+    for (auto &lightBuffer : lightBuffers)
+    {
+        lightBuffer = new Buffer(aDevice, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        lightBuffer->Map(0, bufferSize);
+        LightBufferObject& lbo = *((LightBufferObject*)lightBuffer->GetMappedData());
+        lbo.proj = glm::mat4{1.0f};
+        lbo.view = glm::mat4{1.0f};
+        lbo.direction = glm::normalize(glm::vec3(1.0f, -3.0f, 1.0f));
+        lbo.color = glm::vec3(0.2);
+        lbo.ambient = 0.037f;
+        //printf("%p\n", lightBuffer->GetMappedData());
+    }
+}
+
+void ShadowSystem::UpdateLightBuffer()
+{
+    LightBufferObject& lbo = *((LightBufferObject*)lightBuffers[swapChain->CurrentFrame]->GetMappedData());
+    lbo.proj = _lightCam.GetProjectionMatrix();
+    lbo.view = _lightCam.GetView();
+    //lightBuffers[swapChain->CurrentFrame]->CopyToBuffer(&lbo, sizeof(lbo));
 }

@@ -115,6 +115,7 @@ void App::Run()
         //camera.SetOrthographicProjection(-aspect, -1, aspect, 1, -1, 1);
         camera.SetPerspectiveProjection(glm::radians(60.f), aspect, .01f, 100.f);
         aRenderSystem->UpdateCameraBuffer(camera);
+        aShadowSystem->UpdateLightBuffer();
         //Render Shadow Map
         //auto offscreenCommandBuffer = aRenderer->GetOffscreenCommandBuffer();
         if (aRenderer->NeedUpdate() || SceneObjects.BeginCommandBufferUpdate())
