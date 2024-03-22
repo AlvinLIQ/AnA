@@ -6,8 +6,6 @@ using namespace Systems;
 
 ShadowSystem* _shadowSystem;
 
-Cameras::Camera _lightCam;
-
 ShadowSystem::ShadowSystem(Device& mDevice, SwapChain* pSwapchain) : aDevice(mDevice)
 {
     swapChain = pSwapchain;
@@ -18,10 +16,6 @@ ShadowSystem::ShadowSystem(Device& mDevice, SwapChain* pSwapchain) : aDevice(mDe
     lightDescriptor = new Descriptor(mDevice, (void**)lightBuffers.data(), sizeof(LightBufferObject), 0, MAX_FRAMES_IN_FLIGHT, Pipelines::GetCurrent()->GetDescriptorSetLayouts()[LIGHT_LAYOUT], VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
     createShadowFrameBuffer();
     _shadowSystem = this;
-    float aspect = 4.0f / 3.0f;
-    //_lightCam.SetOrthographicProjection(-aspect, -1, aspect, 1, 0.01, 150.0f);
-    _lightCam.SetPerspectiveProjection(45.0f, aspect, 10.0f, 100.0f);
-    _lightCam.SetViewDirection(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, -3.0f, 1.0f));
 }
 
 ShadowSystem::~ShadowSystem()
@@ -216,10 +210,10 @@ void ShadowSystem::createLightBuffers()
     }
 }
 
-void ShadowSystem::UpdateLightBuffer()
+void ShadowSystem::UpdateLightBuffer(Cameras::Camera& lightCamera)
 {
     LightBufferObject& lbo = *((LightBufferObject*)lightBuffers[swapChain->CurrentFrame]->GetMappedData());
-    lbo.proj = _lightCam.GetProjectionMatrix();
-    lbo.view = _lightCam.GetView();
+    lbo.proj = lightCamera.GetProjectionMatrix();
+    lbo.view = lightCamera.GetView();
     //lightBuffers[swapChain->CurrentFrame]->CopyToBuffer(&lbo, sizeof(lbo));
 }

@@ -81,7 +81,7 @@ void main()
         float diffuseLightItensity = max(dot(normalSpace, normalize(lbo.direction)), 0);
         float visibility = 1.0;
         vec3 shadowProj = vec3(shadowCoord.xyz / shadowCoord.w);
-        if (texture(shadowSampler, shadowProj.xy).r < shadowProj.z - 0.005)
+        if (texture(shadowSampler, shadowProj.xy).r < shadowProj.z)
         {
             visibility = 0.3;
         }
@@ -90,5 +90,5 @@ void main()
         return;
     }
     float depth = texture(shadowSampler, texCoord).r;
-    outColor = biasMat * vec4(1.0 - (1.0 - depth) * 100.0);
+    outColor = vec4(1.0 - (1.0 - depth) * 100.0);
 }
