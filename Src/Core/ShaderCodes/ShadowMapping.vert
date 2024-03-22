@@ -72,16 +72,13 @@ vec3 inverse(vec3 lightDirection)
 }
 
 const mat4 biasMat = mat4( 
-	0.5, 0.0, 0.0, 0.0,
-	0.0, 0.5, 0.0, 0.0,
-	0.0, 0.0, 1.0, 0.0,
-	0.5, 0.5, 0.0, 1.0 );
+  0.5, 0.0, 0.0, 0.0,
+  0.0, 0.5, 0.0, 0.0,
+  0.0, 0.0, 1.0, 0.0,
+  0.5, 0.5, 0.0, 1.0 );
 
 const vec3 LIGHT_DIRECTION = vec3(1., -3., 1.);
 void main()
 {
-    mat4 dView = lbo.view;
-    dView[3].xyz = mat3(cbo.invView) * cbo.view[3].xyz;
-    dView[3].yz -= 0.4;
-    gl_Position = lbo.proj * dView * (objectBuffer.objects[gl_BaseInstance].model * vec4(position, 1.0));
+    gl_Position = biasMat * lbo.proj * lbo.view * (objectBuffer.objects[gl_BaseInstance].model * vec4(position, 1.0));
 }

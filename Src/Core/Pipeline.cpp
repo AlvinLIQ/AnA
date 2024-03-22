@@ -83,10 +83,10 @@ void Pipeline::createGraphicsPipeline(const std::vector<unsigned char>& vertShad
     pipelineConfig.colorBlending.attachmentCount = 0;
     pipelineConfig.rasterizer.cullMode = VK_CULL_MODE_NONE;
     pipelineConfig.depthStencilInfo.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
-    pipelineConfig.rasterizer.depthBiasEnable = VK_TRUE;
-    pipelineConfig.dynamicStates.push_back(VK_DYNAMIC_STATE_DEPTH_BIAS);
-    pipelineConfig.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(pipelineConfig.dynamicStates.size());
-    pipelineConfig.dynamicStateInfo.pDynamicStates = pipelineConfig.dynamicStates.data();
+    pipelineConfig.rasterizer.depthBiasEnable = VK_FALSE;
+    //pipelineConfig.dynamicStates.push_back(VK_DYNAMIC_STATE_DEPTH_BIAS);
+    //pipelineConfig.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(pipelineConfig.dynamicStates.size());
+    //pipelineConfig.dynamicStateInfo.pDynamicStates = pipelineConfig.dynamicStates.data();
     auto logicalDevice = aDevice.GetLogicalDevice();
 
     if (vkCreateGraphicsPipelines(logicalDevice, VK_NULL_HANDLE, 1, &pipelineConfig.pipelineInfo, nullptr, &pipeline) != VK_SUCCESS)

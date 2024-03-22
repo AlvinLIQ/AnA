@@ -56,8 +56,8 @@ int main()
     Model::CreateModelFromFile(aApp->GetDevice(), "Models/cube.obj", nObj->Model);
     nObj->Properties.sType = ANA_MODEL;
     nObj->Color = {.68f, .68f, 1.0f};
-    nObj->Properties.transform.scale = {11.4f, 0.19f, 11.4};
-    nObj->Properties.transform.translation = {3.0, 0.4, 0.0};
+    nObj->Properties.transform.scale = {11.4f, 0.02f, 11.4};
+    nObj->Properties.transform.translation = {3.0, 0.5, 0.0};
     aApp->SceneObjects.Append(nObj);
 /*
     nObj = new Object;

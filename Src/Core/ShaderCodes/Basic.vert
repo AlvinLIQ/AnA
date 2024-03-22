@@ -55,10 +55,10 @@ struct Ray{
 const vec3 LIGHT_DIRECTION = normalize(vec3(1., -3., 1.));
 
 const mat4 biasMat = mat4( 
-	0.5, 0.0, 0.0, 0.0,
-	0.0, 0.5, 0.0, 0.0,
-	0.0, 0.0, 1.0, 0.0,
-	0.5, 0.5, 0.0, 1.0 );
+  0.5, 0.0, 0.0, 0.0,
+  0.0, 0.5, 0.0, 0.0,
+  0.0, 0.0, 1.0, 0.0,
+  0.5, 0.5, 0.0, 1.0 );
 
 #define PI 3.14
 
@@ -95,11 +95,8 @@ void main() {
         gl_Position = cbo.proj * cbo.view * vertex;
         outNormalSpace = normalize(mat3(objectBuffer.objects[gl_BaseInstance].model) * normal);
         outVertex = vertex.xyz / vertex.w;
-
-        mat4 dView = lbo.view;
-        dView[3].xyz = mat3(cbo.invView) * cbo.view[3].xyz;
-        dView[3].yz -= 0.4;
-        outShadowCoord = lbo.proj * dView * vertex;
+        mat4 dView = mat4(0.659720, 0.609492, -0.439646, 0.000000, 0.000000, 0.585016, 0.811022, 0.000000, 0.751512, -0.535047, 0.385947, 0.000000, 0.726552, 0.091322, 6.044646, 1.000000);
+        outShadowCoord = biasMat * lbo.proj * lbo.view * vertex;
         fragColor = color;
     }
     else
