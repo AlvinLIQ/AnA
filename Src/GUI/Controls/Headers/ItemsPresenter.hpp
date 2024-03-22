@@ -5,11 +5,11 @@ namespace AnA
 {
     namespace Controls
     {
-        class ItemsControl : public Control
+        class ItemsPresenter : public Control
         {
         public:
-            ItemsControl();
-            ~ItemsControl();
+            ItemsPresenter();
+            ~ItemsPresenter();
             
             void AppendItem(Control* newItem)
             {

@@ -1,14 +1,14 @@
-#include "Headers/ItemsControl.hpp"
+#include "Headers/ItemsPresenter.hpp"
 
 using namespace AnA;
 using namespace Controls;
 
-ItemsControl::ItemsControl() : Control()
+ItemsPresenter::ItemsPresenter() : Control()
 {
 
 }
 
-ItemsControl::~ItemsControl()
+ItemsPresenter::~ItemsPresenter()
 {
     for (auto item = items.begin(); item < items.end(); item++)
     {

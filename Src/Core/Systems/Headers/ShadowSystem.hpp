@@ -12,6 +12,10 @@ namespace AnA
         alignas(16) glm::vec3 color{};
         float ambient{0.0f};
     };
+    namespace Cameras
+    {
+        class Camera;
+    }
     namespace Systems
     {
         class ShadowSystem
@@ -29,7 +33,7 @@ namespace AnA
             void BeginRenderPass(VkCommandBuffer& commandBuffer);
             void EndRenderPass(VkCommandBuffer& commandBuffer);
 
-            void UpdateLightBuffer();
+            void UpdateLightBuffer(Cameras::Camera& lightCamera);
         private:
             Device& aDevice;
             SwapChain* swapChain;

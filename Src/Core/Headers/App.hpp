@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../Camera/Headers/Camera.hpp"
 #include "Object.hpp"
 #include "Renderer.hpp"
 #include "SwapChain.hpp"
@@ -10,6 +9,7 @@
 #include "../Systems/Headers/RenderSystem.hpp"
 #include "../Systems/Headers/ShadowSystem.hpp"
 #include "../Input/Headers/InputManager.hpp"
+#include "../Resource/Headers/ResourceManager.hpp"
 #include <thread>
 
 namespace AnA
@@ -34,11 +34,6 @@ namespace AnA
         static std::shared_ptr<Model> &Get2DModel();
         static void CreateModel(const Model::ModelInfo &modelInfo, std::shared_ptr<Model> &model);
 
-        Cameras::Camera &GetCamera()
-        {
-            return camera;
-        }
-
         Input::InputManager& GetInputManager()
         {
             return *aInputManager;
@@ -62,7 +57,7 @@ namespace AnA
         Systems::ShadowSystem* aShadowSystem;
         Input::InputManager* aInputManager;
 
-        Cameras::Camera camera;
+        Resource::ResourceManager* aResourceManager;
 
         std::thread uiThread;
         static void startUILoop(std::thread &loopThread);

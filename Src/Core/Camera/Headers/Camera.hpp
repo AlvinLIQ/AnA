@@ -56,5 +56,17 @@ namespace AnA
 
             float speedRatio = 1.0f;
         };
+
+        struct CameraInfo
+        {
+            float fov;
+            float aspect;
+            float near;
+            float far;
+            void UpdateCameraPerspective(Camera& camera)
+            {
+                camera.SetPerspectiveProjection(fov, aspect, near, far);
+            }
+        };
     }
 }

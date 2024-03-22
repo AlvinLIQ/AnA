@@ -88,10 +88,12 @@ void App::Init()
     aRenderSystem = new Systems::RenderSystem(*aDevice, aRenderer->GetSwapChain());
     SceneObjects.Init(aDevice, Pipelines::GetCurrent()->GetDescriptorSetLayouts()[SSBO_LAYOUT]);
     aShadowSystem = new Systems::ShadowSystem(*aDevice, &aRenderer->GetSwapChain());
+    aResourceManager = new Resource::ResourceManager();
 }
 
 void App::Run()
 {
+    Cameras::Camera& camera = aResourceManager->MainCamera, &lightCamera = aResourceManager->LightCamera;
     Cameras::CameraController cameraController{camera};
     cameraController.GetCameraKeyMapConfigs(aInputManager->GetKeyMapConfigs());
     cameraController.GetCameraCursorConfigs(aInputManager->GetCursorConfigs());
@@ -101,6 +103,8 @@ void App::Run()
     //camera.SetViewTarget(glm::vec3(-1.f, -2.f, 2.f), glm::vec3(0.f, 0.f, 2.5f));
     auto prevTime = std::chrono::high_resolution_clock::now();
     int pressed = 0;
+    
+    aResourceManager->UpdateCamera(aRenderer->GetAspect());
     while(!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -123,11 +127,13 @@ void App::Run()
             }
             printf("\n");
         }
-        float aspect = aRenderer->GetAspect();
-        //camera.SetOrthographicProjection(-aspect, -1, aspect, 1, -1, 1);
-        camera.SetPerspectiveProjection(glm::radians(60.f), aspect, .01f, 100.f);
+
+        if (aRenderer->NeedUpdate())
+        {
+            aResourceManager->UpdateCamera(aRenderer->GetAspect());
+        }
         aRenderSystem->UpdateCameraBuffer(camera);
-        aShadowSystem->UpdateLightBuffer();
+        aShadowSystem->UpdateLightBuffer(lightCamera);
         //Render Shadow Map
         //auto offscreenCommandBuffer = aRenderer->GetOffscreenCommandBuffer();
         if (aRenderer->NeedUpdate() || SceneObjects.BeginCommandBufferUpdate())
@@ -173,6 +179,8 @@ void App::Cleanup()
     SceneObjects.Destroy();
 
     _2DModel.reset();
+    delete aResourceManager;
+
     delete aDevice;
     vkDestroySurfaceKHR(aInstance->GetInstance(), aWindow->GetSurface(), nullptr);
     delete aInstance;
