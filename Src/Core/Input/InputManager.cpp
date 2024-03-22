@@ -1,6 +1,5 @@
 #include "Headers/InputManager.hpp"
 #include <GLFW/glfw3.h>
-#include <cstdio>
 
 using namespace AnA;
 using namespace AnA::Input;

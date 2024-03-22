@@ -100,6 +100,7 @@ void App::Run()
     //camera.SetViewDirection({}, glm::vec3(0.5f, 0.f, 1.f));
     //camera.SetViewTarget(glm::vec3(-1.f, -2.f, 2.f), glm::vec3(0.f, 0.f, 2.5f));
     auto prevTime = std::chrono::high_resolution_clock::now();
+    int pressed = 0;
     while(!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -111,6 +112,17 @@ void App::Run()
         camera.SetSpeedRatio(frameTime);
         if (aInputManager->CheckAndRunCallbacks())
             camera.UpdateViewMatrix();
+        if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && pressed == 0)
+        {
+            pressed = 1;
+            auto& camView = camera.GetView();
+            for (int i = 0, j; i < camView.length(); i++)
+            {
+                for (j = 0; j < camView[i].length(); j++)
+                    printf("%f, ", camView[i][j]);
+            }
+            printf("\n");
+        }
         float aspect = aRenderer->GetAspect();
         //camera.SetOrthographicProjection(-aspect, -1, aspect, 1, -1, 1);
         camera.SetPerspectiveProjection(glm::radians(60.f), aspect, .01f, 100.f);

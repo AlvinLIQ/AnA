@@ -18,7 +18,9 @@ ShadowSystem::ShadowSystem(Device& mDevice, SwapChain* pSwapchain) : aDevice(mDe
     lightDescriptor = new Descriptor(mDevice, (void**)lightBuffers.data(), sizeof(LightBufferObject), 0, MAX_FRAMES_IN_FLIGHT, Pipelines::GetCurrent()->GetDescriptorSetLayouts()[LIGHT_LAYOUT], VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
     createShadowFrameBuffer();
     _shadowSystem = this;
-    _lightCam.SetPerspectiveProjection(45, 4.0f / 3.0f, 0.01f, 100.0f);
+    float aspect = 4.0f / 3.0f;
+    //_lightCam.SetOrthographicProjection(-aspect, -1, aspect, 1, 0.01, 150.0f);
+    _lightCam.SetPerspectiveProjection(45.0f, aspect, 10.0f, 100.0f);
     _lightCam.SetViewDirection(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, -3.0f, 1.0f));
 }
 
@@ -47,7 +49,7 @@ VkExtent2D ShadowSystem::GetExtent()
 
 void ShadowSystem::RenderShadows(VkCommandBuffer commandBuffer, Objects &objects)
 {
-    vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
+    //vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
     auto pipelines = Pipelines::GetCurrent();
     pipelines->Get()[SHADOW_MAPPING_PIPELINE]->Bind(commandBuffer);
     Object* object;
@@ -60,7 +62,7 @@ void ShadowSystem::RenderShadows(VkCommandBuffer commandBuffer, Objects &objects
     for (int i = 0; i < objectArray.size(); i++)
     {
         object = objectArray[i];
-        if (object->Properties.sType != ANA_MODEL)
+        if (object->Properties.sType != ANA_MODEL || i == 2)
             continue;
 
         object->Model->Bind(commandBuffer);
