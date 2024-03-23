@@ -4,6 +4,7 @@ cflags =
 libs = 
 ana = 
 shader =
+shaderArgs = --target-env=vulkan1.3
 rm =
 ifeq ($(OS), Windows_NT)
 	libs += -LC:/VulkanSDK/1.3.275.0/Lib -LC:/glfw3/lib-vc2022 -lvulkan-1 -lglfw3dll
@@ -33,14 +34,14 @@ all: shader $(ana)
 vert:
 
 shader: $(shaderspv)
-	$(cc) Src/Core/ShaderCodes/ShaderCodes.c -o $(shader) -std=c2x
+	$(cc) $(cflags) $(libs) -lSPIRV-Tools-shared Src/Core/ShaderCodes/ShaderCodes.c -o $(shader) -std=c2x
 	$(shader) Shaders/ $(^F) > Src/Core/Headers/ShaderCodes.hpp
 %_frag.spv : %.frag
-	glslc $< -o Shaders/$(@F)
+	glslc $< -o Shaders/$(@F) $(shaderArgs)
 %_vert.spv : %.vert
-	glslc $< -o Shaders/$(@F)
+	glslc $< -o Shaders/$(@F) $(shaderArgs)
 %_comp.spv : %.comp
-	glslc $< -o Shaders/$(@F)
+	glslc $< -o Shaders/$(@F) $(shaderArgs)
 
 $(ana): $(objects)
 	$(cpp) $^ $(libs) -g -o $@ -std=c++20

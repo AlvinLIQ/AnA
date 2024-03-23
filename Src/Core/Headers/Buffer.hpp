@@ -30,6 +30,10 @@ namespace AnA
         {
             return mappedData;
         }
+        const VkDeviceSize GetSize() const
+        {
+            return bufferSize;
+        }
 
         void CopyToBuffer(Buffer& srcBuffer, VkDeviceSize bufferSize)
         {
@@ -58,5 +62,6 @@ namespace AnA
         void* mappedData = nullptr;
         VkBuffer buffer = VK_NULL_HANDLE;
         VkDeviceMemory bufferMemory = VK_NULL_HANDLE;
+        VkDeviceSize bufferSize = 0;
     };
 }

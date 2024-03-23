@@ -40,6 +40,11 @@ Pipeline::Pipeline(Device& mDevice, const std::vector<unsigned char>& computeSha
     createComputePipeline(computeShaderCode);
 }
 
+Pipeline::Pipeline(Device& mDevice, PipelineConfig pipelineConfig) : aDevice {mDevice}, renderPass {pipelineConfig.pipelineInfo.renderPass}, pipelineLayout{pipelineConfig.pipelineInfo.layout}
+{
+    createGraphicsPipeline(pipelineConfig);
+}
+
 Pipeline::~Pipeline()
 {
     auto logicalDevice = aDevice.GetLogicalDevice();
@@ -79,20 +84,22 @@ void Pipeline::createGraphicsPipeline(const std::vector<unsigned char>& vertShad
 {
     VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
 
-    PipelineConfig pipelineConfig = pipelineConfig.GetDefault(vertShaderModule, 0, pipelineLayout, renderPass, vertexTopology); 
-    pipelineConfig.colorBlending.attachmentCount = 0;
-    pipelineConfig.rasterizer.cullMode = VK_CULL_MODE_NONE;
-    pipelineConfig.depthStencilInfo.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
-    pipelineConfig.rasterizer.depthBiasEnable = VK_FALSE;
-    //pipelineConfig.dynamicStates.push_back(VK_DYNAMIC_STATE_DEPTH_BIAS);
-    //pipelineConfig.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(pipelineConfig.dynamicStates.size());
-    //pipelineConfig.dynamicStateInfo.pDynamicStates = pipelineConfig.dynamicStates.data();
+    PipelineConfig pipelineConfig = pipelineConfig.GetForDepthTest(vertShaderModule, pipelineLayout, renderPass, vertexTopology); 
+    
     auto logicalDevice = aDevice.GetLogicalDevice();
 
     if (vkCreateGraphicsPipelines(logicalDevice, VK_NULL_HANDLE, 1, &pipelineConfig.pipelineInfo, nullptr, &pipeline) != VK_SUCCESS)
         throw std::runtime_error("Failed to create pipeline!");
 
     vkDestroyShaderModule(logicalDevice, vertShaderModule, nullptr);
+}
+
+void Pipeline::createGraphicsPipeline(PipelineConfig pipelineConfig)
+{
+    auto logicalDevice = aDevice.GetLogicalDevice();
+
+    if (vkCreateGraphicsPipelines(logicalDevice, VK_NULL_HANDLE, 1, &pipelineConfig.pipelineInfo, nullptr, &pipeline) != VK_SUCCESS)
+        throw std::runtime_error("Failed to create pipeline!");
 }
 
 void Pipeline::createComputePipeline(const std::string& computeShaderFileName)

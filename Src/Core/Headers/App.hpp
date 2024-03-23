@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Object.hpp"
 #include "Renderer.hpp"
 #include "SwapChain.hpp"
 #include "Window.hpp"
@@ -9,7 +8,8 @@
 #include "../Systems/Headers/RenderSystem.hpp"
 #include "../Systems/Headers/ShadowSystem.hpp"
 #include "../Input/Headers/InputManager.hpp"
-#include "../Resource/Headers/ResourceManager.hpp"
+#include "../Resources/Headers/Object.hpp"
+#include "../Resources/Headers/ResourceManager.hpp"
 #include <thread>
 
 namespace AnA

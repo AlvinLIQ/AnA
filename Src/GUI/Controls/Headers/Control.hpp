@@ -1,5 +1,5 @@
 #pragma once
-#include "../../../Core/Headers/Object.hpp"
+#include "../../../Core/Resources/Headers/Object.hpp"
 #include "../../../Core/Headers/SwapChain.hpp"
 #include "Types.hpp"
 #include "../Styles/Default/ControlStyle.hpp"

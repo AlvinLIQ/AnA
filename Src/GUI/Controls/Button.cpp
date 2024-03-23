@@ -1,6 +1,5 @@
 //b'\xd5I5f\x9do-\xc2\xeeTU\x08E\xaaM\xd3'
 #include "Headers/Button.hpp"
-#include "../../Core/Headers/Object.hpp"
 #include "Headers/Control.hpp"
 #include "Styles/Default/ControlStyle.hpp"
 

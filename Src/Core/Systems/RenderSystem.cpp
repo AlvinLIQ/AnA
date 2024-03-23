@@ -1,6 +1,5 @@
 #include "Headers/RenderSystem.hpp"
 #include "Headers/ShadowSystem.hpp"
-#include <vector>
 #include <vulkan/vulkan_core.h>
 #include <glm/gtc/constants.hpp>
 
@@ -15,7 +14,7 @@ RenderSystem::RenderSystem(Device& mDevice, SwapChain& mSwapChain) : aDevice {mD
     createCameraBuffers();
     pipelines = new Pipelines(aDevice, aSwapChain.GetRenderPass(), aSwapChain.GetOffscreenRenderPass(), 
         {VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(ObjectPushConstantData)});
-    descriptor = new Descriptor(mDevice, (void**)cameraBuffers.data(), sizeof(CameraBufferObject), 0, MAX_FRAMES_IN_FLIGHT, pipelines->GetDescriptorSetLayouts()[UBO_LAYOUT], VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+    descriptor = new Descriptor(mDevice, cameraBuffers.data(), sizeof(CameraBufferObject), 0, MAX_FRAMES_IN_FLIGHT, pipelines->GetDescriptorSetLayouts()[UBO_LAYOUT], VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
 }
 
 RenderSystem::~RenderSystem()

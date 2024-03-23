@@ -2,7 +2,7 @@
 
 using namespace AnA;
 
-Descriptor::Descriptor(Device& mDevice, void** buffers, VkDeviceSize bufferSize, uint32_t binding,
+Descriptor::Descriptor(Device& mDevice, Buffer** buffers, VkDeviceSize bufferSize, uint32_t binding,
     int descriptorSetCount, VkShaderStageFlags stageFlags,
     const VkDescriptorType descriptorType) : aDevice(mDevice)
 {
@@ -19,7 +19,7 @@ Descriptor::Descriptor(Device& mDevice, void** buffers, VkDeviceSize bufferSize,
     aDevice.CreateDescriptorSets(buffers, bufferSize, binding, descriptorSetCount, pool, setLayout, descriptorType, sets);
 }
 
-Descriptor::Descriptor(Device& mDevice, void** buffers, VkDeviceSize bufferSize, uint32_t binding,
+Descriptor::Descriptor(Device& mDevice, Buffer** buffers, VkDeviceSize bufferSize, uint32_t binding,
     int descriptorSetCount, VkDescriptorSetLayout descriptorSetLayout,
     const VkDescriptorType descriptorType) : aDevice(mDevice)
 {    
@@ -60,6 +60,38 @@ Descriptor::Descriptor(Device& mDevice, VkSampler& sampler, VkImageView& imageVi
     imageInfo.imageView = imageView;
     imageInfo.sampler = sampler;
     aDevice.CreateDescriptorSets(&imageInfo, binding, descriptorSetCount, pool, descriptorSetLayout, descriptorType, sets);
+}
+
+Descriptor::Descriptor(Device& mDevice, Descriptor::DescriptorConfig& descriptorConfig) : aDevice{mDevice}
+{
+    aDevice.CreateDescriptorPool(descriptorConfig.descriptorCount, pool, descriptorConfig.descriptorType);
+
+    VkDescriptorSetLayoutCreateInfo layoutInfo{};
+    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    layoutInfo.bindingCount = 1;
+
+    VkDescriptorSetLayoutBinding layoutBinding = Device::CreateLayoutBinding(descriptorConfig.binding,
+     descriptorConfig.descriptorType, descriptorConfig.stageFlags);
+    layoutInfo.pBindings = &layoutBinding;
+    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &setLayout) != VK_SUCCESS)
+        throw std::runtime_error("Failed to create the DescriptorSetLayout");
+
+    if (descriptorConfig.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER || descriptorConfig.descriptorType == VK_DESCRIPTOR_TYPE_SAMPLER)
+    {
+        VkDescriptorImageInfo imageInfo{};
+        imageInfo.imageLayout = descriptorConfig.imageLayout;
+        imageInfo.imageView = descriptorConfig.imageView;
+        imageInfo.sampler = descriptorConfig.sampler;
+        aDevice.CreateDescriptorSets(&imageInfo, descriptorConfig.binding,
+         descriptorConfig.descriptorCount, pool, 
+         setLayout, descriptorConfig.descriptorType, sets);
+    }
+    else
+    {
+        aDevice.CreateDescriptorSets(descriptorConfig.buffers.data(), descriptorConfig.bufferSize,
+         descriptorConfig.binding, descriptorConfig.descriptorCount, pool,
+          setLayout, descriptorConfig.descriptorType, sets);
+    }
 }
 
 Descriptor::~Descriptor()
