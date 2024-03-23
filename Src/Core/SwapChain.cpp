@@ -3,7 +3,7 @@
 #include <limits>
 
 using namespace AnA;
-
+SwapChain* _swapChain;
 SwapChain::SwapChain(Device& mDevice,
                              VkSurfaceKHR &mSurface, GLFWwindow* mWindow) : aDevice{mDevice}, surface{mSurface}, window{mWindow}
 {
@@ -14,6 +14,8 @@ SwapChain::SwapChain(Device& mDevice,
     createOffscreenRenderPass();
     createFramebuffers();
     createSyncObjects();
+
+    _swapChain = this;
 }
 SwapChain::~SwapChain()
 {
@@ -83,6 +85,11 @@ VkResult SwapChain::SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint3
 
     CurrentFrame = (CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     return result;
+}
+
+SwapChain* SwapChain::GetCurrent()
+{
+    return _swapChain;
 }
 
 VkExtent2D SwapChain::GetExtent()

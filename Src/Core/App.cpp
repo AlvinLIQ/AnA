@@ -85,9 +85,8 @@ void App::Init()
     _aDevice = aDevice = new Device(aInstance->GetInstance(), aWindow->GetSurface());
     aRenderer = new Renderer(*aWindow, *aDevice);
     aRenderSystem = new Systems::RenderSystem(*aDevice, aRenderer->GetSwapChain());
-    SceneObjects.Init(aDevice, Pipelines::GetCurrent()->GetDescriptorSetLayouts()[SSBO_LAYOUT]);
     aShadowSystem = new Systems::ShadowSystem(*aDevice, &aRenderer->GetSwapChain());
-    aResourceManager = new Resource::ResourceManager();
+    aResourceManager = new Resource::ResourceManager(*aDevice);
 }
 
 void App::Run()
@@ -135,25 +134,25 @@ void App::Run()
         aShadowSystem->UpdateLightBuffer(lightCamera);
         //Render Shadow Map
         //auto offscreenCommandBuffer = aRenderer->GetOffscreenCommandBuffer();
-        if (aRenderer->NeedUpdate() || SceneObjects.BeginCommandBufferUpdate())
+        if (aRenderer->NeedUpdate() || aResourceManager->SceneObjects->BeginCommandBufferUpdate())
         {
             //Record Objects
             aRenderer->RecordSecondaryCommandBuffers([](VkCommandBuffer secondaryCommandBuffer)
             {
-                Systems::RenderSystem::GetCurrent()->RenderObjects(secondaryCommandBuffer, _aApp->SceneObjects);
+                Systems::RenderSystem::GetCurrent()->RenderObjects(secondaryCommandBuffer, *Resource::ResourceManager::GetCurrent()->SceneObjects);
             });
-            SceneObjects.EndCommandBufferUpdate();
+            aResourceManager->SceneObjects->EndCommandBufferUpdate();
         }
         
         if (auto commandBuffer = aRenderer->BeginFrame())
         {
-            if (SceneObjects.BeginStorageBufferUpdate())
+            if (aResourceManager->SceneObjects->BeginStorageBufferUpdate())
             {
-                SceneObjects.CommitStorageBufferUpdate(commandBuffer);
-                SceneObjects.EndStorageBufferUpdate();
+                aResourceManager->SceneObjects->CommitStorageBufferUpdate(commandBuffer);
+                aResourceManager->SceneObjects->EndStorageBufferUpdate();
             }
             aShadowSystem->BeginRenderPass(commandBuffer);
-            aShadowSystem->RenderShadows(commandBuffer, _aApp->SceneObjects);
+            aShadowSystem->RenderShadows(commandBuffer, *aResourceManager->SceneObjects);
             aShadowSystem->EndRenderPass(commandBuffer);
             aRenderer->BeginSwapChainRenderPass(commandBuffer);
             aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer);
@@ -162,7 +161,7 @@ void App::Run()
         }
         else
         {
-            SceneObjects.RequestUpdate();
+            aResourceManager->SceneObjects->RequestUpdate();
         }
     }
     //waitUILoop(uiThread);
@@ -175,7 +174,6 @@ void App::Cleanup()
     delete aRenderer;
     delete aRenderSystem;
     delete aShadowSystem;
-    SceneObjects.Destroy();
 
     _2DModel.reset();
     delete aResourceManager;

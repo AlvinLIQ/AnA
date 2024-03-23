@@ -8,7 +8,6 @@
 #include "../Systems/Headers/RenderSystem.hpp"
 #include "../Systems/Headers/ShadowSystem.hpp"
 #include "../Input/Headers/InputManager.hpp"
-#include "../Resources/Headers/Object.hpp"
 #include "../Resources/Headers/ResourceManager.hpp"
 #include <thread>
 
@@ -27,8 +26,6 @@ namespace AnA
         void Run();
         void Cleanup();
         void Exit();
-
-        Objects SceneObjects;
 
         static void CreateCubeModel(std::shared_ptr<Model>& model);
         static std::shared_ptr<Model> &Get2DModel();

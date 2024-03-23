@@ -13,14 +13,6 @@
 
 #define PIPELINE_COUNT 5
 
-#define UBO_LAYOUT 0
-#define SSBO_LAYOUT 1
-#define SAMPLER_LAYOUT 3
-#define SHADOW_SAMPLER_LAYOUT 4
-#define LIGHT_LAYOUT 2
-
-#define DESCRIPTOR_SET_LAYOUT_COUNT 5
-
 namespace AnA
 {
     class Pipeline
@@ -304,7 +296,7 @@ namespace AnA
         VkPipelineLayout computePipelineLayout;
         void createPipelineLayouts(VkPushConstantRange pushConstantRange);
 
-        VkDescriptorSetLayout descriptorSetLayouts[DESCRIPTOR_SET_LAYOUT_COUNT] = {};
+        VkDescriptorSetLayout descriptorSetLayouts[DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT] = {};
         VkDescriptorSetLayout computeDescriptorSetLayout;
         void createDescriptorSetLayouts();
     };

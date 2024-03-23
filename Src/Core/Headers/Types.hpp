@@ -44,17 +44,5 @@ namespace AnA
             };
         }
     };
-
-    struct PointLight
-    {
-        glm::vec3 position;
-        glm::vec3 color;
-    };
-
-    struct Ray
-    {
-        glm::vec3 origin;
-        glm::vec3 direction;
-    };
     typedef glm::vec<2, uint32_t> Range;
 }

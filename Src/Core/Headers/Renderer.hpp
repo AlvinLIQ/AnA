@@ -3,7 +3,6 @@
 #include "Device.hpp"
 #include "Window.hpp"
 #include "SwapChain.hpp"
-#include "vulkan/vulkan_core.h"
 
 #include <cassert>
 #include <vector>

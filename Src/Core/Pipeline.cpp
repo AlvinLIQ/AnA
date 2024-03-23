@@ -216,14 +216,14 @@ void Pipelines::createDescriptorSetLayouts()
     auto uboLayoutBinding = Device::CreateLayoutBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS);
     layoutInfo.pBindings = &uboLayoutBinding;
 
-    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[UBO_LAYOUT]) != VK_SUCCESS)
+    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[DEFAULT_UBO_LAYOUT]) != VK_SUCCESS)
         throw std::runtime_error("Failed to create the DescriptorSetLayout 1");
     if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &computeDescriptorSetLayout) != VK_SUCCESS)
         throw std::runtime_error("Failed to create the ComputeDescriptorSetLayout");
     
     auto ssboLayoutBinding = Model::ModelStorageBufferObject::GetBindingDescriptionSet();
     layoutInfo.pBindings = &ssboLayoutBinding;
-    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[SSBO_LAYOUT]) != VK_SUCCESS)
+    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[DEFAULT_SSBO_LAYOUT]) != VK_SUCCESS)
         throw std::runtime_error("Failed to create the DescriptorSetLayout 2");
 
     VkDescriptorSetLayoutBinding samplerLayoutBinding{};
@@ -233,7 +233,7 @@ void Pipelines::createDescriptorSetLayouts()
     samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     samplerLayoutBinding.binding = 0;
     layoutInfo.pBindings = &samplerLayoutBinding;
-    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[SAMPLER_LAYOUT]) != VK_SUCCESS)
+    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[DEFAULT_SAMPLER_LAYOUT]) != VK_SUCCESS)
         throw std::runtime_error("Failed to create the DescriptorSetLayout 3");
 
     VkDescriptorSetLayoutBinding shadowSamplerLayoutBinding{};
@@ -243,11 +243,11 @@ void Pipelines::createDescriptorSetLayouts()
     shadowSamplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     shadowSamplerLayoutBinding.binding = 0;
     layoutInfo.pBindings = &shadowSamplerLayoutBinding;
-    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[SHADOW_SAMPLER_LAYOUT]) != VK_SUCCESS)
+    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[DEFAULT_SHADOW_SAMPLER_LAYOUT]) != VK_SUCCESS)
         throw std::runtime_error("Failed to create the DescriptorSetLayout 4");
 
     VkDescriptorSetLayoutBinding lightLayoutBinding = Device::CreateLayoutBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS);
     layoutInfo.pBindings = &lightLayoutBinding;
-    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[LIGHT_LAYOUT]) != VK_SUCCESS)
+    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[DEFAULT_LIGHT_LAYOUT]) != VK_SUCCESS)
         throw std::runtime_error("Failed to create the DescriptorSetLayout 5");
 }

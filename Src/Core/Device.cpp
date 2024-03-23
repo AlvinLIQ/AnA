@@ -384,7 +384,7 @@ void Device::CreateDescriptorSets(Buffer** buffers, VkDeviceSize bufferSize, uin
     }
 }
 
-void Device::CreateDescriptorSets(VkDescriptorImageInfo* pImageInfo, uint32_t binding, int descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets)
+void Device::CreateDescriptorSets(VkDescriptorImageInfo* imageInfos, uint32_t binding, int descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets)
 {
     std::vector<VkDescriptorSetLayout> layouts(descriptorSetCount, descriptorSetLayout);
     VkDescriptorSetAllocateInfo allocInfo{};
@@ -407,7 +407,7 @@ void Device::CreateDescriptorSets(VkDescriptorImageInfo* pImageInfo, uint32_t bi
         descriptorWrite.dstArrayElement = 0;
         descriptorWrite.descriptorType = descriptorType;
         descriptorWrite.descriptorCount = 1;
-        descriptorWrite.pImageInfo = pImageInfo;
+        descriptorWrite.pImageInfo = &imageInfos[i];
         vkUpdateDescriptorSets(logicalDevice, 1,
             &descriptorWrite, 0, nullptr);
     }
