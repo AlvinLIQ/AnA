@@ -15,6 +15,14 @@
 #define ANA_TEXT_DEFAULT_LINE_HEIGHT 32
 #define IS_ASCII_CHAR(A) (A) <= 127
 
+#define DEFAULT_UBO_LAYOUT 0
+#define DEFAULT_SSBO_LAYOUT 1
+#define DEFAULT_SAMPLER_LAYOUT 3
+#define DEFAULT_SHADOW_SAMPLER_LAYOUT 4
+#define DEFAULT_LIGHT_LAYOUT 2
+
+#define DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT 5
+
 namespace AnA
 {
     inline std::vector<unsigned char> ReadFile(const std::string &filename)
@@ -33,6 +41,10 @@ namespace AnA
         return buffer;
     }
     class Buffer;
+    namespace Cameras
+    {
+        class Camera;
+    }
     class Device
     {
     public:
@@ -58,7 +70,7 @@ namespace AnA
 
         void CreateDescriptorPool(int descriptorCount, VkDescriptorPool& descriptorPool, VkDescriptorType descriptorType);
         void CreateDescriptorSets(Buffer** buffers, VkDeviceSize bufferSize, uint32_t binding, int descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets);
-        void CreateDescriptorSets(VkDescriptorImageInfo* pImageInfo, uint32_t binding, int descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets);
+        void CreateDescriptorSets(VkDescriptorImageInfo* imageInfos, uint32_t binding, int descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets);
 
         static VkDescriptorSetLayoutBinding CreateLayoutBinding(uint32_t binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags);
 

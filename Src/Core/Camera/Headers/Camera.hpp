@@ -12,6 +12,13 @@ namespace AnA
 {
     namespace Cameras
     {
+        struct CameraBufferObject
+        {
+            glm::mat4 proj{1.f};
+            glm::mat4 view{1.f};
+            glm::mat4 invView{1.f};
+            glm::vec2 resolution{};
+        };
         class Camera
         {
         public:

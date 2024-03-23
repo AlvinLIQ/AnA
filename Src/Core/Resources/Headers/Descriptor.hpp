@@ -5,6 +5,26 @@
 
 namespace AnA
 {
+    namespace Resource
+    {
+        struct Image
+        {
+            VkImage image;
+            VkDeviceMemory imageMemory;
+            VkImageView imageView;
+            VkImageLayout imageLayout;
+            VkImageType imageType;
+            VkFormat format;
+            VkExtent3D extent;
+            void CleanUp(VkDevice& device)
+            {
+                vkDestroyImageView(device, imageView, nullptr);
+                vkDestroyImage(device, image, nullptr);
+                vkFreeMemory(device, imageMemory, nullptr);
+            }
+        };
+    }
+
     class Descriptor
     {
     public:
@@ -12,11 +32,10 @@ namespace AnA
         {
             VkDescriptorType descriptorType;
             int descriptorCount;
-            std::vector<Buffer*> buffers;
+            Buffer** buffers;
             VkDeviceSize bufferSize;
-            VkSampler sampler;
-            VkImageView imageView;
-            VkImageLayout imageLayout;
+            VkSampler* samplers;
+            AnA::Resource::Image* images;
             uint32_t binding;
             VkShaderStageFlags stageFlags;
         };

@@ -4,18 +4,6 @@
 
 namespace AnA
 {
-    struct LightBufferObject
-    {
-        glm::mat4 proj{1.f};
-        glm::mat4 view{1.f};
-        alignas(16) glm::vec3 direction{0.0f};
-        alignas(16) glm::vec3 color{};
-        float ambient{0.0f};
-    };
-    namespace Cameras
-    {
-        class Camera;
-    }
     namespace Systems
     {
         class ShadowSystem
@@ -45,9 +33,6 @@ namespace AnA
             
             VkFramebuffer shadowFrameBuffer;
             void createShadowFrameBuffer();
-
-            VkSampler shadowSampler;
-            void createShadowSampler();
 
             Descriptor* shadowDescriptor, *lightDescriptor;
             

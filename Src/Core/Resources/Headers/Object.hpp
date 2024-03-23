@@ -3,7 +3,6 @@
 #include "Model.hpp"
 #include "Texture.hpp"
 #include "../../Headers/Types.hpp"
-#include "Descriptor.hpp"
 #include "glm/fwd.hpp"
 #include <memory>
 #include <stdint.h>
@@ -19,6 +18,7 @@
 #define ANA_SPHERE 64
 
 #define MAX_OBJECTS_COUNT 100
+#define MAX_OBJECTS_SIZE (MAX_OBJECTS_COUNT * sizeof(Model::ModelStorageBufferObject))
 
 namespace AnA
 {
@@ -76,14 +76,12 @@ namespace AnA
     class Objects
     {
     public:
-        void Init(Device* mDevice, VkDescriptorSetLayout& descriptorSetLayout)
+        Objects(Device& mDevice) : aDevice {mDevice}
         {
-            aDevice = mDevice;
             createObjectsBuffers();
-            descriptor = new Descriptor(*mDevice, objectsBuffers.data(), MAX_OBJECTS_COUNT * sizeof(Model::ModelStorageBufferObject), 0, MAX_FRAMES_IN_FLIGHT, descriptorSetLayout, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
         }
 
-        void Destroy()
+        ~Objects()
         {
             for (auto& object : objects)
                 delete object;
@@ -91,18 +89,16 @@ namespace AnA
             for (auto& objectsBuffer : objectsBuffers)
                 delete objectsBuffer;
             delete staggingBuffer;
-
-            delete descriptor;
         }
 
         const std::vector<Object*>& Get() const
         {
             return objects;
         }
-        
-        std::vector<VkDescriptorSet>& GetDescriptorSets()
+
+        Buffer** GetBuffers()
         {
-            return descriptor->GetSets();
+            return objectsBuffers.data();
         }
 
         void RequestUpdate(ANA_OBJECTS_UPDATE_FLAG_BIT flag = ANA_OBJECTS_UPDATE_ALL)
@@ -225,7 +221,7 @@ namespace AnA
     private:
         bool commandBufferNeedUpdate = false;
 
-        Device* aDevice;
+        Device& aDevice;
 
         std::vector<Object*> objects;
         std::vector<Range> updateQueue;
@@ -237,16 +233,13 @@ namespace AnA
             objectsBuffers.resize(MAX_FRAMES_IN_FLIGHT);
             for (auto& objectsBuffer : objectsBuffers)
             {
-                objectsBuffer = new Buffer(*aDevice, sizeof(glm::mat4) * MAX_OBJECTS_COUNT,
+                objectsBuffer = new Buffer(aDevice, sizeof(glm::mat4) * MAX_OBJECTS_COUNT,
                  VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
             }
-            staggingBuffer = new Buffer(*aDevice, sizeof(glm::mat4) * MAX_OBJECTS_COUNT,
+            staggingBuffer = new Buffer(aDevice, sizeof(glm::mat4) * MAX_OBJECTS_COUNT,
                  VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        }
-        
-        Descriptor* descriptor;
-        
+        }        
     };
 }

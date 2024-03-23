@@ -22,6 +22,8 @@ namespace AnA
 
         uint32_t CurrentFrame = 0;
 
+        static SwapChain* GetCurrent();
+
         VkExtent2D GetExtent();
 
         VkFormat GetFormat();

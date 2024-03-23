@@ -59,7 +59,15 @@ Descriptor::Descriptor(Device& mDevice, VkSampler& sampler, VkImageView& imageVi
     imageInfo.imageLayout = imageLayout;
     imageInfo.imageView = imageView;
     imageInfo.sampler = sampler;
-    aDevice.CreateDescriptorSets(&imageInfo, binding, descriptorSetCount, pool, descriptorSetLayout, descriptorType, sets);
+    if (descriptorSetCount > 1)
+    {
+        std::vector<VkDescriptorImageInfo> imageInfos(descriptorSetCount, imageInfo);
+        aDevice.CreateDescriptorSets(imageInfos.data(), binding, descriptorSetCount, pool, descriptorSetLayout, descriptorType, sets);
+    }
+    else
+    {
+        aDevice.CreateDescriptorSets(&imageInfo, binding, descriptorSetCount, pool, descriptorSetLayout, descriptorType, sets);
+    }
 }
 
 Descriptor::Descriptor(Device& mDevice, Descriptor::DescriptorConfig& descriptorConfig) : aDevice{mDevice}
@@ -78,17 +86,22 @@ Descriptor::Descriptor(Device& mDevice, Descriptor::DescriptorConfig& descriptor
 
     if (descriptorConfig.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER || descriptorConfig.descriptorType == VK_DESCRIPTOR_TYPE_SAMPLER)
     {
-        VkDescriptorImageInfo imageInfo{};
-        imageInfo.imageLayout = descriptorConfig.imageLayout;
-        imageInfo.imageView = descriptorConfig.imageView;
-        imageInfo.sampler = descriptorConfig.sampler;
-        aDevice.CreateDescriptorSets(&imageInfo, descriptorConfig.binding,
-         descriptorConfig.descriptorCount, pool, 
-         setLayout, descriptorConfig.descriptorType, sets);
+        std::vector<VkDescriptorImageInfo> imageInfos;
+        imageInfos.resize(descriptorConfig.descriptorCount);
+        for (int i = 0; i < descriptorConfig.descriptorCount; i++)
+        {
+            
+            imageInfos[i].imageLayout = descriptorConfig.images[i].imageLayout;
+            imageInfos[i].imageView = descriptorConfig.images[i].imageView;
+            imageInfos[i].sampler = descriptorConfig.samplers[i];
+        }
+        aDevice.CreateDescriptorSets(imageInfos.data(), descriptorConfig.binding,
+            descriptorConfig.descriptorCount, pool, 
+            setLayout, descriptorConfig.descriptorType, sets);
     }
     else
     {
-        aDevice.CreateDescriptorSets(descriptorConfig.buffers.data(), descriptorConfig.bufferSize,
+        aDevice.CreateDescriptorSets(descriptorConfig.buffers, descriptorConfig.bufferSize,
          descriptorConfig.binding, descriptorConfig.descriptorCount, pool,
           setLayout, descriptorConfig.descriptorType, sets);
     }
