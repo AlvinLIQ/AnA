@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Buffer.hpp"
-#include "Device.hpp"
+#include "../../Headers/Buffer.hpp"
 #include <functional>
 #include <glm/fwd.hpp>
 #include <vulkan/vulkan_core.h>

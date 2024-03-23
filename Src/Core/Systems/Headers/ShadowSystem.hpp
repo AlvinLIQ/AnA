@@ -1,6 +1,6 @@
 #pragma once
 #include "../../Headers/SwapChain.hpp"
-#include "../../Headers/Object.hpp"
+#include "../../Resources/Headers/Object.hpp"
 
 namespace AnA
 {

@@ -1,5 +1,5 @@
 #include "Headers/Model.hpp"
-#include "Headers/Buffer.hpp"
+#include "../Headers/Buffer.hpp"
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
@@ -7,7 +7,7 @@
 #include <memory>
 
 #define TINYOBJLOADER_IMPLEMENTATION
-#include "../tinyobjloader/tiny_obj_loader.h"
+#include "../../tinyobjloader/tiny_obj_loader.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Headers/Object.hpp"
+#include "../../Resources/Headers/Object.hpp"
 #include <glm/glm.hpp>
 
 namespace AnA

@@ -2,7 +2,7 @@
 
 #include "Model.hpp"
 #include "Texture.hpp"
-#include "Types.hpp"
+#include "../../Headers/Types.hpp"
 #include "Descriptor.hpp"
 #include "glm/fwd.hpp"
 #include <memory>
@@ -80,7 +80,7 @@ namespace AnA
         {
             aDevice = mDevice;
             createObjectsBuffers();
-            descriptor = new Descriptor(*mDevice, (void**)objectsBuffers.data(), MAX_OBJECTS_COUNT * sizeof(Model::ModelStorageBufferObject), 0, MAX_FRAMES_IN_FLIGHT, descriptorSetLayout, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+            descriptor = new Descriptor(*mDevice, objectsBuffers.data(), MAX_OBJECTS_COUNT * sizeof(Model::ModelStorageBufferObject), 0, MAX_FRAMES_IN_FLIGHT, descriptorSetLayout, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
         }
 
         void Destroy()

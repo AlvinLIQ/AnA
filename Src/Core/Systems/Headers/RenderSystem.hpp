@@ -1,10 +1,9 @@
 #pragma once
-#include "../../Headers/Object.hpp"
+#include "../../Resources/Headers/Object.hpp"
 #include "../../Headers/Pipeline.hpp"
 #include "../../Headers/SwapChain.hpp"
 #include "../../Camera/Headers/Camera.hpp"
 #include "../../Headers/Buffer.hpp"
-#include "../../Headers/Descriptor.hpp"
 #include <vector>
 #include <vulkan/vulkan_core.h>
 

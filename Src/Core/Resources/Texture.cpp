@@ -1,5 +1,5 @@
 #include "Headers/Texture.hpp"
-#include "Headers/Pipeline.hpp"
+#include "../Headers/Pipeline.hpp"
 
 #define DEFAULT_FONT_SIZE 32.0f
 

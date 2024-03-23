@@ -13,7 +13,7 @@ ShadowSystem::ShadowSystem(Device& mDevice, SwapChain* pSwapchain) : aDevice(mDe
     createShadowSampler();
     shadowDescriptor = new Descriptor(mDevice, shadowSampler, imageView, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL, 0, MAX_FRAMES_IN_FLIGHT, Pipelines::GetCurrent()->GetDescriptorSetLayouts()[SHADOW_SAMPLER_LAYOUT], VK_SHADER_STAGE_FRAGMENT_BIT, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
     createLightBuffers();
-    lightDescriptor = new Descriptor(mDevice, (void**)lightBuffers.data(), sizeof(LightBufferObject), 0, MAX_FRAMES_IN_FLIGHT, Pipelines::GetCurrent()->GetDescriptorSetLayouts()[LIGHT_LAYOUT], VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+    lightDescriptor = new Descriptor(mDevice, lightBuffers.data(), sizeof(LightBufferObject), 0, MAX_FRAMES_IN_FLIGHT, Pipelines::GetCurrent()->GetDescriptorSetLayouts()[LIGHT_LAYOUT], VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
     createShadowFrameBuffer();
     _shadowSystem = this;
 }
@@ -43,7 +43,7 @@ VkExtent2D ShadowSystem::GetExtent()
 
 void ShadowSystem::RenderShadows(VkCommandBuffer commandBuffer, Objects &objects)
 {
-    //vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
+    vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
     auto pipelines = Pipelines::GetCurrent();
     pipelines->Get()[SHADOW_MAPPING_PIPELINE]->Bind(commandBuffer);
     Object* object;
