@@ -17,8 +17,26 @@ InputManager::InputManager(Window& mWindow) : aWindow {mWindow}
 
 InputManager::~InputManager()
 {
-    keyMapConfigs.clear();
-    cursorConfigs.clear();
+    for (auto& inputProfile : inputProfiles)
+    {
+        inputProfile.keyMapConfigs.clear();
+        inputProfile.cursorConfigs.clear();
+    }
+}
+
+void InputManager::SetActiveProfile(int profileIndex)
+{
+    if (profileIndex < inputProfiles.size())
+    {
+        activeProfileIndex = profileIndex;
+        auto window = aWindow.GetGLFWwindow();
+        auto& profileFlag = inputProfiles[profileIndex].flag;
+        if (profileFlag & InputProfileFlags::HideCursor)
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        else
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, profileFlag & InputProfileFlags::RawMotion && glfwRawMouseMotionSupported());
+    }
 }
 
 bool InputManager::CheckAndRunCallbacks()
@@ -26,7 +44,7 @@ bool InputManager::CheckAndRunCallbacks()
     auto window = aWindow.GetGLFWwindow();
     glfwGetCursorPos(window, &curPos.x, &curPos.y);
     CursorPosition duration = {(curPos.x - prevPos.x) / (double)aWindow.Width, (curPos.y - prevPos.y) / (double)aWindow.Height};
-    auto &cursorConfigs = _aInputManager->GetCursorConfigs();
+    auto &cursorConfigs = inputProfiles[activeProfileIndex].cursorConfigs;
     for (auto &cursorConfig : cursorConfigs)
     {
         if (cursorConfig.callBack != nullptr)
@@ -34,6 +52,7 @@ bool InputManager::CheckAndRunCallbacks()
     }
     prevPos = curPos;
 
+    auto &keyMapConfigs = inputProfiles[activeProfileIndex].keyMapConfigs;
     for (auto &keyMapConfig : keyMapConfigs)
     {
         if (keyMapConfig.callBack != nullptr && glfwGetKey(window, keyMapConfig.keyCode) == GLFW_PRESS)
@@ -45,7 +64,7 @@ bool InputManager::CheckAndRunCallbacks()
 
 void InputManager::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    auto &keyMapConfigs = _aInputManager->GetKeyMapConfigs();
+    auto &keyMapConfigs = _aInputManager->GetActiveProfile().keyMapConfigs;
     for (auto &keyMapConfig : keyMapConfigs)
     {
         if (keyMapConfig.keyCode == key && keyMapConfig.callBack != nullptr)

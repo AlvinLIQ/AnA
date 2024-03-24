@@ -12,9 +12,9 @@ using namespace AnA::Cameras;
 
 const int keyCodes[] = {GLFW_KEY_A, GLFW_KEY_D, GLFW_KEY_SPACE, GLFW_KEY_C, GLFW_KEY_S, GLFW_KEY_W};
 
-void CameraController::GetCameraKeyMapConfigs(std::vector<Input::InputManager::KeyMapConfig> &configs)
+void CameraController::GetCameraKeyMapConfigs(std::vector<Input::KeyMapConfig> &configs)
 {
-    Input::InputManager::KeyMapConfig config;
+    Input::KeyMapConfig config;
 
     config.callBack = (void(*)(void*))CameraController::Move;
 
@@ -26,12 +26,19 @@ void CameraController::GetCameraKeyMapConfigs(std::vector<Input::InputManager::K
     }
 }
 
-void CameraController::GetCameraCursorConfigs(std::vector<Input::InputManager::CursorConfig> &configs)
+void CameraController::GetCameraCursorConfigs(std::vector<Input::CursorConfig> &configs)
 {
-    Input::InputManager::CursorConfig config;
+    Input::CursorConfig config;
     config.param = &aCamera;
-    config.callBack = (void(*)(void*, Input::InputManager::CursorPosition&))CameraController::CursorMoved;
+    config.callBack = (void(*)(void*, Input::CursorPosition&))CameraController::CursorMoved;
     configs.push_back(config);
+}
+
+void CameraController::GetInputProfile(Input::InputProfile& inputProfile)
+{
+    inputProfile.flag = Input::InputProfileFlags::HideCursor | Input::InputProfileFlags::RawMotion;
+    GetCameraKeyMapConfigs(inputProfile.keyMapConfigs);
+    GetCameraCursorConfigs(inputProfile.cursorConfigs);
 }
 
 CameraController::CameraController(Camera &mCamera) : aCamera {mCamera}
@@ -70,7 +77,7 @@ void CameraController::Rotate(CameraController::CameraCallbackParam* param)
     param->aCamera.CameraTransform.rotation[posIndex] -= (param->id & 1 ? -rotateStep : rotateStep) * param->aCamera.GetSpeedRatio() * 6.283;
 }
 
-void CameraController::CursorMoved(Camera* camera, Input::InputManager::CursorPosition &duration)
+void CameraController::CursorMoved(Camera* camera, Input::CursorPosition &duration)
 {
     const float rotateSpeed = camera->GetSpeedRatio() * 6.283 * 80.;
     camera->CameraTransform.rotation.y = glm::mod(camera->CameraTransform.rotation.y + (float)duration.x * rotateSpeed, glm::two_pi<float>());

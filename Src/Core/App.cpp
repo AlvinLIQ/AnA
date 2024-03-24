@@ -93,8 +93,9 @@ void App::Run()
 {
     Cameras::Camera& camera = aResourceManager->MainCamera, &lightCamera = aResourceManager->LightCamera;
     Cameras::CameraController cameraController{camera};
-    cameraController.GetCameraKeyMapConfigs(aInputManager->GetKeyMapConfigs());
-    cameraController.GetCameraCursorConfigs(aInputManager->GetCursorConfigs());
+    auto& activeProfile = aInputManager->GetActiveProfile();
+    cameraController.GetInputProfile(activeProfile);
+    aInputManager->SetActiveProfile(0);
     //startUILoop(uiThread);
     auto window = aWindow->GetGLFWwindow();
     //camera.SetViewDirection({}, glm::vec3(0.5f, 0.f, 1.f));
