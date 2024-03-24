@@ -270,34 +270,4 @@ namespace AnA
 
         VkShaderModule createShaderModule(const std::vector<unsigned char> &code);
     };
-
-    class Pipelines
-    {
-    public:
-        Pipelines(Device& mDevice, VkRenderPass renderPass, VkRenderPass offscreenRenderPass, VkPushConstantRange pushConstantRange);
-        ~Pipelines();
-
-        static Pipelines* GetCurrent();
-
-        const std::vector<Pipeline*>& Get() const
-        {
-            return pipelines;
-        }
-
-        VkDescriptorSetLayout* GetDescriptorSetLayouts()
-        {
-            return descriptorSetLayouts;
-        }
-    private:
-        Device& aDevice;
-
-        std::vector<Pipeline*> pipelines;
-        VkPipelineLayout pipelineLayout;
-        VkPipelineLayout computePipelineLayout;
-        void createPipelineLayouts(VkPushConstantRange pushConstantRange);
-
-        VkDescriptorSetLayout descriptorSetLayouts[DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT] = {};
-        VkDescriptorSetLayout computeDescriptorSetLayout;
-        void createDescriptorSetLayouts();
-    };
 }
