@@ -1,5 +1,5 @@
 #include "Headers/Texture.hpp"
-#include "../Headers/Pipeline.hpp"
+#include "Headers/ResourceManager.hpp"
 
 #define DEFAULT_FONT_SIZE 32.0f
 
@@ -8,28 +8,19 @@ using namespace AnA;
 Texture::Texture(const char* filename, Device& mDevice) : aDevice { mDevice }
 {
     aDevice.CreateTextureImage(filename, &textureImage, &textureImageMemory);
-    textureImageView = aDevice.CreateImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
-    createTextureSampler();
-
-    descriptor = new Descriptor(mDevice, textureSampler, textureImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 0, 1, Pipelines::GetCurrent()->GetDescriptorSetLayouts()[SAMPLER_LAYOUT], VK_SHADER_STAGE_FRAGMENT_BIT, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+    init();
 }
 
 Texture::Texture(const uint32_t color, Device& mDevice) : aDevice { mDevice }
 {
     aDevice.CreateColorImage(color, &textureImage, &textureImageMemory);
-    textureImageView = aDevice.CreateImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
-    createTextureSampler();
-
-    descriptor = new Descriptor(mDevice, textureSampler, textureImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 0, 1, Pipelines::GetCurrent()->GetDescriptorSetLayouts()[SAMPLER_LAYOUT], VK_SHADER_STAGE_FRAGMENT_BIT, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+    init();
 }
 
 Texture::Texture(const char* text, const int width, const int height, const float lineHeight, Device& mDevice) : aDevice { mDevice }
 {
     aDevice.CreateTextImage(text, width, height, lineHeight, &textureImage, &textureImageMemory);
-    textureImageView = aDevice.CreateImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
-    createTextureSampler(VK_SAMPLER_ADDRESS_MODE_REPEAT);
-
-    descriptor = new Descriptor(mDevice, textureSampler, textureImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 0, 1, Pipelines::GetCurrent()->GetDescriptorSetLayouts()[SAMPLER_LAYOUT], VK_SHADER_STAGE_FRAGMENT_BIT, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+    init();
 }
 
 Texture::~Texture()
@@ -61,6 +52,16 @@ Device& Texture::GetDevice()
 VkDescriptorSet& Texture::GetDescriptorSet()
 {
     return descriptor->GetSets()[0];
+}
+
+void Texture::init()
+{
+    textureImageView = aDevice.CreateImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
+    createTextureSampler();
+    
+    descriptor = new Descriptor(aDevice, textureSampler, textureImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+         0, 1, Resource::ResourceManager::GetCurrent()->Shaders[0]->GetDescriptors()[DEFAULT_SAMPLER_LAYOUT]->GetLayout(),
+         VK_SHADER_STAGE_FRAGMENT_BIT, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
 }
 
 void Texture::createTextureSampler(enum VkSamplerAddressMode samplerAddressMode)

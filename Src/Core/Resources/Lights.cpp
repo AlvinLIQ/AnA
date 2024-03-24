@@ -7,12 +7,15 @@ using namespace Lights;
 
 Light::Light(Device& mDevice) : aDevice {mDevice}
 {
-
+    createBuffers();
 }
 
 Light::~Light()
 {
-
+    for (auto& buffer : buffers)
+    {
+        delete buffer;
+    }
 }
 
 Buffer** Light::GetBuffers()

@@ -84,9 +84,9 @@ void App::Init()
     aWindow->CreateWindowSurface(aInstance);
     _aDevice = aDevice = new Device(aInstance->GetInstance(), aWindow->GetSurface());
     aRenderer = new Renderer(*aWindow, *aDevice);
+    aResourceManager = new Resource::ResourceManager(*aDevice);
     aRenderSystem = new Systems::RenderSystem(*aDevice, aRenderer->GetSwapChain());
     aShadowSystem = new Systems::ShadowSystem(*aDevice, &aRenderer->GetSwapChain());
-    aResourceManager = new Resource::ResourceManager(*aDevice);
 }
 
 void App::Run()
@@ -130,8 +130,8 @@ void App::Run()
         {
             aResourceManager->UpdateCamera(aRenderer->GetAspect());
         }
-        aRenderSystem->UpdateCameraBuffer(camera);
-        aShadowSystem->UpdateLightBuffer(lightCamera);
+        aResourceManager->UpdateCameraBuffer();
+        aResourceManager->GlobalLight->UpdateBuffers(aResourceManager->LightCamera);
         //Render Shadow Map
         //auto offscreenCommandBuffer = aRenderer->GetOffscreenCommandBuffer();
         if (aRenderer->NeedUpdate() || aResourceManager->SceneObjects->BeginCommandBufferUpdate())
@@ -139,7 +139,9 @@ void App::Run()
             //Record Objects
             aRenderer->RecordSecondaryCommandBuffers([](VkCommandBuffer secondaryCommandBuffer)
             {
-                Systems::RenderSystem::GetCurrent()->RenderObjects(secondaryCommandBuffer, *Resource::ResourceManager::GetCurrent()->SceneObjects);
+                Systems::RenderSystem::GetCurrent()->RenderObjects(secondaryCommandBuffer, 
+                    *Resource::ResourceManager::GetCurrent()->SceneObjects, 
+                    *Resource::ResourceManager::GetCurrent()->Shaders[0]);
             });
             aResourceManager->SceneObjects->EndCommandBufferUpdate();
         }
@@ -152,7 +154,7 @@ void App::Run()
                 aResourceManager->SceneObjects->EndStorageBufferUpdate();
             }
             aShadowSystem->BeginRenderPass(commandBuffer);
-            aShadowSystem->RenderShadows(commandBuffer, *aResourceManager->SceneObjects);
+            aShadowSystem->RenderShadows(commandBuffer, *aResourceManager->SceneObjects, *aResourceManager->Shaders[2]);
             aShadowSystem->EndRenderPass(commandBuffer);
             aRenderer->BeginSwapChainRenderPass(commandBuffer);
             aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer);

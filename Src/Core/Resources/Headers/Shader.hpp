@@ -16,11 +16,17 @@ namespace AnA
 
         ~Shader();
 
+        Pipeline* GetPipeline() const;
+        const VkPipelineLayout& GetPipelineLayout() const;
+        const std::vector<Descriptor*>& GetDescriptors() const;
+        std::vector<std::vector<VkDescriptorSet>>& GetDescriptorSets();
     private:
         Device& aDevice;
         Pipeline* pipeline;
         VkPipelineLayout pipelineLayout {VK_NULL_HANDLE};
         void createPipelineLayout(std::vector<Descriptor::DescriptorConfig>& descriptorConfigs);
+        void createDescriptors(std::vector<Descriptor::DescriptorConfig>& descriptorConfigs);
         std::vector<Descriptor*> descriptors;
+        std::vector<std::vector<VkDescriptorSet>> descriptorSets;
     };
 }

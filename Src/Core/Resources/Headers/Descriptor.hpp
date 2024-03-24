@@ -48,9 +48,10 @@ namespace AnA
         ~Descriptor();
 
         std::vector<VkDescriptorSet>& GetSets();
-        VkDescriptorSetLayout GetLayout();
+        const VkDescriptorSetLayout& GetLayout() const;
     private:
-        VkDescriptorPool pool;
+        VkDescriptorPool pool{VK_NULL_HANDLE};
+        bool layoutCreated = false;
         VkDescriptorSetLayout setLayout{VK_NULL_HANDLE};
         std::vector<VkDescriptorSet> sets;
         Device& aDevice;

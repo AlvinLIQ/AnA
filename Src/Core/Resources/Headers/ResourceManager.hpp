@@ -16,6 +16,7 @@ namespace AnA
             ~ResourceManager();
 
             static ResourceManager* GetCurrent();
+            std::vector<VkFramebuffer>& GetShadowFramebuffers();
 
             //Built-in resources
             Cameras::Camera MainCamera;
@@ -27,18 +28,16 @@ namespace AnA
 
             Objects* SceneObjects;
             std::vector<Shader*> Shaders;
-            std::vector<Descriptor::DescriptorConfig> GetDefault();
+            std::vector<Descriptor::DescriptorConfig> GetDefaultDescriptorConfig();
 
             Lights::Light* GlobalLight;
+            void UpdateResources();
         private:
             Device& aDevice;
             std::vector<Buffer*> mainCameraBuffers;
             void createMainCameraBuffers();
 
-            VkSampler textureSampler;
-            void createTextureSampler();
-            VkSampler shadowSampler;
-            void createShadowSampler();
+            std::vector<VkSampler> shadowSamplers;
             std::vector<Image> shadowImages;
             std::vector<VkFramebuffer> shadowFramebuffers;
             void createShadowFramebuffers();

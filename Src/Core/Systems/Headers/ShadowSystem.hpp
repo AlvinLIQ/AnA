@@ -14,30 +14,13 @@ namespace AnA
             static ShadowSystem* GetCurrent();
 
             VkExtent2D GetExtent();
-            void RenderShadows(VkCommandBuffer commandBuffer, Objects &objects);
-            std::vector<VkDescriptorSet>& GetShadowSamplerSets();
-            std::vector<VkDescriptorSet>& GetLightSets();
+            void RenderShadows(VkCommandBuffer commandBuffer, Objects& objects, Shader& shader);
 
             void BeginRenderPass(VkCommandBuffer& commandBuffer);
             void EndRenderPass(VkCommandBuffer& commandBuffer);
-
-            void UpdateLightBuffer(Cameras::Camera& lightCamera);
         private:
             Device& aDevice;
             SwapChain* swapChain;
-            
-            VkImage image;
-            VkDeviceMemory imageMemory;
-            VkImageView imageView;
-            void createImageView();
-            
-            VkFramebuffer shadowFrameBuffer;
-            void createShadowFrameBuffer();
-
-            Descriptor* shadowDescriptor, *lightDescriptor;
-            
-            std::vector<Buffer*> lightBuffers;
-            void createLightBuffers();
         };
     }
 }
