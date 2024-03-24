@@ -17,14 +17,15 @@ namespace AnA
                 int id;
             };
 
-            void GetCameraKeyMapConfigs(std::vector<Input::InputManager::KeyMapConfig> &configs);
-            void GetCameraCursorConfigs(std::vector<Input::InputManager::CursorConfig> &configs);
+            void GetCameraKeyMapConfigs(std::vector<Input::KeyMapConfig> &configs);
+            void GetCameraCursorConfigs(std::vector<Input::CursorConfig> &configs);
+            void GetInputProfile(Input::InputProfile& inputProfile);
             CameraController(Camera &mCamera);
             
             static void Move(CameraCallbackParam* param);
             static void Rotate(CameraCallbackParam* param);
 
-            static void CursorMoved(Camera* camera, Input::InputManager::CursorPosition &duration);
+            static void CursorMoved(Camera* camera, Input::CursorPosition &duration);
 
         private:
             Camera &aCamera;

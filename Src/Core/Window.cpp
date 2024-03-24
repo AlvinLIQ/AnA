@@ -29,10 +29,6 @@ int Window::Init()
     glfwSetWindowUserPointer(window, this);
     glfwSetFramebufferSizeCallback(window, Window::FramebufferResizeCallback);
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    if (glfwRawMouseMotionSupported())
-        glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-
     glfwMakeContextCurrent(window);
     
     return 0;

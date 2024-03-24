@@ -6,46 +6,57 @@ namespace AnA
 {
     namespace Input
     {
+        struct KeyMapConfig
+        {
+            void* param;
+            void(*callBack)(void* param);
+            int keyCode;
+            int action;
+        };
+        struct CursorPosition
+        {
+            double x;
+            double y;
+        };
+        struct CursorConfig
+        {
+            void* param;
+            void(*callBack)(void* pParam, CursorPosition &curPos);
+            int action;
+        };
+        enum InputProfileFlags
+        {
+            None = 0, HideCursor = 1, RawMotion = 2
+        };
+        struct InputProfile
+        {
+            uint32_t flag;
+            std::vector<KeyMapConfig> keyMapConfigs;
+            std::vector<CursorConfig> cursorConfigs;
+        };
         class InputManager
         {
         public:
-            struct KeyMapConfig
-            {
-                void* param;
-                void(*callBack)(void* param);
-                int keyCode;
-                int action;
-            };
-            struct CursorPosition
-            {
-                double x;
-                double y;
-            };
-            struct CursorConfig
-            {
-                void* param;
-                void(*callBack)(void* pParam, CursorPosition &curPos);
-                int action;
-            };
             InputManager(Window& mWindow);
             ~InputManager();
 
-            std::vector<KeyMapConfig> &GetKeyMapConfigs()
+            InputProfile& GetActiveProfile()
             {
-                return keyMapConfigs;
+                return inputProfiles[activeProfileIndex];
             }
-            std::vector<CursorConfig> &GetCursorConfigs()
+
+            std::vector<InputProfile>& GetProfiles()
             {
-                return cursorConfigs;
+                return inputProfiles;
             }
+            void SetActiveProfile(int profileIndex);
             
             bool CheckAndRunCallbacks();
         private:
             Window& aWindow;
-            std::vector<KeyMapConfig> keyMapConfigs;
             static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-
-            std::vector<CursorConfig> cursorConfigs;
+            int activeProfileIndex = 0;
+            std::vector<InputProfile> inputProfiles{1};
 
             CursorPosition curPos, prevPos;
         };
