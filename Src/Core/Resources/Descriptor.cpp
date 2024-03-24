@@ -14,6 +14,7 @@ Descriptor::Descriptor(Device& mDevice, Buffer** buffers, VkDeviceSize bufferSiz
     layoutInfo.pBindings = &layoutBinding;
     if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &setLayout) != VK_SUCCESS)
         throw std::runtime_error("Failed to create the DescriptorSetLayout");
+    layoutCreated = true;
 
     aDevice.CreateDescriptorPool(descriptorSetCount, pool, descriptorType);
     aDevice.CreateDescriptorSets(buffers, bufferSize, binding, descriptorSetCount, pool, setLayout, descriptorType, sets);
@@ -39,7 +40,10 @@ Descriptor::Descriptor(Device& mDevice, VkSampler& sampler, VkImageView& imageVi
     layoutInfo.pBindings = &layoutBinding;
     if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &setLayout) != VK_SUCCESS)
         throw std::runtime_error("Failed to create the DescriptorSetLayout");
+    layoutCreated = true;
 
+    if (descriptorSetCount == 0)
+        return;
     aDevice.CreateDescriptorPool(descriptorSetCount, pool, descriptorType);
 
     VkDescriptorImageInfo imageInfo{};
@@ -51,8 +55,10 @@ Descriptor::Descriptor(Device& mDevice, VkSampler& sampler, VkImageView& imageVi
 
 Descriptor::Descriptor(Device& mDevice, VkSampler& sampler, VkImageView& imageView, VkImageLayout imageLayout, uint32_t binding, 
         int descriptorSetCount, VkDescriptorSetLayout descriptorSetLayout, VkShaderStageFlags stageFlags, const VkDescriptorType descriptorType
-        ) : aDevice(mDevice)
+        ) : aDevice(mDevice), setLayout(descriptorSetLayout)
 {
+    if (descriptorSetCount == 0)
+        return;
     aDevice.CreateDescriptorPool(descriptorSetCount, pool, descriptorType);
 
     VkDescriptorImageInfo imageInfo{};
@@ -72,8 +78,6 @@ Descriptor::Descriptor(Device& mDevice, VkSampler& sampler, VkImageView& imageVi
 
 Descriptor::Descriptor(Device& mDevice, Descriptor::DescriptorConfig& descriptorConfig) : aDevice{mDevice}
 {
-    aDevice.CreateDescriptorPool(descriptorConfig.descriptorCount, pool, descriptorConfig.descriptorType);
-
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     layoutInfo.bindingCount = 1;
@@ -83,7 +87,11 @@ Descriptor::Descriptor(Device& mDevice, Descriptor::DescriptorConfig& descriptor
     layoutInfo.pBindings = &layoutBinding;
     if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &setLayout) != VK_SUCCESS)
         throw std::runtime_error("Failed to create the DescriptorSetLayout");
+    layoutCreated = true;
 
+    if (descriptorConfig.descriptorCount == 0)
+        return;
+    aDevice.CreateDescriptorPool(descriptorConfig.descriptorCount, pool, descriptorConfig.descriptorType);
     if (descriptorConfig.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER || descriptorConfig.descriptorType == VK_DESCRIPTOR_TYPE_SAMPLER)
     {
         std::vector<VkDescriptorImageInfo> imageInfos;
@@ -110,12 +118,18 @@ Descriptor::Descriptor(Device& mDevice, Descriptor::DescriptorConfig& descriptor
 Descriptor::~Descriptor()
 {
     auto device = aDevice.GetLogicalDevice();
-    vkDestroyDescriptorPool(device, pool, nullptr);
-    if (setLayout != VK_NULL_HANDLE)
+    if (pool != VK_NULL_HANDLE)
+        vkDestroyDescriptorPool(device, pool, nullptr);
+    if (layoutCreated)
         vkDestroyDescriptorSetLayout(device, setLayout, nullptr);
 }
 
 std::vector<VkDescriptorSet>& Descriptor::GetSets()
 {
     return sets;
+}
+
+const VkDescriptorSetLayout& Descriptor::GetLayout() const
+{
+    return setLayout;
 }

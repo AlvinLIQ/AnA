@@ -26,6 +26,8 @@ int main()
     App* aApp = new App();
     aApp->Init();
 
+    auto& SceneObjects = *Resource::ResourceManager::GetCurrent()->SceneObjects;
+
     Object* object = new Object;
     object->Color = {0.1f, 0.2f, 0.3f};
 
@@ -39,7 +41,7 @@ int main()
     Model::CreateModelFromFile(aApp->GetDevice(), "Models/torus.obj", object->Model);
     object->Texture = std::make_unique<Texture>("Textures/texture.png", aApp->GetDevice());
 
-    aApp->SceneObjects.Append(std::move(object));
+    SceneObjects.Append(std::move(object));
 
     Object* nObj = new Object;
     nObj->Color = {1.0, 1.0, 0.0};
@@ -50,7 +52,7 @@ int main()
     nObj->Properties.transform.translation = {-1.5, -.5, 1.5};
     Model::CreateModelFromFile(aApp->GetDevice(), "Models/cube.obj", nObj->Model);
     //nObj->Texture = std::make_unique<Texture>("Textures/test.jpg", aApp->GetDevice());
-    aApp->SceneObjects.Append(nObj);
+    SceneObjects.Append(nObj);
 
     nObj = new Object;
     Model::CreateModelFromFile(aApp->GetDevice(), "Models/cube.obj", nObj->Model);
@@ -58,7 +60,7 @@ int main()
     nObj->Color = {.68f, .68f, 1.0f};
     nObj->Properties.transform.scale = {11.4f, 0.02f, 11.4};
     nObj->Properties.transform.translation = {3.0, 0.5, 0.0};
-    aApp->SceneObjects.Append(nObj);
+    SceneObjects.Append(nObj);
 /*
     nObj = new Object;
     Model::CreateModelFromFile(aApp->GetDevice(), "Models/sphere.obj", nObj->Model);
@@ -66,7 +68,7 @@ int main()
     nObj->Color = {1.0F, 1.0f, 1.0f};
     nObj->Properties.transform.scale = {0.4f, 0.4f, 0.4};
     nObj->Properties.transform.translation = {0.0, -0.2, 0.0};
-    aApp->SceneObjects.Append(nObj);*/
+    SceneObjects.Append(nObj);*/
 
     nObj = new Object;
     App::CreateCubeModel(nObj->Model);
@@ -74,7 +76,7 @@ int main()
     nObj->Color = {1.0F, 1.0f, 1.0f};
     nObj->Properties.transform.scale = {0.4f, 0.4f, 0.4};
     nObj->Properties.transform.translation = {1.5, -2.0, 0.0};
-    aApp->SceneObjects.Append(nObj);
+    SceneObjects.Append(nObj);
 
     nObj = new Object;
     nObj->Properties.sType = ANA_SPHERE;
@@ -82,7 +84,7 @@ int main()
     nObj->Color = {1.0F, 1.0f, 1.0f};
     nObj->Properties.transform.scale = {0.4f, 0.3f, 1.0f};
     nObj->Properties.transform.translation = {-.6f, -0.775f, 0.0f};
-    aApp->SceneObjects.Append(nObj);
+    SceneObjects.Append(nObj);
 
 /*  
     Control::InitControl(&aApp->GetSwapChain());
@@ -94,7 +96,7 @@ int main()
     button->Color = glm::vec3(1.0f);
     button->Properties.color = glm::vec3(1.0f);
     //button->Texture = nObj->Texture;
-    aApp->SceneObjects.Append(button);
+    SceneObjects.Append(button);
 
     TextBlock* textBlock = new TextBlock;
     textBlock->Model = App::Get2DModel();
@@ -102,7 +104,7 @@ int main()
     textBlock->Properties.transform.scale = glm::vec3(.3f);
     textBlock->Properties.color = glm::vec3(1.0);
 
-    aApp->SceneObjects.Append(textBlock);
+    SceneObjects.Append(textBlock);
     */
     aApp->Run();
     delete aApp;

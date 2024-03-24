@@ -1,5 +1,4 @@
 #include "Headers/ResourceManager.hpp"
-#include "../Headers/Window.hpp"
 #include "../Headers/SwapChain.hpp"
 #include "../Headers/ShaderCodes.hpp"
 
@@ -13,8 +12,6 @@ ResourceManager::ResourceManager(Device& mDevice) : aDevice {mDevice}
     _resourceManager = this;
     createMainCameraBuffers();
     createShadowFramebuffers();
-    createTextureSampler();
-    createShadowSampler();
 
     SceneObjects = new Objects(aDevice);
     GlobalLight = new Lights::Light(aDevice);
@@ -26,12 +23,11 @@ ResourceManager::~ResourceManager()
 {
     for (auto& shader : Shaders)
         delete shader;
-
-    vkDestroySampler(aDevice.GetLogicalDevice(), textureSampler, nullptr);
-    vkDestroySampler(aDevice.GetLogicalDevice(), shadowSampler, nullptr);
     
+    cleanupShadowResources();
 
     delete SceneObjects;
+    delete GlobalLight;
 
     for (auto& mainCameraBuffer : mainCameraBuffers)
         delete mainCameraBuffer;
@@ -40,6 +36,11 @@ ResourceManager::~ResourceManager()
 ResourceManager* ResourceManager::GetCurrent()
 {
     return _resourceManager;
+}
+
+std::vector<VkFramebuffer>& ResourceManager::GetShadowFramebuffers()
+{
+    return shadowFramebuffers;
 }
 
 void ResourceManager::UpdateCamera(float aspect)
@@ -51,7 +52,24 @@ void ResourceManager::UpdateCamera(float aspect)
     //LightCamera.SetOrthographicProjection(-aspect, -1.0, aspect, 1.0, LightCameraInfo.near, LightCameraInfo.far);
 }
 
-std::vector<Descriptor::DescriptorConfig> ResourceManager::GetDefault()
+void ResourceManager::UpdateCameraBuffer()
+{
+    Cameras::CameraBufferObject& cbo = *(Cameras::CameraBufferObject*)mainCameraBuffers[SwapChain::GetCurrent()->CurrentFrame]->GetMappedData();
+    cbo.proj = MainCamera.GetProjectionMatrix();
+    cbo.view = MainCamera.GetView();
+    cbo.invView = MainCamera.GetInverseView();
+
+    auto extent = SwapChain::GetCurrent()->GetExtent();
+    cbo.resolution = {(float)extent.width, (float)extent.height};
+}
+
+void ResourceManager::UpdateResources()
+{
+    cleanupShadowResources();
+    createShadowFramebuffers();
+}
+
+std::vector<Descriptor::DescriptorConfig> ResourceManager::GetDefaultDescriptorConfig()
 {
     std::vector<Descriptor::DescriptorConfig> descriptorConfigs(DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT);
     auto pConfig = &descriptorConfigs[DEFAULT_UBO_LAYOUT];
@@ -65,7 +83,7 @@ std::vector<Descriptor::DescriptorConfig> ResourceManager::GetDefault()
     pConfig = &descriptorConfigs[DEFAULT_LIGHT_LAYOUT];
     pConfig->binding = 0;
     pConfig->descriptorCount = MAX_FRAMES_IN_FLIGHT;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
     pConfig->buffers = GlobalLight->GetBuffers();
     pConfig->bufferSize = sizeof(Lights::LightBufferObject);
@@ -80,16 +98,17 @@ std::vector<Descriptor::DescriptorConfig> ResourceManager::GetDefault()
 
     pConfig = &descriptorConfigs[DEFAULT_SAMPLER_LAYOUT];
     pConfig->binding = 0;
-    pConfig->descriptorCount = 1;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    pConfig->stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
+    pConfig->descriptorCount = 0;
+    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    pConfig->stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
     pConfig = &descriptorConfigs[DEFAULT_SHADOW_SAMPLER_LAYOUT];
     pConfig->binding = 0;
     pConfig->descriptorCount = MAX_FRAMES_IN_FLIGHT;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    pConfig->stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
+    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    pConfig->stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     pConfig->images = shadowImages.data();
+    pConfig->samplers = shadowSamplers.data();
 
     return descriptorConfigs;
 }
@@ -110,7 +129,8 @@ void ResourceManager::createShadowFramebuffers()
 {
     shadowImages.resize(MAX_FRAMES_IN_FLIGHT);
     shadowFramebuffers.resize(MAX_FRAMES_IN_FLIGHT);
-    Window* window = (Window*)glfwGetWindowUserPointer(glfwGetCurrentContext());
+    shadowSamplers.resize(MAX_FRAMES_IN_FLIGHT);
+    auto extent = SwapChain::GetCurrent()->GetExtent();
     for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
         auto& shadowImage = shadowImages[i];
@@ -118,7 +138,10 @@ void ResourceManager::createShadowFramebuffers()
         imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         imageInfo.imageType = VK_IMAGE_TYPE_2D;
         imageInfo.format = VK_FORMAT_D32_SFLOAT;
-        imageInfo.extent = {static_cast<uint32_t>(window->Width), static_cast<uint32_t>(window->Height), 1};
+        imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        imageInfo.extent = {extent.width, extent.height, 1};
+        shadowImage.extent = imageInfo.extent;
+        shadowImage.imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL;
         imageInfo.mipLevels = 1;
         imageInfo.arrayLayers = 1;
         imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -143,15 +166,19 @@ void ResourceManager::createShadowFramebuffers()
         framebufferInfo.attachmentCount = 1;
         framebufferInfo.pAttachments = &shadowImage.imageView;
 
-        framebufferInfo.width = static_cast<uint32_t>(window->Width);
-        framebufferInfo.height = static_cast<uint32_t>(window->Height);
+        framebufferInfo.width = extent.width;
+        framebufferInfo.height = extent.height;
         framebufferInfo.layers = 1;
         vkCreateFramebuffer(aDevice.GetLogicalDevice(), &framebufferInfo, nullptr, &shadowFramebuffers[i]);
+
+        aDevice.CreateSampler(&shadowSamplers[i], VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE);
     }
 }
 
 void ResourceManager::cleanupShadowResources()
 {
+    for (auto& shadowSampler : shadowSamplers)
+        vkDestroySampler(aDevice.GetLogicalDevice(), shadowSampler, nullptr);
     for (auto& shadowFrameBuffer : shadowFramebuffers)
         vkDestroyFramebuffer(aDevice.GetLogicalDevice(), shadowFrameBuffer, nullptr);
     for (auto& shadowImage : shadowImages)
@@ -160,9 +187,10 @@ void ResourceManager::cleanupShadowResources()
 
 void ResourceManager::createDefaultShaders()
 {
-    Shader* shader;
     auto renderPass = SwapChain::GetCurrent()->GetRenderPass();
-    shader = new Shader(aDevice, Basic_vert, Basic_frag, renderPass);
-    shader = new Shader(aDevice, Line_vert, Line_frag, renderPass);
+    Shaders.push_back(new Shader(aDevice, Basic_vert, Basic_frag, renderPass));
+    Shaders.push_back(new Shader(aDevice, Line_vert, Line_frag, renderPass));
 
+    auto offscreenRenderPass = SwapChain::GetCurrent()->GetOffscreenRenderPass();
+    Shaders.push_back(new Shader(aDevice, ShadowMapping_vert, offscreenRenderPass));
 }

@@ -45,6 +45,7 @@ namespace AnA
     {
         class Camera;
     }
+    class Shader;
     class Device
     {
     public:

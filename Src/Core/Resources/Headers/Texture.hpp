@@ -21,6 +21,8 @@ namespace AnA
     private:
         Device& aDevice;
 
+        void init();
+
         VkImage textureImage;
         VkDeviceMemory textureImageMemory;
         VkImageView textureImageView;
