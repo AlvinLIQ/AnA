@@ -1,8 +1,7 @@
 <Window>
     <Canvas>
-        <RenderingArea/>
-        <Button Text="Text"/>
-        <MenuBar>
+        <RenderingArea XAlign="Stretch" YAlign="Stretch"/>
+        <MenuBar XAlign="Stretch" Height="40">
             <Menu Text="File">
                 <MenuItem Text="New Project"/>
                 <MenuItem Text="Open Project"/>
