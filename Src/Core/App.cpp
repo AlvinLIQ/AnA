@@ -130,6 +130,7 @@ void App::Run()
         if (aRenderer->NeedUpdate())
         {
             aResourceManager->UpdateCamera(aRenderer->GetAspect());
+            aResourceManager->UpdateResources();
         }
         aResourceManager->UpdateCameraBuffer();
         aResourceManager->GlobalLight->UpdateBuffers(aResourceManager->LightCamera);

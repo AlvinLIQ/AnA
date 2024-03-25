@@ -49,6 +49,7 @@ namespace AnA
 
         std::vector<VkDescriptorSet>& GetSets();
         const VkDescriptorSetLayout& GetLayout() const;
+        void UpdateDescriptorSets(DescriptorConfig& descriptorConfig);
     private:
         VkDescriptorPool pool{VK_NULL_HANDLE};
         bool layoutCreated = false;

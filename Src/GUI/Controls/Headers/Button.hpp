@@ -1,11 +1,11 @@
 #pragma once
-#include "Control.hpp"
+#include "ItemPresenter.hpp"
 
 namespace AnA
 {
     namespace Controls
     {
-        class Button : public Control
+        class Button : public ItemPresenter
         {
         public:
             Button();

@@ -81,6 +81,6 @@ const vec3 LIGHT_DIRECTION = vec3(1., -3., 1.);
 void main()
 {
     mat4 dView = mat4(lbo.view);
-    dView[3] = vec4(mat3(cbo.invView) * vec3(cbo.view[3]), 1.0);
+    dView[3] = vec4(mat3(cbo.invView) * vec3(cbo.view[3].xyz / cbo.view[3].w), 1.0);
     gl_Position = biasMat * lbo.proj * dView * (objectBuffer.objects[gl_BaseInstance].model * vec4(position, 1.0));
 }
