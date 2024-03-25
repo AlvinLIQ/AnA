@@ -24,6 +24,8 @@ ResourceManager::~ResourceManager()
     for (auto& shader : Shaders)
         delete shader;
     
+    for (auto& shadowSampler : shadowSamplers)
+        vkDestroySampler(aDevice.GetLogicalDevice(), shadowSampler, nullptr);
     cleanupShadowResources();
 
     delete SceneObjects;
@@ -67,6 +69,11 @@ void ResourceManager::UpdateResources()
 {
     cleanupShadowResources();
     createShadowFramebuffers();
+    auto deafultShadowSamplerConfig = GetDefaultDescriptorConfig()[DEFAULT_SHADOW_SAMPLER_LAYOUT];
+    for (int i = 0; i < 2; i++)
+    {
+        Shaders[i]->GetDescriptors()[DEFAULT_SHADOW_SAMPLER_LAYOUT]->UpdateDescriptorSets(deafultShadowSamplerConfig);
+    }
 }
 
 std::vector<Descriptor::DescriptorConfig> ResourceManager::GetDefaultDescriptorConfig()
@@ -129,7 +136,9 @@ void ResourceManager::createShadowFramebuffers()
 {
     shadowImages.resize(MAX_FRAMES_IN_FLIGHT);
     shadowFramebuffers.resize(MAX_FRAMES_IN_FLIGHT);
-    shadowSamplers.resize(MAX_FRAMES_IN_FLIGHT);
+    bool samplersNotCreated = shadowSamplers.empty();
+    if (samplersNotCreated)
+        shadowSamplers.resize(MAX_FRAMES_IN_FLIGHT);
     auto extent = SwapChain::GetCurrent()->GetExtent();
     for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
@@ -170,15 +179,13 @@ void ResourceManager::createShadowFramebuffers()
         framebufferInfo.height = extent.height;
         framebufferInfo.layers = 1;
         vkCreateFramebuffer(aDevice.GetLogicalDevice(), &framebufferInfo, nullptr, &shadowFramebuffers[i]);
-
-        aDevice.CreateSampler(&shadowSamplers[i], VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE);
+        if (samplersNotCreated)
+            aDevice.CreateSampler(&shadowSamplers[i], VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE);
     }
 }
 
 void ResourceManager::cleanupShadowResources()
 {
-    for (auto& shadowSampler : shadowSamplers)
-        vkDestroySampler(aDevice.GetLogicalDevice(), shadowSampler, nullptr);
     for (auto& shadowFrameBuffer : shadowFramebuffers)
         vkDestroyFramebuffer(aDevice.GetLogicalDevice(), shadowFrameBuffer, nullptr);
     for (auto& shadowImage : shadowImages)

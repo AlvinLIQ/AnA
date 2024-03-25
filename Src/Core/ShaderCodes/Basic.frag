@@ -55,7 +55,7 @@ struct Ray{
 };
 
 const vec3 LIGHT_DIRECTION = normalize(vec3(1., -3., 1.));
-const vec3 LIGHT_COLOR = vec3(0.9, 0.9, 0.2);
+const vec3 LIGHT_COLOR = vec3(0.95, 0.7, 0.95);
 
 vec3 GetPointOfRay(Ray ray, float len)
 {

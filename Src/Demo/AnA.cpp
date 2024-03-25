@@ -50,14 +50,14 @@ int main()
     nObj->Properties.transform.rotation = {glm::two_pi<float>() / 4, 0.f, 0.f};
     
     nObj->Properties.transform.translation = {-1.5, -.5, 1.5};
-    Model::CreateModelFromFile(aApp->GetDevice(), "Models/cube.obj", nObj->Model);
+    App::CreateCubeModel(nObj->Model);
     //nObj->Texture = std::make_unique<Texture>("Textures/test.jpg", aApp->GetDevice());
     SceneObjects.Append(nObj);
 
     nObj = new Object;
-    Model::CreateModelFromFile(aApp->GetDevice(), "Models/cube.obj", nObj->Model);
+    App::CreateCubeModel(nObj->Model);
     nObj->Properties.sType = ANA_MODEL;
-    nObj->Color = {.68f, .68f, 1.0f};
+    nObj->Color = {0.5f, 0.5f, .5f};
     nObj->Properties.transform.scale = {11.4f, 0.02f, 11.4};
     nObj->Properties.transform.translation = {3.0, 0.5, 0.0};
     SceneObjects.Append(nObj);

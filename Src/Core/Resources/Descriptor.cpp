@@ -133,3 +133,25 @@ const VkDescriptorSetLayout& Descriptor::GetLayout() const
 {
     return setLayout;
 }
+
+void Descriptor::UpdateDescriptorSets(DescriptorConfig& descriptorConfig)
+{
+    for (int i = 0; i < sets.size(); i++)
+    {
+        VkDescriptorImageInfo imageInfo;
+        imageInfo.imageLayout = descriptorConfig.images[i].imageLayout;
+        imageInfo.imageView = descriptorConfig.images[i].imageView;
+        imageInfo.sampler = descriptorConfig.samplers[i];
+
+        VkWriteDescriptorSet descriptorWrite{};
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = sets[i];
+        descriptorWrite.dstBinding = descriptorConfig.binding;
+        descriptorWrite.dstArrayElement = 0;
+        descriptorWrite.descriptorType = descriptorConfig.descriptorType;
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.pImageInfo = &imageInfo;
+        vkUpdateDescriptorSets(aDevice.GetLogicalDevice(), 1,
+            &descriptorWrite, 0, nullptr);
+    }
+}

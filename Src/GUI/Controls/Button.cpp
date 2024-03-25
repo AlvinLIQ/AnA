@@ -1,6 +1,5 @@
 //b'\xd5I5f\x9do-\xc2\xeeTU\x08E\xaaM\xd3'
 #include "Headers/Button.hpp"
-#include "Headers/Control.hpp"
 #include "Styles/Default/ControlStyle.hpp"
 
 using namespace AnA;
@@ -26,7 +25,7 @@ void Button_PointerReleased(Button* control, PointerEventArgs args)
     control->Color = ButtonBackgroundColor;
 }
 
-Button::Button() : Control()
+Button::Button() : ItemPresenter()
 {
     SetRenderMode(ButtonRenderMode);
     controlSize = ButtonMinSize;
