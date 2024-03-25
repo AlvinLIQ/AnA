@@ -95,8 +95,7 @@ void main() {
         gl_Position = cbo.proj * cbo.view * vertex;
         outNormalSpace = normalize(mat3(objectBuffer.objects[gl_BaseInstance].model) * normal);
         outVertex = vertex.xyz / vertex.w;
-        mat4 dView = mat4(lbo.view);
-        dView[3] = vec4(mat3(cbo.invView) * vec3(cbo.view[3].xyz / cbo.view[3].w), 1.0);
+        mat4 dView = mat4(0.999949, -0.009408, 0.003682, 0.000000, 0.000000, 0.364459, 0.931219, 0.000000, -0.010103, -0.931172, 0.364441, 0.000000, -1.931544, -0.269233, 11.256238, 1.000000);
         outShadowCoord = biasMat * lbo.proj * dView * vertex;
         fragColor = color;
     }

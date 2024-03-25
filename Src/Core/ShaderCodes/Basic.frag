@@ -83,7 +83,7 @@ void main()
         vec3 shadowProj = vec3(shadowCoord.xyz / shadowCoord.w);
         if (texture(shadowSampler, shadowProj.xy).r < shadowProj.z)
         {
-            visibility = 1.0;
+            visibility = 0.3;
         }
         vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient + pointLightIntensity * LIGHT_COLOR) * visibility;
         outColor = texture(texSampler, texCoord) * vec4(vec3(finalLight), 1.0);
