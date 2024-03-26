@@ -59,8 +59,13 @@ const mat4 biasMat = mat4(
   0.0, 0.5, 0.0, 0.0,
   0.0, 0.0, 1.0, 0.0,
   0.5, 0.5, 0.0, 1.0 );
-
-#define PI 3.14
+/*
+const mat4 paddingMat = mat4(
+    0.8, 0.0, 0.0, 0.0,
+    0.0, 0.8, 0.0, 0.0,
+    0.0, 0.0, 1.0, 0.0,
+    0.2, -0.2, 0.0, 1.0
+);*/
 
 mat4 transform(vec3 scale, vec3 rotation, vec3 transition)
 {
