@@ -20,7 +20,7 @@ else
 	rm = rm
 endif
 
-sources := $(wildcard Src/Core/*.cpp Src/Core/*/*.cpp Src/GUI/Controls/*.cpp Src/Demo/*.cpp)
+sources := $(wildcard Src/Core/*.cpp Src/Core/*/*.cpp Src/GUI/Controls/*.cpp Src/Editors/*.cpp)
 objects = $(sources:.cpp=.o)
 depends = $(sources:.cpp=.d)
 

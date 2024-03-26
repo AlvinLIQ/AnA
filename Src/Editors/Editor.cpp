@@ -1,3 +1,23 @@
+#include "Headers/Editor.hpp"
+
+using namespace AnA;
+using namespace Editors;
+
+Editor::Editor()
+{
+
+}
+
+Editor::~Editor()
+{
+
+}
+
+void Editor::Init()
+{
+
+}
+
 #define INCLUDE_STB_IMAGE
 
 #include "../Core/Headers/App.hpp"
@@ -77,14 +97,22 @@ int main()
     nObj->Properties.transform.scale = {0.4f, 0.4f, 0.4};
     nObj->Properties.transform.translation = {1.5, -2.0, 0.0};
     SceneObjects.Append(nObj);
+/*
+    nObj = new Object;
+    nObj->Model = aApp->Get2DModel();
+    nObj->Properties.sType = ANA_RECTANGLE;
+    nObj->Color = {1.0F, 1.0f, 1.0f};
+    nObj->Properties.transform.scale = {0.02f, 1.0f, 0.4};
+    nObj->Properties.transform.translation = {0.0, 0.0, 0.0};
+    SceneObjects.Append(nObj);
 
     nObj = new Object;
-    nObj->Properties.sType = ANA_SPHERE;
     nObj->Model = aApp->Get2DModel();
+    nObj->Properties.sType = ANA_RECTANGLE;
     nObj->Color = {1.0F, 1.0f, 1.0f};
-    nObj->Properties.transform.scale = {0.4f, 0.3f, 1.0f};
-    nObj->Properties.transform.translation = {-.6f, -0.775f, 0.0f};
-    SceneObjects.Append(nObj);
+    nObj->Properties.transform.scale = {1.0f, 0.02f, 0.4};
+    nObj->Properties.transform.translation = {0.0, 0.0, 0.0};
+    SceneObjects.Append(nObj);*/
 
 /*  
     Control::InitControl(&aApp->GetSwapChain());
