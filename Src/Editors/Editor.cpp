@@ -97,6 +97,14 @@ int main()
     nObj->Properties.transform.scale = {0.4f, 0.4f, 0.4};
     nObj->Properties.transform.translation = {1.5, -2.0, 0.0};
     SceneObjects.Append(nObj);
+
+    nObj = new Object;
+    nObj->Model = aApp->Get2DModel();
+    nObj->Properties.sType = ANA_RECTANGLE;
+    nObj->Color = {1.0F, 1.0f, 1.0f};
+    nObj->Properties.transform.scale = {0.4f, 0.3f, 0.4};
+    nObj->Properties.transform.translation = {-0.6, -.7, 0.0};
+    SceneObjects.Append(nObj);
 /*
     nObj = new Object;
     nObj->Model = aApp->Get2DModel();

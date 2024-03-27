@@ -51,7 +51,7 @@ void ResourceManager::UpdateCamera(float aspect)
     MainCameraInfo.UpdateCameraPerspective(MainCamera);
     LightCameraInfo.aspect = aspect;
     //LightCameraInfo.UpdateCameraPerspective(LightCamera);
-    LightCamera.SetOrthographicProjection(-aspect, -1.0, aspect, 1.0, LightCameraInfo.near, LightCameraInfo.far);
+    LightCamera.SetOrthographicProjection(-1.0f, -1.0f, 1.0f, 1.0f, 0.1, 75.0f);
 }
 
 void ResourceManager::UpdateCameraBuffer()
@@ -148,9 +148,9 @@ void ResourceManager::createShadowFramebuffers()
         imageInfo.imageType = VK_IMAGE_TYPE_2D;
         imageInfo.format = VK_FORMAT_D32_SFLOAT;
         imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        imageInfo.extent = {extent.width, extent.height, 1};
+        imageInfo.extent = {extent.height, extent.height, 1};
         shadowImage.extent = imageInfo.extent;
-        shadowImage.imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL;
+        shadowImage.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
         imageInfo.mipLevels = 1;
         imageInfo.arrayLayers = 1;
         imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -175,7 +175,7 @@ void ResourceManager::createShadowFramebuffers()
         framebufferInfo.attachmentCount = 1;
         framebufferInfo.pAttachments = &shadowImage.imageView;
 
-        framebufferInfo.width = extent.width;
+        framebufferInfo.width = extent.height;
         framebufferInfo.height = extent.height;
         framebufferInfo.layers = 1;
         vkCreateFramebuffer(aDevice.GetLogicalDevice(), &framebufferInfo, nullptr, &shadowFramebuffers[i]);

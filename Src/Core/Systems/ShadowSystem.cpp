@@ -71,7 +71,7 @@ void ShadowSystem::BeginRenderPass(VkCommandBuffer& commandBuffer)
     renderPassBegin.framebuffer = Resource::ResourceManager::GetCurrent()->GetShadowFramebuffers()[swapChain->CurrentFrame];
     renderPassBegin.renderArea.offset.x = 0;
     renderPassBegin.renderArea.offset.y = 0;
-    renderPassBegin.renderArea.extent = extent;
+    renderPassBegin.renderArea.extent = {extent.height, extent.height};
     renderPassBegin.clearValueCount = 1;
     renderPassBegin.pClearValues = clearValues;
     
@@ -81,7 +81,7 @@ void ShadowSystem::BeginRenderPass(VkCommandBuffer& commandBuffer)
 
     VkViewport viewport;
     viewport.height = extent.height;
-    viewport.width = extent.width;
+    viewport.width = extent.height;
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
     viewport.x = 0;
@@ -89,7 +89,7 @@ void ShadowSystem::BeginRenderPass(VkCommandBuffer& commandBuffer)
     vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
     
     VkRect2D scissor;
-    scissor.extent.width = extent.width;
+    scissor.extent.width = extent.height;
     scissor.extent.height = extent.height;
     scissor.offset.x = 0;
     scissor.offset.y = 0;
