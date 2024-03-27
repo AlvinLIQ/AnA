@@ -117,14 +117,9 @@ void App::Run()
             camera.UpdateViewMatrix();
         if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && pressed == 0)
         {
-            pressed = 1;
-            auto& camView = camera.GetView();
-            for (int i = 0, j; i < camView.length(); i++)
-            {
-                for (j = 0; j < camView[i].length(); j++)
-                    printf("%f, ", camView[i][j]);
-            }
-            printf("\n");
+            float near, far, left, top, right, bottom;
+            scanf("%f%f%f%f%f%f", &left, &top, &right, &bottom, &near, &far);
+            aResourceManager->LightCamera.SetOrthographicProjection(left, top, right, bottom, near, far);
         }
 
         if (aRenderer->NeedUpdate())
@@ -133,7 +128,7 @@ void App::Run()
             aResourceManager->UpdateResources();
         }
         aResourceManager->UpdateCameraBuffer();
-        aResourceManager->GlobalLight->UpdateBuffers(aResourceManager->LightCamera);
+        aResourceManager->GlobalLight->UpdateBuffers(aResourceManager->LightCamera, GetSwapChain().CurrentFrame);
         //Render Shadow Map
         //auto offscreenCommandBuffer = aRenderer->GetOffscreenCommandBuffer();
         if (aRenderer->NeedUpdate() || aResourceManager->SceneObjects->BeginCommandBufferUpdate())
