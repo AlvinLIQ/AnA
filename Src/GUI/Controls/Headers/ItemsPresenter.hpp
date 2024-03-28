@@ -41,7 +41,9 @@ namespace AnA
                 delete targetItem;
             }
 
-        private:
+            void Draw(VkCommandBuffer commandBuffer);
+
+        protected:
             std::vector<Control*> items;
         };
     }
