@@ -1,6 +1,5 @@
 #version 460
 
-layout(location = 0) out vec3 baseColor;
 
 const vec2 positions[] = {{-1.0, -1.0}, {1.0, 1.0}, {-1.0, 1.0}, {1.0, -1.0}};
 

@@ -6,8 +6,8 @@
 #include <GLFW/glfw3.h>
 #include "Instance.hpp"
 
-#define DEFAULT_WINDOW_WIDTH 800
-#define DEFAULT_WINDOW_HEIGHT 600
+#define DEFAULT_WINDOW_WIDTH 1360
+#define DEFAULT_WINDOW_HEIGHT 768
 
 namespace AnA
 {

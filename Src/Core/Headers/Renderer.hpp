@@ -62,6 +62,9 @@ namespace AnA
 
         void EndFrame();
         void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer);
+        void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2D offset);
+        void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2D offset, VkExtent2D extent);
+
         void EndSwapChainRenderPass(VkCommandBuffer commandBuffer);
 
     private:

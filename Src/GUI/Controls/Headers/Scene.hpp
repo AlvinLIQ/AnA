@@ -1,17 +1,19 @@
 #pragma once
 
-#include "ItemsPresenter.hpp"
+#include "Control.hpp"
 
 namespace AnA
 {
     namespace Controls
     {
-        class Grid : public ItemsPresenter
+        class Scene : public Control
         {
         public:
-            Grid();
-            ~Grid();
+            Scene();
+            ~Scene();
+
             virtual void PrepareDraw();
+            
         };
     }
 }
