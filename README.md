@@ -4,13 +4,14 @@
 
 ### Currently working on
 
-* Collision Detection(runs in GPU)
 * GUI Control
+* Multi-Thread Commandbuffer Recording
 
 ### To do
 
-* [ ] Lighting System
+* [X] Lighting System
 * [ ] Designer
 
 ### Screenshots
+
 ![Screenshot1](https://github.com/AlvinLIQ/AnA_Docs/blob/main/Img/Screenshots/Screenshot%202023-09-22%20021048.png "Screenshot")
