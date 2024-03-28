@@ -17,3 +17,11 @@ ItemsPresenter::~ItemsPresenter()
         delete pItem;
     }
 }
+
+void ItemsPresenter::Draw(VkCommandBuffer commandBuffer)
+{
+    for (auto& item : items)
+    {
+        item->Draw(commandBuffer);
+    }
+}

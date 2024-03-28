@@ -1,5 +1,4 @@
 #include "Headers/Control.hpp"
-#include "../../Core/Headers/App.hpp"
 
 using namespace AnA;
 using namespace AnA::Controls;
@@ -8,18 +7,23 @@ SwapChain* aSwapChain = nullptr;
 Control* pressedControl = nullptr;
 Control* focusedControl = nullptr;
 
-Control::Control() : Object()
+Control::Control()
 {
-    this->Model = App::Get2DModel();
+    //this->Model = App::Get2DModel();
 }
 
 void Control::PrepareDraw()
 {
     auto renderSize = GetSizeForRender();
-    Properties.transform.scale = {renderSize.Width, renderSize.Height, 1.f};
-    
+    //Properties.transform.scale = {renderSize.Width, renderSize.Height, 1.f};
+    ControlSize = renderSize;
     auto renderOffset = GetActualControlOffset(renderSize);
-    Properties.transform.translation = {renderOffset.x, renderOffset.y, 0.f};
+    ControlOffset = renderOffset;
+}
+
+void Control::Draw(VkCommandBuffer commandBuffer)
+{
+    //Model->Draw(commandBuffer);
 }
 
 void Control::InitControl(SwapChain* swapChain)

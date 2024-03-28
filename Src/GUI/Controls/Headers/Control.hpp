@@ -1,5 +1,4 @@
 #pragma once
-#include "../../../Core/Resources/Headers/Object.hpp"
 #include "../../../Core/Headers/SwapChain.hpp"
 #include "Types.hpp"
 #include "../Styles/Default/ControlStyle.hpp"
@@ -9,7 +8,7 @@ namespace AnA
 {
     namespace Controls
     {
-        class Control : public Object
+        class Control
         {
         public:
             Control();
@@ -39,25 +38,26 @@ namespace AnA
                 return actualOffset;
             }
 
+            SIZE_F ControlSize {AnA::ControlSize};
             SIZE_F GetSizeForRender() const
             {
                 SIZE_F renderSize;
                 if (renderMode == AlignType::Relative)
                 {
                     auto extent = GetSwapChainExtent();
-                    renderSize.Width = controlSize.Width / (float)extent.height;
-                    renderSize.Height = controlSize.Height / (float)extent.height;
+                    renderSize.Width = ControlSize.Width / (float)extent.height;
+                    renderSize.Height = ControlSize.Height / (float)extent.height;
                 }
                 else if (renderMode == AlignType::Absolute)
                 {
                     auto extent = GetSwapChainExtent();
-                    renderSize.Width = controlSize.Width / (float)extent.width;
-                    renderSize.Height = controlSize.Height / (float)extent.height;
+                    renderSize.Width = ControlSize.Width / (float)extent.width;
+                    renderSize.Height = ControlSize.Height / (float)extent.height;
                 }
                 else if (renderMode == AlignType::Auto)
                 {
-                    auto scale = Properties.transform.scale;
-                    renderSize = {scale.x, scale.y};
+                    auto scale = ControlSize;
+                    renderSize = ControlSize;
                 }
                 return renderSize;
             }
@@ -67,7 +67,7 @@ namespace AnA
                     newSize.Width > maxSize.Width || newSize.Height > maxSize.Height)
                     return;
 
-                controlSize = newSize;
+                ControlSize = newSize;
             }
 
             AlignType GetRenderMode() const
@@ -83,6 +83,7 @@ namespace AnA
             }
 
             virtual void PrepareDraw();
+            virtual void Draw(VkCommandBuffer commandBuffer);
             static void InitControl(SwapChain* swapChain);
             static VkExtent2D GetSwapChainExtent();
             static Device& GetDevice();
@@ -101,10 +102,11 @@ namespace AnA
             void Unfocus();
             
             bool IsInside(POS_F pos);
+
+            glm::vec3 Color{1.0f};
         private:
             AlignType renderMode {ControlRenderMode};
         protected:
-            SIZE_F controlSize {ControlSize};
             SIZE_F minSize {ControlMinSize};
             SIZE_F maxSize {std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
         };

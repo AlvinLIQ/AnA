@@ -20,7 +20,7 @@ namespace AnA
                 item = newItem;
             }
 
-        private:
+        protected:
             Control* item;
         };
     }
