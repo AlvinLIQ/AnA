@@ -117,9 +117,9 @@ void App::Run()
             camera.UpdateViewMatrix();
         if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && pressed == 0)
         {
-            float near, far, left, top, right, bottom;
-            scanf("%f%f%f%f%f%f", &left, &top, &right, &bottom, &near, &far);
-            aResourceManager->LightCamera.SetOrthographicProjection(left, top, right, bottom, near, far);
+            float near, far, scale;
+            scanf("%f%f%f", &scale, &near, &far);
+            aResourceManager->LightCamera.SetOrthographicProjection(-scale, -scale, scale, scale, near, far);
         }
 
         if (aRenderer->NeedUpdate())
