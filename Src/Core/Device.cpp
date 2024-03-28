@@ -329,6 +329,8 @@ void Device::CreateSampler(VkSampler* pSampler, enum VkSamplerAddressMode sample
     samplerInfo.compareEnable = VK_FALSE;
     samplerInfo.compareOp = compareOp;
     samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+    samplerInfo.maxAnisotropy = 1.0f;
+    samplerInfo.maxLod = 1.0f;
 
     vkCreateSampler(logicalDevice, &samplerInfo, nullptr, pSampler);
 }
