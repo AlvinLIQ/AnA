@@ -137,8 +137,42 @@ void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer)
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = aSwapChain->GetRenderPass();
     renderPassInfo.framebuffer = aSwapChain->GetSwapChainFramebuffers()[currentImageIndex];
-    renderPassInfo.renderArea.offset = {0, 0};
+    renderPassInfo.renderArea.offset = {};
     renderPassInfo.renderArea.extent = swapChainExtent;
+    renderPassInfo.clearValueCount = numsof(clearValues);
+    renderPassInfo.pClearValues = clearValues;
+    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
+}
+
+void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2D offset)
+{
+    assert(isFrameStarted && "Can't call BeginSwapChainRenderPass while frame is not in progress!");
+    assert(commandBuffer == GetCurrentCommandBuffer() && "Can't begin render pass on command buffer from a different frame!");
+    auto swapChainExtent = aSwapChain->GetExtent();
+
+    VkRenderPassBeginInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = aSwapChain->GetRenderPass();
+    renderPassInfo.framebuffer = aSwapChain->GetSwapChainFramebuffers()[currentImageIndex];
+    renderPassInfo.renderArea.offset = offset;
+    renderPassInfo.renderArea.extent = {swapChainExtent.width - renderPassInfo.renderArea.offset.x, swapChainExtent.height - renderPassInfo.renderArea.offset.y};
+    renderPassInfo.clearValueCount = numsof(clearValues);
+    renderPassInfo.pClearValues = clearValues;
+    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
+}
+
+void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2D offset, VkExtent2D extent)
+{
+    assert(isFrameStarted && "Can't call BeginSwapChainRenderPass while frame is not in progress!");
+    assert(commandBuffer == GetCurrentCommandBuffer() && "Can't begin render pass on command buffer from a different frame!");
+    auto swapChainExtent = aSwapChain->GetExtent();
+
+    VkRenderPassBeginInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = aSwapChain->GetRenderPass();
+    renderPassInfo.framebuffer = aSwapChain->GetSwapChainFramebuffers()[currentImageIndex];
+    renderPassInfo.renderArea.offset = offset;
+    renderPassInfo.renderArea.extent = extent;
     renderPassInfo.clearValueCount = numsof(clearValues);
     renderPassInfo.pClearValues = clearValues;
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
