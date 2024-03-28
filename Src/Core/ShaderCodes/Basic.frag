@@ -89,6 +89,4 @@ void main()
         outColor = texture(texSampler, texCoord) * vec4(vec3(finalLight), 1.0);
         return;
     }
-    float depth = texture(shadowSampler, texCoord).r;
-    outColor = biasMat * vec4(1.0 - (1. - depth) * 100.0);
 }
