@@ -52,7 +52,7 @@ void ResourceManager::UpdateCamera(float aspect)
     LightCameraInfo.aspect = aspect;
     //LightCameraInfo.UpdateCameraPerspective(LightCamera);
     const float scale = 6.0;
-    LightCamera.SetOrthographicProjection(-scale, -scale, scale, scale, -10.0f, 10.0f);
+    LightCamera.SetOrthographicProjection(-scale * aspect, -scale, scale * aspect, scale, -100.0f, 100.0f);
 }
 
 void ResourceManager::UpdateCameraBuffer()
@@ -149,7 +149,7 @@ void ResourceManager::createShadowFramebuffers()
         imageInfo.imageType = VK_IMAGE_TYPE_2D;
         imageInfo.format = VK_FORMAT_D32_SFLOAT;
         imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        imageInfo.extent = {extent.height, extent.height, 1};
+        imageInfo.extent = {extent.width, extent.height, 1};
         shadowImage.extent = imageInfo.extent;
         shadowImage.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
         imageInfo.mipLevels = 1;
@@ -176,7 +176,7 @@ void ResourceManager::createShadowFramebuffers()
         framebufferInfo.attachmentCount = 1;
         framebufferInfo.pAttachments = &shadowImage.imageView;
 
-        framebufferInfo.width = extent.height;
+        framebufferInfo.width = extent.width;
         framebufferInfo.height = extent.height;
         framebufferInfo.layers = 1;
         vkCreateFramebuffer(aDevice.GetLogicalDevice(), &framebufferInfo, nullptr, &shadowFramebuffers[i]);
