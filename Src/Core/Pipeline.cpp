@@ -68,7 +68,7 @@ void Pipeline::createGraphicsPipeline(const std::vector<unsigned char>& vertShad
     VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
     VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
 
-    PipelineConfig pipelineConfig = pipelineConfig.GetDefault(vertShaderModule, fragShaderModule, pipelineLayout, renderPass, vertexTopology); 
+    PipelineConfig pipelineConfig = pipelineConfig.GetDefault(vertShaderModule, fragShaderModule, pipelineLayout, renderPass, aDevice.GetMaxUsableSampleCount(), vertexTopology); 
 
     auto logicalDevice = aDevice.GetLogicalDevice();
 
@@ -83,7 +83,7 @@ void Pipeline::createGraphicsPipeline(const std::vector<unsigned char>& vertShad
 {
     VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
 
-    PipelineConfig pipelineConfig = pipelineConfig.GetForDepthTest(vertShaderModule, pipelineLayout, renderPass, vertexTopology); 
+    PipelineConfig pipelineConfig = pipelineConfig.GetForDepthTest(vertShaderModule, pipelineLayout, renderPass, aDevice.GetMaxUsableSampleCount(), vertexTopology); 
     
     auto logicalDevice = aDevice.GetLogicalDevice();
 

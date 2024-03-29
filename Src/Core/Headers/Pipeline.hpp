@@ -35,7 +35,7 @@ namespace AnA
             VkGraphicsPipelineCreateInfo pipelineInfo{};
             std::vector<VkDynamicState> dynamicStates = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
             static PipelineConfig GetDefault(VkShaderModule vertexShaderModule, VkShaderModule fragShaderModule,
-                VkPipelineLayout &pipelineLayout, VkRenderPass &renderPass, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
+                VkPipelineLayout &pipelineLayout, VkRenderPass &renderPass, VkSampleCountFlagBits msaaSamplers, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
             {
                 PipelineConfig dConfig;
                 dConfig.shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -81,8 +81,8 @@ namespace AnA
                 dConfig.rasterizer.depthBiasSlopeFactor = 0.0f;    // Optional
 
                 dConfig.multiSampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-                dConfig.multiSampling.sampleShadingEnable = VK_FALSE;
-                dConfig.multiSampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+                dConfig.multiSampling.sampleShadingEnable = VK_TRUE;
+                dConfig.multiSampling.rasterizationSamples = msaaSamplers;
                 dConfig.multiSampling.minSampleShading = 1.0f;          // Optional
                 dConfig.multiSampling.pSampleMask = nullptr;            // Optional
                 dConfig.multiSampling.alphaToCoverageEnable = VK_FALSE; // Optional
@@ -139,7 +139,7 @@ namespace AnA
                 return dConfig;
             }
             static PipelineConfig GetForDepthTest(VkShaderModule vertexShaderModule,
-                VkPipelineLayout &pipelineLayout, VkRenderPass &renderPass, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
+                VkPipelineLayout &pipelineLayout, VkRenderPass &renderPass, VkSampleCountFlagBits msaaSamplers, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
             {
                 PipelineConfig dConfig;
                 dConfig.shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;

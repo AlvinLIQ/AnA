@@ -158,7 +158,7 @@ void Device::CreateColorImage(const uint32_t color, VkImage* pTexImage, VkDevice
     imageInfo.extent.depth = 1;
     imageInfo.mipLevels = 1;
     imageInfo.arrayLayers = 1;
-    imageInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+    imageInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
     imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -167,9 +167,9 @@ void Device::CreateColorImage(const uint32_t color, VkImage* pTexImage, VkDevice
     imageInfo.flags = 0;
     CreateImage(&imageInfo, pTexImage, pTexMemory);
 
-    TransitionImageLayout(*pTexImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    TransitionImageLayout(*pTexImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
     CopyBufferToImage(aBuffer.GetBuffer(), *pTexImage, imageInfo.extent);
-    TransitionImageLayout(*pTexImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    TransitionImageLayout(*pTexImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
 #ifdef INCLUDE_STB_IMAGE
@@ -196,7 +196,7 @@ void Device::CreateTextureImage(const char* imagePath, VkImage* pTexImage, VkDev
     imageInfo.extent.depth = 1;
     imageInfo.mipLevels = 1;
     imageInfo.arrayLayers = 1;
-    imageInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+    imageInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
     imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -205,9 +205,9 @@ void Device::CreateTextureImage(const char* imagePath, VkImage* pTexImage, VkDev
     imageInfo.flags = 0;
     CreateImage(&imageInfo, pTexImage, pTexMemory);
 
-    TransitionImageLayout(*pTexImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    TransitionImageLayout(*pTexImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
     CopyBufferToImage(aBuffer.GetBuffer(), *pTexImage, imageInfo.extent);
-    TransitionImageLayout(*pTexImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    TransitionImageLayout(*pTexImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
 void Device::CreateTextImage(const char* text, int width, int height, float lineHeight, VkImage* pTextImage, VkDeviceMemory* pTextMemory)
@@ -294,7 +294,7 @@ void Device::CreateTextImage(const char* text, int width, int height, float line
     imageInfo.extent.depth = 1;
     imageInfo.mipLevels = 1;
     imageInfo.arrayLayers = 1;
-    imageInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+    imageInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
     imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -303,9 +303,9 @@ void Device::CreateTextImage(const char* text, int width, int height, float line
     imageInfo.flags = 0;
     CreateImage(&imageInfo, pTextImage, pTextMemory);
 
-    TransitionImageLayout(*pTextImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    TransitionImageLayout(*pTextImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
     CopyBufferToImage(aBuffer.GetBuffer(), *pTextImage, imageInfo.extent);
-    TransitionImageLayout(*pTextImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    TransitionImageLayout(*pTextImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
 #endif
@@ -494,6 +494,11 @@ VkQueue &Device::GetPresentQueue()
     return presentQueue;
 }
 
+VkSampleCountFlagBits Device::GetMaxUsableSampleCount()
+{
+    return usableSamples.front();
+}
+
 Device::QueueFamilyIndices Device::FindQueueFamilies(VkPhysicalDevice device)
 {
     QueueFamilyIndices indices;
@@ -576,11 +581,28 @@ void Device::pickPhysicalDevice()
         if (isDeviceSuitable(device))
         {
             physicalDevice = device;
+            checkUsableSamples();
             break;
         }
     }
     if (physicalDevice == VK_NULL_HANDLE)
         throw std::runtime_error("Failed to find a suitable GPU!");
+}
+
+void Device::checkUsableSamples()
+{
+    VkPhysicalDeviceProperties physicalDeviceProperties;
+    vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
+
+    VkSampleCountFlags counts = physicalDeviceProperties.limits.framebufferColorSampleCounts & physicalDeviceProperties.limits.framebufferDepthSampleCounts;
+    if (counts & VK_SAMPLE_COUNT_64_BIT) {  usableSamples.push_back(VK_SAMPLE_COUNT_64_BIT); }
+    if (counts & VK_SAMPLE_COUNT_32_BIT) { usableSamples.push_back(VK_SAMPLE_COUNT_32_BIT); }
+    if (counts & VK_SAMPLE_COUNT_16_BIT) { usableSamples.push_back(VK_SAMPLE_COUNT_16_BIT); }
+    if (counts & VK_SAMPLE_COUNT_8_BIT) { usableSamples.push_back(VK_SAMPLE_COUNT_8_BIT); }
+    if (counts & VK_SAMPLE_COUNT_4_BIT) { usableSamples.push_back(VK_SAMPLE_COUNT_4_BIT); }
+    if (counts & VK_SAMPLE_COUNT_2_BIT) { usableSamples.push_back(VK_SAMPLE_COUNT_2_BIT); }
+
+    usableSamples.push_back(VK_SAMPLE_COUNT_1_BIT);
 }
 
 bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device)
@@ -651,6 +673,7 @@ void Device::createLogicalDevice()
     deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
     //vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
     deviceFeatures2.features.samplerAnisotropy = VK_TRUE;
+    deviceFeatures2.features.sampleRateShading = VK_TRUE;
     deviceFeatures2.pNext = &indexingFeatures;
 
     VkDeviceCreateInfo createInfo{};

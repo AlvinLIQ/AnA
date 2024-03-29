@@ -96,6 +96,7 @@ namespace AnA
         {
             return commandPool;
         }
+        VkSampleCountFlagBits GetMaxUsableSampleCount();
         
         QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
 
@@ -122,6 +123,8 @@ namespace AnA
         {
             VK_KHR_SWAPCHAIN_EXTENSION_NAME
         };
+        std::vector<VkSampleCountFlagBits> usableSamples{};
+        void checkUsableSamples();
 
         bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 

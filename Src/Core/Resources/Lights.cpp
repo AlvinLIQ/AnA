@@ -48,8 +48,8 @@ void Light::createBuffers()
         lbo.proj = glm::mat4{1.0f};
         lbo.view = glm::mat4{1.0f};
         lbo.direction = glm::normalize(Direction);
-        lbo.color = glm::vec3(0.2);
-        lbo.ambient = 0.037f;
+        lbo.color = Color;
+        lbo.ambient = 0.37f;
         //printf("%p\n", lightBuffer->GetMappedData());
     }
 }
