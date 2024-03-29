@@ -56,7 +56,7 @@ VkDescriptorSet& Texture::GetDescriptorSet()
 
 void Texture::init()
 {
-    textureImageView = aDevice.CreateImageView(textureImage, VK_FORMAT_R8G8B8A8_UNORM);
+    textureImageView = aDevice.CreateImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
     createTextureSampler();
     
     descriptor = new Descriptor(aDevice, textureSampler, textureImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,

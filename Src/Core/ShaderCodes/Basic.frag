@@ -85,7 +85,7 @@ void main()
         {
             visibility = 0.5;
         }
-        vec3 finalLight = (diffuseLightItensity * lbo.color + 0.2f) * visibility + pointLightIntensity * LIGHT_COLOR;
+        vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility + pointLightIntensity * LIGHT_COLOR;
         outColor = texture(texSampler, texCoord) * vec4(vec3(finalLight), 1.0);
         return;
     }

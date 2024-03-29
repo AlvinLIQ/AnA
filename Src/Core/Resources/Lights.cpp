@@ -49,7 +49,7 @@ void Light::createBuffers()
         lbo.view = glm::mat4{1.0f};
         lbo.direction = glm::normalize(Direction);
         lbo.color = Color;
-        lbo.ambient = 0.37f;
+        lbo.ambient = Ambient;
         //printf("%p\n", lightBuffer->GetMappedData());
     }
 }
