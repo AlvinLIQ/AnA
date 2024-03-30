@@ -142,10 +142,10 @@ void App::Run()
             {
                 aResourceManager->SceneObjects->CommitStorageBufferUpdate(commandBuffer);
                 aResourceManager->SceneObjects->EndStorageBufferUpdate();
+                aShadowSystem->BeginRenderPass(commandBuffer);
+                aShadowSystem->RenderShadows(commandBuffer, *aResourceManager->SceneObjects, *aResourceManager->Shaders[2]);
+                aShadowSystem->EndRenderPass(commandBuffer);
             }
-            aShadowSystem->BeginRenderPass(commandBuffer);
-            aShadowSystem->RenderShadows(commandBuffer, *aResourceManager->SceneObjects, *aResourceManager->Shaders[2]);
-            aShadowSystem->EndRenderPass(commandBuffer);
             aRenderer->BeginSwapChainRenderPass(commandBuffer);
             aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer);
             aRenderer->EndSwapChainRenderPass(commandBuffer);
