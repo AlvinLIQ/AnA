@@ -26,7 +26,7 @@ RenderSystem* RenderSystem::GetCurrent()
 void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, Objects &objects, Shader& shader)
 {
     shader.GetPipeline()->Bind(commandBuffer);
-    std::vector<VkDescriptorSet> sets = shader.GetDescriptorSets()[aSwapChain.CurrentFrame];
+    std::vector<VkDescriptorSet>& sets = shader.GetDescriptorSets()[aSwapChain.CurrentFrame];
     Object* object;
     auto objectArray = objects.Get();
     for (int i = 0; i < objectArray.size(); i++)

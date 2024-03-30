@@ -4,7 +4,7 @@
 
 ### Currently working on
 
-* GUI Control
+* GUI Control on Compute Shader
 * Multi-Thread Commandbuffer Recording
 
 ### To do
