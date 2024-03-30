@@ -9,13 +9,6 @@
 #include <vector>
 
 #define SHAPE_TYPE uint32_t
-#define ANA_MODEL 1
-#define ANA_TRIANGLE 2
-#define ANA_RECTANGLE 4
-#define ANA_ELLIPSE 8
-#define ANA_CURVED_RECTANGLE 16
-#define ANA_TEXT 32
-#define ANA_SPHERE 64
 
 #define MAX_OBJECTS_COUNT 100
 #define MAX_OBJECTS_SIZE (MAX_OBJECTS_COUNT * sizeof(Model::ModelStorageBufferObject))
@@ -24,14 +17,12 @@ namespace AnA
 {
     struct ObjectPushConstantData
     {
-        glm::uint32_t sType;
         alignas(16) glm::vec3 color;
     };
 
     struct ItemProperties
     {
         Transform transform;
-        uint32_t sType{ANA_RECTANGLE};
         std::optional<glm::vec3> color;
     };
 
@@ -54,9 +45,8 @@ namespace AnA
 
         std::unique_ptr<Texture> Texture;
         
-        static void CreateShape(SHAPE_TYPE sType,glm::vec2 offset, glm::vec2 size, std::optional<glm::vec3> color, ItemProperties* pRectangleProperties)
+        static void CreateShape(glm::vec2 offset, glm::vec2 size, std::optional<glm::vec3> color, ItemProperties* pRectangleProperties)
         {
-            pRectangleProperties->sType = sType;
             pRectangleProperties->transform.translation = {offset , 0.f};
             pRectangleProperties->transform.scale = {size, 1.f};
             if (color.has_value())

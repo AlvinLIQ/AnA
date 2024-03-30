@@ -8,7 +8,6 @@ layout(location = 3) in vec2 uv;
 layout(location = 0) out vec3 fragColor;
 
 layout(push_constant) uniform Push {
-    uint sType;
     vec3 color;
 } push;
 

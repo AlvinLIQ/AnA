@@ -6,7 +6,6 @@ using namespace AnA::Controls;
 
 TextBlock::TextBlock()
 {
-    //Properties.sType = ANA_TEXT;
 }
 
 TextBlock::~TextBlock()

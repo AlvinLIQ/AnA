@@ -19,7 +19,6 @@ layout(location = 5) in vec4 shadowCoord;
 layout(location = 0) out vec4 outColor;
 
 layout(push_constant) uniform Push {
-    uint sType;
     vec3 color;
 } push;
 
@@ -75,18 +74,15 @@ void main()
 	//float shadow = texture(shadowSampler, shadowCoord.xy).r;
     //float lightIntensity = max(dot(normalSpace, normalize(LIGHT_DIRECTION - vec3(vertex))), 0);
     //outColor = texture(texSampler, texCoord) * (vec4(lightIntensity * LIGHT_COLOR + 0.033, 1.0));
-    if (push.sType == ANA_MODEL)
+
+    float pointLightIntensity = max(dot(normalSpace, normalize(LIGHT_DIRECTION - vertex)), 0);
+    float diffuseLightItensity = max(dot(normalSpace, normalize(lbo.direction)), 0);
+    float visibility = 1.0;
+    vec3 shadowProj = vec3(shadowCoord.xyz / shadowCoord.w);
+    if (texture(shadowSampler, shadowProj.xy).r < shadowProj.z)
     {
-        float pointLightIntensity = max(dot(normalSpace, normalize(LIGHT_DIRECTION - vertex)), 0);
-        float diffuseLightItensity = max(dot(normalSpace, normalize(lbo.direction)), 0);
-        float visibility = 1.0;
-        vec3 shadowProj = vec3(shadowCoord.xyz / shadowCoord.w);
-        if (texture(shadowSampler, shadowProj.xy).r < shadowProj.z)
-        {
-            visibility = 0.5;
-        }
-        vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility + pointLightIntensity * LIGHT_COLOR;
-        outColor = texture(texSampler, texCoord) * vec4(vec3(finalLight), 1.0);
-        return;
+        visibility = 0.5;
     }
+    vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility + pointLightIntensity * LIGHT_COLOR;
+    outColor = texture(texSampler, texCoord) * vec4(vec3(finalLight), 1.0);
 }

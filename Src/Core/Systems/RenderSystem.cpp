@@ -45,7 +45,6 @@ void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, Objects &objects
         object->Model->Bind(commandBuffer);
         ObjectPushConstantData push{};
         auto &itemProperties = object->Properties;
-        push.sType = itemProperties.sType;
         push.color = itemProperties.color.has_value() ? itemProperties.color.value() : object->Color;
         vkCmdPushConstants(commandBuffer, 
         shader.GetPipelineLayout(),

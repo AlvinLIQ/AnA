@@ -29,7 +29,6 @@ Button::Button() : ItemPresenter()
 {
     SetRenderMode(ButtonRenderMode);
     ControlSize = ButtonMinSize;
-    //Object::CreateShape(ANA_CURVED_RECTANGLE, {}, {}, ButtonBackgroundColor, &Properties);
 
     PointerEvents[PointerEventType::Released].push_back((PointerEventHandler)Button_PointerMoved);
     PointerEvents[PointerEventType::Released].push_back((PointerEventHandler)Button_PointerExited);
