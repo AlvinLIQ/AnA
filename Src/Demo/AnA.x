@@ -32,7 +32,6 @@ int main()
     object->Color = {0.1f, 0.2f, 0.3f};
 
     auto &objectProperties = object->Properties;
-    objectProperties.sType = ANA_MODEL;
     objectProperties.transform.scale = {.7f, .7f, .7f};
     objectProperties.transform.rotation = glm::vec3(0.04f * glm::two_pi<float>(), 0.f, 0.f);
     objectProperties.transform.translation = {0.f, 0.f , 1.5f};
@@ -56,7 +55,6 @@ int main()
 
     nObj = new Object;
     App::CreateCubeModel(nObj->Model);
-    nObj->Properties.sType = ANA_MODEL;
     nObj->Color = {0.5f, 0.5f, .5f};
     nObj->Properties.transform.scale = {11.4f, 0.02f, 11.4};
     nObj->Properties.transform.translation = {3.0, 0.5, 0.0};
@@ -64,7 +62,6 @@ int main()
 /*
     nObj = new Object;
     Model::CreateModelFromFile(aApp->GetDevice(), "Models/sphere.obj", nObj->Model);
-    nObj->Properties.sType = ANA_MODEL;
     nObj->Color = {1.0F, 1.0f, 1.0f};
     nObj->Properties.transform.scale = {0.4f, 0.4f, 0.4};
     nObj->Properties.transform.translation = {0.0, -0.2, 0.0};
@@ -72,7 +69,6 @@ int main()
 
     nObj = new Object;
     App::CreateCubeModel(nObj->Model);
-    nObj->Properties.sType = ANA_MODEL;
     nObj->Color = {1.0F, 1.0f, 1.0f};
     nObj->Properties.transform.scale = {0.4f, 0.4f, 0.4};
     nObj->Properties.transform.translation = {1.5, -2.0, 0.0};
