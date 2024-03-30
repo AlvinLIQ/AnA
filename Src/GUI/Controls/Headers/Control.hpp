@@ -2,6 +2,7 @@
 #include "../../../Core/Headers/SwapChain.hpp"
 #include "Types.hpp"
 #include "../Styles/Default/ControlStyle.hpp"
+#include "../../../Core/Resources/Headers/Texture.hpp"
 #include <limits>
 #include <memory>
 
@@ -105,7 +106,7 @@ namespace AnA
             bool IsInside(POS_F pos);
 
             glm::vec3 Color{1.0f};
-            std::unique_ptr<Texture> Texture;
+            std::unique_ptr<AnA::Texture> Texture;
         private:
             AlignType renderMode {ControlRenderMode};
         protected:

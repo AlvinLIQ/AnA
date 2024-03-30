@@ -97,6 +97,17 @@ int main()
     nObj->Properties.transform.scale = {0.4f, 0.4f, 0.4};
     nObj->Properties.transform.translation = {1.5, 0.3, 0.0};
     SceneObjects.Append(nObj);
+    /*
+    for (int i = 0; i < 90; i++)
+    {
+        nObj = new Object;
+        App::CreateCubeModel(nObj->Model);
+        nObj->Properties.sType = ANA_MODEL;
+        nObj->Color = {1.0F, 1.0f, 1.0f};
+        nObj->Properties.transform.scale = {drand48(), drand48(), drand48()};
+        nObj->Properties.transform.translation = {drand48(), drand48(), drand48()};
+        SceneObjects.Append(nObj);
+    }*/
 /*
     nObj = new Object;
     nObj->Model = aApp->Get2DModel();
