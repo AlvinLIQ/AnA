@@ -17,6 +17,9 @@ ResourceManager::ResourceManager(Device& mDevice) : aDevice {mDevice}
     GlobalLight = new Lights::Light(aDevice);
 
     createDefaultShaders();
+#ifdef ANA_INCLUDE_CONTROL
+    Controls::Control::InitControl(SwapChain::GetCurrent());
+#endif
 }
 
 ResourceManager::~ResourceManager()

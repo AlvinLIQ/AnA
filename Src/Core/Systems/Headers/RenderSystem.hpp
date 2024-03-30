@@ -13,7 +13,7 @@ namespace AnA
             RenderSystem(Device& mDevice, SwapChain& mSwapChain);
             ~RenderSystem();
 
-            void RenderObjects(VkCommandBuffer commandBuffer, Objects &objects, Shader& shader);
+            void RenderObjects(VkCommandBuffer commandBuffer, Objects& objects, Shader& shader);
             static RenderSystem* GetCurrent();
         private:
             Device& aDevice;

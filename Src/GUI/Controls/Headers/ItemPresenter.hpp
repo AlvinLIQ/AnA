@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Control.hpp"
+#include <vulkan/vulkan_core.h>
 
 namespace AnA
 {
@@ -12,14 +13,9 @@ namespace AnA
             ItemPresenter();
             ~ItemPresenter();
             
-            void Child(Control* newItem)
-            {
-                if (item != nullptr)
-                    delete item;
+            void Child(Control* newItem);
 
-                item = newItem;
-            }
-
+            void Draw(VkCommandBuffer commandBuffer);
         protected:
             Control* item;
         };
