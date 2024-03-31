@@ -1,6 +1,7 @@
 #include "Headers/ResourceManager.hpp"
 #include "../Headers/SwapChain.hpp"
 #include "../Headers/ShaderCodes.hpp"
+#include <vulkan/vulkan_core.h>
 
 using namespace AnA;
 using namespace Resource;
@@ -209,4 +210,5 @@ void ResourceManager::createDefaultShaders()
 
     auto offscreenRenderPass = SwapChain::GetCurrent()->GetOffscreenRenderPass();
     Shaders.push_back(new Shader(aDevice, ShadowMapping_vert, offscreenRenderPass));
+    Shaders.push_back(new Shader(aDevice, Shape_vert, Shape_frag, renderPass));
 }

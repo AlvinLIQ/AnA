@@ -9,6 +9,7 @@ int main()
     App app{};
     app.Init();
     Controls::StackPanel* mainControl = new Controls::StackPanel();
+    mainControl->Color = glm::vec3(1.0);
     
     Resource::ResourceManager::GetCurrent()->MainControl = mainControl;
     app.Run();
