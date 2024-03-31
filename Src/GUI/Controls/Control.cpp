@@ -12,6 +12,11 @@ Control::Control()
     //this->Model = App::Get2DModel();
 }
 
+Control::~Control()
+{
+    
+}
+
 void Control::PrepareDraw()
 {
     auto renderSize = GetSizeForRender();

@@ -27,12 +27,17 @@ ResourceManager::~ResourceManager()
     for (auto& shader : Shaders)
         delete shader;
     
+    auto logicalDevice = aDevice.GetLogicalDevice();
     for (auto& shadowSampler : shadowSamplers)
-        vkDestroySampler(aDevice.GetLogicalDevice(), shadowSampler, nullptr);
+        vkDestroySampler(logicalDevice, shadowSampler, nullptr);
     cleanupShadowResources();
 
     delete SceneObjects;
     delete GlobalLight;
+//#ifdef ANA_INCLUDE_CONTROL
+    if (MainControl != nullptr)
+        delete MainControl;
+//#endif
 
     for (auto& mainCameraBuffer : mainCameraBuffers)
         delete mainCameraBuffer;

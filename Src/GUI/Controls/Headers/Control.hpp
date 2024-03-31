@@ -14,6 +14,7 @@ namespace AnA
         {
         public:
             Control();
+            ~Control();
             
             AlignmentType HorizontalAlignment {ControlHorizontalAlignment};
             AlignmentType VerticalAlignment {ControlVerticalAlignment};
@@ -106,7 +107,7 @@ namespace AnA
             bool IsInside(POS_F pos);
 
             glm::vec3 Color{1.0f};
-            std::unique_ptr<AnA::Texture> Texture;
+            std::unique_ptr<AnA::Texture> Texture{nullptr};
         private:
             AlignType renderMode {ControlRenderMode};
         protected:

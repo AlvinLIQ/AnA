@@ -5,9 +5,9 @@
 #include "Shader.hpp"
 #include "Lights.hpp"
 
-#ifdef ANA_INCLUDE_CONTROL
+//#ifdef ANA_INCLUDE_CONTROL
 #include "../../../GUI/Controls/Headers/Control.hpp"
-#endif
+//#endif
 
 namespace AnA
 {
@@ -35,9 +35,10 @@ namespace AnA
             std::vector<Descriptor::DescriptorConfig> GetDefaultDescriptorConfig();
 
             Lights::Light* GlobalLight;
-#ifdef ANA_INCLUDE_CONTROL
-            Controls::Control* MainControl;
-#endif
+//#ifdef ANA_INCLUDE_CONTROL
+            AnA::Controls::Control* MainControl = NULL;
+//#endif
+
             void UpdateResources();
         private:
             Device& aDevice;

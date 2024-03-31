@@ -8,10 +8,9 @@ int main()
 {
     App app{};
     app.Init();
-    //Controls::StackPanel* mainControl = new Controls::StackPanel();
+    Controls::StackPanel* mainControl = new Controls::StackPanel();
     
-
-    //Resource::ResourceManager::GetCurrent()->MainControl = mainControl;
+    Resource::ResourceManager::GetCurrent()->MainControl = mainControl;
     app.Run();
     return 0;
 }
