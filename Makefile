@@ -49,7 +49,7 @@ $(ana): $(objects) $(editor:.cpp=.o)
 demo: $(objects) $(demo_controls:.cpp=.o)
 	$(cpp) $^ $(libs) -g -o $@ -std=c++20
 
--include $(depends)
+-include $(depends) $(editor:.cpp=.d) $(demo_controls:.cpp=.d)
 
 %.o : %.cpp Makefile
 	$(cpp) $(cflags) -g -MMD -MP -c $< -o $@ -std=c++20

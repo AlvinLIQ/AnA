@@ -20,19 +20,13 @@ namespace AnA
         alignas(16) glm::vec3 color;
     };
 
-    struct ItemProperties
-    {
-        Transform transform;
-        std::optional<glm::vec3> color;
-    };
-
     class Object
     {
     public:
         using id_t = unsigned int;
 
         Object();
-        virtual ~Object();
+        ~Object();
 
         id_t GetId()
         {
@@ -41,17 +35,8 @@ namespace AnA
 
         std::shared_ptr<Model> Model;
         glm::vec3 Color{};
-        ItemProperties Properties;
-
+        AnA::Transform Transform;
         std::unique_ptr<Texture> Texture;
-        
-        static void CreateShape(glm::vec2 offset, glm::vec2 size, std::optional<glm::vec3> color, ItemProperties* pRectangleProperties)
-        {
-            pRectangleProperties->transform.translation = {offset , 0.f};
-            pRectangleProperties->transform.scale = {size, 1.f};
-            if (color.has_value())
-                pRectangleProperties->color = color;
-        }
 
         virtual void PrepareDraw();
     private:
@@ -171,7 +156,7 @@ namespace AnA
                 for (uint32_t i = 0; i < updateRange.y; i++)
                 {
                     objects[updateRange.x + i]->PrepareDraw();
-                    staggingBufferData[updateRange.x + i] = {objects[updateRange.x + i]->Properties.transform.mat4()};
+                    staggingBufferData[updateRange.x + i] = {objects[updateRange.x + i]->Transform.mat4()};
                 }
                 regions.push_back(region);
             }
