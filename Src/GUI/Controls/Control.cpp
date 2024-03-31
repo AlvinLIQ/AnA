@@ -26,11 +26,6 @@ void Control::PrepareDraw()
     ControlOffset = renderOffset;
 }
 
-void Control::Draw(VkCommandBuffer commandBuffer)
-{
-    //Model->Draw(commandBuffer);
-}
-
 void Control::InitControl(SwapChain* swapChain)
 {
     aSwapChain = swapChain;

@@ -18,9 +18,9 @@ ResourceManager::ResourceManager(Device& mDevice) : aDevice {mDevice}
     GlobalLight = new Lights::Light(aDevice);
 
     createDefaultShaders();
-#ifdef ANA_INCLUDE_CONTROL
+//#ifdef ANA_INCLUDE_CONTROL
     Controls::Control::InitControl(SwapChain::GetCurrent());
-#endif
+//#endif
 }
 
 ResourceManager::~ResourceManager()
@@ -108,7 +108,7 @@ std::vector<Descriptor::DescriptorConfig> ResourceManager::GetDefaultDescriptorC
     pConfig = &descriptorConfigs[DEFAULT_SSBO_LAYOUT];
     pConfig->binding = 0;
     pConfig->descriptorCount = MAX_FRAMES_IN_FLIGHT;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
     pConfig->buffers = SceneObjects->GetBuffers();
     pConfig->bufferSize = MAX_OBJECTS_SIZE;

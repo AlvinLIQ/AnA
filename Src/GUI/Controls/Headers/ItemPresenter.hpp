@@ -15,7 +15,7 @@ namespace AnA
             
             void Child(Control* newItem);
 
-            void Draw(VkCommandBuffer commandBuffer);
+            void PrepareDraw();
         protected:
             Control* item;
         };

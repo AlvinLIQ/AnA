@@ -33,8 +33,8 @@ struct Object{
     mat4 model;
 };
 
-layout(std140, set = 1, binding = 0) buffer ObjectBuffer {
-    Object objects[];
+layout(std140, set = 1, binding = 0) uniform ObjectBuffer {
+    Object objects[10];
 } objectBuffer;
 
 layout(set = 3, binding = 0) uniform sampler2D texSampler;

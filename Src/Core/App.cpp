@@ -138,10 +138,10 @@ void App::Run()
         
         if (auto commandBuffer = aRenderer->BeginFrame())
         {
-            if (aResourceManager->SceneObjects->BeginStorageBufferUpdate())
+            if (aResourceManager->SceneObjects->BeginBufferUpdate())
             {
-                aResourceManager->SceneObjects->CommitStorageBufferUpdate(commandBuffer);
-                aResourceManager->SceneObjects->EndStorageBufferUpdate();
+                aResourceManager->SceneObjects->CommitBufferUpdate(commandBuffer);
+                aResourceManager->SceneObjects->EndBufferUpdate();
                 aShadowSystem->BeginRenderPass(commandBuffer);
                 aShadowSystem->RenderShadows(commandBuffer, *aResourceManager->SceneObjects, *aResourceManager->Shaders[2]);
                 aShadowSystem->EndRenderPass(commandBuffer);

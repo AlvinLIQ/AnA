@@ -93,7 +93,7 @@ int main()
     nObj->Transform.translation = {1.5, 0.3, 0.0};
     SceneObjects.Append(nObj);
     /*
-    for (int i = 0; i < 90; i++)
+    for (int i = 0; i < 990; i++)
     {
         nObj = new Object;
         App::CreateCubeModel(nObj->Model);

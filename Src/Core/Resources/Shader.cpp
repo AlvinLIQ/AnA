@@ -127,9 +127,9 @@ void Shader::createDescriptors(std::vector<Descriptor::DescriptorConfig>& descri
         descriptors.push_back(descriptor);
         for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
         {
-            if (descriptor->GetSets().size() > i)
+            if (descriptor->GetSets().size())
             {
-                descriptorSets[i].push_back(descriptor->GetSets()[i]);
+                descriptorSets[i].push_back(descriptor->GetSets()[i % descriptor->GetSets().size()]);
             }
             else
             {
