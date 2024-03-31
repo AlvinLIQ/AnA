@@ -147,7 +147,8 @@ void App::Run()
                 aShadowSystem->EndRenderPass(commandBuffer);
             }
             aRenderer->BeginSwapChainRenderPass(commandBuffer);
-            aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer);
+            if (aResourceManager->SceneObjects->Get().size())
+                aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer);
             aRenderer->EndSwapChainRenderPass(commandBuffer);
             aRenderer->EndFrame();
         }

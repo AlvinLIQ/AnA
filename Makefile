@@ -20,7 +20,9 @@ else
 	rm = rm
 endif
 
-sources := $(wildcard Src/Core/*.cpp Src/Core/*/*.cpp Src/GUI/Controls/*.cpp Src/Editors/*.cpp)
+sources := $(wildcard Src/Core/*.cpp Src/Core/*/*.cpp Src/GUI/Controls/*.cpp)
+editor := $(wildcard Src/Editors/*.cpp)
+demo_controls = Src/Demo/AnAControls.cpp
 objects = $(sources:.cpp=.o)
 depends = $(sources:.cpp=.d)
 
@@ -30,8 +32,6 @@ temp2 = $(temp:.comp=_comp.spv)
 shaderspv = $(temp2:.frag=_frag.spv)
 
 all: shader $(ana)
-
-vert:
 
 shader: $(shaderspv)
 	$(cc) $(cflags) $(libs) -lSPIRV-Tools-shared Src/Core/ShaderCodes/ShaderCodes.c -o $(shader) -std=c2x
@@ -43,7 +43,10 @@ shader: $(shaderspv)
 %_comp.spv : %.comp
 	glslc $< -o Shaders/$(@F) $(shaderArgs)
 
-$(ana): $(objects)
+$(ana): $(objects) $(editor:.cpp=.o)
+	$(cpp) $^ $(libs) -g -o $@ -std=c++20
+
+demo: $(objects) $(demo_controls:.cpp=.o)
 	$(cpp) $^ $(libs) -g -o $@ -std=c++20
 
 -include $(depends)
