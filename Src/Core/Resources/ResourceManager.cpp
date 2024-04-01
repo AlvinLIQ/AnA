@@ -206,9 +206,7 @@ void ResourceManager::createDefaultShaders()
 {
     auto renderPass = SwapChain::GetCurrent()->GetRenderPass();
     Shaders.push_back(new Shader(aDevice, Basic_vert, Basic_frag, renderPass));
-    Shaders.push_back(new Shader(aDevice, Line_vert, Line_frag, renderPass));
-
+    Shaders.push_back(new Shader(aDevice, Shape_vert, Shape_frag, renderPass));
     auto offscreenRenderPass = SwapChain::GetCurrent()->GetOffscreenRenderPass();
     Shaders.push_back(new Shader(aDevice, ShadowMapping_vert, offscreenRenderPass));
-    Shaders.push_back(new Shader(aDevice, Shape_vert, Shape_frag, renderPass));
 }

@@ -103,6 +103,7 @@ void App::Run()
     auto prevTime = std::chrono::high_resolution_clock::now();
     
     aResourceManager->UpdateCamera(aRenderer->GetAspect());
+    bool rendererNeedUpdate;
     while(!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -115,7 +116,7 @@ void App::Run()
         if (aInputManager->CheckAndRunCallbacks())
             camera.UpdateViewMatrix();
 
-        if (aRenderer->NeedUpdate())
+        if ((rendererNeedUpdate = aRenderer->NeedUpdate()))
         {
             aResourceManager->UpdateCamera(aRenderer->GetAspect());
             aResourceManager->UpdateResources();
@@ -124,7 +125,7 @@ void App::Run()
         aResourceManager->GlobalLight->UpdateBuffers(aResourceManager->LightCamera, GetSwapChain().CurrentFrame);
         //Render Shadow Map
         //auto offscreenCommandBuffer = aRenderer->GetOffscreenCommandBuffer();
-        if (aRenderer->NeedUpdate() || aResourceManager->SceneObjects->BeginCommandBufferUpdate())
+        if (rendererNeedUpdate || aResourceManager->SceneObjects->BeginCommandBufferUpdate())
         {
             //Record Objects
             aRenderer->RecordSecondaryCommandBuffers([](VkCommandBuffer secondaryCommandBuffer)
@@ -146,6 +147,13 @@ void App::Run()
                 aShadowSystem->RenderShadows(commandBuffer, *aResourceManager->SceneObjects, *aResourceManager->Shaders[2]);
                 aShadowSystem->EndRenderPass(commandBuffer);
             }
+            else if (rendererNeedUpdate)
+            {
+                aShadowSystem->BeginRenderPass(commandBuffer);
+                aShadowSystem->RenderShadows(commandBuffer, *aResourceManager->SceneObjects, *aResourceManager->Shaders[2]);
+                aShadowSystem->EndRenderPass(commandBuffer);
+            }
+
             aRenderer->BeginSwapChainRenderPass(commandBuffer);
             if (aResourceManager->SceneObjects->Get().size())
                 aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer);
