@@ -43,14 +43,6 @@ void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, Objects &objects
             sets.data(), 0, nullptr);
 
         object->Model->Bind(commandBuffer);
-        ObjectPushConstantData push{};
-        push.color = object->Color;
-        vkCmdPushConstants(commandBuffer, 
-        shader.GetPipelineLayout(),
-        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-        0,
-        sizeof(ObjectPushConstantData),
-        &push);
 
         object->Model->Draw(commandBuffer, i);
     }

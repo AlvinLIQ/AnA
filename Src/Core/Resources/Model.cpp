@@ -194,6 +194,14 @@ void Model::Bind(VkCommandBuffer commandBuffer)
         vkCmdBindIndexBuffer(commandBuffer, indexBuffer->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
 }
 
+void Model::Bind(VkCommandBuffer commandBuffer, VkDeviceSize& vertexOffset, VkDeviceSize& indexOffset)
+{
+    VkBuffer buffers[] = {vertexBuffer->GetBuffer()};
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, &vertexOffset);
+    if (hasIndexBuffer)
+        vkCmdBindIndexBuffer(commandBuffer, indexBuffer->GetBuffer(), indexOffset, VK_INDEX_TYPE_UINT32);
+}
+
 void Model::Draw(VkCommandBuffer commandBuffer, Index instanceIndex)
 {
     if (hasIndexBuffer)
