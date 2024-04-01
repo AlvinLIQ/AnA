@@ -55,4 +55,4 @@ demo: $(objects) $(demo_controls:.cpp=.o)
 	$(cpp) $(cflags) -g -MMD -MP -c $< -o $@ -std=c++20
 
 clean:
-	$(rm) $(objects) $(depends)
+	$(rm) $(objects) $(depends) $(editor:.cpp=.d) $(demo_controls:.cpp=.d)
