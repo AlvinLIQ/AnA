@@ -10,6 +10,7 @@
 ### To do
 
 * [X] Lighting System
+* [ ] Batching
 * [ ] Designer
 
 ### Screenshots
