@@ -155,6 +155,76 @@ void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shar
     model = std::make_shared<Model>(mDevice, modelInfo);
 }
 
+void Model::GetVerticesFromFile(const char *filePath, std::vector<Vertex>& vertices)
+{
+    tinyobj::attrib_t attrib;
+    std::vector<tinyobj::shape_t> shapes;
+    std::vector<tinyobj::material_t> materials;
+    std::string warn, err;
+
+    if (!tinyobj::LoadObj(&attrib,& shapes,& materials,& warn,& err, filePath, "Models/"))
+        throw std::runtime_error(warn + err);
+
+    
+    std::unordered_map<Vertex, Index, VertexHash> verticesMap;
+    for (const auto& shape : shapes)
+    {
+        for (int i = 0; i < shape.mesh.indices.size(); i++)
+        {
+            const auto& index = shape.mesh.indices[i];
+            Vertex vertex{};
+
+            if (index.vertex_index >= 0)
+            {
+                vertex.position =
+                {
+                    attrib.vertices[3 * index.vertex_index],
+                    attrib.vertices[3 * index.vertex_index + 1],
+                    attrib.vertices[3 * index.vertex_index + 2]
+                };
+                
+                auto colorIndex = 3 * index.vertex_index + 2;
+                if (colorIndex < attrib.colors.size())
+                {
+                    vertex.color = 
+                    {
+                        attrib.colors[colorIndex - 2],
+                        attrib.colors[colorIndex - 1],
+                        attrib.colors[colorIndex],
+                    };
+                }
+                if (materials.size())
+                {
+                    vertex.color = 
+                    {
+                        materials[0].diffuse[0],
+                        materials[0].diffuse[1],
+                        materials[0].diffuse[2]
+                    };
+                }
+            }
+            if (index.normal_index >= 0)
+            {
+                vertex.normal =
+                {
+                    attrib.normals[3 * index.normal_index],
+                    attrib.normals[3 * index.normal_index + 1],
+                    attrib.normals[3 * index.normal_index + 2]
+                };
+            }
+            if (index.texcoord_index >= 0)
+            {
+                vertex.uv =
+                {
+                    attrib.texcoords[2 * index.texcoord_index],
+                    attrib.texcoords[2 * index.texcoord_index + 1],
+                };
+            }
+            vertices.push_back(vertex);
+        }
+    }
+}
+
 void Model::createVertexBuffers()
 {
     vertexCount = static_cast<uint32_t>(vertices.size());

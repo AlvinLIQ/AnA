@@ -56,7 +56,7 @@ int main()
     object->Transform.translation = {0.f, 0.f , 1.5f};
 
     //object->Model = App::Get2DModel();
-    Model::CreateModelFromFile(aApp->GetDevice(), "Models/torus.obj", object->Model);
+    Model::CreateModelFromFile(aApp->GetDevice(), "Models/cube.obj", object->Model);
     object->Texture = std::make_unique<Texture>("Textures/texture.png", aApp->GetDevice());
 
     SceneObjects.Append(std::move(object));
