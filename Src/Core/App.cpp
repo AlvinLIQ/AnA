@@ -89,8 +89,15 @@ void App::Init()
     aShadowSystem = new Systems::ShadowSystem(*aDevice, &aRenderer->GetSwapChain());
 }
 
-void App::Run()
+void App::Run(RecordCallBack recordCallBack)
 {
+    if (recordCallBack == nullptr)
+        recordCallBack = [](VkCommandBuffer secondaryCommandBuffer)
+            {
+                Systems::RenderSystem::GetCurrent()->RenderObjects(secondaryCommandBuffer, 
+                    *Resource::ResourceManager::GetCurrent()->SceneObjects, 
+                    *Resource::ResourceManager::GetCurrent()->Shaders[0]);
+            };
     Cameras::Camera& camera = aResourceManager->MainCamera, &lightCamera = aResourceManager->LightCamera;
     Cameras::CameraController cameraController{camera};
     auto& activeProfile = aInputManager->GetActiveProfile();
@@ -128,12 +135,7 @@ void App::Run()
         if (rendererNeedUpdate || aResourceManager->SceneObjects->BeginCommandBufferUpdate())
         {
             //Record Objects
-            aRenderer->RecordSecondaryCommandBuffers([](VkCommandBuffer secondaryCommandBuffer)
-            {
-                Systems::RenderSystem::GetCurrent()->RenderObjects(secondaryCommandBuffer, 
-                    *Resource::ResourceManager::GetCurrent()->SceneObjects, 
-                    *Resource::ResourceManager::GetCurrent()->Shaders[0]);
-            });
+            aRenderer->RecordSecondaryCommandBuffers(recordCallBack);
             aResourceManager->SceneObjects->EndCommandBufferUpdate();
         }
         

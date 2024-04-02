@@ -22,7 +22,7 @@ endif
 
 sources := $(wildcard Src/Core/*.cpp Src/Core/*/*.cpp Src/GUI/Controls/*.cpp)
 editor := $(wildcard Src/Editors/*.cpp)
-demo_controls = Src/Demo/AnAControls.cpp
+example_batching = Src/Examples/example_batching.cpp
 objects = $(sources:.cpp=.o)
 depends = $(sources:.cpp=.d)
 
@@ -46,13 +46,13 @@ shader: $(shaderspv)
 $(ana): $(objects) $(editor:.cpp=.o)
 	$(cpp) $^ $(libs) -g -o $@ -std=c++20
 
-demo: $(objects) $(demo_controls:.cpp=.o)
+example: $(objects) $(example_batching:.cpp=.o)
 	$(cpp) $^ $(libs) -g -o $@ -std=c++20
 
--include $(depends) $(editor:.cpp=.d) $(demo_controls:.cpp=.d)
+-include $(depends) $(editor:.cpp=.d) $(example_batching:.cpp=.d)
 
 %.o : %.cpp Makefile
 	$(cpp) $(cflags) -g -MMD -MP -c $< -o $@ -std=c++20
 
 clean:
-	$(rm) $(objects) $(depends) $(editor:.cpp=.d) $(demo_controls:.cpp=.d)
+	$(rm) $(objects) $(depends) $(editor:.cpp=.o) $(example_batching:.cpp=.o) $(editor:.cpp=.d) $(example_batching:.cpp=.d)

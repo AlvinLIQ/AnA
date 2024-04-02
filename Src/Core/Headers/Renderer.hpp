@@ -10,6 +10,7 @@
 
 namespace AnA
 {
+    typedef void(*RecordCallBack)(VkCommandBuffer commandBuffer);
     class Renderer
     {
     public:
@@ -57,7 +58,7 @@ namespace AnA
 
         VkCommandBuffer BeginFrame();
 
-        void RecordSecondaryCommandBuffers(void(*recordCallBack)(VkCommandBuffer commandBuffer));
+        void RecordSecondaryCommandBuffers(RecordCallBack recordCallBack);
         void ExcuteSecondaryCommandBuffer(VkCommandBuffer commandBuffer);
 
         void EndFrame();

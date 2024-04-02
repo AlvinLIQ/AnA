@@ -23,7 +23,7 @@ namespace AnA
         App &operator=(const App&) = delete;
 
         void Init();
-        void Run();
+        void Run(RecordCallBack recordCallBack = nullptr);
         void Cleanup();
         void Exit();
 

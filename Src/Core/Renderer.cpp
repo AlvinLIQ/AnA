@@ -59,7 +59,7 @@ VkCommandBuffer Renderer::BeginFrame()
     return commandBuffer;
 }
 
-void Renderer::RecordSecondaryCommandBuffers(void(*recordCallBack)(VkCommandBuffer commandBuffer))
+void Renderer::RecordSecondaryCommandBuffers(RecordCallBack recordCallBack)
 {
     VkCommandBufferInheritanceInfo inheritanceInfo{};
     inheritanceInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
