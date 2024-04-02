@@ -20,15 +20,16 @@ using namespace AnA;
 
 Model::Model(Device& mDevice, const ModelInfo& modelInfo) : aDevice{mDevice}
 {
-    createVertexBuffers(modelInfo.vertices);
+    vertices = modelInfo.vertices;
+    indices = modelInfo.indices;
+    createVertexBuffers();
     if ((hasIndexBuffer = modelInfo.indices.size() > 0))
     {
-        createIndexBuffers(modelInfo.indices);
+        createIndexBuffers();
         indexStep = modelInfo.indexStep;
     }
     transforms = modelInfo.transforms;
     vertexProjections = modelInfo.vertexProjections;
-    vertices = modelInfo.vertices;
 }
 
 Model::~Model()
@@ -154,7 +155,7 @@ void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shar
     model = std::make_shared<Model>(mDevice, modelInfo);
 }
 
-void Model::createVertexBuffers(const std::vector<Vertex>& vertices)
+void Model::createVertexBuffers()
 {
     vertexCount = static_cast<uint32_t>(vertices.size());
     assert(vertexCount >= 3 && "Vertex count must be at least 3");
@@ -170,7 +171,7 @@ void Model::createVertexBuffers(const std::vector<Vertex>& vertices)
     vertexBuffer->CopyToBuffer(stagingBuffer, bufferSize);
 }
 
-void Model::createIndexBuffers(const std::vector<Index>& indices)
+void Model::createIndexBuffers()
 {
     indexCount = static_cast<uint32_t>(indices.size());
     VkDeviceSize bufferSize = sizeof(indices[0]) * indexCount;

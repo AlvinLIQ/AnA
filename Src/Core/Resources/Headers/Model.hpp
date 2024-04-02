@@ -69,6 +69,11 @@ namespace AnA
             return vertices;
         }
 
+        std::vector<Index>& GetIndices()
+        {
+            return indices;
+        }
+
         std::vector<glm::mat3>& GetTransforms()
         {
             return transforms;
@@ -86,10 +91,11 @@ namespace AnA
         void Bind(VkCommandBuffer commandBuffer, VkDeviceSize& vertexOffset, VkDeviceSize& indexOffset);
         void Draw(VkCommandBuffer commandBuffer, Index instanceIndex = 0);
     private:
-        void createVertexBuffers(const std::vector<Vertex>& vertices);
-        void createIndexBuffers(const std::vector<Index>& indices);
+        void createVertexBuffers();
+        void createIndexBuffers();
 
         std::vector<Vertex> vertices;
+        std::vector<Index> indices;
         std::vector<glm::mat3> transforms;
         std::vector<glm::vec2> vertexProjections;
 

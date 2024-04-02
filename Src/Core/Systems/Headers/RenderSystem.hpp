@@ -14,6 +14,7 @@ namespace AnA
             ~RenderSystem();
 
             void RenderObjects(VkCommandBuffer commandBuffer, Objects& objects, Shader& shader);
+            void RenderObjectsWithBatching(VkCommandBuffer commandBuffer, Objects& objects, Shader& shader);
             static RenderSystem* GetCurrent();
         private:
             Device& aDevice;
