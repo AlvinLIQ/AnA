@@ -14,7 +14,7 @@ ResourceManager::ResourceManager(Device& mDevice) : aDevice {mDevice}
     createMainCameraBuffers();
     createShadowFramebuffers();
 
-    SceneObjects = new Objects(aDevice);
+    SceneObjects = new Meshes(aDevice);
     GlobalLight = new Lights::Light(aDevice);
 
     createDefaultShaders();
@@ -104,14 +104,6 @@ std::vector<Descriptor::DescriptorConfig> ResourceManager::GetDefaultDescriptorC
     pConfig->stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
     pConfig->buffers = GlobalLight->GetBuffers();
     pConfig->bufferSize = sizeof(Lights::LightBufferObject);
-
-    pConfig = &descriptorConfigs[DEFAULT_SSBO_LAYOUT];
-    pConfig->binding = 0;
-    pConfig->descriptorCount = MAX_FRAMES_IN_FLIGHT;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    pConfig->stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
-    pConfig->buffers = SceneObjects->GetBuffers();
-    pConfig->bufferSize = MAX_OBJECTS_SIZE;
 
     pConfig = &descriptorConfigs[DEFAULT_SAMPLER_LAYOUT];
     pConfig->binding = 0;

@@ -48,3 +48,17 @@ void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, Objects &objects
     }
 }
 
+void RenderSystem::RenderMeshes(VkCommandBuffer commandBuffer, Meshes &meshes, Shader& shader)
+{
+    shader.GetPipeline()->Bind(commandBuffer);
+    std::vector<VkDescriptorSet>& sets = shader.GetDescriptorSets()[aSwapChain.CurrentFrame];
+    if (meshes.TestTexture == nullptr)
+        meshes.TestTexture = new Texture((uint32_t)0xFFFFFFFF, aDevice);
+    sets[DEFAULT_SAMPLER_LAYOUT] = meshes.TestTexture->GetDescriptorSet();
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+        shader.GetPipelineLayout(), 0, static_cast<uint32_t>(sets.size()),
+        sets.data(), 0, nullptr);
+
+    meshes.Bind(commandBuffer);
+    meshes.Draw(commandBuffer);
+}

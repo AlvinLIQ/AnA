@@ -41,104 +41,24 @@ void CopyVertices(IndexedVertex &indexedVertex, std::vector<Model::Vertex> &dstV
     memcpy(dstVertices.data(), indexedVertex.vertices, sizeof(Vertex_T) * indexedVertex.vertexCount);
 }
 
+const VkDeviceSize offset = 0;
+std::vector<MeshInfo> meshInfos = 
+{
+    {"Models/cube.obj", {{3.0, 0.5, 0.0}, {11.4f, 0.02f, 11.4}}},
+    {"Models/torus.obj", {{0.f, 0.f , 1.5f}, {.7f, .7f, .7f}}},
+    {"Models/cube.obj", {{-1.5, -.5, 1.5}, {0.7f, 0.7f, 0.7f}}},
+    {"Models/cube.obj", {{1.5, -0.4, 0.0}, {0.4f, 0.4f, 0.4}}}
+};
+
 int main()
 {
-    App* aApp = new App();
-    aApp->Init();
-
-    auto& SceneObjects = *Resource::ResourceManager::GetCurrent()->SceneObjects;
-
-    Object* object = new Object;
-    object->Color = {0.1f, 0.2f, 0.3f};
-
-    object->Transform.scale = {.7f, .7f, .7f};
-    object->Transform.rotation = glm::vec3(0.04f * glm::two_pi<float>(), 0.f, 0.f);
-    object->Transform.translation = {0.f, 0.f , 1.5f};
-
-    //object->Model = App::Get2DModel();
-    Model::CreateModelFromFile(aApp->GetDevice(), "Models/torus.obj", object->Model);
-    object->Texture = std::make_unique<Texture>("Textures/texture.png", aApp->GetDevice());
-
-    SceneObjects.Append(std::move(object));
-
-    Object* nObj = new Object;
-    nObj->Color = {1.0, 1.0, 0.0};
-    nObj->Transform = object->Transform;
-    //nObj->Transform.scale = {.0001, .0001, .0001};
-    nObj->Transform.rotation = {glm::two_pi<float>() / 4, 0.f, 0.f};
-    
-    nObj->Transform.translation = {-1.5, -.5, 1.5};
-    App::CreateCubeModel(nObj->Model);
-    //nObj->Texture = std::make_unique<Texture>("Textures/test.jpg", aApp->GetDevice());
-    SceneObjects.Append(nObj);
-
-    nObj = new Object;
-    App::CreateCubeModel(nObj->Model);
-    nObj->Color = {0.5f, 0.5f, .5f};
-    nObj->Transform.scale = {11.4f, 0.02f, 11.4};
-    nObj->Transform.translation = {3.0, 0.5, 0.0};
-    SceneObjects.Append(nObj);
-/*
-    nObj = new Object;
-    Model::CreateModelFromFile(aApp->GetDevice(), "Models/sphere.obj", nObj->Model);
-    nObj->Color = {1.0F, 1.0f, 1.0f};
-    nObj->Transform.scale = {0.4f, 0.4f, 0.4};
-    nObj->Transform.translation = {0.0, -0.2, 0.0};
-    SceneObjects.Append(nObj);*/
-
-    nObj = new Object;
-    App::CreateCubeModel(nObj->Model);
-    nObj->Color = {1.0F, 1.0f, 1.0f};
-    nObj->Transform.scale = {0.4f, 0.4f, 0.4};
-    nObj->Transform.translation = {1.5, 0.3, 0.0};
-    SceneObjects.Append(nObj);
-    /*
-    for (int i = 0; i < 990; i++)
-    {
-        nObj = new Object;
-        App::CreateCubeModel(nObj->Model);
-        nObj->Color = {1.0F, 1.0f, 1.0f};
-        nObj->Transform.scale = {drand48(), drand48(), drand48()};
-        nObj->Transform.translation = {drand48(), drand48(), drand48()};
-        SceneObjects.Append(nObj);
-    }*/
-/*
-    nObj = new Object;
-    nObj->Model = aApp->Get2DModel();
-    nObj->Color = {1.0F, 1.0f, 1.0f};
-    nObj->Transform.scale = {0.02f, 1.0f, 0.4};
-    nObj->Transform.translation = {0.0, 0.0, 0.0};
-    SceneObjects.Append(nObj);
-
-    nObj = new Object;
-    nObj->Model = aApp->Get2DModel();
-    nObj->Color = {1.0F, 1.0f, 1.0f};
-    nObj->Transform.scale = {1.0f, 0.02f, 0.4};
-    nObj->Transform.translation = {0.0, 0.0, 0.0};
-    SceneObjects.Append(nObj);*/
-
-/*  
-    Control::InitControl(&aApp->GetSwapChain());
-    
-    Button* button = new Button;
-    button->Model = App::Get2DModel();
-    button->HorizontalAlignment = AlignmentType::Start;
-    button->VerticalAlignment = AlignmentType::Start;
-    button->Color = glm::vec3(1.0f);
-    button->Properties.color = glm::vec3(1.0f);
-    //button->Texture = nObj->Texture;
-    SceneObjects.Append(button);
-
-    TextBlock* textBlock = new TextBlock;
-    textBlock->Model = App::Get2DModel();
-    textBlock->Text("Test123");
-    textBlock->Transform.scale = glm::vec3(.3f);
-    textBlock->Properties.color = glm::vec3(1.0);
-
-    SceneObjects.Append(textBlock);
-    */
-    aApp->Run();
-    delete aApp;
-    aApp = nullptr;
+    App app{};
+    app.Init();
+    auto meshes = Resource::ResourceManager::GetCurrent()->SceneObjects;
+    //std::vector<std::string> files(1000, "Models/cube.obj");
+    for (int i = 0; i < 1000; i++)
+        meshInfos.push_back({"Models/cube.obj", {{drand48(), drand48(), drand48()}, {drand48(), drand48(), drand48()}}});
+    meshes->Append(meshInfos);
+    app.Run();
     return 0;
 }

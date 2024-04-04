@@ -61,7 +61,9 @@ namespace AnA
 
         void* mappedData = nullptr;
         VkBuffer buffer = VK_NULL_HANDLE;
-        VkDeviceMemory bufferMemory = VK_NULL_HANDLE;
         VkDeviceSize bufferSize = 0;
+        VkBufferUsageFlags bufferUsage;
+        VkDeviceMemory bufferMemory = VK_NULL_HANDLE;
+        VkMemoryPropertyFlags bufferMemoryProperties;
     };
 }

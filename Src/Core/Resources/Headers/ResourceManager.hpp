@@ -1,6 +1,6 @@
 #pragma once
 #include "../../Camera/Headers/Camera.hpp"
-#include "Object.hpp"
+#include "Mesh.hpp"
 #include "Descriptor.hpp"
 #include "Shader.hpp"
 #include "Lights.hpp"
@@ -30,7 +30,7 @@ namespace AnA
             void UpdateCamera(float aspect);
             void UpdateCameraBuffer();
 
-            Objects* SceneObjects;
+            Meshes* SceneObjects;
             std::vector<Shader*> Shaders;
             std::vector<Descriptor::DescriptorConfig> GetDefaultDescriptorConfig();
 

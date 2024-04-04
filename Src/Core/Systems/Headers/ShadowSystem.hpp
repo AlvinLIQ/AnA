@@ -1,6 +1,6 @@
 #pragma once
 #include "../../Headers/SwapChain.hpp"
-#include "../../Resources/Headers/Object.hpp"
+#include "../../Resources/Headers/Mesh.hpp"
 
 namespace AnA
 {
@@ -14,7 +14,7 @@ namespace AnA
             static ShadowSystem* GetCurrent();
 
             VkExtent2D GetExtent();
-            void RenderShadows(VkCommandBuffer commandBuffer, Objects& objects, Shader& shader);
+            void RenderShadows(VkCommandBuffer commandBuffer, Meshes& meshes, Shader& shader);
 
             void BeginRenderPass(VkCommandBuffer& commandBuffer);
             void EndRenderPass(VkCommandBuffer& commandBuffer);

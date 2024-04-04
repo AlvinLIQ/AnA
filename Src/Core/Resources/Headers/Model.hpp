@@ -85,7 +85,7 @@ namespace AnA
         }
 
         static void CreateModelFromFile(Device& mDevice, const char* filePath, std::shared_ptr<Model>& model);
-        static void GetVerticesFromFile(const char *filePath, std::vector<Vertex>& vertices);
+        static void CreateMeshFromFile(const char *filePath, std::vector<Vertex>& vertices, std::vector<Index>& indices, size_t vertexOffset = 0);
         void LoadMaterialFromFile(const char* filePath);
         
         void Bind(VkCommandBuffer commandBuffer);

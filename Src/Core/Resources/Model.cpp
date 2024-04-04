@@ -43,86 +43,8 @@ Model::~Model()
 void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shared_ptr<Model>& model)
 {
     ModelInfo modelInfo{};
-    tinyobj::attrib_t attrib;
-    std::vector<tinyobj::shape_t> shapes;
-    std::vector<tinyobj::material_t> materials;
-    std::string warn, err;
+    CreateMeshFromFile(filePath, modelInfo.vertices, modelInfo.indices);
 
-    if (!tinyobj::LoadObj(&attrib,& shapes,& materials,& warn,& err, filePath, "Models/"))
-        throw std::runtime_error(warn + err);
-
-    modelInfo.vertices.clear();
-    modelInfo.indices.clear();
-
-    std::unordered_map<Vertex, Index, VertexHash> verticesMap;
-    for (const auto& shape : shapes)
-    {
-        for (int i = 0; i < shape.mesh.indices.size(); i++)
-        {
-            const auto& index = shape.mesh.indices[i];
-            Vertex vertex{};
-
-            if (index.vertex_index >= 0)
-            {
-                vertex.position =
-                {
-                    attrib.vertices[3 * index.vertex_index],
-                    attrib.vertices[3 * index.vertex_index + 1],
-                    attrib.vertices[3 * index.vertex_index + 2]
-                };
-                
-                auto colorIndex = 3 * index.vertex_index + 2;
-                if (colorIndex < attrib.colors.size())
-                {
-                    vertex.color = 
-                    {
-                        attrib.colors[colorIndex - 2],
-                        attrib.colors[colorIndex - 1],
-                        attrib.colors[colorIndex],
-                    };
-                }
-                if (materials.size())
-                {
-                    vertex.color = 
-                    {
-                        materials[0].diffuse[0],
-                        materials[0].diffuse[1],
-                        materials[0].diffuse[2]
-                    };
-                }
-            }
-            if (index.normal_index >= 0)
-            {
-                vertex.normal =
-                {
-                    attrib.normals[3 * index.normal_index],
-                    attrib.normals[3 * index.normal_index + 1],
-                    attrib.normals[3 * index.normal_index + 2]
-                };
-            }
-            if (index.texcoord_index >= 0)
-            {
-                vertex.uv =
-                {
-                    attrib.texcoords[2 * index.texcoord_index],
-                    attrib.texcoords[2 * index.texcoord_index + 1],
-                };
-            }
-            //if (index.normal_index + index.vertex_index + index.texcoord_index >= 0)
-            auto result = verticesMap.find(vertex);
-            if (result != verticesMap.end())
-            {
-                modelInfo.indices.push_back(result->second);
-            }
-            else
-            {
-                verticesMap.insert(std::pair<Vertex, Index>(vertex, modelInfo.vertices.size()));
-                modelInfo.indices.push_back(static_cast<Index>(modelInfo.vertices.size()));
-                modelInfo.vertices.push_back(vertex);
-            }
-        }
-    }
-    //printf("%llu:%llu\n", modelInfo.indices.size(), modelInfo.vertices.size());
     const glm::vec<2, int> sets[] = {{0, 1}, {0, 2}, {1, 2}};
     for (int i = 0, j, k = 0; i < modelInfo.indices.size(); i += k)
     {
@@ -155,7 +77,7 @@ void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shar
     model = std::make_shared<Model>(mDevice, modelInfo);
 }
 
-void Model::GetVerticesFromFile(const char *filePath, std::vector<Vertex>& vertices)
+void Model::CreateMeshFromFile(const char *filePath, std::vector<Vertex>& vertices, std::vector<Index>& indices, size_t vertexOffset)
 {
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
@@ -165,7 +87,6 @@ void Model::GetVerticesFromFile(const char *filePath, std::vector<Vertex>& verti
     if (!tinyobj::LoadObj(&attrib,& shapes,& materials,& warn,& err, filePath, "Models/"))
         throw std::runtime_error(warn + err);
 
-    
     std::unordered_map<Vertex, Index, VertexHash> verticesMap;
     for (const auto& shape : shapes)
     {
@@ -220,7 +141,17 @@ void Model::GetVerticesFromFile(const char *filePath, std::vector<Vertex>& verti
                     attrib.texcoords[2 * index.texcoord_index + 1],
                 };
             }
-            vertices.push_back(vertex);
+            auto result = verticesMap.find(vertex);
+            if (result != verticesMap.end())
+            {
+                indices.push_back(result->second + vertexOffset);
+            }
+            else
+            {
+                verticesMap.insert(std::pair<Vertex, Index>(vertex, vertices.size()));
+                indices.push_back(static_cast<Index>(vertices.size() + vertexOffset));
+                vertices.push_back(vertex);
+            }
         }
     }
 }

@@ -71,30 +71,27 @@ void Renderer::RecordSecondaryCommandBuffers(RecordCallBack recordCallBack)
     beginInfo.pInheritanceInfo = &inheritanceInfo;
 
     auto swapChainExtent = aSwapChain->GetExtent();
-    for (auto& secondaryCommandBuffer : secondaryCommandBuffers)
-    {
-        if (vkBeginCommandBuffer(secondaryCommandBuffer, &beginInfo) != VK_SUCCESS)
-            throw std::runtime_error("Failed to begin recording secondary buffer!");
+    auto& secondaryCommandBuffer = secondaryCommandBuffers[aSwapChain->CurrentFrame];
+    if (vkBeginCommandBuffer(secondaryCommandBuffer, &beginInfo) != VK_SUCCESS)
+        throw std::runtime_error("Failed to begin recording secondary buffer!");
 
-        VkViewport viewport{};
-        viewport.x = 0.0f;
-        viewport.y = 0.0f;
-        viewport.width = (float)swapChainExtent.width;
-        viewport.height = (float)swapChainExtent.height;
-        viewport.minDepth = 0.0f;
-        viewport.maxDepth = 1.0f;
-        vkCmdSetViewport(secondaryCommandBuffer, 0, 1, &viewport);
-        
-        VkRect2D scissor{};
-        scissor.extent = swapChainExtent;
-        scissor.offset = {0, 0};
+    VkViewport viewport{};
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
+    viewport.width = (float)swapChainExtent.width;
+    viewport.height = (float)swapChainExtent.height;
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+    vkCmdSetViewport(secondaryCommandBuffer, 0, 1, &viewport);
+    
+    VkRect2D scissor{};
+    scissor.extent = swapChainExtent;
+    scissor.offset = {0, 0};
 
-        vkCmdSetScissor(secondaryCommandBuffer, 0, 1, &scissor);
-        recordCallBack(secondaryCommandBuffer);
+    vkCmdSetScissor(secondaryCommandBuffer, 0, 1, &scissor);
+    recordCallBack(secondaryCommandBuffer);
 
-        vkEndCommandBuffer(secondaryCommandBuffer);
-    }
-
+    vkEndCommandBuffer(secondaryCommandBuffer);
 }
 
 void Renderer::ExcuteSecondaryCommandBuffer(VkCommandBuffer commandBuffer)

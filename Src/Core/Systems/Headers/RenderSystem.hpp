@@ -1,5 +1,6 @@
 #pragma once
 #include "../../Resources/Headers/Object.hpp"
+#include "../../Resources/Headers/Mesh.hpp"
 #include "../../Headers/SwapChain.hpp"
 #include <vulkan/vulkan_core.h>
 
@@ -14,6 +15,7 @@ namespace AnA
             ~RenderSystem();
 
             void RenderObjects(VkCommandBuffer commandBuffer, Objects& objects, Shader& shader);
+            void RenderMeshes(VkCommandBuffer commandBuffer, Meshes& meshes, Shader& shader);
             void RenderObjectsWithBatching(VkCommandBuffer commandBuffer, Objects& objects, Shader& shader);
             static RenderSystem* GetCurrent();
         private:

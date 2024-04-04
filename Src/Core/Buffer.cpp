@@ -1,31 +1,14 @@
 #include "Headers/Buffer.hpp"
-#include <stdexcept>
 #include <cassert>
 
 using namespace AnA;
-Buffer::Buffer(Device& mDevice, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties) : aDevice {mDevice}, bufferSize {size}
+Buffer::Buffer(Device& mDevice, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties) : aDevice {mDevice},
+ bufferSize {size}, bufferUsage{usage}, bufferMemoryProperties{properties}
 {
-    VkBufferCreateInfo bufferInfo{};
-    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    bufferInfo.size = size;
-    bufferInfo.usage = usage;
-    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-    if (vkCreateBuffer(aDevice.GetLogicalDevice(), &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
+    if (bufferSize)
     {
-        throw std::runtime_error("failed to create buffer!");
+        aDevice.CreateBuffer(size, usage, properties, buffer, bufferMemory);
     }
-
-    VkMemoryRequirements memRequirements;
-    vkGetBufferMemoryRequirements(aDevice.GetLogicalDevice(), buffer, &memRequirements);
-
-    VkMemoryAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = aDevice.FindMemoryType(memRequirements.memoryTypeBits, properties);
-    if (vkAllocateMemory(aDevice.GetLogicalDevice(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
-        throw std::runtime_error("failed to allocate buffer memory!");
-    }
-    vkBindBufferMemory(aDevice.GetLogicalDevice(), buffer, bufferMemory, 0);
 }
 
 Buffer::~Buffer()

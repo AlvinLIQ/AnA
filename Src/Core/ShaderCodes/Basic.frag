@@ -29,18 +29,11 @@ layout(set = 0, binding = 0) uniform CameraBufferObject {
     vec2 resolution;
 } cbo;
 
-struct Object{
-    mat4 model;
-};
 
-layout(std140, set = 1, binding = 0) uniform ObjectBuffer {
-    Object objects[10];
-} objectBuffer;
+layout(set = 2, binding = 0) uniform sampler2D texSampler;
+layout(set = 3, binding = 0) uniform sampler2D shadowSampler;
 
-layout(set = 3, binding = 0) uniform sampler2D texSampler;
-layout(set = 4, binding = 0) uniform sampler2D shadowSampler;
-
-layout(set = 2, binding = 0) uniform LightBufferObject {
+layout(set = 1, binding = 0) uniform LightBufferObject {
     mat4 proj;
     mat4 view;
     vec3 direction;
@@ -84,5 +77,5 @@ void main()
         visibility = 0.5;
     }
     vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility + pointLightIntensity * LIGHT_COLOR;
-    outColor = texture(texSampler, texCoord) * vec4(vec3(finalLight), 1.0);
+    outColor = vec4(vec3(fragColor * finalLight), 1.0);
 }

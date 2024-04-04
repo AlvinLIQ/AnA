@@ -94,7 +94,7 @@ void App::Run(RecordCallBack recordCallBack)
     if (recordCallBack == nullptr)
         recordCallBack = [](VkCommandBuffer secondaryCommandBuffer)
             {
-                Systems::RenderSystem::GetCurrent()->RenderObjects(secondaryCommandBuffer, 
+                Systems::RenderSystem::GetCurrent()->RenderMeshes(secondaryCommandBuffer, 
                     *Resource::ResourceManager::GetCurrent()->SceneObjects, 
                     *Resource::ResourceManager::GetCurrent()->Shaders[0]);
             };
@@ -141,10 +141,12 @@ void App::Run(RecordCallBack recordCallBack)
         
         if (auto commandBuffer = aRenderer->BeginFrame())
         {
-            if (aResourceManager->SceneObjects->BeginBufferUpdate())
+            aShadowSystem->BeginRenderPass(commandBuffer);
+                aShadowSystem->RenderShadows(commandBuffer, *aResourceManager->SceneObjects, *aResourceManager->Shaders[2]);
+                aShadowSystem->EndRenderPass(commandBuffer);
+            if (aResourceManager->SceneObjects->NeedUpdate())
             {
-                aResourceManager->SceneObjects->CommitBufferUpdate(commandBuffer);
-                aResourceManager->SceneObjects->EndBufferUpdate();
+                aResourceManager->SceneObjects->CommitBufferUpdate();
                 aShadowSystem->BeginRenderPass(commandBuffer);
                 aShadowSystem->RenderShadows(commandBuffer, *aResourceManager->SceneObjects, *aResourceManager->Shaders[2]);
                 aShadowSystem->EndRenderPass(commandBuffer);
@@ -157,14 +159,14 @@ void App::Run(RecordCallBack recordCallBack)
             }
 
             aRenderer->BeginSwapChainRenderPass(commandBuffer);
-            if (aResourceManager->SceneObjects->Get().size())
+            if (aResourceManager->SceneObjects->GetOutdatedCommandBufferCount() < MAX_FRAMES_IN_FLIGHT)
                 aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer);
             aRenderer->EndSwapChainRenderPass(commandBuffer);
             aRenderer->EndFrame();
         }
         else
         {
-            aResourceManager->SceneObjects->RequestUpdate();
+            //aResourceManager->SceneObjects->UpdateBuffers({0, -1});
         }
     }
     //waitUILoop(uiThread);

@@ -16,11 +16,7 @@ struct Object{
     mat4 model;
 };
 
-layout(std140, set = 1, binding = 0) uniform ObjectBuffer {
-    Object objects[10];
-} objectBuffer;
-
-layout(set = 2, binding = 0) uniform LightBufferObject {
+layout(set = 1, binding = 0) uniform LightBufferObject {
     mat4 proj;
     mat4 view;
     vec3 direction;
@@ -81,5 +77,5 @@ const vec3 LIGHT_DIRECTION = vec3(1., -3., 1.);
 void main()
 {
     //mat4 dView = mat4(0.999949, -0.009408, 0.003682, 0.000000, 0.000000, 0.364459, 0.931219, 0.000000, -0.010103, -0.931172, 0.364441, 0.000000, -1.931544, -0.269233, 11.256238, 1.000000);
-    gl_Position = lbo.proj * lbo.view * (objectBuffer.objects[gl_BaseInstance].model * vec4(position, 1.0));
+    gl_Position = lbo.proj * lbo.view * (vec4(position, 1.0));
 }

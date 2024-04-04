@@ -27,24 +27,17 @@ VkExtent2D ShadowSystem::GetExtent()
     return swapChain->GetExtent();
 }
 
-void ShadowSystem::RenderShadows(VkCommandBuffer commandBuffer, Objects &objects, Shader& shader)
+void ShadowSystem::RenderShadows(VkCommandBuffer commandBuffer, Meshes &meshes, Shader& shader)
 {
     vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
     shader.GetPipeline()->Bind(commandBuffer);
-    Object* object;
-    auto objectArray = objects.Get();
     std::vector<VkDescriptorSet> sets = shader.GetDescriptorSets()[swapChain->CurrentFrame];
 
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-        shader.GetPipelineLayout(), 0, 3,
+        shader.GetPipelineLayout(), 0, 2,
         sets.data(), 0, nullptr);
-    for (int i = 0; i < objectArray.size(); i++)
-    {
-        object = objectArray[i];
-
-        object->Model->Bind(commandBuffer);
-        object->Model->Draw(commandBuffer, i);
-    }
+    meshes.Bind(commandBuffer);
+    meshes.Draw(commandBuffer);
 }
 
 void ShadowSystem::BeginRenderPass(VkCommandBuffer& commandBuffer)

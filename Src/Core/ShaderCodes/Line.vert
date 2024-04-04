@@ -22,13 +22,9 @@ struct Object{
     mat4 model;
 };
 
-layout(std140, set = 1, binding = 0) uniform ObjectBuffer {
-    Object objects[10];
-};
-
 void main()
 {
     gl_PointSize = 10;
-    gl_Position = cbo.proj * cbo.view * objects[gl_BaseInstance].model * vec4(position, 1.0);
+    gl_Position = cbo.proj * cbo.view * vec4(position, 1.0);
     fragColor = color;
 }
