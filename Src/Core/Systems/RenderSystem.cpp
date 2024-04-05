@@ -1,5 +1,6 @@
 #include "Headers/RenderSystem.hpp"
 #include "../Resources/Headers/Shader.hpp"
+#include "../Resources/Headers/ResourceManager.hpp"
 #include <vulkan/vulkan_core.h>
 #include <glm/gtc/constants.hpp>
 
@@ -52,9 +53,7 @@ void RenderSystem::RenderMeshes(VkCommandBuffer commandBuffer, Meshes &meshes, S
 {
     shader.GetPipeline()->Bind(commandBuffer);
     std::vector<VkDescriptorSet>& sets = shader.GetDescriptorSets()[aSwapChain.CurrentFrame];
-    if (meshes.TestTexture == nullptr)
-        meshes.TestTexture = new Texture((uint32_t)0xFFFFFFFF, aDevice);
-    sets[DEFAULT_SAMPLER_LAYOUT] = meshes.TestTexture->GetDescriptorSet();
+    sets[DEFAULT_SAMPLER_LAYOUT] = Resource::ResourceManager::GetCurrent()->DefaultTexture->GetDescriptorSet();
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
         shader.GetPipelineLayout(), 0, static_cast<uint32_t>(sets.size()),
         sets.data(), 0, nullptr);

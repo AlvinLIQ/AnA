@@ -38,7 +38,7 @@ namespace AnA
 //#ifdef ANA_INCLUDE_CONTROL
             AnA::Controls::Control* MainControl = NULL;
 //#endif
-
+            Texture* DefaultTexture;
             void UpdateResources();
         private:
             Device& aDevice;

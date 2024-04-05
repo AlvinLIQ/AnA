@@ -49,7 +49,6 @@ namespace AnA
         {
             return outdatedCommandBufferCount;
         }
-        Texture* TestTexture{nullptr};
     private:
         Device& aDevice;
         Buffer* vertexBuffer;

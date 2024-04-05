@@ -1,5 +1,4 @@
 #include "Headers/Mesh.hpp"
-#include "Headers/Texture.hpp"
 
 using namespace AnA;
 
@@ -9,8 +8,6 @@ Meshes::Meshes(Device& mDevice) : aDevice {mDevice}
 
 Meshes::~Meshes()
 {
-    if (TestTexture != nullptr)
-        delete TestTexture;
     delete vertexBuffer;
     delete indexBuffer;
 }
