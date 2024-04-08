@@ -47,7 +47,37 @@ VkCommandBuffer Renderer::BeginFrame()
     }
     needUpdate = false;
     isFrameStarted = true;
-    
+
+    auto commandBuffer = GetCurrentCommandBuffer();
+
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
+        throw std::runtime_error("Failed to begin recording buffer!");
+
+    return commandBuffer;
+}
+
+VkCommandBuffer Renderer::BeginFrame(RecordCallBack secondaryCommandBufferRecordCallBack)
+{
+    assert(!isFrameStarted && "Can't call BeginFrame while already in progress!");
+    auto result = aSwapChain->AcquireNextImage(&currentImageIndex);
+    if (result == VK_ERROR_OUT_OF_DATE_KHR)
+    {
+        aSwapChain->RecreateSwapChain();
+        needUpdate = true;
+        return nullptr;
+    }
+    else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+    {
+        throw std::runtime_error("Failed to acquire swap chain image!");
+    }
+    needUpdate = false;
+    isFrameStarted = true;
+
+    RecordSecondaryCommandBuffers(secondaryCommandBufferRecordCallBack);
+
     auto commandBuffer = GetCurrentCommandBuffer();
 
     VkCommandBufferBeginInfo beginInfo{};

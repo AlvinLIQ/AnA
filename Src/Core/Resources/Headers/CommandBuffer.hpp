@@ -6,7 +6,8 @@ namespace AnA
     class CommandBuffer
     {
     public:
-        CommandBuffer(Device& mDevice, VkCommandPool commandPool, VkCommandBufferBeginInfo commandBufferBeginInfo);
+        CommandBuffer(Device& mDevice, VkCommandBufferUsageFlags usageFlags, VkCommandBufferInheritanceInfo* pInheritInfo = nullptr);
+        CommandBuffer(Device& mDevice, VkCommandBufferBeginInfo& commandBufferBeginInfo);
         ~CommandBuffer();
 
         void Begin();
@@ -18,6 +19,5 @@ namespace AnA
         VkCommandBuffer buffer;
         VkCommandBufferLevel level;
         void createCommandBuffer();
-        VkCommandPool pool;
     };
 }

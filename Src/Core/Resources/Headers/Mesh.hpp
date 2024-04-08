@@ -38,7 +38,7 @@ namespace AnA
         }
         bool BeginCommandBufferUpdate()
         {
-            return outdatedCommandBufferCount > 0;
+            return outdatedCommandBufferCount > 0 && outdatedCommandBufferCount--;
         }
         void EndCommandBufferUpdate()
         {

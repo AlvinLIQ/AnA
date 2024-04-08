@@ -39,7 +39,7 @@ void Buffer::cleanup()
 
 void Buffer::replace()
 {
-    //cleanup();
+    cleanup();
     this->buffer = newBuffer->buffer;
     this->bufferMemory = newBuffer->bufferMemory;
     this->bufferSize = newBuffer->bufferSize;

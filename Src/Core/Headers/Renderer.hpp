@@ -55,8 +55,8 @@ namespace AnA
             auto swapChainextent = GetSwapChainExtent();
             return static_cast<float>(swapChainextent.width) / static_cast<float>(swapChainextent.height);
         }
-
         VkCommandBuffer BeginFrame();
+        VkCommandBuffer BeginFrame(RecordCallBack secondaryCommandBufferRecordCallBack);
 
         void RecordSecondaryCommandBuffers(RecordCallBack recordCallBack);
         void ExcuteSecondaryCommandBuffer(VkCommandBuffer commandBuffer);

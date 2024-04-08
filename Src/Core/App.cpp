@@ -136,14 +136,11 @@ void App::Run(RecordCallBack recordCallBack)
         }
         aResourceManager->UpdateCameraBuffer();
         aResourceManager->GlobalLight->UpdateBuffers(aResourceManager->LightCamera, GetSwapChain().CurrentFrame);
-        if (rendererNeedUpdate || aResourceManager->SceneObjects->BeginCommandBufferUpdate())
-        {
-            //Record Objects
-            aRenderer->RecordSecondaryCommandBuffers(recordCallBack);
-            aResourceManager->SceneObjects->EndCommandBufferUpdate();
-        }
-        
-        if (auto commandBuffer = aRenderer->BeginFrame())
+        auto commandBuffer = 
+            (rendererNeedUpdate || aResourceManager->SceneObjects->BeginCommandBufferUpdate()) ? 
+            aRenderer->BeginFrame(recordCallBack) : 
+            aRenderer->BeginFrame();
+        if (commandBuffer)
         {
             if (aResourceManager->SceneObjects->NeedUpdate())
             {
