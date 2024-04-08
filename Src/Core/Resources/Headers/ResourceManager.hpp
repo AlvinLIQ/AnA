@@ -1,5 +1,6 @@
 #pragma once
 #include "../../Camera/Headers/Camera.hpp"
+#include "../../Headers/Threadpool.hpp"
 #include "Mesh.hpp"
 #include "Descriptor.hpp"
 #include "Shader.hpp"
@@ -8,6 +9,8 @@
 //#ifdef ANA_INCLUDE_CONTROL
 #include "../../../GUI/Controls/Headers/Control.hpp"
 //#endif
+
+#define DEFAULT_TEXTURE_ID 0
 
 namespace AnA
 {
@@ -38,7 +41,8 @@ namespace AnA
 //#ifdef ANA_INCLUDE_CONTROL
             AnA::Controls::Control* MainControl = NULL;
 //#endif
-            Texture* DefaultTexture;
+            std::unordered_map<uint32_t, Texture*> TextureMap;
+            ThreadPool TaskPool{};
             void UpdateResources();
         private:
             Device& aDevice;

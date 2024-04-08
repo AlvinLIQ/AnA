@@ -53,7 +53,8 @@ void RenderSystem::RenderMeshes(VkCommandBuffer commandBuffer, Meshes &meshes, S
 {
     shader.GetPipeline()->Bind(commandBuffer);
     std::vector<VkDescriptorSet>& sets = shader.GetDescriptorSets()[aSwapChain.CurrentFrame];
-    sets[DEFAULT_SAMPLER_LAYOUT] = Resource::ResourceManager::GetCurrent()->DefaultTexture->GetDescriptorSet();
+    auto& textureMap = Resource::ResourceManager::GetCurrent()->TextureMap;
+    sets[DEFAULT_SAMPLER_LAYOUT] = textureMap[DEFAULT_TEXTURE_ID]->GetDescriptorSet();
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
         shader.GetPipelineLayout(), 0, static_cast<uint32_t>(sets.size()),
         sets.data(), 0, nullptr);

@@ -13,8 +13,7 @@ Buffer::Buffer(Device& mDevice, VkDeviceSize size, VkBufferUsageFlags usage, VkM
 
 Buffer::~Buffer()
 {
-    vkDestroyBuffer(aDevice.GetLogicalDevice(), buffer, nullptr);
-    vkFreeMemory(aDevice.GetLogicalDevice(), bufferMemory, nullptr);
+    cleanup();
 }
 
 VkResult Buffer::Map(VkDeviceSize offset, VkDeviceSize size)
@@ -32,3 +31,22 @@ void Buffer::Unmap()
     }
 }
 
+void Buffer::cleanup()
+{
+    vkDestroyBuffer(aDevice.GetLogicalDevice(), buffer, nullptr);
+    vkFreeMemory(aDevice.GetLogicalDevice(), bufferMemory, nullptr);
+}
+
+void Buffer::replace()
+{
+    //cleanup();
+    this->buffer = newBuffer->buffer;
+    this->bufferMemory = newBuffer->bufferMemory;
+    this->bufferSize = newBuffer->bufferSize;
+    newBuffer = nullptr;
+}
+
+void Buffer::ReplaceRequest(Buffer* newBuffer)
+{
+    this->newBuffer = newBuffer;
+}

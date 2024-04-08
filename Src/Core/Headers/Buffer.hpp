@@ -20,6 +20,8 @@ namespace AnA
 
         VkBuffer &GetBuffer()
         {
+            if (newBuffer != nullptr)
+                replace();
             return buffer;
         }
         VkDeviceMemory GetBufferMemory()
@@ -56,6 +58,7 @@ namespace AnA
             memcpy(this->GetMappedData(), data, bufferSize);
             this->Unmap();
         }
+        void ReplaceRequest(Buffer* newBuffer);
     private:
         Device& aDevice;
 
@@ -65,5 +68,10 @@ namespace AnA
         VkBufferUsageFlags bufferUsage;
         VkDeviceMemory bufferMemory = VK_NULL_HANDLE;
         VkMemoryPropertyFlags bufferMemoryProperties;
+
+        Buffer* newBuffer{nullptr};
+
+        void replace();
+        void cleanup();
     };
 }

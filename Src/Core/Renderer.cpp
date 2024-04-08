@@ -71,6 +71,7 @@ void Renderer::RecordSecondaryCommandBuffers(RecordCallBack recordCallBack)
     beginInfo.pInheritanceInfo = &inheritanceInfo;
 
     auto swapChainExtent = aSwapChain->GetExtent();
+    //aSwapChain->WaitForFences();
     auto& secondaryCommandBuffer = secondaryCommandBuffers[aSwapChain->CurrentFrame];
     if (vkBeginCommandBuffer(secondaryCommandBuffer, &beginInfo) != VK_SUCCESS)
         throw std::runtime_error("Failed to begin recording secondary buffer!");

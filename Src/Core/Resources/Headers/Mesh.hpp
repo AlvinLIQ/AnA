@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include "Model.hpp"
 #include "../../Headers/Types.hpp"
+#include <mutex>
 
 namespace AnA
 {
@@ -13,6 +14,7 @@ namespace AnA
         std::vector<Model::Index> indices;
         uint32_t vertexOffset;
         uint32_t indexOffset;
+        uint32_t textureId{(uint32_t)-1};
     };
     struct MeshInfo
     {
@@ -25,6 +27,9 @@ namespace AnA
         Meshes(Device& mDevice);
         ~Meshes();
         void Append(const std::vector<MeshInfo>& meshInfos);
+        void RemoveAt(uint32_t meshIndex);
+        void RemoveAt(Range removeRange);
+        void RemoveAt(std::vector<uint32_t> meshIndices);
         void Bind(VkCommandBuffer commandBuffer);
         void Draw(VkCommandBuffer commandBuffer);
         bool NeedUpdate()
@@ -40,24 +45,35 @@ namespace AnA
             if (outdatedCommandBufferCount > 0)
                 --outdatedCommandBufferCount;
         }
+        void CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer);
         void CommitBufferUpdate();
+        void UpdateAll();
         void UpdateBuffers(Range updateRange);
         void UpdateVertexPositions(Mesh& mesh);
         void UpdateVertexPositions(Range updateRange);
 
+        Mesh& GetAt(size_t index)
+        {
+            return meshes[index];
+        }
+        size_t GetMeshCount() const
+        {
+            return meshes.size();
+        }
         uint32_t GetOutdatedCommandBufferCount() const
         {
             return outdatedCommandBufferCount;
         }
     private:
         Device& aDevice;
-        Buffer* vertexBuffer;
+        Buffer* vertexBuffer{nullptr};
         size_t vertexCount = 0;
-        Buffer* indexBuffer;
+        Buffer* indexBuffer{nullptr};
         size_t indexCount = 0;
         std::vector<Mesh> meshes;
         std::vector<Range> updateQueue{};
         uint32_t maxUpdateRange = 0;
         uint32_t outdatedCommandBufferCount = MAX_FRAMES_IN_FLIGHT;
+        std::mutex mutex;
     };
 }

@@ -674,6 +674,7 @@ void Device::createLogicalDevice()
     //vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
     deviceFeatures2.features.samplerAnisotropy = VK_TRUE;
     deviceFeatures2.features.sampleRateShading = VK_TRUE;
+    deviceFeatures2.features.shaderSampledImageArrayDynamicIndexing = VK_TRUE;
     deviceFeatures2.pNext = &indexingFeatures;
 
     VkDeviceCreateInfo createInfo{};

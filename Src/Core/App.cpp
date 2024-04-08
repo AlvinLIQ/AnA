@@ -111,10 +111,16 @@ void App::Run(RecordCallBack recordCallBack)
     
     aResourceManager->UpdateCamera(aRenderer->GetAspect());
     bool rendererNeedUpdate;
+    std::vector<MeshInfo> meshInfos;
+    for (int i = 0; i < 1000; i++)
+        meshInfos.push_back({"Models/cube.obj", {{drand48(), drand48(), drand48()}, {drand48(), drand48(), drand48()}}});
     while(!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
-
+        if (glfwGetKey(aWindow->GetGLFWwindow(), GLFW_KEY_F) == GLFW_PRESS)
+        {
+            aResourceManager->SceneObjects->Append(meshInfos);
+        }
         auto curTime = std::chrono::high_resolution_clock::now();
         float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(curTime - prevTime).count();
         prevTime = curTime;
@@ -130,8 +136,6 @@ void App::Run(RecordCallBack recordCallBack)
         }
         aResourceManager->UpdateCameraBuffer();
         aResourceManager->GlobalLight->UpdateBuffers(aResourceManager->LightCamera, GetSwapChain().CurrentFrame);
-        //Render Shadow Map
-        //auto offscreenCommandBuffer = aRenderer->GetOffscreenCommandBuffer();
         if (rendererNeedUpdate || aResourceManager->SceneObjects->BeginCommandBufferUpdate())
         {
             //Record Objects
@@ -141,22 +145,13 @@ void App::Run(RecordCallBack recordCallBack)
         
         if (auto commandBuffer = aRenderer->BeginFrame())
         {
-            aShadowSystem->BeginRenderPass(commandBuffer);
-                aShadowSystem->RenderShadows(commandBuffer, *aResourceManager->SceneObjects, *aResourceManager->Shaders[2]);
-                aShadowSystem->EndRenderPass(commandBuffer);
             if (aResourceManager->SceneObjects->NeedUpdate())
             {
                 aResourceManager->SceneObjects->CommitBufferUpdate();
-                aShadowSystem->BeginRenderPass(commandBuffer);
-                aShadowSystem->RenderShadows(commandBuffer, *aResourceManager->SceneObjects, *aResourceManager->Shaders[2]);
-                aShadowSystem->EndRenderPass(commandBuffer);
             }
-            else if (rendererNeedUpdate)
-            {
-                aShadowSystem->BeginRenderPass(commandBuffer);
-                aShadowSystem->RenderShadows(commandBuffer, *aResourceManager->SceneObjects, *aResourceManager->Shaders[2]);
-                aShadowSystem->EndRenderPass(commandBuffer);
-            }
+            aShadowSystem->BeginRenderPass(commandBuffer);
+            aShadowSystem->RenderShadows(commandBuffer, *aResourceManager->SceneObjects, *aResourceManager->Shaders[2]);
+            aShadowSystem->EndRenderPass(commandBuffer);
 
             aRenderer->BeginSwapChainRenderPass(commandBuffer);
             if (aResourceManager->SceneObjects->GetOutdatedCommandBufferCount() < MAX_FRAMES_IN_FLIGHT)
