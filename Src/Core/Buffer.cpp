@@ -14,6 +14,8 @@ Buffer::Buffer(Device& mDevice, VkDeviceSize size, VkBufferUsageFlags usage, VkM
 Buffer::~Buffer()
 {
     cleanup();
+    if (newBuffer)
+        delete newBuffer;
 }
 
 VkResult Buffer::Map(VkDeviceSize offset, VkDeviceSize size)
