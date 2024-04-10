@@ -31,13 +31,28 @@ void Buffer::Unmap()
     }
 }
 
+VkBuffer& Buffer::GetBuffer()
+{
+    if (newBuffer != nullptr)
+    {
+        if (++newBufferRecords > MAX_FRAMES_IN_FLIGHT)
+        {
+            newBufferRecords = 0;
+            tryReplace();
+            return buffer;
+        }
+        return newBuffer->buffer;
+    }
+    return buffer;
+}
+
 void Buffer::cleanup()
 {
     vkDestroyBuffer(aDevice.GetLogicalDevice(), buffer, nullptr);
     vkFreeMemory(aDevice.GetLogicalDevice(), bufferMemory, nullptr);
 }
 
-void Buffer::replace()
+void Buffer::tryReplace()
 {
     cleanup();
     this->buffer = newBuffer->buffer;

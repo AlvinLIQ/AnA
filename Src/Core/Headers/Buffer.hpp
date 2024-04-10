@@ -18,12 +18,7 @@ namespace AnA
 
         void UpdateData(void* newData, size_t dataSize);
 
-        VkBuffer &GetBuffer()
-        {
-            if (newBuffer != nullptr)
-                replace();
-            return buffer;
-        }
+        VkBuffer &GetBuffer();
         VkDeviceMemory GetBufferMemory()
         {
             return bufferMemory;
@@ -69,9 +64,11 @@ namespace AnA
         VkDeviceMemory bufferMemory = VK_NULL_HANDLE;
         VkMemoryPropertyFlags bufferMemoryProperties;
 
+        int newBufferRecords = 0;
+
         Buffer* newBuffer{nullptr};
 
-        void replace();
+        void tryReplace();
         void cleanup();
     };
 }
