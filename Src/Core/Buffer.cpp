@@ -65,5 +65,6 @@ void Buffer::tryReplace()
 
 void Buffer::ReplaceRequest(Buffer* newBuffer)
 {
+    while (this->newBuffer != nullptr);
     this->newBuffer = newBuffer;
 }
