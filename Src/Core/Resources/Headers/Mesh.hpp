@@ -38,12 +38,7 @@ namespace AnA
         }
         bool BeginCommandBufferUpdate()
         {
-            return outdatedCommandBufferCount > 0 && outdatedCommandBufferCount--;
-        }
-        void EndCommandBufferUpdate()
-        {
-            if (outdatedCommandBufferCount > 0)
-                --outdatedCommandBufferCount;
+            return commandBufferNeedUpdate;
         }
         void CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer);
         void CommitBufferUpdate();
@@ -60,10 +55,6 @@ namespace AnA
         {
             return meshes.size();
         }
-        uint32_t GetOutdatedCommandBufferCount() const
-        {
-            return outdatedCommandBufferCount;
-        }
     private:
         Device& aDevice;
         Buffer* vertexBuffer{nullptr};
@@ -73,7 +64,7 @@ namespace AnA
         std::vector<Mesh> meshes;
         std::vector<Range> updateQueue{};
         uint32_t maxUpdateRange = 0;
-        uint32_t outdatedCommandBufferCount = MAX_FRAMES_IN_FLIGHT;
+        bool commandBufferNeedUpdate = false;
         std::mutex mutex;
     };
 }

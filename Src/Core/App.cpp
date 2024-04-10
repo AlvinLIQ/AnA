@@ -151,8 +151,7 @@ void App::Run(RecordCallBack recordCallBack)
             aShadowSystem->EndRenderPass(commandBuffer);
 
             aRenderer->BeginSwapChainRenderPass(commandBuffer);
-            if (aResourceManager->SceneObjects->GetOutdatedCommandBufferCount() < MAX_FRAMES_IN_FLIGHT)
-                aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer);
+            aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer);
             aRenderer->EndSwapChainRenderPass(commandBuffer);
             aRenderer->EndFrame();
         }

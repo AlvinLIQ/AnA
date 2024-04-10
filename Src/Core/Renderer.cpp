@@ -97,12 +97,13 @@ void Renderer::RecordSecondaryCommandBuffers(RecordCallBack recordCallBack)
 
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT | VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
     beginInfo.pInheritanceInfo = &inheritanceInfo;
 
     auto swapChainExtent = aSwapChain->GetExtent();
     //aSwapChain->WaitForFences();
-    auto& secondaryCommandBuffer = secondaryCommandBuffers[aSwapChain->CurrentFrame];
+    int nextCommandBufferIndex = (currentSecondaryBufferIndex + 1) % MAX_FRAMES_IN_FLIGHT;
+    auto& secondaryCommandBuffer = secondaryCommandBuffers[nextCommandBufferIndex];
     if (vkBeginCommandBuffer(secondaryCommandBuffer, &beginInfo) != VK_SUCCESS)
         throw std::runtime_error("Failed to begin recording secondary buffer!");
 
@@ -123,11 +124,12 @@ void Renderer::RecordSecondaryCommandBuffers(RecordCallBack recordCallBack)
     recordCallBack(secondaryCommandBuffer);
 
     vkEndCommandBuffer(secondaryCommandBuffer);
+    currentSecondaryBufferIndex = nextCommandBufferIndex;
 }
 
 void Renderer::ExcuteSecondaryCommandBuffer(VkCommandBuffer commandBuffer)
 {
-    vkCmdExecuteCommands(commandBuffer, 1, &secondaryCommandBuffers[currentFrameIndex]);
+    vkCmdExecuteCommands(commandBuffer, 1, &secondaryCommandBuffers[currentSecondaryBufferIndex]);
 }
 
 void Renderer::EndFrame()

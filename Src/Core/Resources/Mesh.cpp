@@ -126,7 +126,7 @@ void Meshes::UpdateAll()
         UpdateBuffers({0, meshes.size()});
         vertexBuffer = newVertexBuffer;
         indexBuffer = newIndexBuffer;
-        outdatedCommandBufferCount = MAX_FRAMES_IN_FLIGHT;
+        commandBufferNeedUpdate = true;
         return;
     }
     Resource::ResourceManager::GetCurrent()->TaskPool.enqueue([this]()
@@ -145,7 +145,7 @@ void Meshes::UpdateAll()
         CommitBufferUpdate(newVertexBuffer, newIndexBuffer);
         vertexBuffer->ReplaceRequest(newVertexBuffer);
         indexBuffer->ReplaceRequest(newIndexBuffer);
-        outdatedCommandBufferCount = MAX_FRAMES_IN_FLIGHT;
+        commandBufferNeedUpdate = true;
     });
 }
 

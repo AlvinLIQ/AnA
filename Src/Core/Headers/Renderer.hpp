@@ -75,6 +75,7 @@ namespace AnA
 
         std::vector<VkCommandBuffer> commandBuffers;
         std::vector<VkCommandBuffer> secondaryCommandBuffers;
+        int currentSecondaryBufferIndex = 0;
         void createCommandBuffers();
         void freeCommandBuffersMemory();
 
