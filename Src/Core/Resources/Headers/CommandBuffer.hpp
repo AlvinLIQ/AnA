@@ -6,18 +6,20 @@ namespace AnA
     class CommandBuffer
     {
     public:
-        CommandBuffer(Device& mDevice, VkCommandBufferUsageFlags usageFlags, VkCommandBufferInheritanceInfo* pInheritInfo = nullptr);
-        CommandBuffer(Device& mDevice, VkCommandBufferBeginInfo& commandBufferBeginInfo);
+        CommandBuffer(Device& mDevice, int commandBufferCount, VkCommandBufferLevel commandBufferlevel, VkCommandBufferUsageFlags usageFlags, VkRenderPass renderPass);
+        CommandBuffer(Device& mDevice, int commandBufferCount, VkCommandBufferLevel commandBufferlevel, VkCommandBufferBeginInfo& commandBufferBeginInfo);
         ~CommandBuffer();
 
-        void Begin();
+        VkCommandBuffer& Begin();
         void End();
-        VkCommandBuffer Get() const;
+        const VkCommandBuffer& Get() const;
     private:
         Device& aDevice;
-        VkCommandBufferBeginInfo beginInfo;
-        VkCommandBuffer buffer;
+        VkCommandBufferBeginInfo beginInfo{};
+        VkCommandBufferInheritanceInfo inheritanceInfo{};
+        std::vector<VkCommandBuffer> buffers;
         VkCommandBufferLevel level;
+        int currentBufferIndex = 1;
         void createCommandBuffer();
     };
 }

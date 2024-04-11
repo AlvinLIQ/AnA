@@ -108,7 +108,7 @@ void App::Run(RecordCallBack recordCallBack)
     //camera.SetViewDirection({}, glm::vec3(0.5f, 0.f, 1.f));
     //camera.SetViewTarget(glm::vec3(-1.f, -2.f, 2.f), glm::vec3(0.f, 0.f, 2.5f));
     auto prevTime = std::chrono::high_resolution_clock::now();
-    
+    bool commandBufferNeedUpdate;
     aResourceManager->UpdateCamera(aRenderer->GetAspect());
     std::vector<MeshInfo> meshInfos;
     for (int i = 0; i < 1000; i++)
@@ -132,7 +132,7 @@ void App::Run(RecordCallBack recordCallBack)
             aResourceManager->Resize();
         }
         aResourceManager->Update();
-        if (aResourceManager->SceneObjects->BeginCommandBufferUpdate())
+        if ((commandBufferNeedUpdate = aResourceManager->SceneObjects->BeginCommandBufferUpdate()))
         {
             aRenderer->RecordSecondaryCommandBuffers(recordCallBack);
             aResourceManager->SceneObjects->EndCommandBufferUpdate();
@@ -148,10 +148,6 @@ void App::Run(RecordCallBack recordCallBack)
             aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer);
             aRenderer->EndSwapChainRenderPass(commandBuffer);
             aRenderer->EndFrame();
-        }
-        else
-        {
-            //aResourceManager->SceneObjects->UpdateBuffers({0, -1});
         }
     }
     //waitUILoop(uiThread);

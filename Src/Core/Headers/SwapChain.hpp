@@ -34,6 +34,8 @@ namespace AnA
         VkRenderPass& GetRenderPass();
         VkRenderPass& GetOffscreenRenderPass();
 
+        void SetViewport(VkCommandBuffer& commandBuffer);
+
         VkSemaphore& GetCurrentSemaphore();
 
         std::vector<VkFramebuffer> GetSwapChainFramebuffers();
@@ -56,6 +58,8 @@ namespace AnA
         std::vector<VkImage> swapChainImages;
         VkFormat swapChainImageFormat;
         VkExtent2D swapChainExtent;
+        VkViewport viewport;
+        VkRect2D scissor;
         void createSwapChain();
 
         std::vector<VkImageView> swapChainImageViews;

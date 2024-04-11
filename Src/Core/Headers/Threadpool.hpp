@@ -82,7 +82,7 @@ public:
         cv_.notify_one(); 
     } 
   
-private: 
+protected: 
     // Vector to store worker threads 
     std::vector<std::thread> threads_; 
   

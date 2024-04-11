@@ -3,6 +3,7 @@
 #include "Device.hpp"
 #include "Window.hpp"
 #include "SwapChain.hpp"
+#include "../Resources/Headers/CommandBuffer.hpp"
 
 #include <cassert>
 #include <vector>
@@ -62,8 +63,8 @@ namespace AnA
 
         void EndFrame();
         void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer);
-        void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2D offset);
-        void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2D offset, VkExtent2D extent);
+        void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2D& offset);
+        void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2D& offset, VkExtent2D& extent);
 
         void EndSwapChainRenderPass(VkCommandBuffer commandBuffer);
 
@@ -73,8 +74,7 @@ namespace AnA
         SwapChain* aSwapChain;
 
         std::vector<VkCommandBuffer> commandBuffers;
-        std::vector<VkCommandBuffer> secondaryCommandBuffers;
-        int currentSecondaryBufferIndex = 0;
+        CommandBuffer* secondaryCommandBuffers;
         void createCommandBuffers();
         void freeCommandBuffersMemory();
 

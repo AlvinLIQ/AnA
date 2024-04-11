@@ -70,21 +70,7 @@ void ShadowSystem::BeginRenderPass(VkCommandBuffer& commandBuffer)
                         &renderPassBegin,
                         VK_SUBPASS_CONTENTS_INLINE);
 
-    VkViewport viewport;
-    viewport.width = extent.width;
-    viewport.height = extent.height;
-    viewport.minDepth = 0.0f;
-    viewport.maxDepth = 1.0f;
-    viewport.x = 0;
-    viewport.y = 0;
-    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-    
-    VkRect2D scissor;
-    scissor.extent.width = extent.width;
-    scissor.extent.height = extent.height;
-    scissor.offset.x = 0;
-    scissor.offset.y = 0;
-    vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+    swapChain->SetViewport(commandBuffer);
 }
 
 void ShadowSystem::EndRenderPass(VkCommandBuffer& commandBuffer)

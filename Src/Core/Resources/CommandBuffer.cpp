@@ -1,38 +1,49 @@
 #include "Headers/CommandBuffer.hpp"
 
+#define NextBufferIndex ((currentBufferIndex + 1) % static_cast<uint32_t>(buffers.size()))
+
 using namespace AnA;
 
-CommandBuffer::CommandBuffer(Device& mDevice, VkCommandBufferUsageFlags usageFlags, VkCommandBufferInheritanceInfo* pInheritInfo) : aDevice{mDevice}
+CommandBuffer::CommandBuffer(Device& mDevice, int commandBufferCount, VkCommandBufferLevel commandBufferlevel, VkCommandBufferUsageFlags usageFlags, VkRenderPass renderPass) : aDevice{mDevice}, level{commandBufferlevel}
 {
-    VkCommandBufferBeginInfo beginInfo{};
+    inheritanceInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
+    inheritanceInfo.renderPass = renderPass;
+
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = usageFlags;
-    beginInfo.pInheritanceInfo = pInheritInfo;
+    beginInfo.pInheritanceInfo = &inheritanceInfo;
+
+    buffers.resize(commandBufferCount);
+    createCommandBuffer();
 }
 
-CommandBuffer::CommandBuffer(Device& mDevice, VkCommandBufferBeginInfo& commandBufferBeginInfo) : aDevice{mDevice}, beginInfo{commandBufferBeginInfo}
+CommandBuffer::CommandBuffer(Device& mDevice, int commandBufferCount, VkCommandBufferLevel commandBufferlevel, VkCommandBufferBeginInfo& commandBufferBeginInfo) : aDevice{mDevice}, beginInfo{commandBufferBeginInfo}, level{commandBufferlevel}
 {
-
+    buffers.resize(commandBufferCount);
+    createCommandBuffer();
 }
 
 CommandBuffer::~CommandBuffer()
 {
-    vkFreeCommandBuffers(aDevice.GetLogicalDevice(), aDevice.GetCommandPool(), 1, &buffer);
+    vkFreeCommandBuffers(aDevice.GetLogicalDevice(), aDevice.GetCommandPool(), static_cast<uint32_t>(buffers.size()), buffers.data());
 }
 
-void CommandBuffer::Begin()
+VkCommandBuffer& CommandBuffer::Begin()
 {
-    vkBeginCommandBuffer(buffer, &beginInfo);
+    if (vkBeginCommandBuffer(buffers[NextBufferIndex], &beginInfo) != VK_SUCCESS)
+        throw std::runtime_error("Failed to begin command buffer!");
+    return buffers[NextBufferIndex];
 }
 
 void CommandBuffer::End()
 {
-    vkEndCommandBuffer(buffer);
+    vkEndCommandBuffer(buffers[NextBufferIndex]);
+    currentBufferIndex = NextBufferIndex;
 }
 
-VkCommandBuffer CommandBuffer::Get() const
+const VkCommandBuffer& CommandBuffer::Get() const
 {
-    return buffer;
+    return buffers[currentBufferIndex];
 }
 
 void CommandBuffer::createCommandBuffer()
@@ -40,7 +51,7 @@ void CommandBuffer::createCommandBuffer()
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     allocInfo.commandPool = aDevice.GetCommandPool();
-    allocInfo.commandBufferCount = 1;
+    allocInfo.commandBufferCount = static_cast<uint32_t>(buffers.size());
     allocInfo.level = level;
-    vkAllocateCommandBuffers(aDevice.GetLogicalDevice(), &allocInfo, &buffer);
+    vkAllocateCommandBuffers(aDevice.GetLogicalDevice(), &allocInfo, buffers.data());
 }

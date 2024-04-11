@@ -23,12 +23,7 @@ Renderer::~Renderer()
 
     commandBuffers.clear();
 
-    vkFreeCommandBuffers(aDevice.GetLogicalDevice(), 
-        aDevice.GetCommandPool(), 
-        static_cast<uint32_t>(secondaryCommandBuffers.size()), 
-        secondaryCommandBuffers.data());
-
-    secondaryCommandBuffers.clear();
+    delete secondaryCommandBuffers;
 }
 
 VkCommandBuffer Renderer::BeginFrame()
@@ -61,45 +56,19 @@ VkCommandBuffer Renderer::BeginFrame()
 
 void Renderer::RecordSecondaryCommandBuffers(RecordCallBack recordCallBack)
 {
-    VkCommandBufferInheritanceInfo inheritanceInfo{};
-    inheritanceInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
-    inheritanceInfo.renderPass = aSwapChain->GetRenderPass();
-
-    VkCommandBufferBeginInfo beginInfo{};
-    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT | VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
-    beginInfo.pInheritanceInfo = &inheritanceInfo;
-
     auto swapChainExtent = aSwapChain->GetExtent();
     //aSwapChain->WaitForFences();
-    int nextCommandBufferIndex = (currentSecondaryBufferIndex + 1) % MAX_FRAMES_IN_FLIGHT;
-    auto& secondaryCommandBuffer = secondaryCommandBuffers[nextCommandBufferIndex];
-    if (vkBeginCommandBuffer(secondaryCommandBuffer, &beginInfo) != VK_SUCCESS)
-        throw std::runtime_error("Failed to begin recording secondary buffer!");
+    auto& secondaryCommandBuffer = secondaryCommandBuffers->Begin();
 
-    VkViewport viewport{};
-    viewport.x = 0.0f;
-    viewport.y = 0.0f;
-    viewport.width = (float)swapChainExtent.width;
-    viewport.height = (float)swapChainExtent.height;
-    viewport.minDepth = 0.0f;
-    viewport.maxDepth = 1.0f;
-    vkCmdSetViewport(secondaryCommandBuffer, 0, 1, &viewport);
-    
-    VkRect2D scissor{};
-    scissor.extent = swapChainExtent;
-    scissor.offset = {0, 0};
-
-    vkCmdSetScissor(secondaryCommandBuffer, 0, 1, &scissor);
+    aSwapChain->SetViewport(secondaryCommandBuffer);
     recordCallBack(secondaryCommandBuffer);
 
-    vkEndCommandBuffer(secondaryCommandBuffer);
-    currentSecondaryBufferIndex = nextCommandBufferIndex;
+    secondaryCommandBuffers->End();
 }
 
 void Renderer::ExcuteSecondaryCommandBuffer(VkCommandBuffer commandBuffer)
 {
-    vkCmdExecuteCommands(commandBuffer, 1, &secondaryCommandBuffers[currentSecondaryBufferIndex]);
+    vkCmdExecuteCommands(commandBuffer, 1, &secondaryCommandBuffers->Get());
 }
 
 void Renderer::EndFrame()
@@ -144,7 +113,7 @@ void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer)
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
 }
 
-void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2D offset)
+void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2D& offset)
 {
     assert(isFrameStarted && "Can't call BeginSwapChainRenderPass while frame is not in progress!");
     assert(commandBuffer == GetCurrentCommandBuffer() && "Can't begin render pass on command buffer from a different frame!");
@@ -161,7 +130,7 @@ void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
 }
 
-void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2D offset, VkExtent2D extent)
+void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2D& offset, VkExtent2D& extent)
 {
     assert(isFrameStarted && "Can't call BeginSwapChainRenderPass while frame is not in progress!");
     assert(commandBuffer == GetCurrentCommandBuffer() && "Can't begin render pass on command buffer from a different frame!");
@@ -197,8 +166,9 @@ void Renderer::createCommandBuffers()
     if (vkAllocateCommandBuffers(aDevice.GetLogicalDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) 
         throw std::runtime_error("Failed to allocate command buffers!");
 
-    secondaryCommandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
-    if (vkAllocateCommandBuffers(aDevice.GetLogicalDevice(), &allocInfo, secondaryCommandBuffers.data()) != VK_SUCCESS) 
-        throw std::runtime_error("Failed to allocate secondary command buffers!");
+    secondaryCommandBuffers = new CommandBuffer(aDevice, 
+        MAX_FRAMES_IN_FLIGHT, 
+        VK_COMMAND_BUFFER_LEVEL_SECONDARY,
+        VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT | VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT,
+        aSwapChain->GetRenderPass());
 }

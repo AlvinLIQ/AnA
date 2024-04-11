@@ -129,6 +129,12 @@ std::vector<VkFramebuffer> SwapChain::GetSwapChainFramebuffers()
     return swapChainFramebuffers;
 }
 
+void SwapChain::SetViewport(VkCommandBuffer& commandBuffer)
+{
+    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+    vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+}
+
 void SwapChain::RecreateSwapChain()
 {
     int width, height;
@@ -262,6 +268,16 @@ void SwapChain::createSwapChain()
 
     swapChainImageFormat = surfaceFormat.format;
     swapChainExtent = extent;
+
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
+    viewport.width = (float)swapChainExtent.width;
+    viewport.height = (float)swapChainExtent.height;
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+
+    scissor.extent = swapChainExtent;
+    scissor.offset = {0, 0};
 }
 
 void SwapChain::createImageViews()
