@@ -19,7 +19,7 @@ namespace AnA
         VkCommandBufferInheritanceInfo inheritanceInfo{};
         std::vector<VkCommandBuffer> buffers;
         VkCommandBufferLevel level;
-        int currentBufferIndex = 1;
+        int currentBufferIndex = 0;
         void createCommandBuffer();
     };
 }

@@ -37,8 +37,9 @@ VkCommandBuffer& CommandBuffer::Begin()
 
 void CommandBuffer::End()
 {
-    vkEndCommandBuffer(buffers[NextBufferIndex]);
-    currentBufferIndex = NextBufferIndex;
+    int nextBufferIndex = NextBufferIndex;
+    vkEndCommandBuffer(buffers[nextBufferIndex]);
+    currentBufferIndex = nextBufferIndex;
 }
 
 const VkCommandBuffer& CommandBuffer::Get() const

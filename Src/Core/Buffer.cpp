@@ -35,12 +35,12 @@ void Buffer::Unmap()
 
 VkBuffer& Buffer::GetBuffer()
 {
-    if (newBuffer != nullptr)
+    if (this->newBuffer != nullptr)
     {
-        if (newBufferRecords++ > MAX_FRAMES_IN_FLIGHT)
+        if (++newBufferRecords > MAX_FRAMES_IN_FLIGHT)
         {
             newBufferRecords = 0;
-            tryReplace();
+            replace();
             return buffer;
         }
         return newBuffer->buffer;
@@ -54,13 +54,13 @@ void Buffer::cleanup()
     vkFreeMemory(aDevice.GetLogicalDevice(), bufferMemory, nullptr);
 }
 
-void Buffer::tryReplace()
+void Buffer::replace()
 {
     cleanup();
     this->buffer = newBuffer->buffer;
     this->bufferMemory = newBuffer->bufferMemory;
     this->bufferSize = newBuffer->bufferSize;
-    newBuffer = nullptr;
+    newBuffer = newBuffer->newBuffer;
 }
 
 void Buffer::ReplaceRequest(Buffer* newBuffer)

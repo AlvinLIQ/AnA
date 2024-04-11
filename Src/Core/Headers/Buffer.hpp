@@ -18,7 +18,7 @@ namespace AnA
 
         void UpdateData(void* newData, size_t dataSize);
 
-        VkBuffer &GetBuffer();
+        VkBuffer& GetBuffer();
         VkDeviceMemory GetBufferMemory()
         {
             return bufferMemory;
@@ -29,7 +29,7 @@ namespace AnA
         }
         const VkDeviceSize GetSize() const
         {
-            return bufferSize;
+            return newBuffer == nullptr ? bufferSize : newBuffer->bufferSize;
         }
 
         void CopyToBuffer(Buffer& srcBuffer, VkDeviceSize bufferSize)
@@ -68,7 +68,7 @@ namespace AnA
 
         Buffer* newBuffer{nullptr};
 
-        void tryReplace();
+        void replace();
         void cleanup();
     };
 }

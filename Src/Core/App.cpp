@@ -108,16 +108,17 @@ void App::Run(RecordCallBack recordCallBack)
     //camera.SetViewDirection({}, glm::vec3(0.5f, 0.f, 1.f));
     //camera.SetViewTarget(glm::vec3(-1.f, -2.f, 2.f), glm::vec3(0.f, 0.f, 2.5f));
     auto prevTime = std::chrono::high_resolution_clock::now();
-    bool commandBufferNeedUpdate;
     aResourceManager->UpdateCamera(aRenderer->GetAspect());
     std::vector<MeshInfo> meshInfos;
+    bool pressed = false;
     for (int i = 0; i < 1000; i++)
         meshInfos.push_back({"Models/cube.obj", {{drand48(), drand48(), drand48()}, {drand48(), drand48(), drand48()}}});
     while(!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
-        if (glfwGetKey(aWindow->GetGLFWwindow(), GLFW_KEY_F) == GLFW_PRESS)
+        if (!pressed && glfwGetKey(aWindow->GetGLFWwindow(), GLFW_KEY_F) == GLFW_PRESS)
         {
+            pressed = true;
             aResourceManager->SceneObjects.Append(meshInfos);
         }
         auto curTime = std::chrono::high_resolution_clock::now();
@@ -132,7 +133,7 @@ void App::Run(RecordCallBack recordCallBack)
             aResourceManager->Resize();
         }
         aResourceManager->Update();
-        if ((commandBufferNeedUpdate = aResourceManager->SceneObjects.BeginCommandBufferUpdate()))
+        if (aResourceManager->SceneObjects.BeginCommandBufferUpdate())
         {
             aRenderer->RecordSecondaryCommandBuffers(recordCallBack);
             aResourceManager->SceneObjects.EndCommandBufferUpdate();
