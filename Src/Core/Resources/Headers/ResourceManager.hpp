@@ -32,6 +32,9 @@ namespace AnA
             Cameras::CameraInfo LightCameraInfo{glm::radians(45.0f), 1.0, 0.01f, 100.0f};
             void UpdateCamera(float aspect);
             void UpdateCameraBuffer();
+            void Update();
+
+            void Resize();
 
             Meshes* SceneObjects;
             std::vector<Shader*> Shaders;
@@ -43,7 +46,7 @@ namespace AnA
 //#endif
             std::unordered_map<uint32_t, Texture*> TextureMap;
             ThreadPool TaskPool{};
-            void UpdateResources();
+            void RecreateResources();
         private:
             Device& aDevice;
             std::vector<Buffer*> mainCameraBuffers;

@@ -33,6 +33,8 @@ namespace AnA
             uint32_t flag;
             std::vector<KeyMapConfig> keyMapConfigs;
             std::vector<CursorConfig> cursorConfigs;
+            void* param;
+            void(*callback)(void* param) = nullptr;
         };
         class InputManager
         {
@@ -51,7 +53,7 @@ namespace AnA
             }
             void SetActiveProfile(int profileIndex);
             
-            bool CheckAndRunCallbacks();
+            void CheckAndRunCallbacks();
         private:
             Window& aWindow;
             static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);

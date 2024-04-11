@@ -40,6 +40,10 @@ namespace AnA
         {
             return commandBufferNeedUpdate;
         }
+        void EndCommandBufferUpdate()
+        {
+            commandBufferNeedUpdate = false;
+        }
         void CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer);
         void CommitBufferUpdate();
         void UpdateAll();

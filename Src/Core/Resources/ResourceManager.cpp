@@ -80,7 +80,24 @@ void ResourceManager::UpdateCameraBuffer()
     cbo.resolution = {(float)extent.width, (float)extent.height};
 }
 
-void ResourceManager::UpdateResources()
+void ResourceManager::Update()
+{
+    UpdateCameraBuffer();
+    GlobalLight->UpdateBuffers(LightCamera, SwapChain::GetCurrent()->CurrentFrame);
+    if (SceneObjects->NeedUpdate())
+    {
+        SceneObjects->CommitBufferUpdate();
+    }
+}
+
+void ResourceManager::Resize()
+{
+    auto extent = SwapChain::GetCurrent()->GetExtent();
+    UpdateCamera(static_cast<float>(extent.width) / static_cast<float>(extent.height));
+    RecreateResources();
+}
+
+void ResourceManager::RecreateResources()
 {
     cleanupShadowResources();
     createShadowFramebuffers();

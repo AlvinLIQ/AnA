@@ -39,6 +39,11 @@ void CameraController::GetInputProfile(Input::InputProfile& inputProfile)
     inputProfile.flag = Input::InputProfileFlags::HideCursor | Input::InputProfileFlags::RawMotion;
     GetCameraKeyMapConfigs(inputProfile.keyMapConfigs);
     GetCameraCursorConfigs(inputProfile.cursorConfigs);
+    inputProfile.param = &aCamera;
+    inputProfile.callback = [](void* camera)
+    {
+        ((Camera*)camera)->UpdateViewMatrix();
+    };
 }
 
 CameraController::CameraController(Camera &mCamera) : aCamera {mCamera}

@@ -39,7 +39,7 @@ void InputManager::SetActiveProfile(int profileIndex)
     }
 }
 
-bool InputManager::CheckAndRunCallbacks()
+void InputManager::CheckAndRunCallbacks()
 {
     auto window = aWindow.GetGLFWwindow();
     glfwGetCursorPos(window, &curPos.x, &curPos.y);
@@ -59,7 +59,10 @@ bool InputManager::CheckAndRunCallbacks()
             keyMapConfig.callBack(keyMapConfig.param);
     }
     //glfwSetCursorPos(window, centerX, centerY);
-    return keyMapConfigs.size() + cursorConfigs.size() > 0;
+    if (keyMapConfigs.size() + cursorConfigs.size() > 0)
+    {
+        inputProfiles[activeProfileIndex].callback(inputProfiles[activeProfileIndex].param);
+    }
 }
 
 void InputManager::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)

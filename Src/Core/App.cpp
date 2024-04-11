@@ -110,7 +110,6 @@ void App::Run(RecordCallBack recordCallBack)
     auto prevTime = std::chrono::high_resolution_clock::now();
     
     aResourceManager->UpdateCamera(aRenderer->GetAspect());
-    bool rendererNeedUpdate;
     std::vector<MeshInfo> meshInfos;
     for (int i = 0; i < 1000; i++)
         meshInfos.push_back({"Models/cube.obj", {{drand48(), drand48(), drand48()}, {drand48(), drand48(), drand48()}}});
@@ -126,26 +125,21 @@ void App::Run(RecordCallBack recordCallBack)
         prevTime = curTime;
         printf("FPS:%.2f\r", 1.0f / frameTime);
         camera.SetSpeedRatio(frameTime);
-        if (aInputManager->CheckAndRunCallbacks())
-            camera.UpdateViewMatrix();
-
-        if ((rendererNeedUpdate = aRenderer->NeedUpdate()))
+        aInputManager->CheckAndRunCallbacks();
+        //Update Resources
+        if (aRenderer->NeedUpdate())
         {
-            aResourceManager->UpdateCamera(aRenderer->GetAspect());
-            aResourceManager->UpdateResources();
+            aResourceManager->Resize();
         }
-        aResourceManager->UpdateCameraBuffer();
-        aResourceManager->GlobalLight->UpdateBuffers(aResourceManager->LightCamera, GetSwapChain().CurrentFrame);
-        auto commandBuffer = 
-            (rendererNeedUpdate || aResourceManager->SceneObjects->BeginCommandBufferUpdate()) ? 
-            aRenderer->BeginFrame(recordCallBack) : 
-            aRenderer->BeginFrame();
-        if (commandBuffer)
+        aResourceManager->Update();
+        if (aResourceManager->SceneObjects->BeginCommandBufferUpdate())
         {
-            if (aResourceManager->SceneObjects->NeedUpdate())
-            {
-                aResourceManager->SceneObjects->CommitBufferUpdate();
-            }
+            aRenderer->RecordSecondaryCommandBuffers(recordCallBack);
+            aResourceManager->SceneObjects->EndCommandBufferUpdate();
+        }
+        //Record Primary Command Buffer
+        if (auto commandBuffer = aRenderer->BeginFrame())
+        {
             aShadowSystem->BeginRenderPass(commandBuffer);
             aShadowSystem->RenderShadows(commandBuffer, *aResourceManager->SceneObjects, *aResourceManager->Shaders[2]);
             aShadowSystem->EndRenderPass(commandBuffer);
