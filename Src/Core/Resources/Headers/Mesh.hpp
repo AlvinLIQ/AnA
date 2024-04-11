@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 #include "Model.hpp"
 #include "../../Headers/Types.hpp"
-#include <mutex>
 
 namespace AnA
 {
@@ -69,6 +68,5 @@ namespace AnA
         std::vector<Range> updateQueue{};
         uint32_t maxUpdateRange = 0;
         bool commandBufferNeedUpdate = false;
-        std::mutex mutex;
     };
 }

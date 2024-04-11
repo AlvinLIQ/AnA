@@ -36,11 +36,11 @@ namespace AnA
 
             void Resize();
 
-            Meshes* SceneObjects;
+            Meshes SceneObjects;
             std::vector<Shader*> Shaders;
             std::vector<Descriptor::DescriptorConfig> GetDefaultDescriptorConfig();
 
-            Lights::Light* GlobalLight;
+            Lights::Light GlobalLight;
 //#ifdef ANA_INCLUDE_CONTROL
             AnA::Controls::Control* MainControl = NULL;
 //#endif

@@ -8,14 +8,11 @@ using namespace Resource;
 
 ResourceManager* _resourceManager = nullptr;
 
-ResourceManager::ResourceManager(Device& mDevice) : aDevice {mDevice}
+ResourceManager::ResourceManager(Device& mDevice) : aDevice {mDevice}, SceneObjects(mDevice), GlobalLight(mDevice)
 {
     _resourceManager = this;
     createMainCameraBuffers();
     createShadowFramebuffers();
-
-    SceneObjects = new Meshes(aDevice);
-    GlobalLight = new Lights::Light(aDevice);
 
     createDefaultShaders();
 //#ifdef ANA_INCLUDE_CONTROL
@@ -38,8 +35,8 @@ ResourceManager::~ResourceManager()
         vkDestroySampler(logicalDevice, shadowSampler, nullptr);
     cleanupShadowResources();
 
-    delete SceneObjects;
-    delete GlobalLight;
+    //delete SceneObjects;
+    //delete GlobalLight;
 //#ifdef ANA_INCLUDE_CONTROL
     if (MainControl != nullptr)
         delete MainControl;
@@ -83,10 +80,10 @@ void ResourceManager::UpdateCameraBuffer()
 void ResourceManager::Update()
 {
     UpdateCameraBuffer();
-    GlobalLight->UpdateBuffers(LightCamera, SwapChain::GetCurrent()->CurrentFrame);
-    if (SceneObjects->NeedUpdate())
+    GlobalLight.UpdateBuffers(LightCamera, SwapChain::GetCurrent()->CurrentFrame);
+    if (SceneObjects.NeedUpdate())
     {
-        SceneObjects->CommitBufferUpdate();
+        SceneObjects.CommitBufferUpdate();
     }
 }
 
@@ -124,7 +121,7 @@ std::vector<Descriptor::DescriptorConfig> ResourceManager::GetDefaultDescriptorC
     pConfig->descriptorCount = MAX_FRAMES_IN_FLIGHT;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
-    pConfig->buffers = GlobalLight->GetBuffers();
+    pConfig->buffers = GlobalLight.GetBuffers();
     pConfig->bufferSize = sizeof(Lights::LightBufferObject);
 
     pConfig = &descriptorConfigs[DEFAULT_SAMPLER_LAYOUT];

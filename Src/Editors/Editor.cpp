@@ -54,11 +54,11 @@ int main()
 {
     App app{};
     app.Init();
-    auto meshes = Resource::ResourceManager::GetCurrent()->SceneObjects;
+    auto& meshes = Resource::ResourceManager::GetCurrent()->SceneObjects;
     //std::vector<std::string> files(1000, "Models/cube.obj");
     //for (int i = 0; i < 1000; i++)
     //    meshInfos.push_back({"Models/cube.obj", {{drand48(), drand48(), drand48()}, {drand48(), drand48(), drand48()}}});
-    meshes->Append(meshInfos);
+    meshes.Append(meshInfos);
     app.Run();
     return 0;
 }

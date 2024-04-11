@@ -95,7 +95,7 @@ void App::Run(RecordCallBack recordCallBack)
         recordCallBack = [](VkCommandBuffer secondaryCommandBuffer)
             {
                 Systems::RenderSystem::GetCurrent()->RenderMeshes(secondaryCommandBuffer, 
-                    *Resource::ResourceManager::GetCurrent()->SceneObjects, 
+                    Resource::ResourceManager::GetCurrent()->SceneObjects, 
                     *Resource::ResourceManager::GetCurrent()->Shaders[0]);
             };
     Cameras::Camera& camera = aResourceManager->MainCamera, &lightCamera = aResourceManager->LightCamera;
@@ -118,7 +118,7 @@ void App::Run(RecordCallBack recordCallBack)
         glfwPollEvents();
         if (glfwGetKey(aWindow->GetGLFWwindow(), GLFW_KEY_F) == GLFW_PRESS)
         {
-            aResourceManager->SceneObjects->Append(meshInfos);
+            aResourceManager->SceneObjects.Append(meshInfos);
         }
         auto curTime = std::chrono::high_resolution_clock::now();
         float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(curTime - prevTime).count();
@@ -132,16 +132,16 @@ void App::Run(RecordCallBack recordCallBack)
             aResourceManager->Resize();
         }
         aResourceManager->Update();
-        if ((commandBufferNeedUpdate = aResourceManager->SceneObjects->BeginCommandBufferUpdate()))
+        if ((commandBufferNeedUpdate = aResourceManager->SceneObjects.BeginCommandBufferUpdate()))
         {
             aRenderer->RecordSecondaryCommandBuffers(recordCallBack);
-            aResourceManager->SceneObjects->EndCommandBufferUpdate();
+            aResourceManager->SceneObjects.EndCommandBufferUpdate();
         }
         //Record Primary Command Buffer
         if (auto commandBuffer = aRenderer->BeginFrame())
         {
             aShadowSystem->BeginRenderPass(commandBuffer);
-            aShadowSystem->RenderShadows(commandBuffer, *aResourceManager->SceneObjects, *aResourceManager->Shaders[2]);
+            aShadowSystem->RenderShadows(commandBuffer, aResourceManager->SceneObjects, *aResourceManager->Shaders[2]);
             aShadowSystem->EndRenderPass(commandBuffer);
 
             aRenderer->BeginSwapChainRenderPass(commandBuffer);
