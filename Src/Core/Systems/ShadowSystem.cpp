@@ -49,9 +49,6 @@ void ShadowSystem::BeginRenderPass(VkCommandBuffer& commandBuffer)
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
     vkBeginCommandBuffer(commandBuffer, &beginInfo);
 */
-    VkClearValue clearValues[1];
-    clearValues[0].depthStencil.depth = 1.0f;
-    clearValues[0].depthStencil.stencil = 0;
 
     auto extent = swapChain->GetExtent();
 
@@ -64,7 +61,7 @@ void ShadowSystem::BeginRenderPass(VkCommandBuffer& commandBuffer)
     renderPassBegin.renderArea.offset.y = 0;
     renderPassBegin.renderArea.extent = {extent.width, extent.height};
     renderPassBegin.clearValueCount = 1;
-    renderPassBegin.pClearValues = clearValues;
+    renderPassBegin.pClearValues = &clearValue;
     
     vkCmdBeginRenderPass(commandBuffer,
                         &renderPassBegin,

@@ -21,6 +21,8 @@ namespace AnA
         private:
             Device& aDevice;
             SwapChain* swapChain;
+
+            VkClearValue clearValue{.depthStencil{1.0f, 0}};
         };
     }
 }
