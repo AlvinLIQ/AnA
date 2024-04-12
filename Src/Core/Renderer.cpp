@@ -10,6 +10,10 @@ using namespace AnA;
 Renderer::Renderer(Window& mWindow, Device& mDevice) : aWindow {mWindow}, aDevice {mDevice}
 {
     aSwapChain = new SwapChain(aDevice, aWindow.GetSurface(), aWindow.GetGLFWwindow());
+    inheritanceInfos[RENDER_PASS_TYPE_ONSCREEN].sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
+    inheritanceInfos[RENDER_PASS_TYPE_ONSCREEN].renderPass = aSwapChain->GetRenderPass();
+    inheritanceInfos[RENDER_PASS_TYPE_OFFSCREEN].sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
+    inheritanceInfos[RENDER_PASS_TYPE_OFFSCREEN].renderPass = aSwapChain->GetOffscreenRenderPass();
     createCommandBuffers();
 }
 
@@ -54,21 +58,24 @@ VkCommandBuffer Renderer::BeginFrame()
     return commandBuffer;
 }
 
-void Renderer::RecordSecondaryCommandBuffers(RecordCallBack recordCallBack)
+void Renderer::RecordSecondaryCommandBuffer(RecordCallBack recordCallBack, RenderPassType renderPassType)
 {
     auto swapChainExtent = aSwapChain->GetExtent();
     //aSwapChain->WaitForFences();
-    auto& secondaryCommandBuffer = secondaryCommandBuffers->Begin();
+    auto& secondaryCommandBuffer = secondaryCommandBuffers->Begin(&inheritanceInfos[renderPassType]);
 
     aSwapChain->SetViewport(secondaryCommandBuffer);
     recordCallBack(secondaryCommandBuffer);
 
     secondaryCommandBuffers->End();
+    recordedSecondaryCommandBuffers[renderPassType] = secondaryCommandBuffer;
 }
 
-void Renderer::ExcuteSecondaryCommandBuffer(VkCommandBuffer commandBuffer)
+void Renderer::ExcuteSecondaryCommandBuffer(VkCommandBuffer commandBuffer, RenderPassType renderPassType)
 {
-    vkCmdExecuteCommands(commandBuffer, 1, &secondaryCommandBuffers->Get());
+    vkCmdExecuteCommands(commandBuffer, 
+    1, 
+    &recordedSecondaryCommandBuffers[renderPassType]);
 }
 
 void Renderer::EndFrame()
@@ -147,12 +154,34 @@ void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
 }
 
-void Renderer::EndSwapChainRenderPass(VkCommandBuffer commandBuffer)
+void Renderer::EndRenderPass(VkCommandBuffer commandBuffer)
 {
     assert(isFrameStarted && "Can't call EndSwapChainRenderPass while frame is not in progress!");
     assert(commandBuffer == GetCurrentCommandBuffer() && "Can't end render pass on command buffer from a different frame!");
 
     vkCmdEndRenderPass(commandBuffer);
+}
+
+void Renderer::BeginOffscreenRenderPass(VkCommandBuffer commandBuffer, VkFramebuffer& framebuffer)
+{
+    auto extent = aSwapChain->GetExtent();
+
+    VkRenderPassBeginInfo renderPassBegin;
+    renderPassBegin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassBegin.pNext = NULL;
+    renderPassBegin.renderPass = aSwapChain->GetOffscreenRenderPass();
+    renderPassBegin.framebuffer = framebuffer;
+    renderPassBegin.renderArea.offset.x = 0;
+    renderPassBegin.renderArea.offset.y = 0;
+    renderPassBegin.renderArea.extent = {extent.width, extent.height};
+    renderPassBegin.clearValueCount = 1;
+    renderPassBegin.pClearValues = &clearValues[RENDER_PASS_TYPE_OFFSCREEN];
+    
+    vkCmdBeginRenderPass(commandBuffer,
+                        &renderPassBegin,
+                        VK_SUBPASS_CONTENTS_INLINE);
+
+    aSwapChain->SetViewport(commandBuffer);
 }
 
 void Renderer::createCommandBuffers()
@@ -169,6 +198,5 @@ void Renderer::createCommandBuffers()
     secondaryCommandBuffers = new CommandBuffer(aDevice, 
         MAX_FRAMES_IN_FLIGHT, 
         VK_COMMAND_BUFFER_LEVEL_SECONDARY,
-        VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT | VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT,
-        aSwapChain->GetRenderPass());
+        VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT | VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT);
 }

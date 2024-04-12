@@ -4,14 +4,11 @@
 
 using namespace AnA;
 
-CommandBuffer::CommandBuffer(Device& mDevice, int commandBufferCount, VkCommandBufferLevel commandBufferlevel, VkCommandBufferUsageFlags usageFlags, VkRenderPass renderPass) : aDevice{mDevice}, level{commandBufferlevel}
+CommandBuffer::CommandBuffer(Device& mDevice, int commandBufferCount, VkCommandBufferLevel commandBufferlevel, VkCommandBufferUsageFlags usageFlags) : aDevice{mDevice}, level{commandBufferlevel}
 {
-    inheritanceInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
-    inheritanceInfo.renderPass = renderPass;
-
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = usageFlags;
-    beginInfo.pInheritanceInfo = &inheritanceInfo;
+    beginInfo.pInheritanceInfo = nullptr;
 
     buffers.resize(commandBufferCount);
     createCommandBuffer();
@@ -28,8 +25,9 @@ CommandBuffer::~CommandBuffer()
     vkFreeCommandBuffers(aDevice.GetLogicalDevice(), aDevice.GetCommandPool(), static_cast<uint32_t>(buffers.size()), buffers.data());
 }
 
-VkCommandBuffer& CommandBuffer::Begin()
+VkCommandBuffer& CommandBuffer::Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo)
 {
+    beginInfo.pInheritanceInfo = pInheritanceInfo;
     if (vkBeginCommandBuffer(buffers[NextBufferIndex], &beginInfo) != VK_SUCCESS)
         throw std::runtime_error("Failed to begin command buffer!");
     return buffers[NextBufferIndex];

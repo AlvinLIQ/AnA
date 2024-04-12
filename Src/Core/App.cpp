@@ -94,10 +94,18 @@ void App::Run(RecordCallBack recordCallBack)
     if (recordCallBack == nullptr)
         recordCallBack = [](VkCommandBuffer secondaryCommandBuffer)
             {
+                auto resourceManager = Resource::ResourceManager::GetCurrent();
                 Systems::RenderSystem::GetCurrent()->RenderMeshes(secondaryCommandBuffer, 
-                    Resource::ResourceManager::GetCurrent()->SceneObjects, 
-                    *Resource::ResourceManager::GetCurrent()->Shaders[0]);
+                    resourceManager->SceneObjects, 
+                    *resourceManager->Shaders[0]);
             };
+    auto offscreenRecordCallBack = [](VkCommandBuffer secondaryCommandBuffer)
+            {
+                auto aResourceManager = Resource::ResourceManager::GetCurrent();
+                auto aShadowSystem = Systems::ShadowSystem::GetCurrent();
+                aShadowSystem->RenderShadows(secondaryCommandBuffer, aResourceManager->SceneObjects, *aResourceManager->Shaders[2]);
+            };
+
     Cameras::Camera& camera = aResourceManager->MainCamera, &lightCamera = aResourceManager->LightCamera;
     Cameras::CameraController cameraController{camera};
     auto& activeProfile = aInputManager->GetActiveProfile();
@@ -135,19 +143,18 @@ void App::Run(RecordCallBack recordCallBack)
         aResourceManager->Update();
         if (aResourceManager->SceneObjects.BeginCommandBufferUpdate())
         {
-            aRenderer->RecordSecondaryCommandBuffers(recordCallBack);
+            aRenderer->RecordSecondaryCommandBuffer(recordCallBack, RENDER_PASS_TYPE_ONSCREEN);
             aResourceManager->SceneObjects.EndCommandBufferUpdate();
         }
         //Record Primary Command Buffer
         if (auto commandBuffer = aRenderer->BeginFrame())
         {
-            aShadowSystem->BeginRenderPass(commandBuffer);
-            aShadowSystem->RenderShadows(commandBuffer, aResourceManager->SceneObjects, *aResourceManager->Shaders[2]);
-            aShadowSystem->EndRenderPass(commandBuffer);
-
+            aRenderer->BeginOffscreenRenderPass(commandBuffer, aResourceManager->GetShadowFramebuffers()[aRenderer->GetFrameIndex()]);
+            offscreenRecordCallBack(commandBuffer);
+            aRenderer->EndRenderPass(commandBuffer);
             aRenderer->BeginSwapChainRenderPass(commandBuffer);
-            aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer);
-            aRenderer->EndSwapChainRenderPass(commandBuffer);
+            aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer, RENDER_PASS_TYPE_ONSCREEN);
+            aRenderer->EndRenderPass(commandBuffer);
             aRenderer->EndFrame();
         }
     }

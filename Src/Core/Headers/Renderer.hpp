@@ -12,6 +12,7 @@
 namespace AnA
 {
     typedef void(*RecordCallBack)(VkCommandBuffer commandBuffer);
+    enum RenderPassType {RENDER_PASS_TYPE_ONSCREEN, RENDER_PASS_TYPE_OFFSCREEN, RENDER_PASS_TYPE_SIZE};
     class Renderer
     {
     public:
@@ -58,15 +59,16 @@ namespace AnA
         }
         VkCommandBuffer BeginFrame();
 
-        void RecordSecondaryCommandBuffers(RecordCallBack recordCallBack);
-        void ExcuteSecondaryCommandBuffer(VkCommandBuffer commandBuffer);
+        void RecordSecondaryCommandBuffer(RecordCallBack recordCallBack, RenderPassType renderPassType);
+        void ExcuteSecondaryCommandBuffer(VkCommandBuffer commandBuffer, RenderPassType renderPassType);
 
         void EndFrame();
         void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer);
         void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2D& offset);
         void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2D& offset, VkExtent2D& extent);
 
-        void EndSwapChainRenderPass(VkCommandBuffer commandBuffer);
+        void EndRenderPass(VkCommandBuffer commandBuffer);
+        void BeginOffscreenRenderPass(VkCommandBuffer commandBuffer, VkFramebuffer& framebuffer);
 
     private:
         Window& aWindow;
@@ -84,5 +86,7 @@ namespace AnA
 
         bool needUpdate = false;
         VkClearValue clearValues[2] = {{.color = {{0.6f, 0.6f, 0.6f, 1.0f}}}, {.depthStencil = {1.0f, 0}}};
+        VkCommandBufferInheritanceInfo inheritanceInfos[RENDER_PASS_TYPE_SIZE]{};
+        VkCommandBuffer recordedSecondaryCommandBuffers[RENDER_PASS_TYPE_SIZE];
     };
 }
