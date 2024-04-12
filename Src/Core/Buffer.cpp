@@ -37,7 +37,7 @@ VkBuffer& Buffer::GetBuffer()
 {
     if (this->newBuffer != nullptr)
     {
-        if (++newBufferRecords > MAX_FRAMES_IN_FLIGHT)
+        if (newBufferRecords++ > MAX_FRAMES_IN_FLIGHT)
         {
             newBufferRecords = 0;
             replace();
