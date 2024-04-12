@@ -121,6 +121,7 @@ void App::Run(RecordCallBack recordCallBack)
     bool pressed = false;
     for (int i = 0; i < 1000; i++)
         meshInfos.push_back({"Models/cube.obj", {{drand48(), drand48(), drand48()}, {drand48(), drand48(), drand48()}}});
+    bool commandBufferNeedUpdate;
     while(!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -141,17 +142,21 @@ void App::Run(RecordCallBack recordCallBack)
             aResourceManager->Resize();
         }
         aResourceManager->Update();
-        if (aResourceManager->SceneObjects.BeginCommandBufferUpdate())
+        if ((commandBufferNeedUpdate = aResourceManager->SceneObjects.BeginCommandBufferUpdate()))
         {
             aRenderer->RecordSecondaryCommandBuffer(recordCallBack, RENDER_PASS_TYPE_ONSCREEN);
+            aRenderer->RecordSecondaryCommandBuffer(offscreenRecordCallBack, RENDER_PASS_TYPE_OFFSCREEN);
             aResourceManager->SceneObjects.EndCommandBufferUpdate();
         }
         //Record Primary Command Buffer
         if (auto commandBuffer = aRenderer->BeginFrame())
         {
-            aRenderer->BeginOffscreenRenderPass(commandBuffer, aResourceManager->GetShadowFramebuffers()[aRenderer->GetFrameIndex()]);
-            offscreenRecordCallBack(commandBuffer);
-            aRenderer->EndRenderPass(commandBuffer);
+            if (commandBufferNeedUpdate)
+            {
+                aRenderer->BeginOffscreenRenderPass(commandBuffer, aResourceManager->GetShadowFramebuffers()[GetSwapChain().CurrentFrame]);
+                aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer, RENDER_PASS_TYPE_OFFSCREEN);
+                aRenderer->EndRenderPass(commandBuffer);
+            }
             aRenderer->BeginSwapChainRenderPass(commandBuffer);
             aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer, RENDER_PASS_TYPE_ONSCREEN);
             aRenderer->EndRenderPass(commandBuffer);

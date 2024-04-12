@@ -27,7 +27,8 @@ Renderer::~Renderer()
 
     commandBuffers.clear();
 
-    delete secondaryCommandBuffers;
+    delete secondaryCommandBuffers[RENDER_PASS_TYPE_ONSCREEN];
+    delete secondaryCommandBuffers[RENDER_PASS_TYPE_OFFSCREEN];
 }
 
 VkCommandBuffer Renderer::BeginFrame()
@@ -62,12 +63,12 @@ void Renderer::RecordSecondaryCommandBuffer(RecordCallBack recordCallBack, Rende
 {
     auto swapChainExtent = aSwapChain->GetExtent();
     //aSwapChain->WaitForFences();
-    auto& secondaryCommandBuffer = secondaryCommandBuffers->Begin(&inheritanceInfos[renderPassType]);
+    auto& secondaryCommandBuffer = secondaryCommandBuffers[renderPassType]->Begin(&inheritanceInfos[renderPassType]);
 
     aSwapChain->SetViewport(secondaryCommandBuffer);
     recordCallBack(secondaryCommandBuffer);
 
-    secondaryCommandBuffers->End();
+    secondaryCommandBuffers[renderPassType]->End();
     recordedSecondaryCommandBuffers[renderPassType] = secondaryCommandBuffer;
 }
 
@@ -179,9 +180,8 @@ void Renderer::BeginOffscreenRenderPass(VkCommandBuffer commandBuffer, VkFramebu
     
     vkCmdBeginRenderPass(commandBuffer,
                         &renderPassBegin,
-                        VK_SUBPASS_CONTENTS_INLINE);
+                        VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
 
-    aSwapChain->SetViewport(commandBuffer);
 }
 
 void Renderer::createCommandBuffers()
@@ -195,7 +195,11 @@ void Renderer::createCommandBuffers()
     if (vkAllocateCommandBuffers(aDevice.GetLogicalDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) 
         throw std::runtime_error("Failed to allocate command buffers!");
 
-    secondaryCommandBuffers = new CommandBuffer(aDevice, 
+    secondaryCommandBuffers[RENDER_PASS_TYPE_ONSCREEN] = new CommandBuffer(aDevice, 
+        MAX_FRAMES_IN_FLIGHT, 
+        VK_COMMAND_BUFFER_LEVEL_SECONDARY,
+        VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT | VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT);
+    secondaryCommandBuffers[RENDER_PASS_TYPE_OFFSCREEN] = new CommandBuffer(aDevice, 
         MAX_FRAMES_IN_FLIGHT, 
         VK_COMMAND_BUFFER_LEVEL_SECONDARY,
         VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT | VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT);

@@ -15,6 +15,7 @@ namespace AnA
 
             VkExtent2D GetExtent();
             void RenderShadows(VkCommandBuffer commandBuffer, Meshes& meshes, Shader& shader);
+            int CurrentShadowIndex = 0;
         private:
             Device& aDevice;
             SwapChain* swapChain;

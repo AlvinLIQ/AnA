@@ -76,7 +76,7 @@ namespace AnA
         SwapChain* aSwapChain;
 
         std::vector<VkCommandBuffer> commandBuffers;
-        CommandBuffer* secondaryCommandBuffers;
+        CommandBuffer* secondaryCommandBuffers[RENDER_PASS_TYPE_SIZE];
         void createCommandBuffers();
         void freeCommandBuffersMemory();
 
