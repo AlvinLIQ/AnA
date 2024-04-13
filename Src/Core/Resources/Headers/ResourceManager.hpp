@@ -27,9 +27,9 @@ namespace AnA
 
             //Built-in resources
             Cameras::Camera MainCamera;
-            Cameras::CameraInfo MainCameraInfo{glm::radians(60.0f), 1.0, 0.01f, 100.0f};
+            Cameras::CameraInfo MainCameraInfo{glm::radians(60.0f), 1.0, 0.1f, 32.0f};
             Cameras::Camera LightCamera;
-            Cameras::CameraInfo LightCameraInfo{glm::radians(45.0f), 1.0, 0.01f, 100.0f};
+            Cameras::CameraInfo LightCameraInfo{glm::radians(45.0f), 1.0, 0.01f, 32.0f};
             void UpdateCamera(float aspect);
             void UpdateCameraBuffer();
             void Update();
