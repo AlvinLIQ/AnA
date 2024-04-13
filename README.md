@@ -5,11 +5,12 @@
 ### Currently working on
 
 * GUI Controls
-* Multi-Thread Commandbuffer Recording
+* Batching(Partially done)
 
 ### To do
 
 * [X] Lighting System
+* [X] Multi-Thread Commandbuffer Recording
 * [ ] Batching
 * [ ] Designer
 
