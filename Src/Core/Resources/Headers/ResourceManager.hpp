@@ -45,7 +45,7 @@ namespace AnA
             AnA::Controls::Control* MainControl = NULL;
 //#endif
             std::unordered_map<uint32_t, Texture*> TextureMap;
-            ThreadPool TaskPool{};
+            ThreadPool<void()> TaskPool{};
             void RecreateResources();
         private:
             Device& aDevice;

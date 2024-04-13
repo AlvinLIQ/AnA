@@ -4,17 +4,12 @@
 
 using namespace AnA;
 
-CommandBuffer::CommandBuffer(Device& mDevice, int commandBufferCount, VkCommandBufferLevel commandBufferlevel, VkCommandBufferUsageFlags usageFlags) : aDevice{mDevice}, level{commandBufferlevel}
+CommandBuffer::CommandBuffer(Device* mDevice, int commandBufferCount, VkCommandBufferLevel commandBufferlevel, VkCommandBufferUsageFlags usageFlags)
 {
-    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags = usageFlags;
-    beginInfo.pInheritanceInfo = nullptr;
-
-    buffers.resize(commandBufferCount);
-    createCommandBuffer();
+    Init(mDevice, commandBufferCount, commandBufferlevel, usageFlags);
 }
 
-CommandBuffer::CommandBuffer(Device& mDevice, int commandBufferCount, VkCommandBufferLevel commandBufferlevel, VkCommandBufferBeginInfo& commandBufferBeginInfo) : aDevice{mDevice}, beginInfo{commandBufferBeginInfo}, level{commandBufferlevel}
+CommandBuffer::CommandBuffer(Device* mDevice, int commandBufferCount, VkCommandBufferLevel commandBufferlevel, VkCommandBufferBeginInfo& commandBufferBeginInfo) : aDevice{mDevice}, beginInfo{commandBufferBeginInfo}, level{commandBufferlevel}
 {
     buffers.resize(commandBufferCount);
     createCommandBuffer();
@@ -22,7 +17,20 @@ CommandBuffer::CommandBuffer(Device& mDevice, int commandBufferCount, VkCommandB
 
 CommandBuffer::~CommandBuffer()
 {
-    vkFreeCommandBuffers(aDevice.GetLogicalDevice(), aDevice.GetCommandPool(), static_cast<uint32_t>(buffers.size()), buffers.data());
+    vkFreeCommandBuffers(aDevice->GetLogicalDevice(), aDevice->GetCommandPool(), static_cast<uint32_t>(buffers.size()), buffers.data());
+}
+
+void CommandBuffer::Init(Device* mDevice, int commandBufferCount, VkCommandBufferLevel commandBufferlevel, VkCommandBufferUsageFlags usageFlags)
+{
+    aDevice = mDevice;
+    level = commandBufferlevel;
+
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = usageFlags;
+    beginInfo.pInheritanceInfo = nullptr;
+
+    buffers.resize(commandBufferCount);
+    createCommandBuffer();
 }
 
 VkCommandBuffer& CommandBuffer::Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo)
@@ -49,8 +57,8 @@ void CommandBuffer::createCommandBuffer()
 {
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = aDevice.GetCommandPool();
+    allocInfo.commandPool = aDevice->GetCommandPool();
     allocInfo.commandBufferCount = static_cast<uint32_t>(buffers.size());
     allocInfo.level = level;
-    vkAllocateCommandBuffers(aDevice.GetLogicalDevice(), &allocInfo, buffers.data());
+    vkAllocateCommandBuffers(aDevice->GetLogicalDevice(), &allocInfo, buffers.data());
 }

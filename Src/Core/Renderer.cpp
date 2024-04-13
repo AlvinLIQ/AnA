@@ -195,11 +195,11 @@ void Renderer::createCommandBuffers()
     if (vkAllocateCommandBuffers(aDevice.GetLogicalDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) 
         throw std::runtime_error("Failed to allocate command buffers!");
 
-    secondaryCommandBuffers[RENDER_PASS_TYPE_ONSCREEN] = new CommandBuffer(aDevice, 
+    secondaryCommandBuffers[RENDER_PASS_TYPE_ONSCREEN] = new CommandBuffer(&aDevice, 
         MAX_FRAMES_IN_FLIGHT, 
         VK_COMMAND_BUFFER_LEVEL_SECONDARY,
         VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT | VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT);
-    secondaryCommandBuffers[RENDER_PASS_TYPE_OFFSCREEN] = new CommandBuffer(aDevice, 
+    secondaryCommandBuffers[RENDER_PASS_TYPE_OFFSCREEN] = new CommandBuffer(&aDevice, 
         MAX_FRAMES_IN_FLIGHT, 
         VK_COMMAND_BUFFER_LEVEL_SECONDARY,
         VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT | VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT);
