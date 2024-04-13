@@ -8,6 +8,8 @@
 
 #define INCLUDE_STB_IMAGE
 
+#define NextFrameIndex(X) ((X + 1) % MAX_FRAMES_IN_FLIGHT)
+
 namespace AnA
 {
     class SwapChain

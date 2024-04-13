@@ -153,7 +153,7 @@ void App::Run(RecordCallBack recordCallBack)
         {
             if (commandBufferNeedUpdate)
             {
-                aRenderer->BeginOffscreenRenderPass(commandBuffer, aResourceManager->GetShadowFramebuffers()[GetSwapChain().CurrentFrame]);
+                aRenderer->BeginOffscreenRenderPass(commandBuffer, aResourceManager->GetShadowFramebuffers()[NextFrameIndex(aShadowSystem->CurrentShadowIndex)]);
                 aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer, RENDER_PASS_TYPE_OFFSCREEN);
                 aRenderer->EndRenderPass(commandBuffer);
             }
