@@ -128,7 +128,10 @@ void App::Run(RecordCallBack recordCallBack)
         if (!pressed && glfwGetKey(aWindow->GetGLFWwindow(), GLFW_KEY_F) == GLFW_PRESS)
         {
             pressed = true;
-            aResourceManager->SceneObjects.Append(meshInfos);
+            aResourceManager->TaskPool.enqueue([this, &meshInfos]()
+            {
+                aResourceManager->SceneObjects.Append(meshInfos);
+            });
         }
         auto curTime = std::chrono::high_resolution_clock::now();
         float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(curTime - prevTime).count();
