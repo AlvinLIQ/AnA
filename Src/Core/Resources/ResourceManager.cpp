@@ -8,7 +8,12 @@ using namespace Resource;
 
 ResourceManager* _resourceManager = nullptr;
 
-ResourceManager::ResourceManager(Device& mDevice) : aDevice {mDevice}, SceneObjects(mDevice), GlobalLight(mDevice)
+ResourceManager::ResourceManager(Device& mDevice) : aDevice {mDevice}, 
+        SceneObjects(mDevice), 
+        GlobalLight(mDevice), 
+        SecondaryCommandBufferPool(mDevice, 
+        VK_COMMAND_BUFFER_LEVEL_SECONDARY,
+        VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT | VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT)
 {
     _resourceManager = this;
     createMainCameraBuffers();

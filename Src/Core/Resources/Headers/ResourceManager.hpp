@@ -1,6 +1,7 @@
 #pragma once
 #include "../../Camera/Headers/Camera.hpp"
 #include "../../Headers/Threadpool.hpp"
+#include "CommandBufferPool.hpp"
 #include "Mesh.hpp"
 #include "Descriptor.hpp"
 #include "Shader.hpp"
@@ -45,7 +46,9 @@ namespace AnA
             AnA::Controls::Control* MainControl = NULL;
 //#endif
             std::unordered_map<uint32_t, Texture*> TextureMap;
-            ThreadPool<void()> TaskPool{};
+            ThreadPool<void()> TaskPool{MAX_FRAMES_IN_FLIGHT};
+            CommandBufferPool SecondaryCommandBufferPool;
+            //ThreadPool<void(CommandBuffer*)> SecondaryCommandBufferPool{};
             void RecreateResources();
         private:
             Device& aDevice;

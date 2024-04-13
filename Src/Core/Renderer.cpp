@@ -27,8 +27,7 @@ Renderer::~Renderer()
 
     commandBuffers.clear();
 
-    delete secondaryCommandBuffers[RENDER_PASS_TYPE_ONSCREEN];
-    delete secondaryCommandBuffers[RENDER_PASS_TYPE_OFFSCREEN];
+    delete offscreenSecondaryCommandBuffers;
 }
 
 VkCommandBuffer Renderer::BeginFrame()
@@ -63,20 +62,17 @@ void Renderer::RecordSecondaryCommandBuffer(RecordCallBack recordCallBack, Rende
 {
     auto swapChainExtent = aSwapChain->GetExtent();
     //aSwapChain->WaitForFences();
-    auto& secondaryCommandBuffer = secondaryCommandBuffers[renderPassType]->Begin(&inheritanceInfos[renderPassType]);
-
-    aSwapChain->SetViewport(secondaryCommandBuffer);
+    auto& secondaryCommandBuffer = offscreenSecondaryCommandBuffers->Begin(&inheritanceInfos[renderPassType]);
     recordCallBack(secondaryCommandBuffer);
 
-    secondaryCommandBuffers[renderPassType]->End();
-    recordedSecondaryCommandBuffers[renderPassType] = secondaryCommandBuffer;
+    offscreenSecondaryCommandBuffers->End();
 }
 
 void Renderer::ExcuteSecondaryCommandBuffer(VkCommandBuffer commandBuffer, RenderPassType renderPassType)
 {
     vkCmdExecuteCommands(commandBuffer, 
     1, 
-    &recordedSecondaryCommandBuffers[renderPassType]);
+    &offscreenSecondaryCommandBuffers->Get());
 }
 
 void Renderer::EndFrame()
@@ -195,11 +191,7 @@ void Renderer::createCommandBuffers()
     if (vkAllocateCommandBuffers(aDevice.GetLogicalDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) 
         throw std::runtime_error("Failed to allocate command buffers!");
 
-    secondaryCommandBuffers[RENDER_PASS_TYPE_ONSCREEN] = new CommandBuffer(&aDevice, 
-        MAX_FRAMES_IN_FLIGHT, 
-        VK_COMMAND_BUFFER_LEVEL_SECONDARY,
-        VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT | VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT);
-    secondaryCommandBuffers[RENDER_PASS_TYPE_OFFSCREEN] = new CommandBuffer(&aDevice, 
+    offscreenSecondaryCommandBuffers = new CommandBuffer(aDevice, 
         MAX_FRAMES_IN_FLIGHT, 
         VK_COMMAND_BUFFER_LEVEL_SECONDARY,
         VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT | VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT);

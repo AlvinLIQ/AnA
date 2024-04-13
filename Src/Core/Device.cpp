@@ -19,7 +19,7 @@ Device::Device(VkInstance &mInstance, VkSurfaceKHR &mSurface) : instance {mInsta
 {
     pickPhysicalDevice();
     createLogicalDevice();
-    createCommandPool();
+    CreateCommandPool(VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT, &commandPool);
 }
 Device::~Device()
 {
@@ -720,7 +720,7 @@ uint32_t Device::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags prope
     throw std::runtime_error("Failed to find suitable memory type!");
 }
 
-void Device::createCommandPool()
+void Device::CreateCommandPool(VkCommandPoolCreateFlags flags, VkCommandPool* pool)
 {
     Device::QueueFamilyIndices queueFamilyIndices = GetQueueFamiliesForCurrent();
 
@@ -730,7 +730,7 @@ void Device::createCommandPool()
     poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsAndComputeFamily.value();
 
     if (vkCreateCommandPool(logicalDevice, &poolInfo, 
-    nullptr, &commandPool) != VK_SUCCESS)
+    nullptr, pool) != VK_SUCCESS)
         throw std::runtime_error("Failed to create command pool!");
 }
 

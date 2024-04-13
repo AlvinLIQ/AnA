@@ -11,8 +11,6 @@
 
 namespace AnA
 {
-    typedef void(*RecordCallBack)(VkCommandBuffer commandBuffer);
-    enum RenderPassType {RENDER_PASS_TYPE_ONSCREEN, RENDER_PASS_TYPE_OFFSCREEN, RENDER_PASS_TYPE_SIZE};
     class Renderer
     {
     public:
@@ -57,6 +55,10 @@ namespace AnA
             auto swapChainextent = GetSwapChainExtent();
             return static_cast<float>(swapChainextent.width) / static_cast<float>(swapChainextent.height);
         }
+        VkCommandBufferInheritanceInfo& GetInheritanceInfo(RenderPassType renderPassType)
+        {
+            return inheritanceInfos[renderPassType];
+        }
         VkCommandBuffer BeginFrame();
 
         void RecordSecondaryCommandBuffer(RecordCallBack recordCallBack, RenderPassType renderPassType);
@@ -76,7 +78,7 @@ namespace AnA
         SwapChain* aSwapChain;
 
         std::vector<VkCommandBuffer> commandBuffers;
-        CommandBuffer* secondaryCommandBuffers[RENDER_PASS_TYPE_SIZE];
+        CommandBuffer* offscreenSecondaryCommandBuffers;
         void createCommandBuffers();
         void freeCommandBuffersMemory();
 
@@ -87,6 +89,5 @@ namespace AnA
         bool needUpdate = false;
         VkClearValue clearValues[2] = {{.color = {{0.6f, 0.6f, 0.6f, 1.0f}}}, {.depthStencil = {1.0f, 0}}};
         VkCommandBufferInheritanceInfo inheritanceInfos[RENDER_PASS_TYPE_SIZE]{};
-        VkCommandBuffer recordedSecondaryCommandBuffers[RENDER_PASS_TYPE_SIZE];
     };
 }

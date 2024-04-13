@@ -60,7 +60,7 @@ public:
     {
         // Creating worker threads 
         for (size_t i = 0; i < num_threads; ++i) { 
-            threads_.emplace_back([this, arg = args[i]] { 
+            threads_.emplace_back([this, args, i] { 
                 while (true) { 
                     std::function<TaskType> task; 
                     // The reason for putting the below code 
@@ -90,7 +90,7 @@ public:
                         tasks_.pop(); 
                     } 
   
-                    task(arg); 
+                    task(&(*args)[i]); 
                 } 
             }); 
         } 

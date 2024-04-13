@@ -144,7 +144,10 @@ void App::Run(RecordCallBack recordCallBack)
         aResourceManager->Update();
         if ((commandBufferNeedUpdate = aResourceManager->SceneObjects.BeginCommandBufferUpdate()))
         {
-            aRenderer->RecordSecondaryCommandBuffer(recordCallBack, RENDER_PASS_TYPE_ONSCREEN);
+            aResourceManager->SecondaryCommandBufferPool.Reset();
+            aResourceManager->SecondaryCommandBufferPool.enqueue(recordCallBack, 
+                &aRenderer->GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN));
+            //aRenderer->RecordSecondaryCommandBuffer(recordCallBack, RENDER_PASS_TYPE_ONSCREEN);
             aRenderer->RecordSecondaryCommandBuffer(offscreenRecordCallBack, RENDER_PASS_TYPE_OFFSCREEN);
             aResourceManager->SceneObjects.EndCommandBufferUpdate();
         }
@@ -157,9 +160,13 @@ void App::Run(RecordCallBack recordCallBack)
                 aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer, RENDER_PASS_TYPE_OFFSCREEN);
                 aRenderer->EndRenderPass(commandBuffer);
             }
-            aRenderer->BeginSwapChainRenderPass(commandBuffer);
-            aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer, RENDER_PASS_TYPE_ONSCREEN);
-            aRenderer->EndRenderPass(commandBuffer);
+            if (aResourceManager->SecondaryCommandBufferPool)
+            {
+                aRenderer->BeginSwapChainRenderPass(commandBuffer);
+                aResourceManager->SecondaryCommandBufferPool.ExcuteRecordedBuffer(commandBuffer);
+                //aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer, RENDER_PASS_TYPE_ONSCREEN);
+                aRenderer->EndRenderPass(commandBuffer);
+            }
             aRenderer->EndFrame();
         }
     }

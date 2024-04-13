@@ -46,6 +46,10 @@ namespace AnA
     }
     class Shader;
     class Texture;
+
+    typedef void(*RecordCallBack)(VkCommandBuffer commandBuffer);
+    enum RenderPassType {RENDER_PASS_TYPE_ONSCREEN, RENDER_PASS_TYPE_OFFSCREEN, RENDER_PASS_TYPE_SIZE};
+
     class Device
     {
     public:
@@ -72,6 +76,7 @@ namespace AnA
         void CreateDescriptorPool(int descriptorCount, VkDescriptorPool& descriptorPool, VkDescriptorType descriptorType);
         void CreateDescriptorSets(Buffer** buffers, VkDeviceSize bufferSize, uint32_t binding, int descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets);
         void CreateDescriptorSets(VkDescriptorImageInfo* imageInfos, uint32_t binding, int descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets);
+        void CreateCommandPool(VkCommandPoolCreateFlags flags, VkCommandPool* pool);
 
         static VkDescriptorSetLayoutBinding CreateLayoutBinding(uint32_t binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags);
 
@@ -136,7 +141,6 @@ namespace AnA
         void createLogicalDevice();
 
         VkCommandPool commandPool;
-        void createCommandPool();
 
         VkCommandBuffer beginSingleTimeCommands();
         void endSingleTimeCommands(VkCommandBuffer commandBuffer);
