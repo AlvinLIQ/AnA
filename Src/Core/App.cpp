@@ -128,7 +128,7 @@ void App::Run(RecordCallBack recordCallBack)
         if (!pressed && glfwGetKey(aWindow->GetGLFWwindow(), GLFW_KEY_F) == GLFW_PRESS)
         {
             pressed = true;
-            aResourceManager->TaskPool.enqueue([this, &meshInfos]()
+            aResourceManager->TaskPool.Enqueue([this, &meshInfos]()
             {
                 aResourceManager->SceneObjects.Append(meshInfos);
             });
@@ -145,12 +145,11 @@ void App::Run(RecordCallBack recordCallBack)
             aResourceManager->Resize();
         }
         aResourceManager->Update();
-        if ((commandBufferNeedUpdate = aResourceManager->SceneObjects.BeginCommandBufferUpdate()))
+        if ((commandBufferNeedUpdate = (aResourceManager->SceneObjects.BeginCommandBufferUpdate() || aRenderer->NeedUpdate())))
         {
             aResourceManager->SecondaryCommandBufferPool.Reset();
-            aResourceManager->SecondaryCommandBufferPool.enqueue(recordCallBack, 
+            aResourceManager->SecondaryCommandBufferPool.Enqueue(recordCallBack, 
                 &aRenderer->GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN));
-            //aRenderer->RecordSecondaryCommandBuffer(recordCallBack, RENDER_PASS_TYPE_ONSCREEN);
             aRenderer->RecordSecondaryCommandBuffer(offscreenRecordCallBack, RENDER_PASS_TYPE_OFFSCREEN);
             aResourceManager->SceneObjects.EndCommandBufferUpdate();
         }
@@ -159,17 +158,15 @@ void App::Run(RecordCallBack recordCallBack)
         {
             if (commandBufferNeedUpdate)
             {
-                aRenderer->BeginOffscreenRenderPass(commandBuffer, aResourceManager->GetShadowFramebuffers()[NextFrameIndex(aShadowSystem->CurrentShadowIndex)]);
+                aRenderer->BeginOffscreenRenderPass(commandBuffer, 
+                    aResourceManager->GetShadowFramebuffers()[aResourceManager->SecondaryCommandBufferPool.CurrentBufferIndex]);
                 aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer, RENDER_PASS_TYPE_OFFSCREEN);
                 aRenderer->EndRenderPass(commandBuffer);
             }
-            if (aResourceManager->SecondaryCommandBufferPool)
-            {
-                aRenderer->BeginSwapChainRenderPass(commandBuffer);
-                aResourceManager->SecondaryCommandBufferPool.ExcuteRecordedBuffer(commandBuffer);
-                //aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer, RENDER_PASS_TYPE_ONSCREEN);
-                aRenderer->EndRenderPass(commandBuffer);
-            }
+            while(!aResourceManager->SecondaryCommandBufferPool); //Sync
+            aRenderer->BeginSwapChainRenderPass(commandBuffer);
+            aResourceManager->SecondaryCommandBufferPool.ExcuteRecordedBuffer(commandBuffer);
+            aRenderer->EndRenderPass(commandBuffer);
             aRenderer->EndFrame();
         }
     }

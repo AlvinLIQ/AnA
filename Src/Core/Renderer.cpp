@@ -170,10 +170,10 @@ void Renderer::BeginOffscreenRenderPass(VkCommandBuffer commandBuffer, VkFramebu
     renderPassBegin.framebuffer = framebuffer;
     renderPassBegin.renderArea.offset.x = 0;
     renderPassBegin.renderArea.offset.y = 0;
-    renderPassBegin.renderArea.extent = {extent.width, extent.height};
+    renderPassBegin.renderArea.extent = extent;
     renderPassBegin.clearValueCount = 1;
     renderPassBegin.pClearValues = &clearValues[RENDER_PASS_TYPE_OFFSCREEN];
-    
+
     vkCmdBeginRenderPass(commandBuffer,
                         &renderPassBegin,
                         VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);

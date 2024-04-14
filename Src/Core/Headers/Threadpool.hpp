@@ -116,13 +116,18 @@ public:
     } 
   
     // Enqueue task for execution by the thread pool 
-    virtual void enqueue(std::function<TaskType> task) 
+    virtual void Enqueue(std::function<TaskType> task) 
     { 
         { 
             std::unique_lock<std::mutex> lock(queue_mutex_); 
             tasks_.emplace(std::move(task)); 
         } 
         cv_.notify_one(); 
+    }
+
+    void Join()
+    {
+        while(tasks_.size() != 0);
     }
   
 protected: 

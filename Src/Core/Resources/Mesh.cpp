@@ -129,7 +129,7 @@ void Meshes::UpdateAll()
         commandBufferNeedUpdate = true;
         return;
     }
-    Resource::ResourceManager::GetCurrent()->TaskPool.enqueue([this]()
+    Resource::ResourceManager::GetCurrent()->TaskPool.Enqueue([this]()
     {
         auto newVertexBuffer = new Buffer(aDevice, vertexCount * sizeof(Model::Vertex), 
         VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,

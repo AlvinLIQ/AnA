@@ -28,6 +28,7 @@ namespace AnA
         {
             std::unique_lock<std::mutex> lock(queue_mutex_);
             recordedCommandBuffers.clear();
+            CurrentBufferIndex = (CurrentBufferIndex + 1) % MAX_FRAMES_IN_FLIGHT;
         }
         void ExcuteRecordedBuffer(VkCommandBuffer& commandBuffer)
         {
@@ -36,9 +37,9 @@ namespace AnA
                 static_cast<uint32_t>(recordedCommandBuffers.size()), 
                 recordedCommandBuffers.data());
         }
-        void enqueue(RecordCallBack recordCallBack, VkCommandBufferInheritanceInfo* pInheritanceInfo)
+        void Enqueue(RecordCallBack recordCallBack, VkCommandBufferInheritanceInfo* pInheritanceInfo)
         {
-            ThreadPool::enqueue([this, recordCallBack, pInheritanceInfo](CommandBuffer* commandBuffer)
+            ThreadPool::Enqueue([this, recordCallBack, pInheritanceInfo](CommandBuffer* commandBuffer)
             {
                 auto& _commandBuffer = commandBuffer->Begin(pInheritanceInfo);
                 recordCallBack(_commandBuffer);
@@ -52,6 +53,7 @@ namespace AnA
             size_t index;
             size_t recordedIndex;
         };
+        uint32_t CurrentBufferIndex = 0;
     private:
         Device& aDevice;
         std::vector<CommandBuffer> commandBuffers;

@@ -9,6 +9,7 @@
 #define INCLUDE_STB_IMAGE
 
 #define NextFrameIndex(X) ((X + 1) % MAX_FRAMES_IN_FLIGHT)
+#define OFFSCREEN_IMAGE_SIZE 400
 
 namespace AnA
 {

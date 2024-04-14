@@ -129,7 +129,7 @@ void Shader::createDescriptors(std::vector<Descriptor::DescriptorConfig>& descri
         {
             if (descriptor->GetSets().size())
             {
-                descriptorSets[i].push_back(descriptor->GetSets()[i % descriptor->GetSets().size()]);
+                descriptorSets[i].push_back(descriptor->GetSets()[i % (int)descriptor->GetSets().size()]);
             }
             else
             {
