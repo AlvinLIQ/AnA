@@ -31,6 +31,7 @@ namespace AnA
         void RemoveAt(std::vector<uint32_t> meshIndices);
         void Bind(VkCommandBuffer commandBuffer);
         void Draw(VkCommandBuffer commandBuffer);
+        void DrawBatch(VkCommandBuffer commandBuffer);
         bool NeedUpdate()
         {
             return updateQueue.size();
@@ -50,7 +51,7 @@ namespace AnA
         void UpdateVertexPositions(Mesh& mesh);
         void UpdateVertexPositions(Range updateRange);
 
-        Mesh& GetAt(size_t index)
+        Mesh& At(size_t index)
         {
             return meshes[index];
         }

@@ -61,6 +61,18 @@ void Meshes::Draw(VkCommandBuffer commandBuffer)
     vkCmdDrawIndexed(commandBuffer, indexBuffer->GetSize() / sizeof(Model::Index), 1, 0, 0, 0);
 }
 
+void Meshes::DrawBatch(VkCommandBuffer commandBuffer)
+{
+    size_t i;
+    uint32_t batchSize = 16;
+    for (i = batchSize; i < meshes.size(); i += batchSize)
+    {
+        auto indexOffset = meshes[i - batchSize].indexOffset;
+        vkCmdDrawIndexed(commandBuffer, (meshes[i].indexOffset - indexOffset) * sizeof(Model::Index), 
+            1, indexOffset, 0, 0);
+    }
+}
+
 void Meshes::CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer)
 {
     auto vertices = ((Model::Vertex*)newVertBuffer->GetMappedData());

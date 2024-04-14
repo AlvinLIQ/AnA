@@ -155,3 +155,20 @@ void Descriptor::UpdateDescriptorSets(DescriptorConfig& descriptorConfig)
             &descriptorWrite, 0, nullptr);
     }
 }
+
+void Descriptor::UpdateDescriptorSets(std::vector<VkDescriptorImageInfo> imageInfos, uint32_t dstBinding, VkDescriptorType descriptorType)
+{
+    for (int i = 0; i < sets.size(); i++)
+    {
+        VkWriteDescriptorSet descriptorWrite{};
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = sets[i];
+        descriptorWrite.dstBinding = dstBinding;
+        descriptorWrite.dstArrayElement = 0;
+        descriptorWrite.descriptorType = descriptorType;
+        descriptorWrite.descriptorCount = static_cast<uint32_t>(imageInfos.size());
+        descriptorWrite.pImageInfo = imageInfos.data();
+        vkUpdateDescriptorSets(aDevice.GetLogicalDevice(), 1,
+            &descriptorWrite, 0, nullptr);
+    }
+}
