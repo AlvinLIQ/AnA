@@ -23,15 +23,12 @@ ResourceManager::ResourceManager(Device& mDevice) : aDevice {mDevice},
 //#ifdef ANA_INCLUDE_CONTROL
     Controls::Control::InitControl(SwapChain::GetCurrent());
 //#endif
-    TextureMap.insert(std::pair<uint32_t, Texture*>(DEFAULT_TEXTURE_ID, new Texture(0xFFFFFFFF, mDevice)));
+    TextureMap.try_emplace(DEFAULT_TEXTURE_ID, (uint32_t)0xFFFFFFFF, mDevice);
 }
 
 ResourceManager::~ResourceManager()
 {
-    for (auto& texture : TextureMap)
-    {
-        delete texture.second;
-    }
+    TextureMap.clear();
     for (auto& shader : Shaders)
         delete shader;
     
