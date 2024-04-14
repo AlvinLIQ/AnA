@@ -37,35 +37,35 @@ void App::CreateCubeModel(std::shared_ptr<Model>& model)
     std::vector<Model::Vertex> vertices = 
     {
         // left (gray)
-        {{-.5f, -.5f, -.5f},{.5f, .5f, .5f}, {-1.0f, 0.0f, 0.0f}},
-        {{-.5f, -.5f, .5f}, {.5f, .5f, .5f}, {-1.0f, 0.0f, 0.0f}},
-        {{-.5f, .5f, -.5f}, {.5f, .5f, .5f}, {-1.0f, 0.0f, 0.0f}},
-        {{-.5f, .5f, .5f},  {.5f, .5f, .5f}, {-1.0f, 0.0f, 0.0f}},
+        {{-.5f, -.5f, -.5f},{-1.0f, 0.0f, 0.0f}},
+        {{-.5f, -.5f, .5f}, {-1.0f, 0.0f, 0.0f}},
+        {{-.5f, .5f, -.5f}, {-1.0f, 0.0f, 0.0f}},
+        {{-.5f, .5f, .5f},  {-1.0f, 0.0f, 0.0f}},
         // right (red)
-        {{.5f, -.5f, -.5f},{.9f, .2f, .2f}, {1.0f, 0.0f, 0.0f}},
-        {{.5f, -.5f, .5f}, {.9f, .2f, .2f}, {1.0f, 0.0f, 0.0f}},
-        {{.5f, .5f, -.5f}, {.9f, .2f, .2f}, {1.0f, 0.0f, 0.0f}},
-        {{.5f, .5f, .5f},  {.9f, .2f, .2f}, {1.0f, 0.0f, 0.0f}},
+        {{.5f, -.5f, -.5f}, {1.0f, 0.0f, 0.0f}},
+        {{.5f, -.5f, .5f},  {1.0f, 0.0f, 0.0f}},
+        {{.5f, .5f, -.5f},  {1.0f, 0.0f, 0.0f}},
+        {{.5f, .5f, .5f},   {1.0f, 0.0f, 0.0f}},
         // top (yellow)
-        {{-.5f, -.5f, -.5f},{.9f, .9f, .2f}, {0.0f, -1.0f, 0.0f}},
-        {{-.5f, -.5f, .5f}, {.9f, .9f, .2f}, {0.0f, -1.0f, 0.0f}},
-        {{.5f, -.5f, -.5f}, {.9f, .9f, .2f}, {0.0f, -1.0f, 0.0f}},
-        {{.5f, -.5f, .5f},  {.9f, .9f, .2f}, {0.0f, -1.0f, 0.0f}},
+        {{-.5f, -.5f, -.5f},{0.0f, -1.0f, 0.0f}},
+        {{-.5f, -.5f, .5f}, {0.0f, -1.0f, 0.0f}},
+        {{.5f, -.5f, -.5f}, {0.0f, -1.0f, 0.0f}},
+        {{.5f, -.5f, .5f},  {0.0f, -1.0f, 0.0f}},
         // bottom (white)
-        {{-.5f, .5f, -.5f}, {.9f, .9f, .9f}, {0.0f, 1.0f, 0.0f}},
-        {{-.5f, .5f, .5f},  {.9f, .9f, .9f}, {0.0f, 1.0f, 0.0f}},
-        {{.5f,  .5f, -.5f}, {.9f, .9f, .9f}, {0.0f, 1.0f, 0.0f}},
-        {{.5f,  .5f, .5f},  {.9f, .9f, .9f}, {0.0f, 1.0f, 0.0f}},
+        {{-.5f, .5f, -.5f}, {0.0f, 1.0f, 0.0f}},
+        {{-.5f, .5f, .5f},  {0.0f, 1.0f, 0.0f}},
+        {{.5f,  .5f, -.5f}, {0.0f, 1.0f, 0.0f}},
+        {{.5f,  .5f, .5f},  {0.0f, 1.0f, 0.0f}},
         // back (green)
-        {{-.5f, -.5f, .5f}, {.2f, .9f, .2f}, {0.0f, 0.0f, -1.0f}},
-        {{-.5f, .5f, .5f},  {.2f, .9f, .2f}, {0.0f, 0.0f, -1.0f}},
-        {{.5f,  -.5f, .5f}, {.2f, .9f, .2f}, {0.0f, 0.0f, -1.0f}},
-        {{.5f,  .5f, .5f},  {.2f, .9f, .2f}, {0.0f, 0.0f, -1.0f}},
+        {{-.5f, -.5f, .5f}, {0.0f, 0.0f, -1.0f}},
+        {{-.5f, .5f, .5f},  {0.0f, 0.0f, -1.0f}},
+        {{.5f,  -.5f, .5f}, {0.0f, 0.0f, -1.0f}},
+        {{.5f,  .5f, .5f},  {0.0f, 0.0f, -1.0f}},
         // front (blue)
-        {{-.5f, -.5f, -.5f}, {.2f, .2f, .9f}, {0.0f, 0.0f, 1.0f}},
-        {{-.5f, .5f, -.5f},  {.2f, .2f, .9f}, {0.0f, 0.0f, 1.0f}},
-        {{.5f,  -.5f, -.5f}, {.2f, .2f, .9f}, {0.0f, 0.0f, 1.0f}},
-        {{.5f,  .5f, -.5f},  {.2f, .2f, .9f}, {0.0f, 0.0f, 1.0f}},
+        {{-.5f, -.5f, -.5f}, {0.0f, 0.0f, 1.0f}},
+        {{-.5f, .5f, -.5f},  {0.0f, 0.0f, 1.0f}},
+        {{.5f,  -.5f, -.5f}, {0.0f, 0.0f, 1.0f}},
+        {{.5f,  .5f, -.5f},  {0.0f, 0.0f, 1.0f}},
     };
 
     Model::ModelInfo modelInfo = {vertices, {}, {}, 4, {0, 1, 2, 1, 2, 3}};
@@ -89,15 +89,15 @@ void App::Init()
     aShadowSystem = new Systems::ShadowSystem(*aDevice, &aRenderer->GetSwapChain());
 }
 
-void App::Run(RecordCallBack recordCallBack)
+void App::Run(RecordCallBackEx recordCallBack)
 {
     if (recordCallBack == nullptr)
-        recordCallBack = [](VkCommandBuffer secondaryCommandBuffer)
+        recordCallBack = [](VkCommandBuffer secondaryCommandBuffer, size_t index)
             {
                 auto resourceManager = Resource::ResourceManager::GetCurrent();
-                Systems::RenderSystem::GetCurrent()->RenderMeshes(secondaryCommandBuffer, 
+                Systems::RenderSystem::GetCurrent()->RenderBatch(secondaryCommandBuffer, 
                     resourceManager->SceneObjects, 
-                    *resourceManager->Shaders[0]);
+                    *resourceManager->Shaders[0], index);
             };
     auto offscreenRecordCallBack = [](VkCommandBuffer secondaryCommandBuffer)
             {
@@ -196,10 +196,10 @@ std::shared_ptr<Model> &App::Get2DModel()
     {
         std::vector<Model::Vertex> vertices
         {
-            {{-1.0f, -1.0f, 0.f}, {}, {}, {0.0f, 0.0f}},
-            {{1.0f, -1.0f, 0.f}, {}, {}, {1.0f, 0.0f}},
-            {{-1.0f, 1.0f, 0.f}, {}, {}, {0.0f, 1.0f}},
-            {{1.0f, 1.0f, 0.f}, {}, {}, {1.0f, 1.0f}}
+            {{-1.0f, -1.0f, 0.f}, {}, {0.0f, 0.0f}},
+            {{1.0f, -1.0f, 0.f}, {}, {1.0f, 0.0f}},
+            {{-1.0f, 1.0f, 0.f}, {}, {0.0f, 1.0f}},
+            {{1.0f, 1.0f, 0.f}, {}, {1.0f, 1.0f}}
         };
         Model::ModelInfo modelInfo{vertices, {}, {}, 4, {0, 1, 2, 1, 2, 3}};
         _2DModel = std::make_shared<Model>(*_aDevice, modelInfo);

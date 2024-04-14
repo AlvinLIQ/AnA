@@ -48,6 +48,7 @@ namespace AnA
     class Texture;
 
     typedef void(*RecordCallBack)(VkCommandBuffer commandBuffer);
+    typedef void(*RecordCallBackEx)(VkCommandBuffer commandBuffer, size_t index);
     enum RenderPassType {RENDER_PASS_TYPE_ONSCREEN, RENDER_PASS_TYPE_OFFSCREEN, RENDER_PASS_TYPE_SIZE};
 
     class Device

@@ -8,12 +8,11 @@
 #define ANA_TEXT 32
 #define ANA_SPHERE 64
 
-layout(location = 0) in vec3 fragColor;
-layout(location = 1) in vec2 texCoord;
-layout(location = 2) flat in uint objectIndex;
-layout(location = 3) in vec3 normalSpace;
-layout(location = 4) in vec3 vertex;
-layout(location = 5) in vec4 shadowCoord;
+layout(location = 0) in vec2 texCoord;
+layout(location = 1) flat in uint texIndex;
+layout(location = 2) in vec3 normalSpace;
+layout(location = 3) in vec3 vertex;
+layout(location = 4) in vec4 shadowCoord;
 
 
 layout(location = 0) out vec4 outColor;
@@ -77,5 +76,5 @@ void main()
         visibility = 0.5;
     }
     vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility + pointLightIntensity * LIGHT_COLOR;
-    outColor = texture(texSampler, texCoord) * vec4(finalLight, 1.0);
+    outColor = vec4(finalLight, 1.0);
 }

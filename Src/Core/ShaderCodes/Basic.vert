@@ -9,15 +9,15 @@
 #define ANA_SPHERE 64
 
 layout(location = 0) in vec3 position;
-layout(location = 1) in vec3 color;
-layout(location = 2) in vec3 normal;
-layout(location = 3) in vec2 uv;
-layout(location = 0) out vec3 fragColor;
-layout(location = 1) out vec2 outTexCoord;
-layout(location = 2) out uint outObjectID;
-layout(location = 3) out vec3 outNormalSpace;
-layout(location = 4) out vec3 outVertex;
-layout(location = 5) out vec4 outShadowCoord;
+layout(location = 1) in vec3 normal;
+layout(location = 2) in vec2 uv;
+layout(location = 3) in uint texIndex;
+
+layout(location = 0) out vec2 outTexCoord;
+layout(location = 1) out uint outTexID;
+layout(location = 2) out vec3 outNormalSpace;
+layout(location = 3) out vec3 outVertex;
+layout(location = 4) out vec4 outShadowCoord;
 
 layout(push_constant) uniform Push {
     vec3 color;
@@ -94,9 +94,8 @@ void main() {
     outVertex = vertex.xyz / vertex.w;
     //mat4 dView = mat4(0.999949, -0.009408, 0.003682, 0.000000, 0.000000, 0.364459, 0.931219, 0.000000, -0.010103, -0.931172, 0.364441, 0.000000, -1.931544, -0.269233, 11.256238, 1.000000);
     outShadowCoord = biasMat * lbo.proj * lbo.view * vertex;
-    fragColor = color;
 
     outTexCoord = uv;
-    outObjectID = gl_BaseInstance;
+    outTexID = texIndex;
     //gl_Position = push.projectionMatrix * push.transformMatrix * vec4(position, 1.0);
 }

@@ -5,6 +5,9 @@ using namespace AnA;
 
 Meshes::Meshes(Device& mDevice) : aDevice {mDevice}
 {
+    VkPhysicalDeviceProperties properties;
+    vkGetPhysicalDeviceProperties(mDevice.GetPhysicalDevice(), &properties);
+    batchSize = properties.limits.maxDescriptorSetSamplers;
 }
 
 Meshes::~Meshes()
@@ -61,14 +64,26 @@ void Meshes::Draw(VkCommandBuffer commandBuffer)
     vkCmdDrawIndexed(commandBuffer, indexBuffer->GetSize() / sizeof(Model::Index), 1, 0, 0, 0);
 }
 
-void Meshes::DrawBatch(VkCommandBuffer commandBuffer)
+void Meshes::Draw(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout, size_t offset, size_t size)
 {
+    auto& textureMap = Resource::ResourceManager::GetCurrent()->TextureMap;
+    auto& texture = textureMap.at(DEFAULT_TEXTURE_ID);
+    sets[DEFAULT_SAMPLER_LAYOUT] = texture.GetDescriptorSet();
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+        pipelineLayout, 0, static_cast<uint32_t>(sets.size()),
+        sets.data(), 0, nullptr);
     size_t i;
-    uint32_t batchSize = 16;
-    for (i = batchSize; i < meshes.size(); i += batchSize)
+    for (i = batchSize; i < size; i += batchSize)
     {
         auto indexOffset = meshes[i - batchSize].indexOffset;
-        vkCmdDrawIndexed(commandBuffer, (meshes[i].indexOffset - indexOffset) * sizeof(Model::Index), 
+        vkCmdDrawIndexed(commandBuffer, meshes[i].indexOffset - indexOffset, 
+            1, indexOffset, 0, 0);
+    }
+    if (i > size)
+    {
+        auto indexOffset = meshes[i - batchSize].indexOffset;
+        auto& backMesh = meshes[size - 1];
+        vkCmdDrawIndexed(commandBuffer, backMesh.indexOffset - indexOffset + backMesh.indices.size(), 
             1, indexOffset, 0, 0);
     }
 }
@@ -86,7 +101,7 @@ void Meshes::CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer)
             auto& vertex = vertices[mesh.vertexOffset + j];
             auto& meshVertex = mesh.vertices[j];
             vertex.position = model * meshVertex.position + mesh.transform.translation;
-            vertex.color = meshVertex.color;
+            //vertex.color = meshVertex.color;
             vertex.normal = meshVertex.normal;
             vertex.uv = meshVertex.uv;
         }
@@ -110,7 +125,7 @@ void Meshes::CommitBufferUpdate()
                 auto& vertex = vertices[mesh.vertexOffset + j];
                 auto& meshVertex = mesh.vertices[j];
                 vertex.position = model * meshVertex.position + mesh.transform.translation;
-                vertex.color = meshVertex.color;
+                //vertex.color = meshVertex.color;
                 vertex.normal = meshVertex.normal;
                 vertex.uv = meshVertex.uv;
             }

@@ -31,7 +31,7 @@ namespace AnA
         void RemoveAt(std::vector<uint32_t> meshIndices);
         void Bind(VkCommandBuffer commandBuffer);
         void Draw(VkCommandBuffer commandBuffer);
-        void DrawBatch(VkCommandBuffer commandBuffer);
+        void Draw(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout, size_t offset, size_t size);
         bool NeedUpdate()
         {
             return updateQueue.size();
@@ -59,6 +59,14 @@ namespace AnA
         {
             return meshes.size();
         }
+        uint32_t GetBatchCount() const
+        {
+            uint32_t batchCount = meshes.size() / batchSize;
+            if (meshes.size() % batchCount)
+                batchCount++;
+
+            return batchCount;
+        }
     private:
         Device& aDevice;
         Buffer* vertexBuffer{nullptr};
@@ -66,6 +74,7 @@ namespace AnA
         Buffer* indexBuffer{nullptr};
         size_t indexCount = 0;
         std::vector<Mesh> meshes;
+        uint32_t batchSize;
         std::vector<Range> updateQueue{};
         uint32_t maxUpdateRange = 0;
         bool commandBufferNeedUpdate = false;

@@ -103,7 +103,7 @@ void Model::CreateMeshFromFile(const char *filePath, std::vector<Vertex>& vertic
                     attrib.vertices[3 * index.vertex_index + 1],
                     attrib.vertices[3 * index.vertex_index + 2]
                 };
-                
+                /*
                 auto colorIndex = 3 * index.vertex_index + 2;
                 if (colorIndex < attrib.colors.size())
                 {
@@ -122,7 +122,7 @@ void Model::CreateMeshFromFile(const char *filePath, std::vector<Vertex>& vertic
                         materials[0].diffuse[1],
                         materials[0].diffuse[2]
                     };
-                }
+                }*/
             }
             if (index.normal_index >= 0)
             {
@@ -231,9 +231,9 @@ std::vector<VkVertexInputAttributeDescription> Model::Vertex::GetAttributeDescri
 {
     std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
     attributeDescriptions.push_back({0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, position)});
-    attributeDescriptions.push_back({1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, color)});
-    attributeDescriptions.push_back({2, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, normal)});
-    attributeDescriptions.push_back({3, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, uv)});
+    attributeDescriptions.push_back({1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, normal)});
+    attributeDescriptions.push_back({2, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, uv)});
+    attributeDescriptions.push_back({3, 0, VK_FORMAT_R32_UINT, offsetof(Vertex, textureId)});
 
     return attributeDescriptions;
 }

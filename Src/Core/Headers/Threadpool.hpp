@@ -90,7 +90,7 @@ public:
                         tasks_.pop(); 
                     } 
   
-                    task(&(*args)[i]); 
+                    task(&(*args)[i], i); 
                 } 
             }); 
         } 

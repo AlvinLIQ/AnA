@@ -4,7 +4,7 @@
 
 namespace AnA
 {
-    class CommandBufferPool : public ThreadPool<void(CommandBuffer*)>
+    class CommandBufferPool : public ThreadPool<void(CommandBuffer*, size_t index)>
     {
     public:
         CommandBufferPool(Device& mDevice, 
@@ -37,12 +37,12 @@ namespace AnA
                 static_cast<uint32_t>(recordedCommandBuffers.size()), 
                 recordedCommandBuffers.data());
         }
-        void Enqueue(RecordCallBack recordCallBack, VkCommandBufferInheritanceInfo* pInheritanceInfo)
+        void Enqueue(RecordCallBackEx recordCallBack, VkCommandBufferInheritanceInfo* pInheritanceInfo)
         {
-            ThreadPool::Enqueue([this, recordCallBack, pInheritanceInfo](CommandBuffer* commandBuffer)
+            ThreadPool::Enqueue([this, recordCallBack, pInheritanceInfo](CommandBuffer* commandBuffer, size_t index)
             {
                 auto& _commandBuffer = commandBuffer->Begin(pInheritanceInfo);
-                recordCallBack(_commandBuffer);
+                recordCallBack(_commandBuffer, index);
                 commandBuffer->End();
                 std::unique_lock<std::mutex> lock(queue_mutex_);
                 recordedCommandBuffers.push_back(_commandBuffer);
@@ -54,6 +54,10 @@ namespace AnA
             size_t recordedIndex;
         };
         uint32_t CurrentBufferIndex = 0;
+        uint32_t GetCommandBufferCount()
+        {
+            return static_cast<uint32_t>(commandBuffers.size());
+        }
     private:
         Device& aDevice;
         std::vector<CommandBuffer> commandBuffers;
