@@ -21,7 +21,7 @@ else
 endif
 
 sources := $(wildcard Src/Core/*.cpp Src/Core/*/*.cpp Src/GUI/Controls/*.cpp)
-editor := $(wildcard Src/Editors/*.cpp)
+editor := $(wildcard Src/Editor/*.cpp)
 example_batching = Src/Examples/example_batching.cpp
 objects = $(sources:.cpp=.o)
 depends = $(sources:.cpp=.d)
