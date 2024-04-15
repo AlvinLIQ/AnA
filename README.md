@@ -5,7 +5,6 @@
 ### Currently working on
 
 * GUI Controls
-* Batching(Partially done)
 
 ### To do
 
