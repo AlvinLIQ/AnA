@@ -120,7 +120,7 @@ void App::Run(RecordCallBackEx recordCallBack)
     std::vector<MeshInfo> meshInfos;
     bool pressed = false;
     for (int i = 0; i < 1000; i++)
-        meshInfos.push_back({"Models/cube.obj", {{drand48(), drand48(), drand48()}, {drand48(), drand48(), drand48()}}});
+        meshInfos.push_back({"Models/cube.obj", {{drand48(), drand48(), drand48()}, {drand48(), drand48(), drand48()}}, (uint32_t)rand() % 4});
     bool commandBufferNeedUpdate;
     while(!glfwWindowShouldClose(window))
     {
