@@ -38,7 +38,7 @@ void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, Objects &objects
             uint32_t color = (uint32_t)0xFF000000 ^ ((uint32_t)(object->Color.b * 255.0f) << 16) ^ ((uint32_t)(object->Color.g * 255.0f) << 8) ^ ((uint32_t)(object->Color.r * 255.0f));
             object->Texture = std::make_unique<Texture>(color, aDevice);
         }
-        sets[DEFAULT_SAMPLER_LAYOUT] = object->Texture->GetDescriptorSet();
+        //sets[DEFAULT_SAMPLER_LAYOUT] = object->Texture->GetDescriptorSet();
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
             shader.GetPipelineLayout(), 0, static_cast<uint32_t>(sets.size()),
             sets.data(), 0, nullptr);
@@ -56,7 +56,7 @@ void RenderSystem::RenderMeshes(VkCommandBuffer commandBuffer, Meshes &meshes, S
     std::vector<VkDescriptorSet>& sets = shader.GetDescriptorSets()[resourceManager->SecondaryCommandBufferPool.CurrentBufferIndex];
     auto& textureMap = resourceManager->TextureMap;
     auto& texture = textureMap.at(DEFAULT_TEXTURE_ID);
-    sets[DEFAULT_SAMPLER_LAYOUT] = texture.GetDescriptorSet();
+    //sets[DEFAULT_SAMPLER_LAYOUT] = texture.GetDescriptorSet();
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
         shader.GetPipelineLayout(), 0, static_cast<uint32_t>(sets.size()),
         sets.data(), 0, nullptr);
@@ -70,13 +70,6 @@ void RenderSystem::RenderBatch(VkCommandBuffer commandBuffer, Meshes &meshes, Sh
     shader.GetPipeline()->Bind(commandBuffer);
     auto resourceManager = Resource::ResourceManager::GetCurrent();
     std::vector<VkDescriptorSet>& sets = shader.GetDescriptorSets()[resourceManager->SecondaryCommandBufferPool.CurrentBufferIndex];
-    auto& textureMap = resourceManager->TextureMap;
-    auto& texture = textureMap.at(DEFAULT_TEXTURE_ID);
-    sets[DEFAULT_SAMPLER_LAYOUT] = texture.GetDescriptorSet();
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-        shader.GetPipelineLayout(), 0, static_cast<uint32_t>(sets.size()),
-        sets.data(), 0, nullptr);
-
     meshes.Bind(commandBuffer);
     meshes.Draw(commandBuffer, sets, shader.GetPipelineLayout(), 0, meshes.GetMeshCount());
 }

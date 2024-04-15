@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include "Model.hpp"
+#include "Descriptor.hpp"
 #include "../../Headers/Types.hpp"
 
 namespace AnA
@@ -13,12 +14,13 @@ namespace AnA
         std::vector<Model::Index> indices;
         uint32_t vertexOffset;
         uint32_t indexOffset;
-        uint32_t textureId{(uint32_t)-1};
+        uint32_t textureId{};
     };
     struct MeshInfo
     {
         std::string filePath;
         AnA::Transform transform;
+        uint32_t tetureId{};
     };
     class Meshes
     {
@@ -76,7 +78,11 @@ namespace AnA
         std::vector<Mesh> meshes;
         uint32_t batchSize;
         std::vector<Range> updateQueue{};
+        void commitBufferUpdate(Model::Vertex* vertices, Model::Index* indices, Range& updateRange);
         uint32_t maxUpdateRange = 0;
         bool commandBufferNeedUpdate = false;
+        std::unordered_map<uint32_t, uint32_t> textureIdMap{};
+        std::vector<Descriptor*> samplersDescriptors;
+        void appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageInfos);
     };
 }

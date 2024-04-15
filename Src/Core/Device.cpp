@@ -335,7 +335,7 @@ void Device::CreateSampler(VkSampler* pSampler, enum VkSamplerAddressMode sample
     vkCreateSampler(logicalDevice, &samplerInfo, nullptr, pSampler);
 }
 
-void Device::CreateDescriptorPool(int descriptorCount, VkDescriptorPool& descriptorPool, VkDescriptorType descriptorType)
+void Device::CreateDescriptorPool(int descriptorCount, VkDescriptorPool& descriptorPool, VkDescriptorType descriptorType, VkCommandPoolCreateFlags flags)
 {
     VkDescriptorPoolSize poolSizes[1];
     poolSizes[0].type = descriptorType;
@@ -346,7 +346,7 @@ void Device::CreateDescriptorPool(int descriptorCount, VkDescriptorPool& descrip
     poolInfo.poolSizeCount = numsof(poolSizes);
     poolInfo.pPoolSizes = poolSizes;
     poolInfo.maxSets = static_cast<uint32_t>(descriptorCount);
-    poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+    poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT | flags;
     
     if (vkCreateDescriptorPool(logicalDevice, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
         throw std::runtime_error("Failed to create descriptor pool!");
@@ -415,15 +415,50 @@ void Device::CreateDescriptorSets(VkDescriptorImageInfo* imageInfos, uint32_t bi
     }
 }
 
-VkDescriptorSetLayoutBinding Device::CreateLayoutBinding(uint32_t binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags)
+void Device::CreateDescriptorSets(int descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, std::vector<VkDescriptorSet>& descriptorSets, void* pNext)
+{
+    std::vector<VkDescriptorSetLayout> layouts(descriptorSetCount, descriptorSetLayout);
+    VkDescriptorSetAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocInfo.descriptorPool = descriptorPool;
+    allocInfo.descriptorSetCount = static_cast<uint32_t>(descriptorSetCount);
+    allocInfo.pSetLayouts = layouts.data();
+    allocInfo.pNext = pNext;
+    descriptorSets.resize(descriptorSetCount);
+    
+    if (vkAllocateDescriptorSets(logicalDevice, &allocInfo, descriptorSets.data()) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to allocate descriptor sets!");
+    }
+}
+
+VkDescriptorSetLayoutBinding Device::CreateLayoutBinding(uint32_t binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags, uint32_t descriptorCount)
 {
     VkDescriptorSetLayoutBinding layoutBinding{};
-    layoutBinding.descriptorCount = 1;
+    layoutBinding.descriptorCount = descriptorCount;
     layoutBinding.descriptorType = descriptorType;
     layoutBinding.pImmutableSamplers = nullptr;
     layoutBinding.stageFlags = stageFlags;
     layoutBinding.binding = binding;
     return layoutBinding;
+}
+
+std::vector<VkDescriptorSetLayoutBinding> Device::CreateLayoutBindings(uint32_t binding, 
+    VkDescriptorType descriptorType, 
+    VkShaderStageFlags stageFlags, 
+    uint32_t descriptorCount)
+{
+    std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
+    layoutBindings.resize(descriptorCount);
+    for (auto &layoutBinding : layoutBindings)
+    {
+        layoutBinding.descriptorCount = descriptorCount;
+        layoutBinding.descriptorType = descriptorType;
+        layoutBinding.pImmutableSamplers = nullptr;
+        layoutBinding.stageFlags = stageFlags;
+        layoutBinding.binding = binding++;
+    }
+    return layoutBindings;
 }
 
 void Device::TransitionImageLayout(VkImage &image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
@@ -667,6 +702,9 @@ void Device::createLogicalDevice()
     indexingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
     indexingFeatures.descriptorBindingPartiallyBound = VK_TRUE;
     indexingFeatures.descriptorBindingVariableDescriptorCount = VK_TRUE;
+    indexingFeatures.descriptorBindingSampledImageUpdateAfterBind = VK_TRUE;
+    indexingFeatures.runtimeDescriptorArray = VK_TRUE;
+    indexingFeatures.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
     indexingFeatures.pNext = &shaderDrawParametersFeatures;
 
     VkPhysicalDeviceFeatures2 deviceFeatures2{};

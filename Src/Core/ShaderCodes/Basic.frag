@@ -1,4 +1,5 @@
 #version 460
+#extension GL_EXT_nonuniform_qualifier : enable 
 
 #define ANA_MODEL 1
 #define ANA_TRIANGLE 2
@@ -29,7 +30,7 @@ layout(set = 0, binding = 0) uniform CameraBufferObject {
 } cbo;
 
 
-layout(set = 2, binding = 0) uniform sampler2D texSampler;
+layout(set = 2, binding = 0) uniform sampler2D texSampler[];
 layout(set = 3, binding = 0) uniform sampler2D shadowSampler;
 
 layout(set = 1, binding = 0) uniform LightBufferObject {
@@ -76,5 +77,5 @@ void main()
         visibility = 0.5;
     }
     vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility + pointLightIntensity * LIGHT_COLOR;
-    outColor = vec4(finalLight, 1.0);
+    outColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord) * vec4(finalLight, 1.0);
 }

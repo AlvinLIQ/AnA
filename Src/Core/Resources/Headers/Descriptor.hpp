@@ -43,6 +43,7 @@ namespace AnA
         Descriptor(Device& mDevice, Buffer** buffers, VkDeviceSize bufferSize, uint32_t binding, int descriptorSetCount, VkDescriptorSetLayout descriptorSetLayout, const VkDescriptorType descriptorType);
         Descriptor(Device& mDevice, VkSampler& sampler, VkImageView& imageView, VkImageLayout imageLayout, uint32_t binding, int descriptorSetCount, VkShaderStageFlags stageFlags, const VkDescriptorType descriptorType);
         Descriptor(Device& mDevice, VkSampler& sampler, VkImageView& imageView, VkImageLayout imageLayout, uint32_t binding, int descriptorSetCount, VkDescriptorSetLayout descriptorSetLayout, VkShaderStageFlags stageFlags, const VkDescriptorType descriptorType);
+        Descriptor(Device& mDevice, int descriptorSetCount, uint32_t descriptorCount, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags);
 
         Descriptor(Device& mDevice, Descriptor::DescriptorConfig& descriptorConfig);
         ~Descriptor();

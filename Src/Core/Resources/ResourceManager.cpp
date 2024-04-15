@@ -24,6 +24,9 @@ ResourceManager::ResourceManager(Device& mDevice) : aDevice {mDevice},
     Controls::Control::InitControl(SwapChain::GetCurrent());
 //#endif
     TextureMap.try_emplace(DEFAULT_TEXTURE_ID, (uint32_t)0xFFFFFFFF, mDevice);
+    TextureMap.try_emplace(1, (uint32_t)0xFF996666, mDevice);
+    TextureMap.try_emplace(2, (uint32_t)0xFF669966, mDevice);
+    TextureMap.try_emplace(3, (uint32_t)0xFF666699, mDevice);
 }
 
 ResourceManager::~ResourceManager()

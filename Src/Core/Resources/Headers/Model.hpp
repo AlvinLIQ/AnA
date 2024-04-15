@@ -23,7 +23,7 @@ namespace AnA
             glm::vec3 position{};
             glm::vec3 normal{};
             glm::vec2 uv{};
-            glm::uint32 textureId{};
+            glm::uint32_t textureId{};
 
             bool operator==(const Vertex& vertex) const
             {

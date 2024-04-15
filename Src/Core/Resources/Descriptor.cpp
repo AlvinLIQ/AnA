@@ -76,6 +76,17 @@ Descriptor::Descriptor(Device& mDevice, VkSampler& sampler, VkImageView& imageVi
     }
 }
 
+Descriptor::Descriptor(Device& mDevice, int descriptorSetCount, uint32_t descriptorCount, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags) : aDevice{mDevice}
+{
+    aDevice.CreateDescriptorPool(descriptorCount, pool, descriptorType, VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT);
+    VkDescriptorSetVariableDescriptorCountAllocateInfoEXT countInfo{};
+    countInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO;
+    uint32_t maxBinding = MaxBatchSize - 1;
+    countInfo.pDescriptorCounts = &maxBinding;
+    countInfo.descriptorSetCount = descriptorSetCount;
+    aDevice.CreateDescriptorSets(descriptorSetCount, pool, descriptorSetLayout, sets, &countInfo);
+}
+
 Descriptor::Descriptor(Device& mDevice, Descriptor::DescriptorConfig& descriptorConfig) : aDevice{mDevice}
 {
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
@@ -85,12 +96,30 @@ Descriptor::Descriptor(Device& mDevice, Descriptor::DescriptorConfig& descriptor
     VkDescriptorSetLayoutBinding layoutBinding = Device::CreateLayoutBinding(descriptorConfig.binding,
      descriptorConfig.descriptorType, descriptorConfig.stageFlags);
     layoutInfo.pBindings = &layoutBinding;
-    if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &setLayout) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create the DescriptorSetLayout");
-    layoutCreated = true;
-
     if (descriptorConfig.descriptorCount == 0)
+    {
+        layoutBinding.descriptorCount = MaxBatchSize;
+        VkDescriptorBindingFlags bindingFlags = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT | 
+            VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT |
+            VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT_EXT;
+        VkDescriptorSetLayoutBindingFlagsCreateInfo flagsInfo{};
+        flagsInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
+        flagsInfo.bindingCount = 1;
+        flagsInfo.pBindingFlags = &bindingFlags;
+
+        layoutInfo.pNext = &flagsInfo;
+        layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT_EXT;
+        if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &setLayout) != VK_SUCCESS)
+            throw std::runtime_error("Failed to create the DescriptorSetLayout");
+        layoutCreated = true;
         return;
+    }
+    else
+    {
+        if (vkCreateDescriptorSetLayout(aDevice.GetLogicalDevice(), &layoutInfo, nullptr, &setLayout) != VK_SUCCESS)
+            throw std::runtime_error("Failed to create the DescriptorSetLayout");
+        layoutCreated = true;
+    }
     aDevice.CreateDescriptorPool(descriptorConfig.descriptorCount, pool, descriptorConfig.descriptorType);
     if (descriptorConfig.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER || descriptorConfig.descriptorType == VK_DESCRIPTOR_TYPE_SAMPLER)
     {
@@ -159,14 +188,30 @@ void Descriptor::UpdateDescriptorSets(DescriptorConfig& descriptorConfig)
 void Descriptor::UpdateDescriptorSets(std::vector<VkDescriptorImageInfo> imageInfos, uint32_t dstBinding, VkDescriptorType descriptorType)
 {
     for (int i = 0; i < sets.size(); i++)
-    {
+    {/*
+        std::vector<VkWriteDescriptorSet> writes{};
+        for (uint32_t j = 0; j < imageInfos.size(); j++)
+        {
+            VkWriteDescriptorSet descriptorWrite{};
+            descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrite.dstSet = sets[i];
+            descriptorWrite.dstBinding = dstBinding;
+            descriptorWrite.dstArrayElement = 0;
+            descriptorWrite.descriptorType = descriptorType;
+            descriptorWrite.descriptorCount = 1;
+            descriptorWrite.pImageInfo = &imageInfos[j];
+            writes.push_back(descriptorWrite);
+        }
+        vkUpdateDescriptorSets(aDevice.GetLogicalDevice(), (uint32_t)writes.size(),
+            writes.data(), 0, nullptr);
+            */
         VkWriteDescriptorSet descriptorWrite{};
         descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrite.dstSet = sets[i];
         descriptorWrite.dstBinding = dstBinding;
         descriptorWrite.dstArrayElement = 0;
         descriptorWrite.descriptorType = descriptorType;
-        descriptorWrite.descriptorCount = static_cast<uint32_t>(imageInfos.size());
+        descriptorWrite.descriptorCount = (uint32_t)imageInfos.size();
         descriptorWrite.pImageInfo = imageInfos.data();
         vkUpdateDescriptorSets(aDevice.GetLogicalDevice(), 1,
             &descriptorWrite, 0, nullptr);
