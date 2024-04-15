@@ -11,7 +11,7 @@
 
 * [X] Lighting System
 * [X] Multi-Thread Commandbuffer Recording
-* [ ] Batching
+* [X] Batching
 * [ ] Designer
 
 ### Screenshots
