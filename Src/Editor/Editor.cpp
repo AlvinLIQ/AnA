@@ -1,4 +1,5 @@
 #include "Headers/Editor.hpp"
+#include "../GUI/Controls/Headers/StackPanel.hpp"
 
 using namespace AnA;
 using namespace Editors;
@@ -11,6 +12,12 @@ Editor::Editor() : App()
 Editor::~Editor()
 {
 
+}
+
+void Editor::Init()
+{
+    App::Init();
+    aResourceManager->MainControl = new Controls::StackPanel();
 }
 
 void Editor::onCommandBufferRecording(VkCommandBuffer& commandBuffer)

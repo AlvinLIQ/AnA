@@ -228,7 +228,7 @@ void Meshes::commitBufferUpdate(Model::Vertex* vertices, Model::Index* indices, 
 
 void Meshes::appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageInfos)
 {
-    auto& descriptorSetLayout = Resource::ResourceManager::GetCurrent()->Shaders[0]->GetDescriptors()[DEFAULT_SAMPLER_LAYOUT]->GetLayout();
+    auto& descriptorSetLayout = Resource::ResourceManager::GetCurrent()->Shaders[0].GetDescriptors()[DEFAULT_SAMPLER_LAYOUT]->GetLayout();
     auto descriptor = new Descriptor(aDevice, 1, 
         batchSize,
         descriptorSetLayout,

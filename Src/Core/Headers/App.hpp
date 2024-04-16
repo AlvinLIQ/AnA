@@ -46,16 +46,6 @@ namespace AnA
             return *aDevice;
         }
     private:
-        Window* aWindow;
-        Instance* aInstance;
-        Device* aDevice;
-        Renderer* aRenderer;
-        Systems::RenderSystem* aRenderSystem;
-        Systems::ShadowSystem* aShadowSystem;
-        Input::InputManager* aInputManager;
-
-        Resource::ResourceManager* aResourceManager;
-
         std::thread uiThread;
         static void startUILoop(std::thread &loopThread);
         static void waitUILoop(std::thread &loopThread);
@@ -66,5 +56,13 @@ namespace AnA
     protected:
         virtual void onCommandBufferRecording(VkCommandBuffer& commandBuffer);
         VkOffset2D offset{0, 0};
+        Window* aWindow;
+        Instance* aInstance;
+        Device* aDevice;
+        Renderer* aRenderer;
+        Systems::RenderSystem* aRenderSystem;
+        Systems::ShadowSystem* aShadowSystem;
+        Input::InputManager* aInputManager;
+        Resource::ResourceManager* aResourceManager;
     };
 }

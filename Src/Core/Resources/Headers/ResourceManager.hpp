@@ -38,7 +38,7 @@ namespace AnA
             void Resize();
 
             Meshes SceneObjects;
-            std::vector<Shader*> Shaders;
+            std::vector<Shader> Shaders;
             std::vector<Descriptor::DescriptorConfig> GetDefaultDescriptorConfig();
 
             Lights::Light GlobalLight;

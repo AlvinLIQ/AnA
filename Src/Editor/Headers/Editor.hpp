@@ -10,6 +10,7 @@ namespace AnA
         public:
             Editor();
             ~Editor();
+            void Init();
         protected:
             void onCommandBufferRecording(VkCommandBuffer& commandBuffer); 
         };

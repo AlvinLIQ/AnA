@@ -97,13 +97,13 @@ void App::Run(RecordCallBackEx recordCallBack)
                 auto resourceManager = Resource::ResourceManager::GetCurrent();
                 Systems::RenderSystem::GetCurrent()->RenderBatch(secondaryCommandBuffer, 
                     resourceManager->SceneObjects, 
-                    *resourceManager->Shaders[0], index);
+                    resourceManager->Shaders[0], index);
             };
     auto offscreenRecordCallBack = [](VkCommandBuffer secondaryCommandBuffer)
             {
                 auto aResourceManager = Resource::ResourceManager::GetCurrent();
                 auto aShadowSystem = Systems::ShadowSystem::GetCurrent();
-                aShadowSystem->RenderShadows(secondaryCommandBuffer, aResourceManager->SceneObjects, *aResourceManager->Shaders[2]);
+                aShadowSystem->RenderShadows(secondaryCommandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[2]);
             };
 
     Cameras::Camera& camera = aResourceManager->MainCamera, &lightCamera = aResourceManager->LightCamera;

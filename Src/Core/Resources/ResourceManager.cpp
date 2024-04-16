@@ -32,8 +32,9 @@ ResourceManager::ResourceManager(Device& mDevice) : aDevice {mDevice},
 ResourceManager::~ResourceManager()
 {
     TextureMap.clear();
-    for (auto& shader : Shaders)
-        delete shader;
+    //for (auto& shader : Shaders)
+    //    delete shader;
+    Shaders.clear();
     
     auto logicalDevice = aDevice.GetLogicalDevice();
     for (auto& shadowSampler : shadowSamplers)
@@ -107,7 +108,7 @@ void ResourceManager::RecreateResources()
     auto deafultShadowSamplerConfig = GetDefaultDescriptorConfig()[DEFAULT_SHADOW_SAMPLER_LAYOUT];
     for (int i = 0; i < 2; i++)
     {
-        Shaders[i]->GetDescriptors()[DEFAULT_SHADOW_SAMPLER_LAYOUT]->UpdateDescriptorSets(deafultShadowSamplerConfig);
+        Shaders[i].GetDescriptors()[DEFAULT_SHADOW_SAMPLER_LAYOUT]->UpdateDescriptorSets(deafultShadowSamplerConfig);
     }
 }
 
@@ -221,9 +222,10 @@ void ResourceManager::cleanupShadowResources()
 
 void ResourceManager::createDefaultShaders()
 {
+    Shaders.reserve(3); // Reserve space for 3 default shaders
     auto renderPass = SwapChain::GetCurrent()->GetRenderPass();
-    Shaders.push_back(new Shader(aDevice, Basic_vert, Basic_frag, renderPass));
-    Shaders.push_back(new Shader(aDevice, Shape_vert, Shape_frag, renderPass));
+    Shaders.emplace_back(aDevice, Basic_vert, Basic_frag, renderPass);
+    Shaders.emplace_back(aDevice, Shape_vert, Shape_frag, renderPass);
     auto offscreenRenderPass = SwapChain::GetCurrent()->GetOffscreenRenderPass();
-    Shaders.push_back(new Shader(aDevice, ShadowMapping_vert, offscreenRenderPass));
+    Shaders.emplace_back(aDevice, ShadowMapping_vert, offscreenRenderPass);
 }
