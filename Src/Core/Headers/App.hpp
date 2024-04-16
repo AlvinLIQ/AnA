@@ -63,5 +63,6 @@ namespace AnA
         Systems::ShadowSystem* aShadowSystem;
         Input::InputManager* aInputManager;
         Resource::ResourceManager* aResourceManager;
+        VkOffset2D sceneOffset{};
     };
 }

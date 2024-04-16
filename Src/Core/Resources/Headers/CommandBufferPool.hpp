@@ -48,6 +48,28 @@ namespace AnA
                 recordedCommandBuffers.push_back(_commandBuffer);
             });
         }
+        void Enqueue(RecordCallBackEx recordCallBack, VkCommandBufferInheritanceInfo* pInheritanceInfo, VkOffset2D offset)
+        {
+            ThreadPool::Enqueue([this, recordCallBack, pInheritanceInfo, offset](CommandBuffer* commandBuffer, size_t index)
+            {
+                auto& _commandBuffer = commandBuffer->Begin(pInheritanceInfo, offset);
+                recordCallBack(_commandBuffer, index);
+                commandBuffer->End();
+                std::unique_lock<std::mutex> lock(queue_mutex_);
+                recordedCommandBuffers.push_back(_commandBuffer);
+            });
+        }
+        void Enqueue(RecordCallBackEx recordCallBack, VkCommandBufferInheritanceInfo* pInheritanceInfo, VkOffset2D offset, VkExtent2D extent)
+        {
+            ThreadPool::Enqueue([this, recordCallBack, pInheritanceInfo, offset, extent](CommandBuffer* commandBuffer, size_t index)
+            {
+                auto& _commandBuffer = commandBuffer->Begin(pInheritanceInfo, offset, extent);
+                recordCallBack(_commandBuffer, index);
+                commandBuffer->End();
+                std::unique_lock<std::mutex> lock(queue_mutex_);
+                recordedCommandBuffers.push_back(_commandBuffer);
+            });
+        }
         struct CommandBufferRecordedInfo
         {
             size_t index;

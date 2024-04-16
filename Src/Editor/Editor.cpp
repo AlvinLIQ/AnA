@@ -18,10 +18,14 @@ void Editor::Init()
 {
     App::Init();
     aResourceManager->MainControl = new Controls::StackPanel();
+    sceneOffset.x = 300;
 }
 
 void Editor::onCommandBufferRecording(VkCommandBuffer& commandBuffer)
 {
+    auto extent = GetSwapChain().GetExtent();
+    extent.width = sceneOffset.x;
+    //Update GUI Command Buffers here
     App::onCommandBufferRecording(commandBuffer);
 }
 

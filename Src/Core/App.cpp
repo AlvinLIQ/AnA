@@ -149,7 +149,7 @@ void App::Run(RecordCallBackEx recordCallBack)
         {
             aResourceManager->SecondaryCommandBufferPool.Reset();
             aResourceManager->SecondaryCommandBufferPool.Enqueue(recordCallBack, 
-                &aRenderer->GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN));
+                &aRenderer->GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), sceneOffset);
             aRenderer->RecordOffscreenSecondaryCommandBuffer(offscreenRecordCallBack);
             aResourceManager->SceneObjects.EndCommandBufferUpdate();
         }
