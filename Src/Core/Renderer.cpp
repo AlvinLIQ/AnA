@@ -58,17 +58,17 @@ VkCommandBuffer Renderer::BeginFrame()
     return commandBuffer;
 }
 
-void Renderer::RecordSecondaryCommandBuffer(RecordCallBack recordCallBack, RenderPassType renderPassType)
+void Renderer::RecordOffscreenSecondaryCommandBuffer(RecordCallBack recordCallBack)
 {
     auto swapChainExtent = aSwapChain->GetExtent();
     //aSwapChain->WaitForFences();
-    auto& secondaryCommandBuffer = offscreenSecondaryCommandBuffers->Begin(&inheritanceInfos[renderPassType]);
+    auto& secondaryCommandBuffer = offscreenSecondaryCommandBuffers->Begin(&inheritanceInfos[RENDER_PASS_TYPE_OFFSCREEN]);
     recordCallBack(secondaryCommandBuffer);
 
     offscreenSecondaryCommandBuffers->End();
 }
 
-void Renderer::ExcuteSecondaryCommandBuffer(VkCommandBuffer commandBuffer, RenderPassType renderPassType)
+void Renderer::ExecuteOffscreenSecondaryCommandBuffer(VkCommandBuffer commandBuffer)
 {
     vkCmdExecuteCommands(commandBuffer, 
     1, 

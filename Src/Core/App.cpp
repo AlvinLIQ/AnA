@@ -150,7 +150,7 @@ void App::Run(RecordCallBackEx recordCallBack)
             aResourceManager->SecondaryCommandBufferPool.Reset();
             aResourceManager->SecondaryCommandBufferPool.Enqueue(recordCallBack, 
                 &aRenderer->GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN));
-            aRenderer->RecordSecondaryCommandBuffer(offscreenRecordCallBack, RENDER_PASS_TYPE_OFFSCREEN);
+            aRenderer->RecordOffscreenSecondaryCommandBuffer(offscreenRecordCallBack);
             aResourceManager->SceneObjects.EndCommandBufferUpdate();
         }
         //Record Primary Command Buffer
@@ -264,7 +264,7 @@ void App::onCommandBufferRecording(VkCommandBuffer& commandBuffer)
     {
         aRenderer->BeginOffscreenRenderPass(commandBuffer, 
             aResourceManager->GetShadowFramebuffers()[aResourceManager->SecondaryCommandBufferPool.CurrentBufferIndex]);
-        aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer, RENDER_PASS_TYPE_OFFSCREEN);
+        aRenderer->ExecuteOffscreenSecondaryCommandBuffer(commandBuffer);
         aRenderer->EndRenderPass(commandBuffer);
     }
     while(!aResourceManager->SecondaryCommandBufferPool); //Sync

@@ -61,8 +61,8 @@ namespace AnA
         }
         VkCommandBuffer BeginFrame();
 
-        void RecordSecondaryCommandBuffer(RecordCallBack recordCallBack, RenderPassType renderPassType);
-        void ExcuteSecondaryCommandBuffer(VkCommandBuffer commandBuffer, RenderPassType renderPassType);
+        void RecordOffscreenSecondaryCommandBuffer(RecordCallBack recordCallBack);
+        void ExecuteOffscreenSecondaryCommandBuffer(VkCommandBuffer commandBuffer);
 
         void EndFrame();
         void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer);
