@@ -55,7 +55,6 @@ namespace AnA
         bool commandBufferNeedUpdate = false;
     protected:
         virtual void onCommandBufferRecording(VkCommandBuffer& commandBuffer);
-        VkOffset2D offset{0, 0};
         Window* aWindow;
         Instance* aInstance;
         Device* aDevice;

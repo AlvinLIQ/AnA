@@ -268,7 +268,7 @@ void App::onCommandBufferRecording(VkCommandBuffer& commandBuffer)
         aRenderer->EndRenderPass(commandBuffer);
     }
     while(!aResourceManager->SecondaryCommandBufferPool); //Sync
-    aRenderer->BeginSwapChainRenderPass(commandBuffer, offset);
+    aRenderer->BeginSwapChainRenderPass(commandBuffer);
     aResourceManager->SecondaryCommandBufferPool.ExcuteRecordedBuffer(commandBuffer);
     aRenderer->EndRenderPass(commandBuffer);
 }

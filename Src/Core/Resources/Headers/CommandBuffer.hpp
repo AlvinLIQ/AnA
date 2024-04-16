@@ -11,6 +11,8 @@ namespace AnA
         ~CommandBuffer();
 
         VkCommandBuffer& Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo = nullptr);
+        VkCommandBuffer& Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo, VkOffset2D offset);
+        VkCommandBuffer& Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo, VkOffset2D offset, VkExtent2D extent);
         void End();
         const VkCommandBuffer& Get() const;
     private:

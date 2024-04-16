@@ -53,6 +53,31 @@ VkCommandBuffer& CommandBuffer::Begin(VkCommandBufferInheritanceInfo* pInheritan
     return buffers[NextBufferIndex];
 }
 
+VkCommandBuffer& CommandBuffer::Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo, VkOffset2D offset)
+{
+    beginInfo.pInheritanceInfo = pInheritanceInfo;
+    if (vkBeginCommandBuffer(buffers[NextBufferIndex], &beginInfo) != VK_SUCCESS)
+        throw std::runtime_error("Failed to begin command buffer!");
+    auto extent = SwapChain::GetCurrent()->GetExtent();
+    VkViewport viewport = {(float)offset.x, (float)offset.y, static_cast<float>(extent.width - offset.x), static_cast<float>(extent.height - offset.y), 0.0f, 1.0f};
+    VkRect2D scissor = {offset, {extent.width - offset.x, extent.height - offset.y}};
+    vkCmdSetViewport(buffers[NextBufferIndex], 0, 1, &viewport);
+    vkCmdSetScissor(buffers[NextBufferIndex], 0, 1, &scissor);
+    return buffers[NextBufferIndex];
+}
+
+VkCommandBuffer& CommandBuffer::Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo, VkOffset2D offset, VkExtent2D extent)
+{
+    beginInfo.pInheritanceInfo = pInheritanceInfo;
+    if (vkBeginCommandBuffer(buffers[NextBufferIndex], &beginInfo) != VK_SUCCESS)
+        throw std::runtime_error("Failed to begin command buffer!");
+    VkViewport viewport = {0.0f, 0.0f, static_cast<float>(extent.width), static_cast<float>(extent.height), 0.0f, 1.0f};
+    VkRect2D scissor = {offset, extent};
+    vkCmdSetViewport(buffers[NextBufferIndex], 0, 1, &viewport);
+    vkCmdSetScissor(buffers[NextBufferIndex], 0, 1, &scissor);
+    return buffers[NextBufferIndex];
+}
+
 void CommandBuffer::End()
 {
     int nextBufferIndex = NextBufferIndex;
