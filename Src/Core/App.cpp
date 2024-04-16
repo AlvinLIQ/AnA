@@ -108,6 +108,8 @@ void App::Run()
     for (int i = 0; i < 1000; i++)
         meshInfos.push_back({"Models/cube.obj", {{drand48(), drand48(), drand48()}, {drand48(), drand48(), drand48()}}, (uint32_t)rand() % 4});
     std::string title = "AnA FPS:";
+    int frameCount = 0;
+    float runingTime = 0.0f, prevSecond = 0.0f;
     while(!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -122,7 +124,15 @@ void App::Run()
         auto curTime = std::chrono::high_resolution_clock::now();
         float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(curTime - prevTime).count();
         prevTime = curTime;
-        glfwSetWindowTitle(aWindow->GetGLFWwindow(), (title + std::to_string((int)(1.0f / frameTime))).c_str());
+        runingTime += frameTime;
+        prevSecond += frameTime;
+        frameCount++;
+        if (prevSecond >= 1.0f)
+        {
+            glfwSetWindowTitle(aWindow->GetGLFWwindow(), (title + std::to_string((int)(frameCount / prevSecond))).c_str());
+            prevSecond = 0.0f;
+            frameCount = 0;
+        }
         camera.SetSpeedRatio(frameTime);
         aInputManager->CheckAndRunCallbacks();
         //Update Resources
