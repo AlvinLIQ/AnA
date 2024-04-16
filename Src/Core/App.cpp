@@ -122,10 +122,13 @@ void App::Run(RecordCallBackEx recordCallBack)
     for (int i = 0; i < 1000; i++)
         meshInfos.push_back({"Models/cube.obj", {{drand48(), drand48(), drand48()}, {drand48(), drand48(), drand48()}}, (uint32_t)rand() % 4});
     bool commandBufferNeedUpdate;
+    int count;
+    std::string title = "AnA FPS:";
     while(!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
-        if (!pressed && glfwGetKey(aWindow->GetGLFWwindow(), GLFW_KEY_F) == GLFW_PRESS)
+        auto buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &count);
+        if (!pressed && (glfwGetKey(aWindow->GetGLFWwindow(), GLFW_KEY_F) == GLFW_PRESS || buttons[2] == GLFW_PRESS))
         {
             pressed = true;
             aResourceManager->TaskPool.Enqueue([this, &meshInfos]()
@@ -136,7 +139,7 @@ void App::Run(RecordCallBackEx recordCallBack)
         auto curTime = std::chrono::high_resolution_clock::now();
         float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(curTime - prevTime).count();
         prevTime = curTime;
-        printf("FPS:%.2f\r", 1.0f / frameTime);
+        glfwSetWindowTitle(aWindow->GetGLFWwindow(), (title + std::to_string((int)(1.0f / frameTime))).c_str());
         camera.SetSpeedRatio(frameTime);
         aInputManager->CheckAndRunCallbacks();
         //Update Resources
