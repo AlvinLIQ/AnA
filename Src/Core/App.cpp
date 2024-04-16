@@ -121,13 +121,11 @@ void App::Run(RecordCallBackEx recordCallBack)
     bool pressed = false;
     for (int i = 0; i < 1000; i++)
         meshInfos.push_back({"Models/cube.obj", {{drand48(), drand48(), drand48()}, {drand48(), drand48(), drand48()}}, (uint32_t)rand() % 4});
-    int count;
     std::string title = "AnA FPS:";
     while(!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
-        auto buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &count);
-        if (!pressed && (glfwGetKey(aWindow->GetGLFWwindow(), GLFW_KEY_F) == GLFW_PRESS || buttons[2] == GLFW_PRESS))
+        if (!pressed && glfwGetKey(aWindow->GetGLFWwindow(), GLFW_KEY_F) == GLFW_PRESS)
         {
             pressed = true;
             aResourceManager->TaskPool.Enqueue([this, &meshInfos]()
