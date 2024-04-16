@@ -3,7 +3,7 @@
 using namespace AnA;
 using namespace Editors;
 
-Editor::Editor()
+Editor::Editor() : App()
 {
 
 }
@@ -13,33 +13,17 @@ Editor::~Editor()
 
 }
 
-void Editor::Init()
+void Editor::onCommandBufferRecording(VkCommandBuffer& commandBuffer)
 {
-
+    App::onCommandBufferRecording(commandBuffer);
 }
+
 
 #define INCLUDE_STB_IMAGE
 
-#include "../Core/Headers/App.hpp"
-//#include "../GUI/Controls/Headers/Button.hpp"
-//#include "../GUI/Controls/Headers/TextBlock.hpp"
-#include "../VertexLoader/Headers/VertexLoader.hpp"
 
 using namespace AnA;
 //using namespace AnA::Controls;
-
-void CopyVertices(IndexedVertex &indexedVertex, std::vector<Model::Vertex> &dstVertices)
-{
-    /*
-    auto &srcVertices = indexedVertex.vertices;
-    for (int i = 0; i < indexedVertex.vertexCount; i++)
-    {
-        dstVertices[i].position = glm::vec3(srcVertices[i].position[0], srcVertices[i].position[1], srcVertices[i].position[2]);
-        //printf("%f %f %f\n", srcVertices[i].position[0], srcVertices[i].position[1], srcVertices[i].position[2]);
-        dstVertices[i].color = glm::vec3(srcVertices[i].color[0], srcVertices[i].color[1], srcVertices[i].color[2]);
-    }*/
-    memcpy(dstVertices.data(), indexedVertex.vertices, sizeof(Vertex_T) * indexedVertex.vertexCount);
-}
 
 const VkDeviceSize offset = 0;
 std::vector<MeshInfo> meshInfos = 
@@ -52,13 +36,13 @@ std::vector<MeshInfo> meshInfos =
 
 int main()
 {
-    App app{};
-    app.Init();
+    Editor editor{};
+    editor.Init();
     auto& meshes = Resource::ResourceManager::GetCurrent()->SceneObjects;
     //std::vector<std::string> files(1000, "Models/cube.obj");
     //for (int i = 0; i < 1000; i++)
     //    meshInfos.push_back({"Models/cube.obj", {{drand48(), drand48(), drand48()}, {drand48(), drand48(), drand48()}}});
     meshes.Append(meshInfos);
-    app.Run();
+    editor.Run();
     return 0;
 }

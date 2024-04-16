@@ -61,5 +61,10 @@ namespace AnA
         static void waitUILoop(std::thread &loopThread);
         static void uiLoop();
         static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
+        bool commandBufferNeedUpdate = false;
+    protected:
+        virtual void onCommandBufferRecording(VkCommandBuffer& commandBuffer);
+        VkOffset2D offset{0, 0};
     };
 }

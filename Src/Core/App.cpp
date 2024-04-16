@@ -121,7 +121,6 @@ void App::Run(RecordCallBackEx recordCallBack)
     bool pressed = false;
     for (int i = 0; i < 1000; i++)
         meshInfos.push_back({"Models/cube.obj", {{drand48(), drand48(), drand48()}, {drand48(), drand48(), drand48()}}, (uint32_t)rand() % 4});
-    bool commandBufferNeedUpdate;
     int count;
     std::string title = "AnA FPS:";
     while(!glfwWindowShouldClose(window))
@@ -159,17 +158,7 @@ void App::Run(RecordCallBackEx recordCallBack)
         //Record Primary Command Buffer
         if (auto commandBuffer = aRenderer->BeginFrame())
         {
-            if (commandBufferNeedUpdate)
-            {
-                aRenderer->BeginOffscreenRenderPass(commandBuffer, 
-                    aResourceManager->GetShadowFramebuffers()[aResourceManager->SecondaryCommandBufferPool.CurrentBufferIndex]);
-                aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer, RENDER_PASS_TYPE_OFFSCREEN);
-                aRenderer->EndRenderPass(commandBuffer);
-            }
-            while(!aResourceManager->SecondaryCommandBufferPool); //Sync
-            aRenderer->BeginSwapChainRenderPass(commandBuffer);
-            aResourceManager->SecondaryCommandBufferPool.ExcuteRecordedBuffer(commandBuffer);
-            aRenderer->EndRenderPass(commandBuffer);
+            onCommandBufferRecording(commandBuffer);
             aRenderer->EndFrame();
         }
     }
@@ -269,4 +258,19 @@ void App::keyCallback(GLFWwindow* window, int key, int scancode, int action, int
     _uiSignal = UI_SIGNAL_KEY;
    */
     //glfwGetKey
+}
+
+void App::onCommandBufferRecording(VkCommandBuffer& commandBuffer)
+{
+    if (commandBufferNeedUpdate)
+    {
+        aRenderer->BeginOffscreenRenderPass(commandBuffer, 
+            aResourceManager->GetShadowFramebuffers()[aResourceManager->SecondaryCommandBufferPool.CurrentBufferIndex]);
+        aRenderer->ExcuteSecondaryCommandBuffer(commandBuffer, RENDER_PASS_TYPE_OFFSCREEN);
+        aRenderer->EndRenderPass(commandBuffer);
+    }
+    while(!aResourceManager->SecondaryCommandBufferPool); //Sync
+    aRenderer->BeginSwapChainRenderPass(commandBuffer, offset);
+    aResourceManager->SecondaryCommandBufferPool.ExcuteRecordedBuffer(commandBuffer);
+    aRenderer->EndRenderPass(commandBuffer);
 }
