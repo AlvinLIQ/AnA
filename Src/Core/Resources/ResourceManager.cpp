@@ -92,6 +92,13 @@ void ResourceManager::Update()
     {
         SceneObjects.CommitBufferUpdate();
     }
+    for (auto& recordCallBackInfo : RecordCallBacks)
+    {
+        if (recordCallBackInfo.needRecord())
+        {
+            recordCallBackInfo.recordCallBack(recordCallBackInfo.offset, recordCallBackInfo.extent);
+        }
+    }
 }
 
 void ResourceManager::Resize()

@@ -87,25 +87,11 @@ void App::Init()
     aResourceManager = new Resource::ResourceManager(*aDevice);
     aRenderSystem = new Systems::RenderSystem(*aDevice, aRenderer->GetSwapChain());
     aShadowSystem = new Systems::ShadowSystem(*aDevice, &aRenderer->GetSwapChain());
+    createRecordCallBacks();
 }
 
-void App::Run(RecordCallBackEx recordCallBack)
+void App::Run()
 {
-    if (recordCallBack == nullptr)
-        recordCallBack = [](VkCommandBuffer secondaryCommandBuffer, size_t index)
-            {
-                auto resourceManager = Resource::ResourceManager::GetCurrent();
-                Systems::RenderSystem::GetCurrent()->RenderBatch(secondaryCommandBuffer, 
-                    resourceManager->SceneObjects, 
-                    resourceManager->Shaders[0], index);
-            };
-    auto offscreenRecordCallBack = [](VkCommandBuffer secondaryCommandBuffer)
-            {
-                auto aResourceManager = Resource::ResourceManager::GetCurrent();
-                auto aShadowSystem = Systems::ShadowSystem::GetCurrent();
-                aShadowSystem->RenderShadows(secondaryCommandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[2]);
-            };
-
     Cameras::Camera& camera = aResourceManager->MainCamera, &lightCamera = aResourceManager->LightCamera;
     Cameras::CameraController cameraController{camera};
     auto& activeProfile = aInputManager->GetActiveProfile();
@@ -145,14 +131,6 @@ void App::Run(RecordCallBackEx recordCallBack)
             aResourceManager->Resize();
         }
         aResourceManager->Update();
-        if ((commandBufferNeedUpdate = (aResourceManager->SceneObjects.BeginCommandBufferUpdate() || aRenderer->NeedUpdate())))
-        {
-            aResourceManager->SecondaryCommandBufferPool.Reset();
-            aResourceManager->SecondaryCommandBufferPool.Enqueue(recordCallBack, 
-                &aRenderer->GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), sceneOffset);
-            aRenderer->RecordOffscreenSecondaryCommandBuffer(offscreenRecordCallBack);
-            aResourceManager->SceneObjects.EndCommandBufferUpdate();
-        }
         //Record Primary Command Buffer
         if (auto commandBuffer = aRenderer->BeginFrame())
         {
@@ -256,6 +234,34 @@ void App::keyCallback(GLFWwindow* window, int key, int scancode, int action, int
     _uiSignal = UI_SIGNAL_KEY;
    */
     //glfwGetKey
+}
+
+void App::createRecordCallBacks()
+{
+    auto& RecordCallBacks = aResourceManager->RecordCallBacks;
+    RecordCallBacks.emplace_back([]() 
+    {
+        return _aApp->commandBufferNeedUpdate = (Resource::ResourceManager::GetCurrent()->SceneObjects.BeginCommandBufferUpdate() || _aApp->GetRenderer().NeedUpdate());
+    }, [](VkOffset2D& offset, VkExtent2D& extent)
+    {
+        auto aResourceManager = Resource::ResourceManager::GetCurrent();
+        auto& aRenderer = _aApp->GetRenderer();
+        aResourceManager->SecondaryCommandBufferPool.Reset();
+        aResourceManager->SecondaryCommandBufferPool.Enqueue([](VkCommandBuffer secondaryCommandBuffer, size_t index)
+        {
+            auto aResourceManager = Resource::ResourceManager::GetCurrent();
+            Systems::RenderSystem::GetCurrent()->RenderBatch(secondaryCommandBuffer, 
+                aResourceManager->SceneObjects, 
+                aResourceManager->Shaders[0], index);
+        }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), _aApp->GetSceneOffset());
+        aRenderer.RecordOffscreenSecondaryCommandBuffer([](VkCommandBuffer offScreenSecondaryCommandBuffer)
+        {
+            auto aResourceManager = Resource::ResourceManager::GetCurrent();
+            auto aShadowSystem = Systems::ShadowSystem::GetCurrent();
+            aShadowSystem->RenderShadows(offScreenSecondaryCommandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[2]);
+        });
+        aResourceManager->SceneObjects.EndCommandBufferUpdate();
+    });
 }
 
 void App::onCommandBufferRecording(VkCommandBuffer& commandBuffer)

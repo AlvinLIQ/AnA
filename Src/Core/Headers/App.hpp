@@ -23,7 +23,7 @@ namespace AnA
         App &operator=(const App&) = delete;
 
         void Init();
-        void Run(RecordCallBackEx recordCallBack = nullptr);
+        void Run();
         void Cleanup();
         void Exit();
 
@@ -40,10 +40,18 @@ namespace AnA
         {
             return aRenderer->GetSwapChain();
         }
+        Renderer& GetRenderer()
+        {
+            return *aRenderer;
+        }
 
         Device& GetDevice()
         {
             return *aDevice;
+        }
+        VkOffset2D &GetSceneOffset()
+        {
+            return sceneOffset;
         }
     private:
         std::thread uiThread;
@@ -54,6 +62,7 @@ namespace AnA
 
         bool commandBufferNeedUpdate = false;
     protected:
+        virtual void createRecordCallBacks();
         virtual void onCommandBufferRecording(VkCommandBuffer& commandBuffer);
         Window* aWindow;
         Instance* aInstance;

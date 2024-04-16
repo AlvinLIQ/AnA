@@ -18,7 +18,6 @@ void Editor::Init()
 {
     App::Init();
     aResourceManager->MainControl = new Controls::StackPanel();
-    sceneOffset.x = 300;
 }
 
 void Editor::onCommandBufferRecording(VkCommandBuffer& commandBuffer)

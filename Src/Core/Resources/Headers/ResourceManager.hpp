@@ -15,6 +15,13 @@
 
 namespace AnA
 {
+    struct RecordCallBackInfo
+    {
+        BoolCallBack needRecord;
+        ViewportCallBack recordCallBack;
+        VkOffset2D offset;
+        VkExtent2D extent;
+    };
     namespace Resource
     {
         class ResourceManager
@@ -50,6 +57,7 @@ namespace AnA
             CommandBufferPool SecondaryCommandBufferPool;
             //ThreadPool<void(CommandBuffer*)> SecondaryCommandBufferPool{};
             void RecreateResources();
+            std::vector<RecordCallBackInfo> RecordCallBacks{};
         private:
             Device& aDevice;
             std::vector<Buffer*> mainCameraBuffers;
