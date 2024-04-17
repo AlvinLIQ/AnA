@@ -11,8 +11,6 @@ namespace AnA
             Editor();
             ~Editor();
             void Init();
-        protected:
-            void onCommandBufferRecording(VkCommandBuffer& commandBuffer); 
         };
     }
 }

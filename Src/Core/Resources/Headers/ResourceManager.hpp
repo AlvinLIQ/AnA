@@ -7,9 +7,11 @@
 #include "Shader.hpp"
 #include "Lights.hpp"
 
-//#ifdef ANA_INCLUDE_CONTROL
+#define ANA_INCLUDE_CONTROL
+
+#ifdef ANA_INCLUDE_CONTROL
 #include "../../../GUI/Controls/Headers/Control.hpp"
-//#endif
+#endif
 
 #define DEFAULT_TEXTURE_ID 0
 
@@ -49,9 +51,9 @@ namespace AnA
             std::vector<Descriptor::DescriptorConfig> GetDefaultDescriptorConfig();
 
             Lights::Light GlobalLight;
-//#ifdef ANA_INCLUDE_CONTROL
+#ifdef ANA_INCLUDE_CONTROL
             AnA::Controls::Control* MainControl = NULL;
-//#endif
+#endif
             std::unordered_map<uint32_t, Texture> TextureMap;
             ThreadPool<void()> TaskPool{MAX_FRAMES_IN_FLIGHT};
             CommandBufferPool SecondaryCommandBufferPool;

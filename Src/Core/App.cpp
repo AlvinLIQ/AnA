@@ -272,6 +272,25 @@ void App::createRecordCallBacks()
         });
         aResourceManager->SceneObjects.EndCommandBufferUpdate();
     });
+#ifdef ANA_INCLUDE_CONTROL
+/*
+    RecordCallBacks.emplace_back([]()
+    {
+        auto aResourceManager = Resource::ResourceManager::GetCurrent();
+        return aResourceManager->MainControl != nullptr && _aApp->commandBufferNeedUpdate;
+    }, [](VkOffset2D& offset, VkExtent2D& extent)
+    {
+        //record controls here
+        auto aResourceManager = Resource::ResourceManager::GetCurrent();
+        auto& aRenderer = _aApp->GetRenderer();
+        auto controlExtent = aRenderer.GetSwapChainExtent();
+        controlExtent.width = _aApp->GetSceneOffset().x;
+        aResourceManager->SecondaryCommandBufferPool.Enqueue([](VkCommandBuffer secondaryCommandBuffer, size_t index)
+        {
+            
+        }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), offset, controlExtent);
+    });*/
+#endif
 }
 
 void App::onCommandBufferRecording(VkCommandBuffer& commandBuffer)

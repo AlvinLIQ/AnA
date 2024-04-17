@@ -17,17 +17,14 @@ Editor::~Editor()
 void Editor::Init()
 {
     App::Init();
-    aResourceManager->MainControl = new Controls::StackPanel();
-}
 
-void Editor::onCommandBufferRecording(VkCommandBuffer& commandBuffer)
-{
-    auto extent = GetSwapChain().GetExtent();
-    extent.width = sceneOffset.x;
-    //Update GUI Command Buffers here
-    App::onCommandBufferRecording(commandBuffer);
+    auto panel = new Controls::StackPanel();
+    panel->VerticalAlignment = AlignmentType::Center;
+    panel->HorizontalAlignment = AlignmentType::Start;
+    panel->Orientation = Controls::Orientations::Vertical;
+    aResourceManager->MainControl = panel;
+    //sceneOffset.x = 300;
 }
-
 
 #define INCLUDE_STB_IMAGE
 

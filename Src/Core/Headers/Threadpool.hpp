@@ -58,6 +58,7 @@ public:
     ThreadPool(ArgType* args, size_t num_threads 
                = std::thread::hardware_concurrency()) 
     {
+        threadsStatus_.resize(num_threads, 0);
         // Creating worker threads 
         for (size_t i = 0; i < num_threads; ++i) { 
             threads_.emplace_back([this, args, i] { 
@@ -67,7 +68,15 @@ public:
                     // here is to unlock the queue before 
                     // executing the task so that other 
                     // threads can perform enqueue tasks 
-                    { 
+                    {
+                        if (threadsStatus_[i])
+                        {
+                            if (stop_)
+                            {
+                                break;
+                            }
+                            continue;
+                        }
                         // Locking the queue so that data 
                         // can be shared safely 
                         std::unique_lock<std::mutex> lock( 
@@ -75,19 +84,21 @@ public:
   
                         // Waiting until there is a task to 
                         // execute or the pool is stopped 
-                        cv_.wait(lock, [this] { 
+                        cv_.wait(lock, [this, i] { 
                             return !tasks_.empty() || stop_; 
                         }); 
-  
+
                         // exit the thread in case the pool 
                         // is stopped and there are no tasks 
                         if (stop_ && tasks_.empty()) { 
                             return; 
-                        } 
-  
+                        }
+
                         // Get the next task from the queue 
                         task = std::move(tasks_.front()); 
                         tasks_.pop(); 
+
+                        threadsStatus_[i] = 1;
                     } 
   
                     task(&(*args)[i], i); 
@@ -113,7 +124,13 @@ public:
         for (auto& thread : threads_) { 
             thread.join(); 
         } 
-    } 
+    }
+
+    void Reset()
+    {
+        while(tasks_.size() != 0);
+        threadsStatus_.assign(threadsStatus_.size(), 0);
+    }
   
     // Enqueue task for execution by the thread pool 
     virtual void Enqueue(std::function<TaskType> task) 
@@ -132,7 +149,8 @@ public:
   
 protected: 
     // Vector to store worker threads 
-    std::vector<std::thread> threads_; 
+    std::vector<std::thread> threads_;
+    std::vector<unsigned char> threadsStatus_;
   
     // Queue of tasks 
     std::queue<std::function<TaskType>> tasks_; 

@@ -29,6 +29,7 @@ namespace AnA
             std::unique_lock<std::mutex> lock(queue_mutex_);
             recordedCommandBuffers.clear();
             CurrentBufferIndex = (CurrentBufferIndex + 1) % MAX_FRAMES_IN_FLIGHT;
+            ThreadPool::Reset();
         }
         void ExcuteRecordedBuffer(VkCommandBuffer& commandBuffer)
         {

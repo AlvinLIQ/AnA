@@ -20,9 +20,9 @@ ResourceManager::ResourceManager(Device& mDevice) : aDevice {mDevice},
     createShadowFramebuffers();
 
     createDefaultShaders();
-//#ifdef ANA_INCLUDE_CONTROL
+#ifdef ANA_INCLUDE_CONTROL
     Controls::Control::InitControl(SwapChain::GetCurrent());
-//#endif
+#endif
     TextureMap.try_emplace(DEFAULT_TEXTURE_ID, (uint32_t)0xFFFFFFFF, mDevice);
     TextureMap.try_emplace(1, (uint32_t)0xFF996666, mDevice);
     TextureMap.try_emplace(2, (uint32_t)0xFF669966, mDevice);
@@ -43,10 +43,10 @@ ResourceManager::~ResourceManager()
 
     //delete SceneObjects;
     //delete GlobalLight;
-//#ifdef ANA_INCLUDE_CONTROL
+#ifdef ANA_INCLUDE_CONTROL
     if (MainControl != nullptr)
         delete MainControl;
-//#endif
+#endif
 
     for (auto& mainCameraBuffer : mainCameraBuffers)
         delete mainCameraBuffer;
