@@ -22,3 +22,9 @@ void Object::PrepareDraw()
 {
 
 }
+
+void Object::Draw(VkCommandBuffer commandBuffer)
+{
+    Model->Bind(commandBuffer);
+    Model->Draw(commandBuffer);
+}

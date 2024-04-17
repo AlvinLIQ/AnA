@@ -31,3 +31,9 @@ void ItemPresenter::PrepareDraw()
     if (item != nullptr)
         item->PrepareDraw();
 }
+
+void ItemPresenter::Draw(VkCommandBuffer commandBuffer)
+{
+    if (item != nullptr)
+        item->Draw(commandBuffer);
+}

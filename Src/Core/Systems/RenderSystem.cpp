@@ -24,6 +24,18 @@ RenderSystem* RenderSystem::GetCurrent()
     return currentRenderSystem;
 }
 
+void RenderSystem::RenderObject(VkCommandBuffer commandBuffer, Object& object, Shader& shader)
+{
+    shader.GetPipeline()->Bind(commandBuffer);
+    auto resourceManager = Resource::ResourceManager::GetCurrent();
+    std::vector<VkDescriptorSet>& sets = shader.GetDescriptorSets()[resourceManager->SecondaryCommandBufferPool.CurrentBufferIndex];
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+            shader.GetPipelineLayout(), 0, static_cast<uint32_t>(sets.size()),
+            sets.data(), 0, nullptr);
+    object.PrepareDraw();
+    object.Draw(commandBuffer);
+}
+
 void RenderSystem::RenderObjects(VkCommandBuffer commandBuffer, Objects &objects, Shader& shader)
 {
     shader.GetPipeline()->Bind(commandBuffer);

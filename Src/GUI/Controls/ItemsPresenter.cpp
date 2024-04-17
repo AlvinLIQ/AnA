@@ -26,6 +26,14 @@ void ItemsPresenter::PrepareDraw()
     }
 }
 
+void ItemsPresenter::Draw(VkCommandBuffer commandBuffer)
+{
+    for (auto& item : items)
+    {
+        item->Draw(commandBuffer);
+    }
+}
+
 void ItemsPresenter::Child(Control* newItem)
 {
     items.push_back(newItem);

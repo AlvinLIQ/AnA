@@ -1,4 +1,5 @@
 #include "Headers/Control.hpp"
+#include "../../Core/Headers/App.hpp"
 
 using namespace AnA;
 using namespace AnA::Controls;
@@ -9,7 +10,7 @@ Control* focusedControl = nullptr;
 
 Control::Control()
 {
-    //this->Model = App::Get2DModel();
+    this->Model = App::Get2DModel();
 }
 
 Control::~Control()

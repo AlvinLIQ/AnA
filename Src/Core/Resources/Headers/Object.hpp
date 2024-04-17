@@ -39,6 +39,7 @@ namespace AnA
         std::unique_ptr<Texture> Texture;
 
         virtual void PrepareDraw();
+        virtual void Draw(VkCommandBuffer commandBuffer);
     private:
         id_t id;
     };
