@@ -231,8 +231,9 @@ void ResourceManager::createDefaultShaders()
 {
     Shaders.reserve(3); // Reserve space for 3 default shaders
     auto renderPass = SwapChain::GetCurrent()->GetRenderPass();
-    Shaders.emplace_back(aDevice, Basic_vert, Basic_frag, renderPass);
-    Shaders.emplace_back(aDevice, Shape_vert, Shape_frag, renderPass);
+    auto descriptorConfig = GetDefaultDescriptorConfig();
+    Shaders.emplace_back(aDevice, Basic_vert, Basic_frag, renderPass, descriptorConfig);
+    Shaders.emplace_back(aDevice, Shape_vert, Shape_frag, renderPass, descriptorConfig);
     auto offscreenRenderPass = SwapChain::GetCurrent()->GetOffscreenRenderPass();
-    Shaders.emplace_back(aDevice, ShadowMapping_vert, offscreenRenderPass);
+    Shaders.emplace_back(aDevice, ShadowMapping_vert, offscreenRenderPass, descriptorConfig);
 }

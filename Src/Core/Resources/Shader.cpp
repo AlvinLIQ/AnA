@@ -26,6 +26,21 @@ Shader::Shader(Device& mDevice, const std::vector<unsigned char>& vertShaderCode
     pipeline = new Pipeline(mDevice, vertShaderCode, renderPass, pipelineLayout);
 }
 
+Shader::Shader(Device& mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass, std::vector<Descriptor::DescriptorConfig>& descriptorConfigs) : aDevice{mDevice}
+{
+    createDescriptors(descriptorConfigs);
+    
+    if (pDefaultPipelineLayout == nullptr)
+    {
+        createPipelineLayout(descriptorConfigs);
+    }
+    else
+    {
+        pipelineLayout = *pDefaultPipelineLayout;
+    }
+    pipeline = new Pipeline(mDevice, vertShaderCode, renderPass, pipelineLayout);
+}
+
 Shader::Shader(Device& mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass) : aDevice{mDevice}
 {
     auto descriptorConfigs = Resource::ResourceManager::GetCurrent()->GetDefaultDescriptorConfig();
