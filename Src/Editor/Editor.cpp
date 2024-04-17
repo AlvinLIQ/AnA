@@ -26,12 +26,6 @@ void Editor::Init()
     //sceneOffset.x = 300;
 }
 
-#define INCLUDE_STB_IMAGE
-
-
-using namespace AnA;
-//using namespace AnA::Controls;
-
 const VkDeviceSize offset = 0;
 std::vector<MeshInfo> meshInfos = 
 {
