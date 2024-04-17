@@ -13,6 +13,7 @@ namespace AnA
         VkCommandBuffer& Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo = nullptr);
         VkCommandBuffer& Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo, VkOffset2D offset);
         VkCommandBuffer& Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo, VkOffset2D offset, VkExtent2D extent);
+        VkCommandBuffer& Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo, VkOffset2D ltOffset, VkOffset2D rbOffset);
         void End();
         const VkCommandBuffer& Get() const;
     private:
