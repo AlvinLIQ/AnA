@@ -21,6 +21,7 @@ ItemsPresenter::~ItemsPresenter()
 void ItemsPresenter::Draw(VkCommandBuffer commandBuffer)
 {
     prepareDraw();
+    Control::Draw(commandBuffer);
     for (auto& item : items)
     {
         item->Draw(commandBuffer);

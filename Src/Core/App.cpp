@@ -179,7 +179,7 @@ std::shared_ptr<Model> &App::Get2DModel()
             {{-1.0f, 1.0f, 0.f}, {}, {0.0f, 1.0f}},
             {{1.0f, 1.0f, 0.f}, {}, {1.0f, 1.0f}}
         };
-        Model::ModelInfo modelInfo{vertices, {}, {}, 4, {0, 1, 2, 1, 2, 3}};
+        Model::ModelInfo modelInfo{vertices, {}, {}, 4, {0, 2, 1, 1, 2, 3}};
         _2DModel = std::make_shared<Model>(*_aDevice, modelInfo);
     }
 
@@ -273,7 +273,7 @@ void App::createRecordCallBacks()
         aResourceManager->SceneObjects.EndCommandBufferUpdate();
     });
 #ifdef ANA_INCLUDE_CONTROL
-/*
+
     RecordCallBacks.emplace_back([]()
     {
         auto aResourceManager = Resource::ResourceManager::GetCurrent();
@@ -287,9 +287,11 @@ void App::createRecordCallBacks()
         controlExtent.width = _aApp->GetSceneOffset().x;
         aResourceManager->SecondaryCommandBufferPool.Enqueue([](VkCommandBuffer secondaryCommandBuffer, size_t index)
         {
-            
+            _aApp->aRenderSystem->RenderObject(secondaryCommandBuffer, *
+                _aApp->aResourceManager->MainControl, 
+                _aApp->aResourceManager->Shaders[1]);
         }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), offset, controlExtent);
-    });*/
+    });
 #endif
 }
 

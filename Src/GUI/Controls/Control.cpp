@@ -22,9 +22,15 @@ void Control::Draw(VkCommandBuffer commandBuffer)
 {
     auto renderSize = GetSizeForRender();
     //Properties.transform.scale = {renderSize.Width, renderSize.Height, 1.f};
-    ControlSize = renderSize;
+    //ControlSize = renderSize;
     auto renderOffset = GetActualControlOffset(renderSize);
-    ControlOffset = renderOffset;
+    //ControlOffset = renderOffset;
+    this->Transform.scale = {renderSize.Width, renderSize.Height, 1.f};
+    this->Transform.translation = {renderOffset.x, renderOffset.y, 0.f};
+    ObjectPushConstantData push{this->Transform.mat4(), Color};
+    auto& shader = Resource::ResourceManager::GetCurrent()->Shaders[1];
+    auto& pipelineLayout = shader.GetPipelineLayout();
+    vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(push), &push);
     Object::Draw(commandBuffer);
 }
 

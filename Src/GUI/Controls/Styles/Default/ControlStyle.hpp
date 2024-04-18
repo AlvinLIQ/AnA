@@ -12,7 +12,7 @@ namespace AnA
 
     const SIZE_F ControlMinSize = {};
 
-    const AlignType ControlRenderMode = Absolute;
+    const AlignType ControlRenderMode = Auto;
     /*Button*/
     const SIZE_F ButtonMinSize = {10.f, 10.0f};
     const AlignType ButtonRenderMode = Relative;

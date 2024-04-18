@@ -4,6 +4,8 @@
 using namespace AnA;
 using namespace Editors;
 
+#define EDITOR_LEFT_PANEL_WIDTH 300
+
 Editor::Editor() : App()
 {
 
@@ -20,10 +22,11 @@ void Editor::Init()
 
     auto panel = new Controls::StackPanel();
     panel->VerticalAlignment = AlignmentType::Center;
-    panel->HorizontalAlignment = AlignmentType::Start;
+    panel->HorizontalAlignment = AlignmentType::Center;
     panel->Orientation = Controls::Orientations::Vertical;
+    panel->Color = glm::vec3{1.0f};
     aResourceManager->MainControl = panel;
-    //sceneOffset.x = 300;
+    sceneOffset.x = EDITOR_LEFT_PANEL_WIDTH;
 }
 
 const VkDeviceSize offset = 0;

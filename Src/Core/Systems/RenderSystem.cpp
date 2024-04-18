@@ -30,7 +30,7 @@ void RenderSystem::RenderObject(VkCommandBuffer commandBuffer, Object& object, S
     auto resourceManager = Resource::ResourceManager::GetCurrent();
     std::vector<VkDescriptorSet>& sets = shader.GetDescriptorSets()[resourceManager->SecondaryCommandBufferPool.CurrentBufferIndex];
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-            shader.GetPipelineLayout(), 0, static_cast<uint32_t>(sets.size()),
+            shader.GetPipelineLayout(), 0, 1,
             sets.data(), 0, nullptr);
     object.Draw(commandBuffer);
 }
