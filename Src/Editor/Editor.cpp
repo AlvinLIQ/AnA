@@ -32,7 +32,8 @@ std::vector<MeshInfo> meshInfos =
     {"Models/cube.obj", {{3.0, 0.5, 0.0}, {11.4f, 0.02f, 11.4}}, 0},
     {"Models/torus.obj", {{0.f, 0.f , 1.5f}, {.7f, .7f, .7f}}, 1},
     {"Models/cube.obj", {{-1.5, -.5, 1.5}, {0.7f, 0.7f, 0.7f}}, 2},
-    {"Models/cube.obj", {{1.5, -0.4, 0.0}, {0.4f, 0.4f, 0.4}}, 3}
+    {"Models/cube.obj", {{1.5, -0.4, 0.0}, {0.4f, 0.4f, 0.4}}, 3},
+    {"Models/bunny.obj", {{5.5, 0.4, 0.0}, glm::vec3{5.0}, {0.0, 0.0, glm::pi<float>()}}, 0}
 };
 
 int main()

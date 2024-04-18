@@ -19,7 +19,7 @@ namespace AnA
             void Draw(VkCommandBuffer commandBuffer);
         protected:
             std::vector<Control*> items;
-            virtual void prepareDraw();
+            virtual void prepareDraw() = 0;
         };
     }
 }
