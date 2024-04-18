@@ -22,7 +22,7 @@ int main()
     auto meshes = Resource::ResourceManager::GetCurrent()->SceneObjects;
     //std::vector<std::string> files(1000, "Models/cube.obj");
     for (int i = 0; i < 1000; i++)
-        meshInfos.push_back({"Models/cube.obj", {{drand48(), drand48(), drand48()}, {drand48(), drand48(), drand48()}}});
+        meshInfos.push_back({"Models/cube.obj", {{random_double(), random_double(), random_double()}, {random_double(), random_double(), random_double()}}});
     meshes->Append(meshInfos);
     texture = new Texture((uint32_t)0xFFFFFFFF, app.GetDevice());
     app.Run([](VkCommandBuffer commandBuffer)

@@ -5,6 +5,7 @@
 #include <vector>
 #include <fstream>
 #include <vulkan/vulkan.h>
+#include "Utils.hpp"
 
 #define INCLUDE_STB_IMAGE
 

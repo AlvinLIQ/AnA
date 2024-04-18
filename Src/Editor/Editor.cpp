@@ -42,7 +42,7 @@ int main()
     auto& meshes = Resource::ResourceManager::GetCurrent()->SceneObjects;
     //std::vector<std::string> files(1000, "Models/cube.obj");
     //for (int i = 0; i < 1000; i++)
-    //    meshInfos.push_back({"Models/cube.obj", {{drand48(), drand48(), drand48()}, {drand48(), drand48(), drand48()}}});
+    //    meshInfos.push_back({"Models/cube.obj", {{random_double(), random_double(), random_double()}, {random_double(), random_double(), random_double()}}});
     meshes.Append(meshInfos);
     editor.Run();
     return 0;
