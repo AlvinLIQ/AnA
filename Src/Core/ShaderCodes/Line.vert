@@ -7,10 +7,6 @@ layout(location = 3) in vec2 uv;
 
 layout(location = 0) out vec3 fragColor;
 
-layout(push_constant) uniform Push {
-    vec3 color;
-} push;
-
 layout(set = 0, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;

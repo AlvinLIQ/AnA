@@ -16,11 +16,10 @@ namespace AnA
             void RemoveChild(Control* targetItem);
             void RemoveChildAt(int index);
 
-            void PrepareDraw();
             void Draw(VkCommandBuffer commandBuffer);
-
         protected:
             std::vector<Control*> items;
+            virtual void prepareDraw();
         };
     }
 }

@@ -15,7 +15,6 @@ namespace AnA
             ~RenderSystem();
 
             void RenderObject(VkCommandBuffer commandBuffer, Object& object, Shader& shader);
-            void RenderObjects(VkCommandBuffer commandBuffer, Objects& objects, Shader& shader);
             void RenderMeshes(VkCommandBuffer commandBuffer, Meshes& meshes, Shader& shader);
             void RenderBatch(VkCommandBuffer commandBuffer, Meshes& meshes, Shader& shader, size_t batchIndex);
             static RenderSystem* GetCurrent();

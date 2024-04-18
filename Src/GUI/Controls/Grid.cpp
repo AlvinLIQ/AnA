@@ -13,7 +13,7 @@ Grid::~Grid()
 
 }
 
-void Grid::PrepareDraw()
+void Grid::prepareDraw()
 {
     
 }

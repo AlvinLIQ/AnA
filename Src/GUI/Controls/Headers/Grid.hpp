@@ -11,7 +11,8 @@ namespace AnA
         public:
             Grid();
             ~Grid();
-            virtual void PrepareDraw();
+        protected:
+            virtual void prepareDraw();
         };
     }
 }

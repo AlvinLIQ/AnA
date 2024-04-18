@@ -18,11 +18,6 @@ Object::~Object()
     }
 }
 
-void Object::PrepareDraw()
-{
-
-}
-
 void Object::Draw(VkCommandBuffer commandBuffer)
 {
     Model->Bind(commandBuffer);

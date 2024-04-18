@@ -7,10 +7,6 @@ layout(location = 3) in uint texIndex;
 
 layout(location = 0) out vec3 fragColor;
 
-layout(push_constant) uniform Push {
-    vec3 color;
-} push;
-
 layout(set = 0, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
@@ -18,16 +14,14 @@ layout(set = 0, binding = 0) uniform CameraBufferObject {
     vec2 resolution;
 } cbo;
 
-struct Object{
-    mat4 model;
-};
+layout(push_constant) uniform Push {
+    mat4 transform;
+    vec3 color;
+} push;
 
-layout(std140, set = 1, binding = 0) readonly buffer ObjectBuffer {
-    Object objects[];
-};
 
 void main()
 {
-    gl_Position = vec4(position, 1.0);
-    fragColor = vec3(1.0);
+    gl_Position = push.transform * vec4(position, 1.0);
+    fragColor = push.color;
 }

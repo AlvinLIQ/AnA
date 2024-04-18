@@ -18,13 +18,14 @@ Control::~Control()
     
 }
 
-void Control::PrepareDraw()
+void Control::Draw(VkCommandBuffer commandBuffer)
 {
     auto renderSize = GetSizeForRender();
     //Properties.transform.scale = {renderSize.Width, renderSize.Height, 1.f};
     ControlSize = renderSize;
     auto renderOffset = GetActualControlOffset(renderSize);
     ControlOffset = renderOffset;
+    Object::Draw(commandBuffer);
 }
 
 void Control::InitControl(SwapChain* swapChain)

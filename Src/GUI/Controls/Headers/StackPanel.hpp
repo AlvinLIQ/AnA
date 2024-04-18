@@ -12,8 +12,9 @@ namespace AnA
             StackPanel();
             ~StackPanel();
 
-            void PrepareDraw();
             Orientations Orientation {Horizontal};
+        protected:
+            void prepareDraw();
         };
     }
 }

@@ -1,9 +1,5 @@
 #version 460
 
-layout(push_constant) uniform Push {
-    vec3 color;
-} push;
-
 struct Projection
 {
     vec2 pos1;

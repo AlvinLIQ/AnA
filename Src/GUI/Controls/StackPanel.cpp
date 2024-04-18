@@ -13,7 +13,7 @@ StackPanel::~StackPanel()
     
 }
 
-void StackPanel::PrepareDraw()
+void StackPanel::prepareDraw()
 {
     float maxSize = 0;
     int o = Orientation;

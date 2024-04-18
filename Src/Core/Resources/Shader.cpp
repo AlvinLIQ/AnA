@@ -120,14 +120,14 @@ void Shader::createPipelineLayout(std::vector<Descriptor::DescriptorConfig>& des
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.setLayoutCount = descriptors.size();
     pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
-    /*
+    
     VkPushConstantRange range;
     range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
     range.offset = 0;
     range.size = sizeof(ObjectPushConstantData);
     pipelineLayoutInfo.pushConstantRangeCount = 1;
     pipelineLayoutInfo.pPushConstantRanges = &range;
-*/
+
     if (vkCreatePipelineLayout(aDevice.GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create pipeline layout!");

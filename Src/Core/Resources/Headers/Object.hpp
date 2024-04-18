@@ -5,8 +5,6 @@
 #include "../../Headers/Types.hpp"
 #include "glm/fwd.hpp"
 #include <memory>
-#include <stdint.h>
-#include <vector>
 
 #define SHAPE_TYPE uint32_t
 
@@ -17,7 +15,8 @@ namespace AnA
 {
     struct ObjectPushConstantData
     {
-        alignas(16) glm::vec3 color;
+        glm::mat4 transform;
+        glm::vec3 color;
     };
 
     class Object
@@ -38,7 +37,6 @@ namespace AnA
         AnA::Transform Transform;
         std::unique_ptr<Texture> Texture;
 
-        virtual void PrepareDraw();
         virtual void Draw(VkCommandBuffer commandBuffer);
     private:
         id_t id;
@@ -48,168 +46,6 @@ namespace AnA
     static const ANA_OBJECTS_UPDATE_FLAG_BIT ANA_OBJECTS_UPDATE_COMMAND_BUFFER = 1;
     static const ANA_OBJECTS_UPDATE_FLAG_BIT ANA_OBJECTS_UPDATE_STORAGE_BUFFER = 2;
     static const ANA_OBJECTS_UPDATE_FLAG_BIT ANA_OBJECTS_UPDATE_ALL = 3;
-
-    class Objects
-    {
-    public:
-        Objects(Device& mDevice) : aDevice {mDevice}
-        {
-            createObjectsBuffers();
-        }
-
-        ~Objects()
-        {
-            for (auto& object : objects)
-                delete object;
-            objects.clear();
-            for (auto& objectsBuffer : objectsBuffers)
-                delete objectsBuffer;
-        }
-
-        const std::vector<Object*>& Get() const
-        {
-            return objects;
-        }
-
-        Buffer** GetBuffers()
-        {
-            return objectsBuffers.data();
-        }
-
-        void RequestUpdate(ANA_OBJECTS_UPDATE_FLAG_BIT flag = ANA_OBJECTS_UPDATE_ALL)
-        {
-            if (flag & ANA_OBJECTS_UPDATE_COMMAND_BUFFER)
-                commandBufferNeedUpdate = true;
-            if (flag & ANA_OBJECTS_UPDATE_STORAGE_BUFFER && objects.size())
-                UpdateBuffer({0, static_cast<uint32_t>(objects.size())});
-        }
-
-        void UpdateBuffer(Range updateRange)
-        {
-            int y1 = updateRange.x + updateRange.y, y2;
-            for (auto& updateQueueItem : updateQueue)
-            {
-                y2 = updateQueueItem.x + updateQueueItem.y;
-                if (updateRange.x >= updateQueueItem.x)
-                {
-                    if (y1 <= y2)
-                    {
-                        return;
-                    }
-                    else if (updateRange.x <= y2)
-                    {
-                        updateQueueItem.y += y1 - y2;
-                        updateRange.y = updateQueueItem.y;
-                        return;
-                    }
-                }
-                else if (y1 <= y2)
-                {
-                    if (y1 >= updateQueueItem.x)
-                    {
-                        updateQueueItem.x = updateRange.x;
-                        updateQueueItem.y = y2 - updateRange.x;
-                        updateRange.y = updateQueueItem.y;
-                        return;
-                    }
-                }
-                else
-                {
-                    updateQueueItem = updateRange;
-                    if (updateRange.y > maxUpdateRange)
-                        maxUpdateRange = updateRange.y;
-                    return;
-                }
-            }
-
-            updateQueue.push_back(updateRange);
-        }
-
-        const bool BeginCommandBufferUpdate()
-        {
-            return commandBufferNeedUpdate;
-        }
-
-        void EndCommandBufferUpdate()
-        {
-            commandBufferNeedUpdate = false;
-        }
-
-        const bool BeginBufferUpdate()
-        {
-            return updateQueue.size();
-        }
-
-        void CommitBufferUpdate(VkCommandBuffer& commandBuffer)
-        {
-            std::vector<VkBufferCopy> regions;
-
-            for (auto& updateRange : updateQueue)
-            {
-                //VkBufferCopy region{};
-                //region.dstOffset = updateRange.x * sizeof(Model::ModelStorageBufferObject);
-                //region.srcOffset = region.dstOffset;
-                //region.size = updateRange.y * sizeof(Model::ModelStorageBufferObject);
-                
-                for (uint32_t i = 0; i < updateRange.y; i++)
-                {
-                    objects[updateRange.x + i]->PrepareDraw();
-                    for (auto& objectsBuffer : objectsBuffers)
-                        ((glm::mat4*)objectsBuffer->GetMappedData())[updateRange.x + i] = {objects[updateRange.x + i]->Transform.mat4()};
-                }
-                //regions.push_back(region);
-            }
-        }
-
-        void EndBufferUpdate()
-        {
-            maxUpdateRange = 0;
-            updateQueue.clear();
-        }
-
-        void Append(Object* newObject)
-        {
-            objects.push_back(newObject);
-            UpdateBuffer({objects.size() - 1, 1});
-            RequestUpdate(ANA_OBJECTS_UPDATE_COMMAND_BUFFER);
-        }
-
-        void RemoveAt(int index)
-        {
-            int i = 0;
-            for (auto obj = objects.begin(); obj < objects.end(); obj++)
-            {
-                if (i == index)
-                {
-                    objects.erase(obj);
-                    RequestUpdate();
-                    break;
-                }
-
-                i++;
-            }
-        }
-    private:
-        bool commandBufferNeedUpdate = false;
-
-        Device& aDevice;
-
-        std::vector<Object*> objects;
-        std::vector<Range> updateQueue;
-        uint32_t maxUpdateRange = 0;
-        std::vector<Buffer*> objectsBuffers;
-        void createObjectsBuffers()
-        {
-            objectsBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-            for (auto& objectsBuffer : objectsBuffers)
-            {
-                objectsBuffer = new Buffer(aDevice, sizeof(glm::mat4) * MAX_OBJECTS_COUNT,
-                VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-                objectsBuffer->Map(0, sizeof(glm::mat4) * MAX_OBJECTS_COUNT);
-            }
-        }
-    };
 
 /*
     class Objects

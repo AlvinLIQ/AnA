@@ -84,7 +84,7 @@ namespace AnA
                 renderMode = newRenderMode;
             }
 
-            virtual void PrepareDraw();
+            virtual void Draw(VkCommandBuffer commandBuffer);
             static void InitControl(SwapChain* swapChain);
             static VkExtent2D GetSwapChainExtent();
             static Device& GetDevice();

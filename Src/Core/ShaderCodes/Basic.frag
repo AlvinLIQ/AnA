@@ -18,10 +18,6 @@ layout(location = 4) in vec4 shadowCoord;
 
 layout(location = 0) out vec4 outColor;
 
-layout(push_constant) uniform Push {
-    vec3 color;
-} push;
-
 layout(set = 0, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;

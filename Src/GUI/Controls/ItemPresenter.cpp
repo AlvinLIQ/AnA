@@ -26,12 +26,6 @@ void ItemPresenter::Child(Control* newItem)
     item = newItem;
 }
 
-void ItemPresenter::PrepareDraw()
-{
-    if (item != nullptr)
-        item->PrepareDraw();
-}
-
 void ItemPresenter::Draw(VkCommandBuffer commandBuffer)
 {
     if (item != nullptr)

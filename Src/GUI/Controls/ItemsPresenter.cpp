@@ -18,16 +18,9 @@ ItemsPresenter::~ItemsPresenter()
     items.clear();
 }
 
-void ItemsPresenter::PrepareDraw()
-{
-    for (auto& item : items)
-    {
-        item->PrepareDraw();
-    }
-}
-
 void ItemsPresenter::Draw(VkCommandBuffer commandBuffer)
 {
+    prepareDraw();
     for (auto& item : items)
     {
         item->Draw(commandBuffer);
