@@ -7,10 +7,11 @@ shader =
 shaderArgs = --target-env=vulkan1.3
 rm =
 ifeq ($(OS), Windows_NT)
-	libs += -LC:/VulkanSDK/1.3.275.0/Lib -LC:/glfw3/lib-vc2022 -lvulkan-1 -lglfw3dll
-	cflags = -IC:/VulkanSDK/1.3.275.0/Include -IC:/glfw3/include
+	vulkan_dir = $(wildcard C:/VulkanSDK/*/)
+	libs += -L$(vulkan_dir)Lib -LC:/glfw3/lib-vc2022 -lvulkan-1 -lglfw3dll
+	cflags = -I$(vulkan_dir)Include -IC:/glfw3/include
 	ana = AnA.exe
-	shader = Shaders\\xxdi.exe
+	shader = "Shaders/xxdi.exe"
 	rm = del
 else
 	libs += -lvulkan -lglfw
@@ -33,7 +34,12 @@ shaderspv = $(temp2:.frag=_frag.spv)
 
 all: shader $(ana)
 
-shader: $(shaderspv)
+shader: shader_prepare shader_compile
+
+shader_prepare:
+	@ mkdir -p Shaders
+
+shader_compile: $(shaderspv)
 	$(cc) $(cflags) $(libs) -lSPIRV-Tools-shared Src/Core/ShaderCodes/ShaderCodes.c -o $(shader) -std=c2x
 	$(shader) Shaders/ $(^F) > Src/Core/Headers/ShaderCodes.hpp
 %_frag.spv : %.frag
