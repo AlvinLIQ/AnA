@@ -18,13 +18,13 @@ ItemsPresenter::~ItemsPresenter()
     items.clear();
 }
 
-void ItemsPresenter::Draw(VkCommandBuffer commandBuffer)
+void ItemsPresenter::PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount)
 {
     prepareDraw();
-    Control::Draw(commandBuffer);
+    Control::PrepareDraw(shapeBuffer, shapeCount);
     for (auto& item : items)
     {
-        item->Draw(commandBuffer);
+        item->PrepareDraw(shapeBuffer, shapeCount);
     }
 }
 

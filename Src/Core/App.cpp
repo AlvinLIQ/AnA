@@ -287,8 +287,8 @@ void App::createRecordCallBacks()
         controlExtent.width = _aApp->GetSceneOffset().x;
         aResourceManager->SecondaryCommandBufferPool.Enqueue([](VkCommandBuffer secondaryCommandBuffer, size_t index)
         {
-            _aApp->aRenderSystem->RenderObject(secondaryCommandBuffer, *
-                _aApp->aResourceManager->MainControl, 
+            _aApp->aRenderSystem->RenderShapes(secondaryCommandBuffer, 
+                *_aApp->aResourceManager->Shapes, 
                 _aApp->aResourceManager->Shaders[1]);
         }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), offset, controlExtent);
     });

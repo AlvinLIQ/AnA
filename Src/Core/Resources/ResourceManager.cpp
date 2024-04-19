@@ -9,7 +9,7 @@ using namespace Resource;
 ResourceManager* _resourceManager = nullptr;
 
 ResourceManager::ResourceManager(Device& mDevice) : aDevice {mDevice}, 
-        SceneObjects(mDevice), 
+        SceneObjects(mDevice),
         GlobalLight(mDevice), 
         SecondaryCommandBufferPool(mDevice, 
         VK_COMMAND_BUFFER_LEVEL_SECONDARY,
@@ -20,6 +20,7 @@ ResourceManager::ResourceManager(Device& mDevice) : aDevice {mDevice},
     createShadowFramebuffers();
 
     createDefaultShaders();
+    Shapes = new AnA::Shapes(mDevice);
 #ifdef ANA_INCLUDE_CONTROL
     Controls::Control::InitControl(SwapChain::GetCurrent());
 #endif
@@ -35,6 +36,7 @@ ResourceManager::~ResourceManager()
     //for (auto& shader : Shaders)
     //    delete shader;
     Shaders.clear();
+    delete Shapes;
     
     auto logicalDevice = aDevice.GetLogicalDevice();
     for (auto& shadowSampler : shadowSamplers)

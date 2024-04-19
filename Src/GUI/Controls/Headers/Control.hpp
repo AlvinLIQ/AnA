@@ -2,14 +2,14 @@
 #include "../../../Core/Headers/SwapChain.hpp"
 #include "Types.hpp"
 #include "../Styles/Default/ControlStyle.hpp"
-#include "../../../Core/Resources/Headers/Object.hpp"
+#include "../../../Core/Resources/Headers/Shape.hpp"
 #include <limits>
 
 namespace AnA
 {
     namespace Controls
     {
-        class Control : public AnA::Object
+        class Control : public AnA::ShapeInfo
         {
         public:
             Control();
@@ -84,7 +84,7 @@ namespace AnA
                 renderMode = newRenderMode;
             }
 
-            virtual void Draw(VkCommandBuffer commandBuffer);
+            virtual void PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount);
             static void InitControl(SwapChain* swapChain);
             static VkExtent2D GetSwapChainExtent();
             static Device& GetDevice();
@@ -103,8 +103,6 @@ namespace AnA
             void Unfocus();
             
             bool IsInside(POS_F pos);
-
-            glm::vec3 Color{1.0f};
         private:
             AlignType renderMode {ControlRenderMode};
         protected:

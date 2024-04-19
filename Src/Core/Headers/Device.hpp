@@ -50,6 +50,10 @@ namespace AnA
     }
     class Shader;
     class Texture;
+    namespace Controls
+    {
+        class Control;
+    }
 
     typedef void(*RecordCallBack)(VkCommandBuffer commandBuffer);
     typedef void(*RecordCallBackEx)(VkCommandBuffer commandBuffer, size_t index);

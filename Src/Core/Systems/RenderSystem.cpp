@@ -24,15 +24,12 @@ RenderSystem* RenderSystem::GetCurrent()
     return currentRenderSystem;
 }
 
-void RenderSystem::RenderObject(VkCommandBuffer commandBuffer, Object& object, Shader& shader)
+void RenderSystem::RenderShapes(VkCommandBuffer commandBuffer, Shapes& shapes, Shader& shader)
 {
     shader.GetPipeline()->Bind(commandBuffer);
     auto resourceManager = Resource::ResourceManager::GetCurrent();
-    std::vector<VkDescriptorSet>& sets = shader.GetDescriptorSets()[resourceManager->SecondaryCommandBufferPool.CurrentBufferIndex];
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-            shader.GetPipelineLayout(), 0, 1,
-            sets.data(), 0, nullptr);
-    object.Draw(commandBuffer);
+    shapes.PrepareDraw(resourceManager->MainControl);
+    shapes.Draw(commandBuffer, shader.GetPipelineLayout());
 }
 
 void RenderSystem::RenderMeshes(VkCommandBuffer commandBuffer, Meshes &meshes, Shader& shader)

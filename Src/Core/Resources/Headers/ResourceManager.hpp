@@ -6,6 +6,7 @@
 #include "Descriptor.hpp"
 #include "Shader.hpp"
 #include "Lights.hpp"
+#include "Texture.hpp"
 
 #define ANA_INCLUDE_CONTROL
 
@@ -51,6 +52,7 @@ namespace AnA
             std::vector<Descriptor::DescriptorConfig> GetDefaultDescriptorConfig();
 
             Lights::Light GlobalLight;
+            Shapes* Shapes;
 #ifdef ANA_INCLUDE_CONTROL
             AnA::Controls::Control* MainControl = NULL;
 #endif

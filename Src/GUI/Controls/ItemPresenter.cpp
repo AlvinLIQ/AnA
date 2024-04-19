@@ -26,8 +26,9 @@ void ItemPresenter::Child(Control* newItem)
     item = newItem;
 }
 
-void ItemPresenter::Draw(VkCommandBuffer commandBuffer)
+void ItemPresenter::PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount)
 {
+    Control::PrepareDraw(shapeBuffer, shapeCount);
     if (item != nullptr)
-        item->Draw(commandBuffer);
+        item->PrepareDraw(shapeBuffer, shapeCount);
 }

@@ -1,5 +1,5 @@
 #include "Headers/Editor.hpp"
-//#include "../GUI/Controls/Headers/StackPanel.hpp"
+#include "../GUI/Controls/Headers/StackPanel.hpp"
 
 using namespace AnA;
 using namespace Editors;
@@ -19,14 +19,14 @@ Editor::~Editor()
 void Editor::Init()
 {
     App::Init();
-/*
+
     auto panel = new Controls::StackPanel();
     panel->VerticalAlignment = AlignmentType::Center;
     panel->HorizontalAlignment = AlignmentType::Center;
     panel->Orientation = Controls::Orientations::Vertical;
     panel->Color = glm::vec3{1.0f};
     aResourceManager->MainControl = panel;
-    sceneOffset.x = EDITOR_LEFT_PANEL_WIDTH;*/
+    sceneOffset.x = EDITOR_LEFT_PANEL_WIDTH;
 }
 
 const VkDeviceSize offset = 0;

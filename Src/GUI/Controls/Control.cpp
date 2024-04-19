@@ -1,5 +1,4 @@
 #include "Headers/Control.hpp"
-#include "../../Core/Headers/App.hpp"
 
 using namespace AnA;
 using namespace AnA::Controls;
@@ -10,7 +9,7 @@ Control* focusedControl = nullptr;
 
 Control::Control()
 {
-    this->Model = App::Get2DModel();
+    Color = glm::vec3{1.0f};
 }
 
 Control::~Control()
@@ -18,20 +17,15 @@ Control::~Control()
     
 }
 
-void Control::Draw(VkCommandBuffer commandBuffer)
+void Control::PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount)
 {
     auto renderSize = GetSizeForRender();
-    //Properties.transform.scale = {renderSize.Width, renderSize.Height, 1.f};
-    //ControlSize = renderSize;
     auto renderOffset = GetActualControlOffset(renderSize);
-    //ControlOffset = renderOffset;
     this->Transform.scale = {renderSize.Width, renderSize.Height, 1.f};
     this->Transform.translation = {renderOffset.x, renderOffset.y, 0.f};
-    ObjectPushConstantData push{this->Transform.mat4(), Color};
-    auto& shader = Resource::ResourceManager::GetCurrent()->Shaders[1];
-    auto& pipelineLayout = shader.GetPipelineLayout();
-    vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(push), &push);
-    Object::Draw(commandBuffer);
+    shapeBuffer[shapeCount].transform = Transform.mat4();
+    shapeBuffer[shapeCount].color = Color;
+    shapeCount++;
 }
 
 void Control::InitControl(SwapChain* swapChain)
