@@ -188,23 +188,7 @@ void Descriptor::UpdateDescriptorSets(DescriptorConfig& descriptorConfig)
 void Descriptor::UpdateDescriptorSets(std::vector<VkDescriptorImageInfo> imageInfos, uint32_t dstBinding, VkDescriptorType descriptorType)
 {
     for (int i = 0; i < sets.size(); i++)
-    {/*
-        std::vector<VkWriteDescriptorSet> writes{};
-        for (uint32_t j = 0; j < imageInfos.size(); j++)
-        {
-            VkWriteDescriptorSet descriptorWrite{};
-            descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            descriptorWrite.dstSet = sets[i];
-            descriptorWrite.dstBinding = dstBinding;
-            descriptorWrite.dstArrayElement = 0;
-            descriptorWrite.descriptorType = descriptorType;
-            descriptorWrite.descriptorCount = 1;
-            descriptorWrite.pImageInfo = &imageInfos[j];
-            writes.push_back(descriptorWrite);
-        }
-        vkUpdateDescriptorSets(aDevice.GetLogicalDevice(), (uint32_t)writes.size(),
-            writes.data(), 0, nullptr);
-            */
+    {
         VkWriteDescriptorSet descriptorWrite{};
         descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrite.dstSet = sets[i];
@@ -213,6 +197,23 @@ void Descriptor::UpdateDescriptorSets(std::vector<VkDescriptorImageInfo> imageIn
         descriptorWrite.descriptorType = descriptorType;
         descriptorWrite.descriptorCount = (uint32_t)imageInfos.size();
         descriptorWrite.pImageInfo = imageInfos.data();
+        vkUpdateDescriptorSets(aDevice.GetLogicalDevice(), 1,
+            &descriptorWrite, 0, nullptr);
+    }
+}
+
+void Descriptor::UpdateDescriptorSets(VkDescriptorBufferInfo* pBufferInfo, uint32_t dstBinding, VkDescriptorType descriptorType)
+{
+    for (int i = 0; i < sets.size(); i++)
+    {
+        VkWriteDescriptorSet descriptorWrite{};
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = sets[i];
+        descriptorWrite.dstBinding = dstBinding;
+        descriptorWrite.dstArrayElement = 0;
+        descriptorWrite.descriptorType = descriptorType;
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.pBufferInfo = pBufferInfo;
         vkUpdateDescriptorSets(aDevice.GetLogicalDevice(), 1,
             &descriptorWrite, 0, nullptr);
     }

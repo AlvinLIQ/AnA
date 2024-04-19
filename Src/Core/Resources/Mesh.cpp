@@ -12,6 +12,7 @@ Meshes::Meshes(Device& mDevice) : aDevice {mDevice}
 
 Meshes::~Meshes()
 {
+    delete ssboDescriptor;
     for (auto& descriptor : samplersDescriptors)
         delete descriptor;
     delete vertexBuffer;
@@ -75,7 +76,8 @@ void Meshes::RemoveAt(std::vector<uint32_t> meshIndices)
 void Meshes::Bind(VkCommandBuffer commandBuffer)
 {
     VkDeviceSize offset = 0;
-    vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer->GetBuffer(), &offset);
+    //see you later buddy
+    //vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer->GetBuffer(), &offset);
     vkCmdBindIndexBuffer(commandBuffer, indexBuffer->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
 }
 
@@ -87,6 +89,7 @@ void Meshes::Draw(VkCommandBuffer commandBuffer)
 void Meshes::Draw(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout, size_t offset, size_t size)
 {
     size_t i, j;
+    sets[DEFAULT_SSBO_LAYOUT] = ssboDescriptor->GetSets()[0];
     for (i = batchSize, j = 0; i < size; i += batchSize, j++)
     {
         sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors[j]->GetSets()[0];
@@ -137,7 +140,7 @@ void Meshes::UpdateAll()
     if (vertexBuffer == nullptr)
     {
         auto newVertexBuffer = new Buffer(aDevice, vertexCount * sizeof(Model::Vertex), 
-        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         //vertexBuffer->CopyToBuffer(Vertices.data(), Vertices.size() * sizeof(Model::Vertex));
 
@@ -150,13 +153,15 @@ void Meshes::UpdateAll()
         UpdateBuffers({0, meshes.size()});
         vertexBuffer = newVertexBuffer;
         indexBuffer = newIndexBuffer;
+        createSSBODescriptor();
+        updateSSBODescriptor();
         commandBufferNeedUpdate = true;
         return;
     }
     Resource::ResourceManager::GetCurrent()->TaskPool.Enqueue([this]()
     {
         auto newVertexBuffer = new Buffer(aDevice, vertexCount * sizeof(Model::Vertex), 
-        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         //vertexBuffer->CopyToBuffer(Vertices.data(), Vertices.size() * sizeof(Model::Vertex));
 
@@ -169,6 +174,7 @@ void Meshes::UpdateAll()
         CommitBufferUpdate(newVertexBuffer, newIndexBuffer);
         vertexBuffer->ReplaceRequest(newVertexBuffer);
         indexBuffer->ReplaceRequest(newIndexBuffer);
+        updateSSBODescriptor();
         commandBufferNeedUpdate = true;
     });
 }
@@ -224,6 +230,25 @@ void Meshes::commitBufferUpdate(Model::Vertex* vertices, Model::Index* indices, 
         }
         memcpy(&indices[mesh.indexOffset], mesh.indices.data(), mesh.indices.size() * sizeof(Model::Index));
     }
+}
+
+void Meshes::createSSBODescriptor()
+{
+    auto& descriptorSetLayout = Resource::ResourceManager::GetCurrent()->Shaders[0].GetDescriptors()[DEFAULT_SSBO_LAYOUT]->GetLayout();
+    ssboDescriptor = new Descriptor(aDevice, 1, 
+        batchSize,
+        descriptorSetLayout,
+        VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+        VK_SHADER_STAGE_FRAGMENT_BIT);
+}
+
+void Meshes::updateSSBODescriptor()
+{
+    VkDescriptorBufferInfo bufferInfo;
+    bufferInfo.buffer = vertexBuffer->GetBuffer();
+    bufferInfo.offset = 0;
+    bufferInfo.range = vertexBuffer->GetSize();
+    ssboDescriptor->UpdateDescriptorSets(&bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
 }
 
 void Meshes::appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageInfos)

@@ -122,7 +122,13 @@ void ResourceManager::RecreateResources()
 std::vector<Descriptor::DescriptorConfig> ResourceManager::GetDefaultDescriptorConfig()
 {
     std::vector<Descriptor::DescriptorConfig> descriptorConfigs(DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT);
-    auto pConfig = &descriptorConfigs[DEFAULT_UBO_LAYOUT];
+    auto pConfig = &descriptorConfigs[DEFAULT_SSBO_LAYOUT];
+    pConfig->binding = 0;
+    pConfig->descriptorCount = 0;
+    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+    pConfig = &descriptorConfigs[DEFAULT_UBO_LAYOUT];
     pConfig->binding = 0;
     pConfig->descriptorCount = MAX_FRAMES_IN_FLIGHT;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;

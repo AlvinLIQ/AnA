@@ -1,14 +1,6 @@
 #version 460
 #extension GL_EXT_nonuniform_qualifier : enable 
 
-#define ANA_MODEL 1
-#define ANA_TRIANGLE 2
-#define ANA_RECTANGLE 4
-#define ANA_ELLIPSE 8
-#define ANA_CURVED_RECTANGLE 16
-#define ANA_TEXT 32
-#define ANA_SPHERE 64
-
 layout(location = 0) in vec2 texCoord;
 layout(location = 1) flat in uint texIndex;
 layout(location = 2) in vec3 normalSpace;
@@ -18,24 +10,23 @@ layout(location = 4) in vec4 shadowCoord;
 
 layout(location = 0) out vec4 outColor;
 
-layout(set = 0, binding = 0) uniform CameraBufferObject {
+layout(set = 1, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
     mat4 invView;
     vec2 resolution;
 } cbo;
 
-
-layout(set = 2, binding = 0) uniform sampler2D texSampler[];
-layout(set = 3, binding = 0) uniform sampler2D shadowSampler;
-
-layout(set = 1, binding = 0) uniform LightBufferObject {
+layout(set = 2, binding = 0) uniform LightBufferObject {
     mat4 proj;
     mat4 view;
     vec3 direction;
     vec3 color;
     float ambient;
 } lbo;
+
+layout(set = 3, binding = 0) uniform sampler2D texSampler[];
+layout(set = 4, binding = 0) uniform sampler2D shadowSampler;
 
 struct Ray{
     vec3 center;

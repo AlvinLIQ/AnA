@@ -69,6 +69,10 @@ namespace AnA
 
             return batchCount;
         }
+        Descriptor* GetSSBODescriptor()
+        {
+            return ssboDescriptor;
+        }
     private:
         Device& aDevice;
         Buffer* vertexBuffer{nullptr};
@@ -83,6 +87,9 @@ namespace AnA
         bool commandBufferNeedUpdate = false;
         std::unordered_map<uint32_t, uint32_t> textureIdMap{};
         std::vector<Descriptor*> samplersDescriptors;
+        Descriptor* ssboDescriptor;
+        void createSSBODescriptor();
+        void updateSSBODescriptor();
         void appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageInfos);
     };
 }

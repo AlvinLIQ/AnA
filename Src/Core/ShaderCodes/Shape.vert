@@ -1,18 +1,19 @@
 #version 460
 
-layout(location = 0) in vec3 position;
-layout(location = 1) in vec3 normal;
-layout(location = 2) in vec2 uv;
-layout(location = 3) in uint texIndex;
-
 layout(location = 0) out vec3 fragColor;
 
-layout(set = 0, binding = 0) uniform CameraBufferObject {
-    mat4 proj;
-    mat4 view;
-    mat4 invView;
-    vec2 resolution;
-} cbo;
+struct Vertex
+{
+    vec3 position;
+    vec3 normal;
+    vec2 uv;
+    uint texIndex;
+};
+
+layout(std140, set = 0, binding = 0) buffer VertexSSBO
+{
+    Vertex vertices[];
+} ssbo;
 
 layout(push_constant) uniform Push {
     mat4 transform;
@@ -22,6 +23,6 @@ layout(push_constant) uniform Push {
 
 void main()
 {
-    gl_Position = push.transform * vec4(position, 1.0);
+    gl_Position = push.transform * vec4(ssbo.vertices[gl_VertexIndex].position, 1.0);
     fragColor = push.color;
 }

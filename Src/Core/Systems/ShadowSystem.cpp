@@ -33,9 +33,9 @@ void ShadowSystem::RenderShadows(VkCommandBuffer commandBuffer, Meshes &meshes, 
     vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
     shader.GetPipeline()->Bind(commandBuffer);
     std::vector<VkDescriptorSet> sets = shader.GetDescriptorSets()[Resource::ResourceManager::GetCurrent()->SecondaryCommandBufferPool.CurrentBufferIndex];
-
+    sets[DEFAULT_SSBO_LAYOUT] = meshes.GetSSBODescriptor()->GetSets()[0];
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-        shader.GetPipelineLayout(), 0, 2,
+        shader.GetPipelineLayout(), 0, 3,
         sets.data(), 0, nullptr);
     meshes.Bind(commandBuffer);
     meshes.Draw(commandBuffer);

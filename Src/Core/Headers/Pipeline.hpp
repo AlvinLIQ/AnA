@@ -1,5 +1,5 @@
 #pragma once
-#include "../Resources/Headers/Model.hpp"
+#include "Device.hpp"
 
 #include <vulkan/vulkan.h>
 #include <vector>
@@ -22,8 +22,8 @@ namespace AnA
         {
             VkPipelineShaderStageCreateInfo shaderStages[2] = {{},{}};
             VkPipelineDynamicStateCreateInfo dynamicStateInfo{};
-            std::vector<VkVertexInputBindingDescription> bindingDescriptions = Model::Vertex::GetBindingDescription();
-            std::vector<VkVertexInputAttributeDescription> attributeDescriptions = Model::Vertex::GetAttributeDescription();
+            std::vector<VkVertexInputBindingDescription> bindingDescriptions{};// = Model::Vertex::GetBindingDescription();
+            std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};// = Model::Vertex::GetAttributeDescription();
             VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
             VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
             VkPipelineViewportStateCreateInfo viewportState{};

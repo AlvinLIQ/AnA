@@ -52,6 +52,7 @@ namespace AnA
         const VkDescriptorSetLayout& GetLayout() const;
         void UpdateDescriptorSets(DescriptorConfig& descriptorConfig);
         void UpdateDescriptorSets(std::vector<VkDescriptorImageInfo> imageInfos, uint32_t dstBinding = 0, VkDescriptorType descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+        void UpdateDescriptorSets(VkDescriptorBufferInfo* pBufferInfo, uint32_t dstBinding, VkDescriptorType descriptorType);
     private:
         VkDescriptorPool pool{VK_NULL_HANDLE};
         bool layoutCreated = false;

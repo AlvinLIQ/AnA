@@ -1,36 +1,32 @@
 #version 460
 
-#define ANA_MODEL 1
-#define ANA_TRIANGLE 2
-#define ANA_RECTANGLE 4
-#define ANA_ELLIPSE 8
-#define ANA_CURVED_RECTANGLE 16
-#define ANA_TEXT 32
-#define ANA_SPHERE 64
-
-layout(location = 0) in vec3 position;
-layout(location = 1) in vec3 normal;
-layout(location = 2) in vec2 uv;
-layout(location = 3) in uint texIndex;
-
 layout(location = 0) out vec2 outTexCoord;
 layout(location = 1) out uint outTexID;
 layout(location = 2) out vec3 outNormalSpace;
 layout(location = 3) out vec3 outVertex;
 layout(location = 4) out vec4 outShadowCoord;
 
-layout(set = 0, binding = 0) uniform CameraBufferObject {
+struct Vertex
+{
+    vec3 position;
+    vec3 normal;
+    vec2 uv;
+    uint texIndex;
+};
+
+layout(std140, set = 0, binding = 0) buffer VertexSSBO
+{
+    Vertex vertices[];
+} ssbo;
+
+layout(set = 1, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
     mat4 invView;
     vec2 resolution;
 } cbo;
 
-struct Object{
-    mat4 model;
-};
-
-layout(set = 1, binding = 0) uniform LightBufferObject {
+layout(set = 2, binding = 0) uniform LightBufferObject {
     mat4 proj;
     mat4 view;
     vec3 direction;
@@ -84,14 +80,15 @@ mat4 transform(vec3 scale, vec3 rotation, vec3 transition)
 }
 
 void main() {
-    vec4 vertex = vec4(position, 1.0);
-    gl_Position = cbo.proj * cbo.view * vertex;
-    outNormalSpace = normalize(normal);
-    outVertex = vertex.xyz / vertex.w;
+    Vertex vertex = ssbo.vertices[gl_VertexIndex];
+    vec4 vertexPos = vec4(vertex.position, 1.0);
+    gl_Position = cbo.proj * cbo.view * vertexPos;
+    outNormalSpace = normalize(vertex.normal);
+    outVertex = vertexPos.xyz / vertexPos.w;
     //mat4 dView = mat4(0.999949, -0.009408, 0.003682, 0.000000, 0.000000, 0.364459, 0.931219, 0.000000, -0.010103, -0.931172, 0.364441, 0.000000, -1.931544, -0.269233, 11.256238, 1.000000);
-    outShadowCoord = biasMat * lbo.proj * lbo.view * vertex;
+    outShadowCoord = biasMat * lbo.proj * lbo.view * vertexPos;
 
-    outTexCoord = uv;
-    outTexID = texIndex;
+    outTexCoord = vertex.uv;
+    outTexID = vertex.texIndex;
     //gl_Position = push.projectionMatrix * push.transformMatrix * vec4(position, 1.0);
 }
