@@ -121,6 +121,16 @@ void App::Run()
                 aResourceManager->SceneObjects.Append(meshInfos);
             });
         }
+        if (glfwGetKey(aWindow->GetGLFWwindow(), GLFW_KEY_EQUAL) == GLFW_PRESS)
+        {
+            aResourceManager->MainCameraInfo.far += 0.01f;
+            aResourceManager->MainCameraInfo.UpdateCameraPerspective(aResourceManager->MainCamera);
+        }
+        if (glfwGetKey(aWindow->GetGLFWwindow(), GLFW_KEY_MINUS) == GLFW_PRESS)
+        {
+            aResourceManager->MainCameraInfo.far -= 0.01f;
+            aResourceManager->MainCameraInfo.UpdateCameraPerspective(aResourceManager->MainCamera);
+        }
         auto curTime = std::chrono::high_resolution_clock::now();
         float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(curTime - prevTime).count();
         prevTime = curTime;
