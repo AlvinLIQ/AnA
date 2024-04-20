@@ -295,6 +295,7 @@ void App::createRecordCallBacks()
         auto& aRenderer = _aApp->GetRenderer();
         auto controlExtent = aRenderer.GetSwapChainExtent();
         controlExtent.width = _aApp->GetSceneOffset().x;
+        aResourceManager->MainControl->Aspect = (float)controlExtent.width / (float)controlExtent.height;
         aResourceManager->SecondaryCommandBufferPool.Enqueue([](VkCommandBuffer secondaryCommandBuffer, size_t index)
         {
             _aApp->aRenderSystem->RenderShapes(secondaryCommandBuffer, 

@@ -52,14 +52,11 @@ namespace AnA
                 }
                 else if (renderMode == AlignType::Absolute)
                 {
-                    auto extent = GetSwapChainExtent();
-                    renderSize.Width = ControlSize.Width / (float)extent.width;
-                    renderSize.Height = ControlSize.Height / (float)extent.height;
+                    renderSize = ControlSize;
                 }
                 else if (renderMode == AlignType::Auto)
                 {
-                    auto scale = ControlSize;
-                    renderSize = ControlSize;
+                    renderSize = {ControlSize.Width / Aspect, ControlSize.Height};
                 }
                 return renderSize;
             }
@@ -83,6 +80,8 @@ namespace AnA
                 //
                 renderMode = newRenderMode;
             }
+
+            float Aspect = 1.0f;
 
             virtual void PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount);
             static void InitControl(SwapChain* swapChain);

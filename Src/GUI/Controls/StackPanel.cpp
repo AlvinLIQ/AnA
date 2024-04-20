@@ -5,7 +5,7 @@ using namespace Controls;
 
 StackPanel::StackPanel()
 {
-
+    SetRenderMode(Absolute);
 }
 
 StackPanel::~StackPanel()
@@ -31,6 +31,7 @@ void StackPanel::PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount)
     }
     for (int i = 0; i < items.size(); i++)
     {
+        items[i]->Aspect = Aspect;
         auto _size = items[i]->GetSizeForRender();
         ((float*)&offset)[invO] += ((float*)&size)[invO] + ((float*)&_size)[invO];
         size = _size;
