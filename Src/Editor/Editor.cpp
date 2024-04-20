@@ -27,6 +27,19 @@ void Editor::Init()
     panel->Color = glm::vec3{1.0f};
     aResourceManager->MainControl = panel;
     sceneOffset.x = EDITOR_LEFT_PANEL_WIDTH;
+    aInputManager->GlobalProfile.flag = Input::InputProfileFlags::None;
+    Input::KeyMapConfig keyMapConfig;
+    keyMapConfig.keyCode = GLFW_KEY_TAB;
+    keyMapConfig.param = aInputManager;
+    keyMapConfig.callBack = [](void* param)
+    {
+        auto aInputManager = (Input::InputManager*)param;
+        auto& activeProfile = aInputManager->GetActiveProfile();
+        aInputManager->ProcessProfileFlag((activeProfile.flag ^= Input::Disabled) & Input::Disabled ? 
+            aInputManager->GlobalProfile.flag :
+            activeProfile.flag);
+    };
+    aInputManager->GlobalProfile.keyMapConfigs.push_back(keyMapConfig);
 }
 
 const VkDeviceSize offset = 0;

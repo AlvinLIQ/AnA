@@ -144,7 +144,7 @@ void App::Run()
             frameCount = 0;
         }
         camera.SetSpeedRatio(frameTime);
-        aInputManager->CheckAndRunCallbacks();
+        aInputManager->Check();
         //Update Resources
         if (aRenderer->NeedUpdate())
         {

@@ -11,7 +11,7 @@ namespace AnA
             void* param;
             void(*callBack)(void* param);
             int keyCode;
-            int action;
+            int action = GLFW_PRESS;
         };
         struct CursorPosition
         {
@@ -26,7 +26,7 @@ namespace AnA
         };
         enum InputProfileFlags
         {
-            None = 0, HideCursor = 1, RawMotion = 2
+            None = 0, HideCursor = 1, RawMotion = 2, Disabled = 4
         };
         struct InputProfile
         {
@@ -34,6 +34,7 @@ namespace AnA
             std::vector<KeyMapConfig> keyMapConfigs;
             std::vector<CursorConfig> cursorConfigs;
             void* param;
+            //only call when there's a config
             void(*callback)(void* param) = nullptr;
         };
         class InputManager
@@ -51,9 +52,11 @@ namespace AnA
             {
                 return inputProfiles;
             }
+            InputProfile GlobalProfile{};
             void SetActiveProfile(int profileIndex);
-            
-            void CheckAndRunCallbacks();
+            void ProcessProfileFlag(uint32_t profileFlag);
+
+            void Check();
         private:
             Window& aWindow;
             static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -61,6 +64,7 @@ namespace AnA
             std::vector<InputProfile> inputProfiles{1};
 
             CursorPosition curPos, prevPos;
+            void checkProfile(Input::InputProfile& inputProfile);
         };
     }
 }

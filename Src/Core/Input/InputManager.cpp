@@ -9,9 +9,9 @@ InputManager* _aInputManager;
 InputManager::InputManager(Window& mWindow) : aWindow {mWindow}
 {
     _aInputManager = this;
-/*
-    auto &window = aWindow.GetGLFWwindow();
-    glfwSetKeyCallback(window, InputManager::keyCallback);*/
+
+    auto window = aWindow.GetGLFWwindow();
+    glfwSetKeyCallback(window, InputManager::keyCallback);
     glfwGetCursorPos(aWindow.GetGLFWwindow(), &prevPos.x, &prevPos.y);
 }
 
@@ -29,22 +29,45 @@ void InputManager::SetActiveProfile(int profileIndex)
     if (profileIndex < inputProfiles.size())
     {
         activeProfileIndex = profileIndex;
-        auto window = aWindow.GetGLFWwindow();
-        auto& profileFlag = inputProfiles[profileIndex].flag;
-        if (profileFlag & InputProfileFlags::HideCursor)
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        else
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, profileFlag & InputProfileFlags::RawMotion && glfwRawMouseMotionSupported());
+        ProcessProfileFlag(inputProfiles[activeProfileIndex].flag);
     }
 }
 
-void InputManager::CheckAndRunCallbacks()
+
+void InputManager::ProcessProfileFlag(uint32_t profileFlag)
 {
+    auto window = aWindow.GetGLFWwindow();
+    if (profileFlag & InputProfileFlags::HideCursor)
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    else
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, profileFlag & InputProfileFlags::RawMotion && glfwRawMouseMotionSupported());
+}
+
+void InputManager::Check()
+{
+    checkProfile(inputProfiles[activeProfileIndex]);
+    //checkProfile(GlobalProfile);
+}
+
+void InputManager::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    auto &keyMapConfigs = _aInputManager->GlobalProfile.keyMapConfigs;
+    for (auto &keyMapConfig : keyMapConfigs)
+    {
+        if (keyMapConfig.keyCode == key && keyMapConfig.callBack != nullptr && keyMapConfig.action == action)
+            keyMapConfig.callBack(keyMapConfig.param);
+    }
+}
+
+void InputManager::checkProfile(Input::InputProfile& inputProfile)
+{
+    if (inputProfile.flag & InputProfileFlags::Disabled)
+        return;
     auto window = aWindow.GetGLFWwindow();
     glfwGetCursorPos(window, &curPos.x, &curPos.y);
     CursorPosition duration = {(curPos.x - prevPos.x) / (double)aWindow.Width, (curPos.y - prevPos.y) / (double)aWindow.Height};
-    auto &cursorConfigs = inputProfiles[activeProfileIndex].cursorConfigs;
+    auto &cursorConfigs = inputProfile.cursorConfigs;
     for (auto &cursorConfig : cursorConfigs)
     {
         if (cursorConfig.callBack != nullptr)
@@ -52,25 +75,15 @@ void InputManager::CheckAndRunCallbacks()
     }
     prevPos = curPos;
 
-    auto &keyMapConfigs = inputProfiles[activeProfileIndex].keyMapConfigs;
+    auto &keyMapConfigs = inputProfile.keyMapConfigs;
     for (auto &keyMapConfig : keyMapConfigs)
     {
-        if (keyMapConfig.callBack != nullptr && glfwGetKey(window, keyMapConfig.keyCode) == GLFW_PRESS)
+        if (keyMapConfig.callBack != nullptr && glfwGetKey(window, keyMapConfig.keyCode) == keyMapConfig.action)
             keyMapConfig.callBack(keyMapConfig.param);
     }
     //glfwSetCursorPos(window, centerX, centerY);
-    if (keyMapConfigs.size() + cursorConfigs.size() > 0)
+    if (inputProfile.callback != nullptr && keyMapConfigs.size() + cursorConfigs.size() > 0)
     {
-        inputProfiles[activeProfileIndex].callback(inputProfiles[activeProfileIndex].param);
-    }
-}
-
-void InputManager::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-    auto &keyMapConfigs = _aInputManager->GetActiveProfile().keyMapConfigs;
-    for (auto &keyMapConfig : keyMapConfigs)
-    {
-        if (keyMapConfig.keyCode == key && keyMapConfig.callBack != nullptr)
-            keyMapConfig.callBack(keyMapConfig.param);
+        inputProfile.callback(inputProfile.param);
     }
 }
