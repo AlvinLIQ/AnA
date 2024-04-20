@@ -41,6 +41,11 @@ void Editor::Init()
     button->HorizontalAlignment = AlignmentType::End;
     button->Color = glm::vec3{0.7f};
     panel->Child(button);
+
+    button = new Controls::Button();
+    button->HorizontalAlignment = AlignmentType::Stretch;
+    button->Color = glm::vec3{0.7f};
+    panel->Child(button);
     
     aResourceManager->MainControl = panel;
     sceneOffset.x = EDITOR_LEFT_PANEL_WIDTH;

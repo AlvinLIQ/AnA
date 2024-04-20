@@ -10,7 +10,7 @@ namespace AnA
     };
     enum AlignmentType
     {
-        Start, Center, End
+        Start, Center, End, Stretch
     };
 
     enum PointerEventType

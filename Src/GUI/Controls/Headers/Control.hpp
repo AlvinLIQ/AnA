@@ -27,12 +27,16 @@ namespace AnA
                 AlignmentType Alignments[]{HorizontalAlignment, VerticalAlignment};
                 for (int i = 0; i < 2; i++)
                 {
-                    if (Alignments[i] == AlignmentType::Center)
-                        pOffset[i] = 0.f;
-                    else if (Alignments[i] == AlignmentType::Start)
+                    if (Alignments[i] == AlignmentType::Start)
                         pOffset[i] = pSize[i] / 2.f - 1.0f;
-                    else
+                    else if (Alignments[i] == AlignmentType::End)
                         pOffset[i] = 1.0f - pSize[i] / 2.f;
+                    else
+                    {
+                        pOffset[i] = 0.f;
+                        if (Alignments[i] == AlignmentType::Stretch)
+                            pSize[i] = 1.f;
+                    }
                 }
                 
                 actualOffset.x += ControlOffset.x;
