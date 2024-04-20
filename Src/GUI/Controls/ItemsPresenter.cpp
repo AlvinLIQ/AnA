@@ -20,7 +20,6 @@ ItemsPresenter::~ItemsPresenter()
 
 void ItemsPresenter::PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount)
 {
-    prepareDraw();
     Control::PrepareDraw(shapeBuffer, shapeCount);
     for (auto& item : items)
     {

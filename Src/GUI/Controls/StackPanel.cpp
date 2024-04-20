@@ -13,33 +13,46 @@ StackPanel::~StackPanel()
     
 }
 
-void StackPanel::prepareDraw()
+void StackPanel::PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount)
 {
-    float maxSize = 0;
-    int o = Orientation;
-    Control* t = nullptr;
-    size_t offsets[] = {(size_t)&t->HorizontalAlignment, (size_t)&t->VerticalAlignment};
+    float maxSize = 1.0f;
+    int o = Orientation, invO = 1 - Orientation;
     for (int i = 0; i < items.size(); i++)
     {
         auto size = items[i]->GetSizeForRender();
-        if (size.Height > maxSize)
+        if (((float*)&size)[o] > maxSize)
             maxSize = ((float*)&size)[o];
+    }
+    SIZE_F size{};
+    POS_F offset{};
+    if (items.size())
+    {
+        ((float*)&offset)[invO] = -1.0;
     }
     for (int i = 0; i < items.size(); i++)
     {
-        auto size = items[i]->GetSizeForRender();
-        auto align = (AlignmentType*)(items[i] + offsets[o]);
+        auto _size = items[i]->GetSizeForRender();
+        ((float*)&offset)[invO] += ((float*)&size)[invO] + ((float*)&_size)[invO];
+        size = _size;
+        auto align = invO ? (AlignmentType*)&items[i]->HorizontalAlignment : &items[i]->VerticalAlignment;//(items[i] + offsets[o]);
         if (*align == Start)
         {
-            ((float*)&items[i]->ControlOffset)[o] = 0.0f;
+            ((float*)&offset)[o] = (((float*)&size)[o] - maxSize);
         }
         else if (*align == Center)
         {
-            ((float*)&items[i]->ControlOffset)[o] = (maxSize - ((float*)&items[i]->ControlSize)[o]) / 2.0f;
+            ((float*)&offset)[o] = 0.0f;
         }
         else
         {
-            ((float*)&items[i]->ControlOffset)[o] = maxSize - ((float*)&items[i]->ControlSize)[o];
+            ((float*)&offset)[o] = (maxSize - ((float*)&size)[o]);
         }
+        items[i]->Transform.translation = {offset.x, offset.y, 0.0f};
+        items[i]->Transform.scale = {size.Width, size.Height, 1.0f};
+        shapeBuffer[shapeCount].transform = items[i]->Transform.mat4();
+        shapeBuffer[shapeCount].color = items[i]->Color;
+        shapeCount++;
     }
+
+    Control::PrepareDraw(shapeBuffer, shapeCount);
 }

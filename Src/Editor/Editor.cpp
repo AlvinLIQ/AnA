@@ -1,5 +1,6 @@
 #include "Headers/Editor.hpp"
 #include "../GUI/Controls/Headers/StackPanel.hpp"
+#include "../GUI/Controls/Headers/Button.hpp"
 
 using namespace AnA;
 using namespace Editors;
@@ -24,7 +25,18 @@ void Editor::Init()
     panel->VerticalAlignment = AlignmentType::Center;
     panel->HorizontalAlignment = AlignmentType::Center;
     panel->Orientation = Controls::Orientations::Vertical;
-    panel->Color = glm::vec3{1.0f};
+    panel->Color = glm::vec3{0.2f};
+
+    auto button = new Controls::Button();
+    button->HorizontalAlignment = AlignmentType::Start;
+    button->Color = glm::vec3{0.7f};
+    panel->Child(button);
+
+    button = new Controls::Button();
+    button->HorizontalAlignment = AlignmentType::End;
+    button->Color = glm::vec3{0.7f};
+    panel->Child(button);
+    
     aResourceManager->MainControl = panel;
     sceneOffset.x = EDITOR_LEFT_PANEL_WIDTH;
     aInputManager->GlobalProfile.flag = Input::InputProfileFlags::None;

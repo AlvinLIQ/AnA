@@ -9,7 +9,6 @@ Control* focusedControl = nullptr;
 
 Control::Control()
 {
-    Color = glm::vec3{1.0f};
 }
 
 Control::~Control()

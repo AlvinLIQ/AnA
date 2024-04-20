@@ -8,7 +8,7 @@ namespace AnA
     struct Shape
     {
         glm::mat4 transform{1.0f};
-        glm::vec3 color{1.0f};
+        alignas(8) glm::vec3 color{1.0f};
     };
     struct ShapeInfo
     {

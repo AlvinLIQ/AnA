@@ -5,7 +5,7 @@ namespace AnA
 {
     namespace Controls
     {
-        enum Orientations {Horizontal, Vertical};
+        enum Orientations {Horizontal = 1, Vertical = 0};
         class StackPanel : public ItemsPresenter
         {
         public:
@@ -13,8 +13,7 @@ namespace AnA
             ~StackPanel();
 
             Orientations Orientation {Horizontal};
-        protected:
-            void prepareDraw();
+            void PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount);
         };
     }
 }

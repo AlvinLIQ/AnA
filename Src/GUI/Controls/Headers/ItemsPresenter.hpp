@@ -19,7 +19,6 @@ namespace AnA
             void PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount);
         protected:
             std::vector<Control*> items;
-            virtual void prepareDraw() = 0;
         };
     }
 }
