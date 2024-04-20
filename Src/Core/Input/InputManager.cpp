@@ -69,10 +69,11 @@ void InputManager::checkProfile(Input::InputProfile& inputProfile)
     CursorPosition duration = {(curPos.x - prevPos.x) / (double)aWindow.Width, (curPos.y - prevPos.y) / (double)aWindow.Height};
     cursorPos = {curPos.x / (double)aWindow.Width, curPos.y / (double)aWindow.Height};
     auto &cursorConfigs = inputProfile.cursorConfigs;
+    int leftButton = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
     for (auto &cursorConfig : cursorConfigs)
     {
         if (cursorConfig.callBack != nullptr)
-            cursorConfig.callBack(cursorConfig.param, inputProfile.flag & InputProfileFlags::RawMotion ? duration : cursorPos);
+            cursorConfig.callBack(cursorConfig.param, inputProfile.flag & InputProfileFlags::RawMotion ? duration : cursorPos, leftButton);
     }
     prevPos = curPos;
 

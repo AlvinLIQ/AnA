@@ -14,7 +14,7 @@ namespace AnA
             int keyCode;
             int action = GLFW_PRESS;
         };
-        typedef void(*CursorCallBack)(void* pParam, CursorPosition &curPos);
+        typedef void(*CursorCallBack)(void* pParam, CursorPosition &curPos, int leftButtonAction);
         struct CursorConfig
         {
             void* param;

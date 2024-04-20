@@ -30,7 +30,7 @@ void CameraController::GetCameraCursorConfigs(std::vector<Input::CursorConfig> &
 {
     Input::CursorConfig config;
     config.param = &aCamera;
-    config.callBack = (void(*)(void*, CursorPosition&))CameraController::CursorMoved;
+    config.callBack = (Input::CursorCallBack)CameraController::CursorMoved;
     configs.push_back(config);
 }
 
@@ -82,7 +82,7 @@ void CameraController::Rotate(CameraController::CameraCallbackParam* param)
     param->aCamera.CameraTransform.rotation[posIndex] -= (param->id & 1 ? -rotateStep : rotateStep) * param->aCamera.GetSpeedRatio() * 6.283;
 }
 
-void CameraController::CursorMoved(Camera* camera, CursorPosition &duration)
+void CameraController::CursorMoved(Camera* camera, CursorPosition &duration, int leftButtonAction)
 {
     const float rotateSpeed = camera->GetSpeedRatio() * 6.283 * 80.;
     camera->CameraTransform.rotation.y = glm::mod(camera->CameraTransform.rotation.y + (float)duration.x * rotateSpeed, glm::two_pi<float>());

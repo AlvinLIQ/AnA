@@ -116,6 +116,7 @@ namespace AnA
             POS_F renderOffset{};
             SIZE_F renderSize{};
             bool cursorInside = false;
+            bool pressed = false;
         protected:
             SIZE_F minSize {ControlMinSize};
             SIZE_F maxSize {std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};

@@ -25,7 +25,7 @@ namespace AnA
             static void Move(CameraCallbackParam* param);
             static void Rotate(CameraCallbackParam* param);
 
-            static void CursorMoved(Camera* camera, CursorPosition &duration);
+            static void CursorMoved(Camera* camera, CursorPosition &duration, int leftButtonAction);
 
         private:
             Camera &aCamera;
