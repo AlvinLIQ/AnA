@@ -84,7 +84,6 @@ void Control::PointerEventTrigger(PointerEventArgs& args)
         return;
     PointerEventType eventType = args.EventType;
     bool isInside = IsInside(args.Position);
-    printf("%.2f %.2f %d\r", args.Position.x, args.Position.y, isInside ? 1 : 0);
     if (eventType == PointerEventType::Moving)
     {
         if (cursorInside && !isInside)
