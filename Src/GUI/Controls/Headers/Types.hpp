@@ -1,6 +1,5 @@
 #pragma once
-
-#include <cstdint>
+#include "../../../Core/Headers/Types.hpp"
 
 namespace AnA
 {
@@ -23,11 +22,12 @@ namespace AnA
     };
     struct PointerEventArgs
     {
-        uint32_t Position[2];
+        CursorPosition Position;
         PointerEventType EventType;
         PointerTriggerType TriggerType;
+        bool Handled = false;
     };
-    typedef void (*PointerEventHandler)(void* control, PointerEventArgs args);
+    typedef void (*PointerEventHandler)(void* control, PointerEventArgs& args);
     struct SIZE_F
     {
         float Width;

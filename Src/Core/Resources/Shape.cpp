@@ -39,3 +39,8 @@ void Shapes::Draw(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout
     &ssboDescriptor->GetSets()[0], 0, nullptr);
     vkCmdDraw(commandBuffer, shapeCount * 6, 1, 0, 0);
 }
+
+Shape* Shapes::GetBufferData()
+{
+    return (Shape*)shapeBuffer->GetMappedData();
+}

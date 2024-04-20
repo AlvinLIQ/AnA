@@ -1,5 +1,6 @@
 #pragma once
 #include "../../Headers/Window.hpp"
+#include "../../Headers/Types.hpp"
 #include <vector>
 
 namespace AnA
@@ -13,15 +14,11 @@ namespace AnA
             int keyCode;
             int action = GLFW_PRESS;
         };
-        struct CursorPosition
-        {
-            double x;
-            double y;
-        };
+        typedef void(*CursorCallBack)(void* pParam, CursorPosition &curPos);
         struct CursorConfig
         {
             void* param;
-            void(*callBack)(void* pParam, CursorPosition &curPos);
+            CursorCallBack callBack;
             int action;
         };
         enum InputProfileFlags
@@ -52,6 +49,11 @@ namespace AnA
             {
                 return inputProfiles;
             }
+
+            CursorPosition& GetCursorPosition()
+            {
+                return cursorPos;
+            }
             InputProfile GlobalProfile{};
             void SetActiveProfile(int profileIndex);
             void ProcessProfileFlag(uint32_t profileFlag);
@@ -62,7 +64,7 @@ namespace AnA
             static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
             int activeProfileIndex = 0;
             std::vector<InputProfile> inputProfiles{1};
-
+            CursorPosition cursorPos;
             CursorPosition curPos, prevPos;
             void checkProfile(Input::InputProfile& inputProfile);
         };

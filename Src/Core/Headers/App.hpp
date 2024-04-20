@@ -31,6 +31,7 @@ namespace AnA
         static std::shared_ptr<Model> &Get2DModel();
         static void CreateModel(const Model::ModelInfo &modelInfo, std::shared_ptr<Model> &model);
 
+        static App* GetCurrent();
         Input::InputManager& GetInputManager()
         {
             return *aInputManager;

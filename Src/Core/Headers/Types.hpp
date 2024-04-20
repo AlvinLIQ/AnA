@@ -71,5 +71,10 @@ namespace AnA
             };
         }
     };
+    struct CursorPosition
+    {
+        double x;
+        double y;
+    };
     typedef glm::vec<2, uint32_t> Range;
 }

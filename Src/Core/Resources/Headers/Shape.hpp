@@ -22,6 +22,7 @@ namespace AnA
         ~Shapes();
         void PrepareDraw(Controls::Control* control);
         void Draw(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout);
+        Shape* GetBufferData();
     private:
         Device& aDevice;
         Buffer* shapeBuffer{nullptr};

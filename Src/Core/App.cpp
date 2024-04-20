@@ -32,6 +32,11 @@ App::~App()
     Cleanup();
 }
 
+App* App::GetCurrent()
+{
+    return _aApp;
+}
+
 void App::CreateCubeModel(std::shared_ptr<Model>& model)
 {
     std::vector<Model::Vertex> vertices = 
@@ -296,6 +301,7 @@ void App::createRecordCallBacks()
         auto controlExtent = aRenderer.GetSwapChainExtent();
         controlExtent.width = _aApp->GetSceneOffset().x;
         aResourceManager->MainControl->Aspect = (float)controlExtent.width / (float)controlExtent.height;
+        aResourceManager->MainControl->Extent = controlExtent;
         aResourceManager->SecondaryCommandBufferPool.Enqueue([](VkCommandBuffer secondaryCommandBuffer, size_t index)
         {
             _aApp->aRenderSystem->RenderShapes(secondaryCommandBuffer, 

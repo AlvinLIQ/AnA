@@ -29,22 +29,18 @@ void Editor::Init()
 
     auto button = new Controls::Button();
     button->HorizontalAlignment = AlignmentType::Start;
-    button->Color = glm::vec3{0.7f};
     panel->Child(button);
 
     button = new Controls::Button();
     button->HorizontalAlignment = AlignmentType::Center;
-    button->Color = glm::vec3{0.7f};
     panel->Child(button);
 
     button = new Controls::Button();
     button->HorizontalAlignment = AlignmentType::End;
-    button->Color = glm::vec3{0.7f};
     panel->Child(button);
 
     button = new Controls::Button();
     button->HorizontalAlignment = AlignmentType::Stretch;
-    button->Color = glm::vec3{0.7f};
     panel->Child(button);
     
     aResourceManager->MainControl = panel;
@@ -56,12 +52,22 @@ void Editor::Init()
     keyMapConfig.callBack = [](void* param)
     {
         auto aInputManager = (Input::InputManager*)param;
+        /*
         auto& activeProfile = aInputManager->GetActiveProfile();
         aInputManager->ProcessProfileFlag((activeProfile.flag ^= Input::Disabled) & Input::Disabled ? 
             aInputManager->GlobalProfile.flag :
-            activeProfile.flag);
+            activeProfile.flag);*/
+        if (&aInputManager->GetActiveProfile() == aInputManager->GetProfiles().data())
+        {
+            aInputManager->SetActiveProfile(1);
+        }
+        else
+        {
+            aInputManager->SetActiveProfile(0);
+        }
     };
     aInputManager->GlobalProfile.keyMapConfigs.push_back(keyMapConfig);
+    Controls::Control::GetInputProfile(aResourceManager->MainControl, aInputManager->GetProfiles());
 }
 
 const VkDeviceSize offset = 0;

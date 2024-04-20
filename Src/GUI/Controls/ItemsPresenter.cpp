@@ -55,3 +55,16 @@ void ItemsPresenter::RemoveChildAt(int index)
     items.erase(items.begin() + index);
     delete targetItem;
 }
+
+void ItemsPresenter::PointerEventTrigger(PointerEventArgs& args)
+{
+    if (args.Handled)
+        return;
+    for (auto& item : items)
+    {
+        item->PointerEventTrigger(args);
+        if (args.Handled)
+            return;
+    }
+    Control::PointerEventTrigger(args);
+}

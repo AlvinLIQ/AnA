@@ -17,6 +17,7 @@ namespace AnA
             void RemoveChildAt(int index);
 
             void PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount);
+            virtual void PointerEventTrigger(PointerEventArgs& args);
         protected:
             std::vector<Control*> items;
         };

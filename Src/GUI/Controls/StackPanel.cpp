@@ -17,12 +17,13 @@ void StackPanel::PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount)
 {
     float maxSize = 1.0f;
     int o = Orientation, invO = 1 - Orientation;
+    /*
     for (int i = 0; i < items.size(); i++)
     {
         auto size = items[i]->GetSizeForRender();
         if (((float*)&size)[o] > maxSize)
             maxSize = ((float*)&size)[o];
-    }
+    }*/
     SIZE_F size{};
     POS_F offset{};
     if (items.size())
@@ -50,6 +51,8 @@ void StackPanel::PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount)
             ((float*)&offset)[o] = 0.0f;
             break;
         }
+        items[i]->SetRenderOffset(offset);
+        items[i]->SetRenderSize(size);
         items[i]->Transform.translation = {offset.x, offset.y, 0.0f};
         items[i]->Transform.scale = {size.Width, size.Height, 1.0f};
         shapeBuffer[shapeCount].transform = items[i]->Transform.mat4();

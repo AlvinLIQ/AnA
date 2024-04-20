@@ -14,6 +14,7 @@ namespace AnA
 
             Orientations Orientation {Horizontal};
             void PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount);
+        private:
         };
     }
 }

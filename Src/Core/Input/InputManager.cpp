@@ -67,11 +67,12 @@ void InputManager::checkProfile(Input::InputProfile& inputProfile)
     auto window = aWindow.GetGLFWwindow();
     glfwGetCursorPos(window, &curPos.x, &curPos.y);
     CursorPosition duration = {(curPos.x - prevPos.x) / (double)aWindow.Width, (curPos.y - prevPos.y) / (double)aWindow.Height};
+    cursorPos = {curPos.x / (double)aWindow.Width, curPos.y / (double)aWindow.Height};
     auto &cursorConfigs = inputProfile.cursorConfigs;
     for (auto &cursorConfig : cursorConfigs)
     {
         if (cursorConfig.callBack != nullptr)
-            cursorConfig.callBack(cursorConfig.param, duration);
+            cursorConfig.callBack(cursorConfig.param, inputProfile.flag & InputProfileFlags::RawMotion ? duration : cursorPos);
     }
     prevPos = curPos;
 

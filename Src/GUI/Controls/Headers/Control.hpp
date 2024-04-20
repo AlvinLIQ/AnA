@@ -3,6 +3,7 @@
 #include "Types.hpp"
 #include "../Styles/Default/ControlStyle.hpp"
 #include "../../../Core/Resources/Headers/Shape.hpp"
+#include "../../../Core/Input/Headers/InputManager.hpp"
 #include <limits>
 
 namespace AnA
@@ -21,9 +22,8 @@ namespace AnA
             POS_F ControlOffset {};
             POS_F GetActualControlOffset(SIZE_F renderSize)
             {
-                POS_F actualOffset;
-                float* pOffset = (float*)&actualOffset;
-                float* pSize = (float*)&renderSize;
+                float* pOffset = (float*)&renderOffset;
+                float* pSize = (float*)&this->renderSize;
                 AlignmentType Alignments[]{HorizontalAlignment, VerticalAlignment};
                 for (int i = 0; i < 2; i++)
                 {
@@ -39,15 +39,14 @@ namespace AnA
                     }
                 }
                 
-                actualOffset.x += ControlOffset.x;
-                actualOffset.y += ControlOffset.y;
-                return actualOffset;
+                renderOffset.x += ControlOffset.x;
+                renderOffset.y += ControlOffset.y;
+                return renderOffset;
             }
 
             SIZE_F ControlSize {AnA::ControlSize};
-            SIZE_F GetSizeForRender() const
+            SIZE_F GetSizeForRender()
             {
-                SIZE_F renderSize;
                 if (renderMode == AlignType::Relative)
                 {
                     auto extent = GetSwapChainExtent();
@@ -86,28 +85,37 @@ namespace AnA
             }
 
             float Aspect = 1.0f;
+            VkExtent2D Extent;
 
             virtual void PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount);
+            virtual void PointerEventTrigger(PointerEventArgs& args);
             static void InitControl(SwapChain* swapChain);
             static VkExtent2D GetSwapChainExtent();
             static Device& GetDevice();
+            static void GetInputProfile(Control* mainControl, std::vector<Input::InputProfile>& profiles);
+
+            void SetRenderOffset(POS_F newOffset)
+            {
+                renderOffset = newOffset;
+            }
+            void SetRenderSize(SIZE_F newSize)
+            {
+                renderSize = newSize;
+            }
 
             std::vector<PointerEventHandler> PointerEvents[PointerEventType::Moving + 1];
-            void PointerEventTrigger(PointerEventArgs& args)
-            {
-                for (auto event : PointerEvents[args.EventType])
-                {
-                    event(this, args);
-                }
-            }
 
             bool IsFocused();
             void Focus();
             void Unfocus();
             
-            bool IsInside(POS_F pos);
+            bool IsInside(CursorPosition pos);
+            static bool IsInside(CursorPosition& pos, POS_F& offset, SIZE_F& size);
         private:
             AlignType renderMode {ControlRenderMode};
+            POS_F renderOffset{};
+            SIZE_F renderSize{};
+            bool cursorInside = false;
         protected:
             SIZE_F minSize {ControlMinSize};
             SIZE_F maxSize {std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
