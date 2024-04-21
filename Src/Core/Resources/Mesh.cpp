@@ -9,6 +9,14 @@ Meshes::Meshes(Device& mDevice) : aDevice {mDevice}
     VkPhysicalDeviceProperties properties;
     vkGetPhysicalDeviceProperties(mDevice.GetPhysicalDevice(), &properties);
     batchSize = MaxBatchSize;
+    indirectBuffer = new Buffer(aDevice, sizeof(VkDrawIndexedIndirectCommand), 
+    VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    indirectBuffer->Map(0, indirectBuffer->GetSize());
+    auto indirectCommand = (VkDrawIndexedIndirectCommand*)indirectBuffer->GetMappedData();
+    indirectCommand->firstIndex = 0;
+    indirectCommand->firstInstance = 0;
+    indirectCommand->instanceCount = 1;
+    indirectCommand->vertexOffset = 0;
 }
 
 Meshes::~Meshes()
@@ -18,6 +26,7 @@ Meshes::~Meshes()
         delete descriptor;
     delete vertexBuffer;
     delete indexBuffer;
+    delete indirectBuffer;
 }
 
 void Meshes::Append(const std::vector<MeshInfo>& meshInfos)
@@ -80,6 +89,7 @@ void Meshes::Bind(VkCommandBuffer commandBuffer)
     //see you later buddy
     //vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer->GetBuffer(), &offset);
     vkCmdBindIndexBuffer(commandBuffer, indexBuffer->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+    ((VkDrawIndexedIndirectCommand*)indirectBuffer->GetMappedData())->indexCount = indexBuffer->GetSize() / sizeof(Model::Index);
 }
 
 void Meshes::Draw(VkCommandBuffer commandBuffer)
@@ -114,6 +124,22 @@ void Meshes::Draw(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& s
         vkCmdDrawIndexed(commandBuffer, backMesh.indexOffset - indexOffset + backMesh.indices.size(), 
             1, indexOffset, 0, 0);
     }
+}
+
+void Meshes::DrawIndirect(VkCommandBuffer commandBuffer)
+{
+    vkCmdDrawIndexedIndirect(commandBuffer, indirectBuffer->GetBuffer(), 0, 1, sizeof(VkDrawIndexedIndirectCommand));
+}
+
+void Meshes::DrawIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout)
+{
+    sets[DEFAULT_SSBO_LAYOUT] = ssboDescriptor->GetSets()[0];
+    sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors.front()->GetSets()[0];
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+    pipelineLayout, 0, static_cast<uint32_t>(sets.size()),
+    sets.data(), 0, nullptr);
+
+    vkCmdDrawIndexedIndirect(commandBuffer, indirectBuffer->GetBuffer(), 0, 1, sizeof(VkDrawIndexedIndirectCommand));
 }
 
 void Meshes::CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer)
@@ -235,7 +261,8 @@ void Meshes::commitBufferUpdate(Model::Vertex* vertices, Model::Index* indices, 
 
 void Meshes::createSSBODescriptor()
 {
-    auto& descriptorSetLayout = Resource::ResourceManager::GetCurrent()->Shaders[0].GetDescriptors()[DEFAULT_SSBO_LAYOUT]->GetLayout();
+    auto& descriptorSetLayout = 
+        Resource::ResourceManager::GetCurrent()->Shaders[0].GetDescriptors()[DEFAULT_SSBO_LAYOUT]->GetLayout();
     ssboDescriptor = new Descriptor(aDevice, 1, 
         batchSize,
         descriptorSetLayout,
@@ -254,7 +281,8 @@ void Meshes::updateSSBODescriptor()
 
 void Meshes::appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageInfos)
 {
-    auto& descriptorSetLayout = Resource::ResourceManager::GetCurrent()->Shaders[0].GetDescriptors()[DEFAULT_SAMPLER_LAYOUT]->GetLayout();
+    auto& descriptorSetLayout = 
+        Resource::ResourceManager::GetCurrent()->Shaders[0].GetDescriptors()[DEFAULT_SAMPLER_LAYOUT]->GetLayout();
     auto descriptor = new Descriptor(aDevice, 1, 
         batchSize,
         descriptorSetLayout,

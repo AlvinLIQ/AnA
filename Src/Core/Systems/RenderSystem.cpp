@@ -55,6 +55,17 @@ void RenderSystem::RenderMeshes(VkCommandBuffer commandBuffer, Meshes &meshes, S
     meshes.Draw(commandBuffer);
 }
 
+void RenderSystem::RenderMeshesIndirect(VkCommandBuffer commandBuffer, Meshes &meshes, Shader& shader)
+{
+    shader.GetPipeline()->Bind(commandBuffer);
+    auto resourceManager = Resource::ResourceManager::GetCurrent();
+    aSwapChain.SetViewport(commandBuffer, {300, 0});
+    std::vector<VkDescriptorSet>& sets = shader.GetDescriptorSets()[resourceManager->SecondaryCommandBufferPool.CurrentBufferIndex];
+
+    meshes.Bind(commandBuffer);
+    meshes.DrawIndirect(commandBuffer, sets, shader.GetPipelineLayout());
+}
+
 void RenderSystem::RenderBatch(VkCommandBuffer commandBuffer, Meshes &meshes, Shader& shader, size_t index)
 {
     shader.GetPipeline()->Bind(commandBuffer);

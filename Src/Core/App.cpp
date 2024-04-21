@@ -271,14 +271,14 @@ void App::createRecordCallBacks()
     {
         auto aResourceManager = Resource::ResourceManager::GetCurrent();
         auto& aRenderer = _aApp->GetRenderer();
-        aResourceManager->SecondaryCommandBufferPool.Reset();
+        aResourceManager->SecondaryCommandBufferPool.Reset();/*
         aResourceManager->SecondaryCommandBufferPool.Enqueue([](VkCommandBuffer secondaryCommandBuffer, size_t index)
         {
             auto aResourceManager = Resource::ResourceManager::GetCurrent();
             Systems::RenderSystem::GetCurrent()->RenderBatch(secondaryCommandBuffer, 
                 aResourceManager->SceneObjects, 
                 aResourceManager->Shaders[0], index);
-        }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), _aApp->GetSceneOffset());
+        }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), _aApp->GetSceneOffset());*/
         aRenderer.RecordOffscreenSecondaryCommandBuffer([](VkCommandBuffer offScreenSecondaryCommandBuffer)
         {
             auto aResourceManager = Resource::ResourceManager::GetCurrent();
@@ -321,13 +321,13 @@ void App::onCommandBufferRecording(VkCommandBuffer& commandBuffer)
     if (commandBufferNeedUpdate)
     {
         aRenderer->BeginOffscreenRenderPass(commandBuffer, 
-            aResourceManager->GetShadowFramebuffers()[aResourceManager->SecondaryCommandBufferPool.CurrentBufferIndex]);
-        aRenderer->ExecuteOffscreenSecondaryCommandBuffer(commandBuffer);
+            aResourceManager->GetShadowFramebuffers()[aResourceManager->SecondaryCommandBufferPool.CurrentBufferIndex],
+            VK_SUBPASS_CONTENTS_INLINE);
+            aShadowSystem->RenderShadowsIndirect(commandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[2]);
         aRenderer->EndRenderPass(commandBuffer);
     }
-    while(!aResourceManager->SecondaryCommandBufferPool); //Sync
-    aRenderer->BeginSwapChainRenderPass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE_AND_SECONDARY_COMMAND_BUFFERS_EXT);
-    aResourceManager->SecondaryCommandBufferPool.ExcuteRecordedBuffer(commandBuffer);
+    aRenderer->BeginSwapChainRenderPass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
+    aRenderSystem->RenderMeshesIndirect(commandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[0]);
     aRenderSystem->RenderShapesIndirect(commandBuffer, *aResourceManager->Shapes, aResourceManager->Shaders[1]);
     aRenderer->EndRenderPass(commandBuffer);
 }

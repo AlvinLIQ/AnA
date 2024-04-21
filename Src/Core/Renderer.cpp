@@ -193,7 +193,7 @@ void Renderer::EndRenderPass(VkCommandBuffer commandBuffer)
     vkCmdEndRenderPass(commandBuffer);
 }
 
-void Renderer::BeginOffscreenRenderPass(VkCommandBuffer commandBuffer, VkFramebuffer& framebuffer)
+void Renderer::BeginOffscreenRenderPass(VkCommandBuffer commandBuffer, VkFramebuffer& framebuffer, VkSubpassContents contents)
 {
     auto extent = aSwapChain->GetExtent();
 
@@ -210,7 +210,7 @@ void Renderer::BeginOffscreenRenderPass(VkCommandBuffer commandBuffer, VkFramebu
 
     vkCmdBeginRenderPass(commandBuffer,
                         &renderPassBegin,
-                        VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
+                        contents);
 
 }
 
