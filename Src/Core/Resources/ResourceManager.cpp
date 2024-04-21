@@ -24,15 +24,19 @@ ResourceManager::ResourceManager(Device& mDevice) : aDevice {mDevice},
 #ifdef ANA_INCLUDE_CONTROL
     Controls::Control::InitControl(SwapChain::GetCurrent());
 #endif
-    TextureMap.try_emplace(DEFAULT_TEXTURE_ID, (uint32_t)0xFFFFFFFF, mDevice);
-    TextureMap.try_emplace(1, (uint32_t)0xFFCC9999, mDevice);
-    TextureMap.try_emplace(2, (uint32_t)0xFF99CC99, mDevice);
-    TextureMap.try_emplace(3, (uint32_t)0xFF9999CC, mDevice);
+    TextureMap.try_emplace(DEFAULT_TEXTURE_ID, new Texture((uint32_t)0xFFFFFFFF, mDevice));
+    TextureMap.try_emplace(1, new Texture((uint32_t)0xFFCC9999, mDevice));
+    TextureMap.try_emplace(2, new Texture((uint32_t)0xFF99CC99, mDevice));
+    TextureMap.try_emplace(3, new Texture((uint32_t)0xFF9999CC, mDevice));
 }
 
 ResourceManager::~ResourceManager()
 {
-    TextureMap.clear();
+    for (auto& texture : TextureMap)
+    {
+        delete texture.second;
+    }
+    //TextureMap.clear();
     //for (auto& shader : Shaders)
     //    delete shader;
     Shaders.clear();
@@ -163,6 +167,23 @@ std::vector<Descriptor::DescriptorConfig> ResourceManager::GetDefaultDescriptorC
     return descriptorConfigs;
 }
 
+std::vector<Descriptor::DescriptorConfig> ResourceManager::GetDefaultShapesDescriptorConfig()
+{
+    std::vector<Descriptor::DescriptorConfig> descriptorConfigs(2);
+    auto pConfig = &descriptorConfigs[0];
+    pConfig->binding = 0;
+    pConfig->descriptorCount = 0;
+    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    pConfig = &descriptorConfigs[1];
+    pConfig->binding = 0;
+    pConfig->descriptorCount = 0;
+    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    pConfig->stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    return descriptorConfigs;
+}
+
 void ResourceManager::createMainCameraBuffers()
 {
     VkDeviceSize bufferSize = sizeof(Cameras::CameraBufferObject);
@@ -241,7 +262,10 @@ void ResourceManager::createDefaultShaders()
     auto renderPass = SwapChain::GetCurrent()->GetRenderPass();
     auto descriptorConfig = GetDefaultDescriptorConfig();
     Shaders.emplace_back(aDevice, Basic_vert, Basic_frag, renderPass, descriptorConfig);
-    Shaders.emplace_back(aDevice, Shape_vert, Shape_frag, renderPass, descriptorConfig);
+
+    auto shapesDescriptorConfig = GetDefaultShapesDescriptorConfig();
+    Shaders.emplace_back(aDevice, Shape_vert, Shape_frag, renderPass, shapesDescriptorConfig);
+
     auto offscreenRenderPass = SwapChain::GetCurrent()->GetOffscreenRenderPass();
     Shaders.emplace_back(aDevice, ShadowMapping_vert, offscreenRenderPass, descriptorConfig);
 }

@@ -50,13 +50,14 @@ namespace AnA
             Meshes SceneObjects;
             std::vector<Shader> Shaders;
             std::vector<Descriptor::DescriptorConfig> GetDefaultDescriptorConfig();
+            std::vector<Descriptor::DescriptorConfig> GetDefaultShapesDescriptorConfig();
 
             Lights::Light GlobalLight;
             Shapes* Shapes;
 #ifdef ANA_INCLUDE_CONTROL
             AnA::Controls::Control* MainControl = NULL;
 #endif
-            std::unordered_map<uint32_t, Texture> TextureMap;
+            std::unordered_map<uint32_t, Texture*> TextureMap;
             ThreadPool<void()> TaskPool{MAX_FRAMES_IN_FLIGHT};
             CommandBufferPool SecondaryCommandBufferPool;
             //ThreadPool<void(CommandBuffer*)> SecondaryCommandBufferPool{};

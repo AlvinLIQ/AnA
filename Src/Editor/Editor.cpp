@@ -25,7 +25,7 @@ void Editor::Init()
     panel->VerticalAlignment = AlignmentType::Center;
     panel->HorizontalAlignment = AlignmentType::Center;
     panel->Orientation = Controls::Orientations::Vertical;
-    panel->Color = glm::vec3{0.2f};
+    panel->Color = glm::vec3{0.92f};
 
     auto button = new Controls::Button();
     button->HorizontalAlignment = AlignmentType::Start;

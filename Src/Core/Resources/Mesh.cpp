@@ -38,7 +38,7 @@ void Meshes::Append(const std::vector<MeshInfo>& meshInfos)
         if (textureIdMap.find(mesh.textureId) == textureIdMap.end())
         {
             textureIdMap.insert(std::pair<uint32_t, uint32_t>(mesh.textureId, static_cast<uint32_t>(textureIdMap.size())));
-            imageInfos.push_back(texture.GetImageInfo());
+            imageInfos.push_back(texture->GetImageInfo());
             if (imageInfos.size() == batchSize)
             {
                 appendSamplersDescriptor(imageInfos);

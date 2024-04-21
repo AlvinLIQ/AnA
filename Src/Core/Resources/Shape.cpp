@@ -28,8 +28,9 @@ Shapes::~Shapes()
 
 void Shapes::PrepareDraw(Controls::Control* control)
 {
-    shapeCount = 0;
-    control->PrepareDraw((Shape*)shapeBuffer->GetMappedData(), shapeCount);
+    uint32_t newShapeCount;
+    control->PrepareDraw((Shape*)shapeBuffer->GetMappedData(), newShapeCount);
+    shapeCount = newShapeCount;
 }
 
 void Shapes::Draw(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
