@@ -38,6 +38,8 @@ namespace AnA
         VkRenderPass& GetOffscreenRenderPass();
 
         void SetViewport(VkCommandBuffer& commandBuffer);
+        void SetViewport(VkCommandBuffer& commandBuffer, VkOffset2D offset);
+        static void SetViewport(VkCommandBuffer& commandBuffer, VkOffset2D offset, VkExtent2D extent);
 
         VkSemaphore& GetCurrentSemaphore();
 

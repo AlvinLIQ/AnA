@@ -135,6 +135,24 @@ void SwapChain::SetViewport(VkCommandBuffer& commandBuffer)
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 }
 
+void SwapChain::SetViewport(VkCommandBuffer& commandBuffer, VkOffset2D offset)
+{
+    VkViewport _viewport = {(float)offset.x, (float)offset.y, static_cast<float>(swapChainExtent.width - offset.x), 
+        static_cast<float>(swapChainExtent.height - offset.y), 0.0f, 1.0f};
+    VkRect2D _scissor = {offset, {swapChainExtent.width - offset.x, swapChainExtent.height - offset.y}};
+    vkCmdSetViewport(commandBuffer, 0, 1, &_viewport);
+    vkCmdSetScissor(commandBuffer, 0, 1, &_scissor);
+}
+
+void SwapChain::SetViewport(VkCommandBuffer& commandBuffer, VkOffset2D offset, VkExtent2D extent)
+{
+    VkViewport _viewport = {(float)offset.x, (float)offset.y, static_cast<float>(extent.width), 
+        static_cast<float>(extent.height), 0.0f, 1.0f};
+    VkRect2D _scissor = {offset, {extent.width, extent.height}};
+    vkCmdSetViewport(commandBuffer, 0, 1, &_viewport);
+    vkCmdSetScissor(commandBuffer, 0, 1, &_scissor);
+}
+
 void SwapChain::RecreateSwapChain()
 {
     int width, height;

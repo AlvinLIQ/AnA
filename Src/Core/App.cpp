@@ -302,12 +302,16 @@ void App::createRecordCallBacks()
         controlExtent.width = _aApp->GetSceneOffset().x;
         aResourceManager->MainControl->Aspect = (float)controlExtent.width / (float)controlExtent.height;
         aResourceManager->MainControl->Extent = controlExtent;
+        aResourceManager->Shapes->Offset = offset;
+        aResourceManager->Shapes->Extent = controlExtent;
+        aResourceManager->Shapes->PrepareDraw(aResourceManager->MainControl);
+        /*
         aResourceManager->SecondaryCommandBufferPool.Enqueue([](VkCommandBuffer secondaryCommandBuffer, size_t index)
         {
             _aApp->aRenderSystem->RenderShapes(secondaryCommandBuffer, 
                 *_aApp->aResourceManager->Shapes, 
                 _aApp->aResourceManager->Shaders[1]);
-        }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), offset, controlExtent);
+        }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), offset, controlExtent);*/
     });
 #endif
 }
@@ -322,7 +326,8 @@ void App::onCommandBufferRecording(VkCommandBuffer& commandBuffer)
         aRenderer->EndRenderPass(commandBuffer);
     }
     while(!aResourceManager->SecondaryCommandBufferPool); //Sync
-    aRenderer->BeginSwapChainRenderPass(commandBuffer);
+    aRenderer->BeginSwapChainRenderPass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE_AND_SECONDARY_COMMAND_BUFFERS_EXT);
     aResourceManager->SecondaryCommandBufferPool.ExcuteRecordedBuffer(commandBuffer);
+    aRenderSystem->RenderShapesIndirect(commandBuffer, *aResourceManager->Shapes, aResourceManager->Shaders[1]);
     aRenderer->EndRenderPass(commandBuffer);
 }

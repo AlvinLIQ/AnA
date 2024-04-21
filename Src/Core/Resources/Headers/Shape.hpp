@@ -22,10 +22,13 @@ namespace AnA
         ~Shapes();
         void PrepareDraw(Controls::Control* control);
         void Draw(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout);
-        Shape* GetBufferData();
+        void DrawIndirect(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout);
+        VkOffset2D Offset;
+        VkExtent2D Extent;
     private:
         Device& aDevice;
         Buffer* shapeBuffer{nullptr};
+        Buffer* indirectBuffer{nullptr};
         Descriptor* ssboDescriptor{nullptr};
         uint32_t shapeCount{};
     };

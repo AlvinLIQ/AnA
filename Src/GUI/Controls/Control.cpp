@@ -135,9 +135,7 @@ void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input:
         args.Position = {pos.x / ((float)control->Extent.width / (float)extent.width), 
                         pos.y / ((float)control->Extent.height / (float)extent.height)};
         control->PointerEventTrigger(args);
-        auto shapeBuffer = Resource::ResourceManager::GetCurrent()->Shapes->GetBufferData();
-        uint32_t shapeCount = 0;
-        control->PrepareDraw(shapeBuffer, shapeCount);
+        Resource::ResourceManager::GetCurrent()->Shapes->PrepareDraw(control);
     };
     profile.cursorConfigs.push_back(cursorConfig);
     profiles.push_back(profile);

@@ -32,6 +32,13 @@ void RenderSystem::RenderShapes(VkCommandBuffer commandBuffer, Shapes& shapes, S
     shapes.Draw(commandBuffer, shader.GetPipelineLayout());
 }
 
+void RenderSystem::RenderShapesIndirect(VkCommandBuffer commandBuffer, Shapes& shapes, Shader& shader)
+{
+    SwapChain::SetViewport(commandBuffer, shapes.Offset, shapes.Extent);
+    shader.GetPipeline()->Bind(commandBuffer);
+    shapes.DrawIndirect(commandBuffer, shader.GetPipelineLayout());
+}
+
 void RenderSystem::RenderMeshes(VkCommandBuffer commandBuffer, Meshes &meshes, Shader& shader)
 {
     shader.GetPipeline()->Bind(commandBuffer);

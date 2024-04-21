@@ -114,7 +114,24 @@ void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer)
     renderPassInfo.renderArea.extent = swapChainExtent;
     renderPassInfo.clearValueCount = numsof(clearValues);
     renderPassInfo.pClearValues = clearValues;
-    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
+    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE_AND_SECONDARY_COMMAND_BUFFERS_EXT);
+}
+
+void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkSubpassContents contents)
+{
+    assert(isFrameStarted && "Can't call BeginSwapChainRenderPass while frame is not in progress!");
+    assert(commandBuffer == GetCurrentCommandBuffer() && "Can't begin render pass on command buffer from a different frame!");
+    auto swapChainExtent = aSwapChain->GetExtent();
+
+    VkRenderPassBeginInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = aSwapChain->GetRenderPass();
+    renderPassInfo.framebuffer = aSwapChain->GetSwapChainFramebuffers()[currentImageIndex];
+    renderPassInfo.renderArea.offset = {};
+    renderPassInfo.renderArea.extent = swapChainExtent;
+    renderPassInfo.clearValueCount = numsof(clearValues);
+    renderPassInfo.pClearValues = clearValues;
+    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, contents);
 }
 
 void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2D& offset)
