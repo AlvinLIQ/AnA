@@ -111,7 +111,7 @@ void App::Run()
     std::vector<MeshInfo> meshInfos;
     bool pressed = false;
     for (int i = 0; i < 1000; i++)
-        meshInfos.push_back({"Models/cube.obj", {{random_double(), random_double(), random_double()}, {random_double(), random_double(), random_double()}}, (uint32_t)rand() % 4});
+        meshInfos.push_back({"Models/cube.obj", {{random_double(), random_double() - 2.0f, random_double() + 5.0f}, {random_double(), random_double(), random_double()}}, (uint32_t)rand() % 4});
     std::string title = "AnA FPS:";
     int frameCount = 0;
     float runingTime = 0.0f, prevSecond = 0.0f;
