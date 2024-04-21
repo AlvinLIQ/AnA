@@ -119,7 +119,7 @@ void ResourceManager::RecreateResources()
     cleanupShadowResources();
     createShadowFramebuffers();
     auto deafultShadowSamplerConfig = GetDefaultDescriptorConfig()[DEFAULT_SHADOW_SAMPLER_LAYOUT];
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 1; i++)
     {
         Shaders[i].GetDescriptors()[DEFAULT_SHADOW_SAMPLER_LAYOUT]->UpdateDescriptorSets(deafultShadowSamplerConfig);
     }
