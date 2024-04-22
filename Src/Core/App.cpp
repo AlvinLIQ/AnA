@@ -271,19 +271,19 @@ void App::createRecordCallBacks()
     {
         auto aResourceManager = Resource::ResourceManager::GetCurrent();
         auto& aRenderer = _aApp->GetRenderer();
-        aResourceManager->SecondaryCommandBufferPool.Reset();/*
+        aResourceManager->SecondaryCommandBufferPool.Reset();
         aResourceManager->SecondaryCommandBufferPool.Enqueue([](VkCommandBuffer secondaryCommandBuffer, size_t index)
         {
             auto aResourceManager = Resource::ResourceManager::GetCurrent();
-            Systems::RenderSystem::GetCurrent()->RenderBatch(secondaryCommandBuffer, 
+            Systems::RenderSystem::GetCurrent()->RenderMeshesIndirect(secondaryCommandBuffer, 
                 aResourceManager->SceneObjects, 
-                aResourceManager->Shaders[0], index);
-        }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), _aApp->GetSceneOffset());*/
+                aResourceManager->Shaders[0]);
+        }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), _aApp->GetSceneOffset());
         aRenderer.RecordOffscreenSecondaryCommandBuffer([](VkCommandBuffer offScreenSecondaryCommandBuffer)
         {
             auto aResourceManager = Resource::ResourceManager::GetCurrent();
             auto aShadowSystem = Systems::ShadowSystem::GetCurrent();
-            aShadowSystem->RenderShadows(offScreenSecondaryCommandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[2]);
+            aShadowSystem->RenderShadowsIndirect(offScreenSecondaryCommandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[2]);
         });
         aResourceManager->SceneObjects.EndCommandBufferUpdate();
     });
@@ -305,13 +305,12 @@ void App::createRecordCallBacks()
         aResourceManager->Shapes->Offset = offset;
         aResourceManager->Shapes->Extent = controlExtent;
         aResourceManager->Shapes->PrepareDraw(aResourceManager->MainControl);
-        /*
         aResourceManager->SecondaryCommandBufferPool.Enqueue([](VkCommandBuffer secondaryCommandBuffer, size_t index)
         {
-            _aApp->aRenderSystem->RenderShapes(secondaryCommandBuffer, 
+            _aApp->aRenderSystem->RenderShapesIndirect(secondaryCommandBuffer, 
                 *_aApp->aResourceManager->Shapes, 
                 _aApp->aResourceManager->Shaders[1]);
-        }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), offset, controlExtent);*/
+        }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), offset, controlExtent);
     });
 #endif
 }
@@ -322,12 +321,15 @@ void App::onCommandBufferRecording(VkCommandBuffer& commandBuffer)
     {
         aRenderer->BeginOffscreenRenderPass(commandBuffer, 
             aResourceManager->GetShadowFramebuffers()[aResourceManager->SecondaryCommandBufferPool.CurrentBufferIndex],
-            VK_SUBPASS_CONTENTS_INLINE);
-            aShadowSystem->RenderShadowsIndirect(commandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[2]);
+            VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
+            //aShadowSystem->RenderShadowsIndirect(commandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[2]);
         aRenderer->EndRenderPass(commandBuffer);
     }
-    aRenderer->BeginSwapChainRenderPass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
-    aRenderSystem->RenderMeshesIndirect(commandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[0]);
-    aRenderSystem->RenderShapesIndirect(commandBuffer, *aResourceManager->Shapes, aResourceManager->Shaders[1]);
+    if (!aResourceManager->SecondaryCommandBufferPool.GetCommandBufferCount())
+        return;
+    aRenderer->BeginSwapChainRenderPass(commandBuffer, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
+    aResourceManager->SecondaryCommandBufferPool.ExcuteRecordedBuffer(commandBuffer);
+    //aRenderSystem->RenderMeshesIndirect(commandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[0]);
+    //aRenderSystem->RenderShapesIndirect(commandBuffer, *aResourceManager->Shapes, aResourceManager->Shaders[1]);
     aRenderer->EndRenderPass(commandBuffer);
 }

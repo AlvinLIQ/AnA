@@ -43,7 +43,6 @@ void ShadowSystem::RenderShadows(VkCommandBuffer commandBuffer, Meshes &meshes, 
 
 void ShadowSystem::RenderShadowsIndirect(VkCommandBuffer commandBuffer, Meshes &meshes, Shader& shader)
 {
-    swapChain->SetViewport(commandBuffer);
     vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
     shader.GetPipeline()->Bind(commandBuffer);
     std::vector<VkDescriptorSet> sets = shader.GetDescriptorSets()[Resource::ResourceManager::GetCurrent()->SecondaryCommandBufferPool.CurrentBufferIndex];
