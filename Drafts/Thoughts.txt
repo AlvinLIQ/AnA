@@ -1,6 +1,6 @@
 Batching
 Load Models as quads, that way I could have fixed indices buffer for each quads
-Combined VertexBuffers into one(optional, vulkan can bind multiple vertex buffers separately, maybe needs a performance test here)
+Combined VertexBuffers into one(Update, now I store vertices in storage buffer)
 
 Multi-Threading
 When a big buffer somehow needs to be resized(re-allocated), keep using the old buffer for now, and then create a task and make it runs on other thread(s), once new buffer is ready, just switch to it, this might applies to other resources as well
