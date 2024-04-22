@@ -34,6 +34,8 @@ namespace AnA
         void ExcuteRecordedBuffer(VkCommandBuffer& commandBuffer)
         {
             std::unique_lock<std::mutex> lock(queue_mutex_);
+            if (!recordedCommandBuffers.size())
+                return;
             vkCmdExecuteCommands(commandBuffer, 
                 static_cast<uint32_t>(recordedCommandBuffers.size()), 
                 recordedCommandBuffers.data());
