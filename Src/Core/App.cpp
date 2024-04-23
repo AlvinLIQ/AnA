@@ -118,6 +118,7 @@ void App::Run()
     while(!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
+        //Test Mesh Appending at runtime
         if (!pressed && glfwGetKey(aWindow->GetGLFWwindow(), GLFW_KEY_F) == GLFW_PRESS)
         {
             pressed = true;
@@ -125,16 +126,6 @@ void App::Run()
             {
                 aResourceManager->SceneObjects.Append(meshInfos);
             });
-        }
-        if (glfwGetKey(aWindow->GetGLFWwindow(), GLFW_KEY_EQUAL) == GLFW_PRESS)
-        {
-            aResourceManager->MainCameraInfo.far += 0.01f;
-            aResourceManager->MainCameraInfo.UpdateCameraPerspective(aResourceManager->MainCamera);
-        }
-        if (glfwGetKey(aWindow->GetGLFWwindow(), GLFW_KEY_MINUS) == GLFW_PRESS)
-        {
-            aResourceManager->MainCameraInfo.far -= 0.01f;
-            aResourceManager->MainCameraInfo.UpdateCameraPerspective(aResourceManager->MainCamera);
         }
         auto curTime = std::chrono::high_resolution_clock::now();
         float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(curTime - prevTime).count();
@@ -144,6 +135,7 @@ void App::Run()
         frameCount++;
         if (prevSecond >= 1.0f)
         {
+            //Show FPS on title bar
             glfwSetWindowTitle(aWindow->GetGLFWwindow(), (title + std::to_string((int)(frameCount / prevSecond))).c_str());
             prevSecond = 0.0f;
             frameCount = 0;
