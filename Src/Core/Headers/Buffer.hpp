@@ -9,10 +9,12 @@ namespace AnA
     class Buffer
     {
     public:
-        Buffer(Device& mDevice, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties);
+        Buffer(Device* mDevice, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties);
         ~Buffer();
         Buffer(const Buffer&) = delete;
         Buffer &operator=(const Buffer&) = delete;
+        Buffer(Buffer&&) = default;
+        Buffer &operator=(Buffer&&) = default;
         VkResult Map(VkDeviceSize offset, VkDeviceSize size);
         void Unmap();
 
@@ -34,12 +36,12 @@ namespace AnA
 
         void CopyToBuffer(Buffer& srcBuffer, VkDeviceSize bufferSize)
         {
-            aDevice.CopyBuffer(srcBuffer.GetBuffer(), buffer, bufferSize);
+            aDevice->CopyBuffer(srcBuffer.GetBuffer(), buffer, bufferSize);
         }
 
         void CopyToBuffer(Buffer& srcBuffer, uint32_t regionCount, const VkBufferCopy* regions)
         {
-            aDevice.CopyBuffer(srcBuffer.GetBuffer(), buffer, regionCount, regions);
+            aDevice->CopyBuffer(srcBuffer.GetBuffer(), buffer, regionCount, regions);
         }
 
         void CopyToBuffer(Buffer& srcBuffer, uint32_t regionCount, const VkBufferCopy* regions, VkCommandBuffer commandBuffer)
@@ -55,7 +57,7 @@ namespace AnA
         }
         void ReplaceRequest(Buffer* newBuffer);
     private:
-        Device& aDevice;
+        Device* aDevice;
 
         void* mappedData = nullptr;
         VkBuffer buffer = VK_NULL_HANDLE;

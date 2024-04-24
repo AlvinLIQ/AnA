@@ -4,10 +4,10 @@
 
 using namespace AnA;
 SwapChain* _swapChain;
-SwapChain::SwapChain(Device& mDevice,
+SwapChain::SwapChain(Device* mDevice,
                              VkSurfaceKHR &mSurface, GLFWwindow* mWindow) : aDevice{mDevice}, surface{mSurface}, window{mWindow}
 {
-    msaaSamplers = aDevice.GetMaxUsableSampleCount();
+    msaaSamplers = aDevice->GetMaxUsableSampleCount();
     createSwapChain();
     createImageViews();
     createColorResources();
@@ -21,7 +21,7 @@ SwapChain::SwapChain(Device& mDevice,
 }
 SwapChain::~SwapChain()
 {
-    auto device = aDevice.GetLogicalDevice();
+    auto device = aDevice->GetLogicalDevice();
     vkDestroyRenderPass(device, offscreenRenderPass, nullptr);
     vkDestroyRenderPass(device, renderPass, nullptr);
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
@@ -35,16 +35,16 @@ SwapChain::~SwapChain()
 
 VkResult SwapChain::AcquireNextImage(uint32_t* pImageIndex)
 {
-    vkWaitForFences(aDevice.GetLogicalDevice(), 1, &inFlightFences[CurrentFrame], VK_TRUE, UINT64_MAX);
+    vkWaitForFences(aDevice->GetLogicalDevice(), 1, &inFlightFences[CurrentFrame], VK_TRUE, UINT64_MAX);
 
-    return vkAcquireNextImageKHR(aDevice.GetLogicalDevice(), swapChain, UINT64_MAX,
+    return vkAcquireNextImageKHR(aDevice->GetLogicalDevice(), swapChain, UINT64_MAX,
                                  imageAvailableSemaphores[CurrentFrame], VK_NULL_HANDLE, pImageIndex);
 }
 
 VkResult SwapChain::SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint32_t commandBufferCount, uint32_t* pImageIndex)
 {
     if (imagesInFlight[*pImageIndex] != VK_NULL_HANDLE)
-        vkWaitForFences(aDevice.GetLogicalDevice(), 1, &imagesInFlight[*pImageIndex], VK_TRUE, UINT64_MAX);
+        vkWaitForFences(aDevice->GetLogicalDevice(), 1, &imagesInFlight[*pImageIndex], VK_TRUE, UINT64_MAX);
 
     imagesInFlight[*pImageIndex] = inFlightFences[CurrentFrame];
 
@@ -64,9 +64,9 @@ VkResult SwapChain::SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint3
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
-    vkResetFences(aDevice.GetLogicalDevice(), 1, &inFlightFences[CurrentFrame]);
+    vkResetFences(aDevice->GetLogicalDevice(), 1, &inFlightFences[CurrentFrame]);
 
-    if (vkQueueSubmit(aDevice.GetGraphicsQueue(), 1, &submitInfo, inFlightFences[CurrentFrame]) != VK_SUCCESS)
+    if (vkQueueSubmit(aDevice->GetGraphicsQueue(), 1, &submitInfo, inFlightFences[CurrentFrame]) != VK_SUCCESS)
     {
         throw std::runtime_error("failed to submit draw command buffer!");
     }
@@ -83,7 +83,7 @@ VkResult SwapChain::SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint3
 
     presentInfo.pImageIndices = pImageIndex;
 
-    auto result = vkQueuePresentKHR(aDevice.GetPresentQueue(), &presentInfo);
+    auto result = vkQueuePresentKHR(aDevice->GetPresentQueue(), &presentInfo);
 
     CurrentFrame = (CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     return result;
@@ -163,7 +163,7 @@ void SwapChain::RecreateSwapChain()
     } while (width == 0 || height == 0);
     
 
-    vkDeviceWaitIdle(aDevice.GetLogicalDevice());
+    vkDeviceWaitIdle(aDevice->GetLogicalDevice());
     cleanupSwapChain();
 
     createSwapChain();
@@ -173,7 +173,7 @@ void SwapChain::RecreateSwapChain()
     createFramebuffers();
 }
 
-Device& SwapChain::GetDevice()
+Device* SwapChain::GetDevice()
 {
     return aDevice;
 }
@@ -231,7 +231,7 @@ VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilit
 
 void SwapChain::createSwapChain()
 {
-    Device::SwapChainSupportDetails swapChainSupport = aDevice.QuerySwapChainSupport(aDevice.GetPhysicalDevice());
+    Device::SwapChainSupportDetails swapChainSupport = aDevice->QuerySwapChainSupport(aDevice->GetPhysicalDevice());
 
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
     VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
@@ -253,7 +253,7 @@ void SwapChain::createSwapChain()
     createInfo.imageArrayLayers = 1;
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-    Device::QueueFamilyIndices indices = aDevice.FindQueueFamilies(aDevice.GetPhysicalDevice());
+    Device::QueueFamilyIndices indices = aDevice->FindQueueFamilies(aDevice->GetPhysicalDevice());
     uint32_t queueFamilyIndices[] = {indices.graphicsAndComputeFamily.value(), indices.presentFamily.value()};
 
     if (indices.graphicsAndComputeFamily != indices.presentFamily)
@@ -276,12 +276,12 @@ void SwapChain::createSwapChain()
 
     createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-    if (vkCreateSwapchainKHR(aDevice.GetLogicalDevice(), &createInfo, nullptr, &swapChain) != VK_SUCCESS)
+    if (vkCreateSwapchainKHR(aDevice->GetLogicalDevice(), &createInfo, nullptr, &swapChain) != VK_SUCCESS)
         throw std::runtime_error("Failed to create swap chain!");
 
-    vkGetSwapchainImagesKHR(aDevice.GetLogicalDevice(), swapChain, &imageCount, nullptr);
+    vkGetSwapchainImagesKHR(aDevice->GetLogicalDevice(), swapChain, &imageCount, nullptr);
     swapChainImages.resize(imageCount);
-    vkGetSwapchainImagesKHR(aDevice.GetLogicalDevice(), swapChain, &imageCount, swapChainImages.data());
+    vkGetSwapchainImagesKHR(aDevice->GetLogicalDevice(), swapChain, &imageCount, swapChainImages.data());
 
     swapChainImageFormat = surfaceFormat.format;
     swapChainExtent = extent;
@@ -302,7 +302,7 @@ void SwapChain::createImageViews()
     swapChainImageViews.resize(swapChainImages.size());
     for (size_t i = 0; i < swapChainImages.size(); i++)
     {
-        swapChainImageViews[i] = aDevice.CreateImageView(swapChainImages[i], swapChainImageFormat);
+        swapChainImageViews[i] = aDevice->CreateImageView(swapChainImages[i], swapChainImageFormat);
     }
 }
 
@@ -311,7 +311,7 @@ VkFormat SwapChain::findSupportedFormat(const std::vector<VkFormat>& candidates,
     for (VkFormat format : candidates)
     {
         VkFormatProperties props;
-        vkGetPhysicalDeviceFormatProperties(aDevice.GetPhysicalDevice(), format, &props);
+        vkGetPhysicalDeviceFormatProperties(aDevice->GetPhysicalDevice(), format, &props);
 
         if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features)
             return format;
@@ -355,8 +355,8 @@ void SwapChain::createColorResources()
     imageInfo.samples = msaaSamplers;
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     imageInfo.flags = 0;
-    aDevice.CreateImage(&imageInfo, &colorImage, &colorImageMemory);
-    colorImageView = aDevice.CreateImageView(colorImage, colorFormat);
+    aDevice->CreateImage(&imageInfo, &colorImage, &colorImageMemory);
+    colorImageView = aDevice->CreateImageView(colorImage, colorFormat);
 }
 
 void SwapChain::createDepthResources()
@@ -389,7 +389,7 @@ void SwapChain::createDepthResources()
         imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         imageInfo.flags = 0;
 
-        aDevice.CreateImage(&imageInfo, &depthImages[i], &depthImageMemorys[i]);
+        aDevice->CreateImage(&imageInfo, &depthImages[i], &depthImageMemorys[i]);
 
         VkImageViewCreateInfo viewInfo{};
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -402,7 +402,7 @@ void SwapChain::createDepthResources()
         viewInfo.subresourceRange.baseArrayLayer = 0;
         viewInfo.subresourceRange.layerCount = 1;
 
-        if (vkCreateImageView(aDevice.GetLogicalDevice(), &viewInfo, nullptr, &depthImageViews[i]) != VK_SUCCESS)
+        if (vkCreateImageView(aDevice->GetLogicalDevice(), &viewInfo, nullptr, &depthImageViews[i]) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to create texture image view!");
         }
@@ -483,7 +483,7 @@ void SwapChain::createRenderPass()
     createInfo.dependencyCount = 1;
     createInfo.pDependencies = &dependency;
 
-    if (vkCreateRenderPass(aDevice.GetLogicalDevice(), &createInfo, nullptr, &renderPass) != VK_SUCCESS)
+    if (vkCreateRenderPass(aDevice->GetLogicalDevice(), &createInfo, nullptr, &renderPass) != VK_SUCCESS)
         throw std::runtime_error("Failed to create render pass!");
 }
 
@@ -535,7 +535,7 @@ void SwapChain::createOffscreenRenderPass()
 	renderPassInfo.pSubpasses = &subpass;
     renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
 	renderPassInfo.pDependencies = dependencies.data();
-    vkCreateRenderPass(aDevice.GetLogicalDevice(), &renderPassInfo, nullptr, &offscreenRenderPass);
+    vkCreateRenderPass(aDevice->GetLogicalDevice(), &renderPassInfo, nullptr, &offscreenRenderPass);
 }
 
 void SwapChain::createFramebuffers()
@@ -554,7 +554,7 @@ void SwapChain::createFramebuffers()
         framebufferInfo.height = swapChainExtent.height;
         framebufferInfo.layers = 1;
 
-        if (vkCreateFramebuffer(aDevice.GetLogicalDevice(), &framebufferInfo, nullptr, &swapChainFramebuffers[i]) !=
+        if (vkCreateFramebuffer(aDevice->GetLogicalDevice(), &framebufferInfo, nullptr, &swapChainFramebuffers[i]) !=
             VK_SUCCESS)
         {
             throw std::runtime_error("failed to create framebuffer!");
@@ -571,7 +571,7 @@ void SwapChain::createSyncObjects()
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-    auto &device = aDevice.GetLogicalDevice();
+    auto &device = aDevice->GetLogicalDevice();
     imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
@@ -587,7 +587,7 @@ void SwapChain::createSyncObjects()
 
 void SwapChain::cleanupSwapChain()
 {
-    auto device = aDevice.GetLogicalDevice();
+    auto device = aDevice->GetLogicalDevice();
     vkDestroyImageView(device, colorImageView, nullptr);
     vkDestroyImage(device, colorImage, nullptr);
     vkFreeMemory(device, colorImageMemory, nullptr);

@@ -61,7 +61,7 @@ namespace AnA
             static VkDescriptorSetLayoutBinding GetBindingDescriptionSet();
         };
 
-        Model(Device& mDevice, const ModelInfo& modelInfo);
+        Model(Device* mDevice, const ModelInfo& modelInfo);
         ~Model();
 
         std::vector<Vertex>& GetVertices()
@@ -84,7 +84,7 @@ namespace AnA
             return vertexProjections;
         }
 
-        static void CreateModelFromFile(Device& mDevice, const char* filePath, std::shared_ptr<Model>& model);
+        static void CreateModelFromFile(Device* mDevice, const char* filePath, std::shared_ptr<Model>& model);
         static void CreateMeshFromFile(const char *filePath, std::vector<Vertex>& vertices, std::vector<Index>& indices, size_t vertexOffset = 0);
         void LoadMaterialFromFile(const char* filePath);
         
@@ -100,7 +100,7 @@ namespace AnA
         std::vector<glm::mat3> transforms;
         std::vector<glm::vec2> vertexProjections;
 
-        Device& aDevice;
+        Device* aDevice;
         Buffer* vertexBuffer;
         bool hasIndexBuffer;
         Buffer* indexBuffer;

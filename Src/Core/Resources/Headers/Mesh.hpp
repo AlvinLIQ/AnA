@@ -25,7 +25,7 @@ namespace AnA
     class Meshes
     {
     public:
-        Meshes(Device& mDevice);
+        Meshes(Device* mDevice);
         ~Meshes();
         void Append(const std::vector<MeshInfo>& meshInfos);
         void RemoveAt(uint32_t meshIndex);
@@ -76,7 +76,7 @@ namespace AnA
             return ssboDescriptor;
         }
     private:
-        Device& aDevice;
+        Device* aDevice;
         Buffer* vertexBuffer{nullptr};
         size_t vertexCount = 0;
         Buffer* indexBuffer{nullptr};

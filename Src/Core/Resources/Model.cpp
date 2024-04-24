@@ -18,7 +18,7 @@
 
 using namespace AnA;
 
-Model::Model(Device& mDevice, const ModelInfo& modelInfo) : aDevice{mDevice}
+Model::Model(Device* mDevice, const ModelInfo& modelInfo) : aDevice{mDevice}
 {
     vertices = modelInfo.vertices;
     indices = modelInfo.indices;
@@ -40,7 +40,7 @@ Model::~Model()
     delete vertexBuffer;
 }
 
-void Model::CreateModelFromFile(Device &mDevice, const char *filePath, std::shared_ptr<Model>& model)
+void Model::CreateModelFromFile(Device* mDevice, const char *filePath, std::shared_ptr<Model>& model)
 {
     ModelInfo modelInfo{};
     CreateMeshFromFile(filePath, modelInfo.vertices, modelInfo.indices);

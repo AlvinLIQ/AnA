@@ -5,12 +5,12 @@ using namespace AnA;
 
 static VkPipelineLayout* pDefaultPipelineLayout = nullptr;
 
-Shader::Shader(Device& mDevice) : aDevice{mDevice}
+Shader::Shader(Device* mDevice) : aDevice{mDevice}
 {
     
 }
 
-Shader::Shader(Device& mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass) : aDevice{mDevice}
+Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass) : aDevice{mDevice}
 {
     auto descriptorConfigs = Resource::ResourceManager::GetCurrent()->GetDefaultDescriptorConfig();
     createDescriptors(descriptorConfigs);
@@ -26,7 +26,7 @@ Shader::Shader(Device& mDevice, const std::vector<unsigned char>& vertShaderCode
     pipeline = new Pipeline(mDevice, vertShaderCode, renderPass, pipelineLayout);
 }
 
-Shader::Shader(Device& mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass, std::vector<Descriptor::DescriptorConfig>& descriptorConfigs) : aDevice{mDevice}
+Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass, std::vector<Descriptor::DescriptorConfig>& descriptorConfigs) : aDevice{mDevice}
 {
     createDescriptors(descriptorConfigs);
     
@@ -41,7 +41,7 @@ Shader::Shader(Device& mDevice, const std::vector<unsigned char>& vertShaderCode
     pipeline = new Pipeline(mDevice, vertShaderCode, renderPass, pipelineLayout);
 }
 
-Shader::Shader(Device& mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass) : aDevice{mDevice}
+Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass) : aDevice{mDevice}
 {
     auto descriptorConfigs = Resource::ResourceManager::GetCurrent()->GetDefaultDescriptorConfig();
     createDescriptors(descriptorConfigs);
@@ -57,7 +57,7 @@ Shader::Shader(Device& mDevice, const std::vector<unsigned char>& vertShaderCode
     pipeline = new Pipeline(mDevice, vertShaderCode, fragShaderCode, renderPass, pipelineLayout);
 }
 
-Shader::Shader(Device& mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, 
+Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, 
             std::vector<Descriptor::DescriptorConfig>& descriptorConfigs) : aDevice{mDevice}
 {
     createDescriptors(descriptorConfigs);
@@ -73,7 +73,7 @@ Shader::Shader(Device& mDevice, const std::vector<unsigned char>& vertShaderCode
     pipeline = new Pipeline(mDevice, vertShaderCode, fragShaderCode, renderPass, pipelineLayout);
 }
 
-Shader::Shader(Device& mDevice, Pipeline::PipelineConfig pipelineConfig, std::vector<Descriptor::DescriptorConfig>& descriptorConfigs) : aDevice{mDevice}
+Shader::Shader(Device* mDevice, Pipeline::PipelineConfig pipelineConfig, std::vector<Descriptor::DescriptorConfig>& descriptorConfigs) : aDevice{mDevice}
 {
     pipeline = new Pipeline(mDevice, pipelineConfig);
     createDescriptors(descriptorConfigs);
@@ -86,7 +86,7 @@ Shader::~Shader()
         delete descriptor;
     if (pipelineLayout != VK_NULL_HANDLE)
     {
-        vkDestroyPipelineLayout(aDevice.GetLogicalDevice(), pipelineLayout, nullptr);
+        vkDestroyPipelineLayout(aDevice->GetLogicalDevice(), pipelineLayout, nullptr);
         pipelineLayout = VK_NULL_HANDLE;
     }
 }
@@ -128,7 +128,7 @@ void Shader::createPipelineLayout(std::vector<Descriptor::DescriptorConfig>& des
     pipelineLayoutInfo.pushConstantRangeCount = 1;
     pipelineLayoutInfo.pPushConstantRanges = &range;
 */
-    if (vkCreatePipelineLayout(aDevice.GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
+    if (vkCreatePipelineLayout(aDevice->GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create pipeline layout!");
     }

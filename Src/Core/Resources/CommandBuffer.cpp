@@ -5,17 +5,17 @@
 
 using namespace AnA;
 
-CommandBuffer::CommandBuffer(Device& mDevice, int commandBufferCount, 
+CommandBuffer::CommandBuffer(Device* mDevice, int commandBufferCount, 
 VkCommandBufferLevel commandBufferlevel, 
 VkCommandBufferUsageFlags usageFlags, bool async) : aDevice{mDevice}, level{commandBufferlevel}, async{async}
 {
     if (async)
     {
-        aDevice.CreateCommandPool(VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT, &pool);
+        aDevice->CreateCommandPool(VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT, &pool);
     }
     else
     {
-        pool = aDevice.GetCommandPool();
+        pool = aDevice->GetCommandPool();
     }
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = usageFlags;
@@ -25,22 +25,22 @@ VkCommandBufferUsageFlags usageFlags, bool async) : aDevice{mDevice}, level{comm
     createCommandBuffer();
 }
 
-CommandBuffer::CommandBuffer(Device& mDevice, int commandBufferCount, 
+CommandBuffer::CommandBuffer(Device* mDevice, int commandBufferCount, 
 VkCommandBufferLevel commandBufferlevel, 
 VkCommandBufferBeginInfo& commandBufferBeginInfo) : aDevice{mDevice}, beginInfo{commandBufferBeginInfo}, level{commandBufferlevel}, async{false}
 {
-    pool = aDevice.GetCommandPool();
+    pool = aDevice->GetCommandPool();
     buffers.resize(commandBufferCount);
     createCommandBuffer();
 }
 
 CommandBuffer::~CommandBuffer()
 {
-    vkFreeCommandBuffers(aDevice.GetLogicalDevice(), pool, 
+    vkFreeCommandBuffers(aDevice->GetLogicalDevice(), pool, 
         static_cast<uint32_t>(buffers.size()), buffers.data());
     if (async)
     {
-        vkDestroyCommandPool(aDevice.GetLogicalDevice(), pool, nullptr);
+        vkDestroyCommandPool(aDevice->GetLogicalDevice(), pool, nullptr);
     }
 }
 
@@ -112,5 +112,5 @@ void CommandBuffer::createCommandBuffer()
     allocInfo.commandPool = pool;
     allocInfo.commandBufferCount = static_cast<uint32_t>(buffers.size());
     allocInfo.level = level;
-    vkAllocateCommandBuffers(aDevice.GetLogicalDevice(), &allocInfo, buffers.data());
+    vkAllocateCommandBuffers(aDevice->GetLogicalDevice(), &allocInfo, buffers.data());
 }

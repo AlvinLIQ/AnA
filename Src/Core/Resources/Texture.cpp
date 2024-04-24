@@ -4,27 +4,27 @@
 
 using namespace AnA;
 
-Texture::Texture(const char* filename, Device& mDevice) : aDevice { mDevice }
+Texture::Texture(const char* filename, Device* mDevice) : aDevice{ mDevice }
 {
-    aDevice.CreateTextureImage(filename, &textureImage, &textureImageMemory);
+    aDevice->CreateTextureImage(filename, &textureImage, &textureImageMemory);
     init();
 }
 
-Texture::Texture(const uint32_t color, Device& mDevice) : aDevice { mDevice }
+Texture::Texture(const uint32_t color, Device* mDevice) : aDevice{ mDevice }
 {
-    aDevice.CreateColorImage(color, &textureImage, &textureImageMemory);
+    aDevice->CreateColorImage(color, &textureImage, &textureImageMemory);
     init();
 }
 
-Texture::Texture(const char* text, const int width, const int height, const float lineHeight, Device& mDevice) : aDevice { mDevice }
+Texture::Texture(const char* text, const int width, const int height, const float lineHeight, Device* mDevice) : aDevice{ mDevice }
 {
-    aDevice.CreateTextImage(text, width, height, lineHeight, &textureImage, &textureImageMemory);
+    aDevice->CreateTextImage(text, width, height, lineHeight, &textureImage, &textureImageMemory);
     init();
 }
 
 Texture::~Texture()
 {
-    auto& device = aDevice.GetLogicalDevice();
+    auto& device = aDevice->GetLogicalDevice();
 
     vkDestroySampler(device, imageInfo.sampler, nullptr);
     vkDestroyImageView(device, imageInfo.imageView, nullptr);
@@ -47,7 +47,7 @@ VkDescriptorImageInfo& Texture::GetImageInfo()
     return imageInfo;
 }
 
-Device& Texture::GetDevice()
+Device* Texture::GetDevice()
 {
     return aDevice;
 }
@@ -55,7 +55,7 @@ Device& Texture::GetDevice()
 void Texture::init()
 {
     imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageInfo.imageView = aDevice.CreateImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
+    imageInfo.imageView = aDevice->CreateImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
     createTextureSampler();
     //auto descriptors = Resource::ResourceManager::GetCurrent()->Shaders[0]->GetDescriptors();
     //descriptor = new Descriptor(aDevice, textureSampler, textureImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
@@ -67,7 +67,7 @@ void Texture::init()
 void Texture::createTextureSampler(enum VkSamplerAddressMode samplerAddressMode)
 {
     VkPhysicalDeviceProperties properties{};
-    vkGetPhysicalDeviceProperties(aDevice.GetPhysicalDevice(), &properties);
+    vkGetPhysicalDeviceProperties(aDevice->GetPhysicalDevice(), &properties);
 
     VkSamplerCreateInfo samplerInfo{};
     samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -84,5 +84,5 @@ void Texture::createTextureSampler(enum VkSamplerAddressMode samplerAddressMode)
     samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
     samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 
-    vkCreateSampler(aDevice.GetLogicalDevice(), &samplerInfo, nullptr, &imageInfo.sampler);
+    vkCreateSampler(aDevice->GetLogicalDevice(), &samplerInfo, nullptr, &imageInfo.sampler);
 }

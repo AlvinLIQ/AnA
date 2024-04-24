@@ -91,7 +91,7 @@ namespace AnA
             virtual void PointerEventTrigger(PointerEventArgs& args);
             static void InitControl(SwapChain* swapChain);
             static VkExtent2D GetSwapChainExtent();
-            static Device& GetDevice();
+            static Device* GetDevice();
             static void GetInputProfile(Control* mainControl, std::vector<Input::InputProfile>& profiles);
 
             void SetRenderOffset(POS_F newOffset)

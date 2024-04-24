@@ -9,7 +9,7 @@ namespace AnA
         class ShadowSystem
         {
         public:
-            ShadowSystem(Device& mDevice, SwapChain* pSwapchain);
+            ShadowSystem(Device* mDevice, SwapChain* pSwapchain);
             ~ShadowSystem();
             static ShadowSystem* GetCurrent();
 
@@ -17,7 +17,7 @@ namespace AnA
             void RenderShadows(VkCommandBuffer commandBuffer, Meshes& meshes, Shader& shader);
             void RenderShadowsIndirect(VkCommandBuffer commandBuffer, Meshes &meshes, Shader& shader);
         private:
-            Device& aDevice;
+            Device* aDevice;
             SwapChain* swapChain;
 
             VkClearValue clearValue{.depthStencil{1.0f, 0}};

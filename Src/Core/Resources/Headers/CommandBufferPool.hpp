@@ -7,7 +7,7 @@ namespace AnA
     class CommandBufferPool : public ThreadPool<void(CommandBuffer*, size_t index)>
     {
     public:
-        CommandBufferPool(Device& mDevice, 
+        CommandBufferPool(Device* mDevice, 
         VkCommandBufferLevel commandBufferLevel, 
         VkCommandBufferUsageFlags commandBufferUsage, 
         size_t count = std::thread::hardware_concurrency()) : aDevice{mDevice}, ThreadPool(&commandBuffers, count)
@@ -84,7 +84,7 @@ namespace AnA
             return static_cast<uint32_t>(commandBuffers.size());
         }
     private:
-        Device& aDevice;
+        Device* aDevice;
         std::vector<CommandBuffer> commandBuffers;
         std::vector<VkCommandBuffer> recordedCommandBuffers;
     };

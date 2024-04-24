@@ -5,7 +5,7 @@
 using namespace AnA;
 using namespace Lights;
 
-Light::Light(Device& mDevice) : aDevice {mDevice}
+Light::Light(Device* mDevice) : aDevice{mDevice}
 {
     createBuffers();
 }

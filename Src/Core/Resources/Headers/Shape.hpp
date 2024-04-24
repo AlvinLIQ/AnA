@@ -18,7 +18,7 @@ namespace AnA
     class Shapes
     {
     public:
-        Shapes(Device& mDeivce);
+        Shapes(Device* mDeivce);
         ~Shapes();
         void PrepareDraw(Controls::Control* control);
         void Draw(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout);
@@ -26,7 +26,7 @@ namespace AnA
         VkOffset2D Offset;
         VkExtent2D Extent;
     private:
-        Device& aDevice;
+        Device* aDevice;
         Buffer* shapeBuffer{nullptr};
         Buffer* indirectBuffer{nullptr};
         Descriptor* ssboDescriptor{nullptr};

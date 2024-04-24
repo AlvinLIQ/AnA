@@ -7,7 +7,7 @@
 
 using namespace AnA;
 
-Renderer::Renderer(Window& mWindow, Device& mDevice) : aWindow {mWindow}, aDevice {mDevice}
+Renderer::Renderer(Window& mWindow, Device* mDevice) : aWindow {mWindow}, aDevice{mDevice}
 {
     aSwapChain = new SwapChain(aDevice, aWindow.GetSurface(), aWindow.GetGLFWwindow());
     inheritanceInfos[RENDER_PASS_TYPE_ONSCREEN].sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
@@ -20,8 +20,8 @@ Renderer::Renderer(Window& mWindow, Device& mDevice) : aWindow {mWindow}, aDevic
 Renderer::~Renderer()
 {
     delete aSwapChain;
-    vkFreeCommandBuffers(aDevice.GetLogicalDevice(), 
-        aDevice.GetCommandPool(), 
+    vkFreeCommandBuffers(aDevice->GetLogicalDevice(), 
+        aDevice->GetCommandPool(), 
         static_cast<uint32_t>(commandBuffers.size()), 
         commandBuffers.data());
 
@@ -219,10 +219,10 @@ void Renderer::createCommandBuffers()
     commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = aDevice.GetCommandPool();
+    allocInfo.commandPool = aDevice->GetCommandPool();
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
-    if (vkAllocateCommandBuffers(aDevice.GetLogicalDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) 
+    if (vkAllocateCommandBuffers(aDevice->GetLogicalDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) 
         throw std::runtime_error("Failed to allocate command buffers!");
 
     offscreenSecondaryCommandBuffers = new CommandBuffer(aDevice, 

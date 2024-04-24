@@ -14,7 +14,7 @@ namespace AnA
     class Renderer
     {
     public:
-        Renderer(Window& mWindow, Device& mDevice);
+        Renderer(Window& mWindow, Device* mDevice);
         ~Renderer();
 
         int GetFrameIndex() const
@@ -75,7 +75,7 @@ namespace AnA
         void BeginOffscreenRenderPass(VkCommandBuffer commandBuffer, VkFramebuffer& framebuffer, VkSubpassContents contents = VK_SUBPASS_CONTENTS_INLINE);
     private:
         Window& aWindow;
-        Device& aDevice;
+        Device* aDevice;
         SwapChain* aSwapChain;
 
         std::vector<VkCommandBuffer> commandBuffers;

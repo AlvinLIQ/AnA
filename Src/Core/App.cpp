@@ -74,7 +74,7 @@ void App::CreateCubeModel(std::shared_ptr<Model>& model)
     };
 
     Model::ModelInfo modelInfo = {vertices, {}, {}, 4, {0, 1, 2, 1, 2, 3}};
-    model = std::make_shared<Model>(*_aDevice, modelInfo);
+    model = std::make_shared<Model>(_aDevice, modelInfo);
 }
 
 void App::Init()
@@ -87,11 +87,11 @@ void App::Init()
     //glfwSetKeyCallback(aWindow->GetGLFWwindow(), App::keyCallback);
     aInstance = new Instance;
     aWindow->CreateWindowSurface(aInstance);
-    _aDevice = aDevice = new Device(aInstance->GetInstance(), aWindow->GetSurface());
-    aRenderer = new Renderer(*aWindow, *aDevice);
-    aResourceManager = new Resource::ResourceManager(*aDevice);
-    aRenderSystem = new Systems::RenderSystem(*aDevice, aRenderer->GetSwapChain());
-    aShadowSystem = new Systems::ShadowSystem(*aDevice, &aRenderer->GetSwapChain());
+    _aDevice= aDevice = new Device(aInstance->GetInstance(), aWindow->GetSurface());
+    aRenderer = new Renderer(*aWindow, aDevice);
+    aResourceManager = new Resource::ResourceManager(aDevice);
+    aRenderSystem = new Systems::RenderSystem(aDevice, aRenderer->GetSwapChain());
+    aShadowSystem = new Systems::ShadowSystem(aDevice, &aRenderer->GetSwapChain());
     createRecordCallBacks();
 }
 
@@ -187,7 +187,7 @@ std::shared_ptr<Model> &App::Get2DModel()
             {{1.0f, 1.0f, 0.f}, {}, {1.0f, 1.0f}}
         };
         Model::ModelInfo modelInfo{vertices, {}, {}, 4, {0, 2, 1, 1, 2, 3}};
-        _2DModel = std::make_shared<Model>(*_aDevice, modelInfo);
+        _2DModel = std::make_shared<Model>(_aDevice, modelInfo);
     }
 
     return _2DModel;
@@ -195,7 +195,7 @@ std::shared_ptr<Model> &App::Get2DModel()
 
 void App::CreateModel(const Model::ModelInfo &modelInfo, std::shared_ptr<Model> &model)
 {
-    model = std::make_shared<Model>(*_aDevice, modelInfo);
+    model = std::make_shared<Model>(_aDevice, modelInfo);
 }
 
 void App::startUILoop(std::thread &loopThread)

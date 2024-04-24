@@ -30,7 +30,7 @@ namespace AnA
         class ResourceManager
         {
         public:
-            ResourceManager(Device& mDevice);
+            ResourceManager(Device* mDevice);
             ~ResourceManager();
 
             static ResourceManager* GetCurrent();
@@ -64,7 +64,7 @@ namespace AnA
             void RecreateResources();
             std::vector<RecordCallBackInfo> RecordCallBacks{};
         private:
-            Device& aDevice;
+            Device* aDevice;
             std::vector<Buffer*> mainCameraBuffers;
             void createMainCameraBuffers();
 

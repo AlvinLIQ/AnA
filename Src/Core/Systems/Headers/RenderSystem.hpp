@@ -11,7 +11,7 @@ namespace AnA
         class RenderSystem
         {
         public:
-            RenderSystem(Device& mDevice, SwapChain& mSwapChain);
+            RenderSystem(Device* mDevice, SwapChain& mSwapChain);
             ~RenderSystem();
 
             void RenderShapes(VkCommandBuffer commandBuffer, Shapes& shapes, Shader& shader);
@@ -20,7 +20,7 @@ namespace AnA
             void RenderMeshesIndirect(VkCommandBuffer commandBuffer, Meshes& meshes, Shader& shader);
             static RenderSystem* GetCurrent();
         private:
-            Device& aDevice;
+            Device* aDevice;
             SwapChain& aSwapChain;
         };
     }

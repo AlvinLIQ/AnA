@@ -46,9 +46,9 @@ namespace AnA
             return *aRenderer;
         }
 
-        Device& GetDevice()
+        Device* GetDevice()
         {
-            return *aDevice;
+            return aDevice;
         }
         VkOffset2D &GetSceneOffset()
         {

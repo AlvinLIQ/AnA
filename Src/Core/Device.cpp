@@ -145,7 +145,7 @@ VkImageView Device::CreateImageView(VkImage& image, VkFormat format)
 
 void Device::CreateColorImage(const uint32_t color, VkImage* pTexImage, VkDeviceMemory* pTexMemory)
 {
-    Buffer aBuffer(*this, sizeof(color), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    Buffer aBuffer(this, sizeof(color), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
     aBuffer.Map(0, sizeof(color));
     memcpy(aBuffer.GetMappedData(), &color, sizeof(color));
     aBuffer.Unmap();
@@ -182,7 +182,7 @@ void Device::CreateTextureImage(const char* imagePath, VkImage* pTexImage, VkDev
     if (!pixels)
         throw std::runtime_error("Failed to load texture image!");
 
-    Buffer aBuffer(*this, imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    Buffer aBuffer(this, imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
     aBuffer.Map(0, imageSize);
     memcpy(aBuffer.GetMappedData(), pixels, static_cast<size_t>(imageSize));
     aBuffer.Unmap();
@@ -263,7 +263,7 @@ void Device::CreateTextImage(const char* text, int width, int height, float line
     }
 
     int bufSize = imageSize * 4;
-    Buffer aBuffer(*this, bufSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    Buffer aBuffer(this, bufSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
     aBuffer.Map(0, bufSize);
     //memcpy(aBuffer.Getconst stbtt_fontinfo *infoMappedData(), textBitmap.data(), static_cast<size_t>(imageSize));
     auto bufData = (unsigned char*)aBuffer.GetMappedData();

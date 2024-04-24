@@ -8,7 +8,7 @@ using namespace Resource;
 
 ResourceManager* _resourceManager = nullptr;
 
-ResourceManager::ResourceManager(Device& mDevice) : aDevice {mDevice}, 
+ResourceManager::ResourceManager(Device* mDevice) : aDevice{mDevice}, 
         SceneObjects(mDevice),
         GlobalLight(mDevice), 
         SecondaryCommandBufferPool(mDevice, 
@@ -42,7 +42,7 @@ ResourceManager::~ResourceManager()
     Shaders.clear();
     delete Shapes;
     
-    auto logicalDevice = aDevice.GetLogicalDevice();
+    auto logicalDevice = aDevice->GetLogicalDevice();
     for (auto& shadowSampler : shadowSamplers)
         vkDestroySampler(logicalDevice, shadowSampler, nullptr);
     cleanupShadowResources();
@@ -220,8 +220,8 @@ void ResourceManager::createShadowFramebuffers()
         imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
         imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
         imageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-        aDevice.CreateImage(&imageInfo, &shadowImage.image, &shadowImage.imageMemory);
-        //aDevice.TransitionImageLayout(image, swapChain->GetDepthFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL);
+        aDevice->CreateImage(&imageInfo, &shadowImage.image, &shadowImage.imageMemory);
+        //aDevice->TransitionImageLayout(image, swapChain->GetDepthFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL);
 
         VkImageViewCreateInfo imageViewInfo{};
         imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -231,7 +231,7 @@ void ResourceManager::createShadowFramebuffers()
         imageViewInfo.components = { VK_COMPONENT_SWIZZLE_R };
         imageViewInfo.subresourceRange = { VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1 };
 
-        vkCreateImageView(aDevice.GetLogicalDevice(), &imageViewInfo, nullptr, &shadowImage.imageView);
+        vkCreateImageView(aDevice->GetLogicalDevice(), &imageViewInfo, nullptr, &shadowImage.imageView);
 
         VkFramebufferCreateInfo framebufferInfo{};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -242,18 +242,18 @@ void ResourceManager::createShadowFramebuffers()
         framebufferInfo.width = imageInfo.extent.width;
         framebufferInfo.height = imageInfo.extent.height;
         framebufferInfo.layers = 1;
-        vkCreateFramebuffer(aDevice.GetLogicalDevice(), &framebufferInfo, nullptr, &shadowFramebuffers[i]);
+        vkCreateFramebuffer(aDevice->GetLogicalDevice(), &framebufferInfo, nullptr, &shadowFramebuffers[i]);
         if (samplersNotCreated)
-            aDevice.CreateSampler(&shadowSamplers[i], VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE);
+            aDevice->CreateSampler(&shadowSamplers[i], VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE);
     }
 }
 
 void ResourceManager::cleanupShadowResources()
 {
     for (auto& shadowFrameBuffer : shadowFramebuffers)
-        vkDestroyFramebuffer(aDevice.GetLogicalDevice(), shadowFrameBuffer, nullptr);
+        vkDestroyFramebuffer(aDevice->GetLogicalDevice(), shadowFrameBuffer, nullptr);
     for (auto& shadowImage : shadowImages)
-        shadowImage.CleanUp(aDevice.GetLogicalDevice());
+        shadowImage.CleanUp(aDevice->GetLogicalDevice());
 }
 
 void ResourceManager::createDefaultShaders()

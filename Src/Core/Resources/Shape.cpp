@@ -3,7 +3,7 @@
 
 using namespace AnA;
 
-Shapes::Shapes(Device& mDeivce) : aDevice {mDeivce}
+Shapes::Shapes(Device* mDeivce) : aDevice{mDeivce}
 {
     auto& descriptorSetLayout = Resource::ResourceManager::GetCurrent()->Shaders[1].GetDescriptors()[DEFAULT_SSBO_LAYOUT]->GetLayout();
     ssboDescriptor = new Descriptor(aDevice, 1, 

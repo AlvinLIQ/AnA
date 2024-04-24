@@ -38,7 +38,7 @@ VkExtent2D Control::GetSwapChainExtent()
     return aSwapChain->GetExtent();
 }
 
-Device& Control::GetDevice()
+Device* Control::GetDevice()
 {
     return aSwapChain->GetDevice();
 }

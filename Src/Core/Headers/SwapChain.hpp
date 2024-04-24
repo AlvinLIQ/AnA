@@ -16,7 +16,7 @@ namespace AnA
     class SwapChain
     {
     public:
-        SwapChain(Device& mDevice, VkSurfaceKHR &mSurface, GLFWwindow* mWindow);
+        SwapChain(Device* mDevice, VkSurfaceKHR &mSurface, GLFWwindow* mWindow);
         ~SwapChain();
 
         VkResult AcquireNextImage(uint32_t* pImageIndex);
@@ -47,9 +47,9 @@ namespace AnA
 
         void RecreateSwapChain();
 
-        Device& GetDevice();
+        Device* GetDevice();
     private:
-        Device& aDevice;
+        Device* aDevice;
         VkSurfaceKHR surface;
 
         VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats);

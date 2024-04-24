@@ -30,7 +30,7 @@ namespace AnA
         class Light
         {
         public:
-            Light(Device& mDevice);
+            Light(Device* mDevice);
             ~Light();
 
             glm::vec3 Direction{1.0f, 1.0f, 1.0f};
@@ -39,7 +39,7 @@ namespace AnA
             Buffer** GetBuffers();
             void UpdateBuffers(Cameras::Camera& lightCamera, int currentFrame);
         private:
-            Device& aDevice;
+            Device* aDevice;
             std::vector<Buffer*> buffers;
             void createBuffers();
         };

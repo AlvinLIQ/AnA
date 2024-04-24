@@ -239,12 +239,12 @@ namespace AnA
             }
 
         };
-        Pipeline(Device& mDevice, const char* vertShaderFileName, const char* fragShaderFileName, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-        Pipeline(Device& mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-        Pipeline(Device& mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-        Pipeline(Device& mDevice, PipelineConfig pipelineConfig);
-        Pipeline(Device& mDevice, const char* computeShaderFile, VkPipelineLayout &mPipelineLayout);
-        Pipeline(Device& mDevice, const std::vector<unsigned char>& computeShaderCode, VkPipelineLayout &mPipelineLayout);
+        Pipeline(Device* mDevice, const char* vertShaderFileName, const char* fragShaderFileName, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+        Pipeline(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+        Pipeline(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+        Pipeline(Device* mDevice, PipelineConfig pipelineConfig);
+        Pipeline(Device* mDevice, const char* computeShaderFile, VkPipelineLayout &mPipelineLayout);
+        Pipeline(Device* mDevice, const std::vector<unsigned char>& computeShaderCode, VkPipelineLayout &mPipelineLayout);
 
         ~Pipeline();
 
@@ -256,7 +256,7 @@ namespace AnA
         }
 
     private:
-        Device& aDevice;
+        Device* aDevice;
         VkRenderPass renderPass;
 
         VkPipelineLayout pipelineLayout;

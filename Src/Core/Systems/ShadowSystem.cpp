@@ -7,7 +7,7 @@ using namespace Systems;
 
 ShadowSystem* _shadowSystem;
 
-ShadowSystem::ShadowSystem(Device& mDevice, SwapChain* pSwapchain) : aDevice(mDevice)
+ShadowSystem::ShadowSystem(Device* mDevice, SwapChain* pSwapchain) : aDevice{mDevice}
 {
     swapChain = pSwapchain;
     _shadowSystem = this;

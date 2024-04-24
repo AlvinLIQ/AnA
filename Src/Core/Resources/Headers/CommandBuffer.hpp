@@ -6,8 +6,8 @@ namespace AnA
     class CommandBuffer
     {
     public:
-        CommandBuffer(Device& mDevice, int commandBufferCount, VkCommandBufferLevel commandBufferlevel, VkCommandBufferUsageFlags usageFlags, bool async = false);
-        CommandBuffer(Device& mDevice, int commandBufferCount, VkCommandBufferLevel commandBufferlevel, VkCommandBufferBeginInfo& commandBufferBeginInfo);
+        CommandBuffer(Device* mDevice, int commandBufferCount, VkCommandBufferLevel commandBufferlevel, VkCommandBufferUsageFlags usageFlags, bool async = false);
+        CommandBuffer(Device* mDevice, int commandBufferCount, VkCommandBufferLevel commandBufferlevel, VkCommandBufferBeginInfo& commandBufferBeginInfo);
         ~CommandBuffer();
 
         VkCommandBuffer& Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo = nullptr);
@@ -17,7 +17,7 @@ namespace AnA
         void End();
         const VkCommandBuffer& Get() const;
     private:
-        Device& aDevice;
+        Device* aDevice;
         bool async;
         VkCommandPool pool{VK_NULL_HANDLE};
         VkCommandBufferBeginInfo beginInfo{};

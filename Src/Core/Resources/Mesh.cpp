@@ -4,10 +4,10 @@
 
 using namespace AnA;
 
-Meshes::Meshes(Device& mDevice) : aDevice {mDevice}
+Meshes::Meshes(Device* mDevice) : aDevice{mDevice}
 {
     VkPhysicalDeviceProperties properties;
-    vkGetPhysicalDeviceProperties(mDevice.GetPhysicalDevice(), &properties);
+    vkGetPhysicalDeviceProperties(mDevice->GetPhysicalDevice(), &properties);
     batchSize = MaxBatchSize;
     indirectBuffer = new Buffer(aDevice, sizeof(VkDrawIndexedIndirectCommand), 
     VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);

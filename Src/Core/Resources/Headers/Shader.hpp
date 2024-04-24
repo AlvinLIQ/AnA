@@ -7,15 +7,15 @@ namespace AnA
     class Shader
     {
     public:
-        Shader(Device& mDevice);
-        Shader(Device& mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass);
-        Shader(Device& mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass, std::vector<Descriptor::DescriptorConfig>& descriptorConfigs);
-        Shader(Device& mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass);
-        Shader(Device& mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, 
+        Shader(Device* mDevice);
+        Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass);
+        Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass, std::vector<Descriptor::DescriptorConfig>& descriptorConfigs);
+        Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass);
+        Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, 
             std::vector<Descriptor::DescriptorConfig>& descriptorConfigs);
 
-        Shader(Device& mDevice, Pipeline::PipelineConfig pipelineConfig);
-        Shader(Device& mDevice, Pipeline::PipelineConfig pipelineConfig, std::vector<Descriptor::DescriptorConfig>& descriptorConfigs);
+        Shader(Device* mDevice, Pipeline::PipelineConfig pipelineConfig);
+        Shader(Device* mDevice, Pipeline::PipelineConfig pipelineConfig, std::vector<Descriptor::DescriptorConfig>& descriptorConfigs);
 
         ~Shader();
 
@@ -24,7 +24,7 @@ namespace AnA
         const std::vector<Descriptor*>& GetDescriptors() const;
         std::vector<std::vector<VkDescriptorSet>>& GetDescriptorSets();
     private:
-        Device& aDevice;
+        Device* aDevice;
         Pipeline* pipeline;
         VkPipelineLayout pipelineLayout {VK_NULL_HANDLE};
         void createPipelineLayout(std::vector<Descriptor::DescriptorConfig>& descriptorConfigs);
