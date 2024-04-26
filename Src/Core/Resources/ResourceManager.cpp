@@ -24,19 +24,15 @@ ResourceManager::ResourceManager(Device* mDevice) : aDevice{mDevice},
 #ifdef ANA_INCLUDE_CONTROL
     Controls::Control::InitControl(SwapChain::GetCurrent());
 #endif
-    TextureMap.try_emplace(DEFAULT_TEXTURE_ID, new Texture((uint32_t)0xFFFFFFFF, mDevice));
-    TextureMap.try_emplace(1, new Texture((uint32_t)0xFFCC9999, mDevice));
-    TextureMap.try_emplace(2, new Texture((uint32_t)0xFF99CC99, mDevice));
-    TextureMap.try_emplace(3, new Texture((uint32_t)0xFF9999CC, mDevice));
+    TextureMap.try_emplace(DEFAULT_TEXTURE_ID, (uint32_t)0xFFFFFFFF, mDevice);
+    TextureMap.try_emplace(1, (uint32_t)0xFFCC9999, mDevice);
+    TextureMap.try_emplace(2, (uint32_t)0xFF99CC99, mDevice);
+    TextureMap.try_emplace(3, (uint32_t)0xFF9999CC, mDevice);
 }
 
 ResourceManager::~ResourceManager()
 {
-    for (auto& texture : TextureMap)
-    {
-        delete texture.second;
-    }
-    //TextureMap.clear();
+    TextureMap.clear();
     //for (auto& shader : Shaders)
     //    delete shader;
     Shaders.clear();

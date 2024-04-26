@@ -19,7 +19,8 @@ namespace AnA
 
         Shader(const Shader&) = delete;
         Shader& operator=(const Shader&) = delete;
-        Shader(Shader&& shader) noexcept : aDevice{shader.aDevice}, pipeline{shader.pipeline}, pipelineLayout{shader.pipelineLayout}, descriptors{shader.descriptors}, descriptorSets{shader.descriptorSets}
+        Shader(Shader&& shader) noexcept : aDevice{shader.aDevice}, pipeline{shader.pipeline}, pipelineLayout{shader.pipelineLayout}, 
+        descriptors{shader.descriptors}, descriptorSets{shader.descriptorSets}
         {
             shader.pipeline = nullptr;
             shader.pipelineLayout = VK_NULL_HANDLE;
