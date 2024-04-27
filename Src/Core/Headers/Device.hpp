@@ -132,6 +132,10 @@ namespace AnA
 
         VkDevice &GetLogicalDevice();
         VkPhysicalDevice &GetPhysicalDevice();
+        const VkPhysicalDeviceProperties& GetPhysicalDeviceProperties() const
+        {
+            return physicalDeviceProperties;
+        }
     private:
         VkInstance& instance;
         VkSurfaceKHR& surface;
@@ -158,5 +162,7 @@ namespace AnA
 
         VkCommandBuffer beginSingleTimeCommands();
         void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+
+        VkPhysicalDeviceProperties physicalDeviceProperties{};
     };
 }

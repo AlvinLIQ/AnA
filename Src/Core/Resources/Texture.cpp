@@ -66,8 +66,7 @@ void Texture::init()
 
 void Texture::createTextureSampler(enum VkSamplerAddressMode samplerAddressMode)
 {
-    VkPhysicalDeviceProperties properties{};
-    vkGetPhysicalDeviceProperties(aDevice->GetPhysicalDevice(), &properties);
+    auto& properties = aDevice->GetPhysicalDeviceProperties();
 
     VkSamplerCreateInfo samplerInfo{};
     samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;

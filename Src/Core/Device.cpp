@@ -312,8 +312,7 @@ void Device::CreateTextImage(const char* text, int width, int height, float line
 
 void Device::CreateSampler(VkSampler* pSampler, enum VkSamplerAddressMode samplerAddressMode, VkBorderColor borderColor, VkCompareOp compareOp)
 {
-    VkPhysicalDeviceProperties properties{};
-    vkGetPhysicalDeviceProperties(physicalDevice, &properties);
+    vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
 
     VkSamplerCreateInfo samplerInfo{};
     samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -323,7 +322,7 @@ void Device::CreateSampler(VkSampler* pSampler, enum VkSamplerAddressMode sample
     samplerInfo.addressModeV = samplerAddressMode;
     samplerInfo.addressModeW = samplerAddressMode;
     samplerInfo.anisotropyEnable = VK_TRUE;
-    samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+    samplerInfo.maxAnisotropy = physicalDeviceProperties.limits.maxSamplerAnisotropy;
     samplerInfo.borderColor = borderColor;
     samplerInfo.unnormalizedCoordinates = VK_FALSE;
     samplerInfo.compareEnable = VK_FALSE;
@@ -616,6 +615,7 @@ void Device::pickPhysicalDevice()
         if (isDeviceSuitable(device))
         {
             physicalDevice = device;
+            vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
             checkUsableSamples();
             break;
         }
@@ -626,9 +626,6 @@ void Device::pickPhysicalDevice()
 
 void Device::checkUsableSamples()
 {
-    VkPhysicalDeviceProperties physicalDeviceProperties;
-    vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
-
     VkSampleCountFlags counts = physicalDeviceProperties.limits.framebufferColorSampleCounts & physicalDeviceProperties.limits.framebufferDepthSampleCounts;
     if (counts & VK_SAMPLE_COUNT_64_BIT) {  usableSamples.push_back(VK_SAMPLE_COUNT_64_BIT); }
     if (counts & VK_SAMPLE_COUNT_32_BIT) { usableSamples.push_back(VK_SAMPLE_COUNT_32_BIT); }
