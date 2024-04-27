@@ -693,13 +693,13 @@ void Device::createLogicalDevice()
         queueCreateInfo.pQueuePriorities = &queuePriority;
         queueCreateInfos.push_back(queueCreateInfo);
     }
-    VkPhysicalDeviceNestedCommandBufferFeaturesEXT nestedCommandBufferFeatures{};
-    nestedCommandBufferFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_NESTED_COMMAND_BUFFER_FEATURES_EXT;
+    //VkPhysicalDeviceNestedCommandBufferFeaturesEXT nestedCommandBufferFeatures{};
+    //nestedCommandBufferFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_NESTED_COMMAND_BUFFER_FEATURES_EXT;
     //nestedCommandBufferFeatures.nestedCommandBufferSimultaneousUse = VK_TRUE;
     VkPhysicalDeviceShaderDrawParametersFeatures shaderDrawParametersFeatures{};
     shaderDrawParametersFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETERS_FEATURES;
     shaderDrawParametersFeatures.shaderDrawParameters = VK_TRUE;
-    shaderDrawParametersFeatures.pNext = &nestedCommandBufferFeatures;
+    //shaderDrawParametersFeatures.pNext = &nestedCommandBufferFeatures;
     //VkPhysicalDeviceFeatures deviceFeatures1{};
     //vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures1);
     VkPhysicalDeviceDescriptorIndexingFeatures indexingFeatures{};
