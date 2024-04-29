@@ -1,5 +1,5 @@
 cc = clang
-cpp = clang++
+cpp = g++
 cflags = 
 libs = 
 ana = 

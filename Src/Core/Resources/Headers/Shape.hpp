@@ -12,7 +12,7 @@ namespace AnA
     };
     struct ShapeInfo
     {
-        Transform Transform{};
+        AnA::Transform Transform{};
         glm::vec3 Color{1.0f};
     };
     class Shapes
