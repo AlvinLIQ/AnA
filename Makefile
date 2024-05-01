@@ -8,7 +8,7 @@ shaderArgs = --target-env=vulkan1.3
 rm =
 ifeq ($(OS), Windows_NT)
 	vulkan_dir = $(wildcard C:/VulkanSDK/*/)
-	glfw_dir = C:/glfw3
+	glfw_dir = C:/glfw3/
 	libs += -L$(vulkan_dir)Lib -L$(glfw_dir)lib -lvulkan-1 -lglfw3dll
 	cflags = -I$(vulkan_dir)Include -I$(glfw_dir)include
 	ana = AnA.exe
