@@ -11,6 +11,7 @@
 * [X] Lighting System
 * [X] Multi-Thread Commandbuffer Recording
 * [X] Draw Indirectly
+* [ ] Mesh Shader
 * [ ] XML to GUI
 
 ## Build&Run
