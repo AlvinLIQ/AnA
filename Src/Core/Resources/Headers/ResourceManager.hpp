@@ -53,7 +53,7 @@ namespace AnA
             std::vector<Descriptor::DescriptorConfig> GetDefaultShapesDescriptorConfig();
 
             Lights::Light GlobalLight;
-            AnA::Shapes* Shapes;
+            AnA::Shapes Shapes;
 #ifdef ANA_INCLUDE_CONTROL
             AnA::Controls::Control* MainControl = NULL;
 #endif

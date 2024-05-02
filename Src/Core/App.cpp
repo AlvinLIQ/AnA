@@ -294,13 +294,14 @@ void App::createRecordCallBacks()
         controlExtent.width = _aApp->GetSceneOffset().x;
         aResourceManager->MainControl->Aspect = (float)controlExtent.width / (float)controlExtent.height;
         aResourceManager->MainControl->Extent = controlExtent;
-        aResourceManager->Shapes->Offset = offset;
-        aResourceManager->Shapes->Extent = controlExtent;
-        aResourceManager->Shapes->PrepareDraw(aResourceManager->MainControl);
+        auto& shapes = aResourceManager->Shapes;
+        shapes.Offset = offset;
+        shapes.Extent = controlExtent;
+        shapes.PrepareDraw(aResourceManager->MainControl);
         aResourceManager->SecondaryCommandBufferPool.Enqueue([](VkCommandBuffer secondaryCommandBuffer, size_t index)
         {
             _aApp->aRenderSystem->RenderShapesIndirect(secondaryCommandBuffer, 
-                *_aApp->aResourceManager->Shapes, 
+                _aApp->aResourceManager->Shapes, 
                 _aApp->aResourceManager->Shaders[1]);
         }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), offset, controlExtent);
     });

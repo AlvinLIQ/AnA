@@ -20,7 +20,8 @@ ResourceManager::ResourceManager(Device* mDevice) : aDevice{mDevice},
     createShadowFramebuffers();
 
     createDefaultShaders();
-    Shapes = new AnA::Shapes(mDevice);
+    Shapes = AnA::Shapes(mDevice);
+    //Shapes = new AnA::Shapes(mDevice);
 #ifdef ANA_INCLUDE_CONTROL
     Controls::Control::InitControl(SwapChain::GetCurrent());
 #endif
@@ -36,7 +37,7 @@ ResourceManager::~ResourceManager()
     //for (auto& shader : Shaders)
     //    delete shader;
     Shaders.clear();
-    delete Shapes;
+    //delete Shapes;
     
     auto logicalDevice = aDevice->GetLogicalDevice();
     for (auto& shadowSampler : shadowSamplers)
