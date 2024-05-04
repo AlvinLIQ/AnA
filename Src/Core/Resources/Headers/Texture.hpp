@@ -24,6 +24,7 @@ namespace AnA
         {
             if (this != &texture)
             {
+                Texture::~Texture();
                 aDevice = texture.aDevice;
                 textureImage = texture.textureImage;
                 textureImageMemory = texture.textureImageMemory;
@@ -44,12 +45,12 @@ namespace AnA
 
         Device* GetDevice();
     private:
-        Device* aDevice;
+        Device* aDevice{nullptr};
 
         void init();
 
-        VkImage textureImage;
-        VkDeviceMemory textureImageMemory;
+        VkImage textureImage{VK_NULL_HANDLE};
+        VkDeviceMemory textureImageMemory{VK_NULL_HANDLE};
         VkDescriptorImageInfo imageInfo;
         void createTextureSampler(enum VkSamplerAddressMode samplerAddressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT);
     };
