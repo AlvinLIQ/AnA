@@ -89,6 +89,7 @@ namespace AnA
         uint32_t maxUpdateRange = 0;
         bool commandBufferNeedUpdate = false;
         std::unordered_map<uint32_t, uint32_t> textureIdMap{};
+        std::vector<VkDescriptorImageInfo> textureInfos;
         std::vector<Descriptor*> samplersDescriptors;
         Descriptor* ssboDescriptor;
         void createSSBODescriptor();

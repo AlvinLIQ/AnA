@@ -51,6 +51,7 @@ namespace AnA
         std::vector<VkDescriptorSet>& GetSets();
         const VkDescriptorSetLayout& GetLayout() const;
         void UpdateDescriptorSets(DescriptorConfig& descriptorConfig);
+        void UpdateDescriptorSets(VkDescriptorImageInfo* imageInfos, uint32_t imageCount, uint32_t dstBinding = 0, VkDescriptorType descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
         void UpdateDescriptorSets(std::vector<VkDescriptorImageInfo> imageInfos, uint32_t dstBinding = 0, VkDescriptorType descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
         void UpdateDescriptorSets(VkDescriptorBufferInfo* pBufferInfo, uint32_t dstBinding, VkDescriptorType descriptorType);
     private:

@@ -9,6 +9,7 @@ namespace AnA
     {
         glm::mat4 transform{1.0f};
         alignas(8) glm::vec3 color{1.0f};
+        alignas(4) uint32_t textureId{0};
     };
     struct ShapeInfo
     {
@@ -36,6 +37,7 @@ namespace AnA
         {
             if (&shapes != this)
             {
+                Shapes::~Shapes();
                 aDevice = shapes.aDevice;
                 shapeBuffer = shapes.shapeBuffer;
                 shapeCount = shapes.shapeCount;
@@ -57,7 +59,7 @@ namespace AnA
         VkOffset2D Offset;
         VkExtent2D Extent;
     private:
-        Device* aDevice;
+        Device* aDevice{nullptr};
         Buffer* shapeBuffer{nullptr};
         Buffer* indirectBuffer{nullptr};
         Descriptor* ssboDescriptor{nullptr};

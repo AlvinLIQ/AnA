@@ -31,6 +31,7 @@ namespace AnA
         {
             if (&shader != this)
             {
+                Shader::~Shader();
                 aDevice = shader.aDevice;
                 pipeline = shader.pipeline;
                 pipelineLayout = shader.pipelineLayout;
@@ -51,8 +52,8 @@ namespace AnA
         const std::vector<Descriptor*>& GetDescriptors() const;
         std::vector<std::vector<VkDescriptorSet>>& GetDescriptorSets();
     private:
-        Device* aDevice;
-        Pipeline* pipeline;
+        Device* aDevice{nullptr};
+        Pipeline* pipeline{nullptr};
         VkPipelineLayout pipelineLayout {VK_NULL_HANDLE};
         void createPipelineLayout(std::vector<Descriptor::DescriptorConfig>& descriptorConfigs);
         void createDescriptors(std::vector<Descriptor::DescriptorConfig>& descriptorConfigs);

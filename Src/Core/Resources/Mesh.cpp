@@ -102,7 +102,7 @@ void Meshes::Draw(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& s
     sets[DEFAULT_SSBO_LAYOUT] = ssboDescriptor->GetSets()[0];
     for (i = batchSize, j = 0; i < size; i += batchSize, j++)
     {
-        sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors[j]->GetSets()[0];
+        sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors[j]->GetSets()[j];
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
         pipelineLayout, 0, static_cast<uint32_t>(sets.size()),
         sets.data(), 0, nullptr);
@@ -113,7 +113,7 @@ void Meshes::Draw(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& s
     }
     if (i > size)
     {
-        sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors[j]->GetSets()[0];
+        sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors[j]->GetSets()[j];
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
         pipelineLayout, 0, static_cast<uint32_t>(sets.size()),
         sets.data(), 0, nullptr);
@@ -282,11 +282,24 @@ void Meshes::appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageI
 {
     auto& descriptorSetLayout = 
         Resource::ResourceManager::GetCurrent()->Shaders[0].GetDescriptors()[DEFAULT_SAMPLER_LAYOUT]->GetLayout();
-    auto descriptor = new Descriptor(aDevice, 1, 
-        batchSize,
-        descriptorSetLayout,
-        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-        VK_SHADER_STAGE_FRAGMENT_BIT);
-    descriptor->UpdateDescriptorSets(imageInfos, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
-    samplersDescriptors.push_back(descriptor);
+    uint32_t remaining = (uint32_t)textureInfos.size() % batchSize;
+    uint32_t offset = (uint32_t)textureInfos.size() - remaining;
+    textureInfos.insert(textureInfos.end(), imageInfos.begin(), imageInfos.end());
+    if (remaining && samplersDescriptors.size())
+    {
+        remaining = std::min(remaining + (uint32_t)imageInfos.size(), batchSize);
+        samplersDescriptors.back()->UpdateDescriptorSets(&textureInfos[offset], remaining, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+        offset += remaining;
+    }
+
+    if (offset < textureInfos.size())
+    {
+        auto descriptor = new Descriptor(aDevice, 1, 
+            batchSize,
+            descriptorSetLayout,
+            VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            VK_SHADER_STAGE_FRAGMENT_BIT);
+        descriptor->UpdateDescriptorSets(&textureInfos[offset], textureInfos.size() - offset, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+        samplersDescriptors.push_back(descriptor);
+    }
 }
