@@ -20,6 +20,7 @@ namespace AnA
             bool IsWrapping;
         protected:
             std::string text = "";
+            Texture* texture{nullptr};
         };
     }
 }
