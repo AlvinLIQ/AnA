@@ -225,8 +225,8 @@ void Device::CreateTextImage(const char* text, int width, int height, float line
     if (!imageSize)
     {
         if (!width)
-            width = ((int)-1) >> 1;
-        
+            width = 100;
+        height = lineHeight;
         imageSize = width * lineHeight;
     }
 

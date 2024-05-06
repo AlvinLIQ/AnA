@@ -12,7 +12,7 @@ namespace AnA
             TextBlock();
             ~TextBlock();
 
-            void PrepareDraw();
+            virtual void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfo, uint32_t& shapeCount);
 
             void Text(const char* newText);
             const char* Text();

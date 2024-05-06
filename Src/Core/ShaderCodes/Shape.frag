@@ -3,9 +3,10 @@
 
 layout(location = 0) in vec3 baseColor;
 layout(location = 1) flat in uint texIndex;
+layout(location = 2) in vec2 texCoord;
 layout(location = 0) out vec4 outColor;
 
-//layout(set = 1, binding = 0) uniform sampler2D texSampler[];
+layout(set = 1, binding = 0) uniform sampler2D texSampler[];
 
 float rect(vec2 uv, float l, float t, float r, float b)
 {
@@ -69,7 +70,6 @@ float rounded_rect2(vec2 uv, vec2 offset, vec2 size, vec2 radius)
 
 void main()
 {
-    outColor = vec4(baseColor, 1.0);
-    //vec4 texColor = texIndex == 0 ? vec4(1.) : texture(texSampler[nonuniformEXT(texIndex)], gl_FragCoord.xy);
-    //outColor = vec4(baseColor, 1.0) * texColor;
+    //outColor = vec4(baseColor, 1.0);
+    outColor = vec4(baseColor, 1.0) * texture(texSampler[nonuniformEXT(texIndex)], texCoord);
 }

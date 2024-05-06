@@ -47,8 +47,7 @@ ResourceManager::~ResourceManager()
     //delete SceneObjects;
     //delete GlobalLight;
 #ifdef ANA_INCLUDE_CONTROL
-    if (MainControl != nullptr)
-        delete MainControl;
+    delete MainControl;
 #endif
 
     for (auto& mainCameraBuffer : mainCameraBuffers)

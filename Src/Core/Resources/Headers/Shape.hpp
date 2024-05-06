@@ -9,12 +9,12 @@ namespace AnA
     {
         glm::mat4 transform{1.0f};
         alignas(8) glm::vec3 color{1.0f};
-        alignas(4) uint32_t textureId{0};
     };
     struct ShapeInfo
     {
         AnA::Transform Transform{};
         glm::vec3 Color{1.0f};
+        uint32_t TextureId{0};
     };
     class Shapes
     {
@@ -28,6 +28,7 @@ namespace AnA
         Shapes& operator=(const Shapes&) = delete;
         Shapes(Shapes&& shapes) noexcept : aDevice{shapes.aDevice}, shapeBuffer{shapes.shapeBuffer}, shapeCount{shapes.shapeCount}, indirectBuffer{shapes.indirectBuffer}, ssboDescriptor{shapes.ssboDescriptor}
         {
+            shapes.samplersDescriptor = nullptr;
             shapes.ssboDescriptor = nullptr;
             shapes.indirectBuffer = nullptr;
             shapes.shapeBuffer = nullptr;
@@ -43,7 +44,9 @@ namespace AnA
                 shapeCount = shapes.shapeCount;
                 indirectBuffer = shapes.indirectBuffer;
                 ssboDescriptor = shapes.ssboDescriptor;
+                samplersDescriptor = shapes.samplersDescriptor;
 
+                shapes.samplersDescriptor = nullptr;
                 shapes.ssboDescriptor = nullptr;
                 shapes.indirectBuffer = nullptr;
                 shapes.shapeBuffer = nullptr;
@@ -63,6 +66,8 @@ namespace AnA
         Buffer* shapeBuffer{nullptr};
         Buffer* indirectBuffer{nullptr};
         Descriptor* ssboDescriptor{nullptr};
+        Descriptor* samplersDescriptor{nullptr};
         uint32_t shapeCount{};
+        std::vector<VkDescriptorImageInfo> imageInfos{};
     };
 }

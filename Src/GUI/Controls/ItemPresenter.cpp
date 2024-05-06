@@ -26,9 +26,9 @@ void ItemPresenter::Child(Control* newItem)
     item = newItem;
 }
 
-void ItemPresenter::PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount)
+void ItemPresenter::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfo, uint32_t& shapeCount)
 {
-    Control::PrepareDraw(shapeBuffer, shapeCount);
+    Control::PrepareDraw(shapeBuffer, imageInfo, shapeCount);
     if (item != nullptr)
-        item->PrepareDraw(shapeBuffer, shapeCount);
+        item->PrepareDraw(shapeBuffer, imageInfo, shapeCount);
 }

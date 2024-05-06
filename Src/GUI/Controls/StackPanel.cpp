@@ -1,4 +1,5 @@
 #include "Headers/StackPanel.hpp"
+#include "../../Core/Resources/Headers/ResourceManager.hpp"
 
 using namespace AnA;
 using namespace Controls;
@@ -10,10 +11,9 @@ StackPanel::StackPanel()
 
 StackPanel::~StackPanel()
 {
-    
 }
 
-void StackPanel::PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount)
+void StackPanel::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfo, uint32_t& shapeCount)
 {
     float maxSize = 1.0f;
     int o = Orientation, invO = 1 - Orientation;
@@ -57,8 +57,14 @@ void StackPanel::PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount)
         items[i]->Transform.scale = {size.Width, size.Height, 1.0f};
         shapeBuffer[shapeCount].transform = items[i]->Transform.mat4();
         shapeBuffer[shapeCount].color = items[i]->Color;
+        if (imageInfo.size() <= shapeCount)
+        {
+            imageInfo.resize(shapeCount + 1);
+        }
+        auto resourceManager = Resource::ResourceManager::GetCurrent();
+        imageInfo[shapeCount] = resourceManager->TextureMap.at(items[i]->TextureId).GetImageInfo();
         shapeCount++;
     }
 
-    Control::PrepareDraw(shapeBuffer, shapeCount);
+    Control::PrepareDraw(shapeBuffer, imageInfo, shapeCount);
 }

@@ -14,7 +14,7 @@ namespace AnA
         {
         public:
             Control();
-            ~Control();
+            virtual ~Control();
             
             AlignmentType HorizontalAlignment {ControlHorizontalAlignment};
             AlignmentType VerticalAlignment {ControlVerticalAlignment};
@@ -87,7 +87,7 @@ namespace AnA
             float Aspect = 1.0f;
             VkExtent2D Extent;
 
-            virtual void PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount);
+            virtual void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount);
             virtual void PointerEventTrigger(PointerEventArgs& args);
             static void InitControl(SwapChain* swapChain);
             static VkExtent2D GetSwapChainExtent();

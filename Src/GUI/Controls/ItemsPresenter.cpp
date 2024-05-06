@@ -10,20 +10,19 @@ ItemsPresenter::ItemsPresenter() : Control()
 
 ItemsPresenter::~ItemsPresenter()
 {
-    for (auto item = items.begin(); item < items.end(); item++)
+    for (auto item : items)
     {
-        Control* pItem = *item;
-        delete pItem;
+        delete item;
     }
     items.clear();
 }
 
-void ItemsPresenter::PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount)
+void ItemsPresenter::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfo, uint32_t& shapeCount)
 {
-    Control::PrepareDraw(shapeBuffer, shapeCount);
+    Control::PrepareDraw(shapeBuffer, imageInfo, shapeCount);
     for (auto& item : items)
     {
-        item->PrepareDraw(shapeBuffer, shapeCount);
+        item->PrepareDraw(shapeBuffer, imageInfo, shapeCount);
     }
 }
 

@@ -1,6 +1,7 @@
 #include "Headers/Editor.hpp"
 #include "../GUI/Controls/Headers/StackPanel.hpp"
 #include "../GUI/Controls/Headers/Button.hpp"
+#include "../GUI/Controls/Headers/TextBlock.hpp"
 
 using namespace AnA;
 using namespace Editors;
@@ -42,6 +43,11 @@ void Editor::Init()
     button = new Controls::Button();
     button->HorizontalAlignment = AlignmentType::Stretch;
     panel->Child(button);
+
+    auto textBlock = new Controls::TextBlock();
+    textBlock->Text("Hello");
+    textBlock->HorizontalAlignment = AlignmentType::Stretch;
+    panel->Child(textBlock);
     
     aResourceManager->MainControl = panel;
     sceneOffset.x = EDITOR_LEFT_PANEL_WIDTH;

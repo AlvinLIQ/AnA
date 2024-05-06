@@ -17,7 +17,7 @@ Control::~Control()
     
 }
 
-void Control::PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount)
+void Control::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfo, uint32_t& shapeCount)
 {
     auto size = GetSizeForRender();
     auto offset = GetActualControlOffset(renderSize);
@@ -25,6 +25,12 @@ void Control::PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount)
     this->Transform.translation = {offset.x, offset.y, 0.f};
     shapeBuffer[shapeCount].transform = Transform.mat4();
     shapeBuffer[shapeCount].color = Color;
+    if (imageInfo.size() <= shapeCount)
+    {
+        imageInfo.resize(shapeCount + 1);
+    }
+    auto resourceManager = Resource::ResourceManager::GetCurrent();
+    imageInfo[shapeCount] = resourceManager->TextureMap.at(TextureId).GetImageInfo();
     shapeCount++;
 }
 
