@@ -277,7 +277,7 @@ void Device::CreateTextImage(const char* text, int& width, int& height, float li
     auto bufData = (unsigned char*)aBuffer.GetMappedData();
     for (int i = 0, j = 0; i < bufSize; i += 4, j++)
     {
-        if (textBitmap[j] > 0xCF)
+        if (textBitmap[j] >= 0xC0)
         {
             bufData[i] = textBitmap[j];
             bufData[i + 1] = bufData[i];
