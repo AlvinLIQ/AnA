@@ -8,7 +8,7 @@ TextBlock::TextBlock()
 {
     Color = {};
     SetRenderMode(Relative);
-    ControlSize = {300, ANA_TEXT_DEFAULT_LINE_HEIGHT};
+    ControlSize = {75.0f, ANA_TEXT_DEFAULT_LINE_HEIGHT};
 }
 
 TextBlock::~TextBlock()
@@ -36,7 +36,9 @@ void TextBlock::Text(const char* newText)
 {
     //TextBlock::~TextBlock();
     text = newText;
-    texture = new Texture(newText, 0, 0, 0, Control::GetDevice());
+    int width = 0, height = 0;
+    texture = new Texture(newText, width, height, 0, Control::GetDevice());
+    ControlSize = {(float)width, (float)height};
 }
 
 const char* TextBlock::Text()

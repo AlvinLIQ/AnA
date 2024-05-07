@@ -71,5 +71,8 @@ float rounded_rect2(vec2 uv, vec2 offset, vec2 size, vec2 radius)
 void main()
 {
     //outColor = vec4(baseColor, 1.0);
-    outColor = vec4(baseColor, 1.0) * texture(texSampler[nonuniformEXT(texIndex)], texCoord);
+    vec4 texColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord);
+    if (texColor.a == 0.)
+        discard;
+    outColor = vec4(baseColor, 1.0) * texColor;
 }

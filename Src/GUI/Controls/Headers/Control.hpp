@@ -49,9 +49,8 @@ namespace AnA
             {
                 if (renderMode == AlignType::Relative)
                 {
-                    auto extent = GetSwapChainExtent();
-                    renderSize.Width = ControlSize.Width / (float)extent.height;
-                    renderSize.Height = ControlSize.Height / (float)extent.height;
+                    renderSize.Width = ControlSize.Width / (float)Extent.width;
+                    renderSize.Height = ControlSize.Height / (float)Extent.height;
                 }
                 else if (renderMode == AlignType::Absolute)
                 {

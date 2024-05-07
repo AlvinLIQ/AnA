@@ -45,8 +45,8 @@ void Editor::Init()
     panel->Child(button);
 
     auto textBlock = new Controls::TextBlock();
-    textBlock->Text("Hello");
-    textBlock->HorizontalAlignment = AlignmentType::Stretch;
+    textBlock->Text("Test Message");
+    textBlock->HorizontalAlignment = AlignmentType::Center;
     panel->Child(textBlock);
     
     aResourceManager->MainControl = panel;

@@ -210,7 +210,7 @@ void Device::CreateTextureImage(const char* imagePath, VkImage* pTexImage, VkDev
     TransitionImageLayout(*pTexImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
-void Device::CreateTextImage(const char* text, int width, int height, float lineHeight, VkImage* pTextImage, VkDeviceMemory* pTextMemory)
+void Device::CreateTextImage(const char* text, int& width, int& height, float lineHeight, VkImage* pTextImage, VkDeviceMemory* pTextMemory)
 {
     auto fontData = ReadFile("Fonts/SourceCodePro-Black.otf");
     stbtt_fontinfo info{};
@@ -222,15 +222,7 @@ void Device::CreateTextImage(const char* text, int width, int height, float line
     {
         lineHeight = ANA_TEXT_DEFAULT_LINE_HEIGHT;
     }
-    if (!imageSize)
-    {
-        if (!width)
-            width = 300;
-        height = lineHeight;
-        imageSize = width * lineHeight;
-    }
-
-    std::vector<unsigned char> textBitmap(imageSize);
+    
     float scale = stbtt_ScaleForPixelHeight(&info, lineHeight);
 
     int hCharWidth, wCharWidth;
@@ -238,6 +230,22 @@ void Device::CreateTextImage(const char* text, int width, int height, float line
     stbtt_GetCodepointHMetrics(&info, L'里', &wCharWidth, NULL);
     hCharWidth *= scale;
     wCharWidth *= scale;
+
+    if (!imageSize)
+    {
+        if (!width)
+        {
+            for (int i = 0; i < strlen(text); i++)
+            {
+                width += (IS_ASCII_CHAR(text[i]) ? hCharWidth : wCharWidth);
+                width += stbtt_GetCodepointKernAdvance(&info, text[i], text[i + 1]) * scale;
+            }
+        }
+        height = lineHeight;
+        imageSize = width * lineHeight;
+    }
+
+    std::vector<unsigned char> textBitmap(imageSize);
 
     int ascent, descent, lineGap;
     stbtt_GetFontVMetrics(&info, &ascent, &descent, &lineGap);

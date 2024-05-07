@@ -32,6 +32,7 @@ void StackPanel::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageIn
     for (int i = 0; i < items.size(); i++)
     {
         items[i]->Aspect = Aspect;
+        items[i]->Extent = Extent;
         auto _size = items[i]->GetSizeForRender();
         ((float*)&offset)[invO] += ((float*)&size)[invO] + ((float*)&_size)[invO];
         size = _size;

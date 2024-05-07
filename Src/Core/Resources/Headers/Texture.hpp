@@ -9,7 +9,7 @@ namespace AnA
     public:
         Texture(const char* filename, Device* mDevice);
         Texture(const uint32_t color, Device* mDevice);
-        Texture(const char* text, const int width, const int height, const float lineHeight, Device* mDevice);
+        Texture(const char* text, int& width, int& height, float lineHeight, Device* mDevice);
         Texture(const Texture&) = delete;
         Texture& operator=(const Texture&) = delete;
         Texture(Texture&& texture) noexcept : aDevice{texture.aDevice}, textureImage{texture.textureImage}, 
