@@ -111,6 +111,8 @@ namespace AnA
             
             bool IsInside(CursorPosition pos);
             static bool IsInside(CursorPosition& pos, POS_F& offset, SIZE_F& size);
+
+            virtual VkDescriptorImageInfo GetDescriptorImageInfo();
         private:
             AlignType renderMode {ControlRenderMode};
             POS_F renderOffset{};

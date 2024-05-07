@@ -1,5 +1,4 @@
 #include "Headers/StackPanel.hpp"
-#include "../../Core/Resources/Headers/ResourceManager.hpp"
 
 using namespace AnA;
 using namespace Controls;
@@ -61,8 +60,7 @@ void StackPanel::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageIn
         {
             imageInfo.resize(shapeCount + 1);
         }
-        auto resourceManager = Resource::ResourceManager::GetCurrent();
-        imageInfo[shapeCount] = resourceManager->TextureMap.at(items[i]->TextureId).GetImageInfo();
+        imageInfo[shapeCount] = items[i]->GetDescriptorImageInfo();
         shapeCount++;
     }
 

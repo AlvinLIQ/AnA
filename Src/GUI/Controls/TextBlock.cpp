@@ -6,6 +6,9 @@ using namespace AnA::Controls;
 
 TextBlock::TextBlock()
 {
+    Color = {};
+    SetRenderMode(Relative);
+    ControlSize = {300, ANA_TEXT_DEFAULT_LINE_HEIGHT};
 }
 
 TextBlock::~TextBlock()
@@ -39,4 +42,12 @@ void TextBlock::Text(const char* newText)
 const char* TextBlock::Text()
 {
     return text.c_str();
+}
+
+VkDescriptorImageInfo TextBlock::GetDescriptorImageInfo()
+{
+    if (texture)
+        return texture->GetImageInfo();
+    else
+        return Control::GetDescriptorImageInfo();
 }

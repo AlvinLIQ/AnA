@@ -17,6 +17,7 @@ namespace AnA
             void Text(const char* newText);
             const char* Text();
 
+            VkDescriptorImageInfo GetDescriptorImageInfo();
             bool IsWrapping;
         protected:
             std::string text = "";

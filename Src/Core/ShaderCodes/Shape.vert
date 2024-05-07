@@ -1,8 +1,8 @@
 #version 460
 
 layout(location = 0) out vec3 fragColor;
-layout(location = 1) flat out uint texIndex;
-layout(location = 2) out vec2 texCoord;
+layout(location = 1) out vec2 texCoord;
+layout(location = 2) out uint texIndex;
 
 struct Shape
 {
@@ -36,8 +36,9 @@ const vec2 uvs[] = vec2[](
 void main()
 {
     uint index = gl_VertexIndex / 6;
-    gl_Position = ssbo.shapes[index].transform * vec4(vertices[gl_VertexIndex % 6], 0.0, 1.0);
+    uint vIndex = gl_VertexIndex % 6;
+    gl_Position = ssbo.shapes[index].transform * vec4(vertices[vIndex], 0.0, 1.0);
     fragColor = ssbo.shapes[index].color;
     texIndex = index;
-    texCoord = uvs[index];
+    texCoord = uvs[vIndex];
 }

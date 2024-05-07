@@ -84,6 +84,11 @@ bool Control::IsInside(CursorPosition& pos, POS_F& offset, SIZE_F& size)
     return pos.x >= offset.x && pos.y >= offset.y && pos.x <= offset.x + size.Width && pos.y <= offset.y + size.Height;
 }
 
+VkDescriptorImageInfo Control::GetDescriptorImageInfo()
+{
+    return Resource::ResourceManager::GetCurrent()->TextureMap.at(TextureId).GetImageInfo();
+}
+
 void Control::PointerEventTrigger(PointerEventArgs& args)
 {
     if (args.Handled)
