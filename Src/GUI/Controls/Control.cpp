@@ -17,21 +17,11 @@ Control::~Control()
     
 }
 
-void Control::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfo, uint32_t& shapeCount)
+void Control::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
     auto size = GetSizeForRender();
     auto offset = GetActualControlOffset(renderSize);
-    this->Transform.scale = {size.Width, size.Height, 1.f};
-    this->Transform.translation = {offset.x, offset.y, 0.f};
-    shapeBuffer[shapeCount].transform = Transform.mat4();
-    shapeBuffer[shapeCount].color = Color;
-    if (imageInfo.size() <= shapeCount)
-    {
-        imageInfo.resize(shapeCount + 1);
-    }
-    auto resourceManager = Resource::ResourceManager::GetCurrent();
-    imageInfo[shapeCount] = resourceManager->TextureMap.at(TextureId).GetImageInfo();
-    shapeCount++;
+    ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
 }
 
 void Control::InitControl(SwapChain* swapChain)
@@ -87,6 +77,20 @@ bool Control::IsInside(CursorPosition& pos, POS_F& offset, SIZE_F& size)
 VkDescriptorImageInfo Control::GetDescriptorImageInfo()
 {
     return Resource::ResourceManager::GetCurrent()->TextureMap.at(TextureId).GetImageInfo();
+}
+
+void Control::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
+{
+    this->Transform.scale = {renderSize.Width, renderSize.Height, 1.f};
+    this->Transform.translation = {renderOffset.x, renderOffset.y, 0.f};
+    shapeBuffer[shapeCount].transform = Transform.mat4();
+    shapeBuffer[shapeCount].color = Color;
+    if (imageInfos.size() <= shapeCount)
+    {
+        imageInfos.resize(shapeCount + 1);
+    }
+    imageInfos[shapeCount] = this->GetDescriptorImageInfo();
+    shapeCount++;
 }
 
 void Control::PointerEventTrigger(PointerEventArgs& args)

@@ -17,12 +17,12 @@ ItemsPresenter::~ItemsPresenter()
     items.clear();
 }
 
-void ItemsPresenter::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfo, uint32_t& shapeCount)
+void ItemsPresenter::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
-    Control::PrepareDraw(shapeBuffer, imageInfo, shapeCount);
+    Control::PrepareDraw(shapeBuffer, imageInfos, shapeCount);
     for (auto& item : items)
     {
-        item->PrepareDraw(shapeBuffer, imageInfo, shapeCount);
+        item->PrepareDraw(shapeBuffer, imageInfos, shapeCount);
     }
 }
 

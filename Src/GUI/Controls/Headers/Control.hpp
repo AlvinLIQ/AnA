@@ -62,7 +62,7 @@ namespace AnA
                 }
                 return renderSize;
             }
-            void SetSizeRequest(SIZE_F newSize)
+            void SizeRequest(SIZE_F newSize)
             {
                 if (newSize.Width < minSize.Width || newSize.Height < minSize.Height || 
                     newSize.Width > maxSize.Width || newSize.Height > maxSize.Height)
@@ -71,11 +71,11 @@ namespace AnA
                 ControlSize = newSize;
             }
 
-            AlignType GetRenderMode() const
+            AlignType RenderMode() const
             {
                 return renderMode;
             }
-            void SetRenderMode(AlignType newRenderMode)
+            void RenderMode(AlignType newRenderMode)
             {
                 if (newRenderMode == renderMode)
                     return;
@@ -93,13 +93,21 @@ namespace AnA
             static Device* GetDevice();
             static void GetInputProfile(Control* mainControl, std::vector<Input::InputProfile>& profiles);
 
-            void SetRenderOffset(POS_F newOffset)
+            void RenderOffset(POS_F newOffset)
             {
                 renderOffset = newOffset;
             }
-            void SetRenderSize(SIZE_F newSize)
+            POS_F RenderOffset()
+            {
+                return renderOffset;
+            }
+            void RenderSize(SIZE_F newSize)
             {
                 renderSize = newSize;
+            }
+            SIZE_F RenderSize()
+            {
+                return renderSize;
             }
 
             std::vector<PointerEventHandler> PointerEvents[PointerEventType::Moving + 1];
@@ -112,6 +120,7 @@ namespace AnA
             static bool IsInside(CursorPosition& pos, POS_F& offset, SIZE_F& size);
 
             virtual VkDescriptorImageInfo GetDescriptorImageInfo();
+            virtual void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfoss, uint32_t& shapeCount);
         private:
             AlignType renderMode {ControlRenderMode};
             POS_F renderOffset{};

@@ -13,7 +13,7 @@ namespace AnA
             ~StackPanel();
 
             Orientations Orientation {Horizontal};
-            void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfo, uint32_t& shapeCount);
+            void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount);
         private:
         };
     }

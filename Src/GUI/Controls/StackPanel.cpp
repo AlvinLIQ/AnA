@@ -5,14 +5,14 @@ using namespace Controls;
 
 StackPanel::StackPanel()
 {
-    SetRenderMode(Absolute);
+    RenderMode(Absolute);
 }
 
 StackPanel::~StackPanel()
 {
 }
 
-void StackPanel::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfo, uint32_t& shapeCount)
+void StackPanel::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
     float maxSize = 1.0f;
     int o = Orientation, invO = 1 - Orientation;
@@ -51,19 +51,10 @@ void StackPanel::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageIn
             ((float*)&offset)[o] = 0.0f;
             break;
         }
-        items[i]->SetRenderOffset(offset);
-        items[i]->SetRenderSize(size);
-        items[i]->Transform.translation = {offset.x, offset.y, 0.0f};
-        items[i]->Transform.scale = {size.Width, size.Height, 1.0f};
-        shapeBuffer[shapeCount].transform = items[i]->Transform.mat4();
-        shapeBuffer[shapeCount].color = items[i]->Color;
-        if (imageInfo.size() <= shapeCount)
-        {
-            imageInfo.resize(shapeCount + 1);
-        }
-        imageInfo[shapeCount] = items[i]->GetDescriptorImageInfo();
-        shapeCount++;
+        items[i]->RenderOffset(offset);
+        items[i]->RenderSize(size);
+        items[i]->ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
     }
 
-    Control::PrepareDraw(shapeBuffer, imageInfo, shapeCount);
+    Control::PrepareDraw(shapeBuffer, imageInfos, shapeCount);
 }

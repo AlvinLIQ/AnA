@@ -29,7 +29,7 @@ void Button_PointerReleased(Button* control, PointerEventArgs& args)
 
 Button::Button() : ItemPresenter()
 {
-    SetRenderMode(ButtonRenderMode);
+    RenderMode(ButtonRenderMode);
     ControlSize = ButtonMinSize;
     Color = ButtonBackgroundColor;
     PointerEvents[PointerEventType::Entered].push_back((PointerEventHandler)Button_PointerEntered);

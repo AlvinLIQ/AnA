@@ -16,7 +16,7 @@ namespace AnA
             void RemoveChild(Control* targetItem);
             void RemoveChildAt(int index);
 
-            void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfo, uint32_t& shapeCount);
+            void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount);
             virtual void PointerEventTrigger(PointerEventArgs& args);
         protected:
             std::vector<Control*> items;

@@ -30,6 +30,9 @@ void Editor::Init()
 
     auto button = new Controls::Button();
     button->HorizontalAlignment = AlignmentType::Start;
+    auto content = new Controls::TextBlock();
+    content->Text("Button");
+    button->Child(content);
     panel->Child(button);
 
     button = new Controls::Button();

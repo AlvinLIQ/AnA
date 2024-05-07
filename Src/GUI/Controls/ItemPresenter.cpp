@@ -26,9 +26,25 @@ void ItemPresenter::Child(Control* newItem)
     item = newItem;
 }
 
-void ItemPresenter::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfo, uint32_t& shapeCount)
+void ItemPresenter::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
-    Control::PrepareDraw(shapeBuffer, imageInfo, shapeCount);
+    Control::PrepareDraw(shapeBuffer, imageInfos, shapeCount);
     if (item != nullptr)
-        item->PrepareDraw(shapeBuffer, imageInfo, shapeCount);
+    {
+        item->HorizontalAlignment = AlignmentType::Center;
+        item->VerticalAlignment = AlignmentType::Center;
+        item->PrepareDraw(shapeBuffer, imageInfos, shapeCount);
+    }
+}
+
+void ItemPresenter::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
+{
+    if (item != nullptr)
+    {
+        item->RenderMode(RenderMode());
+        item->RenderOffset(RenderOffset());
+        item->RenderSize(RenderSize());
+        item->ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
+    }
+    Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
 }

@@ -7,7 +7,7 @@ using namespace AnA::Controls;
 TextBlock::TextBlock()
 {
     Color = {};
-    SetRenderMode(Relative);
+    RenderMode(Relative);
     ControlSize = {75.0f, ANA_TEXT_DEFAULT_LINE_HEIGHT};
 }
 
@@ -16,20 +16,13 @@ TextBlock::~TextBlock()
     delete texture;
 }
 
-void TextBlock::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfo, uint32_t& shapeCount)
+void TextBlock::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
     auto size = GetSizeForRender();
     auto offset = GetActualControlOffset(size);
     this->Transform.scale = {size.Width, size.Height, 1.f};
     this->Transform.translation = {offset.x, offset.y, 0.f};
-    shapeBuffer[shapeCount].transform = Transform.mat4();
-    shapeBuffer[shapeCount].color = Color;
-    if (imageInfo.size() <= shapeCount)
-    {
-        imageInfo.resize(shapeCount + 1);
-    }
-    imageInfo[shapeCount] = texture->GetImageInfo();
-    shapeCount++;
+    ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
 }
 
 void TextBlock::Text(const char* newText)
