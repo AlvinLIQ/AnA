@@ -30,7 +30,8 @@ int Window::Init()
 
     glfwSetWindowUserPointer(window, this);
     glfwSetFramebufferSizeCallback(window, Window::FramebufferResizeCallback);
-
+    //In case window was created with a different size
+    glfwGetWindowSize(window, &Width, &Height);
     glfwMakeContextCurrent(window);
     
     return 0;
