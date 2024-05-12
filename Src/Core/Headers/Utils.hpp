@@ -42,6 +42,14 @@ namespace AnA
 			}
 			return *this;
 		}
+		operator const char*() const
+		{
+			return _str;
+		}
+		const char* Str() const
+		{
+			return _str;
+		}
 	protected:
 		char* _str = nullptr;
 	};
