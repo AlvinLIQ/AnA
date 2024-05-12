@@ -112,7 +112,8 @@ void App::Run()
     bool pressed = false;
     for (int i = 0; i < 1000; i++)
         meshInfos.push_back({"Models/cube.obj", {{random_double(), random_double() - 2.0f, random_double() + 5.0f}, {random_double(), random_double(), random_double()}}, (uint32_t)rand() % 4});
-    std::string title = "AnA FPS:";
+    const char cTitle[] = "AnA FPS:";
+    AnA::String title{cTitle, sizeof(cTitle), sizeof(cTitle) + 5};
     int frameCount = 0;
     float runingTime = 0.0f, prevSecond = 0.0f;
     while(!glfwWindowShouldClose(window))
@@ -136,7 +137,9 @@ void App::Run()
         if (prevSecond >= 1.0f)
         {
             //Show FPS on title bar
-            glfwSetWindowTitle(aWindow->GetGLFWwindow(), (title + std::to_string((int)(frameCount / prevSecond))).c_str());
+            auto fps = std::to_string((int)(frameCount / prevSecond));
+            title.Copy(fps.c_str(), fps.length(), sizeof(cTitle) - 1);
+            glfwSetWindowTitle(aWindow->GetGLFWwindow(), title.Str());
             prevSecond = 0.0f;
             frameCount = 0;
         }

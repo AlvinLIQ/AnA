@@ -127,6 +127,8 @@ namespace AnA
 			if (endPos > _capacity)
 				Resize(endPos);
 			memcpy(&_str[offset], str, len);
+			if (endPos > _index)
+				_index = endPos;
 		}
 	protected:
 		char* _str = nullptr;
