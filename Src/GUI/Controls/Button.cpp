@@ -29,8 +29,8 @@ void Button_PointerReleased(Button* control, PointerEventArgs& args)
 
 Button::Button() : ItemPresenter()
 {
-    RenderMode(ButtonRenderMode);
-    ControlSize = ButtonMinSize;
+    RenderMode(Absolute);
+    ControlSize = ButtonMinAbsoluteSize;
     Color = ButtonBackgroundColor;
     PointerEvents[PointerEventType::Entered].push_back((PointerEventHandler)Button_PointerEntered);
     PointerEvents[PointerEventType::Exited].push_back((PointerEventHandler)Button_PointerExited);

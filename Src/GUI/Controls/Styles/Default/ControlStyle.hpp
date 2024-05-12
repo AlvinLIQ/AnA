@@ -15,6 +15,7 @@ namespace AnA
     const AlignType ControlRenderMode = Auto;
     /*Button*/
     const SIZE_F ButtonMinSize = {0.1f, 0.06f};
+    const SIZE_F ButtonMinAbsoluteSize = {80.f, 36.0f};
     const AlignType ButtonRenderMode = Auto;
     const glm::vec3 ButtonBackgroundColor = {0.85f, 0.85f, 0.85f};
     const glm::vec3 ButtonPointerMovedBackgroundColor = {0.78f, 0.78, 0.78f};

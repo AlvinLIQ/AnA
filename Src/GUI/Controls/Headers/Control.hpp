@@ -47,12 +47,12 @@ namespace AnA
             SIZE_F ControlSize {AnA::ControlSize};
             SIZE_F GetSizeForRender()
             {
-                if (renderMode == AlignType::Relative)
+                if (renderMode == AlignType::Absolute)
                 {
                     renderSize.Width = ControlSize.Width / (float)Extent.width;
                     renderSize.Height = ControlSize.Height / (float)Extent.height;
                 }
-                else if (renderMode == AlignType::Absolute)
+                else if (renderMode == AlignType::Relative)
                 {
                     renderSize = ControlSize;
                 }

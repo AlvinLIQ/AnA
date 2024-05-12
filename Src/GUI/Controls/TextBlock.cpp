@@ -7,7 +7,7 @@ using namespace AnA::Controls;
 TextBlock::TextBlock()
 {
     Color = {};
-    RenderMode(Relative);
+    RenderMode(Absolute);
     ControlSize = {75.0f, ANA_TEXT_DEFAULT_LINE_HEIGHT};
 }
 

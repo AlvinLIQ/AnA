@@ -1,5 +1,3 @@
-<Window>
-    <Canvas>
-        
-    </Canvas>
-</Window>
+<StackPanel ControlSize="300.0f, 0.0f">
+
+</StackPanel>
