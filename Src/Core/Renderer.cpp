@@ -7,27 +7,20 @@
 
 using namespace AnA;
 
-Renderer::Renderer(Window& mWindow, Device* mDevice) : aWindow {mWindow}, aDevice{mDevice}
+Renderer::Renderer(Window& mWindow, Device* mDevice) : aWindow {mWindow}, aDevice{mDevice}, 
+    commandBuffers{mDevice, MAX_FRAMES_IN_FLIGHT, VK_COMMAND_BUFFER_LEVEL_PRIMARY, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT},
+    offscreenSecondaryCommandBuffers(mDevice, MAX_FRAMES_IN_FLIGHT, VK_COMMAND_BUFFER_LEVEL_SECONDARY, VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT | VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT)
 {
     aSwapChain = new SwapChain(aDevice, aWindow.GetSurface(), aWindow.GetGLFWwindow());
     inheritanceInfos[RENDER_PASS_TYPE_ONSCREEN].sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
     inheritanceInfos[RENDER_PASS_TYPE_ONSCREEN].renderPass = aSwapChain->GetRenderPass();
     inheritanceInfos[RENDER_PASS_TYPE_OFFSCREEN].sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
     inheritanceInfos[RENDER_PASS_TYPE_OFFSCREEN].renderPass = aSwapChain->GetOffscreenRenderPass();
-    createCommandBuffers();
 }
 
 Renderer::~Renderer()
 {
     delete aSwapChain;
-    vkFreeCommandBuffers(aDevice->GetLogicalDevice(), 
-        aDevice->GetCommandPool(), 
-        static_cast<uint32_t>(commandBuffers.size()), 
-        commandBuffers.data());
-
-    commandBuffers.clear();
-
-    delete offscreenSecondaryCommandBuffers;
 }
 
 VkCommandBuffer Renderer::BeginFrame()
@@ -47,14 +40,7 @@ VkCommandBuffer Renderer::BeginFrame()
     needUpdate = false;
     isFrameStarted = true;
 
-    auto commandBuffer = GetCurrentCommandBuffer();
-
-    VkCommandBufferBeginInfo beginInfo{};
-    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-    if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
-        throw std::runtime_error("Failed to begin recording buffer!");
-
+    auto commandBuffer = commandBuffers.Begin();
     return commandBuffer;
 }
 
@@ -62,27 +48,24 @@ void Renderer::RecordOffscreenSecondaryCommandBuffer(RecordCallBack recordCallBa
 {
     auto swapChainExtent = aSwapChain->GetExtent();
     //aSwapChain->WaitForFences();
-    auto& secondaryCommandBuffer = offscreenSecondaryCommandBuffers->Begin(&inheritanceInfos[RENDER_PASS_TYPE_OFFSCREEN]);
+    auto& secondaryCommandBuffer = offscreenSecondaryCommandBuffers.Begin(&inheritanceInfos[RENDER_PASS_TYPE_OFFSCREEN]);
     recordCallBack(secondaryCommandBuffer);
 
-    offscreenSecondaryCommandBuffers->End();
+    offscreenSecondaryCommandBuffers.End();
 }
 
 void Renderer::ExecuteOffscreenSecondaryCommandBuffer(VkCommandBuffer commandBuffer)
 {
     vkCmdExecuteCommands(commandBuffer, 
     1, 
-    &offscreenSecondaryCommandBuffers->Get());
+    &offscreenSecondaryCommandBuffers.Get());
 }
 
 void Renderer::EndFrame()
 {
     assert(isFrameStarted && "Can't call EndFrame while frame is not in progress!");
-    auto commandBuffer = GetCurrentCommandBuffer();
-    if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to record command buffer!");
-    }
+    commandBuffers.End();
+    auto commandBuffer = commandBuffers.Get();
     auto result = aSwapChain->SubmitCommandBuffers(&commandBuffer, 1,  &currentImageIndex); 
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || aWindow.FramebufferResized)
@@ -103,7 +86,6 @@ void Renderer::EndFrame()
 void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer)
 {
     assert(isFrameStarted && "Can't call BeginSwapChainRenderPass while frame is not in progress!");
-    assert(commandBuffer == GetCurrentCommandBuffer() && "Can't begin render pass on command buffer from a different frame!");
     auto swapChainExtent = aSwapChain->GetExtent();
 
     VkRenderPassBeginInfo renderPassInfo{};
@@ -120,7 +102,6 @@ void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer)
 void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkSubpassContents contents)
 {
     assert(isFrameStarted && "Can't call BeginSwapChainRenderPass while frame is not in progress!");
-    assert(commandBuffer == GetCurrentCommandBuffer() && "Can't begin render pass on command buffer from a different frame!");
     auto swapChainExtent = aSwapChain->GetExtent();
 
     VkRenderPassBeginInfo renderPassInfo{};
@@ -137,7 +118,6 @@ void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkSubpass
 void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2D& offset)
 {
     assert(isFrameStarted && "Can't call BeginSwapChainRenderPass while frame is not in progress!");
-    assert(commandBuffer == GetCurrentCommandBuffer() && "Can't begin render pass on command buffer from a different frame!");
     auto swapChainExtent = aSwapChain->GetExtent();
 
     VkRenderPassBeginInfo renderPassInfo{};
@@ -154,7 +134,6 @@ void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2
 void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2D& offset, VkExtent2D& extent)
 {
     assert(isFrameStarted && "Can't call BeginSwapChainRenderPass while frame is not in progress!");
-    assert(commandBuffer == GetCurrentCommandBuffer() && "Can't begin render pass on command buffer from a different frame!");
     auto swapChainExtent = aSwapChain->GetExtent();
 
     VkRenderPassBeginInfo renderPassInfo{};
@@ -171,7 +150,6 @@ void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2
 void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2D& ltOffset, VkOffset2D& rbOffset)
 {
     assert(isFrameStarted && "Can't call BeginSwapChainRenderPass while frame is not in progress!");
-    assert(commandBuffer == GetCurrentCommandBuffer() && "Can't begin render pass on command buffer from a different frame!");
     auto swapChainExtent = aSwapChain->GetExtent();
 
     VkRenderPassBeginInfo renderPassInfo{};
@@ -188,7 +166,6 @@ void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2
 void Renderer::EndRenderPass(VkCommandBuffer commandBuffer)
 {
     assert(isFrameStarted && "Can't call EndSwapChainRenderPass while frame is not in progress!");
-    assert(commandBuffer == GetCurrentCommandBuffer() && "Can't end render pass on command buffer from a different frame!");
 
     vkCmdEndRenderPass(commandBuffer);
 }
@@ -212,21 +189,4 @@ void Renderer::BeginOffscreenRenderPass(VkCommandBuffer commandBuffer, VkFramebu
                         &renderPassBegin,
                         contents);
 
-}
-
-void Renderer::createCommandBuffers()
-{
-    commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-    VkCommandBufferAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = aDevice->GetCommandPool();
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
-    if (vkAllocateCommandBuffers(aDevice->GetLogicalDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) 
-        throw std::runtime_error("Failed to allocate command buffers!");
-
-    offscreenSecondaryCommandBuffers = new CommandBuffer(aDevice, 
-        MAX_FRAMES_IN_FLIGHT, 
-        VK_COMMAND_BUFFER_LEVEL_SECONDARY,
-        VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT | VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT);
 }

@@ -6,7 +6,6 @@
 #include "../Resources/Headers/CommandBuffer.hpp"
 
 #include <cassert>
-#include <vector>
 #include <vulkan/vulkan.h>
 
 namespace AnA
@@ -39,7 +38,7 @@ namespace AnA
         VkCommandBuffer GetCurrentCommandBuffer() const
         {
             assert(isFrameStarted && "Cannot get command buffer when frame not in progress!");
-            return commandBuffers[currentFrameIndex];
+            return commandBuffers.Get();
         }
 
         SwapChain& GetSwapChain()
@@ -78,10 +77,9 @@ namespace AnA
         Device* aDevice;
         SwapChain* aSwapChain;
 
-        std::vector<VkCommandBuffer> commandBuffers;
-        CommandBuffer* offscreenSecondaryCommandBuffers;
-        void createCommandBuffers();
-        void freeCommandBuffersMemory();
+        VkCommandBufferBeginInfo beginInfo{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO, nullptr, VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT};
+        CommandBuffer commandBuffers;
+        CommandBuffer offscreenSecondaryCommandBuffers;
 
         uint32_t currentImageIndex = 0;
         int currentFrameIndex = 0;
