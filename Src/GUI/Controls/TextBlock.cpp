@@ -30,13 +30,13 @@ void TextBlock::Text(const char* newText)
     //TextBlock::~TextBlock();
     text = newText;
     int width = 0, height = 0;
-    texture = new Texture(newText, width, height, 0, Control::GetDevice());
+    texture = new Texture(text.Str(), width, height, 0, Control::GetDevice());
     ControlSize = {(float)width, (float)height};
 }
 
 const char* TextBlock::Text()
 {
-    return text.c_str();
+    return text.Str();
 }
 
 VkDescriptorImageInfo TextBlock::GetDescriptorImageInfo()

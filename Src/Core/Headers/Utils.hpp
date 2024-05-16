@@ -40,17 +40,19 @@ namespace AnA
 			if (len == -1)
 				len = strlen(str);
 			_index = _capacity = len;
-			_str = new char[len];
+			_str = new char[len + 1];
 			memcpy(_str, str, len);
+			_str[len] = '\0';
 		}
 		//reserve_size must be >= len
 		String(const char* str, size_t len, size_t reserve_size)
 		{
 			if (len == -1)
 				len = strlen(str);
-			_str = new char[_capacity = reserve_size];
+			_str = new char[(_capacity = reserve_size) + 1];
 			_index = len;
 			memcpy(_str, str, len);
+			_str[_index] = '\0';
 		}
 		~String()
 		{
@@ -58,13 +60,16 @@ namespace AnA
 		}
 		String(const String&) = delete;
 		String& operator=(const String&) = delete;
-		String(const String&& str) noexcept
+		String(String&& str) noexcept
 		{
 			_str = str._str;
 			_capacity = str._capacity;
 			_index = str._index;
+			str._str = nullptr;
+			str._capacity = 0;
+			str._index = 0;
 		}
-		String& operator=(const String&& str) noexcept
+		String& operator=(String&& str) noexcept
 		{
 			if (this != &str)
 			{
@@ -72,6 +77,9 @@ namespace AnA
 				_str = str._str;
 				_capacity = str._capacity;
 				_index = str._index;
+				str._str = nullptr;
+				str._capacity = 0;
+				str._index = 0;
 			}
 			return *this;
 		}

@@ -20,7 +20,7 @@ namespace AnA
             VkDescriptorImageInfo GetDescriptorImageInfo();
             bool IsWrapping;
         protected:
-            std::string text = "";
+            String text = "";
             Texture* texture{nullptr};
         };
     }
