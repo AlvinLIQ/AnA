@@ -18,7 +18,7 @@ namespace AnA
     };
     struct MeshInfo
     {
-        std::string filePath;
+        char filePath[256];
         AnA::Transform transform;
         uint32_t tetureId{};
     };
@@ -28,6 +28,7 @@ namespace AnA
         Meshes(Device* mDevice);
         ~Meshes();
         void Append(const std::vector<MeshInfo>& meshInfos);
+        void Append(const MeshInfo* meshInfos, size_t count);
         void RemoveAt(uint32_t meshIndex);
         void RemoveAt(Range removeRange);
         void RemoveAt(std::vector<uint32_t> meshIndices);

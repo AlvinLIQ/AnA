@@ -31,9 +31,13 @@ void Editor::Init()
     auto button = new Controls::Button();
     button->HorizontalAlignment = AlignmentType::Start;
     auto content = new Controls::TextBlock();
-    content->Text("Button");
+    content->Text("Load");
     button->Child(content);
     panel->Child(button);
+    button->PointerEvents[PointerEventType::Released].push_back([](void* control, PointerEventArgs& args)
+    {
+        
+    });
 
     button = new Controls::Button();
     button->HorizontalAlignment = AlignmentType::Center;
@@ -80,24 +84,17 @@ void Editor::Init()
 }
 
 const VkDeviceSize offset = 0;
-std::vector<MeshInfo> meshInfos = 
-{
-    {"Models/cube.obj", {{3.0, 0.5, 0.0}, {11.4f, 0.02f, 11.4}}, 0},
-    {"Models/torus.obj", {{0.f, 0.f , 1.5f}, {.7f, .7f, .7f}}, 1},
-    {"Models/cube.obj", {{-1.5, -.5, 1.5}, {0.7f, 0.7f, 0.7f}}, 2},
-    {"Models/cube.obj", {{1.5, -0.4, 0.0}, {0.4f, 0.4f, 0.4}}, 3},
-    {"Models/bunny.obj", {{5.5, 0.4, 0.0}, glm::vec3{5.0}, {0.0, 0.0, glm::pi<float>()}}, 0}
-};
 
 int main()
 {
     Editor editor{};
     editor.Init();
+    auto scene = ReadFile("Scenes/scene.ana");
     auto& meshes = Resource::ResourceManager::GetCurrent()->SceneObjects;
     //std::vector<std::string> files(1000, "Models/cube.obj");
     //for (int i = 0; i < 1000; i++)
     //    meshInfos.push_back({"Models/cube.obj", {{random_double(), random_double(), random_double()}, {random_double(), random_double(), random_double()}}});
-    meshes.Append(meshInfos);
+    meshes.Append((MeshInfo*)scene.data(), scene.size() / sizeof(MeshInfo));
     editor.Run();
     return 0;
 }

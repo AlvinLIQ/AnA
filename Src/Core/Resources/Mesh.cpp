@@ -37,7 +37,42 @@ void Meshes::Append(const std::vector<MeshInfo>& meshInfos)
         mesh.transform = meshInfo.transform;
         mesh.vertexOffset = vertexCount;
         mesh.indexOffset = indexCount;
-        Model::CreateMeshFromFile(meshInfo.filePath.c_str(), mesh.vertices, mesh.indices, mesh.vertexOffset);
+        Model::CreateMeshFromFile(meshInfo.filePath, mesh.vertices, mesh.indices, mesh.vertexOffset);
+        vertexCount += mesh.vertices.size();
+        indexCount += mesh.indices.size();
+        auto& textureMap = Resource::ResourceManager::GetCurrent()->TextureMap;
+        mesh.textureId = textureMap.find(meshInfo.tetureId) == textureMap.end() ? DEFAULT_TEXTURE_ID : meshInfo.tetureId;
+        auto& texture = textureMap.at(mesh.textureId);
+        if (textureIdMap.find(mesh.textureId) == textureIdMap.end())
+        {
+            textureIdMap.insert(std::pair<uint32_t, uint32_t>(mesh.textureId, static_cast<uint32_t>(textureIdMap.size())));
+            imageInfos.push_back(texture.GetImageInfo());
+            if (imageInfos.size() == batchSize)
+            {
+                appendSamplersDescriptor(imageInfos);
+                imageInfos.clear();
+            }
+        }
+        meshes.push_back(mesh);
+    }
+    if (imageInfos.size())
+    {
+        appendSamplersDescriptor(imageInfos);
+    }
+    UpdateAll();
+}
+
+void Meshes::Append(const MeshInfo* meshInfos, size_t count)
+{
+    std::vector<VkDescriptorImageInfo> imageInfos{};
+    for (size_t i = 0; i < count; i++)
+    {
+        auto& meshInfo = meshInfos[i];
+        Mesh mesh;
+        mesh.transform = meshInfo.transform;
+        mesh.vertexOffset = vertexCount;
+        mesh.indexOffset = indexCount;
+        Model::CreateMeshFromFile(meshInfo.filePath, mesh.vertices, mesh.indices, mesh.vertexOffset);
         vertexCount += mesh.vertices.size();
         indexCount += mesh.indices.size();
         auto& textureMap = Resource::ResourceManager::GetCurrent()->TextureMap;
