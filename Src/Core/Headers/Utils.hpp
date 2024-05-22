@@ -1,3 +1,4 @@
+#pragma once
 #include <cstdlib>
 #include <cstring>
 
@@ -12,6 +13,7 @@ inline double random_double(double min, double max) {
 }
 
 #define BIG_AMOUNT_OF_MEMORY_SIZE 512
+#define SMALL_AMOUNT_OF_MEMORY_SIZE 16
 
 namespace AnA
 {
@@ -23,10 +25,103 @@ namespace AnA
 		{
 			
 		}
+		Vector(size_t n)
+		{
+			data = new T[n];
+		}
 		~Vector()
 		{
-
+			delete[] data;
 		}
+		Vector(const Vector&) = delete;
+		Vector& operator=(const Vector&) = delete;
+		Vector(const Vector&& v) noexcept
+		{
+			data = v.data;
+			size = v.size;
+			capacity = v.capacity;
+		}
+		Vector& operator=(const Vector&& v) noexcept
+		{
+			if (&v != this)
+			{
+				if (data)
+					delete[] data;
+				data = v.data;
+				size = v.size;
+				capacity = v.capacity;
+				v.data = nullptr;
+				v.capacity = 0;
+				v.size = 0;
+			}
+			return *this;
+		}
+		T* Data()
+		{
+			return data;
+		}
+		const T& operator[](size_t i) const
+		{
+			return data[i];
+		}
+		const size_t Size() const
+		{
+			return size;
+		}
+		void Resize(size_t newSize)
+		{
+			if (newSize > capacity || capacity - newSize > SMALL_AMOUNT_OF_MEMORY_SIZE)
+				Reserve(newSize);
+			size = newSize;
+		}
+		void Reserve(size_t newSize)
+		{
+			auto newData = new T[newSize];
+			if (data)
+			{
+				memcpy(newData, data, newSize > size ? size : newSize);
+				delete[] data;
+			}
+			data = newData;
+			capacity = newSize;
+		}
+		void Insert(size_t pos, T& newData)
+		{
+			if (pos >= capacity)
+			{
+				Reserve(pos + SMALL_AMOUNT_OF_MEMORY_SIZE);
+			}
+			if (pos != size)
+			{
+				memcpy(data, &data[pos], size - pos);
+			}
+			data[pos] = newData;
+			++size;
+		}
+		void Insert(size_t pos, Vector<T>& newData)
+		{
+			if (pos >= capacity)
+			{
+				Reserve(pos + SMALL_AMOUNT_OF_MEMORY_SIZE);
+			}
+			if (pos + newData.size != size)
+			{
+				memcpy(data, &data[pos + newData.size], size - pos - newData.size);
+			}
+			memcpy(&data[pos], newData.data, newData.size);
+			size += newData.size;
+		}
+		Vector& operator+=(T& newData)
+		{
+			Insert(size, newData);
+		}
+		Vector& operator+=(Vector<T>& newData)
+		{
+			Insert(size, newData);
+		}
+	protected:
+		size_t size = 0, capacity = 0;
+		T* data = nullptr;
 	};
 	class String
 	{
