@@ -26,6 +26,8 @@ namespace AnA
         {
             //Textures
             Vector<String> texturePaths;
+            //Shaders
+            Vector<String> codes;
             //MeshInfos
             Vector<MeshInfo> meshInfos;
         };

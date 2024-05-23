@@ -31,6 +31,10 @@ Shapes::Shapes(Device* mDeivce) : aDevice{mDeivce}
     indirectCommand->firstInstance = 0;
     indirectCommand->firstVertex = 0;
     indirectCommand->instanceCount = 1;
+    
+    countBuffer = new Buffer(aDevice, 4, VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    countBuffer->Map(0, 4);
+    *((uint32_t*)countBuffer->GetMappedData()) = 1;
 }
 
 Shapes::~Shapes()
@@ -39,6 +43,7 @@ Shapes::~Shapes()
     delete ssboDescriptor;
     delete shapeBuffer;
     delete indirectBuffer;
+    delete countBuffer;
 }
 
 void Shapes::PrepareDraw(Controls::Control* control)
@@ -64,5 +69,5 @@ void Shapes::DrawIndirect(VkCommandBuffer commandBuffer, VkPipelineLayout pipeli
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, 
     pipelineLayout, 0, numsof(sets), 
     sets, 0, nullptr);
-    vkCmdDrawIndirect(commandBuffer, indirectBuffer->GetBuffer(), 0, 1, sizeof(VkDrawIndirectCommand));
+    vkCmdDrawIndirectCount(commandBuffer, indirectBuffer->GetBuffer(), 0, countBuffer->GetBuffer(), 0, 1, sizeof(VkDrawIndirectCommand));
 }

@@ -31,6 +31,7 @@ namespace AnA
             shapes.samplersDescriptor = nullptr;
             shapes.ssboDescriptor = nullptr;
             shapes.indirectBuffer = nullptr;
+            shapes.countBuffer = nullptr;
             shapes.shapeBuffer = nullptr;
             shapes.shapeCount = 0;
         }
@@ -43,12 +44,14 @@ namespace AnA
                 shapeBuffer = shapes.shapeBuffer;
                 shapeCount = shapes.shapeCount;
                 indirectBuffer = shapes.indirectBuffer;
+                countBuffer = shapes.countBuffer;
                 ssboDescriptor = shapes.ssboDescriptor;
                 samplersDescriptor = shapes.samplersDescriptor;
 
                 shapes.samplersDescriptor = nullptr;
                 shapes.ssboDescriptor = nullptr;
                 shapes.indirectBuffer = nullptr;
+                shapes.countBuffer = nullptr;
                 shapes.shapeBuffer = nullptr;
                 shapes.shapeCount = 0;
                 
@@ -65,6 +68,7 @@ namespace AnA
         Device* aDevice{nullptr};
         Buffer* shapeBuffer{nullptr};
         Buffer* indirectBuffer{nullptr};
+        Buffer* countBuffer{nullptr};
         Descriptor* ssboDescriptor{nullptr};
         Descriptor* samplersDescriptor{nullptr};
         uint32_t shapeCount{};

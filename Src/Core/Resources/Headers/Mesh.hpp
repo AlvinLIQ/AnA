@@ -83,6 +83,7 @@ namespace AnA
         Buffer* indexBuffer{nullptr};
         size_t indexCount = 0;
         Buffer* indirectBuffer{nullptr};
+        Buffer* countBuffer{nullptr};
         std::vector<Mesh> meshes;
         uint32_t batchSize;
         std::vector<Range> updateQueue{};
