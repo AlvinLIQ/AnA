@@ -65,7 +65,7 @@ namespace AnA
             std::vector<RecordCallBackInfo> RecordCallBacks{};
         private:
             Device* aDevice;
-            std::vector<Buffer*> mainCameraBuffers;
+            std::vector<Buffer> mainCameraBuffers;
             void createMainCameraBuffers();
 
             std::vector<VkSampler> shadowSamplers;

@@ -49,9 +49,6 @@ ResourceManager::~ResourceManager()
 #ifdef ANA_INCLUDE_CONTROL
     delete MainControl;
 #endif
-
-    for (auto& mainCameraBuffer : mainCameraBuffers)
-        delete mainCameraBuffer;
 }
 
 ResourceManager* ResourceManager::GetCurrent()
@@ -77,7 +74,7 @@ void ResourceManager::UpdateCamera(float aspect)
 
 void ResourceManager::UpdateCameraBuffer()
 {
-    Cameras::CameraBufferObject& cbo = *(Cameras::CameraBufferObject*)mainCameraBuffers[SwapChain::GetCurrent()->CurrentFrame]->GetMappedData();
+    Cameras::CameraBufferObject& cbo = *(Cameras::CameraBufferObject*)mainCameraBuffers[SwapChain::GetCurrent()->CurrentFrame].GetMappedData();
     cbo.proj = MainCamera.GetProjectionMatrix();
     cbo.view = MainCamera.GetView();
     cbo.invView = MainCamera.GetInverseView();
@@ -186,9 +183,9 @@ void ResourceManager::createMainCameraBuffers()
     mainCameraBuffers.resize(MAX_FRAMES_IN_FLIGHT);
     for (auto &cameraBuffer : mainCameraBuffers)
     {
-        cameraBuffer = new Buffer(aDevice, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
+        cameraBuffer = Buffer(aDevice, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        cameraBuffer->Map(0, bufferSize);
+        cameraBuffer.Map(0, bufferSize);
     }
 }
 

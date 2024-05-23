@@ -2,7 +2,7 @@
 
 using namespace AnA;
 
-Descriptor::Descriptor(Device* mDevice, Buffer** buffers, VkDeviceSize bufferSize, uint32_t binding,
+Descriptor::Descriptor(Device* mDevice, Buffer* buffers, VkDeviceSize bufferSize, uint32_t binding,
     int descriptorSetCount, VkShaderStageFlags stageFlags,
     const VkDescriptorType descriptorType) : aDevice{mDevice}
 {
@@ -20,7 +20,7 @@ Descriptor::Descriptor(Device* mDevice, Buffer** buffers, VkDeviceSize bufferSiz
     aDevice->CreateDescriptorSets(buffers, bufferSize, binding, descriptorSetCount, pool, setLayout, descriptorType, sets);
 }
 
-Descriptor::Descriptor(Device* mDevice, Buffer** buffers, VkDeviceSize bufferSize, uint32_t binding,
+Descriptor::Descriptor(Device* mDevice, Buffer* buffers, VkDeviceSize bufferSize, uint32_t binding,
     int descriptorSetCount, VkDescriptorSetLayout descriptorSetLayout,
     const VkDescriptorType descriptorType) : aDevice{mDevice}
 {    

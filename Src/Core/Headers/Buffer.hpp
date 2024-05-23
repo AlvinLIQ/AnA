@@ -9,12 +9,46 @@ namespace AnA
     class Buffer
     {
     public:
+        Buffer()
+        {
+
+        }
         Buffer(Device* mDevice, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties);
         ~Buffer();
         Buffer(const Buffer&) = delete;
         Buffer &operator=(const Buffer&) = delete;
-        Buffer(Buffer&&) = default;
-        Buffer &operator=(Buffer&&) = default;
+        Buffer(Buffer&& buf) noexcept
+        {
+            aDevice = buf.aDevice;
+            mappedData = buf.mappedData;
+            buffer = buf.buffer;
+            bufferSize = buf.bufferSize;
+            bufferMemory = buf.bufferMemory;
+            bufferUsage = buf.bufferUsage;
+            bufferMemoryProperties = buf.bufferMemoryProperties;
+            newBufferRecords = buf.newBufferRecords;
+            newBuffer = buf.newBuffer;
+        }
+        Buffer &operator=(Buffer&& buf) noexcept
+        {
+            if (&buf != this)
+            {
+                aDevice = buf.aDevice;
+                mappedData = buf.mappedData;
+                buffer = buf.buffer;
+                bufferSize = buf.bufferSize;
+                bufferMemory = buf.bufferMemory;
+                bufferUsage = buf.bufferUsage;
+                bufferMemoryProperties = buf.bufferMemoryProperties;
+                newBufferRecords = buf.newBufferRecords;
+                newBuffer = buf.newBuffer;
+                buf.mappedData = nullptr;
+                buf.buffer = VK_NULL_HANDLE;
+                buf.bufferMemory = VK_NULL_HANDLE;
+                buf.newBuffer = nullptr;
+            }
+            return *this;
+        }
         VkResult Map(VkDeviceSize offset, VkDeviceSize size);
         void Unmap();
 

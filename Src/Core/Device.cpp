@@ -359,7 +359,7 @@ void Device::CreateDescriptorPool(int descriptorCount, VkDescriptorPool& descrip
         throw std::runtime_error("Failed to create descriptor pool!");
 }
 
-void Device::CreateDescriptorSets(Buffer** buffers, VkDeviceSize bufferSize, uint32_t binding, int descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets)
+void Device::CreateDescriptorSets(Buffer* buffers, VkDeviceSize bufferSize, uint32_t binding, int descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets)
 {
     std::vector<VkDescriptorSetLayout> layouts(descriptorSetCount, descriptorSetLayout);
     VkDescriptorSetAllocateInfo allocInfo{};
@@ -377,7 +377,7 @@ void Device::CreateDescriptorSets(Buffer** buffers, VkDeviceSize bufferSize, uin
     {
         auto& buffer = buffers[i];
         VkDescriptorBufferInfo bufferInfo{};
-        bufferInfo.buffer = buffer->GetBuffer();
+        bufferInfo.buffer = buffer.GetBuffer();
         bufferInfo.offset = 0;
         bufferInfo.range = bufferSize;
         VkWriteDescriptorSet descriptorWrite{};
