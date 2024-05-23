@@ -95,7 +95,8 @@ namespace AnA
 			auto newData = new T[newSize];
 			if (data)
 			{
-				memcpy(newData, data, newSize > size ? size : newSize);
+				memcpy(newData, data, (newSize > size ? size : newSize) * sizeof(T));
+				memset(data, 0, size * sizeof(T));
 				delete[] data;
 			}
 			data = newData;
@@ -109,7 +110,7 @@ namespace AnA
 			}
 			if (pos != size)
 			{
-				memcpy(data, &data[pos], size - pos);
+				memcpy(data, &data[pos], (size - pos) * sizeof(T));
 			}
 			data[pos] = newData;
 			++size;
@@ -122,9 +123,9 @@ namespace AnA
 			}
 			if (pos + newData.size != size)
 			{
-				memcpy(data, &data[pos + newData.size], size - pos - newData.size);
+				memcpy(data, &data[pos + newData.size], (size - pos - newData.size) * sizeof(T));
 			}
-			memcpy(&data[pos], newData.data, newData.size);
+			memcpy(&data[pos], newData.data, newData.size * sizeof(T));
 			size += newData.size;
 		}
 		Vector& operator+=(T& newData)
