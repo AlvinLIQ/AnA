@@ -35,5 +35,11 @@ namespace AnA
             ProjectHeader header;
             Vector<Scene> scenes;
         };
+
+        class Project
+        {
+        public:
+            Project(ProjectInfo projInfo);
+        };
     }
 }

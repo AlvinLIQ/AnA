@@ -33,12 +33,9 @@ namespace AnA
         {
             if (&buf != this)
             {
-                if (aDevice)
-                {
-                    cleanup();
-                    if (newBuffer)
-                        delete newBuffer;
-                }
+                cleanup();
+                if (newBuffer)
+                    delete newBuffer;
                 aDevice = buf.aDevice;
                 mappedData = buf.mappedData;
                 buffer = buf.buffer;

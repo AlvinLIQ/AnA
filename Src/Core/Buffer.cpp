@@ -50,8 +50,11 @@ VkBuffer& Buffer::GetBuffer()
 
 void Buffer::cleanup()
 {
-    vkDestroyBuffer(aDevice->GetLogicalDevice(), buffer, nullptr);
-    vkFreeMemory(aDevice->GetLogicalDevice(), bufferMemory, nullptr);
+    if (aDevice)
+    {
+        vkDestroyBuffer(aDevice->GetLogicalDevice(), buffer, nullptr);
+        vkFreeMemory(aDevice->GetLogicalDevice(), bufferMemory, nullptr);
+    }
 }
 
 void Buffer::replace()
