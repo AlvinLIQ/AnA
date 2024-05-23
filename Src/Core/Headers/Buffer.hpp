@@ -33,9 +33,12 @@ namespace AnA
         {
             if (&buf != this)
             {
-                cleanup();
-                if (newBuffer)
-                    delete newBuffer;
+                if (aDevice)
+                {
+                    cleanup();
+                    if (newBuffer)
+                        delete newBuffer;
+                }
                 aDevice = buf.aDevice;
                 mappedData = buf.mappedData;
                 buffer = buf.buffer;
@@ -94,7 +97,7 @@ namespace AnA
         }
         void ReplaceRequest(Buffer* newBuffer);
     private:
-        Device* aDevice;
+        Device* aDevice = nullptr;
 
         void* mappedData = nullptr;
         VkBuffer buffer = VK_NULL_HANDLE;
