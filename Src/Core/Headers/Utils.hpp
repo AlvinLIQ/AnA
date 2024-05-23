@@ -17,6 +17,22 @@ inline double random_double(double min, double max) {
 
 namespace AnA
 {
+	template<typename T, const size_t count>
+	class Array
+	{
+	public:
+		Array();
+		T* Data()
+		{
+			return data;
+		}
+		const T& operator[](size_t i) const
+		{
+			return data[i];
+		}
+	protected:
+		T data[count];
+	};
 	template<typename T>
 	class Vector
 	{
