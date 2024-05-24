@@ -30,6 +30,7 @@ Meshes::~Meshes()
     delete vertexBuffer;
     delete indexBuffer;
     delete indirectBuffer;
+    delete countBuffer;
 }
 
 void Meshes::Append(const std::vector<MeshInfo>& meshInfos)
