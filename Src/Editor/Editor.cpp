@@ -36,25 +36,22 @@ void Editor::Init()
     panel->Child(button);
     button->PointerEvents[PointerEventType::Released].push_back([](void* control, PointerEventArgs& args)
     {
-        
+        char path[256];
+#ifdef WIN32
+#else
+        FILE* f = popen("/usr/bin/zenity --file-selection", "r");
+        fgets(path, 256, f);
+        size_t len = strlen(path);
+        if (!len)
+            return;
+        path[len- 1] = '\0';
+        pclose(f);
+        MeshInfo mesh;
+        memcpy(mesh.filePath, path, 256);
+        mesh.tetureId = 0;
+        Resource::ResourceManager::GetCurrent()->SceneObjects.Append(std::vector<MeshInfo>(1, mesh));
+#endif
     });
-
-    button = new Controls::Button();
-    button->HorizontalAlignment = AlignmentType::Center;
-    panel->Child(button);
-
-    button = new Controls::Button();
-    button->HorizontalAlignment = AlignmentType::End;
-    panel->Child(button);
-
-    button = new Controls::Button();
-    button->HorizontalAlignment = AlignmentType::Stretch;
-    panel->Child(button);
-
-    auto textBlock = new Controls::TextBlock();
-    textBlock->Text("Test Message");
-    textBlock->HorizontalAlignment = AlignmentType::Center;
-    panel->Child(textBlock);
     
     aResourceManager->MainControl = panel;
     sceneOffset.x = EDITOR_LEFT_PANEL_WIDTH;

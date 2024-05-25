@@ -1,8 +1,5 @@
-<StackPanel ControlSize="300.0f, 0.0f">
-    <Grid>
-        <GridColumns>
-            <GridColumn Width="80"/>
-            <GridColumn Width="Max"/>
-        </GridColumns>
-    </Grid>
+<StackPanel ControlSize="300.0f, 0.0f" Orientation="Vertical">
+    <Button>
+        <TextBlock Text="Load Model"/>
+    </Button>
 </StackPanel>
