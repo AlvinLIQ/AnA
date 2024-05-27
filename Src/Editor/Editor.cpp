@@ -36,13 +36,13 @@ void Editor::Init()
     panel->Child(button);
     button->PointerEvents[PointerEventType::Released].push_back([](void* control, PointerEventArgs& args)
     {
-        char path[256];
+        char path[256] = "";
 #ifdef WIN32
 #else
         FILE* f = popen("/usr/bin/zenity --file-selection", "r");
         fgets(path, 256, f);
         size_t len = strlen(path);
-        if (!len)
+        if (len <= 1)
             return;
         path[len- 1] = '\0';
         pclose(f);
