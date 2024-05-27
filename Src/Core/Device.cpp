@@ -522,6 +522,22 @@ void Device::TransitionImageLayout(VkImage &image, VkFormat format, VkImageLayou
     endSingleTimeCommands(commandBuffer);
 }
 
+void Device::WaitBufferIdle(VkBuffer &buffer)
+{
+    VkBufferMemoryBarrier bufferBarrier{};
+    bufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+    bufferBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    bufferBarrier.dstAccessMask = 0;
+    bufferBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    bufferBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    bufferBarrier.buffer = buffer;
+    bufferBarrier.offset = 0;
+    bufferBarrier.size = VK_WHOLE_SIZE;
+    auto commandBuffer = beginSingleTimeCommands();
+    vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 1, &bufferBarrier, 0, nullptr);
+    endSingleTimeCommands(commandBuffer);
+}
+
 Device::QueueFamilyIndices Device::GetQueueFamiliesForCurrent()
 {
     return FindQueueFamilies(physicalDevice);

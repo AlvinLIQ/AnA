@@ -146,6 +146,7 @@ void App::Run()
         camera.SetSpeedRatio(frameTime);
         aInputManager->Check();
         //Update Resources
+        _aApp->commandBufferNeedUpdate = aResourceManager->SceneObjects.BeginCommandBufferUpdate() || aRenderer->NeedUpdate();
         if (aRenderer->NeedUpdate())
         {
             aResourceManager->Resize();
@@ -261,7 +262,7 @@ void App::createRecordCallBacks()
     auto& RecordCallBacks = aResourceManager->RecordCallBacks;
     RecordCallBacks.emplace_back([]() 
     {
-        return _aApp->commandBufferNeedUpdate = (Resource::ResourceManager::GetCurrent()->SceneObjects.BeginCommandBufferUpdate() || _aApp->GetRenderer().NeedUpdate());
+        return _aApp->commandBufferNeedUpdate;
     }, [](VkOffset2D& offset, VkExtent2D& extent)
     {
         auto aResourceManager = Resource::ResourceManager::GetCurrent();

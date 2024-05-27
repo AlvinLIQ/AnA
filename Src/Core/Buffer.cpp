@@ -2,6 +2,9 @@
 #include <cassert>
 
 using namespace AnA;
+
+std::vector<Buffer*> replaceList{};
+
 Buffer::Buffer(Device* mDevice, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties) : aDevice{mDevice},
  bufferSize {size}, bufferUsage{usage}, bufferMemoryProperties{properties}
 {
@@ -37,12 +40,7 @@ VkBuffer& Buffer::GetBuffer()
 {
     if (this->newBuffer != nullptr)
     {
-        if (newBufferRecords++ > MAX_FRAMES_IN_FLIGHT)
-        {
-            newBufferRecords = 0;
-            replace();
-            return buffer;
-        }
+        replaceList.push_back(this);
         return newBuffer->buffer;
     }
     return buffer;
@@ -70,4 +68,25 @@ void Buffer::ReplaceRequest(Buffer* newBuffer)
 {
     while (this->newBuffer != nullptr);
     this->newBuffer = newBuffer;
+}
+
+void Buffer::TryReplace()
+{
+    if (replaceList.size())
+    {
+        vkDeviceWaitIdle(replaceList[0]->aDevice->GetLogicalDevice());
+        for (auto buffer = replaceList.begin(); buffer < replaceList.end(); buffer++)
+        {
+            (*buffer)->newBufferRecords++;
+            if ((*buffer)->newBufferRecords > MAX_FRAMES_IN_FLIGHT + 1)
+            {
+                if ((*buffer)->newBuffer)
+                {
+                    (*buffer)->replace();
+                    (*buffer)->newBufferRecords = 0;
+                }
+                replaceList.erase(buffer);
+            }
+        }
+    }
 }

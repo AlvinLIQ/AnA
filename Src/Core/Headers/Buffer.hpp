@@ -93,6 +93,7 @@ namespace AnA
             this->Unmap();
         }
         void ReplaceRequest(Buffer* newBuffer);
+        static void TryReplace();
     private:
         Device* aDevice = nullptr;
 

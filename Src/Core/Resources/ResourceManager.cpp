@@ -91,6 +91,7 @@ void ResourceManager::Update()
     {
         SceneObjects.CommitBufferUpdate();
     }
+    Buffer::TryReplace();
     for (auto& recordCallBackInfo : RecordCallBacks)
     {
         if (recordCallBackInfo.needRecord())
