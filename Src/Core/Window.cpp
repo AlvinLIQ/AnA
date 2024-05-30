@@ -18,9 +18,9 @@ int Window::Init()
 {
     if (!glfwInit())
         return -1;
-#ifdef GLFW_PLATFORM_WAYLAND
-    glfwWindowHintString(GLFW_WAYLAND_APP_ID, "AnA");
-#endif
+    if (glfwGetPlatform() == GLFW_PLATFORM_WAYLAND)
+        glfwWindowHintString(GLFW_WAYLAND_APP_ID, "AnA");
+
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
     

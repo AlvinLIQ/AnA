@@ -37,20 +37,25 @@ void Editor::Init()
     button->PointerEvents[PointerEventType::Released].push_back([](void* control, PointerEventArgs& args)
     {
         char path[256] = "";
-#ifdef WIN32
-#else
-        FILE* f = popen("/usr/bin/zenity --file-selection", "r");
-        fgets(path, 256, f);
-        size_t len = strlen(path);
-        if (len <= 1)
-            return;
-        path[len- 1] = '\0';
-        pclose(f);
-        MeshInfo mesh;
-        memcpy(mesh.filePath, path, 256);
-        mesh.tetureId = 0;
-        Resource::ResourceManager::GetCurrent()->SceneObjects.Append(std::vector<MeshInfo>(1, mesh));
-#endif
+        switch (glfwGetPlatform())
+        {
+        case GLFW_PLATFORM_WIN32:
+            break;
+        case GLFW_PLATFORM_X11:
+        case GLFW_PLATFORM_WAYLAND:
+            FILE* f = popen("/usr/bin/zenity --file-selection", "r");
+            fgets(path, 256, f);
+            size_t len = strlen(path);
+            if (len <= 1)
+                return;
+            path[len- 1] = '\0';
+            pclose(f);
+            MeshInfo mesh;
+            memcpy(mesh.filePath, path, 256);
+            mesh.tetureId = 0;
+            Resource::ResourceManager::GetCurrent()->SceneObjects.Append(std::vector<MeshInfo>(1, mesh));
+            break;
+        };
     });
     
     aResourceManager->MainControl = panel;
