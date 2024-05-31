@@ -23,8 +23,8 @@ void Editor::Init()
     App::Init();
 
     auto panel = new Controls::StackPanel();
-    panel->VerticalAlignment = AlignmentType::Center;
-    panel->HorizontalAlignment = AlignmentType::Center;
+    panel->VerticalAlignment = AlignmentType::Stretch;
+    panel->HorizontalAlignment = AlignmentType::Stretch;
     panel->Orientation = Controls::Orientations::Vertical;
     panel->Color = glm::vec3{0.92f};
 
@@ -40,6 +40,7 @@ void Editor::Init()
         switch (glfwGetPlatform())
         {
         case GLFW_PLATFORM_WIN32:
+        
             break;
         case GLFW_PLATFORM_X11:
         case GLFW_PLATFORM_WAYLAND:
