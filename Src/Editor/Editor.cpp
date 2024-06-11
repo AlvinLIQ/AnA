@@ -27,7 +27,9 @@ void Editor::Init()
     panel->HorizontalAlignment = AlignmentType::Stretch;
     panel->Orientation = Controls::Orientations::Vertical;
     panel->Color = glm::vec3{0.92f};
-
+    auto panelTitle = new Controls::TextBlock();
+    panelTitle->Text("AnA - Editor");
+    panel->Child(panelTitle);
     auto button = new Controls::Button();
     button->HorizontalAlignment = AlignmentType::Start;
     auto content = new Controls::TextBlock();

@@ -7,3 +7,13 @@ TextBox::TextBox()
 {
     
 }
+
+void TextBox::Insert(size_t index, uint32_t ch)
+{
+    text.insert(text.begin() + index, ch);
+}
+
+void TextBox::CharacterRecevied(uint32_t ch)
+{
+    Insert(cursor, ch);
+}
