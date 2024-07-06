@@ -17,6 +17,53 @@ Control::~Control()
     
 }
 
+POS_F Control::GetActualControlOffset(SIZE_F renderSize)
+{
+    float* pOffset = (float*)&renderOffset;
+    float* pSize = (float*)&this->renderSize;
+    AlignmentType Alignments[]{HorizontalAlignment, VerticalAlignment};
+    for (int i = 0; i < 2; i++)
+    {
+        if (Alignments[i] == AlignmentType::Start)
+            pOffset[i] = pSize[i] / 2.f - 1.0f;
+        else if (Alignments[i] == AlignmentType::End)
+            pOffset[i] = 1.0f - pSize[i] / 2.f;
+        else
+        {
+            pOffset[i] = 0.f;
+            if (Alignments[i] == AlignmentType::Stretch)
+                pSize[i] = 1.f;
+        }
+    }
+                
+    renderOffset.x += ControlOffset.x;
+    renderOffset.y += ControlOffset.y;
+    renderOffset.x *= aSwapChain->ScaleX;
+    renderOffset.y *= aSwapChain->ScaleY;
+    return renderOffset;
+}
+
+SIZE_F Control::GetSizeForRender()
+{
+    if (renderMode == AlignType::Absolute)
+    {
+        renderSize.Width = ControlSize.Width / (float)Extent.width;
+        renderSize.Height = ControlSize.Height / (float)Extent.height;
+    }
+    else if (renderMode == AlignType::Relative)
+    {
+        renderSize = ControlSize;
+    }
+    else if (renderMode == AlignType::Auto)
+    {
+        renderSize = {ControlSize.Width / Aspect, ControlSize.Height};
+    }
+
+    renderSize.Width *= aSwapChain->ScaleX;
+    renderSize.Height *= aSwapChain->ScaleY;
+    return renderSize;
+}
+
 void Control::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
     auto size = GetSizeForRender();

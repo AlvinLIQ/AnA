@@ -11,6 +11,9 @@
 #define NextFrameIndex(X) ((X + 1) % MAX_FRAMES_IN_FLIGHT)
 #define OFFSCREEN_IMAGE_SIZE 400
 
+#define ScaleX Scale[0]
+#define ScaleY Scale[1]
+
 namespace AnA
 {
     class SwapChain
@@ -18,6 +21,8 @@ namespace AnA
     public:
         SwapChain(Device* mDevice, VkSurfaceKHR &mSurface, GLFWwindow* mWindow);
         ~SwapChain();
+
+        float Scale[2];
 
         VkResult AcquireNextImage(uint32_t* pImageIndex);
 

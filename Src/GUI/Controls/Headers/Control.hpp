@@ -20,48 +20,10 @@ namespace AnA
             AlignmentType VerticalAlignment {ControlVerticalAlignment};
 
             POS_F ControlOffset {};
-            POS_F GetActualControlOffset(SIZE_F renderSize)
-            {
-                float* pOffset = (float*)&renderOffset;
-                float* pSize = (float*)&this->renderSize;
-                AlignmentType Alignments[]{HorizontalAlignment, VerticalAlignment};
-                for (int i = 0; i < 2; i++)
-                {
-                    if (Alignments[i] == AlignmentType::Start)
-                        pOffset[i] = pSize[i] / 2.f - 1.0f;
-                    else if (Alignments[i] == AlignmentType::End)
-                        pOffset[i] = 1.0f - pSize[i] / 2.f;
-                    else
-                    {
-                        pOffset[i] = 0.f;
-                        if (Alignments[i] == AlignmentType::Stretch)
-                            pSize[i] = 1.f;
-                    }
-                }
-                
-                renderOffset.x += ControlOffset.x;
-                renderOffset.y += ControlOffset.y;
-                return renderOffset;
-            }
+            POS_F GetActualControlOffset(SIZE_F renderSize);
 
             SIZE_F ControlSize {AnA::ControlSize};
-            SIZE_F GetSizeForRender()
-            {
-                if (renderMode == AlignType::Absolute)
-                {
-                    renderSize.Width = ControlSize.Width / (float)Extent.width;
-                    renderSize.Height = ControlSize.Height / (float)Extent.height;
-                }
-                else if (renderMode == AlignType::Relative)
-                {
-                    renderSize = ControlSize;
-                }
-                else if (renderMode == AlignType::Auto)
-                {
-                    renderSize = {ControlSize.Width / Aspect, ControlSize.Height};
-                }
-                return renderSize;
-            }
+            SIZE_F GetSizeForRender();
             void SizeRequest(SIZE_F newSize)
             {
                 if (newSize.Width < minSize.Width || newSize.Height < minSize.Height || 
