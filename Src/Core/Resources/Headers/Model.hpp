@@ -44,6 +44,13 @@ namespace AnA
                     ^ std::hash<float>()(vertex.uv.y);
             }
         };
+
+        struct BSPNode
+        {
+            BSPNode* left = nullptr;
+            BSPNode* right = nullptr;
+            std::vector<Vertex>* vertices = nullptr;
+        };
         typedef uint32_t Index;
         
         struct ModelInfo
