@@ -23,6 +23,7 @@ void Editor::Init()
     App::Init();
 
     auto panel = new Controls::StackPanel();
+    panel->Spacing = 0.01f;
     panel->VerticalAlignment = AlignmentType::Stretch;
     panel->HorizontalAlignment = AlignmentType::Stretch;
     panel->Orientation = Controls::Orientations::Vertical;

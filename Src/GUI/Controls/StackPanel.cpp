@@ -34,7 +34,7 @@ void StackPanel::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageIn
         items[i]->Aspect = Aspect;
         items[i]->Extent = Extent;
         auto _size = items[i]->GetSizeForRender();
-        ((float*)&offset)[invO] += ((float*)&size)[invO] + ((float*)&_size)[invO];
+        ((float*)&offset)[invO] += ((float*)&size)[invO] + ((float*)&_size)[invO] + Spacing;
         size = _size;
         auto align = invO ? (AlignmentType*)&items[i]->HorizontalAlignment : &items[i]->VerticalAlignment;//(items[i] + offsets[o]);
         switch (*align)

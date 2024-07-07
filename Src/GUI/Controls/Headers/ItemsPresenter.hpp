@@ -18,6 +18,7 @@ namespace AnA
 
             void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount);
             virtual void PointerEventTrigger(PointerEventArgs& args);
+            float Spacing = 0.0f;
         protected:
             std::vector<Control*> items;
         };
