@@ -9,6 +9,9 @@ using namespace AnA;
 using namespace AnA::Cameras;
 
 #define MOVEMENTSIZE 6
+#define ANA_MOVE_LEFTRIGHT 0
+#define ANA_MOVE_UPDOWN 1
+#define ANA_MOVE_FORWARDBACK 2
 
 const int keyCodes[] = {GLFW_KEY_A, GLFW_KEY_D, GLFW_KEY_SPACE, GLFW_KEY_C, GLFW_KEY_S, GLFW_KEY_W};
 
@@ -61,15 +64,15 @@ void CameraController::Move(CameraController::CameraCallbackParam* param)
     int posIndex = param->id >> 1;
     auto &roY = param->aCamera.CameraTransform.rotation.y;
     glm::vec3 moveDirection;
-    if (posIndex == 0)
+    if (posIndex == ANA_MOVE_LEFTRIGHT)
     {
         moveDirection = {cos(roY), 0.f, -sin(roY)};
     }
-    else if (posIndex == 1)
+    else if (posIndex == ANA_MOVE_UPDOWN)
     {
         moveDirection = {0.f, 1.f, 0.f};
     }
-    else if (posIndex == 2)
+    else if (posIndex == ANA_MOVE_FORWARDBACK)
     {
         moveDirection = {sin(roY), 0.f, cos(roY)};
     }

@@ -268,12 +268,12 @@ void Meshes::UpdateVertexPositions(Range updateRange)
     auto vertices = ((Model::Vertex*)vertexBuffer->GetMappedData());
     for (uint32_t i = 0; i < updateRange.y; i++)
     {
-        auto& mesh = meshes[i];
+        auto& mesh = meshes[updateRange.x + i];
         glm::mat3 model = mesh.transform.mat3();
-        for (size_t i = 0; i < mesh.vertices.size(); i++)
+        for (size_t j = 0; i < mesh.vertices.size(); j++)
         {
-            auto& vertex = vertices[mesh.vertexOffset + i];
-            auto& meshVertex = mesh.vertices[i];
+            auto& vertex = vertices[mesh.vertexOffset + j];
+            auto& meshVertex = mesh.vertices[j];
             vertex.position = model * meshVertex.position + mesh.transform.translation;
         }
     }
