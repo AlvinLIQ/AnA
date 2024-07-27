@@ -1,7 +1,6 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <mutex>
 #include "Model.hpp"
 #include "Descriptor.hpp"
 #include "../../Headers/Types.hpp"
