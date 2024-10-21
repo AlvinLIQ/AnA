@@ -113,7 +113,7 @@ void App::Run()
     for (int i = 0; i < 1000; i++)
         meshInfos.push_back({"Models/cube.obj", {{random_double(), random_double() - 2.0f, random_double() + 5.0f}, {random_double(), random_double(), random_double()}}, (uint32_t)rand() % 4});
     const char cTitle[] = "AnA FPS:";
-    AnA::String title{cTitle, sizeof(cTitle), sizeof(cTitle) + 5};
+    AnA::String title{cTitle, sizeof(cTitle), sizeof(cTitle) + 10};
     int frameCount = 0;
     float runingTime = 0.0f, prevSecond = 0.0f;
     while(!glfwWindowShouldClose(window))
@@ -138,7 +138,7 @@ void App::Run()
         {
             //Show FPS on title bar
             auto fps = std::to_string((int)(frameCount / prevSecond));
-            title.Copy(fps.c_str(), fps.length(), sizeof(cTitle) - 1);
+            title.Copy(fps.c_str(), fps.length() + 1, sizeof(cTitle) - 1);
             glfwSetWindowTitle(aWindow->GetGLFWwindow(), title.Str());
             prevSecond = 0.0f;
             frameCount = 0;
@@ -257,6 +257,30 @@ void App::keyCallback(GLFWwindow* window, int key, int scancode, int action, int
     //glfwGetKey
 }
 
+void renderMeshesIndirecct(VkCommandBuffer commandBuffer)
+{
+    auto aResourceManager = Resource::ResourceManager::GetCurrent();
+    Systems::RenderSystem::GetCurrent()->RenderMeshesIndirect(commandBuffer, 
+        aResourceManager->SceneObjects, 
+        aResourceManager->Shaders[0]);
+}
+
+void RenderShadowsIndirect(VkCommandBuffer commandBuffer)
+{
+    auto aResourceManager = Resource::ResourceManager::GetCurrent();
+    auto aShadowSystem = Systems::ShadowSystem::GetCurrent();
+    aShadowSystem->RenderShadowsIndirect(commandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[2]);
+}
+
+void RenderShapesIndirect(VkCommandBuffer commandBuffer)
+{
+    auto aResourceManager = Resource::ResourceManager::GetCurrent();
+    auto aRenderSystem = Systems::RenderSystem::GetCurrent();
+    aRenderSystem->RenderShapesIndirect(commandBuffer, 
+        aResourceManager->Shapes, 
+        aResourceManager->Shaders[1]);
+}
+
 void App::createRecordCallBacks()
 {
     auto& RecordCallBacks = aResourceManager->RecordCallBacks;
@@ -270,16 +294,11 @@ void App::createRecordCallBacks()
         aResourceManager->SecondaryCommandBufferPool.Reset();
         aResourceManager->SecondaryCommandBufferPool.Enqueue([](VkCommandBuffer secondaryCommandBuffer, size_t index)
         {
-            auto aResourceManager = Resource::ResourceManager::GetCurrent();
-            Systems::RenderSystem::GetCurrent()->RenderMeshesIndirect(secondaryCommandBuffer, 
-                aResourceManager->SceneObjects, 
-                aResourceManager->Shaders[0]);
+            renderMeshesIndirecct(secondaryCommandBuffer);
         }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), _aApp->GetSceneOffset());
         aRenderer.RecordOffscreenSecondaryCommandBuffer([](VkCommandBuffer offScreenSecondaryCommandBuffer)
         {
-            auto aResourceManager = Resource::ResourceManager::GetCurrent();
-            auto aShadowSystem = Systems::ShadowSystem::GetCurrent();
-            aShadowSystem->RenderShadowsIndirect(offScreenSecondaryCommandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[2]);
+            RenderShadowsIndirect(offScreenSecondaryCommandBuffer);
         });
         aResourceManager->SceneObjects.EndCommandBufferUpdate();
     });
@@ -304,9 +323,7 @@ void App::createRecordCallBacks()
         shapes.PrepareDraw(aResourceManager->MainControl);
         aResourceManager->SecondaryCommandBufferPool.Enqueue([](VkCommandBuffer secondaryCommandBuffer, size_t index)
         {
-            _aApp->aRenderSystem->RenderShapesIndirect(secondaryCommandBuffer, 
-                _aApp->aResourceManager->Shapes, 
-                _aApp->aResourceManager->Shaders[1]);
+            RenderShapesIndirect(secondaryCommandBuffer);
         }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), offset, controlExtent);
     });
 #endif

@@ -42,9 +42,11 @@ void Editor::Init()
         char path[256] = "";
         switch (glfwGetPlatform())
         {
+#ifdef _WIN32
         case GLFW_PLATFORM_WIN32:
         
             break;
+#else
         case GLFW_PLATFORM_X11:
         case GLFW_PLATFORM_WAYLAND:
             FILE* f = popen("/usr/bin/zenity --file-selection", "r");
@@ -59,6 +61,7 @@ void Editor::Init()
             mesh.tetureId = 0;
             Resource::ResourceManager::GetCurrent()->SceneObjects.Append(std::vector<MeshInfo>(1, mesh));
             break;
+#endif
         };
     });
     

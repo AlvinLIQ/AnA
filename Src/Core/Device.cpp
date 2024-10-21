@@ -634,14 +634,39 @@ void Device::pickPhysicalDevice()
         throw std::runtime_error("Failed to find GPUs with Vulkan support!");
     std::vector<VkPhysicalDevice> devices(deviceCount);
     vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+    int currentScore, bestScore = 0;
     for (const auto &device : devices)
     {
+        currentScore = 0;
         if (isDeviceSuitable(device))
         {
-            physicalDevice = device;
-            vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
+            currentScore = 30;
+            vkGetPhysicalDeviceProperties(device, &physicalDeviceProperties);
             checkUsableSamples();
-            break;
+            currentScore += physicalDeviceProperties.limits.framebufferColorSampleCounts & physicalDeviceProperties.limits.framebufferDepthSampleCounts;
+            currentScore += physicalDeviceProperties.limits.storageImageSampleCounts + physicalDeviceProperties.limits.maxColorAttachments;
+            std::string deviceName = physicalDeviceProperties.deviceName;
+            if (physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+                currentScore += 10;
+            if (deviceName.find("AMD") != -1)
+            {
+                currentScore += 3;
+                if (deviceName.find("RX") != -1)
+                    currentScore += 2;
+            }
+            else if (deviceName.find("NVIDIA") != -1)
+            {
+                currentScore += 3;
+                if (deviceName.find("RTX") != -1)
+                    currentScore += 2;
+                else if (deviceName.find("GTX") != -1)
+                    currentScore += 1;
+            }
+            if (currentScore > bestScore)
+            {
+                physicalDevice = device;
+                bestScore = currentScore;
+            }
         }
     }
     if (physicalDevice == VK_NULL_HANDLE)
@@ -724,9 +749,11 @@ void Device::createLogicalDevice()
     vulkan12Features.descriptorBindingSampledImageUpdateAfterBind = VK_TRUE;
     vulkan12Features.runtimeDescriptorArray = VK_TRUE;
     vulkan12Features.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
-    //VkPhysicalDeviceNestedCommandBufferFeaturesEXT nestedCommandBufferFeatures{};
-    //nestedCommandBufferFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_NESTED_COMMAND_BUFFER_FEATURES_EXT;
-    //nestedCommandBufferFeatures.nestedCommandBufferSimultaneousUse = VK_TRUE;
+    /*
+    VkPhysicalDeviceNestedCommandBufferFeaturesEXT nestedCommandBufferFeatures{};
+    nestedCommandBufferFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_NESTED_COMMAND_BUFFER_FEATURES_EXT;
+    nestedCommandBufferFeatures.nestedCommandBufferSimultaneousUse = VK_TRUE;
+    nestedCommandBufferFeatures.pNext = &vulkan12Features;*/
     VkPhysicalDeviceShaderDrawParametersFeatures shaderDrawParametersFeatures{};
     shaderDrawParametersFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETERS_FEATURES;
     shaderDrawParametersFeatures.shaderDrawParameters = VK_TRUE;
@@ -740,6 +767,7 @@ void Device::createLogicalDevice()
     deviceFeatures2.features.samplerAnisotropy = VK_TRUE;
     deviceFeatures2.features.sampleRateShading = VK_TRUE;
     deviceFeatures2.features.shaderSampledImageArrayDynamicIndexing = VK_TRUE;
+    deviceFeatures2.features.vertexPipelineStoresAndAtomics = VK_TRUE;
     deviceFeatures2.pNext = &shaderDrawParametersFeatures;
 
     VkDeviceCreateInfo createInfo{};
