@@ -66,7 +66,7 @@ void Editor::Init()
     });
     
     aResourceManager->MainControl = panel;
-    sceneOffset.x = EDITOR_LEFT_PANEL_WIDTH * aRenderer->GetSwapChain().ScaleX;
+    sceneOffset.x = EDITOR_LEFT_PANEL_WIDTH;
     aInputManager->GlobalProfile.flag = Input::InputProfileFlags::None;
     Input::KeyMapConfig keyMapConfig;
     keyMapConfig.keyCode = GLFW_KEY_TAB;

@@ -7,7 +7,6 @@ SwapChain* _swapChain;
 SwapChain::SwapChain(Device* mDevice,
                              VkSurfaceKHR &mSurface, GLFWwindow* mWindow) : aDevice{mDevice}, surface{mSurface}, window{mWindow}
 {
-    glfwGetWindowContentScale(window, &ScaleX, &ScaleY);
     msaaSamplers = aDevice->GetMaxUsableSampleCount();
     createSwapChain();
     createImageViews();
@@ -232,6 +231,8 @@ VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilit
 
 void SwapChain::createSwapChain()
 {
+    glfwGetWindowContentScale(window, &ScaleX, &ScaleY);
+
     Device::SwapChainSupportDetails swapChainSupport = aDevice->QuerySwapChainSupport(aDevice->GetPhysicalDevice());
 
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);

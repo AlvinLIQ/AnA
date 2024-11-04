@@ -80,7 +80,7 @@ namespace AnA
 
         #ifdef INCLUDE_STB_IMAGE
         void CreateTextureImage(const char* imagePath, VkImage* pTexImage, VkDeviceMemory* pTexMemory);
-        void CreateTextImage(const char* text, int& width, int& height, float lineHeight, VkImage* pTextImage, VkDeviceMemory* pTextMemory);
+        void CreateTextImage(const char* text, int& width, int& height, float lineHeight, VkImage* pTextImage, VkDeviceMemory* pTextMemory, float scaleX = 1.0f, float scaleY = 1.0f);
         void CreateTextImage(const String& text, int& width, int& height, float lineHeight, VkImage* pTextImage, VkDeviceMemory* pTextMemory);
         #endif
 

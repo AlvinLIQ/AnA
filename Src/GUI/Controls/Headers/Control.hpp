@@ -51,6 +51,7 @@ namespace AnA
             virtual void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount);
             virtual void PointerEventTrigger(PointerEventArgs& args);
             static void InitControl(SwapChain* swapChain);
+            static float* GetScale();
             static VkExtent2D GetSwapChainExtent();
             static Device* GetDevice();
             static void GetInputProfile(Control* mainControl, std::vector<Input::InputProfile>& profiles);

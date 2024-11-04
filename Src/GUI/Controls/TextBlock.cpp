@@ -30,6 +30,7 @@ void TextBlock::Text(const char* newText)
     //TextBlock::~TextBlock();
     text = newText;
     int width = 0, height = 0;
+    float* scale = GetScale();
     texture = new Texture(text.Str(), width, height, 0, Control::GetDevice());
     ControlSize = {(float)width, (float)height};
 }

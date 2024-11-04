@@ -16,9 +16,9 @@ Texture::Texture(const uint32_t color, Device* mDevice) : aDevice{ mDevice }
     init();
 }
 
-Texture::Texture(const char* text, int& width, int& height, float lineHeight, Device* mDevice) : aDevice{ mDevice }
+Texture::Texture(const char* text, int& width, int& height, float lineHeight, Device* mDevice, float scaleX, float scaleY) : aDevice{ mDevice }
 {
-    aDevice->CreateTextImage(text, width, height, lineHeight, &textureImage, &textureImageMemory);
+    aDevice->CreateTextImage(text, width, height, lineHeight, &textureImage, &textureImageMemory, scaleX, scaleY);
     init();
 }
 

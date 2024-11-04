@@ -52,7 +52,9 @@ namespace AnA
         }
         VkOffset2D &GetSceneOffset()
         {
-            return sceneOffset;
+            actualSceneOffset = {static_cast<int32_t>(sceneOffset.x * aRenderer->GetSwapChain().ScaleX), 
+                static_cast<int32_t>(sceneOffset.y * aRenderer->GetSwapChain().ScaleY)};
+            return actualSceneOffset;
         }
     private:
         std::thread uiThread;
@@ -62,6 +64,7 @@ namespace AnA
         static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
         bool commandBufferNeedUpdate = false;
+        VkOffset2D actualSceneOffset{};
     protected:
         virtual void createRecordCallBacks();
         virtual void onCommandBufferRecording(VkCommandBuffer& commandBuffer);

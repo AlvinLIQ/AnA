@@ -210,18 +210,19 @@ void Device::CreateTextureImage(const char* imagePath, VkImage* pTexImage, VkDev
     TransitionImageLayout(*pTexImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
-void Device::CreateTextImage(const char* text, int& width, int& height, float lineHeight, VkImage* pTextImage, VkDeviceMemory* pTextMemory)
+void Device::CreateTextImage(const char* text, int& width, int& height, float lineHeight, VkImage* pTextImage, VkDeviceMemory* pTextMemory, float scaleX, float scaleY)
 {
     auto fontData = ReadFile("Fonts/SourceCodePro-Black.otf");
     stbtt_fontinfo info{};
     if (!stbtt_InitFont(&info, (const unsigned char*)fontData.data(), 0))
         throw std::runtime_error("failed to init font");
     
-    int imageSize = width * height;
+    int imageSize = (int)(width * height * scaleX * scaleY);
     if (!lineHeight)
     {
         lineHeight = ANA_TEXT_DEFAULT_LINE_HEIGHT;
     }
+    lineHeight *= scaleY;
     
     float scale = stbtt_ScaleForPixelHeight(&info, lineHeight);
 
@@ -242,7 +243,7 @@ void Device::CreateTextImage(const char* text, int& width, int& height, float li
             }
         }
         height = lineHeight;
-        imageSize = width * lineHeight;
+        imageSize = width * scaleX * lineHeight;
     }
 
     std::vector<unsigned char> textBitmap(imageSize);

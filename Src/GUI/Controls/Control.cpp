@@ -76,6 +76,11 @@ void Control::InitControl(SwapChain* swapChain)
     aSwapChain = swapChain;
 }
 
+float* Control::GetScale()
+{
+    return &aSwapChain->Scale[0];
+}
+
 VkExtent2D Control::GetSwapChainExtent()
 {
     return aSwapChain->GetExtent();
@@ -194,8 +199,9 @@ void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input:
         args.EventType = leftButtonAction == GLFW_PRESS ? PointerEventType::Pressed : PointerEventType::Moving;
         args.TriggerType = PointerTriggerType::Mouse;
         auto extent = Control::GetSwapChainExtent();
-        args.Position = {pos.x / ((float)control->Extent.width / (float)extent.width), 
-                        pos.y / ((float)control->Extent.height / (float)extent.height)};
+        auto scale = Control::GetScale();
+        args.Position = {pos.x * scale[0] / ((float)control->Extent.width / (float)extent.width), 
+                        pos.y * scale[1] / ((float)control->Extent.height / (float)extent.height)};
         control->PointerEventTrigger(args);
         Resource::ResourceManager::GetCurrent()->Shapes.PrepareDraw(control);
     };
