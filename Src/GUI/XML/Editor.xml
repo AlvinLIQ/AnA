@@ -1,5 +1,7 @@
 <StackPanel ControlSize="300.0f, 0.0f" Orientation="Vertical">
-    <Button>
+    <Button Click="loadModelButton_Click">
         <TextBlock Text="Load Model"/>
     </Button>
+    <ListView Name="modelList" ControlSize="0.0f, 400.0f" HorizontalAlignment="Stretch">
+    </ListView>
 </StackPanel>

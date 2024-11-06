@@ -11,6 +11,8 @@ namespace AnA
             Editor();
             ~Editor();
             void Init();
+        private:
+            static void loadModelButton_Click(void* control, PointerEventArgs& args);
         };
     }
 }

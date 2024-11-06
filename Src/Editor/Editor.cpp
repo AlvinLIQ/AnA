@@ -37,33 +37,7 @@ void Editor::Init()
     content->Text("Load");
     button->Child(content);
     panel->Child(button);
-    button->PointerEvents[PointerEventType::Released].push_back([](void* control, PointerEventArgs& args)
-    {
-        char path[256] = "";
-        switch (glfwGetPlatform())
-        {
-#ifdef _WIN32
-        case GLFW_PLATFORM_WIN32:
-        
-            break;
-#else
-        case GLFW_PLATFORM_X11:
-        case GLFW_PLATFORM_WAYLAND:
-            FILE* f = popen("/usr/bin/zenity --file-selection", "r");
-            fgets(path, 256, f);
-            size_t len = strlen(path);
-            if (len <= 1)
-                return;
-            path[len- 1] = '\0';
-            pclose(f);
-            MeshInfo mesh;
-            memcpy(mesh.filePath, path, 256);
-            mesh.tetureId = 0;
-            Resource::ResourceManager::GetCurrent()->SceneObjects.Append(std::vector<MeshInfo>(1, mesh));
-            break;
-#endif
-        };
-    });
+    button->PointerEvents[PointerEventType::Released].push_back(Editor::loadModelButton_Click);
     
     aResourceManager->MainControl = panel;
     sceneOffset.x = EDITOR_LEFT_PANEL_WIDTH;
@@ -90,6 +64,34 @@ void Editor::Init()
     };
     aInputManager->GlobalProfile.keyMapConfigs.push_back(keyMapConfig);
     Controls::Control::GetInputProfile(aResourceManager->MainControl, aInputManager->GetProfiles());
+}
+
+void Editor::loadModelButton_Click(void* control, PointerEventArgs& args)
+{
+    char path[256] = "";
+    switch (glfwGetPlatform())
+    {
+#ifdef _WIN32
+        case GLFW_PLATFORM_WIN32:
+        
+        break;
+#else
+        case GLFW_PLATFORM_X11:
+        case GLFW_PLATFORM_WAYLAND:
+            FILE* f = popen("/usr/bin/zenity --file-selection", "r");
+            fgets(path, 256, f);
+            size_t len = strlen(path);
+            if (len <= 1)
+                return;
+            path[len- 1] = '\0';
+            pclose(f);
+            MeshInfo mesh;
+            memcpy(mesh.filePath, path, 256);
+            mesh.tetureId = 0;
+            Resource::ResourceManager::GetCurrent()->SceneObjects.Append(std::vector<MeshInfo>(1, mesh));
+            break;
+#endif
+    };
 }
 
 const VkDeviceSize offset = 0;
