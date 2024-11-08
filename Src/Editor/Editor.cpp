@@ -5,6 +5,7 @@
 
 using namespace AnA;
 using namespace Editors;
+using namespace Controls;
 
 #define EDITOR_LEFT_PANEL_WIDTH 300
 
@@ -22,24 +23,28 @@ void Editor::Init()
 {
     App::Init();
 
-    auto panel = new Controls::StackPanel();
-    panel->Spacing = 0.01f;
-    panel->VerticalAlignment = AlignmentType::Stretch;
-    panel->HorizontalAlignment = AlignmentType::Stretch;
-    panel->Orientation = Controls::Orientations::Vertical;
-    panel->Color = glm::vec3{0.92f};
-    auto panelTitle = new Controls::TextBlock();
-    panelTitle->Text("AnA - Editor");
-    panel->Child(panelTitle);
-    auto button = new Controls::Button();
-    button->HorizontalAlignment = AlignmentType::Start;
-    auto content = new Controls::TextBlock();
-    content->Text("Load");
-    button->Child(content);
-    panel->Child(button);
-    button->PointerEvents[PointerEventType::Released].push_back(Editor::loadModelButton_Click);
+    StackPanel* node0 = new StackPanel();
+    node0->ControlSize = {300.0f, 0.0f};
+    node0->Spacing = {0.01f};
+    node0->VerticalAlignment = {Stretch};
+    node0->HorizontalAlignment = {Stretch};
+    node0->Orientation = {Vertical};
+    node0->Color = {0.92f, 0.92f, 0.92f};
+    Button* node1 = new Button();
+    node1->HorizontalAlignment = {Start};
+    node1->PointerEvents[PointerEventType::Released].emplace_back(loadModelButton_Click);
+    node0->Child(node1);
+    TextBlock* node2 = new TextBlock();
+    node2->Text("Load Model");
+    node1->Child(node2);
+    Button* node3 = new Button();
+    node3->HorizontalAlignment = {Start};
+    node0->Child(node3);
+    TextBlock* node4 = new TextBlock();
+    node4->Text("Save Scene");
+    node3->Child(node4);
     
-    aResourceManager->MainControl = panel;
+    aResourceManager->MainControl = node0;
     sceneOffset.x = EDITOR_LEFT_PANEL_WIDTH;
     aInputManager->GlobalProfile.flag = Input::InputProfileFlags::None;
     Input::KeyMapConfig keyMapConfig;

@@ -1,7 +1,9 @@
-<StackPanel ControlSize="300.0f, 0.0f" Orientation="Vertical">
-    <Button Click="loadModelButton_Click">
+<StackPanel ControlSize="300.0f, 0.0f" Spacing="0.01f" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Orientation="Vertical"
+    Color="0.92f, 0.92f, 0.92f">
+    <Button HorizontalAlignment="Start" Click="loadModelButton_Click">
         <TextBlock Text="Load Model"/>
     </Button>
-    <ListView Name="modelList" ControlSize="0.0f, 400.0f" HorizontalAlignment="Stretch">
-    </ListView>
+    <Button HorizontalAlignment="Start">
+        <TextBlock Text="Save Scene"/>
+    </Button>
 </StackPanel>
