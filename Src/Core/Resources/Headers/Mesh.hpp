@@ -60,6 +60,10 @@ namespace AnA
         {
             return meshes[index];
         }
+        const Mesh* Get() const
+        {
+            return meshes.data();
+        }
         size_t GetMeshCount() const
         {
             return meshes.size();

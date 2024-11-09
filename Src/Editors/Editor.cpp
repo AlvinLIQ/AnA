@@ -74,6 +74,33 @@ void Editor::loadModelButton_Click(void* control, PointerEventArgs& args)
     };
 }
 
+void Editor::saveSceneButton_Click(void* control, PointerEventArgs& args)
+{
+    char path[256] = "";
+    auto resourceManager = Resource::ResourceManager::GetCurrent();
+    const Mesh* meshes = resourceManager->SceneObjects.Get();
+    switch (glfwGetPlatform())
+    {
+#ifdef _WIN32
+        case GLFW_PLATFORM_WIN32:
+        
+        break;
+#else
+        case GLFW_PLATFORM_X11:
+        case GLFW_PLATFORM_WAYLAND:
+            FILE* f = popen("/usr/bin/zenity --file-selection --save", "r");
+            fgets(path, 256, f);
+            size_t len = strlen(path);
+            if (len <= 1)
+                return;
+            path[len- 1] = '\0';
+            pclose(f);
+
+            break;
+#endif
+    }
+}
+
 const VkDeviceSize offset = 0;
 
 int main()

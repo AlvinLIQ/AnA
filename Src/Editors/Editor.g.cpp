@@ -25,6 +25,7 @@ node2->Text("Load Model");
 node1->Child(node2);
 Button* node3 = new Button();
 node3->HorizontalAlignment = {Start};
+node3->PointerEvents[PointerEventType::Released].emplace_back(saveSceneButton_Click);
 node0->Child(node3);
 TextBlock* node4 = new TextBlock();
 node4->Text("Save Scene");

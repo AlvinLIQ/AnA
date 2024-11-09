@@ -14,6 +14,7 @@ namespace AnA
             Controls::Control* InitControl();
         private:
             static void loadModelButton_Click(void* control, PointerEventArgs& args);
+            static void saveSceneButton_Click(void* control, PointerEventArgs& args);
         };
     }
 }
