@@ -40,13 +40,14 @@ shaderspv = $(temp2:.frag=_frag.spv)
 
 all: shader ui $(ana)
 
-shader: shader_prepare shader_compile
+shader: shader_prepare $(shader) shader_compile
 
-shader_prepare: $(shader)
+shader_prepare:
 	@ mkdir -p Shaders
 
 shader_compile: $(shaderspv)
 	$(shader) Shaders/ $(^F) > Src/Core/Headers/ShaderCodes.hpp
+
 %_frag.spv : %.frag
 	glslc $< -o Shaders/$(@F) $(shader_args)
 %_vert.spv : %.vert

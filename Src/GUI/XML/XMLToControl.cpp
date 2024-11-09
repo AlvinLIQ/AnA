@@ -74,7 +74,7 @@ std::string XML::XMLToCode(std::string path)
         code += "#include \"../GUI/Controls/Headers/" + node + ".hpp\"\n";
     }
     auto _path = std::filesystem::path(path);
-    std::string className = _path.filename().replace_extension();
+    std::string className = _path.filename().replace_extension().string();
     code += "#include \"Headers/" + className + ".hpp\"\n\nusing namespace AnA;\nusing namespace Controls;\nusing namespace " + _path.parent_path().filename().string() + ";\n";
 
     code += "\nControls::Control* " + className + "::InitControl()\n{\n" + ss.str() + "\nreturn node0;\n}\n";
