@@ -1,4 +1,5 @@
 #include "Headers/Editor.hpp"
+#include "Headers/FileDialog.hpp"
 
 using namespace AnA;
 using namespace Editors;
@@ -48,57 +49,19 @@ void Editor::Init()
 
 void Editor::loadModelButton_Click(void* control, PointerEventArgs& args)
 {
-    char path[256] = "";
-    switch (glfwGetPlatform())
-    {
-#ifdef _WIN32
-        case GLFW_PLATFORM_WIN32:
-        
-        break;
-#else
-        case GLFW_PLATFORM_X11:
-        case GLFW_PLATFORM_WAYLAND:
-            FILE* f = popen("/usr/bin/zenity --file-selection", "r");
-            fgets(path, 256, f);
-            size_t len = strlen(path);
-            if (len <= 1)
-                return;
-            path[len- 1] = '\0';
-            pclose(f);
-            MeshInfo mesh;
-            memcpy(mesh.filePath, path, 256);
-            mesh.tetureId = 0;
-            Resource::ResourceManager::GetCurrent()->SceneObjects.Append(std::vector<MeshInfo>(1, mesh));
-            break;
-#endif
-    };
+    FileDialog fileDialog{};
+    auto path = fileDialog.Run();
+    MeshInfo mesh;
+    memcpy(mesh.filePath, path.c_str(), path.length());
+    mesh.tetureId = 0;
+    Resource::ResourceManager::GetCurrent()->SceneObjects.Append(std::vector<MeshInfo>(1, mesh));
 }
 
 void Editor::saveSceneButton_Click(void* control, PointerEventArgs& args)
 {
-    char path[256] = "";
-    auto resourceManager = Resource::ResourceManager::GetCurrent();
-    const Mesh* meshes = resourceManager->SceneObjects.Get();
-    switch (glfwGetPlatform())
-    {
-#ifdef _WIN32
-        case GLFW_PLATFORM_WIN32:
-        
-        break;
-#else
-        case GLFW_PLATFORM_X11:
-        case GLFW_PLATFORM_WAYLAND:
-            FILE* f = popen("/usr/bin/zenity --file-selection --save", "r");
-            fgets(path, 256, f);
-            size_t len = strlen(path);
-            if (len <= 1)
-                return;
-            path[len- 1] = '\0';
-            pclose(f);
-
-            break;
-#endif
-    }
+    FileDialog fileDialog{};
+    auto path = fileDialog.Run();
+    printf("%s\n", path.c_str());
 }
 
 const VkDeviceSize offset = 0;
