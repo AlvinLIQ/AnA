@@ -31,8 +31,8 @@ void ItemPresenter::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImag
     Control::PrepareDraw(shapeBuffer, imageInfos, shapeCount);
     if (item != nullptr)
     {
-        item->HorizontalAlignment = AlignmentType::Center;
-        item->VerticalAlignment = AlignmentType::Center;
+        item->HorizontalAlignment = HorizontalContentAlignment;
+        item->VerticalAlignment = VerticalContentAlignment;
         item->PrepareDraw(shapeBuffer, imageInfos, shapeCount);
     }
 }

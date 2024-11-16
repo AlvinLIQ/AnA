@@ -14,8 +14,14 @@ StackPanel::~StackPanel()
 
 void StackPanel::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
-    auto RenderOffset = ControlOffset;
-    float maxSize = 1.0f;
+    GetActualControlOffset(GetSizeForRender());
+    StackPanel::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
+}
+
+void StackPanel::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
+{
+    auto renderOffset = ControlOffset;
+    SIZE_F maxSize = RenderSize();
     int o = Orientation, invO = 1 - Orientation;
     /*
     for (int i = 0; i < items.size(); i++)
@@ -35,27 +41,26 @@ void StackPanel::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageIn
         items[i]->Aspect = Aspect;
         items[i]->Extent = Extent;
         auto _size = items[i]->GetSizeForRender();
-        ((float*)&offset)[invO] += ((float*)&size)[invO] + ((float*)&_size)[invO] + Spacing + ((float*)&RenderOffset)[invO];
+        ((float*)&offset)[invO] += ((float*)&size)[invO] + ((float*)&_size)[invO] + Spacing + ((float*)&renderOffset)[invO];
         size = _size;
         auto align = invO ? (AlignmentType*)&items[i]->HorizontalAlignment : &items[i]->VerticalAlignment;//(items[i] + offsets[o]);
         switch (*align)
         {
         case Start:
-            ((float*)&offset)[o] = ((float*)&size)[o] - maxSize + ((float*)&RenderOffset)[o];
+            ((float*)&offset)[o] = ((float*)&size)[o] - ((float*)&maxSize)[o] + ((float*)&renderOffset)[o];
             break;
         case End:
-            ((float*)&offset)[o] = maxSize - ((float*)&size)[o];
+            ((float*)&offset)[o] = ((float*)&maxSize)[o] - ((float*)&size)[o];
             break;
         case Stretch:
-            ((float*)&size)[o] = maxSize;
+            ((float*)&size)[o] = ((float*)&maxSize)[o];
         default:
-            ((float*)&offset)[o] = ((float*)&RenderOffset)[o] * 0.5f;
+            ((float*)&offset)[o] = ((float*)&renderOffset)[o] * 0.5f;
             break;
         }
         items[i]->RenderOffset(offset);
         items[i]->RenderSize(size);
         items[i]->ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
     }
-
-    Control::PrepareDraw(shapeBuffer, imageInfos, shapeCount);
+    Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
 }

@@ -16,6 +16,7 @@ node0->VerticalAlignment = {Stretch};
 node0->HorizontalAlignment = {Stretch};
 node0->Orientation = {Vertical};
 node0->Color = {0.92f, 0.92f, 0.92f};
+node0->ControlOffset = {0.1f, 0.0f};
 TextBlock* node1 = new TextBlock();
 node1->Text("AnA");
 node0->Child(node1);

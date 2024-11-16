@@ -14,6 +14,7 @@ namespace AnA
 
             Orientations Orientation {Horizontal};
             void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount);
+            void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount);
         private:
         };
     }

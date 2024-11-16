@@ -17,6 +17,9 @@ namespace AnA
 
             void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount);
             void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount);
+
+            AlignmentType HorizontalContentAlignment{Center};
+            AlignmentType VerticalContentAlignment{Center};
         protected:
             Control* item{nullptr};
         };

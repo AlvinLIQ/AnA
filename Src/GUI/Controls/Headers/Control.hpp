@@ -83,7 +83,7 @@ namespace AnA
             static bool IsInside(CursorPosition& pos, POS_F& offset, SIZE_F& size);
 
             virtual VkDescriptorImageInfo GetDescriptorImageInfo();
-            virtual void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfoss, uint32_t& shapeCount);
+            virtual void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount);
         private:
             AlignType renderMode {ControlRenderMode};
             POS_F renderOffset{};
