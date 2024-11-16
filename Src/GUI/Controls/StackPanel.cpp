@@ -14,6 +14,7 @@ StackPanel::~StackPanel()
 
 void StackPanel::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
+    auto RenderOffset = ControlOffset;
     float maxSize = 1.0f;
     int o = Orientation, invO = 1 - Orientation;
     /*
@@ -34,13 +35,13 @@ void StackPanel::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageIn
         items[i]->Aspect = Aspect;
         items[i]->Extent = Extent;
         auto _size = items[i]->GetSizeForRender();
-        ((float*)&offset)[invO] += ((float*)&size)[invO] + ((float*)&_size)[invO] + Spacing;
+        ((float*)&offset)[invO] += ((float*)&size)[invO] + ((float*)&_size)[invO] + Spacing + ((float*)&RenderOffset)[invO];
         size = _size;
         auto align = invO ? (AlignmentType*)&items[i]->HorizontalAlignment : &items[i]->VerticalAlignment;//(items[i] + offsets[o]);
         switch (*align)
         {
         case Start:
-            ((float*)&offset)[o] = ((float*)&size)[o] - maxSize;
+            ((float*)&offset)[o] = ((float*)&size)[o] - maxSize + ((float*)&RenderOffset)[o];
             break;
         case End:
             ((float*)&offset)[o] = maxSize - ((float*)&size)[o];
@@ -48,7 +49,7 @@ void StackPanel::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageIn
         case Stretch:
             ((float*)&size)[o] = maxSize;
         default:
-            ((float*)&offset)[o] = 0.0f;
+            ((float*)&offset)[o] = ((float*)&RenderOffset)[o] * 0.5f;
             break;
         }
         items[i]->RenderOffset(offset);

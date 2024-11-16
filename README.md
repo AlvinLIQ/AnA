@@ -12,7 +12,7 @@
 * [X] Multi-Thread Commandbuffer Recording
 * [X] Draw Indirectly
 * [ ] Mesh Shader
-* [ ] XML to GUI
+* [X] XML to GUI
 
 ## Build&Run
 Clone the repo and submodules
