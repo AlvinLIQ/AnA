@@ -247,7 +247,7 @@ void ResourceManager::cleanupShadowResources()
     for (auto& shadowFrameBuffer : shadowFramebuffers)
         vkDestroyFramebuffer(aDevice->GetLogicalDevice(), shadowFrameBuffer, nullptr);
     for (auto& shadowImage : shadowImages)
-        shadowImage.CleanUp(aDevice->GetLogicalDevice());
+        shadowImage.cleanup(aDevice->GetLogicalDevice());
 }
 
 void ResourceManager::createDefaultShaders()

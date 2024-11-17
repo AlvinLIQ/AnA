@@ -16,7 +16,7 @@ namespace AnA
             VkImageType imageType;
             VkFormat format;
             VkExtent3D extent;
-            void CleanUp(VkDevice device)
+            void cleanup(VkDevice device)
             {
                 vkDestroyImageView(device, imageView, nullptr);
                 vkDestroyImage(device, image, nullptr);
