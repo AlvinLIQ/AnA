@@ -12,6 +12,8 @@
 * [X] Multi-Thread Commandbuffer Recording
 * [X] Draw Indirectly
 * [ ] Mesh Shader
+* [ ] Animation System
+* [ ] Cascaded Shaodow Maps
 * [X] XML to GUI
 
 ## Build&Run

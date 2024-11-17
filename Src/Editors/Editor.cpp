@@ -59,9 +59,15 @@ void Editor::loadModelButton_Click(void* control, PointerEventArgs& args)
 
 void Editor::saveSceneButton_Click(void* control, PointerEventArgs& args)
 {
-    FileDialog fileDialog{};
+    FileDialog fileDialog{"--save"};
     auto path = fileDialog.Run();
-    printf("%s\n", path.c_str());
+    if(path.empty())
+        return;
+    FILE* f = fopen(path.c_str(), "wb");
+    auto objects = Resource::ResourceManager::GetCurrent()->SceneObjects;
+    fwrite((const void*)objects.Get(), sizeof(Mesh), objects.GetMeshCount(), f);
+
+    fclose(f);
 }
 
 const VkDeviceSize offset = 0;
