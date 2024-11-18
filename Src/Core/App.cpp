@@ -335,12 +335,13 @@ void App::onCommandBufferRecording(VkCommandBuffer& commandBuffer)
         return;
     //if (commandBufferNeedUpdate)
     //{
+    /*
     aRenderer->BeginOffscreenRenderPass(commandBuffer, 
             aResourceManager->GetShadowFramebuffers()[aResourceManager->SecondaryCommandBufferPool.CurrentBufferIndex],
             VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
             aRenderer->ExecuteOffscreenSecondaryCommandBuffer(commandBuffer);
             //aShadowSystem->RenderShadowsIndirect(commandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[2]);
-    aRenderer->EndRenderPass(commandBuffer);
+    aRenderer->EndRenderPass(commandBuffer);*/
     //}
     aRenderer->BeginSwapChainRenderPass(commandBuffer, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
     aResourceManager->SecondaryCommandBufferPool.ExcuteRecordedBuffer(commandBuffer);

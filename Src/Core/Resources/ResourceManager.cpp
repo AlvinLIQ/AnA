@@ -10,15 +10,15 @@ ResourceManager* _resourceManager = nullptr;
 
 ResourceManager::ResourceManager(Device* mDevice) : aDevice{mDevice}, 
         SceneObjects(mDevice),
-        GlobalLight(mDevice), 
+        GlobalLight(mDevice),
+        shadowMap(mDevice),
         SecondaryCommandBufferPool(mDevice, 
         VK_COMMAND_BUFFER_LEVEL_SECONDARY,
         VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT | VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT)
 {
     _resourceManager = this;
     createMainCameraBuffers();
-    createShadowFramebuffers();
-
+    //createShadowFramebuffers();
     createDefaultShaders();
     Shapes = AnA::Shapes(mDevice);
     //Shapes = new AnA::Shapes(mDevice);
@@ -40,9 +40,9 @@ ResourceManager::~ResourceManager()
     //delete Shapes;
     
     auto logicalDevice = aDevice->GetLogicalDevice();
-    for (auto& shadowSampler : shadowSamplers)
-        vkDestroySampler(logicalDevice, shadowSampler, nullptr);
-    cleanupShadowResources();
+    //for (auto& shadowSampler : shadowSamplers)
+    //   vkDestroySampler(logicalDevice, shadowSampler, nullptr);
+    //cleanupShadowResources();
 
     //delete SceneObjects;
     //delete GlobalLight;
@@ -56,9 +56,10 @@ ResourceManager* ResourceManager::GetCurrent()
     return _resourceManager;
 }
 
-std::vector<VkFramebuffer>& ResourceManager::GetShadowFramebuffers()
+std::vector<Cascade>& ResourceManager::GetCascades()
 {
-    return shadowFramebuffers;
+    return shadowMap.GetCascades();
+    //return shadowFramebuffers;
 }
 
 void ResourceManager::UpdateCamera(float aspect)
@@ -110,8 +111,8 @@ void ResourceManager::Resize()
 
 void ResourceManager::RecreateResources()
 {
-    cleanupShadowResources();
-    createShadowFramebuffers();
+    //cleanupShadowResources();
+    //createShadowFramebuffers();
     auto deafultShadowSamplerConfig = GetDefaultDescriptorConfig()[DEFAULT_SHADOW_SAMPLER_LAYOUT];
     for (int i = 0; i < 1; i++)
     {
@@ -155,8 +156,8 @@ std::vector<Descriptor::DescriptorConfig> ResourceManager::GetDefaultDescriptorC
     pConfig->descriptorCount = MAX_FRAMES_IN_FLIGHT;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     pConfig->stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    pConfig->images = shadowImages.data();
-    pConfig->samplers = shadowSamplers.data();
+    pConfig->images = shadowMap.GetImages().data();
+    pConfig->samplers = shadowMap.GetSamplers().data();
 
     return descriptorConfigs;
 }
@@ -189,7 +190,7 @@ void ResourceManager::createMainCameraBuffers()
         cameraBuffer.Map(0, bufferSize);
     }
 }
-
+/*
 void ResourceManager::createShadowFramebuffers()
 {
     shadowImages.resize(MAX_FRAMES_IN_FLIGHT);
@@ -249,7 +250,7 @@ void ResourceManager::cleanupShadowResources()
     for (auto& shadowImage : shadowImages)
         shadowImage.cleanup(aDevice->GetLogicalDevice());
 }
-
+*/
 void ResourceManager::createDefaultShaders()
 {
     Shaders.reserve(3); // Reserve space for 3 default shaders
@@ -261,5 +262,7 @@ void ResourceManager::createDefaultShaders()
     Shaders.emplace_back(aDevice, Shape_vert, Shape_frag, renderPass, shapesDescriptorConfig);
 
     auto offscreenRenderPass = SwapChain::GetCurrent()->GetOffscreenRenderPass();
-    Shaders.emplace_back(aDevice, ShadowMapping_vert, offscreenRenderPass, descriptorConfig);
+    shadowMap.GetUBODescriptorConfig(&descriptorConfig[3]);
+
+    Shaders.emplace_back(aDevice, CascadedShadowMapping_vert, CascadedShadowMapping_frag, offscreenRenderPass, descriptorConfig);
 }

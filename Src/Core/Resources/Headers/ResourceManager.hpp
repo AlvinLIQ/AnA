@@ -7,6 +7,7 @@
 #include "Shader.hpp"
 #include "Lights.hpp"
 #include "Texture.hpp"
+#include "ShadowMap.hpp"
 
 #define ANA_INCLUDE_CONTROL
 
@@ -34,7 +35,7 @@ namespace AnA
             ~ResourceManager();
 
             static ResourceManager* GetCurrent();
-            std::vector<VkFramebuffer>& GetShadowFramebuffers();
+            std::vector<Cascade>& GetCascades();
 
             //Built-in resources
             Cameras::Camera MainCamera;
@@ -68,11 +69,13 @@ namespace AnA
             std::vector<Buffer> mainCameraBuffers;
             void createMainCameraBuffers();
 
+/*
             std::vector<VkSampler> shadowSamplers;
             std::vector<Image> shadowImages;
             std::vector<VkFramebuffer> shadowFramebuffers;
             void createShadowFramebuffers();
-            void cleanupShadowResources();
+            void cleanupShadowResources();*/
+            ShadowMap shadowMap;
 
             void createDefaultShaders();
         };

@@ -1,7 +1,6 @@
 #include "Headers/ShadowMap.hpp"
 #include "../Camera/Headers/Camera.hpp"
 #include "../Headers/SwapChain.hpp"
-#include "../Headers/Buffer.hpp"
 
 using namespace AnA;
 using namespace Resource;
@@ -98,6 +97,17 @@ void ShadowMap::UpdateBuffers(Cameras::Camera& camera)
 	}
 }
 
+void ShadowMap::GetUBODescriptorConfig(Descriptor::DescriptorConfig* pConfig)
+{
+	pConfig = {};
+	pConfig->binding = 0;
+    pConfig->descriptorCount = MAX_FRAMES_IN_FLIGHT;
+    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+    pConfig->buffers = cascadeBuffers.data();
+    pConfig->bufferSize = sizeof(Cascade);
+}
+
 void ShadowMap::createShadowResources()
 {
     shadowImages.resize(MAX_FRAMES_IN_FLIGHT);
@@ -166,9 +176,13 @@ void ShadowMap::createShadowResources()
         }
         if (samplersNotCreated)
             aDevice->CreateSampler(&shadowSamplers[i], VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE);
-		cascadeBuffer = Buffer(aDevice, cascades.size() * sizeof(Cascade), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
-		VK_MEMORY_PROPERTY_HOST_COHERENT_BIT 
-			| VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+		cascadeBuffers.reserve(MAX_FRAMES_IN_FLIGHT);
+		for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			cascadeBuffers.emplace_back(aDevice, cascades.size() * sizeof(Cascade), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
+			VK_MEMORY_PROPERTY_HOST_COHERENT_BIT 
+				| VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+		}
     }
 }
 

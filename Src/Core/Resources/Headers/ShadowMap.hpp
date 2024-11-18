@@ -1,7 +1,6 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <array>
 #include "../../Headers/Device.hpp"
 #include "../../Headers/Buffer.hpp"
 #include "Descriptor.hpp"
@@ -34,6 +33,7 @@ namespace AnA
             ShadowMap(Device* mDevice);
             ShadowMap(const ShadowMap&) = delete;
             ShadowMap& operator=(const ShadowMap&) = delete;
+            /*
             ShadowMap(ShadowMap&& shadowMap) noexcept : aDevice{shadowMap.aDevice}
             {
 
@@ -48,16 +48,29 @@ namespace AnA
                 }
 
                 return *this;
-            }
+            }*/
             ~ShadowMap();
+            std::vector<Cascade>& GetCascades()
+            {
+                return cascades;
+            }
+            std::vector<Image>& GetImages()
+            {
+                return shadowImages;
+            }
+            std::vector<VkSampler> GetSamplers()
+            {
+                return shadowSamplers;
+            }
             void UpdateBuffers(Cameras::Camera& camera);
+            void GetUBODescriptorConfig(Descriptor::DescriptorConfig* pConfig);
         private:
             Device* aDevice{nullptr};
             float cascadeSplitLambda = 0.95f;
             std::vector<VkSampler> shadowSamplers;
             std::vector<Image> shadowImages;
-            std::array<Cascade, SHADOW_MAP_CASCADE_COUNT> cascades;
-            Buffer cascadeBuffer;
+            std::vector<Cascade> cascades;
+            std::vector<Buffer> cascadeBuffers;
             void createShadowResources();
             void cleanupShadowResources();
         };

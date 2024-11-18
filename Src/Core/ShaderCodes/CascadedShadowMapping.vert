@@ -35,7 +35,7 @@ layout(push_constant) uniform PushConsts {
 	uint cascadeIndex;
 } pushConsts;
 
-layout (set = 4, binding = 3) uniform UBO {
+layout (set = 3, binding = 3) uniform UBO {
 	mat4[SHADOW_MAP_CASCADE_COUNT] cascadeViewProjMat;
 } ubo;
 
