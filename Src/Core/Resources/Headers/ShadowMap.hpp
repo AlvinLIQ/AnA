@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <array>
 #include "../../Headers/Device.hpp"
+#include "../../Headers/Buffer.hpp"
 #include "Descriptor.hpp"
 
 #define SHADOW_MAP_CASCADE_COUNT 4
@@ -49,12 +50,14 @@ namespace AnA
                 return *this;
             }
             ~ShadowMap();
-            
+            void UpdateBuffers(Cameras::Camera& camera);
+        private:
+            Device* aDevice{nullptr};
+            float cascadeSplitLambda = 0.95f;
             std::vector<VkSampler> shadowSamplers;
             std::vector<Image> shadowImages;
             std::array<Cascade, SHADOW_MAP_CASCADE_COUNT> cascades;
-        private:
-            Device* aDevice{nullptr};
+            Buffer cascadeBuffer;
             void createShadowResources();
             void cleanupShadowResources();
         };

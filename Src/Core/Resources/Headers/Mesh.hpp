@@ -82,12 +82,12 @@ namespace AnA
         }
     private:
         Device* aDevice;
-        Buffer* vertexBuffer{nullptr};
+        Buffer vertexBuffer{};
         size_t vertexCount = 0;
-        Buffer* indexBuffer{nullptr};
+        Buffer indexBuffer{};
         size_t indexCount = 0;
-        Buffer* indirectBuffer{nullptr};
-        Buffer* countBuffer{nullptr};
+        Buffer indirectBuffer{};
+        Buffer countBuffer{};
         std::vector<Mesh> meshes;
         uint32_t batchSize;
         std::vector<Range> updateQueue{};

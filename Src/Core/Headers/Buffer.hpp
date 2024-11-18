@@ -15,8 +15,47 @@ namespace AnA
         }
         Buffer(Device* mDevice, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties);
         ~Buffer();
-        Buffer(const Buffer&) = delete;
-        Buffer &operator=(const Buffer&) = delete;
+//        Buffer(const Buffer&) = delete;
+//        Buffer &operator=(const Buffer&) = delete;
+        Buffer(Buffer& buf) noexcept
+        {
+            aDevice = buf.aDevice;
+            mappedData = buf.mappedData;
+            buffer = buf.buffer;
+            bufferSize = buf.bufferSize;
+            bufferMemory = buf.bufferMemory;
+            bufferUsage = buf.bufferUsage;
+            bufferMemoryProperties = buf.bufferMemoryProperties;
+            newBufferRecords = buf.newBufferRecords;
+            newBuffer = buf.newBuffer;
+            buf.mappedData = nullptr;
+            buf.buffer = VK_NULL_HANDLE;
+            buf.bufferMemory = VK_NULL_HANDLE;
+            buf.newBuffer = nullptr;
+        }
+        Buffer &operator=(Buffer& buf) noexcept
+        {
+            if (&buf != this)
+            {
+                cleanup();
+                if (newBuffer)
+                    delete newBuffer;
+                aDevice = buf.aDevice;
+                mappedData = buf.mappedData;
+                buffer = buf.buffer;
+                bufferSize = buf.bufferSize;
+                bufferMemory = buf.bufferMemory;
+                bufferUsage = buf.bufferUsage;
+                bufferMemoryProperties = buf.bufferMemoryProperties;
+                newBufferRecords = buf.newBufferRecords;
+                newBuffer = buf.newBuffer;
+                buf.mappedData = nullptr;
+                buf.buffer = VK_NULL_HANDLE;
+                buf.bufferMemory = VK_NULL_HANDLE;
+                buf.newBuffer = nullptr;
+            }
+            return *this;
+        }
         Buffer(Buffer&& buf) noexcept
         {
             aDevice = buf.aDevice;
@@ -28,6 +67,10 @@ namespace AnA
             bufferMemoryProperties = buf.bufferMemoryProperties;
             newBufferRecords = buf.newBufferRecords;
             newBuffer = buf.newBuffer;
+            buf.mappedData = nullptr;
+            buf.buffer = VK_NULL_HANDLE;
+            buf.bufferMemory = VK_NULL_HANDLE;
+            buf.newBuffer = nullptr;
         }
         Buffer &operator=(Buffer&& buf) noexcept
         {

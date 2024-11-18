@@ -34,10 +34,7 @@ Model::Model(Device* mDevice, const ModelInfo& modelInfo) : aDevice{mDevice}
 
 Model::~Model()
 {
-    if (hasIndexBuffer)
-        delete indexBuffer;
 
-    delete vertexBuffer;
 }
 
 void Model::CreateModelFromFile(Device* mDevice, const char *filePath, std::shared_ptr<Model>& model)
@@ -166,10 +163,10 @@ void Model::createVertexBuffers()
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);//Host CPU Device GPU
     stagingBuffer.CopyToBuffer(vertices.data(), bufferSize);
 
-    vertexBuffer = new Buffer(aDevice, bufferSize, 
+    vertexBuffer = Buffer(aDevice, bufferSize, 
         VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    vertexBuffer->CopyToBuffer(stagingBuffer, bufferSize);
+    vertexBuffer.CopyToBuffer(stagingBuffer, bufferSize);
 }
 
 void Model::createIndexBuffers()
@@ -181,27 +178,27 @@ void Model::createIndexBuffers()
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
     stagingBuffer.CopyToBuffer(indices.data(), bufferSize);
 
-    indexBuffer = new Buffer(aDevice, bufferSize, 
+    indexBuffer = Buffer(aDevice, bufferSize, 
         VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    indexBuffer->CopyToBuffer(stagingBuffer, bufferSize);
+    indexBuffer.CopyToBuffer(stagingBuffer, bufferSize);
 }
 
 void Model::Bind(VkCommandBuffer commandBuffer)
 {
-    VkBuffer buffers[] = {vertexBuffer->GetBuffer()};
+    VkBuffer buffers[] = {vertexBuffer.GetBuffer()};
     VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
     if (hasIndexBuffer)
-        vkCmdBindIndexBuffer(commandBuffer, indexBuffer->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+        vkCmdBindIndexBuffer(commandBuffer, indexBuffer.GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
 }
 
 void Model::Bind(VkCommandBuffer commandBuffer, VkDeviceSize& vertexOffset, VkDeviceSize& indexOffset)
 {
-    VkBuffer buffers[] = {vertexBuffer->GetBuffer()};
+    VkBuffer buffers[] = {vertexBuffer.GetBuffer()};
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, &vertexOffset);
     if (hasIndexBuffer)
-        vkCmdBindIndexBuffer(commandBuffer, indexBuffer->GetBuffer(), indexOffset, VK_INDEX_TYPE_UINT32);
+        vkCmdBindIndexBuffer(commandBuffer, indexBuffer.GetBuffer(), indexOffset, VK_INDEX_TYPE_UINT32);
 }
 
 void Model::Draw(VkCommandBuffer commandBuffer, Index instanceIndex)

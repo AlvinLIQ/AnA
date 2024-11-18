@@ -90,5 +90,4 @@ void main() {
 
     outTexCoord = vertex.uv;
     outTexID = vertex.texIndex;
-    //gl_Position = push.projectionMatrix * push.transformMatrix * vec4(position, 1.0);
 }

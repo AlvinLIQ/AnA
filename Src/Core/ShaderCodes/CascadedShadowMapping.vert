@@ -28,14 +28,23 @@ layout(set = 2, binding = 0) uniform LightBufferObject {
     float ambient;
 } lbo;
 
-const mat4 biasMat = mat4( 
-  0.5, 0.0, 0.0, 0.0,
-  0.0, 0.5, 0.0, 0.0,
-  0.0, 0.0, 1.0, 0.0,
-  0.5, 0.5, 0.0, 1.0 );
+#define SHADOW_MAP_CASCADE_COUNT 4
 
-const vec3 LIGHT_DIRECTION = vec3(1., -3., 1.);
+layout(push_constant) uniform PushConsts {
+	vec4 position;
+	uint cascadeIndex;
+} pushConsts;
+
+layout (set = 4, binding = 3) uniform UBO {
+	mat4[SHADOW_MAP_CASCADE_COUNT] cascadeViewProjMat;
+} ubo;
+
+layout(location = 0) out vec2 outTexCoord;
+
 void main()
 {
-    gl_Position = lbo.proj * lbo.view * (vec4(ssbo.vertices[gl_VertexIndex].position, 1.0));
+    Vertex vertex = ssbo.vertices[gl_VertexIndex];
+    vec4 vertexPos = vec4(vertex.position, 1.0);
+    gl_Position = ubo.cascadeViewProjMat[pushConsts.cascadeIndex] * vertexPos;
+    outTexCoord = vertex.uv;
 }

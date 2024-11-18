@@ -1,6 +1,7 @@
 #pragma once
 #include "../../Headers/Types.hpp"
 #include "../../Headers/Device.hpp"
+#include "../../Headers/Buffer.hpp"
 #include "Descriptor.hpp"
 
 namespace AnA
@@ -30,9 +31,6 @@ namespace AnA
         {
             shapes.samplersDescriptor = nullptr;
             shapes.ssboDescriptor = nullptr;
-            shapes.indirectBuffer = nullptr;
-            shapes.countBuffer = nullptr;
-            shapes.shapeBuffer = nullptr;
             shapes.shapeCount = 0;
         }
         Shapes& operator=(Shapes&& shapes) noexcept
@@ -50,9 +48,6 @@ namespace AnA
 
                 shapes.samplersDescriptor = nullptr;
                 shapes.ssboDescriptor = nullptr;
-                shapes.indirectBuffer = nullptr;
-                shapes.countBuffer = nullptr;
-                shapes.shapeBuffer = nullptr;
                 shapes.shapeCount = 0;
                 
             }
@@ -66,9 +61,9 @@ namespace AnA
         VkExtent2D Extent;
     private:
         Device* aDevice{nullptr};
-        Buffer* shapeBuffer{nullptr};
-        Buffer* indirectBuffer{nullptr};
-        Buffer* countBuffer{nullptr};
+        Buffer shapeBuffer;
+        Buffer indirectBuffer;
+        Buffer countBuffer;
         Descriptor* ssboDescriptor{nullptr};
         Descriptor* samplersDescriptor{nullptr};
         uint32_t shapeCount{};

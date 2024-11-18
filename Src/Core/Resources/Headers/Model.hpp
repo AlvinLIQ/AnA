@@ -108,9 +108,9 @@ namespace AnA
         std::vector<glm::vec2> vertexProjections;
 
         Device* aDevice;
-        Buffer* vertexBuffer;
+        Buffer vertexBuffer;
         bool hasIndexBuffer;
-        Buffer* indexBuffer;
+        Buffer indexBuffer;
         uint32_t vertexCount;
         uint32_t indexCount;
         Index indexStep;

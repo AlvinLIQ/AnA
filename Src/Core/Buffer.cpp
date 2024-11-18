@@ -74,7 +74,7 @@ void Buffer::TryReplace()
 {
     if (replaceList.size())
     {
-        vkDeviceWaitIdle(replaceList[0]->aDevice->GetLogicalDevice());
+        //vkDeviceWaitIdle(replaceList[0]->aDevice->GetLogicalDevice());
         for (auto buffer = replaceList.begin(); buffer < replaceList.end(); buffer++)
         {
             (*buffer)->newBufferRecords++;
