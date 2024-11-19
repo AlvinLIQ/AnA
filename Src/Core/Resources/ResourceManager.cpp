@@ -264,5 +264,5 @@ void ResourceManager::createDefaultShaders()
     auto offscreenRenderPass = SwapChain::GetCurrent()->GetOffscreenRenderPass();
     shadowMap.GetUBODescriptorConfig(&descriptorConfig[3]);
 
-    Shaders.emplace_back(aDevice, CascadedShadowMapping_vert, CascadedShadowMapping_frag, offscreenRenderPass, descriptorConfig);
+    //Shaders.emplace_back(aDevice, CascadedShadowMapping_vert, CascadedShadowMapping_frag, offscreenRenderPass, descriptorConfig);
 }

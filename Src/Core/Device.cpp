@@ -340,7 +340,8 @@ void Device::CreateSampler(VkSampler* pSampler, enum VkSamplerAddressMode sample
     samplerInfo.maxAnisotropy = 1.0f;
     samplerInfo.maxLod = 1.0f;
 
-    vkCreateSampler(logicalDevice, &samplerInfo, nullptr, pSampler);
+    if (vkCreateSampler(logicalDevice, &samplerInfo, nullptr, pSampler) != VK_SUCCESS)
+        throw std::runtime_error("Failed to create sampler");
 }
 
 void Device::CreateDescriptorPool(int descriptorCount, VkDescriptorPool& descriptorPool, VkDescriptorType descriptorType, VkCommandPoolCreateFlags flags)

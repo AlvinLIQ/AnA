@@ -58,11 +58,12 @@ void main()
     float pointLightIntensity = max(dot(normalSpace, normalize(LIGHT_DIRECTION - vertex)), 0);
     float diffuseLightItensity = max(dot(normalSpace, normalize(lbo.direction)), 0);
     float visibility = 1.0;
+    /*
     vec3 shadowProj = vec3(shadowCoord.xyz / shadowCoord.w);
     if (texture(shadowSampler, shadowProj.xy).r < shadowProj.z)
     {
         visibility = 0.5;
-    }
+    }*/
     vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility + pointLightIntensity * LIGHT_COLOR;
     outColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord) * vec4(finalLight, 1.0);
 }

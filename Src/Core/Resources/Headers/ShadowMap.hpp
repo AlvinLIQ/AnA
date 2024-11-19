@@ -56,19 +56,19 @@ namespace AnA
             }
             std::vector<Image>& GetImages()
             {
-                return shadowImages;
+                return images;
             }
-            std::vector<VkSampler> GetSamplers()
+            std::vector<VkSampler>& GetSamplers()
             {
-                return shadowSamplers;
+                return samplers;
             }
             void UpdateBuffers(Cameras::Camera& camera);
             void GetUBODescriptorConfig(Descriptor::DescriptorConfig* pConfig);
         private:
             Device* aDevice{nullptr};
             float cascadeSplitLambda = 0.95f;
-            std::vector<VkSampler> shadowSamplers;
-            std::vector<Image> shadowImages;
+            std::vector<VkSampler> samplers;
+            std::vector<Image> images;
             std::vector<Cascade> cascades;
             std::vector<Buffer> cascadeBuffers;
             void createShadowResources();

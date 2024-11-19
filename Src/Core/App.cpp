@@ -269,7 +269,7 @@ void RenderShadowsIndirect(VkCommandBuffer commandBuffer)
 {
     auto aResourceManager = Resource::ResourceManager::GetCurrent();
     auto aShadowSystem = Systems::ShadowSystem::GetCurrent();
-    aShadowSystem->RenderShadowsIndirect(commandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[2]);
+    //aShadowSystem->RenderShadowsIndirect(commandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[2]);
 }
 
 void RenderShapesIndirect(VkCommandBuffer commandBuffer)
