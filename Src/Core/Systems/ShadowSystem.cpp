@@ -65,9 +65,5 @@ void ShadowSystem::RenderCascadedShadowsIndirect(VkCommandBuffer commandBuffer, 
         pipelineLayout, 0, 3,
         sets.data(), 0, nullptr);
     meshes.Bind(commandBuffer);
-    for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
-    {
-        vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(uint32_t), &i);
-        meshes.DrawIndirect(commandBuffer);
-    }
+    meshes.DrawIndirect(commandBuffer);
 }

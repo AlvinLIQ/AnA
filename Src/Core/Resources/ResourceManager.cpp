@@ -11,7 +11,7 @@ ResourceManager* _resourceManager = nullptr;
 ResourceManager::ResourceManager(Device* mDevice) : aDevice{mDevice}, 
         SceneObjects(mDevice),
         GlobalLight(mDevice),
-        shadowMap(mDevice),
+        ShadowMap(mDevice),
         SecondaryCommandBufferPool(mDevice, 
         VK_COMMAND_BUFFER_LEVEL_SECONDARY,
         VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT | VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT)
@@ -58,7 +58,7 @@ ResourceManager* ResourceManager::GetCurrent()
 
 std::vector<Cascade>& ResourceManager::GetCascades()
 {
-    return shadowMap.GetCascades();
+    return ShadowMap.GetCascades();
     //return shadowFramebuffers;
 }
 
@@ -89,7 +89,7 @@ void ResourceManager::Update()
     UpdateCameraBuffer();
     int currentFrame = SwapChain::GetCurrent()->CurrentFrame;
     GlobalLight.UpdateBuffers(LightCamera, currentFrame);
-    shadowMap.UpdateBuffers(LightCamera, currentFrame);
+    ShadowMap.UpdateBuffers(LightCamera, currentFrame);
     if (SceneObjects.NeedUpdate())
     {
         SceneObjects.CommitBufferUpdate();
@@ -158,8 +158,8 @@ std::vector<Descriptor::DescriptorConfig> ResourceManager::GetDefaultDescriptorC
     pConfig->descriptorCount = MAX_FRAMES_IN_FLIGHT;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     pConfig->stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    pConfig->images = shadowMap.GetImages().data();
-    pConfig->samplers = shadowMap.GetSamplers().data();
+    pConfig->images = ShadowMap.GetImages().data();
+    pConfig->samplers = ShadowMap.GetSamplers().data();
 
     return descriptorConfigs;
 }
@@ -264,7 +264,7 @@ void ResourceManager::createDefaultShaders()
     Shaders.emplace_back(aDevice, Shape_vert, Shape_frag, renderPass, shapesDescriptorConfig);
 
     auto offscreenRenderPass = SwapChain::GetCurrent()->GetOffscreenRenderPass();
-    shadowMap.GetUBODescriptorConfig(&descriptorConfig[3]);
+    ShadowMap.GetUBODescriptorConfig(&descriptorConfig[3]);
 
     Shaders.emplace_back(aDevice, CascadedShadowMapping_vert, offscreenRenderPass, 
         CascadedShadowMapping_frag, descriptorConfig, sizeof(uint32_t));

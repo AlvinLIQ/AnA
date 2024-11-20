@@ -336,12 +336,18 @@ void App::onCommandBufferRecording(VkCommandBuffer& commandBuffer)
     //if (commandBufferNeedUpdate)
     //{
     /*
-    aRenderer->BeginOffscreenRenderPass(commandBuffer, 
-            aResourceManager->GetShadowFramebuffers()[aResourceManager->SecondaryCommandBufferPool.CurrentBufferIndex],
+    int currentFrame = aRenderer->GetFrameIndex();
+    for (uint32_t i = 0 ; i < SHADOW_MAP_CASCADE_COUNT; i++)
+    {
+        aRenderer->BeginOffscreenRenderPass(commandBuffer, 
+            aResourceManager->ShadowMap.GetCascades()[i].framebuffers[currentFrame],
             VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
-            aRenderer->ExecuteOffscreenSecondaryCommandBuffer(commandBuffer);
-            //aShadowSystem->RenderShadowsIndirect(commandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[2]);
-    aRenderer->EndRenderPass(commandBuffer);*/
+        vkCmdPushConstants(commandBuffer, aResourceManager->Shaders[2].GetPipelineLayout(), 
+            VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(uint32_t), &i);
+        aRenderer->ExecuteOffscreenSecondaryCommandBuffer(commandBuffer);
+        //aShadowSystem->RenderShadowsIndirect(commandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[2]);
+        aRenderer->EndRenderPass(commandBuffer);
+    }*/
     //}
     aRenderer->BeginSwapChainRenderPass(commandBuffer, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
     aResourceManager->SecondaryCommandBufferPool.ExcuteRecordedBuffer(commandBuffer);
