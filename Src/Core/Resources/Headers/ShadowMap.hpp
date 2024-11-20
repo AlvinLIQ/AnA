@@ -62,7 +62,11 @@ namespace AnA
             {
                 return samplers;
             }
-            void UpdateBuffers(Cameras::Camera& camera);
+            std::vector<Buffer>& GetCascadesBuffers()
+            {
+                return cascadeBuffers;
+            }
+            void UpdateBuffers(Cameras::Camera& camera, int currentFrame);
             void GetUBODescriptorConfig(Descriptor::DescriptorConfig* pConfig);
         private:
             Device* aDevice{nullptr};

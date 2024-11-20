@@ -87,7 +87,9 @@ void ResourceManager::UpdateCameraBuffer()
 void ResourceManager::Update()
 {
     UpdateCameraBuffer();
-    GlobalLight.UpdateBuffers(LightCamera, SwapChain::GetCurrent()->CurrentFrame);
+    int currentFrame = SwapChain::GetCurrent()->CurrentFrame;
+    GlobalLight.UpdateBuffers(LightCamera, currentFrame);
+    shadowMap.UpdateBuffers(LightCamera, currentFrame);
     if (SceneObjects.NeedUpdate())
     {
         SceneObjects.CommitBufferUpdate();
@@ -264,5 +266,6 @@ void ResourceManager::createDefaultShaders()
     auto offscreenRenderPass = SwapChain::GetCurrent()->GetOffscreenRenderPass();
     shadowMap.GetUBODescriptorConfig(&descriptorConfig[3]);
 
-    //Shaders.emplace_back(aDevice, CascadedShadowMapping_vert, CascadedShadowMapping_frag, offscreenRenderPass, descriptorConfig);
+    Shaders.emplace_back(aDevice, CascadedShadowMapping_vert, offscreenRenderPass, 
+        CascadedShadowMapping_frag, descriptorConfig);
 }

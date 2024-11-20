@@ -138,14 +138,27 @@ namespace AnA
                 dConfig.pipelineInfo.subpass = 0;
                 return dConfig;
             }
-            static PipelineConfig GetForDepthTest(VkShaderModule vertexShaderModule,
+            static PipelineConfig GetForDepthTest(VkShaderModule vertexShaderModule, VkShaderModule fragShaderModule,
                 VkPipelineLayout &pipelineLayout, VkRenderPass &renderPass, VkSampleCountFlagBits msaaSamplers, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
             {
                 PipelineConfig dConfig;
-                dConfig.shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-                dConfig.shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-                dConfig.shaderStages[0].module = vertexShaderModule;
-                dConfig.shaderStages[0].pName = "main";
+                int stageCount = 0;
+                if (vertexShaderModule != VK_NULL_HANDLE)
+                {
+                    dConfig.shaderStages[stageCount].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+                    dConfig.shaderStages[stageCount].stage = VK_SHADER_STAGE_VERTEX_BIT;
+                    dConfig.shaderStages[stageCount].module = vertexShaderModule;
+                    dConfig.shaderStages[stageCount].pName = "main";
+                    stageCount++;
+                }
+                if (fragShaderModule != VK_NULL_HANDLE)
+                {
+                    dConfig.shaderStages[stageCount].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+                    dConfig.shaderStages[stageCount].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+                    dConfig.shaderStages[stageCount].module = fragShaderModule;
+                    dConfig.shaderStages[stageCount].pName = "main";
+                    stageCount++;
+                }
 
                 dConfig.dynamicStates.push_back(VK_DYNAMIC_STATE_DEPTH_BIAS);
                 dConfig.dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
@@ -219,7 +232,7 @@ namespace AnA
                 dConfig.depthStencilInfo.back = {};             // Optional
             
                 dConfig.pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-                dConfig.pipelineInfo.stageCount = 1;
+                dConfig.pipelineInfo.stageCount = stageCount;
                 dConfig.pipelineInfo.pStages = dConfig.shaderStages;
 
                 dConfig.pipelineInfo.pVertexInputState = &dConfig.vertexInputInfo;
@@ -242,6 +255,7 @@ namespace AnA
         Pipeline(Device* mDevice, const char* vertShaderFileName, const char* fragShaderFileName, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
         Pipeline(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
         Pipeline(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+        Pipeline(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst, const std::vector<unsigned char>& fragShaderCode, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
         Pipeline(Device* mDevice, PipelineConfig pipelineConfig);
         Pipeline(Device* mDevice, const char* computeShaderFile, VkPipelineLayout &mPipelineLayout);
         Pipeline(Device* mDevice, const std::vector<unsigned char>& computeShaderCode, VkPipelineLayout &mPipelineLayout);
@@ -264,6 +278,7 @@ namespace AnA
         void createGraphicsPipeline(const std::string &vertShaderFileName, const std::string &fragShaderFileName, const VkPrimitiveTopology vertexTopology);
         void createGraphicsPipeline(const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, const VkPrimitiveTopology vertexTopology);
         void createGraphicsPipeline(const std::vector<unsigned char>& vertShaderCode, const VkPrimitiveTopology vertexTopology);
+        void createGraphicsPipeline(const std::vector<unsigned char>& vertShaderCode, const VkPrimitiveTopology vertexTopology, const std::vector<unsigned char>& fragShaderCode);
         void createGraphicsPipeline(PipelineConfig pipelineConfig);
         void createComputePipeline(const std::string &computeShaderFileName);
         void createComputePipeline(const std::vector<unsigned char>& computeShaderCode);

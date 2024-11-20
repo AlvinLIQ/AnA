@@ -29,6 +29,15 @@ const VkPrimitiveTopology vertexTopology) : aDevice{mDevice}, renderPass {mRende
     createGraphicsPipeline(vertShaderCode, vertexTopology);
 }
 
+Pipeline::Pipeline(Device* mDevice,
+const std::vector<unsigned char>& vertShaderCode,
+VkRenderPass &mRenderPass, 
+VkPipelineLayout &mPipelineLayout, const std::vector<unsigned char>& fragShaderCode, 
+const VkPrimitiveTopology vertexTopology) : aDevice{mDevice}, renderPass {mRenderPass}, pipelineLayout{mPipelineLayout}
+{
+    createGraphicsPipeline(vertShaderCode, vertexTopology, fragShaderCode);
+}
+
 Pipeline::Pipeline(Device* mDevice, const char* computeShaderFile, VkPipelineLayout &mPipelineLayout) : aDevice{mDevice}, pipelineLayout {mPipelineLayout}
 {
     createComputePipeline(computeShaderFile);
@@ -83,13 +92,29 @@ void Pipeline::createGraphicsPipeline(const std::vector<unsigned char>& vertShad
 {
     VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
 
-    PipelineConfig pipelineConfig = pipelineConfig.GetForDepthTest(vertShaderModule, pipelineLayout, renderPass, aDevice->GetMaxUsableSampleCount(), vertexTopology); 
+    PipelineConfig pipelineConfig = pipelineConfig.GetForDepthTest(vertShaderModule, VK_NULL_HANDLE, pipelineLayout, renderPass, aDevice->GetMaxUsableSampleCount(), vertexTopology); 
     
     auto logicalDevice = aDevice->GetLogicalDevice();
 
     if (vkCreateGraphicsPipelines(logicalDevice, VK_NULL_HANDLE, 1, &pipelineConfig.pipelineInfo, nullptr, &pipeline) != VK_SUCCESS)
         throw std::runtime_error("Failed to create pipeline!");
 
+    vkDestroyShaderModule(logicalDevice, vertShaderModule, nullptr);
+}
+
+void Pipeline::createGraphicsPipeline(const std::vector<unsigned char>& vertShaderCode, const VkPrimitiveTopology vertexTopology, const std::vector<unsigned char>& fragShaderCode)
+{
+    VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
+    VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
+
+    PipelineConfig pipelineConfig = pipelineConfig.GetForDepthTest(vertShaderModule, fragShaderModule, pipelineLayout, renderPass, aDevice->GetMaxUsableSampleCount(), vertexTopology); 
+    
+    auto logicalDevice = aDevice->GetLogicalDevice();
+
+    if (vkCreateGraphicsPipelines(logicalDevice, VK_NULL_HANDLE, 1, &pipelineConfig.pipelineInfo, nullptr, &pipeline) != VK_SUCCESS)
+        throw std::runtime_error("Failed to create pipeline!");
+
+    vkDestroyShaderModule(logicalDevice, fragShaderModule, nullptr);
     vkDestroyShaderModule(logicalDevice, vertShaderModule, nullptr);
 }
 

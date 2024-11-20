@@ -15,7 +15,7 @@ ShadowMap::~ShadowMap()
     cleanupShadowResources();
 }
 
-void ShadowMap::UpdateBuffers(Cameras::Camera& camera)
+void ShadowMap::UpdateBuffers(Cameras::Camera& camera, int currentFrame)
 {
     float cascadeSplits[SHADOW_MAP_CASCADE_COUNT];
 
@@ -95,6 +95,7 @@ void ShadowMap::UpdateBuffers(Cameras::Camera& camera)
 
 		lastSplitDist = cascadeSplits[i];
 	}
+	memcpy(cascadeBuffers[currentFrame].GetMappedData(), cascades.data(), cascades.size() * sizeof(Cascade));
 }
 
 void ShadowMap::GetUBODescriptorConfig(Descriptor::DescriptorConfig* pConfig)
@@ -111,10 +112,11 @@ void ShadowMap::GetUBODescriptorConfig(Descriptor::DescriptorConfig* pConfig)
 void ShadowMap::createShadowResources()
 {
     images.resize(MAX_FRAMES_IN_FLIGHT);
+	cascades.resize(SHADOW_MAP_CASCADE_COUNT);
     for (auto& cascade : cascades)
     {
-        cascade.imageViews.resize(images.size());
-        cascade.framebuffers.resize(images.size());
+        cascade.imageViews.resize(MAX_FRAMES_IN_FLIGHT);
+        cascade.framebuffers.resize(MAX_FRAMES_IN_FLIGHT);
     }
 	cascadeBuffers.reserve(MAX_FRAMES_IN_FLIGHT);
     bool samplersNotCreated = samplers.empty();
@@ -163,7 +165,9 @@ void ShadowMap::createShadowResources()
 			viewInfo.subresourceRange.levelCount = 1;
 			viewInfo.subresourceRange.baseArrayLayer = j; //layer index
 			viewInfo.subresourceRange.layerCount = 1;
-			viewInfo.image = images[i].image;
+			viewInfo.image = shadowImage.image;
+			vkCreateImageView(aDevice->GetLogicalDevice(), &viewInfo, nullptr, &cascade.imageViews[i]);
+
             VkFramebufferCreateInfo framebufferInfo{};
             framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
             framebufferInfo.renderPass = SwapChain::GetCurrent()->GetOffscreenRenderPass();
@@ -180,6 +184,7 @@ void ShadowMap::createShadowResources()
 		cascadeBuffers.emplace_back(aDevice, cascades.size() * sizeof(Cascade), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
 		VK_MEMORY_PROPERTY_HOST_COHERENT_BIT 
 				| VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+		cascadeBuffers[i].Map(0, cascades.size() * sizeof(Cascade));
     }
 }
 
