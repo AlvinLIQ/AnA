@@ -267,5 +267,5 @@ void ResourceManager::createDefaultShaders()
     shadowMap.GetUBODescriptorConfig(&descriptorConfig[3]);
 
     Shaders.emplace_back(aDevice, CascadedShadowMapping_vert, offscreenRenderPass, 
-        CascadedShadowMapping_frag, descriptorConfig);
+        CascadedShadowMapping_frag, descriptorConfig, sizeof(uint32_t));
 }

@@ -35,8 +35,8 @@ namespace AnA
         void Bind(VkCommandBuffer commandBuffer);
         void Draw(VkCommandBuffer commandBuffer);
         void Draw(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout, size_t offset, size_t size);
-        void DrawIndirect(VkCommandBuffer commandBuffer, uint32_t index = 0);
-        void DrawIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout, uint32_t index = 0);
+        void DrawIndirect(VkCommandBuffer commandBuffer);
+        void DrawIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout);
         bool NeedUpdate()
         {
             return updateQueue.size();

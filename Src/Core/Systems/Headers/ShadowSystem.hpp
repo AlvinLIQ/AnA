@@ -16,6 +16,7 @@ namespace AnA
             VkExtent2D GetExtent();
             void RenderShadows(VkCommandBuffer commandBuffer, Meshes& meshes, Shader& shader);
             void RenderShadowsIndirect(VkCommandBuffer commandBuffer, Meshes &meshes, Shader& shader);
+            void RenderCascadedShadowsIndirect(VkCommandBuffer commandBuffer, Meshes &meshes, Shader& shader, VkRenderPass& renderPass);
         private:
             Device* aDevice;
             SwapChain* swapChain;

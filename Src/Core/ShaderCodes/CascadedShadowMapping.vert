@@ -30,6 +30,10 @@ layout(set = 2, binding = 0) uniform LightBufferObject {
 
 #define SHADOW_MAP_CASCADE_COUNT 4
 
+layout(push_constant) uniform PushConsts {
+	uint cascadeIndex;
+} push;
+
 layout (set = 3, binding = 0) uniform UBO {
 	mat4[SHADOW_MAP_CASCADE_COUNT] cascadeViewProjMat;
 } ubo;
@@ -40,6 +44,6 @@ void main()
 {
     Vertex vertex = ssbo.vertices[gl_VertexIndex];
     vec4 vertexPos = vec4(vertex.position, 1.0);
-    gl_Position = ubo.cascadeViewProjMat[gl_InstanceIndex] * vertexPos;
+    gl_Position = ubo.cascadeViewProjMat[push.cascadeIndex] * vertexPos;
     outTexCoord = vertex.uv;
 }

@@ -161,18 +161,13 @@ void Meshes::Draw(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& s
     }
 }
 
-void Meshes::DrawIndirect(VkCommandBuffer commandBuffer, uint32_t index)
+void Meshes::DrawIndirect(VkCommandBuffer commandBuffer)
 {
-    auto indirectCommand = (VkDrawIndexedIndirectCommand*)indirectBuffer.GetMappedData();
-    indirectCommand->firstInstance = index;
     vkCmdDrawIndexedIndirectCount(commandBuffer, indirectBuffer.GetBuffer(), 0, countBuffer.GetBuffer(), 0, 1, sizeof(VkDrawIndexedIndirectCommand));
 }
 
-void Meshes::DrawIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout, uint32_t index)
-{
-    auto indirectCommand = (VkDrawIndexedIndirectCommand*)indirectBuffer.GetMappedData();
-    indirectCommand->firstInstance = index;
-    
+void Meshes::DrawIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout)
+{    
     sets[DEFAULT_SSBO_LAYOUT] = ssboDescriptor->GetSets()[0];
     sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors.front()->GetSets()[0];
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
