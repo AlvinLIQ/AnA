@@ -186,7 +186,7 @@ namespace AnA
                 dConfig.rasterizer.rasterizerDiscardEnable = VK_FALSE;
                 dConfig.rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
                 dConfig.rasterizer.lineWidth = 1.0f;
-                dConfig.rasterizer.cullMode = VK_CULL_MODE_NONE;
+                dConfig.rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
                 dConfig.rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
                 dConfig.rasterizer.depthBiasEnable = VK_TRUE;
                 dConfig.rasterizer.depthBiasConstantFactor = 0.0f; // Optional

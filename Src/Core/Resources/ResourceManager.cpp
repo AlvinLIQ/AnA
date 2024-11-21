@@ -68,7 +68,7 @@ void ResourceManager::UpdateCamera(float aspect)
     MainCameraInfo.UpdateCameraPerspective(MainCamera);
     LightCameraInfo.aspect = aspect;
     //LightCameraInfo.UpdateCameraPerspective(LightCamera);
-    const float scale = 10.5f;
+    const float scale = 1.0f;
     LightCamera.SetOrthographicProjection(-scale * LightCameraInfo.aspect, -scale, scale * LightCameraInfo.aspect, scale, 
         -10.0f, 32.0f);
 }
@@ -89,7 +89,7 @@ void ResourceManager::Update()
     UpdateCameraBuffer();
     int currentFrame = SwapChain::GetCurrent()->CurrentFrame;
     GlobalLight.UpdateBuffers(LightCamera, currentFrame);
-    ShadowMap.UpdateBuffers(LightCamera, currentFrame);
+    ShadowMap.UpdateBuffers(MainCamera, LightCamera, currentFrame);
     if (SceneObjects.NeedUpdate())
     {
         SceneObjects.CommitBufferUpdate();
@@ -160,6 +160,9 @@ std::vector<Descriptor::DescriptorConfig> ResourceManager::GetDefaultDescriptorC
     pConfig->stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     pConfig->images = ShadowMap.GetImages().data();
     pConfig->samplers = ShadowMap.GetSamplers().data();
+
+    pConfig = &descriptorConfigs[DEFAULT_CASCADED_UBO_LAYOUT];
+    ShadowMap.GetUBODescriptorConfig(pConfig);
 
     return descriptorConfigs;
 }
@@ -264,7 +267,6 @@ void ResourceManager::createDefaultShaders()
     Shaders.emplace_back(aDevice, Shape_vert, Shape_frag, renderPass, shapesDescriptorConfig);
 
     auto offscreenRenderPass = SwapChain::GetCurrent()->GetOffscreenRenderPass();
-    ShadowMap.GetUBODescriptorConfig(&descriptorConfig[3]);
 
     Shaders.emplace_back(aDevice, CascadedShadowMapping_vert, offscreenRenderPass, 
         CascadedShadowMapping_frag, descriptorConfig, sizeof(uint32_t));

@@ -269,7 +269,7 @@ void RenderShadowsIndirect(VkCommandBuffer commandBuffer)
 {
     auto aResourceManager = Resource::ResourceManager::GetCurrent();
     auto aShadowSystem = Systems::ShadowSystem::GetCurrent();
-    //aShadowSystem->RenderShadowsIndirect(commandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[2]);
+    //aShadowSystem->RenderCascadedShadowsIndirect(commandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[2]);
 }
 
 void RenderShapesIndirect(VkCommandBuffer commandBuffer)
@@ -298,7 +298,7 @@ void App::createRecordCallBacks()
         }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), _aApp->GetSceneOffset());
         aRenderer.RecordOffscreenSecondaryCommandBuffer([](VkCommandBuffer offScreenSecondaryCommandBuffer)
         {
-            RenderShadowsIndirect(offScreenSecondaryCommandBuffer);
+            //RenderShadowsIndirect(offScreenSecondaryCommandBuffer);
         });
         aResourceManager->SceneObjects.EndCommandBufferUpdate();
     });
@@ -335,19 +335,18 @@ void App::onCommandBufferRecording(VkCommandBuffer& commandBuffer)
         return;
     //if (commandBufferNeedUpdate)
     //{
-    /*
+    
     int currentFrame = aRenderer->GetFrameIndex();
     for (uint32_t i = 0 ; i < SHADOW_MAP_CASCADE_COUNT; i++)
     {
         aRenderer->BeginOffscreenRenderPass(commandBuffer, 
             aResourceManager->ShadowMap.GetCascades()[i].framebuffers[currentFrame],
-            VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
-        vkCmdPushConstants(commandBuffer, aResourceManager->Shaders[2].GetPipelineLayout(), 
-            VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(uint32_t), &i);
-        aRenderer->ExecuteOffscreenSecondaryCommandBuffer(commandBuffer);
-        //aShadowSystem->RenderShadowsIndirect(commandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[2]);
+            VK_SUBPASS_CONTENTS_INLINE);
+        
+        //aRenderer->ExecuteOffscreenSecondaryCommandBuffer(commandBuffer);
+        aShadowSystem->RenderCascadedShadowsIndirect(commandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[2], i);
         aRenderer->EndRenderPass(commandBuffer);
-    }*/
+    }
     //}
     aRenderer->BeginSwapChainRenderPass(commandBuffer, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
     aResourceManager->SecondaryCommandBufferPool.ExcuteRecordedBuffer(commandBuffer);

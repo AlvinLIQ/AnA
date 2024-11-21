@@ -11,12 +11,15 @@ namespace AnA
 {
     namespace Resource
     {
+        struct CascadeBufferObject
+        {
+            glm::mat4 viewProjMatrix;
+            float splitDepth;
+        };
         struct Cascade
         {
             std::vector<VkImageView> imageViews;
             std::vector<VkFramebuffer> framebuffers;
-            float splitDepth;
-            glm::mat4 viewProjMatrix;
             void cleanup(VkDevice device)
             {
                 for (auto& imageView : imageViews)
@@ -66,7 +69,7 @@ namespace AnA
             {
                 return cascadeBuffers;
             }
-            void UpdateBuffers(Cameras::Camera& camera, int currentFrame);
+            void UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, int currentFrame);
             void GetUBODescriptorConfig(Descriptor::DescriptorConfig* pConfig);
         private:
             Device* aDevice{nullptr};

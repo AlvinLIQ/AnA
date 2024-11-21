@@ -29,21 +29,27 @@ layout(set = 2, binding = 0) uniform LightBufferObject {
 } lbo;
 
 #define SHADOW_MAP_CASCADE_COUNT 4
+struct Cascade {
+    mat4 viewProj;
+    float split;
+};
+
+layout (set = 5, binding = 0) uniform UBO {
+	Cascade[SHADOW_MAP_CASCADE_COUNT] cascades;
+} ubo;
 
 layout(push_constant) uniform PushConsts {
 	uint cascadeIndex;
 } push;
 
-layout (set = 3, binding = 0) uniform UBO {
-	mat4[SHADOW_MAP_CASCADE_COUNT] cascadeViewProjMat;
-} ubo;
-
 layout(location = 0) out vec2 outTexCoord;
+layout(location = 1) out uint outTexID;
 
 void main()
 {
     Vertex vertex = ssbo.vertices[gl_VertexIndex];
-    vec4 vertexPos = vec4(vertex.position, 1.0);
-    gl_Position = ubo.cascadeViewProjMat[push.cascadeIndex] * vertexPos;
+    vec4 vertexPos = vec4(vertex.position.xyz, 1.0);
+    gl_Position = ubo.cascades[push.cascadeIndex].viewProj * vertexPos;
     outTexCoord = vertex.uv;
+    outTexID = vertex.texIndex;
 }

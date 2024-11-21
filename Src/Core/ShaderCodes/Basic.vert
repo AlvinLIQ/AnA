@@ -4,7 +4,7 @@ layout(location = 0) out vec2 outTexCoord;
 layout(location = 1) out uint outTexID;
 layout(location = 2) out vec3 outNormalSpace;
 layout(location = 3) out vec3 outVertex;
-layout(location = 4) out vec4 outShadowCoord;
+layout(location = 4) out vec3 outViewPos;
 
 struct Vertex
 {
@@ -34,6 +34,15 @@ layout(set = 2, binding = 0) uniform LightBufferObject {
     float ambient;
 } lbo;
 
+#define SHADOW_MAP_CASCADE_COUNT 4
+struct Cascade {
+    mat4 viewProj;
+    float split;
+};
+layout (set = 5, binding = 0) uniform UBO {
+	Cascade[SHADOW_MAP_CASCADE_COUNT] cascades;
+} ubo;
+
 struct Ray{
     vec3 center;
     vec3 direction;
@@ -42,17 +51,11 @@ struct Ray{
 const vec3 LIGHT_DIRECTION = normalize(vec3(1., -3., 1.));
 
 const mat4 biasMat = mat4( 
-  0.5, 0.0, 0.0, 0.0,
-  0.0, 0.5, 0.0, 0.0,
-  0.0, 0.0, 1.0, 0.0,
-  0.5, 0.5, 0.0, 1.0 );
-/*
-const mat4 paddingMat = mat4(
-    0.8, 0.0, 0.0, 0.0,
-    0.0, 0.8, 0.0, 0.0,
-    0.0, 0.0, 1.0, 0.0,
-    0.2, -0.2, 0.0, 1.0
-);*/
+	0.5, 0.0, 0.0, 0.0,
+	0.0, 0.5, 0.0, 0.0,
+	0.0, 0.0, 1.0, 0.0,
+	0.5, 0.5, 0.0, 1.0 
+);
 
 mat4 transform(vec3 scale, vec3 rotation, vec3 transition)
 {
@@ -84,9 +87,8 @@ void main() {
     vec4 vertexPos = vec4(vertex.position, 1.0);
     gl_Position = cbo.proj * cbo.view * vertexPos;
     outNormalSpace = normalize(vertex.normal);
-    outVertex = vertexPos.xyz / vertexPos.w;
-    //mat4 dView = mat4(0.999949, -0.009408, 0.003682, 0.000000, 0.000000, 0.364459, 0.931219, 0.000000, -0.010103, -0.931172, 0.364441, 0.000000, -1.931544, -0.269233, 11.256238, 1.000000);
-    outShadowCoord = biasMat * lbo.proj * lbo.view * vertexPos;
+    outVertex = vertexPos.xyz;
+    outViewPos = (cbo.view * vec4(vertexPos.xyz, 1.0)).xyz;
 
     outTexCoord = vertex.uv;
     outTexID = vertex.texIndex;
