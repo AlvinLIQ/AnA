@@ -88,7 +88,7 @@ void main() {
     gl_Position = cbo.proj * cbo.view * vertexPos;
     outNormalSpace = normalize(vertex.normal);
     outVertex = vertexPos.xyz;
-    outViewPos = (cbo.view * vec4(vertexPos.xyz, 1.0)).xyz;
+    outViewPos = (cbo.view * vertexPos).xyz;
 
     outTexCoord = vertex.uv;
     outTexID = vertex.texIndex;

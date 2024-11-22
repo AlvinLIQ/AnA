@@ -48,7 +48,7 @@ layout(location = 1) out uint outTexID;
 void main()
 {
     Vertex vertex = ssbo.vertices[gl_VertexIndex];
-    vec4 vertexPos = vec4(vertex.position.xyz, 1.0);
+    vec4 vertexPos = vec4(vertex.position, 1.0);
     gl_Position = ubo.cascades[push.cascadeIndex].viewProj * vertexPos;
     outTexCoord = vertex.uv;
     outTexID = vertex.texIndex;

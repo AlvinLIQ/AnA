@@ -60,6 +60,26 @@ float textureProj(vec4 shadowCoord, vec2 offset, uint cascadeIndex)
 
 }
 
+float filterPCF(vec4 sc, uint cascadeIndex)
+{
+	ivec2 texDim = textureSize(shadowSampler, 0).xy;
+	float scale = 0.75;
+	float dx = scale * 1.0 / float(texDim.x);
+	float dy = scale * 1.0 / float(texDim.y);
+
+	float shadowFactor = 0.0;
+	int count = 0;
+	int range = 1;
+	
+	for (int x = -range; x <= range; x++) {
+		for (int y = -range; y <= range; y++) {
+			shadowFactor += textureProj(sc, vec2(dx*x, dy*y), cascadeIndex);
+			count++;
+		}
+	}
+	return shadowFactor / count;
+}
+
 void main()
 {
     //float shadow = textureProj(shadowCoord / shadowCoord.w, vec2(0.0));
@@ -77,7 +97,7 @@ void main()
 		}
 	}
     vec4 shadowCoord = (biasMat * ubo.cascades[cascadeIndex].viewProj) * vec4(vertex, 1.0);	
-    float visibility = textureProj(shadowCoord / shadowCoord.w, vec2(0.0), cascadeIndex);
+    float visibility = filterPCF(shadowCoord / shadowCoord.w, cascadeIndex);
     vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility + pointLightIntensity * LIGHT_COLOR;
     outColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord) * vec4(finalLight, 1.0);
 }
