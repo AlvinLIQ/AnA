@@ -22,7 +22,6 @@ layout(std140, set = 0, binding = 0) buffer VertexSSBO
 layout(set = 1, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
-    mat4 invView;
     vec2 resolution;
 } cbo;
 
@@ -88,7 +87,7 @@ void main() {
     gl_Position = cbo.proj * cbo.view * vertexPos;
     outNormalSpace = normalize(vertex.normal);
     outVertex = vertexPos.xyz;
-    outViewPos = (cbo.view * vertexPos).xyz;
+    outViewPos = (cbo.proj * cbo.view * vertexPos).xyz;
 
     outTexCoord = vertex.uv;
     outTexID = vertex.texIndex;

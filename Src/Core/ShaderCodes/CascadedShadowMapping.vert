@@ -16,7 +16,6 @@ layout(std140, set = 0, binding = 0) buffer VertexSSBO
 layout(set = 1, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
-    mat4 invView;
     vec2 resolution;
 } cbo;
 
@@ -42,14 +41,9 @@ layout(push_constant) uniform PushConsts {
 	uint cascadeIndex;
 } push;
 
-layout(location = 0) out vec2 outTexCoord;
-layout(location = 1) out uint outTexID;
-
 void main()
 {
     Vertex vertex = ssbo.vertices[gl_VertexIndex];
     vec4 vertexPos = vec4(vertex.position, 1.0);
     gl_Position = ubo.cascades[push.cascadeIndex].viewProj * vertexPos;
-    outTexCoord = vertex.uv;
-    outTexID = vertex.texIndex;
 }

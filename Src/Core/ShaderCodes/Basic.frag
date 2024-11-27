@@ -12,7 +12,6 @@ layout(location = 0) out vec4 outColor;
 layout(set = 1, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
-    mat4 invView;
     vec2 resolution;
 } cbo;
 
@@ -97,7 +96,11 @@ void main()
 		}
 	}
     vec4 shadowCoord = (biasMat * ubo.cascades[cascadeIndex].viewProj) * vec4(vertex, 1.0);	
-    float visibility = filterPCF(shadowCoord / shadowCoord.w, cascadeIndex);
+    float visibility = 1.0f; //filterPCF(shadowCoord / shadowCoord.w, cascadeIndex);
+	if (texture(shadowSampler, vec3(shadowCoord.st, cascadeIndex)).r > shadowCoord.z)
+	{
+		visibility = 0.5f;
+	}
     vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility + pointLightIntensity * LIGHT_COLOR;
     outColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord) * vec4(finalLight, 1.0);
 }

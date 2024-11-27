@@ -78,7 +78,7 @@ void ResourceManager::UpdateCameraBuffer()
     Cameras::CameraBufferObject& cbo = *(Cameras::CameraBufferObject*)mainCameraBuffers[SwapChain::GetCurrent()->CurrentFrame].GetMappedData();
     cbo.proj = MainCamera.GetProjectionMatrix();
     cbo.view = MainCamera.GetView();
-    cbo.invView = MainCamera.GetInverseView();
+    //cbo.invView = MainCamera.GetInverseView();
 
     auto extent = SwapChain::GetCurrent()->GetExtent();
     cbo.resolution = {(float)extent.width, (float)extent.height};
