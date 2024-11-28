@@ -4,7 +4,6 @@ layout(location = 0) out vec2 outTexCoord;
 layout(location = 1) out uint outTexID;
 layout(location = 2) out vec3 outNormalSpace;
 layout(location = 3) out vec3 outVertex;
-layout(location = 4) out vec3 outViewPos;
 
 struct Vertex
 {
@@ -87,7 +86,6 @@ void main() {
     gl_Position = cbo.proj * cbo.view * vertexPos;
     outNormalSpace = normalize(vertex.normal);
     outVertex = vertexPos.xyz;
-    outViewPos = (cbo.proj * cbo.view * vertexPos).xyz;
 
     outTexCoord = vertex.uv;
     outTexID = vertex.texIndex;

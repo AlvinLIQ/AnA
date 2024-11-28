@@ -80,7 +80,6 @@ void Renderer::EndFrame()
     }
 
     isFrameStarted = false;
-    currentFrameIndex = (currentFrameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
 void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer)

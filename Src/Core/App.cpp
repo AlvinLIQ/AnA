@@ -296,10 +296,11 @@ void App::createRecordCallBacks()
         {
             renderMeshesIndirecct(secondaryCommandBuffer);
         }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), _aApp->GetSceneOffset());
+        /*
         aRenderer.RecordOffscreenSecondaryCommandBuffer([](VkCommandBuffer offScreenSecondaryCommandBuffer)
         {
             //RenderShadowsIndirect(offScreenSecondaryCommandBuffer);
-        });
+        });*/
         aResourceManager->SceneObjects.EndCommandBufferUpdate();
     });
 #ifdef ANA_INCLUDE_CONTROL

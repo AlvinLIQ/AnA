@@ -1,6 +1,7 @@
 #include "Headers/Lights.hpp"
 #include "../Headers/Buffer.hpp"
 #include "../Camera/Headers/Camera.hpp"
+//#include "Headers/ResourceManager.hpp"
 
 using namespace AnA;
 using namespace Lights;
@@ -27,6 +28,7 @@ void Light::UpdateBuffers(Cameras::Camera& lightCamera, int currentFrame)
     //auto cameraPosition = glm::mat3(Resource::ResourceManager::GetCurrent()->MainCamera.GetInverseView()) * glm::vec3(Resource::ResourceManager::GetCurrent()->MainCamera.GetView()[3]);
     //auto target = cameraPosition - glm::vec3(Direction.x, Direction.y, Direction.z);
     //lightCamera.SetViewTarget(cameraPosition, target);
+    lightCamera.SetViewDirection({}, Direction);
     lightBufferObject = {.proj = lightCamera.GetProjectionMatrix(), .view = lightCamera.GetView(),
                     .direction = Direction, .color = Color, .ambient = Ambient};
 }

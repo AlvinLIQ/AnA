@@ -15,12 +15,13 @@ ShadowMap::~ShadowMap()
     cleanupShadowResources();
 }
 
-std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& proj, const glm::mat4& view)
+std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& proj, const glm::mat4& view, glm::vec3& center)
 {
     const auto inv = glm::inverse(proj * view);
     
     std::vector<glm::vec4> frustumCorners;
     frustumCorners.reserve(8);
+    center = glm::vec3(0, 0, 0);
     for (unsigned int x = 0; x < 2; ++x)
     {
         for (unsigned int y = 0; y < 2; ++y)
@@ -34,70 +35,75 @@ std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& proj, const 
                         2.0f * z - 1.0f,
                         1.0f);
                 frustumCorners.emplace_back(pt / pt.w);
+                center += glm::vec3(frustumCorners.back());
             }
         }
     }
+    center /= frustumCorners.size();
     
     return frustumCorners;
 }
 
 void ShadowMap::UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, int currentFrame)
 {
-	glm::vec3 lightPos = glm::vec3(1.0f, 1.0f, 1.0f);
+	glm::vec3 lightPos = -glm::vec3(1.0f, 1.0f, 1.0f);
     float cascadeSplits[SHADOW_MAP_CASCADE_COUNT];
     
 	float nearPlane = 0.05f;
 	float farPlane = 32.0f;
-	float clipRange = farPlane - nearPlane;
-
-	float minZ = nearPlane;
-	float maxZ = nearPlane + clipRange;
-
-	float range = maxZ - minZ;
-	float ratio = maxZ / minZ;
-
-	// Calculate split depths based on view camera frustum
-	// Based on method presented in https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch10.html
-	for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++) {
-		float p = (i + 1) / static_cast<float>(SHADOW_MAP_CASCADE_COUNT);
-		float log = minZ * std::pow(ratio, p);
-		float uniform = minZ + range * p;
-		float d = cascadeSplitLambda * (log - uniform) + uniform;
-		cascadeSplits[i] = (d - nearPlane) / clipRange;
-	}
-
-	// Calculate orthographic projection matrix for each cascade
-	float lastSplitDist = 0.0;
-	for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++) {
-		float splitDist = cascadeSplits[i];
-
-		glm::vec3 frustumCorners[8] = {
-            glm::vec3( 1.0f,  1.0f, 0.0f),
-            glm::vec3(-1.0f,  1.0f, 0.0f),
-            glm::vec3(-1.0f, -1.0f, 0.0f),
-            glm::vec3( 1.0f, -1.0f, 0.0f),
-            glm::vec3( 1.0f,  1.0f,  1.0f),
-            glm::vec3(-1.0f,  1.0f,  1.0f),
-            glm::vec3(-1.0f, -1.0f,  1.0f),
-            glm::vec3( 1.0f, -1.0f,  1.0f),
-		};
-	    auto cbo = ((CascadeBufferObject*)cascadeBuffers[currentFrame].GetMappedData());
-        cbo[i].viewProjMatrix = light.GetProjectionMatrix() * light.GetView();
-        cbo[i].splitDepth = (0.05f + splitDist * clipRange) * -1.0f;
-
-		lastSplitDist = cascadeSplits[i];
-	}
+    glm::vec3 frustumCenter;
+    auto frustumCorners = getFrustumCornersWorldSpace(camera.GetProjectionMatrix(), camera.GetView(), frustumCenter);
+	glm::mat4 lightView = glm::lookAt(frustumCenter + glm::normalize(lightPos), frustumCenter, glm::vec3(0.0f, -1.0f, 0.0f));
+    
+    float minX = std::numeric_limits<float>::max();
+    float maxX = std::numeric_limits<float>::lowest();
+    float minY = std::numeric_limits<float>::max();
+    float maxY = std::numeric_limits<float>::lowest();
+    float minZ = std::numeric_limits<float>::max();
+    float maxZ = std::numeric_limits<float>::lowest();
+    for (const auto& v : frustumCorners)
+    {
+        const auto trf = lightView * v;
+        minX = std::min(minX, trf.x);
+        maxX = std::max(maxX, trf.x);
+        minY = std::min(minY, trf.y);
+        maxY = std::max(maxY, trf.y);
+        minZ = std::min(minZ, trf.z);
+        maxZ = std::max(maxZ, trf.z);
+    }
+    constexpr float zMult = 10.0f;
+    if (minZ < 0)
+    {
+        minZ *= zMult;
+    }
+    else
+    {
+        minZ /= zMult;
+    }
+    if (maxZ < 0)
+    {
+        maxZ /= zMult;
+    }
+    else
+    {
+        maxZ *= zMult;
+    }
+    
+    const glm::mat4 lightProjection = glm::ortho(minX, maxX, minY, maxY, minZ, maxZ);
+    auto cbo = (CascadeBufferObject*)cascadeBuffers[currentFrame].GetMappedData();
+    for (int i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
+        cbo[i].viewProjMatrix = lightProjection * lightView;//light.GetProjectionMatrix() * light.GetView();
 }
 
 void ShadowMap::GetUBODescriptorConfig(Descriptor::DescriptorConfig* pConfig)
 {
 	*pConfig = {};
 	pConfig->binding = 0;
-    pConfig->descriptorCount = MAX_FRAMES_IN_FLIGHT;
+    pConfig->descriptorCount = cascadeBuffers.size();
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
     pConfig->buffers = cascadeBuffers.data();
-    pConfig->bufferSize = cascades.size() * sizeof(CascadeBufferObject);
+    pConfig->bufferSize = cascadeBuffers.begin()->GetSize();
 }
 
 void ShadowMap::createShadowResources()
@@ -106,22 +112,21 @@ void ShadowMap::createShadowResources()
 	cascades.resize(SHADOW_MAP_CASCADE_COUNT);
     for (auto& cascade : cascades)
     {
-        cascade.imageViews.resize(MAX_FRAMES_IN_FLIGHT);
-        cascade.framebuffers.resize(MAX_FRAMES_IN_FLIGHT);
+        cascade.imageViews.resize(images.size());
+        cascade.framebuffers.resize(images.size());
     }
-	cascadeBuffers.reserve(MAX_FRAMES_IN_FLIGHT);
+	cascadeBuffers.reserve(images.size());
     bool samplersNotCreated = samplers.empty();
     if (samplersNotCreated)
         samplers.resize(images.size());
     auto swapChain = SwapChain::GetCurrent();
-    //auto extent = swapChain->GetExtent();
-    for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    for (int i = 0; i < images.size(); i++)
     {
         auto& shadowImage = images[i];
         VkImageCreateInfo imageInfo{};
         imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         imageInfo.imageType = VK_IMAGE_TYPE_2D;
-        imageInfo.format = VK_FORMAT_D32_SFLOAT;
+        imageInfo.format = swapChain->GetDepthFormat();
         imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         imageInfo.extent = {SHADOW_MAP_DIM, SHADOW_MAP_DIM, 1};
         shadowImage.extent = imageInfo.extent;
@@ -138,7 +143,7 @@ void ShadowMap::createShadowResources()
         imageViewInfo.image = shadowImage.image;
         imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY;
         imageViewInfo.format = imageInfo.format;
-        //imageViewInfo.components = { VK_COMPONENT_SWIZZLE_R };
+        imageViewInfo.components = { VK_COMPONENT_SWIZZLE_R };
         imageViewInfo.subresourceRange = { VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, SHADOW_MAP_CASCADE_COUNT };
 
         vkCreateImageView(aDevice->GetLogicalDevice(), &imageViewInfo, nullptr, &shadowImage.imageView);

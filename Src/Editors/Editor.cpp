@@ -82,7 +82,7 @@ int main()
     //for (int i = 0; i < 1000; i++)
     //    meshInfos.push_back({"Models/cube.obj", {{random_double(), random_double(), random_double()}, {random_double(), random_double(), random_double()}}});
     meshes.Append((MeshInfo*)scene.data(), scene.size() / sizeof(MeshInfo));
-    //MeshInfo meshInfo = {"Models/cube.obj", {{}, {1.0f, 1.0f, 0.3f}}, 4};
+    //MeshInfo meshInfo = {"Models/cube.obj", {{0.0f, 2.0f, 0.0f}, {8.0f, 0.1f, 8.0f}}, 4};
     //meshes.Append(&meshInfo, 1);
     editor.Run();
     return 0;

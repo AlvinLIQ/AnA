@@ -18,7 +18,7 @@ namespace AnA
 
         int GetFrameIndex() const
         {
-            return currentFrameIndex;
+            return aSwapChain->CurrentFrame;
         }
 
         bool IsFrameInProgress() const
@@ -82,7 +82,6 @@ namespace AnA
         CommandBuffer offscreenSecondaryCommandBuffers;
 
         uint32_t currentImageIndex = 0;
-        int currentFrameIndex = 1;
         bool isFrameStarted = false;
 
         bool needUpdate = false;
