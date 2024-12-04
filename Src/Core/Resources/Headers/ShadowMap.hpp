@@ -11,7 +11,7 @@ namespace AnA
 {
     namespace Resource
     {
-        struct CascadeBufferObject
+        struct alignas(16) CascadeBufferObject
         {
             glm::mat4 viewProjMatrix;
             float splitDepth;
@@ -69,7 +69,11 @@ namespace AnA
             {
                 return cascadeBuffers;
             }
-            void UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, int currentFrame);
+            std::vector<VkDescriptorImageInfo>& GetDescriptorImageInfos()
+            {
+                return descriptorImageInfos;
+            }
+            void UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, uint32_t bufferIndex);
             void GetUBODescriptorConfig(Descriptor::DescriptorConfig* pConfig);
         private:
             Device* aDevice{nullptr};
@@ -78,6 +82,7 @@ namespace AnA
             std::vector<Image> images;
             std::vector<Cascade> cascades;
             std::vector<Buffer> cascadeBuffers;
+            std::vector<VkDescriptorImageInfo> descriptorImageInfos;
             void createShadowResources();
             void cleanupShadowResources();
         };

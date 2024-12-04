@@ -26,7 +26,7 @@ Renderer::~Renderer()
 VkCommandBuffer Renderer::BeginFrame()
 {
     assert(!isFrameStarted && "Can't call BeginFrame while already in progress!");
-    auto result = aSwapChain->AcquireNextImage(&currentImageIndex);
+    auto result = aSwapChain->AcquireNextImage();
     if (result == VK_ERROR_OUT_OF_DATE_KHR)
     {
         aSwapChain->RecreateSwapChain();
@@ -66,7 +66,7 @@ void Renderer::EndFrame()
     assert(isFrameStarted && "Can't call EndFrame while frame is not in progress!");
     commandBuffers.End();
     auto commandBuffer = commandBuffers.Get();
-    auto result = aSwapChain->SubmitCommandBuffers(&commandBuffer, 1,  &currentImageIndex); 
+    auto result = aSwapChain->SubmitCommandBuffers(&commandBuffer, 1); 
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || aWindow.FramebufferResized)
     {
@@ -90,7 +90,7 @@ void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer)
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = aSwapChain->GetRenderPass();
-    renderPassInfo.framebuffer = aSwapChain->GetSwapChainFramebuffers()[currentImageIndex];
+    renderPassInfo.framebuffer = aSwapChain->GetCurrentFramebuffer();
     renderPassInfo.renderArea.offset = {};
     renderPassInfo.renderArea.extent = swapChainExtent;
     renderPassInfo.clearValueCount = numsof(clearValues);
@@ -106,7 +106,7 @@ void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkSubpass
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = aSwapChain->GetRenderPass();
-    renderPassInfo.framebuffer = aSwapChain->GetSwapChainFramebuffers()[currentImageIndex];
+    renderPassInfo.framebuffer = aSwapChain->GetCurrentFramebuffer();
     renderPassInfo.renderArea.offset = {};
     renderPassInfo.renderArea.extent = swapChainExtent;
     renderPassInfo.clearValueCount = numsof(clearValues);
@@ -122,7 +122,7 @@ void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = aSwapChain->GetRenderPass();
-    renderPassInfo.framebuffer = aSwapChain->GetSwapChainFramebuffers()[currentImageIndex];
+    renderPassInfo.framebuffer = aSwapChain->GetCurrentFramebuffer();
     renderPassInfo.renderArea.offset = offset;
     renderPassInfo.renderArea.extent = {swapChainExtent.width - renderPassInfo.renderArea.offset.x, swapChainExtent.height - renderPassInfo.renderArea.offset.y};
     renderPassInfo.clearValueCount = numsof(clearValues);
@@ -138,7 +138,7 @@ void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = aSwapChain->GetRenderPass();
-    renderPassInfo.framebuffer = aSwapChain->GetSwapChainFramebuffers()[currentImageIndex];
+    renderPassInfo.framebuffer = aSwapChain->GetCurrentFramebuffer();
     renderPassInfo.renderArea.offset = offset;
     renderPassInfo.renderArea.extent = extent;
     renderPassInfo.clearValueCount = numsof(clearValues);
@@ -154,7 +154,7 @@ void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = aSwapChain->GetRenderPass();
-    renderPassInfo.framebuffer = aSwapChain->GetSwapChainFramebuffers()[currentImageIndex];
+    renderPassInfo.framebuffer = aSwapChain->GetCurrentFramebuffer();
     renderPassInfo.renderArea.offset = ltOffset;
     renderPassInfo.renderArea.extent = {swapChainExtent.width - renderPassInfo.renderArea.offset.x - rbOffset.x, swapChainExtent.height - renderPassInfo.renderArea.offset.y - rbOffset.y};
     renderPassInfo.clearValueCount = numsof(clearValues);

@@ -5,6 +5,7 @@ layout(location = 0) in vec2 texCoord;
 layout(location = 1) flat in uint texIndex;
 layout(location = 2) in vec3 normalSpace;
 layout(location = 3) in vec3 vertex;
+layout(location = 4) in vec4 viewPos;
 
 layout(location = 0) out vec4 outColor;
 
@@ -62,9 +63,17 @@ void main()
 {
     float pointLightIntensity = max(dot(normalSpace, normalize(LIGHT_DIRECTION - vertex)), 0);
     float diffuseLightItensity = max(dot(normalSpace, normalize(lbo.direction)), 0);
-    vec4 shadowCoord = biasMat * ubo.cascades[1].viewProj * vec4(vertex, 1.0);
-    float visibility = textureProj(shadowCoord, vec2(0.0), 0);
+    uint cascadeIndex = 0;
+	for(uint i = 0; i < SHADOW_MAP_CASCADE_COUNT - 1; ++i) {
+		if(viewPos.z < ubo.cascades[i].split) {	
+			cascadeIndex = i + 1;
+		}
+	}
+    vec4 shadowCoord = biasMat * ubo.cascades[0].viewProj * vec4(vertex, 1.0);
+    float visibility = 1.0;//textureProj(shadowCoord, vec2(0.0), cascadeIndex);
+	if (texture(shadowSampler, vec3(shadowCoord.xy/shadowCoord.w, 0)).r < shadowCoord.z / shadowCoord.w)
+		visibility = 0.5;
     vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility + pointLightIntensity * LIGHT_COLOR;
 	outColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord) * vec4(finalLight, 1.0);
-    //outColor = visibility * vec4(vec3(texture(shadowSampler, vec3(gl_FragCoord.xy / cbo.resolution, 0)).r), 1.);
+    //outColor = texture(shadowSampler, vec3(gl_FragCoord.xy / cbo.resolution, 2)).r * vec4(1.);
 }

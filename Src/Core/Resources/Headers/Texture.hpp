@@ -52,6 +52,5 @@ namespace AnA
         VkImage textureImage{VK_NULL_HANDLE};
         VkDeviceMemory textureImageMemory{VK_NULL_HANDLE};
         VkDescriptorImageInfo imageInfo;
-        void createTextureSampler(enum VkSamplerAddressMode samplerAddressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT);
     };
 }

@@ -33,20 +33,20 @@ SwapChain::~SwapChain()
     cleanupSwapChain();
 }
 
-VkResult SwapChain::AcquireNextImage(uint32_t* pImageIndex)
+VkResult SwapChain::AcquireNextImage()
 {
     vkWaitForFences(aDevice->GetLogicalDevice(), 1, &inFlightFences[CurrentFrame], VK_TRUE, UINT64_MAX);
 
     return vkAcquireNextImageKHR(aDevice->GetLogicalDevice(), swapChain, UINT64_MAX,
-                                 imageAvailableSemaphores[CurrentFrame], VK_NULL_HANDLE, pImageIndex);
+                                 imageAvailableSemaphores[CurrentFrame], VK_NULL_HANDLE, &CurrentImage);
 }
 
-VkResult SwapChain::SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint32_t commandBufferCount, uint32_t* pImageIndex)
+VkResult SwapChain::SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint32_t commandBufferCount)
 {
-    if (imagesInFlight[*pImageIndex] != VK_NULL_HANDLE)
-        vkWaitForFences(aDevice->GetLogicalDevice(), 1, &imagesInFlight[*pImageIndex], VK_TRUE, UINT64_MAX);
+    if (imagesInFlight[CurrentImage] != VK_NULL_HANDLE)
+        vkWaitForFences(aDevice->GetLogicalDevice(), 1, &imagesInFlight[CurrentImage], VK_TRUE, UINT64_MAX);
 
-    imagesInFlight[*pImageIndex] = inFlightFences[CurrentFrame];
+    imagesInFlight[CurrentImage] = inFlightFences[CurrentFrame];
 
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -81,7 +81,7 @@ VkResult SwapChain::SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint3
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = swapChains;
 
-    presentInfo.pImageIndices = pImageIndex;
+    presentInfo.pImageIndices = &CurrentImage;
 
     auto result = vkQueuePresentKHR(aDevice->GetPresentQueue(), &presentInfo);
 

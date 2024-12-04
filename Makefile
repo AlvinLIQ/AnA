@@ -55,14 +55,14 @@ shader_compile: $(shaderspv)
 %_comp.spv : %.comp
 	glslc $< -o Shaders/$(@F) $(shader_args)
 
-ui: $(ui_parser)
+ui: ui_parser
 	$(ui_parser) $(ui)
 
 $(shader):
 	$(cc) $(cflags) $(libs) -lSPIRV-Tools-shared Src/Core/ShaderCodes/ShaderCodes.c -o $@ -std=c2x
 
-$(ui_parser):
-	$(cpp) Src/GUI/XML/XMLToControl.cpp -ISrc/GUI/XML/rapidxml -std=c++20 -o $@
+ui_parser:
+	$(cpp) Src/GUI/XML/XMLToControl.cpp -ISrc/GUI/XML/rapidxml -std=c++20 -o $(ui_parser)
 
 $(ana): $(objects) $(editor:.cpp=.o)
 	$(cpp) $^ $(libs) -g -o $@ -std=c++20

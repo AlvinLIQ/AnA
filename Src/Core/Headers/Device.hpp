@@ -75,7 +75,10 @@ namespace AnA
         void CopyBufferToImage(VkBuffer& srcBuffer, VkImage& dstImage, VkExtent3D extent);
 
         void CreateImage(VkImageCreateInfo* pCreateInfo, VkImage* pImage, VkDeviceMemory* pImageMemory);
-        VkImageView CreateImageView(VkImage& image, VkFormat format);
+        VkImageView CreateImageView(VkImage& image, VkFormat format, VkImageViewType viewType = VK_IMAGE_VIEW_TYPE_2D, 
+            VkImageSubresourceRange subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 
+            1, 0, 
+            1});
 
         void CreateColorImage(const uint32_t color, VkImage* pTexImage, VkDeviceMemory* pTexMemory);
 

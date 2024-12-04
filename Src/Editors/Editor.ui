@@ -1,5 +1,5 @@
 <StackPanel ControlSize="300.0f, 0.0f" Spacing="0.01f" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Orientation="Vertical"
-    Color="0.92f, 0.92f, 0.92f" ControlOffset="0.1f, 0.0f">
+    Color="0.8f, 0.8f, 0.8f">
     <TextBlock Text="AnA"/>
     <Button HorizontalAlignment="Start" Click="loadModelButton_Click">
         <TextBlock Text="Load Model"/>
@@ -7,4 +7,6 @@
     <Button HorizontalAlignment="Start" Click="saveSceneButton_Click">
         <TextBlock Text="Save Scene"/>
     </Button>
+    <Scene HorizontalAlignment="Stretch" ImageInfo="Resource::ResourceManager::GetCurrent()->ShadowMap.GetDescriptorImageInfos()[0]"
+        ControlSize="0.0f, 0.3f"/>
 </StackPanel>

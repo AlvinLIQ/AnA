@@ -337,11 +337,11 @@ void App::onCommandBufferRecording(VkCommandBuffer& commandBuffer)
     //if (commandBufferNeedUpdate)
     //{
     
-    int currentFrame = aRenderer->GetFrameIndex();
+    uint32_t frameIndex = aRenderer->GetFrameIndex();
     for (uint32_t i = 0 ; i < SHADOW_MAP_CASCADE_COUNT; i++)
     {
         aRenderer->BeginOffscreenRenderPass(commandBuffer, 
-            aResourceManager->ShadowMap.GetCascades()[i].framebuffers[currentFrame],
+            aResourceManager->ShadowMap.GetCascades()[i].framebuffers[frameIndex],
             VK_SUBPASS_CONTENTS_INLINE);
         
         //aRenderer->ExecuteOffscreenSecondaryCommandBuffer(commandBuffer);

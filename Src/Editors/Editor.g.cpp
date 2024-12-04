@@ -1,4 +1,5 @@
 #include "../GUI/Controls/Headers/Button.hpp"
+#include "../GUI/Controls/Headers/Scene.hpp"
 #include "../GUI/Controls/Headers/StackPanel.hpp"
 #include "../GUI/Controls/Headers/TextBlock.hpp"
 #include "Headers/Editor.hpp"
@@ -15,8 +16,7 @@ node0->Spacing = {0.01f};
 node0->VerticalAlignment = {Stretch};
 node0->HorizontalAlignment = {Stretch};
 node0->Orientation = {Vertical};
-node0->Color = {0.92f, 0.92f, 0.92f};
-node0->ControlOffset = {0.1f, 0.0f};
+node0->Color = {0.8f, 0.8f, 0.8f};
 TextBlock* node1 = new TextBlock();
 node1->Text("AnA");
 node0->Child(node1);
@@ -34,6 +34,11 @@ node0->Child(node4);
 TextBlock* node5 = new TextBlock();
 node5->Text("Save Scene");
 node4->Child(node5);
+Scene* node6 = new Scene();
+node6->HorizontalAlignment = {Stretch};
+node6->ImageInfo(Resource::ResourceManager::GetCurrent()->ShadowMap.GetDescriptorImageInfos()[0]);
+node6->ControlSize = {0.0f, 0.3f};
+node0->Child(node6);
 
 return node0;
 }

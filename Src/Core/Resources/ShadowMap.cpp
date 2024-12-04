@@ -44,55 +44,42 @@ std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& proj, const 
     return frustumCorners;
 }
 
-void ShadowMap::UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, int currentFrame)
+void ShadowMap::UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, uint32_t bufferIndex)
 {
-	glm::vec3 lightPos = -glm::vec3(1.0f, 1.0f, 1.0f);
+	glm::vec3 lightDir = glm::normalize(-glm::vec3(1.0f, 1.0f, 1.0f));
+    glm::vec3 lightPos = lightDir * 2.0f;
     float cascadeSplits[SHADOW_MAP_CASCADE_COUNT];
     
 	float nearPlane = 0.05f;
 	float farPlane = 32.0f;
-    glm::vec3 frustumCenter;
-    auto frustumCorners = getFrustumCornersWorldSpace(camera.GetProjectionMatrix(), camera.GetView(), frustumCenter);
-	glm::mat4 lightView = glm::lookAt(frustumCenter + glm::normalize(lightPos), frustumCenter, glm::vec3(0.0f, -1.0f, 0.0f));
-    
-    float minX = std::numeric_limits<float>::max();
-    float maxX = std::numeric_limits<float>::lowest();
-    float minY = std::numeric_limits<float>::max();
-    float maxY = std::numeric_limits<float>::lowest();
-    float minZ = std::numeric_limits<float>::max();
-    float maxZ = std::numeric_limits<float>::lowest();
-    for (const auto& v : frustumCorners)
+    float clipRange = farPlane - nearPlane;
+    glm::mat4 invCam = glm::inverse(camera.GetProjectionMatrix() * camera.GetView());
+	const glm::vec3 frustumCorners[8] =
     {
-        const auto trf = lightView * v;
-        minX = std::min(minX, trf.x);
-        maxX = std::max(maxX, trf.x);
-        minY = std::min(minY, trf.y);
-        maxY = std::max(maxY, trf.y);
-        minZ = std::min(minZ, trf.z);
-        maxZ = std::max(maxZ, trf.z);
-    }
-    constexpr float zMult = 10.0f;
-    if (minZ < 0)
+        {-1.0f, -1.0f, 0.0f},
+        {1.0f, -1.0f, 0.0f},
+        {-1.0f, 1.0f, 0.0f},
+        {1.0f, 1.0f, 0.0f},
+        {-1.0f, -1.0f, 1.0f},
+        {1.0f, -1.0f, 1.0f},
+        {-1.0f, 1.0f, 1.0f},
+        {1.0f, 1.0f, 1.0f},
+    };
+    for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
     {
-        minZ *= zMult;
-    }
-    else
-    {
-        minZ /= zMult;
-    }
-    if (maxZ < 0)
-    {
-        maxZ /= zMult;
-    }
-    else
-    {
-        maxZ *= zMult;
-    }
-    
-    const glm::mat4 lightProjection = glm::ortho(minX, maxX, minY, maxY, minZ, maxZ);
-    auto cbo = (CascadeBufferObject*)cascadeBuffers[currentFrame].GetMappedData();
-    for (int i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
-        cbo[i].viewProjMatrix = lightProjection * lightView;//light.GetProjectionMatrix() * light.GetView();
+        glm::vec4 frustumCenter = {};
+        for (int j = 0; j < 8; j++)
+        {
+            frustumCenter += invCam * glm::vec4(frustumCorners[j], 1.0f);
+        }
+        frustumCenter /= 8.0f;
+        //light.SetViewDirection(lightDir * (float)i,  lightDir, glm::vec3(0, -1, 0));
+
+        float splitDist = (float)i / (float)SHADOW_MAP_CASCADE_COUNT;
+		auto cbo = (CascadeBufferObject*)cascadeBuffers[bufferIndex].GetMappedData();
+        cbo[i].viewProjMatrix = light.GetProjectionMatrix() * light.GetView();
+        cbo[i].splitDepth = (nearPlane + splitDist * clipRange) * -1.0f;
+	}   
 }
 
 void ShadowMap::GetUBODescriptorConfig(Descriptor::DescriptorConfig* pConfig)
@@ -116,6 +103,7 @@ void ShadowMap::createShadowResources()
         cascade.framebuffers.resize(images.size());
     }
 	cascadeBuffers.reserve(images.size());
+    descriptorImageInfos.resize(images.size());
     bool samplersNotCreated = samplers.empty();
     if (samplersNotCreated)
         samplers.resize(images.size());
@@ -143,7 +131,7 @@ void ShadowMap::createShadowResources()
         imageViewInfo.image = shadowImage.image;
         imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY;
         imageViewInfo.format = imageInfo.format;
-        imageViewInfo.components = { VK_COMPONENT_SWIZZLE_R };
+        //imageViewInfo.components = { VK_COMPONENT_SWIZZLE_R };
         imageViewInfo.subresourceRange = { VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, SHADOW_MAP_CASCADE_COUNT };
 
         vkCreateImageView(aDevice->GetLogicalDevice(), &imageViewInfo, nullptr, &shadowImage.imageView);
@@ -175,6 +163,10 @@ void ShadowMap::createShadowResources()
 		VK_MEMORY_PROPERTY_HOST_COHERENT_BIT 
 				| VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 		cascadeBuffers[i].Map(0, cascades.size() * sizeof(CascadeBufferObject));
+
+        descriptorImageInfos[i].imageLayout = shadowImage.imageLayout;
+        descriptorImageInfos[i].imageView = shadowImage.imageView;
+        descriptorImageInfos[i].sampler = samplers[i];
     }
 }
 

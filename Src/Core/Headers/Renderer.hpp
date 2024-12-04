@@ -16,7 +16,7 @@ namespace AnA
         Renderer(Window& mWindow, Device* mDevice);
         ~Renderer();
 
-        int GetFrameIndex() const
+        uint32_t GetFrameIndex() const
         {
             return aSwapChain->CurrentFrame;
         }
@@ -81,7 +81,6 @@ namespace AnA
         CommandBuffer commandBuffers;
         CommandBuffer offscreenSecondaryCommandBuffers;
 
-        uint32_t currentImageIndex = 0;
         bool isFrameStarted = false;
 
         bool needUpdate = false;

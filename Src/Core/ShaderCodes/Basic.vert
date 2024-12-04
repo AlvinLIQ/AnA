@@ -4,6 +4,7 @@ layout(location = 0) out vec2 outTexCoord;
 layout(location = 1) out uint outTexID;
 layout(location = 2) out vec3 outNormalSpace;
 layout(location = 3) out vec3 outVertex;
+layout(location = 4) out vec4 outViewPos;
 
 struct Vertex
 {
@@ -83,9 +84,11 @@ mat4 transform(vec3 scale, vec3 rotation, vec3 transition)
 void main() {
     Vertex vertex = ssbo.vertices[gl_VertexIndex];
     vec4 vertexPos = vec4(vertex.position, 1.0);
-    gl_Position = cbo.proj * cbo.view * vertexPos;
+    vec4 viewPos = cbo.view * vertexPos;
+    gl_Position = cbo.proj * viewPos;
     outNormalSpace = normalize(vertex.normal);
     outVertex = vertexPos.xyz;
+    outViewPos = viewPos;
 
     outTexCoord = vertex.uv;
     outTexID = vertex.texIndex;

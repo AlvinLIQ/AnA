@@ -24,11 +24,12 @@ namespace AnA
 
         float Scale[2];
 
-        VkResult AcquireNextImage(uint32_t* pImageIndex);
+        VkResult AcquireNextImage();
 
-        VkResult SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint32_t commandBufferCount, uint32_t* pImageIndex);
+        VkResult SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint32_t commandBufferCount);
 
         uint32_t CurrentFrame = 1;
+        uint32_t CurrentImage = 0;
 
         static SwapChain* GetCurrent();
 
@@ -41,6 +42,11 @@ namespace AnA
 
         VkRenderPass& GetRenderPass();
         VkRenderPass& GetOffscreenRenderPass();
+
+        VkFramebuffer& GetCurrentFramebuffer()
+        {
+            return swapChainFramebuffers[CurrentImage];
+        }
 
         void SetViewport(VkCommandBuffer& commandBuffer);
         void SetViewport(VkCommandBuffer& commandBuffer, VkOffset2D offset);

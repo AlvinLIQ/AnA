@@ -17,3 +17,11 @@ void Scene::PrepareDraw()
 {
     
 }
+
+VkDescriptorImageInfo Scene::GetDescriptorImageInfo()
+{
+    if (imageInfo.has_value())
+        return imageInfo.value();
+    else
+        return Control::GetDescriptorImageInfo();
+}

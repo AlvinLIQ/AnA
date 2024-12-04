@@ -21,10 +21,9 @@ Buffer* Light::GetBuffers()
     return buffers.data();
 }
 
-void Light::UpdateBuffers(Cameras::Camera& lightCamera, int currentFrame)
+void Light::UpdateBuffers(Cameras::Camera& lightCamera, uint32_t bufferIndex)
 {
-
-    auto& lightBufferObject = *(LightBufferObject*)buffers[currentFrame].GetMappedData();
+    auto& lightBufferObject = *(LightBufferObject*)buffers[bufferIndex].GetMappedData();
     //auto cameraPosition = glm::mat3(Resource::ResourceManager::GetCurrent()->MainCamera.GetInverseView()) * glm::vec3(Resource::ResourceManager::GetCurrent()->MainCamera.GetView()[3]);
     //auto target = cameraPosition - glm::vec3(Direction.x, Direction.y, Direction.z);
     //lightCamera.SetViewTarget(cameraPosition, target);

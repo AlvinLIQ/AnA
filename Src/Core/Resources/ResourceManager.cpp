@@ -66,9 +66,9 @@ void ResourceManager::UpdateCamera(float aspect)
 {
     MainCameraInfo.aspect = aspect;
     MainCameraInfo.UpdateCameraPerspective(MainCamera);
-    LightCameraInfo.aspect = aspect;
+    LightCameraInfo.aspect = 1.0f;
     //LightCameraInfo.UpdateCameraPerspective(LightCamera);
-    const float scale = 10.5f;
+    const float scale = 1.0f;
     LightCamera.SetOrthographicProjection(-scale * LightCameraInfo.aspect, -scale, scale * LightCameraInfo.aspect, scale, 
         -10.0f, 32.0f);
 }
@@ -87,9 +87,9 @@ void ResourceManager::UpdateCameraBuffer()
 void ResourceManager::Update()
 {
     UpdateCameraBuffer();
-    int currentFrame = SwapChain::GetCurrent()->CurrentFrame;
-    GlobalLight.UpdateBuffers(LightCamera, currentFrame);
-    ShadowMap.UpdateBuffers(MainCamera, LightCamera, currentFrame);
+    uint32_t frameIndex = SwapChain::GetCurrent()->CurrentFrame;
+    GlobalLight.UpdateBuffers(LightCamera, frameIndex);
+    ShadowMap.UpdateBuffers(MainCamera, LightCamera, frameIndex);
     if (SceneObjects.NeedUpdate())
     {
         SceneObjects.CommitBufferUpdate();
@@ -155,7 +155,7 @@ std::vector<Descriptor::DescriptorConfig> ResourceManager::GetDefaultDescriptorC
 
     pConfig = &descriptorConfigs[DEFAULT_SHADOW_SAMPLER_LAYOUT];
     pConfig->binding = 0;
-    pConfig->descriptorCount = MAX_FRAMES_IN_FLIGHT;
+    pConfig->descriptorCount = static_cast<int>(ShadowMap.GetImages().size());
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     pConfig->stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     pConfig->images = ShadowMap.GetImages().data();
@@ -269,5 +269,5 @@ void ResourceManager::createDefaultShaders()
     auto offscreenRenderPass = SwapChain::GetCurrent()->GetOffscreenRenderPass();
 
     Shaders.emplace_back(aDevice, CascadedShadowMapping_vert, offscreenRenderPass
-        , descriptorConfig, sizeof(uint32_t));
+        , CascadedShadowMapping_frag, descriptorConfig, sizeof(uint32_t));
 }
