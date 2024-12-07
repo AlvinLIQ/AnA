@@ -23,11 +23,6 @@ ShadowSystem* ShadowSystem::GetCurrent()
     return _shadowSystem;
 }
 
-VkExtent2D ShadowSystem::GetExtent()
-{
-    return swapChain->GetExtent();
-}
-
 void ShadowSystem::RenderShadows(VkCommandBuffer commandBuffer, Meshes &meshes, Shader& shader)
 {
     vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);

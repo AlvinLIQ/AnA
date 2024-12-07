@@ -46,7 +46,6 @@ VkCommandBuffer Renderer::BeginFrame()
 
 void Renderer::RecordOffscreenSecondaryCommandBuffer(RecordCallBack recordCallBack)
 {
-    auto swapChainExtent = aSwapChain->GetExtent();
     //aSwapChain->WaitForFences();
     auto& secondaryCommandBuffer = offscreenSecondaryCommandBuffers.Begin(&inheritanceInfos[RENDER_PASS_TYPE_OFFSCREEN]);
     recordCallBack(secondaryCommandBuffer);
