@@ -25,6 +25,8 @@ ShadowSystem* ShadowSystem::GetCurrent()
 
 void ShadowSystem::RenderShadows(VkCommandBuffer commandBuffer, Meshes &meshes, Shader& shader)
 {
+    VkExtent2D extent = {SHADOW_MAP_DIM, SHADOW_MAP_DIM};
+    swapChain->SetViewport(commandBuffer, {}, extent);
     vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
     shader.GetPipeline()->Bind(commandBuffer);
     std::vector<VkDescriptorSet> sets = shader.GetDescriptorSets()[Resource::ResourceManager::GetCurrent()->SecondaryCommandBufferPool.CurrentBufferIndex];
@@ -38,6 +40,8 @@ void ShadowSystem::RenderShadows(VkCommandBuffer commandBuffer, Meshes &meshes, 
 
 void ShadowSystem::RenderShadowsIndirect(VkCommandBuffer commandBuffer, Meshes &meshes, Shader& shader)
 {
+    VkExtent2D extent = {SHADOW_MAP_DIM, SHADOW_MAP_DIM};
+    swapChain->SetViewport(commandBuffer, {}, extent);
     vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
     shader.GetPipeline()->Bind(commandBuffer);
     std::vector<VkDescriptorSet> sets = shader.GetDescriptorSets()[Resource::ResourceManager::GetCurrent()->SecondaryCommandBufferPool.CurrentBufferIndex];
@@ -51,6 +55,8 @@ void ShadowSystem::RenderShadowsIndirect(VkCommandBuffer commandBuffer, Meshes &
 
 void ShadowSystem::RenderCascadedShadowsIndirect(VkCommandBuffer commandBuffer, Meshes &meshes, Shader& shader, uint32_t& index)
 {
+    VkExtent2D extent = {SHADOW_MAP_DIM, SHADOW_MAP_DIM};
+    swapChain->SetViewport(commandBuffer, {}, extent);
     vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
     shader.GetPipeline()->Bind(commandBuffer);
     std::vector<VkDescriptorSet> sets = shader.GetDescriptorSets()[Resource::ResourceManager::GetCurrent()->SecondaryCommandBufferPool.CurrentBufferIndex];
