@@ -10,6 +10,7 @@ namespace AnA
 {
     namespace Controls
     {
+        enum Orientations {Horizontal = 1, Vertical = 0};
         class Control : public AnA::ShapeInfo
         {
         public:

@@ -70,9 +70,8 @@ void main()
 		}
 	}
     vec4 shadowCoord = biasMat * ubo.cascades[0].viewProj * vec4(vertex, 1.0);
-    float visibility = 1.0;//textureProj(shadowCoord, vec2(0.0), cascadeIndex);
-	if (texture(shadowSampler, vec3(shadowCoord.xy/shadowCoord.w, 0)).r < shadowCoord.z / shadowCoord.w)
-		visibility = 0.5;
+    float visibility = textureProj(shadowCoord, vec2(0.), cascadeIndex);
+
     vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility + pointLightIntensity * LIGHT_COLOR;
 	outColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord) * vec4(finalLight, 1.0);
     //outColor = texture(shadowSampler, vec3(gl_FragCoord.xy / cbo.resolution, 2)).r * vec4(1.);

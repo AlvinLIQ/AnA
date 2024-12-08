@@ -1,5 +1,6 @@
 #include "../GUI/Controls/Headers/Button.hpp"
 #include "../GUI/Controls/Headers/Scene.hpp"
+#include "../GUI/Controls/Headers/Slider.hpp"
 #include "../GUI/Controls/Headers/StackPanel.hpp"
 #include "../GUI/Controls/Headers/TextBlock.hpp"
 #include "Headers/Editor.hpp"
@@ -34,11 +35,15 @@ node0->Child(node4);
 TextBlock* node5 = new TextBlock();
 node5->Text("Save Scene");
 node4->Child(node5);
-Scene* node6 = new Scene();
+Slider* node6 = new Slider();
 node6->HorizontalAlignment = {Stretch};
-node6->ImageInfo(Resource::ResourceManager::GetCurrent()->ShadowMap.GetDescriptorImageInfos()[0]);
-node6->ControlSize = {0.0f, 0.3f};
+node6->ControlSize = {0.0f, 0.1f};
 node0->Child(node6);
+Scene* node7 = new Scene();
+node7->HorizontalAlignment = {Stretch};
+node7->ImageInfo(Resource::ResourceManager::GetCurrent()->ShadowMap.GetDescriptorImageInfos()[0]);
+node7->ControlSize = {0.0f, 0.3f};
+node0->Child(node7);
 
 return node0;
 }
