@@ -17,7 +17,6 @@ namespace AnA
                 imageInfo = _imageInfo;
             }
 
-            virtual void PrepareDraw();
             VkDescriptorImageInfo GetDescriptorImageInfo();
         private:
             std::optional<VkDescriptorImageInfo> imageInfo;

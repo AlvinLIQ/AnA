@@ -37,7 +37,7 @@ node5->Text("Save Scene");
 node4->Child(node5);
 Slider* node6 = new Slider();
 node6->HorizontalAlignment = {Stretch};
-node6->ControlSize = {0.0f, 0.1f};
+node6->ControlSize = {0.0f, 0.02f};
 node0->Child(node6);
 Scene* node7 = new Scene();
 node7->HorizontalAlignment = {Stretch};

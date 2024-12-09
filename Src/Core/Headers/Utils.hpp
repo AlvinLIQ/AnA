@@ -57,7 +57,7 @@ namespace AnA
 			size = v.size;
 			capacity = v.capacity;
 		}
-		Vector& operator=(const Vector&& v) noexcept
+		Vector& operator=(Vector&& v) noexcept
 		{
 			if (&v != this)
 			{

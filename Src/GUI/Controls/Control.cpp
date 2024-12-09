@@ -49,6 +49,8 @@ SIZE_F Control::GetSizeForRender()
     {
         renderSize.Width = ControlSize.Width / (float)Extent.width;
         renderSize.Height = ControlSize.Height / (float)Extent.height;
+        renderSize.Width *= aSwapChain->ScaleX;
+        renderSize.Height *= aSwapChain->ScaleY;
     }
     else if (renderMode == AlignType::Relative)
     {
@@ -59,8 +61,6 @@ SIZE_F Control::GetSizeForRender()
         renderSize = {ControlSize.Width / Aspect, ControlSize.Height};
     }
 
-    renderSize.Width *= aSwapChain->ScaleX;
-    renderSize.Height *= aSwapChain->ScaleY;
     return renderSize;
 }
 

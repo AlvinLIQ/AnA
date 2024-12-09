@@ -5,17 +5,12 @@ using namespace Controls;
 
 Scene::Scene()
 {
-
+    RenderMode(Relative);
 }
 
 Scene::~Scene()
 {
 
-}
-
-void Scene::PrepareDraw()
-{
-    
 }
 
 VkDescriptorImageInfo Scene::GetDescriptorImageInfo()
