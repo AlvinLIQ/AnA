@@ -51,6 +51,8 @@ void Editor::loadModelButton_Click(void* control, PointerEventArgs& args)
 {
     FileDialog fileDialog{};
     auto path = fileDialog.Run();
+    if (path.empty())
+        return;
     MeshInfo mesh;
     memcpy(mesh.filePath, path.c_str(), path.length());
     mesh.tetureId = 0;

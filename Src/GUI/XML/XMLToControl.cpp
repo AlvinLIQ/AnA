@@ -15,9 +15,10 @@ void traverse_node(rapidxml::xml_node<> *node, std::set<std::string>& usedNodes,
     {
         usedNodes.insert(std::string(node->name()));
     }
-    ss << node->name() << "* node" << id <<" = new "<< node->name() << "();\n";
+    ss << '\t' << node->name() << "* node" << id <<" = new "<< node->name() << "();\n";
     for (auto& attr : node->attributes())
     {
+        ss << '\t';
         if (attr.name() == "Name")
         {
             
@@ -40,7 +41,7 @@ void traverse_node(rapidxml::xml_node<> *node, std::set<std::string>& usedNodes,
         }
     }
     if (parent >= 0)
-        ss << "node" << parent << "->Child(node" << id <<");\n";
+        ss << '\t' << "node" << parent << "->Child(node" << id <<");\n";
     parent = id;
     for (auto& child : node->children())
     {
@@ -81,7 +82,7 @@ std::string XML::XMLToCode(std::string path)
     std::string className = _path.filename().replace_extension().string();
     code += "#include \"Headers/" + className + ".hpp\"\n\nusing namespace AnA;\nusing namespace Controls;\nusing namespace " + _path.parent_path().filename().string() + ";\n";
 
-    code += "\nControls::Control* " + className + "::InitControl()\n{\n" + ss.str() + "\nreturn node0;\n}\n";
+    code += "\nControls::Control* " + className + "::InitControl()\n{\n" + ss.str() + "\n\treturn node0;\n}\n";
 
     std::fstream fs(_path.replace_extension(".g.cpp"), std::ios_base::out);
     fs.write(code.c_str(), code.length());

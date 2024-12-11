@@ -38,6 +38,7 @@ temp = $(shadercodes:.vert=_vert.spv)
 temp2 = $(temp:.comp=_comp.spv)
 shaderspv = $(temp2:.frag=_frag.spv)
 
+.PHONY: shader ui $(ana)
 all: shader ui $(ana)
 
 shader: shader_prepare $(shader) shader_compile
@@ -72,7 +73,7 @@ example: $(objects) $(example_batching:.cpp=.o)
 
 -include $(depends) $(editor:.cpp=.d) $(example_batching:.cpp=.d)
 
-%.o : %.cpp Makefile
+%.o : %.cpp
 	$(cpp) $(cflags) -g -MMD -MP -c $< -o $@ -std=c++20
 
 clean:
