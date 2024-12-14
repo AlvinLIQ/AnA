@@ -152,6 +152,7 @@ void App::Run()
             aResourceManager->Resize();
         }
         aResourceManager->Update();
+        onLoop();
         //Record Primary Command Buffer
         if (auto commandBuffer = aRenderer->BeginFrame())
         {

@@ -1,5 +1,6 @@
 #include "Headers/Editor.hpp"
 #include "Headers/FileDialog.hpp"
+#include "../GUI/Controls/Headers/Slider.hpp"
 
 using namespace AnA;
 using namespace Editors;
@@ -45,6 +46,13 @@ void Editor::Init()
     };
     aInputManager->GlobalProfile.keyMapConfigs.push_back(keyMapConfig);
     Controls::Control::GetInputProfile(aResourceManager->MainControl, aInputManager->GetProfiles());
+}
+
+void Editor::onLoop()
+{
+    aResourceManager->MainCameraInfo.near = ((Controls::Slider*)controlMap["nearSlider"])->Value * 32.0f;
+    aResourceManager->MainCameraInfo.far = ((Controls::Slider*)controlMap["farSlider"])->Value * 32.0f;
+    aResourceManager->MainCameraInfo.UpdateCameraPerspective(aResourceManager->MainCamera);
 }
 
 void Editor::loadModelButton_Click(void* control, PointerEventArgs& args)

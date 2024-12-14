@@ -36,15 +36,22 @@ Controls::Control* Editor::InitControl()
 	node5->Text("Save Scene");
 	node4->Child(node5);
 	Slider* node6 = new Slider();
+	controlMap.insert(std::pair<std::string, Controls::Control*>("nearSlider", (Controls::Control*)node6));
 	node6->HorizontalAlignment = {Stretch};
 	node6->ControlSize = {0.0f, 0.02f};
-	node6->Value = {0.0f};
+	node6->Value = {0.05f / 32.0f};
 	node0->Child(node6);
-	Scene* node7 = new Scene();
+	Slider* node7 = new Slider();
+	controlMap.insert(std::pair<std::string, Controls::Control*>("farSlider", (Controls::Control*)node7));
 	node7->HorizontalAlignment = {Stretch};
-	node7->ImageInfo(Resource::ResourceManager::GetCurrent()->ShadowMap.GetDescriptorImageInfos()[0]);
-	node7->ControlSize = {0.0f, 0.3f};
+	node7->ControlSize = {0.0f, 0.02f};
+	node7->Value = {1.0f};
 	node0->Child(node7);
+	Scene* node8 = new Scene();
+	node8->HorizontalAlignment = {Stretch};
+	node8->ImageInfo(Resource::ResourceManager::GetCurrent()->ShadowMap.GetDescriptorImageInfos()[0]);
+	node8->ControlSize = {0.0f, 0.3f};
+	node0->Child(node8);
 
 	return node0;
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include "../../Core/Headers/App.hpp"
+#include <unordered_map>
 
 namespace AnA
 {
@@ -15,6 +16,9 @@ namespace AnA
         private:
             static void loadModelButton_Click(void* control, PointerEventArgs& args);
             static void saveSceneButton_Click(void* control, PointerEventArgs& args);
+            std::unordered_map<std::string, Controls::Control*> controlMap;
+        protected:
+            void onLoop();
         };
     }
 }
