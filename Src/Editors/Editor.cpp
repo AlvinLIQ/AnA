@@ -6,8 +6,6 @@ using namespace AnA;
 using namespace Editors;
 using namespace Controls;
 
-#define EDITOR_LEFT_PANEL_WIDTH 300
-
 Editor::Editor() : App()
 {
 
@@ -88,12 +86,7 @@ int main()
     editor.Init();
     auto scene = ReadFile("Scenes/scene.ana");
     auto& meshes = Resource::ResourceManager::GetCurrent()->SceneObjects;
-    //std::vector<std::string> files(1000, "Models/cube.obj");
-    //for (int i = 0; i < 1000; i++)
-    //    meshInfos.push_back({"Models/cube.obj", {{random_double(), random_double(), random_double()}, {random_double(), random_double(), random_double()}}});
     meshes.Append((MeshInfo*)scene.data(), scene.size() / sizeof(MeshInfo));
-    //MeshInfo meshInfo = {"Models/cube.obj", {{0.0f, 2.0f, 0.0f}, {8.0f, 0.1f, 8.0f}}, 4};
-    //meshes.Append(&meshInfo, 1);
     editor.Run();
     return 0;
 }

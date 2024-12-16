@@ -12,7 +12,7 @@ using namespace Editors;
 Controls::Control* Editor::InitControl()
 {
 	StackPanel* node0 = new StackPanel();
-	node0->ControlSize = {300.0f, 0.0f};
+	node0->ControlSize = {EDITOR_LEFT_PANEL_WIDTH, 0.0f};
 	node0->Spacing = {0.01f};
 	node0->VerticalAlignment = {Stretch};
 	node0->HorizontalAlignment = {Stretch};
@@ -35,23 +35,29 @@ Controls::Control* Editor::InitControl()
 	TextBlock* node5 = new TextBlock();
 	node5->Text("Save Scene");
 	node4->Child(node5);
-	Slider* node6 = new Slider();
-	controlMap.insert(std::pair<std::string, Controls::Control*>("nearSlider", (Controls::Control*)node6));
-	node6->HorizontalAlignment = {Stretch};
-	node6->ControlSize = {0.0f, 0.02f};
-	node6->Value = {0.05f / 32.0f};
+	TextBlock* node6 = new TextBlock();
+	node6->Text("Near");
 	node0->Child(node6);
 	Slider* node7 = new Slider();
-	controlMap.insert(std::pair<std::string, Controls::Control*>("farSlider", (Controls::Control*)node7));
+	controlMap.insert(std::pair<std::string, Controls::Control*>("nearSlider", (Controls::Control*)node7));
 	node7->HorizontalAlignment = {Stretch};
 	node7->ControlSize = {0.0f, 0.02f};
-	node7->Value = {1.0f};
+	node7->Value = {0.05f / 32.0f};
 	node0->Child(node7);
-	Scene* node8 = new Scene();
-	node8->HorizontalAlignment = {Stretch};
-	node8->ImageInfo(Resource::ResourceManager::GetCurrent()->ShadowMap.GetDescriptorImageInfos()[0]);
-	node8->ControlSize = {0.0f, 0.3f};
+	TextBlock* node8 = new TextBlock();
+	node8->Text("Far");
 	node0->Child(node8);
+	Slider* node9 = new Slider();
+	controlMap.insert(std::pair<std::string, Controls::Control*>("farSlider", (Controls::Control*)node9));
+	node9->HorizontalAlignment = {Stretch};
+	node9->ControlSize = {0.0f, 0.02f};
+	node9->Value = {1.0f};
+	node0->Child(node9);
+	Scene* node10 = new Scene();
+	node10->HorizontalAlignment = {Stretch};
+	node10->ImageInfo(Resource::ResourceManager::GetCurrent()->ShadowMap.GetDescriptorImageInfos()[0]);
+	node10->ControlSize = {0.0f, 0.3f};
+	node0->Child(node10);
 
 	return node0;
 }
