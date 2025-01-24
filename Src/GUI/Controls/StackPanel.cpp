@@ -21,7 +21,7 @@ void StackPanel::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageIn
 void StackPanel::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
     SIZE_F maxSize = RenderSize();
-    auto renderOffset = GetActualControlOffset(maxSize);
+    auto renderOffset = GetActualControlOffset(maxSize) + Padding;
     int o = Orientation, invO = 1 - Orientation;
     /*
     for (int i = 0; i < items.size(); i++)

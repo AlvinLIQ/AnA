@@ -1,5 +1,5 @@
 <StackPanel ControlSize="0.0f, 0.0f" Spacing="0.01f" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Orientation="Vertical"
-    Color="0.8f, 0.8f, 0.8f">
+    Color="0.8f, 0.8f, 0.8f" Padding="0.05f, 0.01f">
     <TextBlock Text="AnA"/>
     <Button HorizontalAlignment="Start" Click="loadModelButton_Click">
         <TextBlock Text="Load Model"/>

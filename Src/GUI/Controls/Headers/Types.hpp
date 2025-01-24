@@ -37,5 +37,9 @@ namespace AnA
     {
         float x;
         float y;
+        POS_F operator+(POS_F& B)
+        {
+            return {x + B.x, y + B.y};
+        }
     };
 }

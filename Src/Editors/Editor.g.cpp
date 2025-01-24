@@ -12,12 +12,13 @@ using namespace Editors;
 Controls::Control* Editor::InitControl()
 {
 	StackPanel* node0 = new StackPanel();
-	node0->ControlSize = {EDITOR_LEFT_PANEL_WIDTH, 0.0f};
+	node0->ControlSize = {0.0f, 0.0f};
 	node0->Spacing = {0.01f};
 	node0->VerticalAlignment = {Stretch};
 	node0->HorizontalAlignment = {Stretch};
 	node0->Orientation = {Vertical};
 	node0->Color = {0.8f, 0.8f, 0.8f};
+	node0->Padding = {0.05f, 0.01f};
 	TextBlock* node1 = new TextBlock();
 	node1->Text("AnA");
 	node0->Child(node1);

@@ -44,7 +44,7 @@ all: shader ui $(ana)
 shader: shader_prepare $(shader) shader_compile
 
 shader_prepare:
-	@ mkdir -p Shaders
+	-@ mkdir -p Shaders
 
 shader_compile: $(shaderspv)
 	$(shader) Shaders/ $(^F) > Src/Core/Headers/ShaderCodes.hpp

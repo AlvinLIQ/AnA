@@ -11,8 +11,12 @@ void slider_Click(void* control, PointerEventArgs& args)
     auto slider = (Slider*)control;
     int o = slider->Orientation == AnA::Controls::Horizontal ? 0 : 1;
     auto offset = slider->RenderOffset();
-    float pos = ((double*)&args.Position)[o] - ((float*)&offset)[o];
     auto size = slider->RenderSize();
+    float pos = ((float)((double*)&args.Position)[o]) * (((float*)&size)[o] + ((float*)&offset)[o]) - ((float*)&offset)[o];
+    if (pos < 0.0f)
+    {
+        pos = 0.0f;
+    }
     slider->Value = pos / ((float*)&size)[o];
 }
 
@@ -29,7 +33,9 @@ void Slider::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageIn
     int invO = 1 - o;
     auto size = RenderSize();
     auto offset = RenderOffset();
-    ((float*)&offset)[o] += (Value - 0.5f) * 2.0f * ((float*)&size)[o];
+    float pos = std::max(std::min(Value * ((float*)&size)[o] * (((float*)&size)[o] - ((float*)&offset)[o]), ((float*)&size)[o] - SLIDER_HALF_SIZE), SLIDER_HALF_SIZE);
+    ((float*)&offset)[o] += (pos - 0.5f) * 2.0f;
+
     button.GetSizeForRender();
     ((float*)&size)[o] = SLIDER_SIZE;
     button.RenderSize(size);
