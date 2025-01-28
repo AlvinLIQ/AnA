@@ -78,6 +78,11 @@ void Editor::saveSceneButton_Click(void* control, PointerEventArgs& args)
     fclose(f);
 }
 
+void Editor::exitButton_Click(void* control, PointerEventArgs& args)
+{
+    exit(0);
+}
+
 const VkDeviceSize offset = 0;
 
 int main()

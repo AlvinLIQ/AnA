@@ -17,10 +17,11 @@ Controls::Control* Editor::InitControl()
 	node0->VerticalAlignment = {Stretch};
 	node0->HorizontalAlignment = {Stretch};
 	node0->Orientation = {Vertical};
-	node0->Color = {0.8f, 0.8f, 0.8f};
+	node0->Color = {0.156f, 0.156f, 0.156f};
 	node0->Padding = {0.05f, 0.01f};
 	TextBlock* node1 = new TextBlock();
 	node1->Text("AnA");
+	node1->Color = {0.8f, 0.8f, 0.8f};
 	node0->Child(node1);
 	Button* node2 = new Button();
 	node2->HorizontalAlignment = {Start};
@@ -59,6 +60,13 @@ Controls::Control* Editor::InitControl()
 	node10->ImageInfo(Resource::ResourceManager::GetCurrent()->ShadowMap.GetDescriptorImageInfos()[0]);
 	node10->ControlSize = {0.0f, 0.3f};
 	node0->Child(node10);
+	Button* node11 = new Button();
+	node11->HorizontalAlignment = {Start};
+	node11->PointerEvents[PointerEventType::Released].emplace_back(exitButton_Click);
+	node0->Child(node11);
+	TextBlock* node12 = new TextBlock();
+	node12->Text("Exit");
+	node11->Child(node12);
 
 	return node0;
 }

@@ -170,7 +170,10 @@ void Control::PointerEventTrigger(PointerEventArgs& args)
         if (!isInside)
         {
             if (cursorInside)
+            {
                 eventType = PointerEventType::Exited;
+                pressed = false;
+            }
             else
                 return;
         }
@@ -186,6 +189,17 @@ void Control::PointerEventTrigger(PointerEventArgs& args)
     }
 }
 
+PointerEventType GetPointerEventType(int buttonAction)
+{
+    switch (buttonAction)
+    {
+    case GLFW_PRESS:
+        return PointerEventType::Pressed;
+
+    }
+    return PointerEventType::Moving;
+}
+
 void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input::InputProfile>& profiles)
 {
     Input::InputProfile profile{};
@@ -196,7 +210,8 @@ void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input:
     {
         auto control = (Control*)param;
         PointerEventArgs args;
-        args.EventType = leftButtonAction == GLFW_PRESS ? PointerEventType::Pressed : PointerEventType::Moving;
+        
+        args.EventType = GetPointerEventType(leftButtonAction);
         args.TriggerType = PointerTriggerType::Mouse;
         auto extent = Control::GetSwapChainExtent();
         auto scale = Control::GetScale();

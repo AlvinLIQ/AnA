@@ -1,6 +1,6 @@
 <StackPanel ControlSize="0.0f, 0.0f" Spacing="0.01f" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Orientation="Vertical"
-    Color="0.8f, 0.8f, 0.8f" Padding="0.05f, 0.01f">
-    <TextBlock Text="AnA"/>
+    Color="0.156f, 0.156f, 0.156f" Padding="0.05f, 0.01f">
+    <TextBlock Text="AnA" Color="0.8f, 0.8f, 0.8f"/>
     <Button HorizontalAlignment="Start" Click="loadModelButton_Click">
         <TextBlock Text="Load Model"/>
     </Button>
@@ -13,4 +13,7 @@
     <Slider Name="farSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="1.0f"/>
     <Scene HorizontalAlignment="Stretch" ImageInfo="Resource::ResourceManager::GetCurrent()->ShadowMap.GetDescriptorImageInfos()[0]"
         ControlSize="0.0f, 0.3f"/>
+    <Button HorizontalAlignment="Start" Click="exitButton_Click">
+        <TextBlock Text="Exit"/>
+    </Button>
 </StackPanel>
