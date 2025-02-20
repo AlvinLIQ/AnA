@@ -10,6 +10,7 @@ namespace AnA
         {
         public:
             TextBlock();
+            TextBlock(const char* newText, glm::vec3 color = {});
             ~TextBlock();
 
             virtual void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount);

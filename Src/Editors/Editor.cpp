@@ -1,6 +1,8 @@
 #include "Headers/Editor.hpp"
 #include "Headers/FileDialog.hpp"
 #include "../GUI/Controls/Headers/Slider.hpp"
+#include "../GUI/Controls/Headers/StackPanel.hpp"
+#include "../GUI/Controls/Headers/TextBlock.hpp"
 
 using namespace AnA;
 using namespace Editors;
@@ -60,9 +62,10 @@ void Editor::loadModelButton_Click(void* control, PointerEventArgs& args)
     if (path.empty())
         return;
     MeshInfo mesh;
-    memcpy(mesh.filePath, path.c_str(), path.length());
+    memcpy(mesh.filePath, path.c_str(), path.length() + 1);
     mesh.tetureId = 0;
     Resource::ResourceManager::GetCurrent()->SceneObjects.Append(std::vector<MeshInfo>(1, mesh));
+    ((Controls::StackPanel*)((Editor*)App::GetCurrent())->controlMap["modelList"])->Child((Controls::Control*)new Controls::TextBlock(path.c_str(), {0.8f, 0.8f, 0.8f}));
 }
 
 void Editor::saveSceneButton_Click(void* control, PointerEventArgs& args)

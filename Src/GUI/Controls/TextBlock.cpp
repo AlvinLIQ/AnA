@@ -11,6 +11,14 @@ TextBlock::TextBlock()
     ControlSize = {75.0f, ANA_TEXT_DEFAULT_LINE_HEIGHT};
 }
 
+TextBlock::TextBlock(const char* text, glm::vec3 color)
+{
+    Color = color;
+    RenderMode(Absolute);
+    ControlSize = {75.0f, ANA_TEXT_DEFAULT_LINE_HEIGHT};
+    Text(text);
+}
+
 TextBlock::~TextBlock()
 {
     delete texture;

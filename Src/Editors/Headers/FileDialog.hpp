@@ -29,7 +29,7 @@ namespace AnA
                 size_t len = strlen(path);
                 if (len <= 1)
                     return "";
-                path[len- 1] = '\0';
+                path[len - 1] = '\0';
                 pclose(f);
 #endif
                 return std::string(path);

@@ -32,7 +32,7 @@ void traverse_node(rapidxml::xml_node<> *node, std::set<std::string>& usedNodes,
         {
             ss << "node" << id << "->" << attr.name() << "(\"" << attr.value() << "\");\n";
         }
-        else if (attr.name() == "ImageInfo")
+        else if (attr.name() == "ImageInfo" || attr.name() == "RenderMode")
         {
             ss << "node" << id << "->" << attr.name() << "(" << attr.value() << ");\n";
         }

@@ -7,6 +7,7 @@
     <Button HorizontalAlignment="Start" Click="saveSceneButton_Click">
         <TextBlock Text="Save Scene"/>
     </Button>
+    <ListView Name="modelList" Orientation="Vertical" HorizontalAlignment="Stretch" RenderMode="Passive" Color="0.2f, 0.2f, 0.2"/>
     <TextBlock Text="Near"/>
     <Slider Name="nearSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.05f / 32.0f"/>
     <TextBlock Text="Far"/>

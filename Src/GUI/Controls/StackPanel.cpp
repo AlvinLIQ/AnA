@@ -21,7 +21,7 @@ void StackPanel::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageIn
 void StackPanel::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
     SIZE_F maxSize = RenderSize();
-    auto renderOffset = GetActualControlOffset(maxSize) + Padding;
+    auto renderOffset = RenderOffset() + Padding;
     int o = Orientation, invO = 1 - Orientation;
     /*
     for (int i = 0; i < items.size(); i++)
@@ -32,16 +32,21 @@ void StackPanel::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorIma
     }*/
     SIZE_F size{};
     POS_F offset{};
-    if (items.size())
+    if (items.size() && ((float*)&renderOffset)[invO] >= 0.0f)
     {
-        ((float*)&offset)[invO] = -1.0;
+        ((float*)&offset)[invO] = -1.0f;
+    }
+    ((float*)&offset)[invO] += ((float*)&renderOffset)[invO];
+    if (((float*)&maxSize)[invO] < 1.0f)
+    {
+        ((float*)&offset)[invO] -= ((float*)&maxSize)[invO];
     }
     for (int i = 0; i < items.size(); i++)
     {
         items[i]->Aspect = Aspect;
         items[i]->Extent = Extent;
         auto _size = items[i]->GetSizeForRender();
-        ((float*)&offset)[invO] += ((float*)&size)[invO] + ((float*)&_size)[invO] + Spacing + ((float*)&renderOffset)[invO];
+        ((float*)&offset)[invO] += ((float*)&size)[invO] + ((float*)&_size)[invO] + Spacing;
         size = _size;
         auto align = invO ? (AlignmentType*)&items[i]->HorizontalAlignment : &items[i]->VerticalAlignment;//(items[i] + offsets[o]);
         switch (*align)
@@ -61,6 +66,8 @@ void StackPanel::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorIma
         items[i]->RenderOffset(offset);
         items[i]->RenderSize(size);
         items[i]->ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
+        ((float*)&maxSize)[invO] = std::max(((float*)&maxSize)[invO] ,(((float*)&offset)[invO] - ((float*)&renderOffset)[invO] + ((float*)&size)[invO]));
     }
+    RenderSize(maxSize);
     Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
 }

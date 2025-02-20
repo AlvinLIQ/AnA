@@ -5,7 +5,7 @@ namespace AnA
 {
     enum AlignType
     {
-        Absolute, Relative, Auto
+        Absolute, Relative, Auto, Passive
     };
     enum AlignmentType
     {
