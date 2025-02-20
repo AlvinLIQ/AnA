@@ -2,6 +2,11 @@
 #include <cstring>
 #include <GLFW/glfw3.h>
 
+#ifdef _WIN32
+#define popen _popen
+#define pclose _pclose
+#endif
+
 namespace AnA
 {
     namespace Editors
@@ -20,8 +25,10 @@ namespace AnA
                 if (!Filter.empty())
                     cmd += " --file-filter=" + Filter;
 #ifdef _WIN32
+                cmd = "zenity" + cmd;
 #else
                 cmd = "/usr/bin/zenity" + cmd;
+#endif
                 if (!Filter.empty())
                     cmd += " --file-filter=" + Filter;
                 FILE* f = popen(cmd.c_str(), "r");
@@ -31,7 +38,6 @@ namespace AnA
                     return "";
                 path[len - 1] = '\0';
                 pclose(f);
-#endif
                 return std::string(path);
             }
             std::string Mode;
