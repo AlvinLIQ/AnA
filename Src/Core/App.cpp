@@ -333,7 +333,7 @@ void App::createRecordCallBacks()
 
 void App::onCommandBufferRecording(VkCommandBuffer& commandBuffer)
 {
-    if (!aResourceManager->SecondaryCommandBufferPool.GetCommandBufferCount())
+    if (!aResourceManager->SecondaryCommandBufferPool.GetCommandBufferCount() || !aResourceManager->SceneObjects.GetMeshCount())
         return;
     //if (commandBufferNeedUpdate)
     //{
@@ -355,4 +355,9 @@ void App::onCommandBufferRecording(VkCommandBuffer& commandBuffer)
     //aRenderSystem->RenderMeshesIndirect(commandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[0]);
     //aRenderSystem->RenderShapesIndirect(commandBuffer, *aResourceManager->Shapes, aResourceManager->Shaders[1]);
     aRenderer->EndRenderPass(commandBuffer);
+}
+
+void App::onLoop()
+{
+    
 }

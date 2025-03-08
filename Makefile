@@ -29,7 +29,7 @@ sources := $(wildcard Src/Core/*.cpp Src/Core/*/*.cpp Src/GUI/Controls/*.cpp)
 editor := $(wildcard Src/Editors/*.cpp)
 ui := $(wildcard Src/Editors/*.ui)
 editor += $(ui:.ui=.g.cpp)
-example_batching = Src/Examples/example_batching.cpp
+example_mesh_shader = Src/Examples/example_mesh_shader.cpp
 objects = $(sources:.cpp=.o)
 depends = $(sources:.cpp=.d)
 
@@ -68,10 +68,10 @@ ui_parser:
 $(ana): $(objects) $(editor:.cpp=.o)
 	$(cpp) $^ $(libs) -g -o $@ -std=c++20
 
-example: $(objects) $(example_batching:.cpp=.o)
+example: $(objects) $(example_mesh_shader:.cpp=.o)
 	$(cpp) $^ $(libs) -g -o $@ -std=c++20
 
--include $(depends) $(editor:.cpp=.d) $(example_batching:.cpp=.d)
+-include $(depends) $(editor:.cpp=.d) $(example_mesh_shader:.cpp=.d)
 
 %.o : %.cpp
 	$(cpp) $(cflags) -g -MMD -MP -c $< -o $@ -std=c++20

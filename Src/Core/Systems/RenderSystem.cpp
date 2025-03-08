@@ -1,6 +1,7 @@
 #include "Headers/RenderSystem.hpp"
 #include "../Resources/Headers/Shader.hpp"
 #include "../Resources/Headers/ResourceManager.hpp"
+#include "../Headers/App.hpp"
 #include <vulkan/vulkan_core.h>
 #include <glm/gtc/constants.hpp>
 
@@ -58,7 +59,8 @@ void RenderSystem::RenderMeshesIndirect(VkCommandBuffer commandBuffer, Meshes &m
 {
     shader.GetPipeline()->Bind(commandBuffer);
     auto resourceManager = Resource::ResourceManager::GetCurrent();
-    aSwapChain.SetViewport(commandBuffer, {300, 0});
+
+    aSwapChain.SetViewport(commandBuffer, App::GetCurrent()->GetSceneOffset());
     std::vector<VkDescriptorSet>& sets = shader.GetDescriptorSets()[resourceManager->SecondaryCommandBufferPool.CurrentBufferIndex];
 
     meshes.Bind(commandBuffer);

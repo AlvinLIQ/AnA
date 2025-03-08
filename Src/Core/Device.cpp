@@ -759,6 +759,10 @@ void Device::createLogicalDevice()
     //VkPhysicalDeviceFeatures deviceFeatures1{};
     //vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures1);
 
+    VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures = {};
+    meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
+    meshShaderFeatures.meshShader = VK_TRUE;
+
     VkPhysicalDeviceFeatures2 deviceFeatures2{};
     deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
     //vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);

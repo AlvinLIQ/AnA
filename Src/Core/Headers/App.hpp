@@ -68,7 +68,7 @@ namespace AnA
     protected:
         virtual void createRecordCallBacks();
         virtual void onCommandBufferRecording(VkCommandBuffer& commandBuffer);
-        virtual void onLoop() = 0;
+        virtual void onLoop();
         Window* aWindow;
         Instance* aInstance;
         Device* aDevice;

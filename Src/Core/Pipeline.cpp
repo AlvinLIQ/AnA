@@ -126,6 +126,20 @@ void Pipeline::createGraphicsPipeline(PipelineConfig pipelineConfig)
         throw std::runtime_error("Failed to create pipeline!");
 }
 
+void Pipeline::createMeshShaderPipeline(const std::vector<unsigned char>& meshShaderCode, const std::vector<unsigned char>& fragShaderCode)
+{
+    VkShaderModule meshShaderModule = createShaderModule(meshShaderCode);
+    VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
+
+    auto pipelineConfig = PipelineConfig::GetForMeshShader(meshShaderModule, fragShaderModule, pipelineLayout, renderPass, aDevice->GetMaxUsableSampleCount());
+    
+    if (vkCreateGraphicsPipelines(aDevice->GetLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineConfig.pipelineInfo, nullptr, &pipeline) != VK_SUCCESS)
+        throw std::runtime_error("Failed to create pipeline!");
+
+    vkDestroyShaderModule(aDevice->GetLogicalDevice(), meshShaderModule, nullptr);
+    vkDestroyShaderModule(aDevice->GetLogicalDevice(), fragShaderModule, nullptr);
+}
+
 void Pipeline::createComputePipeline(const std::string& computeShaderFileName)
 {
     auto computeShaderCode = ReadFile(computeShaderFileName);
