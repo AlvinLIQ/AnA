@@ -98,6 +98,38 @@ void Meshes::Append(const MeshInfo* meshInfos, size_t count)
     UpdateAll();
 }
 
+void Meshes::Append(std::vector<Model::Vertex>& vertices, std::vector<uint32_t>& indices, Transform transform)
+{
+    std::vector<VkDescriptorImageInfo> imageInfos{};
+
+    Mesh mesh{};
+    mesh.transform = transform;
+    mesh.vertexOffset = vertexCount;
+    mesh.indexOffset = indexCount;
+    mesh.vertices = vertices;
+    mesh.indices = indices;
+    vertexCount += mesh.vertices.size();
+    indexCount += mesh.indices.size();
+    auto& textureMap = Resource::ResourceManager::GetCurrent()->TextureMap;
+    auto& texture = textureMap.at(mesh.textureId);
+    if (textureIdMap.find(mesh.textureId) == textureIdMap.end())
+    {
+        textureIdMap.insert(std::pair<uint32_t, uint32_t>(mesh.textureId, static_cast<uint32_t>(textureIdMap.size())));
+        imageInfos.push_back(texture.GetImageInfo());
+        if (imageInfos.size() == batchSize)
+        {
+            appendSamplersDescriptor(imageInfos);
+            imageInfos.clear();
+        }
+    }
+    meshes.push_back(mesh);
+    if (imageInfos.size())
+    {
+        appendSamplersDescriptor(imageInfos);
+    }
+    UpdateAll();
+}
+
 void Meshes::RemoveAt(uint32_t meshIndex)
 {
     meshes.erase(meshes.begin() + meshIndex);
