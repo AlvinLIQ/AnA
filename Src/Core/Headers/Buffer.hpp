@@ -135,7 +135,7 @@ namespace AnA
             memcpy(this->GetMappedData(), data, bufferSize);
             this->Unmap();
         }
-        void ReplaceRequest(Buffer* newBuffer);
+        bool ReplaceRequest(Buffer* newBuffer, bool sync = true);
         static void TryReplace();
     private:
         Device* aDevice = nullptr;

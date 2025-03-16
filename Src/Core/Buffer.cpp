@@ -64,17 +64,26 @@ void Buffer::replace()
     newBuffer = newBuffer->newBuffer;
 }
 
-void Buffer::ReplaceRequest(Buffer* newBuffer)
+bool Buffer::ReplaceRequest(Buffer* newBuffer, bool sync)
 {
-    while (this->newBuffer != nullptr);
-    this->newBuffer = newBuffer;
+    bool result;
+    do
+    {
+        if ((result = this->newBuffer == nullptr))
+        {
+            this->newBuffer = newBuffer;
+            break;
+        }
+
+    } while(sync);
+    return result;
 }
 
 void Buffer::TryReplace()
 {
     if (replaceList.size())
     {
-        vkDeviceWaitIdle(replaceList[0]->aDevice->GetLogicalDevice());
+        //vkDeviceWaitIdle(replaceList[0]->aDevice->GetLogicalDevice());
         for (auto buffer = replaceList.begin(); buffer < replaceList.end(); buffer++)
         {
             (*buffer)->newBufferRecords++;
