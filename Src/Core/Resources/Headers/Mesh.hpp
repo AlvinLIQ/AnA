@@ -16,6 +16,14 @@ namespace AnA
         uint32_t indexOffset;
         uint32_t textureId{};
     };
+    struct Meshlet
+    {
+        uint32_t vertices[64];
+        uint32_t indices[126];
+        uint32_t indexCount;
+        uint32_t vertexCount;
+    };
+
     struct MeshInfo
     {
         char filePath[256];
@@ -81,6 +89,7 @@ namespace AnA
         {
             return ssboDescriptor;
         }
+        bool EnableUpdate = false;
     private:
         Device* aDevice;
         Buffer vertexBuffer{};

@@ -131,13 +131,19 @@ std::vector<Descriptor::DescriptorConfig> ResourceManager::GetDefaultDescriptorC
     pConfig->binding = 0;
     pConfig->descriptorCount = 0;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-
+    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_MESH_BIT_EXT;
+/*
+    pConfig = &descriptorConfigs[DEFAULT_MESHLET_LAYOUT];
+    pConfig->binding = 0;
+    pConfig->descriptorCount = 0;
+    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_MESH_BIT_EXT;
+*/
     pConfig = &descriptorConfigs[DEFAULT_UBO_LAYOUT];
     pConfig->binding = 0;
     pConfig->descriptorCount = MAX_FRAMES_IN_FLIGHT;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_MESH_BIT_EXT;
     pConfig->buffers = mainCameraBuffers.data();
     pConfig->bufferSize = sizeof(Cameras::CameraBufferObject);
 
@@ -145,7 +151,7 @@ std::vector<Descriptor::DescriptorConfig> ResourceManager::GetDefaultDescriptorC
     pConfig->binding = 0;
     pConfig->descriptorCount = MAX_FRAMES_IN_FLIGHT;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_MESH_BIT_EXT;
     pConfig->buffers = GlobalLight.GetBuffers();
     pConfig->bufferSize = sizeof(Lights::LightBufferObject);
 

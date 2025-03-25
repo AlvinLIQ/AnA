@@ -143,7 +143,7 @@ void App::Run()
             prevSecond = 0.0f;
             frameCount = 0;
         }
-        camera.SetSpeedRatio(frameTime);
+        camera.SetSpeedRatio(frameTime * 2.0);
         aInputManager->Check();
         //Update Resources
         _aApp->commandBufferNeedUpdate = aResourceManager->SceneObjects.BeginCommandBufferUpdate() || aRenderer->NeedUpdate();

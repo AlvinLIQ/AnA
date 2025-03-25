@@ -33,10 +33,11 @@ example_mesh_shader = Src/Examples/example_mesh_shader.cpp
 objects = $(sources:.cpp=.o)
 depends = $(sources:.cpp=.d)
 
-shadercodes := $(wildcard Src/Core/ShaderCodes/*.frag Src/Core/ShaderCodes/*.vert Src/Core/ShaderCodes/*.comp)
+shadercodes := $(wildcard Src/Core/ShaderCodes/*.frag Src/Core/ShaderCodes/*.vert Src/Core/ShaderCodes/*.comp Src/Core/ShaderCodes/*.mesh)
 temp = $(shadercodes:.vert=_vert.spv)
 temp2 = $(temp:.comp=_comp.spv)
-shaderspv = $(temp2:.frag=_frag.spv)
+temp3 = $(temp2:.mesh=_mesh.spv)
+shaderspv = $(temp3:.frag=_frag.spv)
 
 .PHONY: shader ui $(ana)
 all: shader ui $(ana)

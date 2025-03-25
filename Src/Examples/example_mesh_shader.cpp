@@ -1,4 +1,5 @@
 #include "../Core/Headers/App.hpp"
+#include "FastNoise.h"  // Include FastNoise library
 
 using namespace AnA;
 
@@ -22,12 +23,34 @@ protected:
 
 std::vector<MeshInfo> meshInfos = 
 {
-    {"Models/cube.obj", {}}
+    {"Models/cube.obj", {}},
+    {"Models/bunny.obj", {{0.0f, -10.0f, 0.0f}, {30.0f, 30.0f, 30.0f}, {glm::pi<float>(), 0.0f, 0.0f}}}
 };
 
-float getHeight(int x, int z) {
-    // Replace this with your terrain heightmap logic
-    return sinf(x * 0.1f) * cosf(z * 0.8f) * tanf(random_double()) * 0.3f;
+
+// Function to generate terrain height using Perlin noise
+float getHeight(float x, float z, float scale = 0.1f, int octaves = 6, float lacunarity = 2.0f, int seed = 42) {
+    // Create a FastNoise instance
+    FastNoiseLite noise;
+    
+    // Set the noise type to Perlin
+    noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+    
+    // Set the seed for randomization
+    noise.SetSeed(seed);
+    
+    // Set frequency scaling
+    noise.SetFrequency(scale);
+    
+    // Set octaves, persistence, and lacunarity
+    noise.SetFractalType(FastNoiseLite::FractalType_FBm); // Using Fractal Brownian Motion (FBM)
+    noise.SetFractalOctaves(octaves);
+    noise.SetFractalLacunarity(lacunarity);
+    
+    // Generate the height using Perlin noise for the (x, z) coordinates
+    float height = noise.GetNoise(x, z);
+
+    return height;
 }
 
 glm::vec3 calculateNormal(int x, int z) {
@@ -57,7 +80,7 @@ void GenTerrain(std::vector<Model::Vertex>& vertices, std::vector<uint32_t>& ind
         for (x = 0; x < width; x++)
         {
             z = getHeight(x, y);
-            vertices.push_back({{x / width * 100.0f, z, y / height * 100.0f}, calculateNormal(x, y), 
+            vertices.push_back({{x / width * 1000.0f, z, y / height * 1000.0f}, calculateNormal(x, y), 
                 {(float)((uint32_t)x % 2), (float)((uint32_t)y % 2)}});
         }
     }
@@ -83,8 +106,10 @@ int main()
     MeshShaderApp app;
     app.Init();
     auto& meshes = Resource::ResourceManager::GetCurrent()->SceneObjects;
-    meshes.Append(vertices, indices, {{0.5, 0.5, 0.5}});
-    //meshes.Append(meshInfos.data(), meshInfos.size());
+    meshes.Append(vertices, indices, {{-500.0, 1.0, -500.0}});
+    meshes.Append(meshInfos.data(), meshInfos.size());
+    meshes.EnableUpdate = true;
+    meshes.UpdateAll();
     app.Run();
     return 0;
 }

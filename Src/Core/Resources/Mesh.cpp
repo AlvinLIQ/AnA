@@ -233,6 +233,8 @@ void Meshes::UpdateAll()
 {
     if (!vertexBuffer.GetBuffer())
     {
+        if (!EnableUpdate)
+            return;
         auto newVertexBuffer = Buffer(aDevice, vertexCount * sizeof(Model::Vertex), 
         VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
