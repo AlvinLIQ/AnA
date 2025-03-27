@@ -17,3 +17,4 @@ ui_parser.exe
 *.pdb
 *.ilk
 *.exe
+*.out
