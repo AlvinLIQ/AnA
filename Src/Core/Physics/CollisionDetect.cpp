@@ -5,11 +5,11 @@ using namespace Physics;
 
 bool AnA::Physics::IsCollided(const glm::vec2* projections, const glm::mat3* transforms, uint32_t projectionCount, float& projectionScale, const glm::vec3& projectionTranslation, const Model::Vertex* vertices, const uint32_t vertexCount, const glm::vec3& vertexTranslation, const float& vertexScale)
 {
-    for (int i = 0; i < projectionCount; i++)
+    for (uint32_t i = 0; i < projectionCount; i++)
     {
         auto& transform = transforms[i];
         auto proj = projections[i] * projectionScale + glm::vec2((transform * projectionTranslation).y);
-        for (int j = 0; j < vertexCount; j++)
+        for (uint32_t j = 0; j < vertexCount; j++)
         {
             auto vertexPosition = transform * (vertices[j].position * vertexScale + vertexTranslation);
             if (proj.x > vertexPosition.y || proj.y < vertexPosition.y)

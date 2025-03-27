@@ -24,9 +24,9 @@ InputManager::~InputManager()
     }
 }
 
-void InputManager::SetActiveProfile(int profileIndex)
+void InputManager::SetActiveProfile(uint32_t profileIndex)
 {
-    if (profileIndex < inputProfiles.size())
+    if (profileIndex < static_cast<uint32_t>(inputProfiles.size()))
     {
         activeProfileIndex = profileIndex;
         ProcessProfileFlag(inputProfiles[activeProfileIndex].flag);

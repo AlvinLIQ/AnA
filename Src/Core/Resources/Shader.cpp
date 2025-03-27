@@ -133,7 +133,7 @@ std::vector<std::vector<VkDescriptorSet>>& Shader::GetDescriptorSets()
 void Shader::createPipelineLayout(std::vector<Descriptor::DescriptorConfig>& descriptorConfigs, VkDeviceSize pushConstantSize)
 {
     std::vector<VkDescriptorSetLayout> descriptorSetLayouts(descriptors.size());
-    for (int i = 0; i < descriptors.size(); i++)
+    for (size_t i = 0; i < descriptors.size(); i++)
     {
         descriptorSetLayouts[i] = descriptors[i]->GetLayout();
     }

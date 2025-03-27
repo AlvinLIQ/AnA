@@ -9,7 +9,7 @@
     </Button>
     <ListView Name="modelList" Orientation="Vertical" HorizontalAlignment="Stretch" RenderMode="Passive" Color="0.2f, 0.2f, 0.2"/>
     <TextBlock Text="Near"/>
-    <Slider Name="nearSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.05f / 32.0f"/>
+    <Slider Name="nearSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.0f"/>
     <TextBlock Text="Far"/>
     <Slider Name="farSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="1.0f"/>
     <Scene HorizontalAlignment="Stretch" ImageInfo="Resource::ResourceManager::GetCurrent()->ShadowMap.GetDescriptorImageInfos()[0]"

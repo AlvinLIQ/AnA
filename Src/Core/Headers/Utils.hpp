@@ -149,7 +149,7 @@ namespace AnA
 		}
 		String(const char* str, size_t len = -1)
 		{
-			if (len == -1)
+			if (len == (size_t)-1)
 				len = strlen(str);
 			_index = _capacity = len;
 			_str = new char[len + 1];
@@ -159,7 +159,7 @@ namespace AnA
 		//reserve_size must be >= len
 		String(const char* str, size_t len, size_t reserve_size)
 		{
-			if (len == -1)
+			if (len == (size_t)-1)
 				len = strlen(str);
 			_str = new char[(_capacity = reserve_size) + 1];
 			_index = len;

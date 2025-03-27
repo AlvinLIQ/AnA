@@ -1,0 +1,20 @@
+fs = import('fs')
+shader_sources = files('Basic.vert', 'Basic.frag', 'CascadedShadowMapping.vert', 'CascadedShadowMapping.frag',
+    'Line.vert', 'Line.frag', 'ShadowMapping.vert', 'Shape.vert', 'Shape.frag', 'CollisionDetect.comp')
+shader_outputs = []
+shader_args = '--target-env=vulkan1.3'
+foreach shader_source : shader_sources
+  output_file = fs.name(shader_source) + '.spv'
+  shader_output = custom_target('compile ' + fs.name(shader_source),
+    output: output_file,
+    command: ['glslc', shader_source, '-o', '@OUTPUT@', shader_args],
+    depend_files: [shader_source]
+  )
+  shader_outputs += shader_output
+endforeach
+xxdi = executable('xxdi', 'ShaderCodes.c')
+shader_codes_header = 'ShaderCodes.hpp'
+shader_hpp = custom_target('Generating Header',
+  output: shader_codes_header,
+  command: [xxdi, join_paths(meson.project_source_root(), 'Src/Core/Headers/ShaderCodes.hpp'), shader_outputs]
+)

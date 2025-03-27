@@ -3,7 +3,6 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include <filesystem>
 #include <set>
 
 using namespace AnA;
@@ -51,7 +50,7 @@ void traverse_node(rapidxml::xml_node<> *node, std::set<std::string>& usedNodes,
     }
 }
 
-std::string XML::XMLToCode(std::string path)
+std::string XML::XMLToCode(std::filesystem::path& path)
 {
     std::ifstream file(path);
     if (!file) {
@@ -79,14 +78,12 @@ std::string XML::XMLToCode(std::string path)
     {
         code += "#include \"../GUI/Controls/Headers/" + node + ".hpp\"\n";
     }
-    auto _path = std::filesystem::path(path);
+    auto _path = std::filesystem::absolute(path);
     std::string className = _path.filename().replace_extension().string();
     code += "#include \"Headers/" + className + ".hpp\"\n\nusing namespace AnA;\nusing namespace Controls;\nusing namespace " + _path.parent_path().filename().string() + ";\n";
 
     code += "\nControls::Control* " + className + "::InitControl()\n{\n" + ss.str() + "\n\treturn node0;\n}\n";
 
-    std::fstream fs(_path.replace_extension(".g.cpp"), std::ios_base::out);
-    fs.write(code.c_str(), code.length());
 
     return code;
 }
@@ -95,6 +92,13 @@ int main(int argc, char* argv[])
 {
     if (argc < 2)
         return 2;
-    std::cout << XML::XMLToCode(argv[1]);
+    std::filesystem::path path(argv[1]);
+    auto code = XML::XMLToCode(path);
+    std::fstream fs(argc >= 3 ? argv[2] : path.replace_extension(".g.cpp").filename(), std::ios_base::out);
+    if (!fs.is_open())
+    {
+        throw std::runtime_error("diu");
+    }
+    fs.write(code.c_str(), code.length());
     return 0;
 }

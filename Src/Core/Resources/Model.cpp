@@ -43,7 +43,7 @@ void Model::CreateModelFromFile(Device* mDevice, const char *filePath, std::shar
     CreateMeshFromFile(filePath, modelInfo.vertices, modelInfo.indices);
 
     const glm::vec<2, int> sets[] = {{0, 1}, {0, 2}, {1, 2}};
-    for (int i = 0, j, k = 0; i < modelInfo.indices.size(); i += k)
+    for (size_t i = 0, j, k = 0; i < modelInfo.indices.size(); i += k)
     {
         for (k = 0; k < 3; k++)
         {
@@ -87,7 +87,7 @@ void Model::CreateMeshFromFile(const char *filePath, std::vector<Vertex>& vertic
     std::unordered_map<Vertex, Index, VertexHash> verticesMap;
     for (const auto& shape : shapes)
     {
-        for (int i = 0; i < shape.mesh.indices.size(); i++)
+        for (size_t i = 0; i < shape.mesh.indices.size(); i++)
         {
             const auto& index = shape.mesh.indices[i];
             Vertex vertex{};
@@ -205,7 +205,7 @@ void Model::Draw(VkCommandBuffer commandBuffer, Index instanceIndex)
 {
     if (hasIndexBuffer)
     {
-        for (int i = 0; i < vertices.size(); i += indexStep)
+        for (size_t i = 0; i < vertices.size(); i += indexStep)
             vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, i, instanceIndex);
     }
     else

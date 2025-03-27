@@ -6,13 +6,13 @@
 
 namespace AnA
 {
-    namespace Editors
+    namespace Editor
     {
-        class Editor : public App
+        class EditorApp : public App
         {
         public:
-            Editor();
-            ~Editor();
+            EditorApp();
+            ~EditorApp();
             void Init();
             Controls::Control* InitControl();
         private:

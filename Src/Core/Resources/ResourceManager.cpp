@@ -8,7 +8,7 @@ using namespace Resource;
 
 ResourceManager* _resourceManager = nullptr;
 
-ResourceManager::ResourceManager(Device* mDevice) : aDevice{mDevice}, 
+ResourceManager::ResourceManager(Device* mDevice) : 
         SceneObjects(mDevice),
         GlobalLight(mDevice),
         ShadowMap(mDevice),
@@ -16,6 +16,7 @@ ResourceManager::ResourceManager(Device* mDevice) : aDevice{mDevice},
         VK_COMMAND_BUFFER_LEVEL_SECONDARY,
         VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT | VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT)
 {
+    aDevice = mDevice;
     _resourceManager = this;
     createMainCameraBuffers();
     //createShadowFramebuffers();
@@ -39,7 +40,7 @@ ResourceManager::~ResourceManager()
     Shaders.clear();
     //delete Shapes;
     
-    auto logicalDevice = aDevice->GetLogicalDevice();
+    //auto logicalDevice = aDevice->GetLogicalDevice();
     //for (auto& shadowSampler : shadowSamplers)
     //   vkDestroySampler(logicalDevice, shadowSampler, nullptr);
     //cleanupShadowResources();

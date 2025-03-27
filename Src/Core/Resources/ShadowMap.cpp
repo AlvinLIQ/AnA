@@ -46,9 +46,9 @@ std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& proj, const 
 
 void ShadowMap::UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, uint32_t bufferIndex)
 {
-	glm::vec3 lightDir = glm::normalize(-glm::vec3(1.0f, 1.0f, 1.0f));
-    glm::vec3 lightPos = lightDir * 2.0f;
-    float cascadeSplits[SHADOW_MAP_CASCADE_COUNT];
+	//glm::vec3 lightDir = glm::normalize(-glm::vec3(1.0f, 1.0f, 1.0f));
+    //glm::vec3 lightPos = lightDir * 2.0f;
+    //float cascadeSplits[SHADOW_MAP_CASCADE_COUNT];
     
 	float nearPlane = 0.05f;
 	float farPlane = 32.0f;
@@ -108,7 +108,7 @@ void ShadowMap::createShadowResources()
     if (samplersNotCreated)
         samplers.resize(images.size());
     auto swapChain = SwapChain::GetCurrent();
-    for (int i = 0; i < images.size(); i++)
+    for (size_t i = 0; i < images.size(); i++)
     {
         auto& shadowImage = images[i];
         VkImageCreateInfo imageInfo{};

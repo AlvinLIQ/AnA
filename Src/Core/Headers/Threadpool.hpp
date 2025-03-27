@@ -133,7 +133,7 @@ public:
     }
   
     // Enqueue task for execution by the thread pool 
-    virtual void Enqueue(std::function<TaskType> task) 
+    void Enqueue(std::function<TaskType> task) 
     { 
         { 
             std::unique_lock<std::mutex> lock(queue_mutex_); 

@@ -9,7 +9,7 @@
 
 namespace AnA
 {
-    namespace Editors
+    namespace Editor
     {
         class FileDialog
         {

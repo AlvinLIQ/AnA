@@ -55,7 +55,7 @@ namespace AnA
                 return cursorPos;
             }
             InputProfile GlobalProfile{};
-            void SetActiveProfile(int profileIndex);
+            void SetActiveProfile(uint32_t profileIndex);
             void ProcessProfileFlag(uint32_t profileFlag);
 
             void Check();

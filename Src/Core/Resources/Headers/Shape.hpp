@@ -27,8 +27,9 @@ namespace AnA
         Shapes(Device* mDeivce);
         Shapes(const Shapes&) = delete;
         Shapes& operator=(const Shapes&) = delete;
-        Shapes(Shapes&& shapes) noexcept : aDevice{shapes.aDevice}, shapeBuffer{shapes.shapeBuffer}, shapeCount{shapes.shapeCount}, indirectBuffer{shapes.indirectBuffer}, ssboDescriptor{shapes.ssboDescriptor}
+        Shapes(Shapes&& shapes) noexcept : aDevice{shapes.aDevice}, shapeBuffer{shapes.shapeBuffer}, indirectBuffer{shapes.indirectBuffer}, ssboDescriptor{shapes.ssboDescriptor}
         {
+            shapeCount = shapes.shapeCount;
             shapes.samplersDescriptor = nullptr;
             shapes.ssboDescriptor = nullptr;
             shapes.shapeCount = 0;
@@ -61,9 +62,9 @@ namespace AnA
         VkExtent2D Extent;
     private:
         Device* aDevice{nullptr};
-        Buffer shapeBuffer;
-        Buffer indirectBuffer;
-        Buffer countBuffer;
+        Buffer shapeBuffer{};
+        Buffer indirectBuffer{};
+        Buffer countBuffer{};
         Descriptor* ssboDescriptor{nullptr};
         Descriptor* samplersDescriptor{nullptr};
         uint32_t shapeCount{};

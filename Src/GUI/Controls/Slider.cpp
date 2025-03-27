@@ -30,7 +30,7 @@ Slider::Slider()
 void Slider::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
     int o = Orientation == Horizontal ? 0 : 1;
-    int invO = 1 - o;
+    //int invO = 1 - o;
     auto size = RenderSize();
     auto offset = RenderOffset();
     float pos = std::max(std::min(Value * ((float*)&size)[o] * (((float*)&size)[o] - ((float*)&offset)[o]), ((float*)&size)[o] - SLIDER_HALF_SIZE), SLIDER_HALF_SIZE);

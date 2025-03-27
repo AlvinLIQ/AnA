@@ -132,7 +132,7 @@ void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2
 void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2D& offset, VkExtent2D& extent)
 {
     assert(isFrameStarted && "Can't call BeginSwapChainRenderPass while frame is not in progress!");
-    auto swapChainExtent = aSwapChain->GetExtent();
+    //auto swapChainExtent = aSwapChain->GetExtent();
 
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;

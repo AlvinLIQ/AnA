@@ -10,8 +10,9 @@ namespace AnA
         CommandBufferPool(Device* mDevice, 
         VkCommandBufferLevel commandBufferLevel, 
         VkCommandBufferUsageFlags commandBufferUsage, 
-        size_t count = std::thread::hardware_concurrency()) : aDevice{mDevice}, ThreadPool(&commandBuffers, count)
+        size_t count = std::thread::hardware_concurrency()) : ThreadPool(&commandBuffers, count)
         {
+            aDevice = mDevice;
             commandBuffers.reserve(count);
             for (size_t i = 0; i < count; i++)
                 commandBuffers.emplace_back(mDevice, MAX_FRAMES_IN_FLIGHT, commandBufferLevel, commandBufferUsage, true);
@@ -31,7 +32,7 @@ namespace AnA
             CurrentBufferIndex = (CurrentBufferIndex + 1) % MAX_FRAMES_IN_FLIGHT;
             ThreadPool::Reset();
         }
-        void ExcuteRecordedBuffer(VkCommandBuffer& commandBuffer)
+        void ExecuteRecordedBuffer(VkCommandBuffer& commandBuffer)
         {
             std::unique_lock<std::mutex> lock(queue_mutex_);
             if (!recordedCommandBuffers.size())

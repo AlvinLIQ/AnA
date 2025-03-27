@@ -6,7 +6,7 @@ using namespace AnA;
 
 Meshes::Meshes(Device* mDevice) : aDevice{mDevice}
 {
-    auto& properties = aDevice->GetPhysicalDeviceProperties();
+    //auto& properties = aDevice->GetPhysicalDeviceProperties();
     batchSize = MaxBatchSize;
     indirectBuffer = Buffer(aDevice, sizeof(VkDrawIndexedIndirectCommand), 
     VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
@@ -152,7 +152,7 @@ void Meshes::RemoveAt(std::vector<uint32_t> meshIndices)
 
 void Meshes::Bind(VkCommandBuffer commandBuffer)
 {
-    VkDeviceSize offset = 0;
+    //VkDeviceSize offset = 0;
     //see you later buddy
     //vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer.GetBuffer(), &offset);
     vkCmdBindIndexBuffer(commandBuffer, indexBuffer.GetBuffer(), 0, VK_INDEX_TYPE_UINT32);

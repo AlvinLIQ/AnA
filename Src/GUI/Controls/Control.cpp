@@ -66,8 +66,8 @@ SIZE_F Control::GetSizeForRender()
 
 void Control::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
-    auto size = GetSizeForRender();
-    auto offset = GetActualControlOffset(renderSize);
+    GetSizeForRender();
+    GetActualControlOffset(renderSize);
     ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
 }
 

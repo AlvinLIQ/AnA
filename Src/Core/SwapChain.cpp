@@ -373,7 +373,7 @@ void SwapChain::createDepthResources()
     depthImageMemorys.resize(imageCount);
     depthImageViews.resize(imageCount);
 
-    for (int i = 0; i < depthImages.size(); i++)
+    for (size_t i = 0; i < depthImages.size(); i++)
     {
         VkImageCreateInfo imageInfo{};
         imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -597,7 +597,7 @@ void SwapChain::cleanupSwapChain()
         vkDestroyFramebuffer(device, swapChainFramebuffers[i], nullptr);
     for (auto imageView : swapChainImageViews)
         vkDestroyImageView(device, imageView, nullptr);
-    for (int i = 0; i < depthImages.size(); i++)
+    for (size_t i = 0; i < depthImages.size(); i++)
     {
         vkDestroyImageView(device, depthImageViews[i], nullptr);
         vkDestroyImage(device, depthImages[i], nullptr);

@@ -7,7 +7,7 @@ using namespace AnA;
 
 CommandBuffer::CommandBuffer(Device* mDevice, int commandBufferCount, 
 VkCommandBufferLevel commandBufferlevel, 
-VkCommandBufferUsageFlags usageFlags, bool async) : aDevice{mDevice}, level{commandBufferlevel}, async{async}
+VkCommandBufferUsageFlags usageFlags, bool async) : aDevice{mDevice}, async{async}, level{commandBufferlevel}
 {
     if (async)
     {
@@ -27,7 +27,7 @@ VkCommandBufferUsageFlags usageFlags, bool async) : aDevice{mDevice}, level{comm
 
 CommandBuffer::CommandBuffer(Device* mDevice, int commandBufferCount, 
 VkCommandBufferLevel commandBufferlevel, 
-VkCommandBufferBeginInfo& commandBufferBeginInfo) : aDevice{mDevice}, beginInfo{commandBufferBeginInfo}, level{commandBufferlevel}, async{false}
+VkCommandBufferBeginInfo& commandBufferBeginInfo) : aDevice{mDevice}, async{false}, beginInfo{commandBufferBeginInfo}, level{commandBufferlevel}
 {
     pool = aDevice->GetCommandPool();
     buffers.resize(commandBufferCount);

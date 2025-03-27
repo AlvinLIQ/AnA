@@ -97,7 +97,7 @@ void App::Init()
 
 void App::Run()
 {
-    Cameras::Camera& camera = aResourceManager->MainCamera, &lightCamera = aResourceManager->LightCamera;
+    Cameras::Camera& camera = aResourceManager->MainCamera;
     Cameras::CameraController cameraController{camera};
     auto& activeProfile = aInputManager->GetActiveProfile();
     cameraController.GetInputProfile(activeProfile);
@@ -115,7 +115,7 @@ void App::Run()
     const char cTitle[] = "AnA FPS:";
     AnA::String title{cTitle, sizeof(cTitle), sizeof(cTitle) + 10};
     int frameCount = 0;
-    float runingTime = 0.0f, prevSecond = 0.0f;
+    float prevSecond = 0.0f;
     while(!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -131,7 +131,6 @@ void App::Run()
         auto curTime = std::chrono::high_resolution_clock::now();
         float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(curTime - prevTime).count();
         prevTime = curTime;
-        runingTime += frameTime;
         prevSecond += frameTime;
         frameCount++;
         if (prevSecond >= 1.0f)
@@ -266,13 +265,6 @@ void renderMeshesIndirecct(VkCommandBuffer commandBuffer)
         aResourceManager->Shaders[0]);
 }
 
-void RenderShadowsIndirect(VkCommandBuffer commandBuffer)
-{
-    auto aResourceManager = Resource::ResourceManager::GetCurrent();
-    auto aShadowSystem = Systems::ShadowSystem::GetCurrent();
-    //aShadowSystem->RenderCascadedShadowsIndirect(commandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[2]);
-}
-
 void RenderShapesIndirect(VkCommandBuffer commandBuffer)
 {
     auto aResourceManager = Resource::ResourceManager::GetCurrent();
@@ -351,7 +343,7 @@ void App::onCommandBufferRecording(VkCommandBuffer& commandBuffer)
     }
     //}
     aRenderer->BeginSwapChainRenderPass(commandBuffer, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
-    aResourceManager->SecondaryCommandBufferPool.ExcuteRecordedBuffer(commandBuffer);
+    aResourceManager->SecondaryCommandBufferPool.ExecuteRecordedBuffer(commandBuffer);
     //aRenderSystem->RenderMeshesIndirect(commandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[0]);
     //aRenderSystem->RenderShapesIndirect(commandBuffer, *aResourceManager->Shapes, aResourceManager->Shaders[1]);
     aRenderer->EndRenderPass(commandBuffer);

@@ -26,8 +26,8 @@ else
 endif
 
 sources := $(wildcard Src/Core/*.cpp Src/Core/*/*.cpp Src/GUI/Controls/*.cpp)
-editor := $(wildcard Src/Editors/*.cpp)
-ui := $(wildcard Src/Editors/*.ui)
+editor := $(wildcard Src/Editor/*.cpp)
+ui := $(wildcard Src/Editor/*.ui)
 editor += $(ui:.ui=.g.cpp)
 example_mesh_shader = Src/Examples/example_mesh_shader.cpp
 objects = $(sources:.cpp=.o)

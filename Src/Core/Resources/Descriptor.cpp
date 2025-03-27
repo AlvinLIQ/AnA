@@ -55,8 +55,9 @@ Descriptor::Descriptor(Device* mDevice, VkSampler& sampler, VkImageView& imageVi
 
 Descriptor::Descriptor(Device* mDevice, VkSampler& sampler, VkImageView& imageView, VkImageLayout imageLayout, uint32_t binding, 
         int descriptorSetCount, VkDescriptorSetLayout descriptorSetLayout, VkShaderStageFlags stageFlags, const VkDescriptorType descriptorType
-        ) : aDevice{mDevice}, setLayout(descriptorSetLayout)
+        ) : setLayout(descriptorSetLayout)
 {
+    aDevice = mDevice;
     if (descriptorSetCount == 0)
         return;
     aDevice->CreateDescriptorPool(descriptorSetCount, pool, descriptorType);
@@ -165,7 +166,7 @@ const VkDescriptorSetLayout& Descriptor::GetLayout() const
 
 void Descriptor::UpdateDescriptorSets(DescriptorConfig& descriptorConfig)
 {
-    for (int i = 0; i < sets.size(); i++)
+    for (size_t i = 0; i < sets.size(); i++)
     {
         VkDescriptorImageInfo imageInfo;
         imageInfo.imageLayout = descriptorConfig.images[i].imageLayout;
@@ -188,7 +189,7 @@ void Descriptor::UpdateDescriptorSets(DescriptorConfig& descriptorConfig)
 void Descriptor::UpdateDescriptorSets(VkDescriptorImageInfo* imageInfos, uint32_t imageCount, uint32_t dstBinding, 
     VkDescriptorType descriptorType)
 {
-    for (int i = 0; i < sets.size(); i++)
+    for (size_t i = 0; i < sets.size(); i++)
     {
         VkWriteDescriptorSet descriptorWrite{};
         descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -205,7 +206,7 @@ void Descriptor::UpdateDescriptorSets(VkDescriptorImageInfo* imageInfos, uint32_
 
 void Descriptor::UpdateDescriptorSets(std::vector<VkDescriptorImageInfo> imageInfos, uint32_t dstBinding, VkDescriptorType descriptorType)
 {
-    for (int i = 0; i < sets.size(); i++)
+    for (size_t i = 0; i < sets.size(); i++)
     {
         VkWriteDescriptorSet descriptorWrite{};
         descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -222,7 +223,7 @@ void Descriptor::UpdateDescriptorSets(std::vector<VkDescriptorImageInfo> imageIn
 
 void Descriptor::UpdateDescriptorSets(VkDescriptorBufferInfo* pBufferInfo, uint32_t dstBinding, VkDescriptorType descriptorType)
 {
-    for (int i = 0; i < sets.size(); i++)
+    for (size_t i = 0; i < sets.size(); i++)
     {
         VkWriteDescriptorSet descriptorWrite{};
         descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

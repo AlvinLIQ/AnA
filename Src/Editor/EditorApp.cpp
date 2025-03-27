@@ -1,24 +1,24 @@
-#include "Headers/Editor.hpp"
+#include "Headers/EditorApp.hpp"
 #include "Headers/FileDialog.hpp"
 #include "../GUI/Controls/Headers/Slider.hpp"
 #include "../GUI/Controls/Headers/StackPanel.hpp"
 #include "../GUI/Controls/Headers/TextBlock.hpp"
 
 using namespace AnA;
-using namespace Editors;
+using namespace Editor;
 using namespace Controls;
 
-Editor::Editor() : App()
+EditorApp::EditorApp() : App()
 {
 
 }
 
-Editor::~Editor()
+EditorApp::~EditorApp()
 {
 
 }
 
-void Editor::Init()
+void EditorApp::Init()
 {
     App::Init();
     aResourceManager->MainControl = InitControl();
@@ -48,14 +48,14 @@ void Editor::Init()
     Controls::Control::GetInputProfile(aResourceManager->MainControl, aInputManager->GetProfiles());
 }
 
-void Editor::onLoop()
+void EditorApp::onLoop()
 {
-    aResourceManager->MainCameraInfo.near = ((Controls::Slider*)controlMap["nearSlider"])->Value * 32.0f;
+    aResourceManager->MainCameraInfo.near = 0.05f + ((Controls::Slider*)controlMap["nearSlider"])->Value * (32.0f - 0.05f);
     aResourceManager->MainCameraInfo.far = ((Controls::Slider*)controlMap["farSlider"])->Value * 32.0f;
     aResourceManager->MainCameraInfo.UpdateCameraPerspective(aResourceManager->MainCamera);
 }
 
-void Editor::loadModelButton_Click(void* control, PointerEventArgs& args)
+void EditorApp::loadModelButton_Click(void* control, PointerEventArgs& args)
 {
     FileDialog fileDialog{};
     auto path = fileDialog.Run();
@@ -65,10 +65,10 @@ void Editor::loadModelButton_Click(void* control, PointerEventArgs& args)
     memcpy(mesh.filePath, path.c_str(), path.length() + 1);
     mesh.tetureId = 0;
     Resource::ResourceManager::GetCurrent()->SceneObjects.Append(std::vector<MeshInfo>(1, mesh));
-    ((Controls::StackPanel*)((Editor*)App::GetCurrent())->controlMap["modelList"])->Child((Controls::Control*)new Controls::TextBlock(path.c_str(), {0.8f, 0.8f, 0.8f}));
+    ((Controls::StackPanel*)((EditorApp*)App::GetCurrent())->controlMap["modelList"])->Child((Controls::Control*)new Controls::TextBlock(path.c_str(), {0.8f, 0.8f, 0.8f}));
 }
 
-void Editor::saveSceneButton_Click(void* control, PointerEventArgs& args)
+void EditorApp::saveSceneButton_Click(void* control, PointerEventArgs& args)
 {
     FileDialog fileDialog{"--save"};
     auto path = fileDialog.Run();
@@ -81,19 +81,20 @@ void Editor::saveSceneButton_Click(void* control, PointerEventArgs& args)
     fclose(f);
 }
 
-void Editor::exitButton_Click(void* control, PointerEventArgs& args)
+void EditorApp::exitButton_Click(void* control, PointerEventArgs& args)
 {
     exit(0);
 }
 
-const VkDeviceSize offset = 0;
+//const VkDeviceSize offset = 0;
 
 int main()
 {
-    Editor editor{};
+    EditorApp editor{};
     editor.Init();
     auto scene = ReadFile("Scenes/scene.ana");
     auto& meshes = Resource::ResourceManager::GetCurrent()->SceneObjects;
+    meshes.EnableUpdate = true;
     meshes.Append((MeshInfo*)scene.data(), scene.size() / sizeof(MeshInfo));
     editor.Run();
     return 0;

@@ -41,7 +41,7 @@ void StackPanel::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorIma
     {
         ((float*)&offset)[invO] -= ((float*)&maxSize)[invO];
     }
-    for (int i = 0; i < items.size(); i++)
+    for (size_t i = 0; i < items.size(); i++)
     {
         items[i]->Aspect = Aspect;
         items[i]->Extent = Extent;

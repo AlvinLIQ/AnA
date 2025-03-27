@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <filesystem>
 
 namespace AnA
 {
@@ -9,6 +10,6 @@ namespace AnA
     }
     namespace XML
     {
-        static std::string XMLToCode(std::string xml);
+        inline std::string XMLToCode(std::filesystem::path& path);
     }
 }

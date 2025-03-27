@@ -46,7 +46,7 @@ void ItemsPresenter::RemoveChild(Control* targetItem)
     }
 }
 
-void ItemsPresenter::RemoveChildAt(int index)
+void ItemsPresenter::RemoveChildAt(size_t index)
 {
     if (index >= items.size())
         return;

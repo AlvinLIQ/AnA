@@ -232,7 +232,7 @@ void Device::CreateTextImage(const char* text, int& width, int& height, float li
     {
         if (!width)
         {
-            for (int i = 0; i < strlen(text); i++)
+            for (size_t i = 0; i < strlen(text); i++)
             {
                 width += (IS_ASCII_CHAR(text[i]) ? hCharWidth : wCharWidth);
                 width += stbtt_GetCodepointKernAdvance(&info, text[i], text[i + 1]) * scale;
@@ -249,7 +249,7 @@ void Device::CreateTextImage(const char* text, int& width, int& height, float li
 
     ascent *= scale;
     descent *= scale;
-    for (int i = 0, x = 0; i < strlen(text); i++)
+    for (size_t i = 0, x = 0; i < strlen(text); i++)
     {
         int l, t, r, b;
         stbtt_GetCodepointBitmapBox(&info, text[i], scale, scale, &l, &t, &r, &b);
@@ -646,18 +646,18 @@ void Device::pickPhysicalDevice()
             std::string deviceName = physicalDeviceProperties.deviceName;
             if (physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
                 currentScore += 10;
-            if (deviceName.find("AMD") != -1)
+            if (deviceName.find("AMD") != (uint32_t)-1)
             {
                 currentScore += 3;
-                if (deviceName.find("RX") != -1)
+                if (deviceName.find("RX") != (uint32_t)-1)
                     currentScore += 2;
             }
-            else if (deviceName.find("NVIDIA") != -1)
+            else if (deviceName.find("NVIDIA") != (uint32_t)-1)
             {
                 currentScore += 3;
-                if (deviceName.find("RTX") != -1)
+                if (deviceName.find("RTX") != (uint32_t)-1)
                     currentScore += 2;
-                else if (deviceName.find("GTX") != -1)
+                else if (deviceName.find("GTX") != (uint32_t)-1)
                     currentScore += 1;
             }
             if (currentScore > bestScore)
@@ -758,10 +758,11 @@ void Device::createLogicalDevice()
     shaderDrawParametersFeatures.pNext = &nestedCommandBufferFeatures;
     //VkPhysicalDeviceFeatures deviceFeatures1{};
     //vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures1);
-
+/*
     VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures = {};
     meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
     meshShaderFeatures.meshShader = VK_TRUE;
+    meshShaderFeatures.pNext = &shaderDrawParametersFeatures;*/
 
     VkPhysicalDeviceFeatures2 deviceFeatures2{};
     deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
