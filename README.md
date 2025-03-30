@@ -29,8 +29,8 @@ meson install -C build
 ```
 
 ### for Windows
-* Install [GNU Make](https://gnuwin32.sourceforge.net/packages/make.htm) for windows(Binaries&Dependencies)
-* Edit Makefile (you can skip this step if you're using a MinGW ToolChain)
+* Install [Meson](https://mesonbuild.com/Getting-meson.html) for windows
+* Edit meson.build (you can skip this step if you're using a MinGW ToolChain)
 
 Sometimes glfw, vulkan lib name can be different, make sure it does match yours
 
