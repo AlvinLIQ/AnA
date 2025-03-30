@@ -1,6 +1,6 @@
 fs = import('fs')
 shader_sources = files('Basic.vert', 'Basic.frag', 'CascadedShadowMapping.vert', 'CascadedShadowMapping.frag',
-    'Line.vert', 'Line.frag', 'ShadowMapping.vert', 'Shape.vert', 'Shape.frag', 'CollisionDetect.comp')
+    'Line.vert', 'Line.frag', 'ShadowMapping.vert', 'Shape.vert', 'Shape.frag', 'CollisionDetect.comp', 'Mesh.mesh', 'Mesh.task')
 shader_outputs = []
 shader_args = '--target-env=vulkan1.3'
 foreach shader_source : shader_sources

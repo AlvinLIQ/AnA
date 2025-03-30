@@ -1,10 +1,9 @@
 #version 460
-#extension GL_NV_mesh_shader: require
+#extension GL_EXT_mesh_shader: require
 #extension GL_EXT_nonuniform_qualifier : enable 
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 layout(triangles, max_vertices = 64, max_primitives = 126) out;
-
 
 struct Vertex
 {
@@ -18,19 +17,6 @@ layout(std140, set = 0, binding = 0) buffer VertexSSBO
 {
     Vertex vertices[];
 } vsbo;
-
-struct Meshlet
-{
-   uint vertices[64];
-   uint indices[126*3];
-   uint indexCount;
-   uint vertexCount; 
-};
-
-layout(std140, set = 0, binding = 1) buffer meshletSSBO
-{
-    Meshlet meshlets[];
-} msbo;
 
 layout(set = 1, binding = 0) uniform CameraBufferObject {
     mat4 proj;
@@ -55,29 +41,36 @@ layout (set = 5, binding = 0) uniform UBO {
 	Cascade[SHADOW_MAP_CASCADE_COUNT] cascades;
 } ubo;
 
-layout(set = 3, binding = 0) uniform sampler2D texSampler[];
-layout(set = 4, binding = 0) uniform sampler2DArray shadowSampler;
+struct Meshlet
+{
+   uint vertices[64];
+   uint indices[126*3];
+   uint indexCount;
+   uint vertexCount; 
+};
+
+layout(std140, set = 6, binding = 0) buffer meshletSSBO
+{
+    Meshlet meshlets[];
+} msbo;
 
 void main()
 {
-	uint mi = gl_WorkGroupID.x;
+	uint iid = gl_LocalInvocationID.x;
 
-	for (uint i = 0; i < uint(msbo.meshlets[mi].vertexCount); ++i)
+    SetMeshOutputsEXT(uint(msbo.meshlets[iid].indexCount), 1);
+	for (uint i = 0; i < uint(msbo.meshlets[iid].vertexCount); ++i)
 	{
-		uint vertexIndex = msbo.meshlets[mi].vertices[i];
+		uint vertexIndex = msbo.meshlets[iid].vertices[i];
 		Vertex vertex = vsbo.vertices[vertexIndex];
         vec4 vertexPos = vec4(vertex.position, 1.0);
         vec4 viewPos = cbo.view * vertexPos;
 
-		gl_MeshVerticesNV[i].gl_Position = cbo.proj * viewPos;
-
-		fragColor[i] = vec3(texture(texSampler[nonuniformEXT(texIndex)], vertex.uv));
+		gl_MeshVerticesEXT[i].gl_Position = cbo.proj * viewPos;
 	}
 
-    gl_PrimitiveCountNV = uint(msbo.meshlets[mi].indexCount) / 3;
-
-	for (uint i = 0; i < uint(msbo.meshlets[mi].indexCount); ++i)
+	for (uint i = 0; i < uint(msbo.meshlets[iid].indexCount); i += 3)
 	{
-		gl_PrimitiveIndicesNV[i] = uint(msbo.meshlets[mi].indices[i]);
+		gl_PrimitiveTriangleIndicesEXT[i] = uvec3(msbo.meshlets[iid].indices[i], msbo.meshlets[iid].indices[i + 1], msbo.meshlets[iid].indices[i + 2]);
 	}
 }

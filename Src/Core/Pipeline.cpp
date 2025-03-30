@@ -38,6 +38,15 @@ const VkPrimitiveTopology vertexTopology) : aDevice{mDevice}, renderPass {mRende
     createGraphicsPipeline(vertShaderCode, vertexTopology, fragShaderCode);
 }
 
+Pipeline::Pipeline(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, 
+    const std::vector<unsigned char>& meshShaderCode, const std::vector<unsigned char>& fragShaderCode, 
+    VkRenderPass &mRenderPass, 
+    VkPipelineLayout &mPipelineLayoutconst, 
+    const VkPrimitiveTopology vertexTopology) : aDevice{mDevice}, renderPass{mRenderPass}, pipelineLayout{mPipelineLayoutconst}
+{
+    createMeshShaderPipeline(taskShaderCode, meshShaderCode, fragShaderCode);
+}
+
 Pipeline::Pipeline(Device* mDevice, const char* computeShaderFile, VkPipelineLayout &mPipelineLayout) : aDevice{mDevice}, pipelineLayout {mPipelineLayout}
 {
     createComputePipeline(computeShaderFile);
@@ -126,16 +135,18 @@ void Pipeline::createGraphicsPipeline(PipelineConfig pipelineConfig)
         throw std::runtime_error("Failed to create pipeline!");
 }
 
-void Pipeline::createMeshShaderPipeline(const std::vector<unsigned char>& meshShaderCode, const std::vector<unsigned char>& fragShaderCode)
+void Pipeline::createMeshShaderPipeline(const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, const std::vector<unsigned char>& fragShaderCode)
 {
+    VkShaderModule taskShaderModule = createShaderModule(taskShaderCode);
     VkShaderModule meshShaderModule = createShaderModule(meshShaderCode);
     VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
 
-    auto pipelineConfig = PipelineConfig::GetForMeshShader(meshShaderModule, fragShaderModule, pipelineLayout, renderPass, aDevice->GetMaxUsableSampleCount());
+    auto pipelineConfig = PipelineConfig::GetForMeshShader(taskShaderModule, meshShaderModule, fragShaderModule, pipelineLayout, renderPass, aDevice->GetMaxUsableSampleCount());
     
     if (vkCreateGraphicsPipelines(aDevice->GetLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineConfig.pipelineInfo, nullptr, &pipeline) != VK_SUCCESS)
         throw std::runtime_error("Failed to create pipeline!");
 
+    vkDestroyShaderModule(aDevice->GetLogicalDevice(), taskShaderModule, nullptr);
     vkDestroyShaderModule(aDevice->GetLogicalDevice(), meshShaderModule, nullptr);
     vkDestroyShaderModule(aDevice->GetLogicalDevice(), fragShaderModule, nullptr);
 }

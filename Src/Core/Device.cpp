@@ -758,11 +758,12 @@ void Device::createLogicalDevice()
     shaderDrawParametersFeatures.pNext = &nestedCommandBufferFeatures;
     //VkPhysicalDeviceFeatures deviceFeatures1{};
     //vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures1);
-/*
+
     VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures = {};
     meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
     meshShaderFeatures.meshShader = VK_TRUE;
-    meshShaderFeatures.pNext = &shaderDrawParametersFeatures;*/
+    meshShaderFeatures.taskShader = VK_TRUE;
+    meshShaderFeatures.pNext = &shaderDrawParametersFeatures;
 
     VkPhysicalDeviceFeatures2 deviceFeatures2{};
     deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
@@ -771,7 +772,7 @@ void Device::createLogicalDevice()
     deviceFeatures2.features.sampleRateShading = VK_TRUE;
     deviceFeatures2.features.shaderSampledImageArrayDynamicIndexing = VK_TRUE;
     deviceFeatures2.features.vertexPipelineStoresAndAtomics = VK_TRUE;
-    deviceFeatures2.pNext = &shaderDrawParametersFeatures;
+    deviceFeatures2.pNext = &meshShaderFeatures;
 
     VkDeviceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;

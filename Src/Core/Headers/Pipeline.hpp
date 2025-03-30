@@ -250,19 +250,25 @@ namespace AnA
                 dConfig.pipelineInfo.subpass = 0;
                 return dConfig;
             }
-            static PipelineConfig GetForMeshShader(VkShaderModule meshShaderModule, VkShaderModule fragShaderModule,
+            static PipelineConfig GetForMeshShader(VkShaderModule taskShaderModule, VkShaderModule meshShaderModule, VkShaderModule fragShaderModule,
                 VkPipelineLayout &pipelineLayout, VkRenderPass &renderPass, VkSampleCountFlagBits msaaSamplers, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
             {
                 PipelineConfig dConfig;
-                dConfig.shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-                dConfig.shaderStages[0].stage = VK_SHADER_STAGE_MESH_BIT_EXT;
-                dConfig.shaderStages[0].module = meshShaderModule;
-                dConfig.shaderStages[0].pName = "main";
+                VkPipelineShaderStageCreateInfo shaderStages[3] = {};
+                shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+                shaderStages[0].stage = VK_SHADER_STAGE_TASK_BIT_EXT;
+                shaderStages[0].module = taskShaderModule;
+                shaderStages[0].pName = "main";
 
-                dConfig.shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-                dConfig.shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-                dConfig.shaderStages[1].module = fragShaderModule;
-                dConfig.shaderStages[1].pName = "main";
+                shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+                shaderStages[1].stage = VK_SHADER_STAGE_MESH_BIT_EXT;
+                shaderStages[1].module = meshShaderModule;
+                shaderStages[1].pName = "main";
+
+                shaderStages[2].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+                shaderStages[2].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+                shaderStages[2].module = fragShaderModule;
+                shaderStages[2].pName = "main";
 
                 dConfig.dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
                 dConfig.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(dConfig.dynamicStates.size());
@@ -337,7 +343,7 @@ namespace AnA
 
                 dConfig.pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
                 dConfig.pipelineInfo.stageCount = 2;
-                dConfig.pipelineInfo.pStages = dConfig.shaderStages;
+                dConfig.pipelineInfo.pStages = shaderStages;
 
                 dConfig.pipelineInfo.pVertexInputState = &dConfig.vertexInputInfo;
                 dConfig.pipelineInfo.pInputAssemblyState = &dConfig.inputAssembly;
@@ -360,6 +366,7 @@ namespace AnA
         Pipeline(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
         Pipeline(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
         Pipeline(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst, const std::vector<unsigned char>& fragShaderCode, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+        Pipeline(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
         Pipeline(Device* mDevice, PipelineConfig pipelineConfig);
         Pipeline(Device* mDevice, const char* computeShaderFile, VkPipelineLayout &mPipelineLayout);
         Pipeline(Device* mDevice, const std::vector<unsigned char>& computeShaderCode, VkPipelineLayout &mPipelineLayout);
@@ -384,7 +391,7 @@ namespace AnA
         void createGraphicsPipeline(const std::vector<unsigned char>& vertShaderCode, const VkPrimitiveTopology vertexTopology);
         void createGraphicsPipeline(const std::vector<unsigned char>& vertShaderCode, const VkPrimitiveTopology vertexTopology, const std::vector<unsigned char>& fragShaderCode);
         void createGraphicsPipeline(PipelineConfig pipelineConfig);
-        void createMeshShaderPipeline(const std::vector<unsigned char>& meshShaderCode, const std::vector<unsigned char>& fragShaderCode);
+        void createMeshShaderPipeline(const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, const std::vector<unsigned char>& fragShaderCode);
         void createComputePipeline(const std::string &computeShaderFileName);
         void createComputePipeline(const std::vector<unsigned char>& computeShaderCode);
 
