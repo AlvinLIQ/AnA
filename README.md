@@ -23,7 +23,8 @@ Install glfw, glm, Vulkan SDK(including validation layer), make, clang(you can u
 
 ### for Linux
 ```shell
-make
+meson setup build
+meson install -C build
 ./AnA
 ```
 
@@ -34,7 +35,8 @@ make
 Sometimes glfw, vulkan lib name can be different, make sure it does match yours
 
 ```
-make
+meson setup build
+meson install -C build
 AnA.exe
 ```
 
