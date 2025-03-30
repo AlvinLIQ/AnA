@@ -5,6 +5,16 @@
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 layout(triangles, max_vertices = 64, max_primitives = 126) out;
 
+struct VertexOutput {
+    vec2 texCoord;
+    uint texID;
+    vec3 normalSpace;
+    vec3 vertexPosition;
+    vec4 viewPos;
+};
+
+layout(location = 0) out VertexOutput vertexOutput[];
+
 struct Vertex
 {
     vec3 position;
@@ -58,8 +68,8 @@ void main()
 {
 	uint iid = gl_LocalInvocationID.x;
 
-    SetMeshOutputsEXT(uint(msbo.meshlets[iid].indexCount), 1);
-	for (uint i = 0; i < uint(msbo.meshlets[iid].vertexCount); ++i)
+//    SetMeshOutputsEXT(uint(msbo.meshlets[iid].indexCount), 1);
+	for (uint i = 0; i < uint(msbo.meshlets[iid].vertexCount); i++)
 	{
 		uint vertexIndex = msbo.meshlets[iid].vertices[i];
 		Vertex vertex = vsbo.vertices[vertexIndex];
@@ -67,10 +77,18 @@ void main()
         vec4 viewPos = cbo.view * vertexPos;
 
 		gl_MeshVerticesEXT[i].gl_Position = cbo.proj * viewPos;
+        vertexOutput[vertexIndex].texCoord = vertex.uv;
+        vertexOutput[vertexIndex].texID = vertex.texIndex;
+        vertexOutput[vertexIndex].normalSpace = vertex.normal;
+        vertexOutput[vertexIndex].vertexPosition = vertex.position;
+        vertexOutput[vertexIndex].viewPos = viewPos;
 	}
 
-	for (uint i = 0; i < uint(msbo.meshlets[iid].indexCount); i += 3)
+	for (uint i = 0; i < uint(msbo.meshlets[iid].indexCount); i++)
 	{
-		gl_PrimitiveTriangleIndicesEXT[i] = uvec3(msbo.meshlets[iid].indices[i], msbo.meshlets[iid].indices[i + 1], msbo.meshlets[iid].indices[i + 2]);
+		gl_PrimitiveTriangleIndicesEXT[i] = uvec3(
+            msbo.meshlets[iid].indices[i * 3], 
+            msbo.meshlets[iid].indices[i * 3 + 1], 
+            msbo.meshlets[iid].indices[i * 3 + 2]);
 	}
 }

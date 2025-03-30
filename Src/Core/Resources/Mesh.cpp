@@ -373,3 +373,57 @@ void Meshes::appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageI
         samplersDescriptors.push_back(descriptor);
     }
 }
+
+std::vector<Meshlet> Meshes::buildMeshlets(
+    uint32_t maxVerticesPerMeshlet,  // max number of vertices per meshlet
+    uint32_t maxIndicesPerMeshlet)  // max number of indices per meshlet (i.e., triangles)
+{
+    std::vector<Meshlet> meshlets;
+
+    // Iterate over each mesh
+    for (const auto& mesh : meshes)
+    {
+        uint32_t totalVertices = mesh.vertices.size();
+        uint32_t totalIndices = mesh.indices.size();
+
+        uint32_t vertexOffset = 0;
+        uint32_t indexOffset = 0;
+
+        // Process vertices and indices in chunks for meshlets
+        while (vertexOffset < totalVertices)
+        {
+            Meshlet meshlet;
+            meshlet.vertexCount = 0;
+            meshlet.indexCount = 0;
+
+            // Determine how many vertices to take for this meshlet
+            uint32_t vertexEnd = std::min(vertexOffset + maxVerticesPerMeshlet, totalVertices);
+            uint32_t vertexCount = vertexEnd - vertexOffset;
+
+            // Store the vertices of the meshlet (just indices for the mesh)
+            for (uint32_t i = vertexOffset; i < vertexEnd; ++i)
+            {
+                meshlet.vertices[meshlet.vertexCount++] = i + mesh.vertexOffset;  // Add offset for global vertex index
+            }
+
+            // Process the indices in this meshlet (usually triangles, 3 indices per triangle)
+            while (indexOffset < totalIndices && meshlet.indexCount < maxIndicesPerMeshlet * 3)
+            {
+                uint32_t triangleVertexCount = meshlet.indexCount / 3;
+                if (triangleVertexCount >= vertexCount / 3) break;
+
+                // Assuming each index refers to a triangle
+                meshlet.indices[meshlet.indexCount++] = mesh.indices[indexOffset] + mesh.indexOffset;  // Add offset for global index
+                indexOffset++;
+            }
+
+            // Add the meshlet to the list
+            meshlets.push_back(meshlet);
+
+            // Move to the next chunk of vertices and indices
+            vertexOffset = vertexEnd;
+        }
+    }
+
+    return meshlets;
+}

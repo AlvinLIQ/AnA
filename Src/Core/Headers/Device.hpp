@@ -172,5 +172,6 @@ namespace AnA
         void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 
         VkPhysicalDeviceProperties physicalDeviceProperties{};
+        VkPhysicalDeviceMeshShaderPropertiesEXT meshShaderProperties{};
     };
 }

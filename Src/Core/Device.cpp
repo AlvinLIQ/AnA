@@ -633,16 +633,21 @@ void Device::pickPhysicalDevice()
     std::vector<VkPhysicalDevice> devices(deviceCount);
     vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
     int currentScore, bestScore = 0;
+    VkPhysicalDeviceMeshShaderPropertiesEXT _meshShaderProperties = {};
+    _meshShaderProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_PROPERTIES_EXT;
+
+    VkPhysicalDeviceProperties2 deviceProperties2 = {};
+    deviceProperties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+    deviceProperties2.pNext = &_meshShaderProperties;
     for (const auto &device : devices)
     {
         currentScore = 0;
         if (isDeviceSuitable(device))
         {
             currentScore = 30;
-            vkGetPhysicalDeviceProperties(device, &physicalDeviceProperties);
-            checkUsableSamples();
-            currentScore += physicalDeviceProperties.limits.framebufferColorSampleCounts & physicalDeviceProperties.limits.framebufferDepthSampleCounts;
-            currentScore += physicalDeviceProperties.limits.storageImageSampleCounts + physicalDeviceProperties.limits.maxColorAttachments;
+            vkGetPhysicalDeviceProperties2(device, &deviceProperties2);
+            currentScore += deviceProperties2.properties.limits.framebufferColorSampleCounts & deviceProperties2.properties.limits.framebufferDepthSampleCounts;
+            currentScore += deviceProperties2.properties.limits.storageImageSampleCounts + deviceProperties2.properties.limits.maxColorAttachments;
             std::string deviceName = physicalDeviceProperties.deviceName;
             if (physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
                 currentScore += 10;
@@ -663,12 +668,16 @@ void Device::pickPhysicalDevice()
             if (currentScore > bestScore)
             {
                 physicalDevice = device;
+                physicalDeviceProperties = deviceProperties2.properties;
+                meshShaderProperties = _meshShaderProperties;
                 bestScore = currentScore;
             }
         }
     }
     if (physicalDevice == VK_NULL_HANDLE)
         throw std::runtime_error("Failed to find a suitable GPU!");
+
+    checkUsableSamples();
 }
 
 void Device::checkUsableSamples()
