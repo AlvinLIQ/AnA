@@ -6,4 +6,5 @@ AnACore = static_library('AnACore', [shader_hpp, 'App.cpp', 'Buffer.cpp', 'Devic
     'Camera/Camera.cpp', 'Resources/CommandBuffer.cpp', 'Resources/Model.cpp', 'Resources/Shape.cpp',
     'Input/InputManager.cpp', 'Resources/Descriptor.cpp', 'Resources/ResourceManager.cpp', 'Resources/Texture.cpp',
     'Physics/CollisionDetect.cpp', 'Resources/Lights.cpp', 'Resources/Shader.cpp', 'Systems/RenderSystem.cpp'],
-    cpp_args: ['-std=c++23'])
+    cpp_args: ['-std=c++23'],
+    dependencies: [vulkan_dep, glfw_dep])

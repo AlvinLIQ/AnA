@@ -77,7 +77,6 @@ namespace AnA
         Device* aDevice;
         SwapChain* aSwapChain;
 
-        VkCommandBufferBeginInfo beginInfo{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO, nullptr, VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT};
         CommandBuffer commandBuffers;
         CommandBuffer offscreenSecondaryCommandBuffers;
 

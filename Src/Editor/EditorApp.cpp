@@ -74,11 +74,12 @@ void EditorApp::saveSceneButton_Click(void* control, PointerEventArgs& args)
     auto path = fileDialog.Run();
     if(path.empty())
         return;
+    /*
     FILE* f = fopen(path.c_str(), "wb");
     auto objects = Resource::ResourceManager::GetCurrent()->SceneObjects;
     fwrite((const void*)objects.Get(), sizeof(Mesh), objects.GetMeshCount(), f);
 
-    fclose(f);
+    fclose(f);*/
 }
 
 void EditorApp::exitButton_Click(void* control, PointerEventArgs& args)

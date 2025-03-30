@@ -84,7 +84,7 @@ public:
   
                         // Waiting until there is a task to 
                         // execute or the pool is stopped 
-                        cv_.wait(lock, [this, i] { 
+                        cv_.wait(lock, [this] { 
                             return !tasks_.empty() || stop_; 
                         }); 
 
