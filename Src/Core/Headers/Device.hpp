@@ -16,7 +16,7 @@
 #define ANA_TEXT_DEFAULT_LINE_HEIGHT 18
 #define IS_ASCII_CHAR(A) (A) <= 127
 
-#define DEFAULT_SSBO_LAYOUT 0
+#define DEFAULT_VERTEX_LAYOUT 0
 #define DEFAULT_UBO_LAYOUT 1
 #define DEFAULT_LIGHT_LAYOUT 2
 #define DEFAULT_SAMPLER_LAYOUT 3
@@ -142,6 +142,9 @@ namespace AnA
         {
             return physicalDeviceProperties;
         }
+
+        PFN_vkCmdDrawMeshTasksEXT vkCmdDrawMeshTasksEXT{ VK_NULL_HANDLE };
+        PFN_vkCmdDrawMeshTasksIndirectCountEXT vkCmdDrawMeshTasksIndirectCountEXT{ VK_NULL_HANDLE };
     private:
         VkInstance& instance;
         VkSurfaceKHR& surface;

@@ -128,7 +128,7 @@ void ResourceManager::RecreateResources()
 std::vector<Descriptor::DescriptorConfig> ResourceManager::GetDefaultDescriptorConfig()
 {
     std::vector<Descriptor::DescriptorConfig> descriptorConfigs(DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT);
-    auto pConfig = &descriptorConfigs[DEFAULT_SSBO_LAYOUT];
+    auto pConfig = &descriptorConfigs[DEFAULT_VERTEX_LAYOUT];
     pConfig->binding = 0;
     pConfig->descriptorCount = 0;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
@@ -267,7 +267,7 @@ void ResourceManager::cleanupShadowResources()
 */
 void ResourceManager::createDefaultShaders()
 {
-    Shaders.reserve(3); // Reserve space for 3 default shaders
+    Shaders.reserve(4); // Reserve space for 3 default shaders
     auto renderPass = SwapChain::GetCurrent()->GetRenderPass();
     auto descriptorConfig = GetDefaultDescriptorConfig();
     Shaders.emplace_back(aDevice, Basic_vert, Basic_frag, renderPass, descriptorConfig);
@@ -279,4 +279,15 @@ void ResourceManager::createDefaultShaders()
 
     Shaders.emplace_back(aDevice, CascadedShadowMapping_vert, offscreenRenderPass
         , CascadedShadowMapping_frag, descriptorConfig, sizeof(uint32_t));
+
+    
+    Descriptor::DescriptorConfig meshletConfig{};
+    meshletConfig.binding = 0;
+    meshletConfig.descriptorCount = 0;
+    meshletConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    meshletConfig.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_MESH_BIT_EXT;
+    descriptorConfig.push_back(meshletConfig);
+
+    Shaders.emplace_back(aDevice, Mesh_task, Mesh_mesh, Basic_frag, renderPass
+        , descriptorConfig);
 }

@@ -806,6 +806,8 @@ void Device::createLogicalDevice()
     if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &logicalDevice) != VK_SUCCESS)
         throw std::runtime_error("Failed to create logical device!");
 
+    vkCmdDrawMeshTasksEXT = reinterpret_cast<PFN_vkCmdDrawMeshTasksEXT>(vkGetDeviceProcAddr(logicalDevice, "vkCmdDrawMeshTasksEXT"));
+    vkCmdDrawMeshTasksIndirectCountEXT = reinterpret_cast<PFN_vkCmdDrawMeshTasksIndirectCountEXT>(vkGetDeviceProcAddr(logicalDevice, "vkCmdDrawMeshTasksIndirectCountEXT"));
     vkGetDeviceQueue(logicalDevice, indices.graphicsAndComputeFamily.value(), 0, &graphicsQueue);
     vkGetDeviceQueue(logicalDevice, indices.presentFamily.value(), 0, &presentQueue);
 }

@@ -85,9 +85,9 @@ namespace AnA
 
             return batchCount;
         }
-        Descriptor* GetSSBODescriptor()
+        Descriptor* GetVertexDescriptor()
         {
-            return ssboDescriptor;
+            return vertexDescriptor;
         }
         bool EnableUpdate = false;
     private:
@@ -101,17 +101,19 @@ namespace AnA
         std::vector<Mesh> meshes;
         uint32_t batchSize;
         std::vector<Range> updateQueue{};
-        void commitBufferUpdate(Model::Vertex* vertices, Model::Index* indices, Range& updateRange);
+        void commitVertexBufferUpdate(Model::Vertex* vertices, Model::Index* indices, Range& updateRange);
         uint32_t maxUpdateRange = 0;
         bool commandBufferNeedUpdate = false;
         std::unordered_map<uint32_t, uint32_t> textureIdMap{};
         std::vector<VkDescriptorImageInfo> textureInfos;
         std::vector<Descriptor*> samplersDescriptors;
-        Descriptor* ssboDescriptor;
+        Descriptor* vertexDescriptor, *meshDescriptor;
         void createSSBODescriptor();
         void updateSSBODescriptor();
         void appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageInfos);
-        std::vector<Meshlet> buildMeshlets(
+        std::vector<Meshlet> meshlets;
+        Buffer meshletsBuffer{};
+        void buildMeshlets(
             uint32_t maxVerticesPerMeshlet = 64,  // max number of vertices per meshlet
             uint32_t maxIndicesPerMeshlet = 126);  // max number of indices per meshlet (i.e., triangles)
     };

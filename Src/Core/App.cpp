@@ -329,7 +329,7 @@ void App::onCommandBufferRecording(VkCommandBuffer& commandBuffer)
         return;
     //if (commandBufferNeedUpdate)
     //{
-    
+    /*
     uint32_t frameIndex = aRenderer->GetFrameIndex();
     for (uint32_t i = 0 ; i < SHADOW_MAP_CASCADE_COUNT; i++)
     {
@@ -340,7 +340,7 @@ void App::onCommandBufferRecording(VkCommandBuffer& commandBuffer)
         //aRenderer->ExecuteOffscreenSecondaryCommandBuffer(commandBuffer);
         aShadowSystem->RenderCascadedShadowsIndirect(commandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[2], i);
         aRenderer->EndRenderPass(commandBuffer);
-    }
+    }*/
     //}
     aRenderer->BeginSwapChainRenderPass(commandBuffer, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
     aResourceManager->SecondaryCommandBufferPool.ExecuteRecordedBuffer(commandBuffer);

@@ -20,7 +20,7 @@ namespace AnA
     public:
         struct PipelineConfig
         {
-            VkPipelineShaderStageCreateInfo shaderStages[2] = {{},{}};
+            VkPipelineShaderStageCreateInfo shaderStages[3] = {{},{}, {}};
             VkPipelineDynamicStateCreateInfo dynamicStateInfo{};
             std::vector<VkVertexInputBindingDescription> bindingDescriptions{};// = Model::Vertex::GetBindingDescription();
             std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};// = Model::Vertex::GetAttributeDescription();
@@ -254,21 +254,20 @@ namespace AnA
                 VkPipelineLayout &pipelineLayout, VkRenderPass &renderPass, VkSampleCountFlagBits msaaSamplers, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
             {
                 PipelineConfig dConfig;
-                VkPipelineShaderStageCreateInfo shaderStages[3] = {};
-                shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-                shaderStages[0].stage = VK_SHADER_STAGE_TASK_BIT_EXT;
-                shaderStages[0].module = taskShaderModule;
-                shaderStages[0].pName = "main";
+                dConfig.shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+                dConfig.shaderStages[0].stage = VK_SHADER_STAGE_TASK_BIT_EXT;
+                dConfig.shaderStages[0].module = taskShaderModule;
+                dConfig.shaderStages[0].pName = "main";
 
-                shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-                shaderStages[1].stage = VK_SHADER_STAGE_MESH_BIT_EXT;
-                shaderStages[1].module = meshShaderModule;
-                shaderStages[1].pName = "main";
+                dConfig.shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+                dConfig.shaderStages[1].stage = VK_SHADER_STAGE_MESH_BIT_EXT;
+                dConfig.shaderStages[1].module = meshShaderModule;
+                dConfig.shaderStages[1].pName = "main";
 
-                shaderStages[2].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-                shaderStages[2].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-                shaderStages[2].module = fragShaderModule;
-                shaderStages[2].pName = "main";
+                dConfig.shaderStages[2].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+                dConfig.shaderStages[2].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+                dConfig.shaderStages[2].module = fragShaderModule;
+                dConfig.shaderStages[2].pName = "main";
 
                 dConfig.dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
                 dConfig.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(dConfig.dynamicStates.size());
@@ -342,8 +341,8 @@ namespace AnA
                 dConfig.depthStencilInfo.back = {};             // Optional
 
                 dConfig.pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-                dConfig.pipelineInfo.stageCount = 2;
-                dConfig.pipelineInfo.pStages = shaderStages;
+                dConfig.pipelineInfo.stageCount = 3;
+                dConfig.pipelineInfo.pStages = dConfig.shaderStages;
 
                 dConfig.pipelineInfo.pVertexInputState = &dConfig.vertexInputInfo;
                 dConfig.pipelineInfo.pInputAssemblyState = &dConfig.inputAssembly;

@@ -12,8 +12,8 @@
     <Slider Name="nearSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.0f"/>
     <TextBlock Text="Far"/>
     <Slider Name="farSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="1.0f"/>
-    <Scene HorizontalAlignment="Stretch" ImageInfo="Resource::ResourceManager::GetCurrent()->ShadowMap.GetDescriptorImageInfos()[0]"
-        ControlSize="0.0f, 0.3f"/>
+    <!--Scene HorizontalAlignment="Stretch" ImageInfo="Resource::ResourceManager::GetCurrent()->ShadowMap.GetDescriptorImageInfos()[0]"
+        ControlSize="0.0f, 0.3f"/-->
     <Button HorizontalAlignment="Start" Click="exitButton_Click">
         <TextBlock Text="Exit"/>
     </Button>
