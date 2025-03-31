@@ -267,7 +267,7 @@ void ResourceManager::cleanupShadowResources()
 */
 void ResourceManager::createDefaultShaders()
 {
-    Shaders.reserve(5); // Reserve space for 3 default shaders
+    Shaders.reserve(4); // Reserve space for 3 default shaders
     auto renderPass = SwapChain::GetCurrent()->GetRenderPass();
     auto descriptorConfig = GetDefaultDescriptorConfig();
     Shaders.emplace_back(aDevice, Basic_vert, Basic_frag, renderPass, descriptorConfig);
@@ -288,8 +288,6 @@ void ResourceManager::createDefaultShaders()
     meshletConfig.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_MESH_BIT_EXT;
     descriptorConfig.push_back(meshletConfig);
 
-    Shaders.emplace_back(aDevice, Mesh_task, Mesh_mesh, Basic_frag, renderPass
+    Shaders.emplace_back(aDevice, Mesh_task, Mesh_mesh, Mesh_frag, renderPass
         , descriptorConfig);
-    std::vector<Descriptor::DescriptorConfig> emptyConfig{};
-    Shaders.emplace_back(aDevice, Test_task, Test_mesh, Test_frag, renderPass, emptyConfig);
 }

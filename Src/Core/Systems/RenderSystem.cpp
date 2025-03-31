@@ -42,17 +42,18 @@ void RenderSystem::RenderShapesIndirect(VkCommandBuffer commandBuffer, Shapes& s
 void RenderSystem::RenderMeshes(VkCommandBuffer commandBuffer, Meshes &meshes, Shader& shader)
 {
     shader.GetPipeline()->Bind(commandBuffer);
-    auto resourceManager = Resource::ResourceManager::GetCurrent();
-    std::vector<VkDescriptorSet>& sets = shader.GetDescriptorSets()[resourceManager->SecondaryCommandBufferPool.CurrentBufferIndex];
+    //auto resourceManager = Resource::ResourceManager::GetCurrent();
+    //std::vector<VkDescriptorSet>& sets = shader.GetDescriptorSets()[resourceManager->SecondaryCommandBufferPool.CurrentBufferIndex];
     //auto& textureMap = resourceManager->TextureMap;
     //auto& texture = textureMap.at(DEFAULT_TEXTURE_ID);
     //sets[DEFAULT_SAMPLER_LAYOUT] = texture.GetDescriptorSet();
+    /*
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
         shader.GetPipelineLayout(), 0, static_cast<uint32_t>(sets.size()),
         sets.data(), 0, nullptr);
-
+*/
     meshes.Bind(commandBuffer);
-    meshes.Draw(commandBuffer);
+    meshes.DrawMesh(commandBuffer, shader.GetPipelineLayout());
 }
 
 void RenderSystem::RenderMeshesIndirect(VkCommandBuffer commandBuffer, Meshes &meshes, Shader& shader)

@@ -66,29 +66,40 @@ layout(std140, set = 6, binding = 0) buffer meshletSSBO
 
 void main()
 {
-	uint iid = gl_LocalInvocationID.x;
+    uint iid = gl_LocalInvocationID.x;
 
-//    SetMeshOutputsEXT(uint(msbo.meshlets[iid].indexCount), 1);
-	for (uint i = 0; i < uint(msbo.meshlets[iid].vertexCount); i++)
-	{
-		uint vertexIndex = msbo.meshlets[iid].vertices[i];
-		Vertex vertex = vsbo.vertices[vertexIndex];
+    uint vertexCount = msbo.meshlets[iid].vertexCount;
+    uint indexCount = msbo.meshlets[iid].indexCount;
+
+    // Ensure we set correct mesh outputs
+    SetMeshOutputsEXT(vertexCount, indexCount / 3);
+
+    // Emit vertices
+    for (uint i = 0; i < vertexCount; i++)
+    {
+        uint vertexIndex = msbo.meshlets[iid].vertices[i];
+        Vertex vertex = vsbo.vertices[vertexIndex];
         vec4 vertexPos = vec4(vertex.position, 1.0);
         vec4 viewPos = cbo.view * vertexPos;
 
-		gl_MeshVerticesEXT[i].gl_Position = cbo.proj * viewPos;
-        vertexOutput[vertexIndex].texCoord = vertex.uv;
-        vertexOutput[vertexIndex].texID = vertex.texIndex;
-        vertexOutput[vertexIndex].normalSpace = vertex.normal;
-        vertexOutput[vertexIndex].vertexPosition = vertex.position;
-        vertexOutput[vertexIndex].viewPos = viewPos;
-	}
+        gl_MeshVerticesEXT[i].gl_Position = cbo.proj * viewPos;
+        
+        // Fix: Use 'i' instead of 'vertexIndex' for vertexOutput array
+        vertexOutput[i].texCoord = vertex.uv;
+        vertexOutput[i].texID = vertex.texIndex;
+        vertexOutput[i].normalSpace = vertex.normal;
+        vertexOutput[i].vertexPosition = vertex.position;
+        vertexOutput[i].viewPos = viewPos;
+    }
 
-	for (uint i = 0; i < uint(msbo.meshlets[iid].indexCount); i++)
-	{
-		gl_PrimitiveTriangleIndicesEXT[i] = uvec3(
-            msbo.meshlets[iid].indices[i * 3], 
-            msbo.meshlets[iid].indices[i * 3 + 1], 
-            msbo.meshlets[iid].indices[i * 3 + 2]);
-	}
+    // Emit primitives
+    for (uint i = 0; i < indexCount; i += 3)
+    {
+        // Fix: Ensure correct triangle grouping
+        gl_PrimitiveTriangleIndicesEXT[i / 3] = uvec3(
+            msbo.meshlets[iid].indices[i], 
+            msbo.meshlets[iid].indices[i + 1], 
+            msbo.meshlets[iid].indices[i + 2]
+        );
+    }
 }

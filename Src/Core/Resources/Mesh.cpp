@@ -214,6 +214,23 @@ void Meshes::DrawIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescripto
     vkCmdDrawIndexedIndirectCount(commandBuffer, indirectBuffer.GetBuffer(), 0, countBuffer.GetBuffer(), 0, 1, sizeof(VkDrawIndexedIndirectCommand));
 }
 
+void Meshes::DrawMesh(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
+{
+    aDevice->vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
+}
+
+void Meshes::DrawMesh(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout)
+{
+    sets[DEFAULT_VERTEX_LAYOUT] = vertexDescriptor->GetSets()[0];
+    sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors.front()->GetSets()[0];
+    sets[DEFAULT_MESHLET_LAYOUT] = meshDescriptor->GetSets()[0];
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+    pipelineLayout, 0, static_cast<uint32_t>(sets.size()),
+    sets.data(), 0, nullptr);
+
+    aDevice->vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
+}
+
 void Meshes::CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer)
 {
     auto vertices = ((Model::Vertex*)newVertBuffer->GetMappedData());
@@ -343,7 +360,7 @@ void Meshes::createSSBODescriptor()
         1,
         descriptorSetLayout,
         VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-        VK_SHADER_STAGE_VERTEX_BIT);
+        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_MESH_BIT_EXT);
     meshDescriptor = new Descriptor(aDevice, 1, 
         1,
         descriptorSetLayout,
@@ -360,7 +377,7 @@ void Meshes::updateSSBODescriptor()
     vertexDescriptor->UpdateDescriptorSets(&bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
     bufferInfo.buffer = meshletsBuffer.GetBuffer();
     bufferInfo.offset = 0;
-    bufferInfo.range = meshletsBuffer.GetSize();
+    bufferInfo.range = meshlets.size() * sizeof(Meshlet);
     meshDescriptor->UpdateDescriptorSets(&bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
 }
 
