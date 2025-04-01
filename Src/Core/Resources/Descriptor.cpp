@@ -79,11 +79,10 @@ Descriptor::Descriptor(Device* mDevice, VkSampler& sampler, VkImageView& imageVi
 
 Descriptor::Descriptor(Device* mDevice, int descriptorSetCount, uint32_t descriptorCount, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags) : aDevice{mDevice}
 {
-    aDevice->CreateDescriptorPool(descriptorCount, pool, descriptorType, VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT);
+    aDevice->CreateDescriptorPool(descriptorSetCount, pool, descriptorType, VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT);
     VkDescriptorSetVariableDescriptorCountAllocateInfoEXT countInfo{};
     countInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO;
-    uint32_t maxBinding = MaxBatchSize - 1;
-    countInfo.pDescriptorCounts = &maxBinding;
+    countInfo.pDescriptorCounts = &descriptorCount;
     countInfo.descriptorSetCount = descriptorSetCount;
     aDevice->CreateDescriptorSets(descriptorSetCount, pool, descriptorSetLayout, sets, &countInfo);
 }

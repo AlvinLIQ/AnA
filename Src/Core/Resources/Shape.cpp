@@ -14,7 +14,7 @@ Shapes::Shapes(Device* mDeivce) : aDevice{mDeivce}
         VK_SHADER_STAGE_FRAGMENT_BIT);
     auto& ssboLayout = Resource::ResourceManager::GetCurrent()->Shaders[1].GetDescriptors()[DEFAULT_VERTEX_LAYOUT]->GetLayout();
     ssboDescriptor = new Descriptor(aDevice, 1, 
-        MaxBatchSize,
+        1,
         ssboLayout,
         VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
         VK_SHADER_STAGE_VERTEX_BIT);
