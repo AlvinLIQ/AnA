@@ -117,6 +117,6 @@ namespace AnA
         Buffer meshletsBuffer{};
         void buildMeshlets(
             uint32_t maxVerticesPerMeshlet = 64,  // max number of vertices per meshlet
-            uint32_t maxIndicesPerMeshlet = 126);  // max number of indices per meshlet (i.e., triangles)
+            uint32_t maxIndicesPerMeshlet = 126 * 3);  // max number of indices per meshlet (i.e., triangles)
     };
 }

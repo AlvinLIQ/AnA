@@ -415,45 +415,29 @@ void Meshes::buildMeshlets(
     // Iterate over each mesh
     for (const auto& mesh : meshes)
     {
-        uint32_t totalVertices = mesh.vertices.size();
-        uint32_t totalIndices = mesh.indices.size();
-
-        uint32_t vertexOffset = 0;
+        uint32_t totalIndices = static_cast<uint32_t>(mesh.indices.size());
         uint32_t indexOffset = 0;
-
-        // Process vertices and indices in chunks for meshlets
-        while (vertexOffset < totalVertices)
+        uint32_t indexEnd;
+        
+        while  (indexOffset < totalIndices)
         {
-            Meshlet meshlet;
-            meshlet.vertexCount = 0;
-            meshlet.indexCount = 0;
-
-            // Determine how many vertices to take for this meshlet
-            uint32_t vertexEnd = std::min(vertexOffset + maxVerticesPerMeshlet, totalVertices);
-            uint32_t vertexCount = vertexEnd - vertexOffset;
-
-            // Store the vertices of the meshlet (just indices for the mesh)
-            for (uint32_t i = vertexOffset; i < vertexEnd; ++i)
+            std::unordered_map<uint32_t, uint32_t> vertices{};
+            Meshlet meshlet{};
+            indexEnd = std::min(indexOffset + maxIndicesPerMeshlet, totalIndices);
+            for (; indexOffset < indexEnd; indexOffset++)
             {
-                meshlet.vertices[meshlet.vertexCount++] = i + mesh.vertexOffset;  // Add offset for global vertex index
+                uint32_t index = mesh.indices[indexOffset];
+                if (vertices.find(index) == vertices.end())
+                {
+                    if(static_cast<uint32_t>(vertices.size()) >= maxVerticesPerMeshlet)
+                        break;
+                
+                    vertices.insert(std::pair<uint32_t, uint32_t>(index, static_cast<uint32_t>(vertices.size())));
+                    meshlet.vertices[meshlet.vertexCount++] = index + mesh.vertexOffset;
+                }
+                meshlet.indices[meshlet.indexCount++] = vertices[index];
             }
-
-            // Process the indices in this meshlet (usually triangles, 3 indices per triangle)
-            while (indexOffset < totalIndices && meshlet.indexCount < maxIndicesPerMeshlet * 3)
-            {
-                uint32_t triangleVertexCount = meshlet.indexCount / 3;
-                if (triangleVertexCount >= vertexCount / 3) break;
-
-                // Assuming each index refers to a triangle
-                meshlet.indices[meshlet.indexCount++] = mesh.indices[indexOffset] + mesh.indexOffset;  // Add offset for global index
-                indexOffset++;
-            }
-
-            // Add the meshlet to the list
             meshlets.push_back(meshlet);
-
-            // Move to the next chunk of vertices and indices
-            vertexOffset = vertexEnd;
         }
     }
 }

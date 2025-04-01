@@ -290,6 +290,6 @@ void ResourceManager::createDefaultShaders()
 
     Shaders.emplace_back(aDevice, Mesh_task, Mesh_mesh, Basic_frag, renderPass
         , descriptorConfig);
-    std::vector<Descriptor::DescriptorConfig> emptyConfig{};
-    Shaders.emplace_back(aDevice, Test_task, Test_mesh, Test_frag, renderPass, emptyConfig);
+    //std::vector<Descriptor::DescriptorConfig> emptyConfig{};
+    Shaders.emplace_back(aDevice, Test_task, Test_mesh, Test_frag, renderPass, descriptorConfig);
 }
