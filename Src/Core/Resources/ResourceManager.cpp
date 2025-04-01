@@ -288,8 +288,7 @@ void ResourceManager::createDefaultShaders()
     meshletConfig.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_MESH_BIT_EXT;
     descriptorConfig.push_back(meshletConfig);
 
-    Shaders.emplace_back(aDevice, Mesh_task, Mesh_mesh, Basic_frag, renderPass
+    Shaders.emplace_back(aDevice, Mesh_task, Mesh_mesh, Mesh_frag, renderPass
         , descriptorConfig);
     //std::vector<Descriptor::DescriptorConfig> emptyConfig{};
-    Shaders.emplace_back(aDevice, Test_task, Test_mesh, Test_frag, renderPass, descriptorConfig);
 }

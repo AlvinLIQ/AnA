@@ -11,7 +11,7 @@
 * [X] Lighting System
 * [X] Multi-Thread Commandbuffer Recording
 * [X] Draw Indirectly
-* [ ] Mesh Shader
+* [X] Mesh Shader
 * [ ] Animation System
 * [ ] Cascaded Shaodow Maps
 * [X] XML to GUI

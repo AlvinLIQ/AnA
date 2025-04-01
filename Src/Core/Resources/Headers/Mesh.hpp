@@ -18,8 +18,8 @@ namespace AnA
     };
     struct Meshlet
     {
-        uint32_t vertices[64];
-        uint32_t indices[126 * 3];
+        uint32_t vertices[128];
+        uint32_t indices[256 * 3];
         uint32_t indexCount;
         uint32_t vertexCount;
     };
@@ -116,7 +116,7 @@ namespace AnA
         std::vector<Meshlet> meshlets;
         Buffer meshletsBuffer{};
         void buildMeshlets(
-            uint32_t maxVerticesPerMeshlet = 64,  // max number of vertices per meshlet
-            uint32_t maxIndicesPerMeshlet = 126 * 3);  // max number of indices per meshlet (i.e., triangles)
+            uint32_t maxVerticesPerMeshlet = 128,  // max number of vertices per meshlet
+            uint32_t maxIndicesPerMeshlet = 256 * 3);  // max number of indices per meshlet (i.e., triangles)
     };
 }

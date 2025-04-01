@@ -1,17 +1,7 @@
 #version 460
 #extension GL_EXT_mesh_shader : require
 
-// Meshlet size and task count based on platform
-#if defined(PLATFORM_NVIDIA)
-    const int taskCount = 32; // Use 32 mesh tasks for NVIDIA
-#elif defined(PLATFORM_AMD)
-    const int taskCount = 16; // Use 16 mesh tasks for AMD
-#else
-    // Default fallback case
-    const int taskCount = 32;
-#endif
-
 void main()
 {
-	EmitMeshTasksEXT(taskCount, 1, 1);
+	EmitMeshTasksEXT(32, 1, 1);
 }
