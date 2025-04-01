@@ -4,10 +4,15 @@
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 layout(triangles, max_vertices = 64, max_primitives = 126) out;
 
-layout(location = 0) out VertexOutput
-{
-	vec4 color;
-} vertexOutput[];
+struct VertexOutput {
+    vec2 texCoord;
+    uint texID;
+    vec3 normalSpace;
+    vec3 vertexPosition;
+    vec4 viewPos;
+};
+
+layout(location = 0) out VertexOutput vertexOutput[];
 
 struct Vertex
 {
@@ -53,7 +58,7 @@ struct Meshlet
    uint vertexCount; 
 };
 
-layout(std140, set = 6, binding = 0) buffer meshletSSBO
+layout(std430, set = 6, binding = 0) buffer meshletSSBO
 {
     Meshlet meshlets[];
 } msbo;
@@ -72,7 +77,7 @@ const vec4[3] colors = {
 
 void main()
 {
-	uint iid = gl_LocalInvocationID.x;
+	uint iid = gl_WorkGroupID.x;
     uint vertexCount = msbo.meshlets[iid].vertexCount;
     uint indexCount = msbo.meshlets[iid].indexCount;
 //gl_LocalInvocationIndex
@@ -81,12 +86,18 @@ void main()
     for (uint i = 0; i < vertexCount; i++)
     {
         Vertex vertex = vsbo.vertices[msbo.meshlets[iid].vertices[i]];
+        vec4 vertexPos = vec4(vertex.position, 1.0);
+        vec4 viewPos = cbo.view * vertexPos;
         gl_MeshVerticesEXT[i].gl_Position = viewProj * vec4(vertex.position, 1.0);
-        vertexOutput[i].color = colors[iid % 3];
+        vertexOutput[i].texCoord = vertex.uv;
+        vertexOutput[i].texID = vertex.texIndex;
+        vertexOutput[i].normalSpace = vertex.normal;
+        vertexOutput[i].vertexPosition = vertex.position;
+        vertexOutput[i].viewPos = viewPos;
     }
-    for (uint i = 0, j; i < indexCount; i += 3, j += 1)
+    for (uint i = 0; i < indexCount; i += 3)
     {
-	    gl_PrimitiveTriangleIndicesEXT[j] = uvec3(
+	    gl_PrimitiveTriangleIndicesEXT[i / 3] = uvec3(
             msbo.meshlets[iid].indices[i], 
             msbo.meshlets[iid].indices[i + 1],
             msbo.meshlets[iid].indices[i + 2]);

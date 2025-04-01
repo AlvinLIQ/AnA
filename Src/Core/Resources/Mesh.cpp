@@ -424,19 +424,32 @@ void Meshes::buildMeshlets(
             std::unordered_map<uint32_t, uint32_t> vertices{};
             Meshlet meshlet{};
             indexEnd = std::min(indexOffset + maxIndicesPerMeshlet, totalIndices);
-            for (; indexOffset < indexEnd; indexOffset++)
+            for (; indexOffset < indexEnd; indexOffset+= 3)
             {
-                uint32_t index = mesh.indices[indexOffset];
-                if (vertices.find(index) == vertices.end())
+                if (vertices.try_emplace(mesh.indices[indexOffset], static_cast<uint32_t>(vertices.size())).second)
                 {
-                    if(static_cast<uint32_t>(vertices.size()) >= maxVerticesPerMeshlet)
+                    if (static_cast<uint32_t>(vertices.size()) >= maxVerticesPerMeshlet)
                         break;
-                
-                    vertices.insert(std::pair<uint32_t, uint32_t>(index, static_cast<uint32_t>(vertices.size())));
-                    meshlet.vertices[meshlet.vertexCount++] = index + mesh.vertexOffset;
+                    meshlet.vertices[meshlet.vertexCount++] = mesh.indices[indexOffset];
                 }
-                meshlet.indices[meshlet.indexCount++] = vertices[index];
+                if (vertices.try_emplace(mesh.indices[indexOffset + 1], static_cast<uint32_t>(vertices.size())).second)
+                {
+                    if (static_cast<uint32_t>(vertices.size()) >= maxVerticesPerMeshlet)
+                        break;
+                    meshlet.vertices[meshlet.vertexCount++] = mesh.indices[indexOffset + 1];
+                }
+                if (vertices.try_emplace(mesh.indices[indexOffset + 2], static_cast<uint32_t>(vertices.size())).second)
+                {
+                    if (static_cast<uint32_t>(vertices.size()) > maxVerticesPerMeshlet)
+                        break;
+                    meshlet.vertices[meshlet.vertexCount++] = mesh.indices[indexOffset + 2];
+                }
+                meshlet.indices[meshlet.indexCount++] = vertices[mesh.indices[indexOffset]];
+                meshlet.indices[meshlet.indexCount++] = vertices[mesh.indices[indexOffset + 1]];
+                meshlet.indices[meshlet.indexCount++] = vertices[mesh.indices[indexOffset + 2]];
             }
+            if (indexOffset < indexEnd)
+                indexOffset -= 3;
             meshlets.push_back(meshlet);
         }
     }
