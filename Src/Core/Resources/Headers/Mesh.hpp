@@ -65,6 +65,7 @@ namespace AnA
         void CommitBufferUpdate();
         void UpdateAll();
         void UpdateBuffers(Range updateRange);
+        void UpdateMeshlets();
         void UpdateVertexPositions(Mesh& mesh);
         void UpdateVertexPositions(Range updateRange);
 
@@ -95,9 +96,9 @@ namespace AnA
         bool EnableUpdate = false;
     private:
         Device* aDevice;
-        Buffer vertexBuffer{};
+        std::vector<Buffer> vertexBuffers{};
         size_t vertexCount = 0;
-        Buffer indexBuffer{};
+        std::vector<Buffer> indexBuffers{};
         size_t indexCount = 0;
         Buffer drawIndexedIndirectBuffer{};
         Buffer drawMeshIndirectBuffer{};
@@ -116,9 +117,11 @@ namespace AnA
         void updateSSBODescriptor();
         void appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageInfos);
         std::vector<Meshlet> meshlets;
-        Buffer meshletsBuffer{};
+        std::vector<Buffer> meshletsBuffers{};
         void buildMeshlets(
             uint32_t maxVerticesPerMeshlet = 128,  // max number of vertices per meshlet
             uint32_t maxIndicesPerMeshlet = 256 * 3);  // max number of indices per meshlet (i.e., triangles)
+        uint8_t currentBufferIndex = 0;
+        uint8_t nextIndex = 1 % MAX_FRAMES_IN_FLIGHT;
     };
 }

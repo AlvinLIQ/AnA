@@ -8,11 +8,10 @@ Meshes::Meshes(Device* mDevice) : aDevice{mDevice}
 {
     //auto& properties = aDevice->GetPhysicalDeviceProperties();
     batchSize = MaxBatchSize;
+    vertexBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+    indexBuffers.resize(vertexBuffers.size());
 
-    meshletsBuffer = Buffer(aDevice, sizeof(Meshlet) * 1000,
-    VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    meshletsBuffer.Map(0, meshletsBuffer.GetSize());
+    meshletsBuffers.resize(vertexBuffers.size());
 
     drawIndexedIndirectBuffer = Buffer(aDevice, sizeof(VkDrawIndexedIndirectCommand), 
     VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
@@ -168,19 +167,19 @@ void Meshes::RemoveAt(std::vector<uint32_t> meshIndices)
 
 void Meshes::Bind(VkCommandBuffer commandBuffer)
 {
-    vkCmdBindIndexBuffer(commandBuffer, indexBuffer.GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
-    ((VkDrawIndexedIndirectCommand*)drawIndexedIndirectBuffer.GetMappedData())->indexCount = indexBuffer.GetSize() / sizeof(Model::Index);
+    vkCmdBindIndexBuffer(commandBuffer, indexBuffers[currentBufferIndex].GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+    ((VkDrawIndexedIndirectCommand*)drawIndexedIndirectBuffer.GetMappedData())->indexCount = indexBuffers[currentBufferIndex].GetSize() / sizeof(Model::Index);
 }
 
 void Meshes::Draw(VkCommandBuffer commandBuffer)
 {
-    vkCmdDrawIndexed(commandBuffer, indexBuffer.GetSize() / sizeof(Model::Index), 1, 0, 0, 0);
+    vkCmdDrawIndexed(commandBuffer, indexBuffers[currentBufferIndex].GetSize() / sizeof(Model::Index), 1, 0, 0, 0);
 }
 
 void Meshes::Draw(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout, size_t offset, size_t size)
 {
     size_t i, j;
-    sets[DEFAULT_VERTEX_LAYOUT] = vertexDescriptor->GetSets()[0];
+    sets[DEFAULT_VERTEX_LAYOUT] = vertexDescriptor->GetSets()[currentBufferIndex];
     for (i = batchSize, j = 0; i < size; i += batchSize, j++)
     {
         sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors[j]->GetSets()[j];
@@ -213,8 +212,8 @@ void Meshes::DrawIndirect(VkCommandBuffer commandBuffer)
 
 void Meshes::DrawIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout)
 {    
-    sets[DEFAULT_VERTEX_LAYOUT] = vertexDescriptor->GetSets()[0];
-    sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors.front()->GetSets()[0];
+    sets[DEFAULT_VERTEX_LAYOUT] = vertexDescriptor->GetSets()[currentBufferIndex];
+    sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors.front()->GetSets()[currentBufferIndex];
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
     pipelineLayout, 0, static_cast<uint32_t>(sets.size()),
     sets.data(), 0, nullptr);
@@ -229,9 +228,9 @@ void Meshes::DrawMesh(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLa
 
 void Meshes::DrawMesh(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout)
 {
-    sets[DEFAULT_VERTEX_LAYOUT] = vertexDescriptor->GetSets()[0];
+    sets[DEFAULT_VERTEX_LAYOUT] = vertexDescriptor->GetSets()[currentBufferIndex];
     sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors.front()->GetSets()[0];
-    sets[DEFAULT_MESHLET_LAYOUT] = meshDescriptor->GetSets()[0];
+    sets[DEFAULT_MESHLET_LAYOUT] = meshDescriptor->GetSets()[currentBufferIndex];
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
     pipelineLayout, 0, static_cast<uint32_t>(sets.size()),
     sets.data(), 0, nullptr);
@@ -241,9 +240,9 @@ void Meshes::DrawMesh(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet
 
 void Meshes::DrawMeshIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout)
 {
-    sets[DEFAULT_VERTEX_LAYOUT] = vertexDescriptor->GetSets()[0];
+    sets[DEFAULT_VERTEX_LAYOUT] = vertexDescriptor->GetSets()[currentBufferIndex];
     sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors.front()->GetSets()[0];
-    sets[DEFAULT_MESHLET_LAYOUT] = meshDescriptor->GetSets()[0];
+    sets[DEFAULT_MESHLET_LAYOUT] = meshDescriptor->GetSets()[currentBufferIndex];
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
     pipelineLayout, 0, static_cast<uint32_t>(sets.size()),
     sets.data(), 0, nullptr);
@@ -264,8 +263,8 @@ void Meshes::CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer)
 
 void Meshes::CommitBufferUpdate()
 {
-    auto vertices = ((Model::Vertex*)vertexBuffer.GetMappedData());
-    auto indices = ((Model::Index*)indexBuffer.GetMappedData());
+    auto vertices = ((Model::Vertex*)vertexBuffers[currentBufferIndex].GetMappedData());
+    auto indices = ((Model::Index*)indexBuffers[currentBufferIndex].GetMappedData());
     for (auto& updateRange : updateQueue)
     {
         commitVertexBufferUpdate(vertices, indices, updateRange);
@@ -275,47 +274,45 @@ void Meshes::CommitBufferUpdate()
 
 void Meshes::UpdateAll()
 {
-    if (!vertexBuffer.GetBuffer())
+    if (!vertexBuffers[currentBufferIndex].GetBuffer())
     {
         if (!EnableUpdate)
             return;
-        auto newVertexBuffer = Buffer(aDevice, vertexCount * sizeof(Model::Vertex), 
+        vertexBuffers[nextIndex] = Buffer(aDevice, vertexCount * sizeof(Model::Vertex), 
         VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         //vertexBuffer->CopyToBuffer(Vertices.data(), Vertices.size() * sizeof(Model::Vertex));
 
-        auto newIndexBuffer = Buffer(aDevice, indexCount * sizeof(Model::Index), 
+        indexBuffers[nextIndex] = Buffer(aDevice, indexCount * sizeof(Model::Index), 
             VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         //indexBuffer->CopyToBuffer(Indices.data(), Indices.size() * sizeof(Model::Index));
-        newVertexBuffer.Map(0, newVertexBuffer.GetSize());
-        newIndexBuffer.Map(0, newIndexBuffer.GetSize());
-        UpdateBuffers({0, meshes.size()});
-        vertexBuffer = newVertexBuffer;
-        indexBuffer = newIndexBuffer;
-        buildMeshlets();
-        memcpy(meshletsBuffer.GetMappedData(), meshlets.data(), sizeof(Meshlet) * meshlets.size());
+        vertexBuffers[nextIndex].Map(0, vertexBuffers[nextIndex].GetSize());
+        indexBuffers[nextIndex].Map(0, indexBuffers[nextIndex].GetSize());
+        UpdateMeshlets();
+
         createSSBODescriptor();
         updateSSBODescriptor();
+        UpdateBuffers({0, meshes.size()});
         commandBufferNeedUpdate = true;
         return;
     }
     Resource::ResourceManager::GetCurrent()->TaskPool.Enqueue([this]()
     {
-        auto newVertexBuffer = new Buffer(aDevice, vertexCount * sizeof(Model::Vertex), 
+        vertexBuffers[nextIndex] = Buffer(aDevice, vertexCount * sizeof(Model::Vertex), 
         VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        //vertexBuffer->CopyToBuffer(Vertices.data(), Vertices.size() * sizeof(Model::Vertex));
 
-        auto newIndexBuffer = new Buffer(aDevice, indexCount * sizeof(Model::Index), 
+        indexBuffers[nextIndex] = Buffer(aDevice, indexCount * sizeof(Model::Index), 
             VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        //indexBuffer->CopyToBuffer(Indices.data(), Indices.size() * sizeof(Model::Index));
-        newVertexBuffer->Map(0, newVertexBuffer->GetSize());
-        newIndexBuffer->Map(0, newIndexBuffer->GetSize());
-        CommitBufferUpdate(newVertexBuffer, newIndexBuffer);
-        vertexBuffer.ReplaceRequest(newVertexBuffer);
-        indexBuffer.ReplaceRequest(newIndexBuffer);
+        vertexBuffers[nextIndex].Map(0, vertexBuffers[nextIndex].GetSize());
+        indexBuffers[nextIndex].Map(0, indexBuffers[nextIndex].GetSize());
+
+        
+        UpdateMeshlets();
+        CommitBufferUpdate(&vertexBuffers[nextIndex], &indexBuffers[nextIndex]);
+
         updateSSBODescriptor();
         commandBufferNeedUpdate = true;
     });
@@ -327,9 +324,23 @@ void Meshes::UpdateBuffers(Range updateRange)
         updateQueue.push_back(updateRange);
 }
 
+void Meshes::UpdateMeshlets()
+{
+    buildMeshlets();
+    if (!meshletsBuffers[nextIndex].GetBuffer() || meshletsBuffers[nextIndex].GetSize() < meshlets.size() * sizeof(Meshlet))
+    {
+        meshletsBuffers[nextIndex] = Buffer(aDevice, meshlets.size() * sizeof(Meshlet),
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        meshletsBuffers[nextIndex].Map(0, meshletsBuffers[nextIndex].GetSize());
+
+        memcpy(meshletsBuffers[nextIndex].GetMappedData(), meshlets.data(), sizeof(Meshlet) * meshlets.size());
+    }
+}
+
 void Meshes::UpdateVertexPositions(Mesh& mesh)
 {
-    auto vertices = ((Model::Vertex*)vertexBuffer.GetMappedData());
+    auto vertices = ((Model::Vertex*)vertexBuffers[currentBufferIndex].GetMappedData());
     glm::mat3 model = mesh.transform.mat3();
     for (size_t i = 0; i < mesh.vertices.size(); i++)
     {
@@ -341,7 +352,7 @@ void Meshes::UpdateVertexPositions(Mesh& mesh)
 
 void Meshes::UpdateVertexPositions(Range updateRange)
 {
-    auto vertices = ((Model::Vertex*)vertexBuffer.GetMappedData());
+    auto vertices = ((Model::Vertex*)vertexBuffers[currentBufferIndex].GetMappedData());
     for (uint32_t i = 0; i < updateRange.y; i++)
     {
         auto& mesh = meshes[updateRange.x + i];
@@ -378,12 +389,12 @@ void Meshes::createSSBODescriptor()
 {
     auto& descriptorSetLayout = 
         Resource::ResourceManager::GetCurrent()->Shaders[0].GetDescriptors()[DEFAULT_VERTEX_LAYOUT]->GetLayout();
-    vertexDescriptor = new Descriptor(aDevice, 1, 
+    vertexDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT, 
         1,
         descriptorSetLayout,
         VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
         VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_MESH_BIT_EXT);
-    meshDescriptor = new Descriptor(aDevice, 1, 
+    meshDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT, 
         1,
         descriptorSetLayout,
         VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
@@ -391,16 +402,21 @@ void Meshes::createSSBODescriptor()
 }
 
 void Meshes::updateSSBODescriptor()
-{
+{    
     VkDescriptorBufferInfo bufferInfo;
-    bufferInfo.buffer = vertexBuffer.GetBuffer();
+    bufferInfo.buffer = vertexBuffers[nextIndex].GetBuffer();
     bufferInfo.offset = 0;
-    bufferInfo.range = vertexBuffer.GetSize();
-    vertexDescriptor->UpdateDescriptorSets(&bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-    bufferInfo.buffer = meshletsBuffer.GetBuffer();
+    bufferInfo.range = vertexBuffers[nextIndex].GetSize();
+    aDevice->UpdateDescriptorSet(bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 
+        vertexDescriptor->GetSets()[nextIndex]);
+
+    bufferInfo.buffer = meshletsBuffers[nextIndex].GetBuffer();
     bufferInfo.offset = 0;
     bufferInfo.range = meshlets.size() * sizeof(Meshlet);
-    meshDescriptor->UpdateDescriptorSets(&bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+    aDevice->UpdateDescriptorSet(bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 
+        meshDescriptor->GetSets()[nextIndex]);
+    currentBufferIndex = nextIndex;
+    nextIndex = NextFrameIndex(currentBufferIndex);
 }
 
 void Meshes::appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageInfos)

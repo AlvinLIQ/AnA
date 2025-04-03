@@ -91,6 +91,7 @@ namespace AnA
 
         void CreateSampler(VkSampler* pSampler, enum VkSamplerAddressMode samplerAddressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT, VkBorderColor borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK, VkCompareOp compareOp = VK_COMPARE_OP_ALWAYS);
 
+        void UpdateDescriptorSet(const VkDescriptorBufferInfo& bufferInfo, uint32_t binding, VkDescriptorType descriptorType, VkDescriptorSet descriptorSet);
         void CreateDescriptorPool(int descriptorCount, VkDescriptorPool& descriptorPool, VkDescriptorType descriptorType, VkDescriptorPoolCreateFlags flags = 0);
         void CreateDescriptorSets(Buffer* buffers, VkDeviceSize bufferSize, uint32_t binding, int descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets);
         void CreateDescriptorSets(VkDescriptorImageInfo* imageInfos, uint32_t binding, int descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets);
