@@ -8,20 +8,31 @@ Meshes::Meshes(Device* mDevice) : aDevice{mDevice}
 {
     //auto& properties = aDevice->GetPhysicalDeviceProperties();
     batchSize = MaxBatchSize;
+
     meshletsBuffer = Buffer(aDevice, sizeof(Meshlet) * 1000,
     VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
     meshletsBuffer.Map(0, meshletsBuffer.GetSize());
-    indirectBuffer = Buffer(aDevice, sizeof(VkDrawIndexedIndirectCommand), 
+
+    drawIndexedIndirectBuffer = Buffer(aDevice, sizeof(VkDrawIndexedIndirectCommand), 
     VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    indirectBuffer.Map(0, indirectBuffer.GetSize());
-    auto indirectCommand = (VkDrawIndexedIndirectCommand*)indirectBuffer.GetMappedData();
-    indirectCommand->firstIndex = 0;
-    indirectCommand->firstInstance = 0;
-    indirectCommand->instanceCount = 1;
-    indirectCommand->vertexOffset = 0;
+    drawIndexedIndirectBuffer.Map(0, drawIndexedIndirectBuffer.GetSize());
+    auto drawIndexedIndirectCommand = (VkDrawIndexedIndirectCommand*)drawIndexedIndirectBuffer.GetMappedData();
+    drawIndexedIndirectCommand->firstIndex = 0;
+    drawIndexedIndirectCommand->firstInstance = 0;
+    drawIndexedIndirectCommand->instanceCount = 1;
+    drawIndexedIndirectCommand->vertexOffset = 0;
+
+    drawMeshIndirectBuffer = Buffer(aDevice, sizeof(VkDrawMeshTasksIndirectCommandEXT), 
+    VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    drawMeshIndirectBuffer.Map(0, drawMeshIndirectBuffer.GetSize());
+    auto drawMeshIndirectCommand = (VkDrawMeshTasksIndirectCommandEXT*)drawMeshIndirectBuffer.GetMappedData();
+    drawMeshIndirectCommand->groupCountX = 1;
+    drawMeshIndirectCommand->groupCountY = 1;
+    drawMeshIndirectCommand->groupCountZ = 1;
+
     countBuffer = Buffer(aDevice, 4, 
-    VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
     countBuffer.Map(0, 4);
     *(uint32_t*)countBuffer.GetMappedData() = 1;
 }
@@ -157,11 +168,8 @@ void Meshes::RemoveAt(std::vector<uint32_t> meshIndices)
 
 void Meshes::Bind(VkCommandBuffer commandBuffer)
 {
-    //VkDeviceSize offset = 0;
-    //see you later buddy
-    //vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer.GetBuffer(), &offset);
     vkCmdBindIndexBuffer(commandBuffer, indexBuffer.GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
-    ((VkDrawIndexedIndirectCommand*)indirectBuffer.GetMappedData())->indexCount = indexBuffer.GetSize() / sizeof(Model::Index);
+    ((VkDrawIndexedIndirectCommand*)drawIndexedIndirectBuffer.GetMappedData())->indexCount = indexBuffer.GetSize() / sizeof(Model::Index);
 }
 
 void Meshes::Draw(VkCommandBuffer commandBuffer)
@@ -200,7 +208,7 @@ void Meshes::Draw(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& s
 
 void Meshes::DrawIndirect(VkCommandBuffer commandBuffer)
 {
-    vkCmdDrawIndexedIndirectCount(commandBuffer, indirectBuffer.GetBuffer(), 0, countBuffer.GetBuffer(), 0, 1, sizeof(VkDrawIndexedIndirectCommand));
+    vkCmdDrawIndexedIndirectCount(commandBuffer, drawIndexedIndirectBuffer.GetBuffer(), 0, countBuffer.GetBuffer(), 0, 1, sizeof(VkDrawIndexedIndirectCommand));
 }
 
 void Meshes::DrawIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout)
@@ -211,7 +219,7 @@ void Meshes::DrawIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescripto
     pipelineLayout, 0, static_cast<uint32_t>(sets.size()),
     sets.data(), 0, nullptr);
 
-    vkCmdDrawIndexedIndirectCount(commandBuffer, indirectBuffer.GetBuffer(), 0, countBuffer.GetBuffer(), 0, 1, sizeof(VkDrawIndexedIndirectCommand));
+    vkCmdDrawIndexedIndirectCount(commandBuffer, drawIndexedIndirectBuffer.GetBuffer(), 0, countBuffer.GetBuffer(), 0, 1, sizeof(VkDrawIndexedIndirectCommand));
 }
 
 void Meshes::DrawMesh(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
@@ -229,6 +237,20 @@ void Meshes::DrawMesh(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet
     sets.data(), 0, nullptr);
 
     aDevice->vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
+}
+
+void Meshes::DrawMeshIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout)
+{
+    sets[DEFAULT_VERTEX_LAYOUT] = vertexDescriptor->GetSets()[0];
+    sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors.front()->GetSets()[0];
+    sets[DEFAULT_MESHLET_LAYOUT] = meshDescriptor->GetSets()[0];
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+    pipelineLayout, 0, static_cast<uint32_t>(sets.size()),
+    sets.data(), 0, nullptr);
+
+    aDevice->vkCmdDrawMeshTasksIndirectCountEXT(commandBuffer, drawMeshIndirectBuffer.GetBuffer(), 0, 
+        countBuffer.GetBuffer(), 
+        0, 1, sizeof(VkDrawMeshTasksIndirectCommandEXT));
 }
 
 void Meshes::CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer)

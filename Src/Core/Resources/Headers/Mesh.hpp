@@ -48,6 +48,7 @@ namespace AnA
         void DrawIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout);
         void DrawMesh(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout);
         void DrawMesh(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout);
+        void DrawMeshIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout);
         bool NeedUpdate()
         {
             return updateQueue.size();
@@ -98,7 +99,8 @@ namespace AnA
         size_t vertexCount = 0;
         Buffer indexBuffer{};
         size_t indexCount = 0;
-        Buffer indirectBuffer{};
+        Buffer drawIndexedIndirectBuffer{};
+        Buffer drawMeshIndirectBuffer{};
         Buffer countBuffer{};
         std::vector<Mesh> meshes;
         uint32_t batchSize;

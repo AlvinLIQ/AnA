@@ -260,7 +260,7 @@ void App::keyCallback(GLFWwindow* window, int key, int scancode, int action, int
 void renderMeshesIndirecct(VkCommandBuffer commandBuffer)
 {
     auto aResourceManager = Resource::ResourceManager::GetCurrent();
-    Systems::RenderSystem::GetCurrent()->RenderMeshes(commandBuffer, 
+    Systems::RenderSystem::GetCurrent()->RenderMeshesIndirect(commandBuffer, 
         aResourceManager->SceneObjects, 
         aResourceManager->Shaders.back());
     /*
