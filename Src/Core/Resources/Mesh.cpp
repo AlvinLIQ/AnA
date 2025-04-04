@@ -327,14 +327,43 @@ void Meshes::UpdateBuffers(Range updateRange)
 void Meshes::UpdateMeshlets()
 {
     buildMeshlets();
-    if (!meshletsBuffers[nextIndex].GetBuffer() || meshletsBuffers[nextIndex].GetSize() < meshlets.size() * sizeof(Meshlet))
+    uint32_t minMeshletBufferSize = (meshletVertexCount + meshletIndexCount + 
+        3 * static_cast<uint32_t>(meshlets.size())) * sizeof(uint32_t);
+    if (!meshletsBuffers[nextIndex].GetBuffer() || 
+        meshletsBuffers[nextIndex].GetSize() < minMeshletBufferSize)
     {
-        meshletsBuffers[nextIndex] = Buffer(aDevice, meshlets.size() * sizeof(Meshlet),
-        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        meshletsBuffers[nextIndex].Map(0, meshletsBuffers[nextIndex].GetSize());
+        meshletsBuffers[nextIndex] = Buffer(aDevice, minMeshletBufferSize,
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | 
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-        memcpy(meshletsBuffers[nextIndex].GetMappedData(), meshlets.data(), sizeof(Meshlet) * meshlets.size());
+        meshletsBuffers[nextIndex].Map(0, meshletsBuffers[nextIndex].GetSize());
+    }
+    uint32_t bufferId = 0;
+    uint32_t* buffer = (uint32_t*)meshletsBuffers[nextIndex].GetMappedData();
+    uint32_t vertexOffset = 0, indexOffset = 0;
+    //buffer[bufferId++] = static_cast<uint32_t>(meshlets.size());
+    for (size_t i = 0; i < meshlets.size(); i++)
+    {
+        auto& meshlet = meshlets[i];
+        buffer[bufferId++] = vertexOffset + indexOffset + (i * 2) + static_cast<uint32_t>(meshlets.size());
+        vertexOffset += meshlet.vertexCount;
+        indexOffset += meshlet.indexCount;
+    }
+    for (auto& meshlet : meshlets)
+    {
+        buffer[bufferId++] = meshlet.vertexCount;
+        buffer[bufferId++] = meshlet.indexCount;
+
+        for (uint32_t i = 0; i < meshlet.vertexCount; i++)
+            buffer[bufferId++] = meshlet.vertices[i];
+        for (uint32_t i = 0; i < meshlet.indexCount; i += 3)
+        {
+            //replace to uint8 later
+            buffer[bufferId++] = meshlet.indices[i];
+            buffer[bufferId++] = meshlet.indices[i + 1];
+            buffer[bufferId++] = meshlet.indices[i + 2];
+        }
     }
 }
 
@@ -412,7 +441,7 @@ void Meshes::updateSSBODescriptor()
 
     bufferInfo.buffer = meshletsBuffers[nextIndex].GetBuffer();
     bufferInfo.offset = 0;
-    bufferInfo.range = meshlets.size() * sizeof(Meshlet);
+    bufferInfo.range = meshletsBuffers[nextIndex].GetSize();
     aDevice->UpdateDescriptorSet(bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 
         meshDescriptor->GetSets()[nextIndex]);
     currentBufferIndex = nextIndex;
@@ -450,6 +479,8 @@ void Meshes::buildMeshlets(
     uint32_t maxIndicesPerMeshlet)  // max number of indices per meshlet (i.e., triangles)
 {
     meshlets.clear();
+    meshletVertexCount = 0;
+    meshletIndexCount = 0;
     // Iterate over each mesh
     for (const auto& mesh : meshes)
     {
@@ -489,6 +520,8 @@ void Meshes::buildMeshlets(
             if (indexOffset < indexEnd)
                 indexOffset -= 3;
             meshlets.push_back(meshlet);
+            meshletVertexCount += meshlet.vertexCount;
+            meshletIndexCount += meshlet.indexCount;
         }
     }
 }

@@ -116,6 +116,8 @@ namespace AnA
         void createSSBODescriptor();
         void updateSSBODescriptor();
         void appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageInfos);
+        uint32_t meshletVertexCount = 0;
+        uint32_t meshletIndexCount = 0;
         std::vector<Meshlet> meshlets;
         std::vector<Buffer> meshletsBuffers{};
         void buildMeshlets(
