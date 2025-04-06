@@ -19,7 +19,7 @@ namespace AnA
     struct Meshlet
     {
         uint32_t vertices[128];
-        uint32_t indices[256 * 3];
+        uint8_t indices[256 * 3];
         uint32_t indexCount;
         uint32_t vertexCount;
     };

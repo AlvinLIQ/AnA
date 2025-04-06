@@ -327,7 +327,7 @@ void Meshes::UpdateBuffers(Range updateRange)
 void Meshes::UpdateMeshlets()
 {
     buildMeshlets();
-    uint32_t minMeshletBufferSize = (meshletVertexCount + meshletIndexCount + 
+    uint32_t minMeshletBufferSize = (meshletVertexCount + meshletIndexCount / 3 + 
         3 * static_cast<uint32_t>(meshlets.size())) * sizeof(uint32_t);
     if (!meshletsBuffers[nextIndex].GetBuffer() || 
         meshletsBuffers[nextIndex].GetSize() < minMeshletBufferSize)
@@ -341,28 +341,27 @@ void Meshes::UpdateMeshlets()
     }
     uint32_t bufferId = 0;
     uint32_t* buffer = (uint32_t*)meshletsBuffers[nextIndex].GetMappedData();
-    uint32_t vertexOffset = 0, indexOffset = 0;
+    uint32_t vertexOffset = 0, primitiveOffset = 0;
     //buffer[bufferId++] = static_cast<uint32_t>(meshlets.size());
     for (size_t i = 0; i < meshlets.size(); i++)
     {
         auto& meshlet = meshlets[i];
-        buffer[bufferId++] = vertexOffset + indexOffset + (i * 2) + static_cast<uint32_t>(meshlets.size());
+        buffer[bufferId++] = vertexOffset + primitiveOffset + (i * 2) + static_cast<uint32_t>(meshlets.size());
         vertexOffset += meshlet.vertexCount;
-        indexOffset += meshlet.indexCount;
+        primitiveOffset += meshlet.indexCount / 3;
     }
     for (auto& meshlet : meshlets)
     {
         buffer[bufferId++] = meshlet.vertexCount;
-        buffer[bufferId++] = meshlet.indexCount;
+        buffer[bufferId++] = meshlet.indexCount / 3;
 
         for (uint32_t i = 0; i < meshlet.vertexCount; i++)
             buffer[bufferId++] = meshlet.vertices[i];
         for (uint32_t i = 0; i < meshlet.indexCount; i += 3)
         {
-            //replace to uint8 later
-            buffer[bufferId++] = meshlet.indices[i];
-            buffer[bufferId++] = meshlet.indices[i + 1];
-            buffer[bufferId++] = meshlet.indices[i + 2];
+            buffer[bufferId++] = (meshlet.indices[i] << 0u) |
+                (meshlet.indices[i + 1] << 8u) |
+                (meshlet.indices[i + 2] << 16u);
         }
     }
 }
@@ -490,24 +489,24 @@ void Meshes::buildMeshlets(
         
         while  (indexOffset < totalIndices)
         {
-            std::unordered_map<uint32_t, uint32_t> vertices{};
+            std::unordered_map<uint32_t, uint8_t> vertices{};
             Meshlet meshlet{};
             indexEnd = std::min(indexOffset + maxIndicesPerMeshlet, totalIndices);
             for (; indexOffset < indexEnd; indexOffset+= 3)
             {
-                if (vertices.try_emplace(mesh.indices[indexOffset], static_cast<uint32_t>(vertices.size())).second)
+                if (vertices.try_emplace(mesh.indices[indexOffset], static_cast<uint8_t>(vertices.size())).second)
                 {
                     if (static_cast<uint32_t>(vertices.size()) >= maxVerticesPerMeshlet)
                         break;
                     meshlet.vertices[meshlet.vertexCount++] = mesh.indices[indexOffset];
                 }
-                if (vertices.try_emplace(mesh.indices[indexOffset + 1], static_cast<uint32_t>(vertices.size())).second)
+                if (vertices.try_emplace(mesh.indices[indexOffset + 1], static_cast<uint8_t>(vertices.size())).second)
                 {
                     if (static_cast<uint32_t>(vertices.size()) >= maxVerticesPerMeshlet)
                         break;
                     meshlet.vertices[meshlet.vertexCount++] = mesh.indices[indexOffset + 1];
                 }
-                if (vertices.try_emplace(mesh.indices[indexOffset + 2], static_cast<uint32_t>(vertices.size())).second)
+                if (vertices.try_emplace(mesh.indices[indexOffset + 2], static_cast<uint8_t>(vertices.size())).second)
                 {
                     if (static_cast<uint32_t>(vertices.size()) > maxVerticesPerMeshlet)
                         break;

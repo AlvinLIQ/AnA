@@ -79,10 +79,10 @@ void main()
 {
 	uint iid = msbo.meshlets[gl_WorkGroupID.x];
     uint vertexCount = msbo.meshlets[iid++];
-    uint indexCount = msbo.meshlets[iid++];
+    uint primitiveCount = msbo.meshlets[iid++];
 //gl_LocalInvocationIndex
 	mat4 viewProj = cbo.proj * cbo.view;
-	SetMeshOutputsEXT(vertexCount, indexCount / 3);
+	SetMeshOutputsEXT(vertexCount, primitiveCount);
     for (uint i = 0; i < vertexCount; i++)
     {
         Vertex vertex = vsbo.vertices[msbo.meshlets[iid + i]];
@@ -96,11 +96,12 @@ void main()
         vertexOutput[i].viewPos = viewPos;
     }
     iid += vertexCount;
-    for (uint i = 0; i < indexCount; i += 3)
+    for (uint i = 0; i < primitiveCount; i++)
     {
-	    gl_PrimitiveTriangleIndicesEXT[i / 3] = uvec3(
-            msbo.meshlets[iid + i], 
-            msbo.meshlets[iid + i + 1],
-            msbo.meshlets[iid + i + 2]);
+        uint packed = msbo.meshlets[iid + i];
+	    gl_PrimitiveTriangleIndicesEXT[i] = uvec3(
+            (packed >> 0u) & 0xFFu, 
+            (packed >> 8u) & 0xFFu,
+            (packed >> 16u) & 0xFFu);
     }
 }
