@@ -77,7 +77,7 @@ const vec4[3] colors = {
 
 void main()
 {
-	uint iid = msbo.meshlets[gl_WorkGroupID.x];
+	uint iid = msbo.meshlets[gl_WorkGroupID.x] + 1;
     uint vertexCount = msbo.meshlets[iid++];
     uint primitiveCount = msbo.meshlets[iid++];
 //gl_LocalInvocationIndex

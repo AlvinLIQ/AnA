@@ -344,7 +344,7 @@ void Meshes::UpdateMeshlets()
     uint32_t bufferId = 0;
     uint32_t* buffer = (uint32_t*)meshletsBuffers[nextIndex].GetMappedData();
     uint32_t vertexOffset = 0, primitiveOffset = 0;
-    //buffer[bufferId++] = static_cast<uint32_t>(meshlets.size());
+    buffer[bufferId++] = static_cast<uint32_t>(meshlets.size());
     for (size_t i = 0; i < meshlets.size(); i++)
     {
         auto& meshlet = meshlets[i];
@@ -417,18 +417,20 @@ void Meshes::commitVertexBufferUpdate(Model::Vertex* vertices, Model::Index* ind
 
 void Meshes::createSSBODescriptor()
 {
-    auto& descriptorSetLayout = 
-        Resource::ResourceManager::GetCurrent()->Shaders[0].GetDescriptors()[DEFAULT_VERTEX_LAYOUT]->GetLayout();
+    auto& shaders = Resource::ResourceManager::GetCurrent()->Shaders;
+    auto& vertexDescriptorSetLayout = 
+        shaders.front().GetDescriptors()[DEFAULT_VERTEX_LAYOUT]->GetLayout();
+    auto& meshDescriptorSetLayout = shaders.back().GetDescriptors()[DEFAULT_MESHLET_LAYOUT]->GetLayout();
     vertexDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT, 
         1,
-        descriptorSetLayout,
+        vertexDescriptorSetLayout,
         VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
         VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_MESH_BIT_EXT);
     meshDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT, 
         1,
-        descriptorSetLayout,
+        meshDescriptorSetLayout,
         VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-        VK_SHADER_STAGE_MESH_BIT_EXT);
+        VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_TASK_BIT_EXT);
 }
 
 void Meshes::updateSSBODescriptor()

@@ -285,7 +285,7 @@ void ResourceManager::createDefaultShaders()
     meshletConfig.binding = 0;
     meshletConfig.descriptorCount = 0;
     meshletConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    meshletConfig.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_MESH_BIT_EXT;
+    meshletConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
     descriptorConfig.push_back(meshletConfig);
 
     Shaders.emplace_back(aDevice, Mesh_task, Mesh_mesh, Mesh_frag, renderPass

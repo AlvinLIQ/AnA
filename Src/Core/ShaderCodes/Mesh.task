@@ -1,7 +1,12 @@
 #version 460
 #extension GL_EXT_mesh_shader : require
 
+layout(std430, set = 6, binding = 0) buffer meshletSSBO
+{
+    uint meshlets[];
+} msbo;
+
 void main()
 {
-	EmitMeshTasksEXT(33, 1, 1);
+	EmitMeshTasksEXT(msbo.meshlets[0], 1, 1);
 }
