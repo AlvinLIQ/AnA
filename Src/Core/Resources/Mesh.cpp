@@ -1,6 +1,7 @@
 #include "Headers/Mesh.hpp"
 #include "Headers/ResourceManager.hpp"
 #include "Headers/Texture.hpp"
+#include "../../3rdParty/meshoptimizer/src/meshoptimizer.h"
 
 using namespace AnA;
 
@@ -326,7 +327,8 @@ void Meshes::UpdateBuffers(Range updateRange)
 
 void Meshes::UpdateMeshlets()
 {
-    buildMeshlets();
+    //buildMeshlets();
+    buildMeshletsWithOptimizer();
     uint32_t minMeshletBufferSize = (meshletVertexCount + meshletIndexCount / 3 + 
         3 * static_cast<uint32_t>(meshlets.size())) * sizeof(uint32_t);
     if (!meshletsBuffers[nextIndex].GetBuffer() || 
@@ -530,55 +532,58 @@ void Meshes::buildMeshletsWithOptimizer()
     constexpr size_t MaxVerts = 128;
     constexpr size_t MaxTris = 256;
 
-    std::vector<Meshlet> finalMeshlets;
+    meshlets.clear();
+    meshletVertexCount = 0;
+    meshletIndexCount = 0;
 
     for (const auto& mesh : meshes)
     {
-        const uint32_t* indexData = mesh.indices.data();
-        size_t indexCount = mesh.indices.size();
-        size_t vertexCount = mesh.vertices.size();
+        std::vector<uint32_t> indices = mesh.indices;
+        for (auto& index : indices)
+            index -= mesh.vertexOffset;
 
         // Estimate output sizes
         size_t maxMeshlets = meshopt_buildMeshletsBound(indexCount, MaxVerts, MaxTris);
 
-        std::vector<meshopt_Meshlet> meshlets(maxMeshlets);
+        std::vector<meshopt_Meshlet> meshopt_meshlets(maxMeshlets);
         std::vector<uint32_t> uniqueVertexIndices(maxMeshlets * MaxVerts);
         std::vector<uint8_t> primitiveIndices(maxMeshlets * MaxTris * 3);
 
         size_t actualMeshletCount = meshopt_buildMeshlets(
-            meshlets.data(),
+            meshopt_meshlets.data(),
             uniqueVertexIndices.data(),
             primitiveIndices.data(),
-            indexData,
-            indexCount,
-            &mesh.vertices[0], // Optional vertex data pointer, can be nullptr
-            vertexCount,
+            indices.data(),
+            indices.size(),
+            &mesh.vertices[0].position.x, // Optional vertex data pointer, can be nullptr
+            mesh.vertices.size(),
             sizeof(Model::Vertex),
             MaxVerts,
             MaxTris,
             0 // flags
         );
 
-        meshlets.resize(actualMeshletCount);
+        meshopt_meshlets.resize(actualMeshletCount);
+        auto& last = meshopt_meshlets.back();
+        uniqueVertexIndices.resize(last.vertex_offset + last.vertex_count);
+        primitiveIndices.resize(last.triangle_offset + ((last.triangle_count * 3 + 3) & ~3));
 
-        // Convert to your Meshlet struct
-        for (const auto& m : meshlets)
+        for (auto& meshletInfo : meshopt_meshlets)
         {
-            Meshlet out{};
-            out.vertexCount = m.vertex_count;
-            out.indexCount = m.triangle_count * 3;
-
-            for (uint32_t i = 0; i < m.vertex_count; ++i)
+            Meshlet meshlet{};
+            meshlet.indexCount = static_cast<uint32_t>(meshletInfo.triangle_count) * 3;
+            meshlet.vertexCount = static_cast<uint32_t>(meshletInfo.vertex_count);
+            meshletIndexCount += meshlet.indexCount;
+            meshletVertexCount += meshlet.vertexCount;
+            for (uint32_t i = 0; i < meshlet.indexCount; i++)
             {
-                out.vertices[i] = uniqueVertexIndices[m.vertex_offset + i];
+                meshlet.indices[i] = primitiveIndices[i + meshletInfo.triangle_offset];
             }
-
-            for (uint32_t i = 0; i < m.triangle_count * 3; ++i)
+            for (uint32_t i = 0; i < meshlet.vertexCount; i++)
             {
-                out.indices[i] = primitiveIndices[m.triangle_offset * 3 + i];
+                meshlet.vertices[i] = uniqueVertexIndices[i + meshletInfo.vertex_offset] + mesh.vertexOffset;
             }
-
-            finalMeshlets.push_back(out);
+            meshlets.push_back(meshlet);
         }
     }
 }

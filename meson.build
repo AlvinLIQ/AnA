@@ -12,6 +12,7 @@ else
     glfw_dep = dependency('glfw3', required: true)      # GLFW
 endif
 
+subdir('Src/3rdParty/')
 subdir('Src/Core/')
 subdir('Src/GUI')
 subdir('Src/Editor/')
