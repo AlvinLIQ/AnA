@@ -14,6 +14,7 @@
 * [X] Mesh Shader
 * [ ] Animation System
 * [ ] Cascaded Shaodow Maps
+* [ ] Fix Crappy Text Rendering
 * [X] XML to GUI
 
 ## Build&Run
