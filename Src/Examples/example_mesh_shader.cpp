@@ -55,7 +55,7 @@ float getHeight(float x, float z, float scale = 0.1f, int octaves = 6, float lac
 
 glm::vec3 calculateNormal(int x, int z) {
     // Get the height of the current point (x, z)
-    float heightCenter = getHeight(x, z);
+//    float heightCenter = getHeight(x, z);
 
     // Get the height of the neighboring points
     float heightLeft = getHeight(x - 1, z);

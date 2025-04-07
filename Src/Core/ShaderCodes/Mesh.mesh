@@ -90,7 +90,7 @@ void main()
         vec4 viewPos = cbo.view * vertexPos;
         gl_MeshVerticesEXT[i].gl_Position = viewProj * vec4(vertex.position, 1.0);
         vertexOutput[i].texCoord = vertex.uv;
-        vertexOutput[i].texID = gl_WorkGroupID.x % 4;
+        vertexOutput[i].texID = vertex.texIndex;
         vertexOutput[i].normalSpace = vertex.normal;
         vertexOutput[i].vertexPosition = vertex.position;
         vertexOutput[i].viewPos = viewPos;
