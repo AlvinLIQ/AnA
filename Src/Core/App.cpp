@@ -6,6 +6,7 @@
 #include <glm/gtc/constants.hpp>
 #include <stdexcept>
 #include <memory>
+#include <chrono>
 
 using namespace AnA;
 
