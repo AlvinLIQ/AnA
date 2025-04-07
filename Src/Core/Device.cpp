@@ -7,9 +7,9 @@
 #ifdef INCLUDE_STB_IMAGE
 #define STB_IMAGE_IMPLEMENTATION
 #include "Headers/Buffer.hpp"
-#include "../stb/stb_image.h"
+#include "../3rdParty/stb/stb_image.h"
 #define STB_TRUETYPE_IMPLEMENTATION
-#include "../stb/stb_truetype.h"
+#include "../3rdParty/stb/stb_truetype.h"
 #endif
 
 

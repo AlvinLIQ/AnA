@@ -524,3 +524,61 @@ void Meshes::buildMeshlets(
         }
     }
 }
+
+void Meshes::buildMeshletsWithOptimizer()
+{
+    constexpr size_t MaxVerts = 128;
+    constexpr size_t MaxTris = 256;
+
+    std::vector<Meshlet> finalMeshlets;
+
+    for (const auto& mesh : meshes)
+    {
+        const uint32_t* indexData = mesh.indices.data();
+        size_t indexCount = mesh.indices.size();
+        size_t vertexCount = mesh.vertices.size();
+
+        // Estimate output sizes
+        size_t maxMeshlets = meshopt_buildMeshletsBound(indexCount, MaxVerts, MaxTris);
+
+        std::vector<meshopt_Meshlet> meshlets(maxMeshlets);
+        std::vector<uint32_t> uniqueVertexIndices(maxMeshlets * MaxVerts);
+        std::vector<uint8_t> primitiveIndices(maxMeshlets * MaxTris * 3);
+
+        size_t actualMeshletCount = meshopt_buildMeshlets(
+            meshlets.data(),
+            uniqueVertexIndices.data(),
+            primitiveIndices.data(),
+            indexData,
+            indexCount,
+            &mesh.vertices[0], // Optional vertex data pointer, can be nullptr
+            vertexCount,
+            sizeof(Model::Vertex),
+            MaxVerts,
+            MaxTris,
+            0 // flags
+        );
+
+        meshlets.resize(actualMeshletCount);
+
+        // Convert to your Meshlet struct
+        for (const auto& m : meshlets)
+        {
+            Meshlet out{};
+            out.vertexCount = m.vertex_count;
+            out.indexCount = m.triangle_count * 3;
+
+            for (uint32_t i = 0; i < m.vertex_count; ++i)
+            {
+                out.vertices[i] = uniqueVertexIndices[m.vertex_offset + i];
+            }
+
+            for (uint32_t i = 0; i < m.triangle_count * 3; ++i)
+            {
+                out.indices[i] = primitiveIndices[m.triangle_offset * 3 + i];
+            }
+
+            finalMeshlets.push_back(out);
+        }
+    }
+}

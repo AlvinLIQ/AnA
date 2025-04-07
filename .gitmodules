@@ -1,12 +1,16 @@
-[submodule "Src/stb"]
-	path = Src/stb
+[submodule "Src/3rdParty/stb"]
+	path = Src/3rdParty/stb
 	url = https://github.com/nothings/stb
 [submodule "Src/VertexLoader"]
 	path = Src/VertexLoader
 	url = https://github.com/AlvinLIQ/VertexLoader
-[submodule "Src/tinyobjloader"]
-	path = Src/tinyobjloader
+[submodule "Src/3rdParty/tinyobjloader"]
+	path = Src/3rdParty/tinyobjloader
 	url = https://github.com/tinyobjloader/tinyobjloader
+[submodule "Src/3rdParty/meshoptimizer"]
+	path = Src/3rdParty/meshoptimizer
+	url = https://github.com/zeux/meshoptimizer
 [submodule "Src/GUI/XML/rapidxml"]
 	path = Src/GUI/XML/rapidxml
 	url = https://github.com/dwd/rapidxml
+tinyobjloader

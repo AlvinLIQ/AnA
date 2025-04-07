@@ -123,6 +123,7 @@ namespace AnA
         void buildMeshlets(
             uint32_t maxVerticesPerMeshlet = 128,  // max number of vertices per meshlet
             uint32_t maxIndicesPerMeshlet = 256 * 3);  // max number of indices per meshlet (i.e., triangles)
+        void buildMeshletsWithOptimizer();
         uint8_t currentBufferIndex = 0;
         uint8_t nextIndex = 1 % MAX_FRAMES_IN_FLIGHT;
     };
