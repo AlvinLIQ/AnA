@@ -6,7 +6,7 @@
 	url = https://github.com/AlvinLIQ/VertexLoader
 [submodule "Src/3rdParty/tinyobjloader"]
 	path = Src/3rdParty/tinyobjloader
-	url = https://github.com/tinyobjloader/tinyobjloade
+	url = https://github.com/tinyobjloader/tinyobjloader
 [submodule "Src/3rdParty/meshoptimizer"]
 	path = Src/3rdParty/meshoptimizer
 	url = https://github.com/zeux/meshoptimizer
