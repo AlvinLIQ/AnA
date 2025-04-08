@@ -10,17 +10,17 @@ namespace AnA
         Shader(Device* mDevice);
         Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass, VkDeviceSize pushConstantSize = 0);
         //Depth Test
-        Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass, std::vector<Descriptor::DescriptorConfig>& descriptorConfigs, VkDeviceSize pushConstantSize = 0);
+        Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass, std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs, VkDeviceSize pushConstantSize = 0);
         //Depth Test
-        Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass, const std::vector<unsigned char>& fragShaderCode, std::vector<Descriptor::DescriptorConfig>& descriptorConfigs, VkDeviceSize pushConstantSize = 0);
+        Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass, const std::vector<unsigned char>& fragShaderCode, std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs, VkDeviceSize pushConstantSize = 0);
         Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, VkDeviceSize pushConstantSize = 0);
         Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, 
-            std::vector<Descriptor::DescriptorConfig>& descriptorConfigs, VkDeviceSize pushConstantSize = 0);
+            std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs, VkDeviceSize pushConstantSize = 0);
         Shader(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, 
-            std::vector<Descriptor::DescriptorConfig>& descriptorConfigs);
+            std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);
 
         Shader(Device* mDevice, Pipeline::PipelineConfig pipelineConfig);
-        Shader(Device* mDevice, Pipeline::PipelineConfig pipelineConfig, std::vector<Descriptor::DescriptorConfig>& descriptorConfigs);
+        Shader(Device* mDevice, Pipeline::PipelineConfig pipelineConfig, std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);
 
         Shader(const Shader&) = delete;
         Shader& operator=(const Shader&) = delete;
@@ -60,8 +60,8 @@ namespace AnA
         Device* aDevice{nullptr};
         Pipeline* pipeline{nullptr};
         VkPipelineLayout pipelineLayout {VK_NULL_HANDLE};
-        void createPipelineLayout(std::vector<Descriptor::DescriptorConfig>& descriptorConfigs, VkDeviceSize pushConstantSize = 0);
-        void createDescriptors(std::vector<Descriptor::DescriptorConfig>& descriptorConfigs);
+        void createPipelineLayout(VkDeviceSize pushConstantSize = 0);
+        void createDescriptors(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);
         std::vector<Descriptor*> descriptors;
         std::vector<std::vector<VkDescriptorSet>> descriptorSets;
     };

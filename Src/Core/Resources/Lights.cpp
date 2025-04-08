@@ -16,9 +16,9 @@ Light::~Light()
 
 }
 
-Buffer* Light::GetBuffers()
+std::vector<Buffer>& Light::GetBuffers()
 {
-    return buffers.data();
+    return buffers;
 }
 
 void Light::UpdateBuffers(Cameras::Camera& lightCamera, uint32_t bufferIndex)

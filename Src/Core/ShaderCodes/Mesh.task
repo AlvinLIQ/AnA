@@ -6,6 +6,8 @@ layout(std430, set = 6, binding = 0) buffer meshletSSBO
     uint meshlets[];
 } msbo;
 
+taskPayloadSharedEXT uint visibleMeshletIndices[32];
+
 void main()
 {
 	EmitMeshTasksEXT(msbo.meshlets[0], 1, 1);

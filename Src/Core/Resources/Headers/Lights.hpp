@@ -36,7 +36,7 @@ namespace AnA
             glm::vec3 Direction{1.0f, 1.0f, 1.0f};
             glm::vec3 Color{0.2};
             float Ambient{0.2f};
-            Buffer* GetBuffers();
+            std::vector<Buffer>& GetBuffers();
             void UpdateBuffers(Cameras::Camera& lightCamera, uint32_t bufferIndex);
         private:
             Device* aDevice;

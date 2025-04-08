@@ -37,6 +37,9 @@ namespace AnA
             static ResourceManager* GetCurrent();
             std::vector<Cascade>& GetCascades();
 
+            static void GetBufferInfos(std::vector<Buffer>& buffers, std::vector<VkDescriptorBufferInfo>& bufferInfos);
+            static void GetImageInfos(const std::vector<Image>& images, const std::vector<VkSampler>& samplers, std::vector<VkDescriptorImageInfo>& imageInfos);
+
             //Built-in resources
             Cameras::Camera MainCamera;
             Cameras::CameraInfo MainCameraInfo{glm::radians(60.0f), 1.0, 0.05f, 32.0f};
@@ -50,8 +53,8 @@ namespace AnA
 
             Meshes SceneObjects;
             std::vector<Shader> Shaders;
-            std::vector<Descriptor::DescriptorConfig> GetDefaultDescriptorConfig();
-            std::vector<Descriptor::DescriptorConfig> GetDefaultShapesDescriptorConfig();
+            std::vector<std::vector<Descriptor::DescriptorConfig>> GetDefaultDescriptorSetConfig();
+            std::vector<std::vector<Descriptor::DescriptorConfig>> GetDefaultShapesDescriptorSetConfig();
 
             Lights::Light GlobalLight;
             AnA::Shapes Shapes;

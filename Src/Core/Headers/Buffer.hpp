@@ -27,19 +27,15 @@ namespace AnA
             bufferUsage = buf.bufferUsage;
             bufferMemoryProperties = buf.bufferMemoryProperties;
             newBufferRecords = buf.newBufferRecords;
-            newBuffer = buf.newBuffer;
             buf.mappedData = nullptr;
             buf.buffer = VK_NULL_HANDLE;
             buf.bufferMemory = VK_NULL_HANDLE;
-            buf.newBuffer = nullptr;
         }
         Buffer &operator=(Buffer& buf) noexcept
         {
             if (&buf != this)
             {
                 cleanup();
-                if (newBuffer)
-                    delete newBuffer;
                 aDevice = buf.aDevice;
                 mappedData = buf.mappedData;
                 buffer = buf.buffer;
@@ -48,11 +44,9 @@ namespace AnA
                 bufferUsage = buf.bufferUsage;
                 bufferMemoryProperties = buf.bufferMemoryProperties;
                 newBufferRecords = buf.newBufferRecords;
-                newBuffer = buf.newBuffer;
                 buf.mappedData = nullptr;
                 buf.buffer = VK_NULL_HANDLE;
                 buf.bufferMemory = VK_NULL_HANDLE;
-                buf.newBuffer = nullptr;
             }
             return *this;
         }
@@ -66,19 +60,15 @@ namespace AnA
             bufferUsage = buf.bufferUsage;
             bufferMemoryProperties = buf.bufferMemoryProperties;
             newBufferRecords = buf.newBufferRecords;
-            newBuffer = buf.newBuffer;
             buf.mappedData = nullptr;
             buf.buffer = VK_NULL_HANDLE;
             buf.bufferMemory = VK_NULL_HANDLE;
-            buf.newBuffer = nullptr;
         }
         Buffer &operator=(Buffer&& buf) noexcept
         {
             if (&buf != this)
             {
                 cleanup();
-                if (newBuffer)
-                    delete newBuffer;
                 aDevice = buf.aDevice;
                 mappedData = buf.mappedData;
                 buffer = buf.buffer;
@@ -87,11 +77,9 @@ namespace AnA
                 bufferUsage = buf.bufferUsage;
                 bufferMemoryProperties = buf.bufferMemoryProperties;
                 newBufferRecords = buf.newBufferRecords;
-                newBuffer = buf.newBuffer;
                 buf.mappedData = nullptr;
                 buf.buffer = VK_NULL_HANDLE;
                 buf.bufferMemory = VK_NULL_HANDLE;
-                buf.newBuffer = nullptr;
             }
             return *this;
         }
@@ -111,7 +99,7 @@ namespace AnA
         }
         const VkDeviceSize GetSize() const
         {
-            return newBuffer == nullptr ? bufferSize : newBuffer->bufferSize;
+            return bufferSize;
         }
 
         void CopyToBuffer(Buffer& srcBuffer, VkDeviceSize bufferSize)
@@ -135,8 +123,6 @@ namespace AnA
             memcpy(this->GetMappedData(), data, bufferSize);
             this->Unmap();
         }
-        bool ReplaceRequest(Buffer* newBuffer, bool sync = true);
-        static void TryReplace();
     private:
         Device* aDevice = nullptr;
 
@@ -148,8 +134,6 @@ namespace AnA
         VkMemoryPropertyFlags bufferMemoryProperties;
 
         int newBufferRecords = 0;
-
-        Buffer* newBuffer{nullptr};
 
         void replace();
         void cleanup();

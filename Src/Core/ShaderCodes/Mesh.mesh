@@ -75,6 +75,8 @@ const vec4[3] colors = {
 	vec4(1.0, 0.0, 0.0, 1.0)
 };
 
+taskPayloadSharedEXT uint visibleMeshletIndices[32];
+
 void main()
 {
 	uint iid = msbo.meshlets[gl_WorkGroupID.x] + 1;

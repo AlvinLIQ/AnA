@@ -1,4 +1,5 @@
 #include "Headers/ShadowMap.hpp"
+#include "Headers/ResourceManager.hpp"
 #include "../Camera/Headers/Camera.hpp"
 #include "../Headers/SwapChain.hpp"
 
@@ -89,8 +90,7 @@ void ShadowMap::GetUBODescriptorConfig(Descriptor::DescriptorConfig* pConfig)
     pConfig->descriptorCount = cascadeBuffers.size();
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-    pConfig->buffers = cascadeBuffers.data();
-    pConfig->bufferSize = cascadeBuffers.begin()->GetSize();
+    Resource::ResourceManager::GetBufferInfos(cascadeBuffers, pConfig->bufferInfos);
 }
 
 void ShadowMap::createShadowResources()

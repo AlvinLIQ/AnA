@@ -93,9 +93,12 @@ namespace AnA
 
         void UpdateDescriptorSet(const VkDescriptorBufferInfo& bufferInfo, uint32_t binding, VkDescriptorType descriptorType, VkDescriptorSet descriptorSet);
         void CreateDescriptorPool(int descriptorCount, VkDescriptorPool& descriptorPool, VkDescriptorType descriptorType, VkDescriptorPoolCreateFlags flags = 0);
-        void CreateDescriptorSets(Buffer* buffers, VkDeviceSize bufferSize, uint32_t binding, int descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets);
-        void CreateDescriptorSets(VkDescriptorImageInfo* imageInfos, uint32_t binding, int descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets);
-        void CreateDescriptorSets(int descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, std::vector<VkDescriptorSet>& descriptorSets, void* pNext);
+        void CreateDescriptorPool(uint32_t descriptorSetCount, const VkDescriptorPoolSize* poolSizes, uint32_t poolSizeCount, VkDescriptorPool& descriptorPool, VkCommandPoolCreateFlags flags);
+        void CreateDescriptorSets(Buffer* buffers, VkDeviceSize bufferSize, uint32_t binding, uint32_t descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets);
+        void CreateDescriptorSets(VkDescriptorImageInfo* imageInfos, uint32_t binding, uint32_t descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets);
+        void CreateDescriptorSets(uint32_t descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, std::vector<VkDescriptorSet>& descriptorSets, void* pNext);
+        void CreateDescriptorSets(uint32_t descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, std::vector<VkDescriptorSet>& descriptorSets, const std::vector<std::vector<VkWriteDescriptorSet>>& writes);
+
         void CreateCommandPool(VkCommandPoolCreateFlags flags, VkCommandPool* pool);
 
         static VkDescriptorSetLayoutBinding CreateLayoutBinding(uint32_t binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags, uint32_t descriptorCount = 1);

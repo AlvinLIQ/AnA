@@ -63,6 +63,30 @@ std::vector<Cascade>& ResourceManager::GetCascades()
     //return shadowFramebuffers;
 }
 
+void ResourceManager::GetBufferInfos(std::vector<Buffer>& buffers, std::vector<VkDescriptorBufferInfo>& bufferInfos)
+{
+    bufferInfos.resize(buffers.size());
+    for (size_t i = 0; i < bufferInfos.size(); i++)
+    {
+        auto& bufferInfo = bufferInfos[i];
+        bufferInfo.buffer = buffers[i].GetBuffer();
+        bufferInfo.offset = 0;
+        bufferInfo.range = buffers[i].GetSize();
+    }
+}
+
+void ResourceManager::GetImageInfos(const std::vector<Image>& images, const std::vector<VkSampler>& samplers, std::vector<VkDescriptorImageInfo>& imageInfos)
+{
+    imageInfos.resize(images.size());
+    for (size_t i = 0; i < imageInfos.size(); i++)
+    {
+        auto& imageInfo = imageInfos[i];
+        imageInfo.imageLayout = images[i].imageLayout;
+        imageInfo.imageView = images[i].imageView;
+        imageInfo.sampler = samplers[i];
+    }
+}
+
 void ResourceManager::UpdateCamera(float aspect)
 {
     MainCameraInfo.aspect = aspect;
@@ -97,7 +121,6 @@ void ResourceManager::Update()
     {
         SceneObjects.CommitBufferUpdate();
     }
-    Buffer::TryReplace();
     for (auto& recordCallBackInfo : RecordCallBacks)
     {
         if (recordCallBackInfo.needRecord())
@@ -118,17 +141,19 @@ void ResourceManager::RecreateResources()
 {
     //cleanupShadowResources();
     //createShadowFramebuffers();
-    auto deafultShadowSamplerConfig = GetDefaultDescriptorConfig()[DEFAULT_SHADOW_SAMPLER_LAYOUT];
+    auto deafultShadowSamplerConfig = GetDefaultDescriptorSetConfig()[DEFAULT_SHADOW_SAMPLER_LAYOUT].begin();
     for (int i = 0; i < 1; i++)
     {
-        Shaders[i].GetDescriptors()[DEFAULT_SHADOW_SAMPLER_LAYOUT]->UpdateDescriptorSets(deafultShadowSamplerConfig);
+        Shaders[i].GetDescriptors()[DEFAULT_SHADOW_SAMPLER_LAYOUT]->UpdateDescriptorSets(*deafultShadowSamplerConfig);
     }
 }
 
-std::vector<Descriptor::DescriptorConfig> ResourceManager::GetDefaultDescriptorConfig()
+std::vector<std::vector<Descriptor::DescriptorConfig>> ResourceManager::GetDefaultDescriptorSetConfig()
 {
-    std::vector<Descriptor::DescriptorConfig> descriptorConfigs(DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT);
-    auto pConfig = &descriptorConfigs[DEFAULT_VERTEX_LAYOUT];
+    std::vector<std::vector<Descriptor::DescriptorConfig>> descriptorSetConfigs(DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT);
+    for (auto& configs : descriptorSetConfigs)
+        configs.resize(1);
+    auto pConfig = descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT].begin();
     pConfig->binding = 0;
     pConfig->descriptorCount = 0;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
@@ -140,57 +165,56 @@ std::vector<Descriptor::DescriptorConfig> ResourceManager::GetDefaultDescriptorC
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_MESH_BIT_EXT;
 */
-    pConfig = &descriptorConfigs[DEFAULT_UBO_LAYOUT];
+    pConfig = descriptorSetConfigs[DEFAULT_UBO_LAYOUT].begin();
     pConfig->binding = 0;
     pConfig->descriptorCount = MAX_FRAMES_IN_FLIGHT;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_MESH_BIT_EXT;
-    pConfig->buffers = mainCameraBuffers.data();
-    pConfig->bufferSize = sizeof(Cameras::CameraBufferObject);
+    GetBufferInfos(mainCameraBuffers, pConfig->bufferInfos);
 
-    pConfig = &descriptorConfigs[DEFAULT_LIGHT_LAYOUT];
+
+    pConfig = descriptorSetConfigs[DEFAULT_LIGHT_LAYOUT].begin();
     pConfig->binding = 0;
-    pConfig->descriptorCount = MAX_FRAMES_IN_FLIGHT;
+    pConfig->descriptorCount = static_cast<uint32_t>(GlobalLight.GetBuffers().size());;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_MESH_BIT_EXT;
-    pConfig->buffers = GlobalLight.GetBuffers();
-    pConfig->bufferSize = sizeof(Lights::LightBufferObject);
+    GetBufferInfos(GlobalLight.GetBuffers(), pConfig->bufferInfos);
 
-    pConfig = &descriptorConfigs[DEFAULT_SAMPLER_LAYOUT];
+    pConfig = descriptorSetConfigs[DEFAULT_SAMPLER_LAYOUT].begin();
     pConfig->binding = 0;
     pConfig->descriptorCount = 0;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     pConfig->stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-    pConfig = &descriptorConfigs[DEFAULT_SHADOW_SAMPLER_LAYOUT];
+    pConfig = descriptorSetConfigs[DEFAULT_SHADOW_SAMPLER_LAYOUT].begin();
     pConfig->binding = 0;
-    pConfig->descriptorCount = static_cast<int>(ShadowMap.GetImages().size());
+    pConfig->descriptorCount = static_cast<uint32_t>(ShadowMap.GetImages().size());
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     pConfig->stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    pConfig->images = ShadowMap.GetImages().data();
-    pConfig->samplers = ShadowMap.GetSamplers().data();
+    GetImageInfos(ShadowMap.GetImages(), ShadowMap.GetSamplers(), pConfig->imageInfos);
 
-    pConfig = &descriptorConfigs[DEFAULT_CASCADED_UBO_LAYOUT];
-    ShadowMap.GetUBODescriptorConfig(pConfig);
+    ShadowMap.GetUBODescriptorConfig(&descriptorSetConfigs[DEFAULT_CASCADED_UBO_LAYOUT][0]);
 
-    return descriptorConfigs;
+    return descriptorSetConfigs;
 }
 
-std::vector<Descriptor::DescriptorConfig> ResourceManager::GetDefaultShapesDescriptorConfig()
+std::vector<std::vector<Descriptor::DescriptorConfig>> ResourceManager::GetDefaultShapesDescriptorSetConfig()
 {
-    std::vector<Descriptor::DescriptorConfig> descriptorConfigs(2);
-    auto pConfig = &descriptorConfigs[0];
+    std::vector<std::vector<Descriptor::DescriptorConfig>> descriptorSetConfigs(2);
+    for (auto configs : descriptorSetConfigs)
+        configs.resize(1);
+    auto pConfig = descriptorSetConfigs[0].begin();
     pConfig->binding = 0;
     pConfig->descriptorCount = 0;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    pConfig = &descriptorConfigs[1];
+    pConfig = descriptorSetConfigs[1].begin();
     pConfig->binding = 0;
     pConfig->descriptorCount = 0;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     pConfig->stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-    return descriptorConfigs;
+    return descriptorSetConfigs;
 }
 
 void ResourceManager::createMainCameraBuffers()
@@ -269,10 +293,10 @@ void ResourceManager::createDefaultShaders()
 {
     Shaders.reserve(5); // Reserve space for 3 default shaders
     auto renderPass = SwapChain::GetCurrent()->GetRenderPass();
-    auto descriptorConfig = GetDefaultDescriptorConfig();
+    auto descriptorConfig = GetDefaultDescriptorSetConfig();
     Shaders.emplace_back(aDevice, Basic_vert, Basic_frag, renderPass, descriptorConfig);
 
-    auto shapesDescriptorConfig = GetDefaultShapesDescriptorConfig();
+    auto shapesDescriptorConfig = GetDefaultShapesDescriptorSetConfig();
     Shaders.emplace_back(aDevice, Shape_vert, Shape_frag, renderPass, shapesDescriptorConfig);
 
     auto offscreenRenderPass = SwapChain::GetCurrent()->GetOffscreenRenderPass();
@@ -286,7 +310,7 @@ void ResourceManager::createDefaultShaders()
     meshletConfig.descriptorCount = 0;
     meshletConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     meshletConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-    descriptorConfig.push_back(meshletConfig);
+    descriptorConfig.push_back({meshletConfig});
 
     Shaders.emplace_back(aDevice, Mesh_task, Mesh_mesh, Mesh_frag, renderPass
         , descriptorConfig);

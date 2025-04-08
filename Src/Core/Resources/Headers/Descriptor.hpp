@@ -31,21 +31,20 @@ namespace AnA
         struct DescriptorConfig
         {
             VkDescriptorType descriptorType;
-            int descriptorCount;
-            Buffer* buffers;
+            uint32_t descriptorCount;
+            std::vector<VkDescriptorBufferInfo> bufferInfos;
             VkDeviceSize bufferSize;
-            VkSampler* samplers;
-            AnA::Resource::Image* images;
+            std::vector<VkDescriptorImageInfo> imageInfos;
             uint32_t binding;
             VkShaderStageFlags stageFlags;
         };
-        Descriptor(Device* mDevice, Buffer* buffers, VkDeviceSize bufferSize, uint32_t binding, int descriptorSetCount, VkShaderStageFlags stageFlags, const VkDescriptorType descriptorType);
-        Descriptor(Device* mDevice, Buffer* buffers, VkDeviceSize bufferSize, uint32_t binding, int descriptorSetCount, VkDescriptorSetLayout descriptorSetLayout, const VkDescriptorType descriptorType);
-        Descriptor(Device* mDevice, VkSampler& sampler, VkImageView& imageView, VkImageLayout imageLayout, uint32_t binding, int descriptorSetCount, VkShaderStageFlags stageFlags, const VkDescriptorType descriptorType);
-        Descriptor(Device* mDevice, VkSampler& sampler, VkImageView& imageView, VkImageLayout imageLayout, uint32_t binding, int descriptorSetCount, VkDescriptorSetLayout descriptorSetLayout, VkShaderStageFlags stageFlags, const VkDescriptorType descriptorType);
-        Descriptor(Device* mDevice, int descriptorSetCount, uint32_t descriptorCount, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags);
+        Descriptor(Device* mDevice, Buffer* buffers, VkDeviceSize bufferSize, uint32_t binding, uint32_t descriptorSetCount, VkShaderStageFlags stageFlags, const VkDescriptorType descriptorType);
+        Descriptor(Device* mDevice, Buffer* buffers, VkDeviceSize bufferSize, uint32_t binding, uint32_t descriptorSetCount, VkDescriptorSetLayout descriptorSetLayout, const VkDescriptorType descriptorType);
+        Descriptor(Device* mDevice, VkSampler& sampler, VkImageView& imageView, VkImageLayout imageLayout, uint32_t binding, uint32_t descriptorSetCount, VkShaderStageFlags stageFlags, const VkDescriptorType descriptorType);
+        Descriptor(Device* mDevice, VkSampler& sampler, VkImageView& imageView, VkImageLayout imageLayout, uint32_t binding, uint32_t descriptorSetCount, VkDescriptorSetLayout descriptorSetLayout, VkShaderStageFlags stageFlags, const VkDescriptorType descriptorType);
+        Descriptor(Device* mDevice, uint32_t descriptorSetCount, uint32_t descriptorCount, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags);
 
-        Descriptor(Device* mDevice, Descriptor::DescriptorConfig& descriptorConfig);
+        Descriptor(Device* mDevice, Descriptor::DescriptorConfig* descriptorConfigs, uint32_t configCount, uint32_t descriptorSetCount);
         ~Descriptor();
 
         std::vector<VkDescriptorSet>& GetSets();

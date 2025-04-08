@@ -13,12 +13,12 @@ Shader::Shader(Device* mDevice) : aDevice{mDevice}
 Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, 
     VkRenderPass& renderPass, VkDeviceSize pushConstantSize) : aDevice{mDevice}
 {
-    auto descriptorConfigs = Resource::ResourceManager::GetCurrent()->GetDefaultDescriptorConfig();
-    createDescriptors(descriptorConfigs);
+    auto descriptorSetConfigs = Resource::ResourceManager::GetCurrent()->GetDefaultDescriptorSetConfig();
+    createDescriptors(descriptorSetConfigs);
     
     if (pDefaultPipelineLayout == nullptr)
     {
-        createPipelineLayout(descriptorConfigs, pushConstantSize);
+        createPipelineLayout(pushConstantSize);
     }
     else
     {
@@ -28,13 +28,13 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode
 }
 
 Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass, 
-    std::vector<Descriptor::DescriptorConfig>& descriptorConfigs, VkDeviceSize pushConstantSize) : aDevice{mDevice}
+    std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs, VkDeviceSize pushConstantSize) : aDevice{mDevice}
 {
-    createDescriptors(descriptorConfigs);
+    createDescriptors(descriptorSetConfigs);
     
     if (pDefaultPipelineLayout == nullptr)
     {
-        createPipelineLayout(descriptorConfigs, pushConstantSize);
+        createPipelineLayout(pushConstantSize);
     }
     else
     {
@@ -44,14 +44,14 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode
 }
 
 Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass, 
-    const std::vector<unsigned char>& fragShaderCode, std::vector<Descriptor::DescriptorConfig>& descriptorConfigs,
+    const std::vector<unsigned char>& fragShaderCode, std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs,
     VkDeviceSize pushConstantSize) : aDevice{mDevice}
 {
-    createDescriptors(descriptorConfigs);
+    createDescriptors(descriptorSetConfigs);
     
     if (pDefaultPipelineLayout == nullptr)
     {
-        createPipelineLayout(descriptorConfigs, pushConstantSize);
+        createPipelineLayout(pushConstantSize);
     }
     else
     {
@@ -63,12 +63,12 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode
 Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, 
     const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, VkDeviceSize pushConstantSize) : aDevice{mDevice}
 {
-    auto descriptorConfigs = Resource::ResourceManager::GetCurrent()->GetDefaultDescriptorConfig();
-    createDescriptors(descriptorConfigs);
+    auto descriptorSetConfigs = Resource::ResourceManager::GetCurrent()->GetDefaultDescriptorSetConfig();
+    createDescriptors(descriptorSetConfigs);
 
     if (pDefaultPipelineLayout == nullptr)
     {
-        createPipelineLayout(descriptorConfigs, pushConstantSize);
+        createPipelineLayout(pushConstantSize);
     }
     else
     {
@@ -78,13 +78,13 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode
 }
 
 Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, 
-            std::vector<Descriptor::DescriptorConfig>& descriptorConfigs, VkDeviceSize pushConstantSize) : aDevice{mDevice}
+    std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs, VkDeviceSize pushConstantSize) : aDevice{mDevice}
 {
-    createDescriptors(descriptorConfigs);
+    createDescriptors(descriptorSetConfigs);
 
     if (pDefaultPipelineLayout == nullptr)
     {
-        createPipelineLayout(descriptorConfigs, pushConstantSize);
+        createPipelineLayout(pushConstantSize);
     }
     else
     {
@@ -94,13 +94,13 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode
 }
 
 Shader::Shader(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, 
-    std::vector<Descriptor::DescriptorConfig>& descriptorConfigs) : aDevice{mDevice}
+    std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs) : aDevice{mDevice}
 {
-    createDescriptors(descriptorConfigs);
+    createDescriptors(descriptorSetConfigs);
 
     if (pDefaultPipelineLayout == nullptr)
     {
-        createPipelineLayout(descriptorConfigs, 0);
+        createPipelineLayout(0);
     }
     else
     {
@@ -110,10 +110,10 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& taskShaderCode
 }
 
 Shader::Shader(Device* mDevice, Pipeline::PipelineConfig pipelineConfig, 
-    std::vector<Descriptor::DescriptorConfig>& descriptorConfigs) : aDevice{mDevice}
+    std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs) : aDevice{mDevice}
 {
     pipeline = new Pipeline(mDevice, pipelineConfig);
-    createDescriptors(descriptorConfigs);
+    createDescriptors(descriptorSetConfigs);
 }
 
 Shader::~Shader()
@@ -146,7 +146,7 @@ std::vector<std::vector<VkDescriptorSet>>& Shader::GetDescriptorSets()
     return descriptorSets;
 }
 
-void Shader::createPipelineLayout(std::vector<Descriptor::DescriptorConfig>& descriptorConfigs, VkDeviceSize pushConstantSize)
+void Shader::createPipelineLayout(VkDeviceSize pushConstantSize)
 {
     std::vector<VkDescriptorSetLayout> descriptorSetLayouts(descriptors.size());
     for (size_t i = 0; i < descriptors.size(); i++)
@@ -174,12 +174,13 @@ void Shader::createPipelineLayout(std::vector<Descriptor::DescriptorConfig>& des
     }
 }
 
-void Shader::createDescriptors(std::vector<Descriptor::DescriptorConfig>& descriptorConfigs)
+void Shader::createDescriptors(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs)
 {
     descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
-    for (auto& descriptorConfig : descriptorConfigs)
+    for (auto& descriptorConfigs : descriptorSetConfigs)
     {
-        auto descriptor = new Descriptor(aDevice, descriptorConfig);
+        auto descriptor = new Descriptor(aDevice, descriptorConfigs.data(),
+            static_cast<uint32_t>(descriptorConfigs.size()), MAX_FRAMES_IN_FLIGHT);
         descriptors.push_back(descriptor);
         for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
         {

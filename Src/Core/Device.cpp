@@ -357,6 +357,19 @@ void Device::CreateDescriptorPool(int descriptorCount, VkDescriptorPool& descrip
         throw std::runtime_error("Failed to create descriptor pool!");
 }
 
+void Device::CreateDescriptorPool(uint32_t descriptorSetCount, const VkDescriptorPoolSize* poolSizes, uint32_t poolSizeCount, VkDescriptorPool& descriptorPool, VkCommandPoolCreateFlags flags)
+{
+    VkDescriptorPoolCreateInfo poolInfo{};
+    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    poolInfo.poolSizeCount = poolSizeCount;
+    poolInfo.pPoolSizes = poolSizes;
+    poolInfo.maxSets = static_cast<uint32_t>(descriptorSetCount);
+    poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT | flags;
+    
+    if (vkCreateDescriptorPool(logicalDevice, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
+        throw std::runtime_error("Failed to create descriptor pool!");
+}
+
 void Device::UpdateDescriptorSet(const VkDescriptorBufferInfo& bufferInfo, uint32_t binding, VkDescriptorType descriptorType, VkDescriptorSet descriptorSet)
 {
     VkWriteDescriptorSet descriptorWrite{};
@@ -371,7 +384,7 @@ void Device::UpdateDescriptorSet(const VkDescriptorBufferInfo& bufferInfo, uint3
         &descriptorWrite, 0, nullptr);
 }
 
-void Device::CreateDescriptorSets(Buffer* buffers, VkDeviceSize bufferSize, uint32_t binding, int descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets)
+void Device::CreateDescriptorSets(Buffer* buffers, VkDeviceSize bufferSize, uint32_t binding, uint32_t descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets)
 {
     std::vector<VkDescriptorSetLayout> layouts(descriptorSetCount, descriptorSetLayout);
     VkDescriptorSetAllocateInfo allocInfo{};
@@ -385,7 +398,7 @@ void Device::CreateDescriptorSets(Buffer* buffers, VkDeviceSize bufferSize, uint
     {
         throw std::runtime_error("Failed to allocate descriptor sets!");
     }
-    for (int i = 0; i < descriptorSetCount; i++)
+    for (uint32_t i = 0; i < descriptorSetCount; i++)
     {
         auto& buffer = buffers[i];
         VkDescriptorBufferInfo bufferInfo{};
@@ -396,7 +409,7 @@ void Device::CreateDescriptorSets(Buffer* buffers, VkDeviceSize bufferSize, uint
     }
 }
 
-void Device::CreateDescriptorSets(VkDescriptorImageInfo* imageInfos, uint32_t binding, int descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets)
+void Device::CreateDescriptorSets(VkDescriptorImageInfo* imageInfos, uint32_t binding, uint32_t descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets)
 {
     std::vector<VkDescriptorSetLayout> layouts(descriptorSetCount, descriptorSetLayout);
     VkDescriptorSetAllocateInfo allocInfo{};
@@ -410,7 +423,7 @@ void Device::CreateDescriptorSets(VkDescriptorImageInfo* imageInfos, uint32_t bi
     {
         throw std::runtime_error("Failed to allocate descriptor sets!");
     }
-    for (int i = 0; i < descriptorSetCount; i++)
+    for (uint32_t i = 0; i < descriptorSetCount; i++)
     {
         VkWriteDescriptorSet descriptorWrite{};
         descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -425,7 +438,7 @@ void Device::CreateDescriptorSets(VkDescriptorImageInfo* imageInfos, uint32_t bi
     }
 }
 
-void Device::CreateDescriptorSets(int descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, std::vector<VkDescriptorSet>& descriptorSets, void* pNext)
+void Device::CreateDescriptorSets(uint32_t descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, std::vector<VkDescriptorSet>& descriptorSets, void* pNext)
 {
     std::vector<VkDescriptorSetLayout> layouts(descriptorSetCount, descriptorSetLayout);
     VkDescriptorSetAllocateInfo allocInfo{};
@@ -439,6 +452,18 @@ void Device::CreateDescriptorSets(int descriptorSetCount, VkDescriptorPool& desc
     if (vkAllocateDescriptorSets(logicalDevice, &allocInfo, descriptorSets.data()) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to allocate descriptor sets!");
+    }
+}
+
+void Device::CreateDescriptorSets(uint32_t descriptorSetCount, VkDescriptorPool& descriptorPool, 
+    VkDescriptorSetLayout& descriptorSetLayout, std::vector<VkDescriptorSet>& descriptorSets, 
+    const std::vector<std::vector<VkWriteDescriptorSet>>& writes)
+{
+    CreateDescriptorSets(descriptorSetCount, descriptorPool, descriptorSetLayout, descriptorSets, nullptr);
+    for (uint32_t i = 0; i < descriptorSetCount; i++)
+    {
+        vkUpdateDescriptorSets(logicalDevice, writes[i].size(), 
+            writes[i].data(), 0, nullptr);
     }
 }
 
