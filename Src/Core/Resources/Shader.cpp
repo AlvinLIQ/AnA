@@ -13,7 +13,8 @@ Shader::Shader(Device* mDevice) : aDevice{mDevice}
 Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, 
     VkRenderPass& renderPass, VkDeviceSize pushConstantSize) : aDevice{mDevice}
 {
-    auto descriptorSetConfigs = Resource::ResourceManager::GetCurrent()->GetDefaultDescriptorSetConfig();
+    std::vector<std::vector<Descriptor::DescriptorConfig>> descriptorSetConfigs;
+    Resource::ResourceManager::GetCurrent()->GetDefaultDescriptorSetConfig(descriptorSetConfigs);
     createDescriptors(descriptorSetConfigs);
     
     if (pDefaultPipelineLayout == nullptr)
@@ -63,7 +64,8 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode
 Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, 
     const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, VkDeviceSize pushConstantSize) : aDevice{mDevice}
 {
-    auto descriptorSetConfigs = Resource::ResourceManager::GetCurrent()->GetDefaultDescriptorSetConfig();
+    std::vector<std::vector<Descriptor::DescriptorConfig>> descriptorSetConfigs;
+    Resource::ResourceManager::GetCurrent()->GetDefaultDescriptorSetConfig(descriptorSetConfigs);
     createDescriptors(descriptorSetConfigs);
 
     if (pDefaultPipelineLayout == nullptr)

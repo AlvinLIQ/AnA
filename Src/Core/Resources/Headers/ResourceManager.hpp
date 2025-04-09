@@ -53,8 +53,8 @@ namespace AnA
 
             Meshes SceneObjects;
             std::vector<Shader> Shaders;
-            std::vector<std::vector<Descriptor::DescriptorConfig>> GetDefaultDescriptorSetConfig();
-            std::vector<std::vector<Descriptor::DescriptorConfig>> GetDefaultShapesDescriptorSetConfig();
+            void GetDefaultDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);
+            void GetDefaultShapesDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);
 
             Lights::Light GlobalLight;
             AnA::Shapes Shapes;

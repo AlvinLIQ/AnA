@@ -91,39 +91,43 @@ Descriptor::Descriptor(Device* mDevice, Descriptor::DescriptorConfig* descriptor
 {
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = configCount;
+
+    VkDescriptorBindingFlags bindingFlags = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT | 
+                VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT |
+                VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT_EXT;
+    VkDescriptorSetLayoutBindingFlagsCreateInfo flagsInfo{};
+    flagsInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
+    flagsInfo.bindingCount = 1;
+    flagsInfo.pBindingFlags = &bindingFlags;
 
     std::vector<VkDescriptorSetLayoutBinding> layoutBindings(configCount);
-    std::vector<VkDescriptorPoolSize> poolSizes(configCount);
+    std::vector<VkDescriptorPoolSize> poolSizes{};
     std::vector<std::vector<VkWriteDescriptorSet>> writes(descriptorSetCount);
     VkDescriptorPoolCreateFlags poolFlags = 0;
     uint32_t totalDescriptorCount = 0;
     for (uint32_t i = 0; i < configCount; i++)
     {
         auto& descriptorConfig = descriptorConfigs[i];
+        VkDescriptorPoolSize poolSize{};
+
         VkWriteDescriptorSet descriptorWrite{};
         descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrite.dstBinding = descriptorConfig.binding;
         descriptorWrite.dstArrayElement = 0;
         descriptorWrite.descriptorType = descriptorConfig.descriptorType;
         descriptorWrite.descriptorCount = descriptorConfig.descriptorCount;
+        poolSize.type = descriptorConfig.descriptorType;
+        poolSize.descriptorCount = descriptorConfig.descriptorCount;
 
         auto& layoutBinding = layoutBindings[i];
         layoutBinding = Device::CreateLayoutBinding(descriptorConfig.binding,
         descriptorConfig.descriptorType, descriptorConfig.stageFlags, descriptorConfig.descriptorCount);
-        layoutInfo.pBindings = &layoutBinding;
+
         totalDescriptorCount += descriptorConfig.descriptorCount;
         if (descriptorConfig.descriptorCount == 0)
         {
             poolFlags |= VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT;
             layoutBinding.descriptorCount = MaxBatchSize;
-            VkDescriptorBindingFlags bindingFlags = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT | 
-                VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT |
-                VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT_EXT;
-            VkDescriptorSetLayoutBindingFlagsCreateInfo flagsInfo{};
-            flagsInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
-            flagsInfo.bindingCount = 1;
-            flagsInfo.pBindingFlags = &bindingFlags;
 
             layoutInfo.pNext = &flagsInfo;
             layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT_EXT;
@@ -145,14 +149,17 @@ Descriptor::Descriptor(Device* mDevice, Descriptor::DescriptorConfig* descriptor
                 writes[i].push_back(descriptorWrite);
             }
         }
+        poolSizes.push_back(poolSize);
     }
-    if (!totalDescriptorCount)
-        return;
+    layoutInfo.pBindings = layoutBindings.data();
+    layoutInfo.bindingCount = static_cast<uint32_t>(layoutBindings.size());
 
     if (vkCreateDescriptorSetLayout(aDevice->GetLogicalDevice(), &layoutInfo, nullptr, &setLayout) != VK_SUCCESS)
         throw std::runtime_error("Failed to create the DescriptorSetLayout");
     layoutCreated = true;
-    aDevice->CreateDescriptorPool(configCount, poolSizes.data(), static_cast<uint32_t>(poolSizes.size()),
+    if (!totalDescriptorCount)
+        return;
+    aDevice->CreateDescriptorPool(descriptorSetCount, poolSizes.data(), static_cast<uint32_t>(poolSizes.size()),
         pool, poolFlags);
     aDevice->CreateDescriptorSets(descriptorSetCount, pool, setLayout, sets, writes);
 }

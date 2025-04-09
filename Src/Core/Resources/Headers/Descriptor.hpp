@@ -33,7 +33,6 @@ namespace AnA
             VkDescriptorType descriptorType;
             uint32_t descriptorCount;
             std::vector<VkDescriptorBufferInfo> bufferInfos;
-            VkDeviceSize bufferSize;
             std::vector<VkDescriptorImageInfo> imageInfos;
             uint32_t binding;
             VkShaderStageFlags stageFlags;

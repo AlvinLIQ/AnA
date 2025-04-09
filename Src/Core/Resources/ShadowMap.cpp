@@ -87,7 +87,7 @@ void ShadowMap::GetUBODescriptorConfig(Descriptor::DescriptorConfig* pConfig)
 {
 	*pConfig = {};
 	pConfig->binding = 0;
-    pConfig->descriptorCount = cascadeBuffers.size();
+    pConfig->descriptorCount = 1;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
     Resource::ResourceManager::GetBufferInfos(cascadeBuffers, pConfig->bufferInfos);

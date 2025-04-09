@@ -141,16 +141,18 @@ void ResourceManager::RecreateResources()
 {
     //cleanupShadowResources();
     //createShadowFramebuffers();
-    auto deafultShadowSamplerConfig = GetDefaultDescriptorSetConfig()[DEFAULT_SHADOW_SAMPLER_LAYOUT].begin();
+    std::vector<std::vector<Descriptor::DescriptorConfig>> configs;
+    GetDefaultDescriptorSetConfig(configs);
+    auto deafultShadowSamplerConfig = configs[DEFAULT_SHADOW_SAMPLER_LAYOUT].begin();
     for (int i = 0; i < 1; i++)
     {
         Shaders[i].GetDescriptors()[DEFAULT_SHADOW_SAMPLER_LAYOUT]->UpdateDescriptorSets(*deafultShadowSamplerConfig);
     }
 }
 
-std::vector<std::vector<Descriptor::DescriptorConfig>> ResourceManager::GetDefaultDescriptorSetConfig()
+void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs)
 {
-    std::vector<std::vector<Descriptor::DescriptorConfig>> descriptorSetConfigs(DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT);
+    descriptorSetConfigs.resize(DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT);
     for (auto& configs : descriptorSetConfigs)
         configs.resize(1);
     auto pConfig = descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT].begin();
@@ -167,15 +169,14 @@ std::vector<std::vector<Descriptor::DescriptorConfig>> ResourceManager::GetDefau
 */
     pConfig = descriptorSetConfigs[DEFAULT_UBO_LAYOUT].begin();
     pConfig->binding = 0;
-    pConfig->descriptorCount = MAX_FRAMES_IN_FLIGHT;
+    pConfig->descriptorCount = 1;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_MESH_BIT_EXT;
     GetBufferInfos(mainCameraBuffers, pConfig->bufferInfos);
 
-
     pConfig = descriptorSetConfigs[DEFAULT_LIGHT_LAYOUT].begin();
     pConfig->binding = 0;
-    pConfig->descriptorCount = static_cast<uint32_t>(GlobalLight.GetBuffers().size());;
+    pConfig->descriptorCount = 1;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_MESH_BIT_EXT;
     GetBufferInfos(GlobalLight.GetBuffers(), pConfig->bufferInfos);
@@ -188,20 +189,18 @@ std::vector<std::vector<Descriptor::DescriptorConfig>> ResourceManager::GetDefau
 
     pConfig = descriptorSetConfigs[DEFAULT_SHADOW_SAMPLER_LAYOUT].begin();
     pConfig->binding = 0;
-    pConfig->descriptorCount = static_cast<uint32_t>(ShadowMap.GetImages().size());
+    pConfig->descriptorCount = 1;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     pConfig->stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     GetImageInfos(ShadowMap.GetImages(), ShadowMap.GetSamplers(), pConfig->imageInfos);
 
     ShadowMap.GetUBODescriptorConfig(&descriptorSetConfigs[DEFAULT_CASCADED_UBO_LAYOUT][0]);
-
-    return descriptorSetConfigs;
 }
 
-std::vector<std::vector<Descriptor::DescriptorConfig>> ResourceManager::GetDefaultShapesDescriptorSetConfig()
+void ResourceManager::GetDefaultShapesDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs)
 {
-    std::vector<std::vector<Descriptor::DescriptorConfig>> descriptorSetConfigs(2);
-    for (auto configs : descriptorSetConfigs)
+    descriptorSetConfigs.resize(2);
+    for (auto& configs : descriptorSetConfigs)
         configs.resize(1);
     auto pConfig = descriptorSetConfigs[0].begin();
     pConfig->binding = 0;
@@ -213,8 +212,6 @@ std::vector<std::vector<Descriptor::DescriptorConfig>> ResourceManager::GetDefau
     pConfig->descriptorCount = 0;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     pConfig->stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-    return descriptorSetConfigs;
 }
 
 void ResourceManager::createMainCameraBuffers()
@@ -293,10 +290,12 @@ void ResourceManager::createDefaultShaders()
 {
     Shaders.reserve(5); // Reserve space for 3 default shaders
     auto renderPass = SwapChain::GetCurrent()->GetRenderPass();
-    auto descriptorConfig = GetDefaultDescriptorSetConfig();
+    std::vector<std::vector<Descriptor::DescriptorConfig>> descriptorConfig;
+    GetDefaultDescriptorSetConfig(descriptorConfig);
     Shaders.emplace_back(aDevice, Basic_vert, Basic_frag, renderPass, descriptorConfig);
 
-    auto shapesDescriptorConfig = GetDefaultShapesDescriptorSetConfig();
+    std::vector<std::vector<Descriptor::DescriptorConfig>> shapesDescriptorConfig;
+    GetDefaultShapesDescriptorSetConfig(shapesDescriptorConfig);
     Shaders.emplace_back(aDevice, Shape_vert, Shape_frag, renderPass, shapesDescriptorConfig);
 
     auto offscreenRenderPass = SwapChain::GetCurrent()->GetOffscreenRenderPass();

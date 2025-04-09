@@ -97,7 +97,7 @@ namespace AnA
         void CreateDescriptorSets(Buffer* buffers, VkDeviceSize bufferSize, uint32_t binding, uint32_t descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets);
         void CreateDescriptorSets(VkDescriptorImageInfo* imageInfos, uint32_t binding, uint32_t descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets);
         void CreateDescriptorSets(uint32_t descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, std::vector<VkDescriptorSet>& descriptorSets, void* pNext);
-        void CreateDescriptorSets(uint32_t descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, std::vector<VkDescriptorSet>& descriptorSets, const std::vector<std::vector<VkWriteDescriptorSet>>& writes);
+        void CreateDescriptorSets(uint32_t descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, std::vector<VkDescriptorSet>& descriptorSets, std::vector<std::vector<VkWriteDescriptorSet>>& writes);
 
         void CreateCommandPool(VkCommandPoolCreateFlags flags, VkCommandPool* pool);
 

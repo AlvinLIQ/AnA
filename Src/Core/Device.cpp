@@ -363,7 +363,7 @@ void Device::CreateDescriptorPool(uint32_t descriptorSetCount, const VkDescripto
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     poolInfo.poolSizeCount = poolSizeCount;
     poolInfo.pPoolSizes = poolSizes;
-    poolInfo.maxSets = static_cast<uint32_t>(descriptorSetCount);
+    poolInfo.maxSets = descriptorSetCount;
     poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT | flags;
     
     if (vkCreateDescriptorPool(logicalDevice, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
@@ -444,12 +444,12 @@ void Device::CreateDescriptorSets(uint32_t descriptorSetCount, VkDescriptorPool&
     VkDescriptorSetAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     allocInfo.descriptorPool = descriptorPool;
-    allocInfo.descriptorSetCount = static_cast<uint32_t>(descriptorSetCount);
+    allocInfo.descriptorSetCount = descriptorSetCount;
     allocInfo.pSetLayouts = layouts.data();
     allocInfo.pNext = pNext;
     descriptorSets.resize(descriptorSetCount);
-    
-    if (vkAllocateDescriptorSets(logicalDevice, &allocInfo, descriptorSets.data()) != VK_SUCCESS)
+    VkResult result;
+    if ((result = vkAllocateDescriptorSets(logicalDevice, &allocInfo, descriptorSets.data())) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to allocate descriptor sets!");
     }
@@ -457,11 +457,13 @@ void Device::CreateDescriptorSets(uint32_t descriptorSetCount, VkDescriptorPool&
 
 void Device::CreateDescriptorSets(uint32_t descriptorSetCount, VkDescriptorPool& descriptorPool, 
     VkDescriptorSetLayout& descriptorSetLayout, std::vector<VkDescriptorSet>& descriptorSets, 
-    const std::vector<std::vector<VkWriteDescriptorSet>>& writes)
+    std::vector<std::vector<VkWriteDescriptorSet>>& writes)
 {
     CreateDescriptorSets(descriptorSetCount, descriptorPool, descriptorSetLayout, descriptorSets, nullptr);
     for (uint32_t i = 0; i < descriptorSetCount; i++)
     {
+        for (auto& write : writes[i])
+            write.dstSet = descriptorSets[i];
         vkUpdateDescriptorSets(logicalDevice, writes[i].size(), 
             writes[i].data(), 0, nullptr);
     }
