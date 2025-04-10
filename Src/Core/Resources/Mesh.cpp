@@ -5,6 +5,58 @@
 
 using namespace AnA;
 
+void FrustumPlanes::ExtractFrustumPlanes(const glm::mat4& m, FrustumPlanes& fp)
+{
+    //Left
+    fp.planes[0] = glm::vec4(
+        m[0][3] + m[0][0],
+        m[1][3] + m[1][0],
+        m[2][3] + m[2][0],
+        m[3][3] + m[3][0]);
+
+    // Right
+    fp.planes[1] = glm::vec4(
+        m[0][3] - m[0][0],
+        m[1][3] - m[1][0],
+        m[2][3] - m[2][0],
+        m[3][3] - m[3][0]);
+
+    // Bottom
+    fp.planes[2] = glm::vec4(
+        m[0][3] + m[0][1],
+        m[1][3] + m[1][1],
+        m[2][3] + m[2][1],
+        m[3][3] + m[3][1]);
+
+    // Top
+    fp.planes[3] = glm::vec4(
+        m[0][3] - m[0][1],
+        m[1][3] - m[1][1],
+        m[2][3] - m[2][1],
+        m[3][3] - m[3][1]);
+
+    // Near
+    fp.planes[4] = glm::vec4(
+        m[0][3] + m[0][2],
+        m[1][3] + m[1][2],
+        m[2][3] + m[2][2],
+        m[3][3] + m[3][2]);
+
+    // Far
+    fp.planes[5] = glm::vec4(
+        m[0][3] - m[0][2],
+        m[1][3] - m[1][2],
+        m[2][3] - m[2][2],
+        m[3][3] - m[3][2]);
+
+    // Normalize the planes
+    for (auto& p : fp.planes)
+    {
+        float len = glm::length(glm::vec3(p));
+        p /= len;
+    }
+}
+
 Meshes::Meshes(Device* mDevice) : aDevice{mDevice}
 {
     //auto& properties = aDevice->GetPhysicalDeviceProperties();
@@ -12,7 +64,8 @@ Meshes::Meshes(Device* mDevice) : aDevice{mDevice}
     vertexBuffers.resize(MAX_FRAMES_IN_FLIGHT);
     indexBuffers.resize(vertexBuffers.size());
 
-    meshletsBuffers.resize(vertexBuffers.size());
+    meshletBuffers.resize(vertexBuffers.size());
+    meshletCullingBuffers.resize(meshletBuffers.size());
 
     drawIndexedIndirectBuffer = Buffer(aDevice, sizeof(VkDrawIndexedIndirectCommand), 
     VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
@@ -224,6 +277,10 @@ void Meshes::DrawIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescripto
 
 void Meshes::DrawMesh(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
 {
+    auto resourceManager = Resource::ResourceManager::GetCurrent();
+    vkCmdPushConstants(commandBuffer, pipelineLayout, 
+        VK_SHADER_STAGE_TASK_BIT_EXT, 0, sizeof(FrustumPlanes), 
+        &resourceManager->MainCameraFrustumPlanes);
     aDevice->vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
 }
 
@@ -236,6 +293,10 @@ void Meshes::DrawMesh(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet
     pipelineLayout, 0, static_cast<uint32_t>(sets.size()),
     sets.data(), 0, nullptr);
 
+    auto resourceManager = Resource::ResourceManager::GetCurrent();
+    vkCmdPushConstants(commandBuffer, pipelineLayout, 
+        VK_SHADER_STAGE_TASK_BIT_EXT, 0, sizeof(FrustumPlanes), 
+        &resourceManager->MainCameraFrustumPlanes);
     aDevice->vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
 }
 
@@ -248,6 +309,10 @@ void Meshes::DrawMeshIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescr
     pipelineLayout, 0, static_cast<uint32_t>(sets.size()),
     sets.data(), 0, nullptr);
 
+    auto resourceManager = Resource::ResourceManager::GetCurrent();
+    vkCmdPushConstants(commandBuffer, pipelineLayout, 
+        VK_SHADER_STAGE_VERTEX_BIT|VK_SHADER_STAGE_FRAGMENT_BIT|VK_SHADER_STAGE_TASK_BIT_EXT, 0, sizeof(FrustumPlanes), 
+        &resourceManager->MainCameraFrustumPlanes);
     aDevice->vkCmdDrawMeshTasksIndirectCountEXT(commandBuffer, drawMeshIndirectBuffer.GetBuffer(), 0, 
         countBuffer.GetBuffer(), 
         0, 1, sizeof(VkDrawMeshTasksIndirectCommandEXT));
@@ -330,19 +395,26 @@ void Meshes::UpdateMeshlets()
     //buildMeshlets();
     buildMeshletsWithOptimizer();
     uint32_t minMeshletBufferSize = (meshletVertexCount + meshletIndexCount / 3 + 1 +
-        3 * static_cast<uint32_t>(meshlets.size())) * sizeof(uint32_t);
-    if (!meshletsBuffers[nextIndex].GetBuffer() || 
-        meshletsBuffers[nextIndex].GetSize() < minMeshletBufferSize)
+        3 * meshlets.size()) * sizeof(uint32_t);
+    if (!meshletBuffers[nextIndex].GetBuffer() || 
+        meshletBuffers[nextIndex].GetSize() < minMeshletBufferSize)
     {
-        meshletsBuffers[nextIndex] = Buffer(aDevice, minMeshletBufferSize,
+        meshletBuffers[nextIndex] = Buffer(aDevice, minMeshletBufferSize,
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | 
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-        meshletsBuffers[nextIndex].Map(0, meshletsBuffers[nextIndex].GetSize());
+        meshletBuffers[nextIndex].Map(0, meshletBuffers[nextIndex].GetSize());
+
+        meshletCullingBuffers[nextIndex] = Buffer(aDevice, meshlets.size() * sizeof(glm::vec4),
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | 
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        meshletCullingBuffers[nextIndex].Map(0, meshletCullingBuffers[nextIndex].GetSize());
     }
     uint32_t bufferId = 0;
-    uint32_t* buffer = (uint32_t*)meshletsBuffers[nextIndex].GetMappedData();
+    uint32_t* buffer = (uint32_t*)meshletBuffers[nextIndex].GetMappedData();
+    glm::vec4* cullingBuffer = (glm::vec4*)meshletCullingBuffers[nextIndex].GetMappedData();
     uint32_t vertexOffset = 0, primitiveOffset = 0;
     if (meshlets.empty())
         buffer[0] = 0;
@@ -352,6 +424,8 @@ void Meshes::UpdateMeshlets()
         buffer[bufferId++] = vertexOffset + primitiveOffset + (i * 2) + static_cast<uint32_t>(meshlets.size());
         vertexOffset += meshlet.vertexCount;
         primitiveOffset += meshlet.indexCount / 3;
+
+        cullingBuffer[i] = glm::vec4(meshlet.center, meshlet.radius);
     }
     for (auto& meshlet : meshlets)
     {
@@ -443,11 +517,18 @@ void Meshes::updateSSBODescriptor()
     aDevice->UpdateDescriptorSet(bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 
         vertexDescriptor->GetSets()[nextIndex]);
 
-    bufferInfo.buffer = meshletsBuffers[nextIndex].GetBuffer();
+    bufferInfo.buffer = meshletBuffers[nextIndex].GetBuffer();
     bufferInfo.offset = 0;
-    bufferInfo.range = meshletsBuffers[nextIndex].GetSize();
+    bufferInfo.range = meshletBuffers[nextIndex].GetSize();
     aDevice->UpdateDescriptorSet(bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 
-        meshDescriptor->GetSets()[nextIndex]);
+
+    meshDescriptor->GetSets()[nextIndex]);
+    bufferInfo.buffer = meshletBuffers[nextIndex].GetBuffer();
+    bufferInfo.offset = 0;
+    bufferInfo.range = meshletBuffers[nextIndex].GetSize();
+    aDevice->UpdateDescriptorSet(bufferInfo, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 
+            meshDescriptor->GetSets()[nextIndex]);
+    
     currentBufferIndex = nextIndex;
     nextIndex = NextFrameIndex(currentBufferIndex);
 }
@@ -573,6 +654,8 @@ void Meshes::buildMeshletsWithOptimizer()
 
         for (auto& meshletInfo : meshopt_meshlets)
         {
+            glm::vec3 minBounding{std::numeric_limits<float>::max()};
+            glm::vec3 maxBounding{-std::numeric_limits<float>::max()};
             Meshlet meshlet{};
             meshlet.indexCount = static_cast<uint32_t>(meshletInfo.triangle_count) * 3;
             meshlet.vertexCount = static_cast<uint32_t>(meshletInfo.vertex_count);
@@ -585,6 +668,17 @@ void Meshes::buildMeshletsWithOptimizer()
             for (uint32_t i = 0; i < meshlet.vertexCount; i++)
             {
                 meshlet.vertices[i] = uniqueVertexIndices[i + meshletInfo.vertex_offset] + mesh.vertexOffset;
+                minBounding = glm::min(minBounding, mesh.vertices[uniqueVertexIndices[i + meshletInfo.vertex_offset]].position);
+                maxBounding = glm::max(maxBounding, mesh.vertices[uniqueVertexIndices[i + meshletInfo.vertex_offset]].position);
+            }
+            meshlet.center = (minBounding + maxBounding) * 0.5f;
+            for (uint32_t i = 0; i < meshlet.vertexCount; i++)
+            {
+                float distance = glm::distance(meshlet.center, 
+                    mesh.vertices[uniqueVertexIndices[i + meshletInfo.vertex_offset]].position);
+                if (distance > meshlet.radius)
+                    meshlet.radius = distance;
+
             }
             meshlets.push_back(meshlet);
         }

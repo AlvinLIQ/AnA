@@ -1,12 +1,27 @@
 #version 460
 #extension GL_EXT_mesh_shader : require
 
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+
+layout(push_constant) uniform PushConstants
+{
+    vec4 frustumPlanes[6];
+};
+
 layout(std430, set = 6, binding = 0) buffer meshletSSBO
 {
     uint meshlets[];
 } msbo;
 
+layout(std140, set = 6, binding = 1) buffer meshletCullingSSBO
+{
+    vec4 cullings[];
+} mcsbo;
+
+taskPayloadSharedEXT uint meshletIndices[32];
+
 void main()
 {
-	EmitMeshTasksEXT(msbo.meshlets[0], 1, 1);
+    if (gl_LocalInvocationIndex == 0)
+	    EmitMeshTasksEXT(msbo.meshlets[0], 1, 1);
 }

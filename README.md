@@ -4,18 +4,14 @@
 
 ## Currently working on
 
-* GUI Controls
+* Culling & LODs
 
 ## To do
 
-* [X] Lighting System
-* [X] Multi-Thread Commandbuffer Recording
-* [X] Draw Indirectly
 * [X] Mesh Shader
 * [ ] Animation System
 * [ ] Cascaded Shaodow Maps
 * [ ] Fix Crappy Text Rendering
-* [X] XML to GUI
 
 ## Build&Run
 Clone the repo and submodules

@@ -96,13 +96,13 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode
 }
 
 Shader::Shader(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, 
-    std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs) : aDevice{mDevice}
+    std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs, VkDeviceSize pushConstantSize) : aDevice{mDevice}
 {
     createDescriptors(descriptorSetConfigs);
 
     if (pDefaultPipelineLayout == nullptr)
     {
-        createPipelineLayout(0);
+        createPipelineLayout(pushConstantSize);
     }
     else
     {
@@ -163,7 +163,7 @@ void Shader::createPipelineLayout(VkDeviceSize pushConstantSize)
     if (pushConstantSize)
     {
         VkPushConstantRange range;
-        range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+        range.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
         range.offset = 0;
         range.size = pushConstantSize;
         pipelineLayoutInfo.pushConstantRangeCount = 1;

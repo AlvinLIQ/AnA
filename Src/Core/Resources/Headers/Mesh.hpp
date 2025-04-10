@@ -32,6 +32,13 @@ namespace AnA
         AnA::Transform transform;
         uint32_t tetureId{};
     };
+
+    struct FrustumPlanes
+    {
+        glm::vec4 planes[6];
+        static void ExtractFrustumPlanes(const glm::mat4& m, FrustumPlanes& fp);
+    };
+
     class Meshes
     {
     public:
@@ -121,7 +128,8 @@ namespace AnA
         uint32_t meshletVertexCount = 0;
         uint32_t meshletIndexCount = 0;
         std::vector<Meshlet> meshlets;
-        std::vector<Buffer> meshletsBuffers{};
+        std::vector<Buffer> meshletBuffers{};
+        std::vector<Buffer> meshletCullingBuffers{};
         void buildMeshlets(
             uint32_t maxVerticesPerMeshlet = 128,  // max number of vertices per meshlet
             uint32_t maxIndicesPerMeshlet = 256 * 3);  // max number of indices per meshlet (i.e., triangles)

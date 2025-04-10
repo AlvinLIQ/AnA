@@ -102,13 +102,16 @@ void ResourceManager::UpdateCamera(float aspect)
 
 void ResourceManager::UpdateCameraBuffer()
 {
+    auto& proj = MainCamera.GetProjectionMatrix();
+    auto& view = MainCamera.GetView();
     Cameras::CameraBufferObject& cbo = *(Cameras::CameraBufferObject*)mainCameraBuffers[SwapChain::GetCurrent()->CurrentFrame].GetMappedData();
-    cbo.proj = MainCamera.GetProjectionMatrix();
-    cbo.view = MainCamera.GetView();
+    cbo.proj = proj;
+    cbo.view = view;
     //cbo.invView = MainCamera.GetInverseView();
 
     auto extent = SwapChain::GetCurrent()->GetExtent();
     cbo.resolution = {(float)extent.width, (float)extent.height};
+    FrustumPlanes::ExtractFrustumPlanes(proj * view, MainCameraFrustumPlanes);
 }
 
 void ResourceManager::Update()
@@ -225,67 +228,7 @@ void ResourceManager::createMainCameraBuffers()
         cameraBuffer.Map(0, bufferSize);
     }
 }
-/*
-void ResourceManager::createShadowFramebuffers()
-{
-    shadowImages.resize(MAX_FRAMES_IN_FLIGHT);
-    shadowFramebuffers.resize(MAX_FRAMES_IN_FLIGHT);
-    bool samplersNotCreated = shadowSamplers.empty();
-    if (samplersNotCreated)
-        shadowSamplers.resize(MAX_FRAMES_IN_FLIGHT);
-    auto extent = SwapChain::GetCurrent()->GetExtent();
-    for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-    {
-        auto& shadowImage = shadowImages[i];
-        VkImageCreateInfo imageInfo{};
-        imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-        imageInfo.imageType = VK_IMAGE_TYPE_2D;
-        imageInfo.format = VK_FORMAT_D32_SFLOAT;
-        imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        imageInfo.extent = {extent.width, extent.height, 1};
-        shadowImage.extent = imageInfo.extent;
-        shadowImage.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-        imageInfo.mipLevels = 1;
-        imageInfo.arrayLayers = 1;
-        imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-        imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-        imageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-        aDevice->CreateImage(&imageInfo, &shadowImage.image, &shadowImage.imageMemory);
-        //aDevice->TransitionImageLayout(image, swapChain->GetDepthFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL);
 
-        VkImageViewCreateInfo imageViewInfo{};
-        imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        imageViewInfo.image = shadowImage.image;
-        imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        imageViewInfo.format = imageInfo.format;
-        imageViewInfo.components = { VK_COMPONENT_SWIZZLE_R };
-        imageViewInfo.subresourceRange = { VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1 };
-
-        vkCreateImageView(aDevice->GetLogicalDevice(), &imageViewInfo, nullptr, &shadowImage.imageView);
-
-        VkFramebufferCreateInfo framebufferInfo{};
-        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = SwapChain::GetCurrent()->GetOffscreenRenderPass();
-        framebufferInfo.attachmentCount = 1;
-        framebufferInfo.pAttachments = &shadowImage.imageView;
-
-        framebufferInfo.width = imageInfo.extent.width;
-        framebufferInfo.height = imageInfo.extent.height;
-        framebufferInfo.layers = 1;
-        vkCreateFramebuffer(aDevice->GetLogicalDevice(), &framebufferInfo, nullptr, &shadowFramebuffers[i]);
-        if (samplersNotCreated)
-            aDevice->CreateSampler(&shadowSamplers[i], VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE);
-    }
-}
-
-void ResourceManager::cleanupShadowResources()
-{
-    for (auto& shadowFrameBuffer : shadowFramebuffers)
-        vkDestroyFramebuffer(aDevice->GetLogicalDevice(), shadowFrameBuffer, nullptr);
-    for (auto& shadowImage : shadowImages)
-        shadowImage.cleanup(aDevice->GetLogicalDevice());
-}
-*/
 void ResourceManager::createDefaultShaders()
 {
     Shaders.reserve(5); // Reserve space for 3 default shaders
@@ -318,6 +261,6 @@ void ResourceManager::createDefaultShaders()
     descriptorConfig.push_back({meshletConfig, meshletCullingConfig});
 
     Shaders.emplace_back(aDevice, Mesh_task, Mesh_mesh, Mesh_frag, renderPass
-        , descriptorConfig);
+        , descriptorConfig, sizeof(FrustumPlanes));
     //std::vector<Descriptor::DescriptorConfig> emptyConfig{};
 }
