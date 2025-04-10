@@ -92,13 +92,12 @@ Descriptor::Descriptor(Device* mDevice, Descriptor::DescriptorConfig* descriptor
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 
-    VkDescriptorBindingFlags bindingFlags = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT | 
+    const VkDescriptorBindingFlags bindlessFlags = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT | 
                 VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT |
                 VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT_EXT;
+    std::vector<VkDescriptorBindingFlags> bindingFlags{};
     VkDescriptorSetLayoutBindingFlagsCreateInfo flagsInfo{};
     flagsInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
-    flagsInfo.bindingCount = 1;
-    flagsInfo.pBindingFlags = &bindingFlags;
 
     std::vector<VkDescriptorSetLayoutBinding> layoutBindings(configCount);
     std::vector<VkDescriptorPoolSize> poolSizes{};
@@ -128,8 +127,8 @@ Descriptor::Descriptor(Device* mDevice, Descriptor::DescriptorConfig* descriptor
         {
             poolFlags |= VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT;
             layoutBinding.descriptorCount = MaxBatchSize;
+            bindingFlags.push_back(0);
 
-            layoutInfo.pNext = &flagsInfo;
             layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT_EXT;
             continue;
         }
@@ -149,7 +148,17 @@ Descriptor::Descriptor(Device* mDevice, Descriptor::DescriptorConfig* descriptor
                 writes[i].push_back(descriptorWrite);
             }
         }
+        bindingFlags.push_back(0);
         poolSizes.push_back(poolSize);
+    }
+    if (bindingFlags.size())
+    {
+        if (poolFlags)
+            bindingFlags.back() = bindlessFlags;
+        layoutInfo.pNext = &flagsInfo;
+
+        flagsInfo.bindingCount = static_cast<uint32_t>(bindingFlags.size());
+        flagsInfo.pBindingFlags = bindingFlags.data();
     }
     layoutInfo.pBindings = layoutBindings.data();
     layoutInfo.bindingCount = static_cast<uint32_t>(layoutBindings.size());

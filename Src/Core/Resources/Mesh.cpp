@@ -428,7 +428,7 @@ void Meshes::createSSBODescriptor()
         VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
         VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_MESH_BIT_EXT);
     meshDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT, 
-        1,
+        2,
         meshDescriptorSetLayout,
         VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
         VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_TASK_BIT_EXT);

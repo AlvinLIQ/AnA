@@ -309,7 +309,13 @@ void ResourceManager::createDefaultShaders()
     meshletConfig.descriptorCount = 0;
     meshletConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     meshletConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-    descriptorConfig.push_back({meshletConfig});
+    Descriptor::DescriptorConfig meshletCullingConfig{};
+    meshletCullingConfig.binding = 1;
+    meshletCullingConfig.descriptorCount = 0;
+    meshletCullingConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    meshletCullingConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT;
+
+    descriptorConfig.push_back({meshletConfig, meshletCullingConfig});
 
     Shaders.emplace_back(aDevice, Mesh_task, Mesh_mesh, Mesh_frag, renderPass
         , descriptorConfig);
