@@ -344,7 +344,8 @@ void Meshes::UpdateMeshlets()
     uint32_t bufferId = 0;
     uint32_t* buffer = (uint32_t*)meshletsBuffers[nextIndex].GetMappedData();
     uint32_t vertexOffset = 0, primitiveOffset = 0;
-    //buffer[bufferId++] = static_cast<uint32_t>(meshlets.size());
+    if (meshlets.empty())
+        buffer[0] = 0;
     for (size_t i = 0; i < meshlets.size(); i++)
     {
         auto& meshlet = meshlets[i];
