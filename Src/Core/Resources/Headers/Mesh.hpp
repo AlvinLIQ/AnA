@@ -22,6 +22,8 @@ namespace AnA
         uint8_t indices[256 * 3];
         uint32_t indexCount;
         uint32_t vertexCount;
+        glm::vec3 center;
+        float radius;
     };
 
     struct MeshInfo

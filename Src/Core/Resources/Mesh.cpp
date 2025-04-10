@@ -329,7 +329,7 @@ void Meshes::UpdateMeshlets()
 {
     //buildMeshlets();
     buildMeshletsWithOptimizer();
-    uint32_t minMeshletBufferSize = (meshletVertexCount + meshletIndexCount / 3 + 
+    uint32_t minMeshletBufferSize = (meshletVertexCount + meshletIndexCount / 3 + 1 +
         3 * static_cast<uint32_t>(meshlets.size())) * sizeof(uint32_t);
     if (!meshletsBuffers[nextIndex].GetBuffer() || 
         meshletsBuffers[nextIndex].GetSize() < minMeshletBufferSize)
@@ -344,7 +344,7 @@ void Meshes::UpdateMeshlets()
     uint32_t bufferId = 0;
     uint32_t* buffer = (uint32_t*)meshletsBuffers[nextIndex].GetMappedData();
     uint32_t vertexOffset = 0, primitiveOffset = 0;
-    buffer[bufferId++] = static_cast<uint32_t>(meshlets.size());
+    //buffer[bufferId++] = static_cast<uint32_t>(meshlets.size());
     for (size_t i = 0; i < meshlets.size(); i++)
     {
         auto& meshlet = meshlets[i];
