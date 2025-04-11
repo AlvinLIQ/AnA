@@ -75,11 +75,14 @@ const vec4[3] colors = {
 	vec4(1.0, 0.0, 0.0, 1.0)
 };
 
-taskPayloadSharedEXT uint meshletIndices[32];
+taskPayloadSharedEXT struct {
+    uint visibleIndices[512]; // max 512 visible meshlets per group
+    uint visibleCount;
+} taskData;
 
 void main()
 {
-	uint iid = msbo.meshlets[gl_WorkGroupID.x];
+	uint iid = msbo.meshlets[taskData.visibleIndices[gl_WorkGroupID.x]];
     uint vertexCount = msbo.meshlets[iid++];
     uint primitiveCount = msbo.meshlets[iid++];
 //gl_LocalInvocationIndex

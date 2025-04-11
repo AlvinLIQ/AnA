@@ -72,6 +72,7 @@ namespace AnA
         private:
             Device* aDevice;
             std::vector<Buffer> mainCameraBuffers;
+            std::vector<Buffer> frustumBuffers;
             void createMainCameraBuffers();
 
 /*

@@ -130,6 +130,7 @@ namespace AnA
         std::vector<Meshlet> meshlets;
         std::vector<Buffer> meshletBuffers{};
         std::vector<Buffer> meshletCullingBuffers{};
+        uint32_t numOfGroup = 64;
         void buildMeshlets(
             uint32_t maxVerticesPerMeshlet = 128,  // max number of vertices per meshlet
             uint32_t maxIndicesPerMeshlet = 256 * 3);  // max number of indices per meshlet (i.e., triangles)

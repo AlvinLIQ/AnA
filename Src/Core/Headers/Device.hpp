@@ -126,6 +126,10 @@ namespace AnA
             return commandPool;
         }
         VkSampleCountFlagBits GetMaxUsableSampleCount();
+        const VkPhysicalDeviceMeshShaderPropertiesEXT& GetMeshShaderProperties() const
+        {
+            return meshShaderProperties;
+        }
         
         QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
 

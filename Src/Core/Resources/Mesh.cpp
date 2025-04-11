@@ -61,6 +61,7 @@ Meshes::Meshes(Device* mDevice) : aDevice{mDevice}
 {
     //auto& properties = aDevice->GetPhysicalDeviceProperties();
     batchSize = MaxBatchSize;
+    numOfGroup = aDevice->GetMeshShaderProperties().maxPreferredTaskWorkGroupInvocations;
     vertexBuffers.resize(MAX_FRAMES_IN_FLIGHT);
     indexBuffers.resize(vertexBuffers.size());
 
@@ -277,10 +278,6 @@ void Meshes::DrawIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescripto
 
 void Meshes::DrawMesh(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
 {
-    auto resourceManager = Resource::ResourceManager::GetCurrent();
-    vkCmdPushConstants(commandBuffer, pipelineLayout, 
-        VK_SHADER_STAGE_TASK_BIT_EXT, 0, sizeof(FrustumPlanes), 
-        &resourceManager->MainCameraFrustumPlanes);
     aDevice->vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
 }
 
@@ -293,10 +290,6 @@ void Meshes::DrawMesh(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet
     pipelineLayout, 0, static_cast<uint32_t>(sets.size()),
     sets.data(), 0, nullptr);
 
-    auto resourceManager = Resource::ResourceManager::GetCurrent();
-    vkCmdPushConstants(commandBuffer, pipelineLayout, 
-        VK_SHADER_STAGE_TASK_BIT_EXT, 0, sizeof(FrustumPlanes), 
-        &resourceManager->MainCameraFrustumPlanes);
     aDevice->vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
 }
 
@@ -309,10 +302,6 @@ void Meshes::DrawMeshIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescr
     pipelineLayout, 0, static_cast<uint32_t>(sets.size()),
     sets.data(), 0, nullptr);
 
-    auto resourceManager = Resource::ResourceManager::GetCurrent();
-    vkCmdPushConstants(commandBuffer, pipelineLayout, 
-        VK_SHADER_STAGE_VERTEX_BIT|VK_SHADER_STAGE_FRAGMENT_BIT|VK_SHADER_STAGE_TASK_BIT_EXT, 0, sizeof(FrustumPlanes), 
-        &resourceManager->MainCameraFrustumPlanes);
     aDevice->vkCmdDrawMeshTasksIndirectCountEXT(commandBuffer, drawMeshIndirectBuffer.GetBuffer(), 0, 
         countBuffer.GetBuffer(), 
         0, 1, sizeof(VkDrawMeshTasksIndirectCommandEXT));
@@ -441,6 +430,14 @@ void Meshes::UpdateMeshlets()
                 (meshlet.indices[i + 2] << 16u);
         }
     }
+
+    auto drawMeshTaskCommand = (glm::uvec3*)drawMeshIndirectBuffer.GetMappedData();
+    uint32_t numofGroup = (static_cast<uint32_t>(meshlets.size()) + numOfGroup - 1) / numOfGroup;
+    glm::uvec3 groupSize;
+    groupSize.x = std::min(numofGroup, 2u);
+    groupSize.y = 1;
+    groupSize.z = 1;
+    *drawMeshTaskCommand = groupSize;
 }
 
 void Meshes::UpdateVertexPositions(Mesh& mesh)
@@ -523,9 +520,9 @@ void Meshes::updateSSBODescriptor()
     aDevice->UpdateDescriptorSet(bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 
 
     meshDescriptor->GetSets()[nextIndex]);
-    bufferInfo.buffer = meshletBuffers[nextIndex].GetBuffer();
+    bufferInfo.buffer = meshletCullingBuffers[nextIndex].GetBuffer();
     bufferInfo.offset = 0;
-    bufferInfo.range = meshletBuffers[nextIndex].GetSize();
+    bufferInfo.range = meshletCullingBuffers[nextIndex].GetSize();
     aDevice->UpdateDescriptorSet(bufferInfo, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 
             meshDescriptor->GetSets()[nextIndex]);
     
@@ -680,6 +677,7 @@ void Meshes::buildMeshletsWithOptimizer()
                     meshlet.radius = distance;
 
             }
+            meshlet.center = mesh.transform.mat3() * meshlet.center + mesh.transform.translation;
             meshlets.push_back(meshlet);
         }
     }

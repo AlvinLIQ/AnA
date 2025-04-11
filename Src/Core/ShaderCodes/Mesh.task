@@ -1,12 +1,16 @@
 #version 460
 #extension GL_EXT_mesh_shader : require
+#extension GL_KHR_shader_subgroup_ballot : require
 
+#ifndef __GLSL_CG_DATA_TYPES
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
-
-layout(push_constant) uniform PushConstants
+#else
+layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
+#endif
+layout(set = 1, binding = 1) uniform Frustum
 {
-    vec4 frustumPlanes[6];
-};
+    vec4 planes[6];
+} frustum;
 
 layout(std430, set = 6, binding = 0) buffer meshletSSBO
 {
@@ -18,10 +22,42 @@ layout(std140, set = 6, binding = 1) buffer meshletCullingSSBO
     vec4 cullings[];
 } mcsbo;
 
-taskPayloadSharedEXT uint meshletIndices[32];
+taskPayloadSharedEXT struct {
+    uint visibleIndices[512]; // max 512 visible meshlets per group
+    uint visibleCount;
+} taskData;
+
+bool isSphereInsideFrustum(vec3 center, float radius)
+{
+    for (int i = 0; i < 6; ++i)
+    {
+        vec4 plane = frustum.planes[i];
+        float d = dot(plane.xyz, center) + plane.w + radius;
+        if (d < 0)
+            return false;
+    }
+    return true;
+}
 
 void main()
 {
+    uint globalID = gl_GlobalInvocationID.x;
+    if (globalID >= msbo.meshlets[0])
+        return;
+    vec4 culling = mcsbo.cullings[globalID];
+    bool visible = isSphereInsideFrustum(culling.xyz, culling.w);
+    
+    uvec4 ballot = subgroupBallot(visible);
+    if (visible)
+    {
+        uint index = subgroupBallotExclusiveBitCount(ballot);
+        taskData.visibleIndices[index] = globalID;
+    }
+
     if (gl_LocalInvocationIndex == 0)
-	    EmitMeshTasksEXT(msbo.meshlets[0], 1, 1);
+    {
+        uint total = subgroupBallotBitCount(ballot);
+        taskData.visibleCount = total;
+	    EmitMeshTasksEXT(total, 1, 1);
+    }
 }

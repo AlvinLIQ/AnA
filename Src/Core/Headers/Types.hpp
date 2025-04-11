@@ -12,7 +12,7 @@ namespace AnA
         glm::vec3 scale{1.f, 1.f, 1.f};
         glm::vec3 rotation{};
 
-        glm::mat3 mat3()
+        glm::mat3 mat3() const
         {
             const float c3 = glm::cos(rotation.z);
             const float s3 = glm::sin(rotation.z);

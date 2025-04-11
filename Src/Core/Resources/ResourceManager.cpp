@@ -104,7 +104,8 @@ void ResourceManager::UpdateCameraBuffer()
 {
     auto& proj = MainCamera.GetProjectionMatrix();
     auto& view = MainCamera.GetView();
-    Cameras::CameraBufferObject& cbo = *(Cameras::CameraBufferObject*)mainCameraBuffers[SwapChain::GetCurrent()->CurrentFrame].GetMappedData();
+    uint32_t currentFrame = SwapChain::GetCurrent()->CurrentFrame;
+    Cameras::CameraBufferObject& cbo = *(Cameras::CameraBufferObject*)mainCameraBuffers[currentFrame].GetMappedData();
     cbo.proj = proj;
     cbo.view = view;
     //cbo.invView = MainCamera.GetInverseView();
@@ -112,6 +113,7 @@ void ResourceManager::UpdateCameraBuffer()
     auto extent = SwapChain::GetCurrent()->GetExtent();
     cbo.resolution = {(float)extent.width, (float)extent.height};
     FrustumPlanes::ExtractFrustumPlanes(proj * view, MainCameraFrustumPlanes);
+    memcpy(frustumBuffers[currentFrame].GetMappedData(), &MainCameraFrustumPlanes, sizeof(FrustumPlanes));
 }
 
 void ResourceManager::Update()
@@ -158,7 +160,7 @@ void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Desc
     descriptorSetConfigs.resize(DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT);
     for (auto& configs : descriptorSetConfigs)
         configs.resize(1);
-    auto pConfig = descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT].begin();
+    auto pConfig = &descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT][0];
     pConfig->binding = 0;
     pConfig->descriptorCount = 0;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
@@ -170,27 +172,34 @@ void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Desc
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_MESH_BIT_EXT;
 */
-    pConfig = descriptorSetConfigs[DEFAULT_UBO_LAYOUT].begin();
+    pConfig = &descriptorSetConfigs[DEFAULT_UBO_LAYOUT][0];
     pConfig->binding = 0;
     pConfig->descriptorCount = 1;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_MESH_BIT_EXT;
     GetBufferInfos(mainCameraBuffers, pConfig->bufferInfos);
+    descriptorSetConfigs[DEFAULT_UBO_LAYOUT].resize(2);
+    pConfig = &descriptorSetConfigs[DEFAULT_UBO_LAYOUT][1];
+    pConfig->binding = 1;
+    pConfig->descriptorCount = 1;
+    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    pConfig->stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT;
+    GetBufferInfos(frustumBuffers, pConfig->bufferInfos);
 
-    pConfig = descriptorSetConfigs[DEFAULT_LIGHT_LAYOUT].begin();
+    pConfig = &descriptorSetConfigs[DEFAULT_LIGHT_LAYOUT][0];
     pConfig->binding = 0;
     pConfig->descriptorCount = 1;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_MESH_BIT_EXT;
     GetBufferInfos(GlobalLight.GetBuffers(), pConfig->bufferInfos);
 
-    pConfig = descriptorSetConfigs[DEFAULT_SAMPLER_LAYOUT].begin();
+    pConfig = &descriptorSetConfigs[DEFAULT_SAMPLER_LAYOUT][0];
     pConfig->binding = 0;
     pConfig->descriptorCount = 0;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     pConfig->stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-    pConfig = descriptorSetConfigs[DEFAULT_SHADOW_SAMPLER_LAYOUT].begin();
+    pConfig = &descriptorSetConfigs[DEFAULT_SHADOW_SAMPLER_LAYOUT][0];
     pConfig->binding = 0;
     pConfig->descriptorCount = 1;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -227,6 +236,14 @@ void ResourceManager::createMainCameraBuffers()
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         cameraBuffer.Map(0, bufferSize);
     }
+
+    frustumBuffers.resize(mainCameraBuffers.size());
+    for (auto& frustumBuffer : frustumBuffers)
+    {
+        frustumBuffer = Buffer(aDevice, sizeof(FrustumPlanes), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        frustumBuffer.Map(0, frustumBuffer.GetSize());
+    }
 }
 
 void ResourceManager::createDefaultShaders()
@@ -261,6 +278,6 @@ void ResourceManager::createDefaultShaders()
     descriptorConfig.push_back({meshletConfig, meshletCullingConfig});
 
     Shaders.emplace_back(aDevice, Mesh_task, Mesh_mesh, Mesh_frag, renderPass
-        , descriptorConfig, sizeof(FrustumPlanes));
+        , descriptorConfig);
     //std::vector<Descriptor::DescriptorConfig> emptyConfig{};
 }
