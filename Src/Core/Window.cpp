@@ -5,6 +5,8 @@ using namespace AnA;
 
 Window::Window()
 {
+    if (init())
+        throw std::runtime_error("Failed to init window!");
 }
 
 Window::~Window()
@@ -14,7 +16,7 @@ Window::~Window()
     glfwTerminate();
 }
 
-int Window::Init()
+int Window::init()
 {
     if (!glfwInit())
         return -1;

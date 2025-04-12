@@ -56,6 +56,7 @@ namespace AnA
     {
         class Control;
     }
+    class Window;
 
     typedef void(*RecordCallBack)(VkCommandBuffer commandBuffer);
     typedef void(*RecordCallBackEx)(VkCommandBuffer commandBuffer, size_t index);
@@ -155,7 +156,7 @@ namespace AnA
         PFN_vkCmdDrawMeshTasksIndirectCountEXT vkCmdDrawMeshTasksIndirectCountEXT{ VK_NULL_HANDLE };
     private:
         VkInstance& instance;
-        VkSurfaceKHR& surface;
+        VkSurfaceKHR surface;
         VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
         void pickPhysicalDevice();
 

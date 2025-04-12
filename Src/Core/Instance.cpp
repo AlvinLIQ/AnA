@@ -1,4 +1,6 @@
 #include "Headers/Instance.hpp"
+#include "Headers/Window.hpp"
+
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <string.h>
@@ -10,8 +12,20 @@ Instance::Instance()
     createInstance();
     setupDebugMessenger();
 }
+
+Instance::Instance(Window& window)
+{
+    createInstance();
+    setupDebugMessenger();
+
+    window.CreateWindowSurface(this);
+    surface = window.GetSurface();
+}
+
 Instance::~Instance()
 {
+    if (surface != VK_NULL_HANDLE)
+        vkDestroySurfaceKHR(instance, surface, nullptr);
     if (enableValidationLayers)
         DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
     vkDestroyInstance(instance, nullptr);

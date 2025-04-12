@@ -34,26 +34,26 @@ namespace AnA
         static App* GetCurrent();
         Input::InputManager& GetInputManager()
         {
-            return *aInputManager;
+            return aInputManager;
         }
 
         SwapChain& GetSwapChain()
         {
-            return aRenderer->GetSwapChain();
+            return aRenderer.GetSwapChain();
         }
         Renderer& GetRenderer()
         {
-            return *aRenderer;
+            return aRenderer;
         }
 
         Device* GetDevice()
         {
-            return aDevice;
+            return &aDevice;
         }
         VkOffset2D &GetSceneOffset()
         {
-            actualSceneOffset = {static_cast<int32_t>(sceneOffset.x * aRenderer->GetSwapChain().ScaleX), 
-                static_cast<int32_t>(sceneOffset.y * aRenderer->GetSwapChain().ScaleY)};
+            actualSceneOffset = {static_cast<int32_t>(sceneOffset.x * aRenderer.GetSwapChain().ScaleX), 
+                static_cast<int32_t>(sceneOffset.y * aRenderer.GetSwapChain().ScaleY)};
             return actualSceneOffset;
         }
     private:
@@ -69,14 +69,14 @@ namespace AnA
         virtual void createRecordCallBacks();
         virtual void onCommandBufferRecording(VkCommandBuffer& commandBuffer);
         virtual void onLoop();
-        Window* aWindow;
-        Instance* aInstance;
-        Device* aDevice;
-        Renderer* aRenderer;
-        Systems::RenderSystem* aRenderSystem;
-        Systems::ShadowSystem* aShadowSystem;
-        Input::InputManager* aInputManager;
-        Resource::ResourceManager* aResourceManager;
+        Window aWindow;
+        Instance aInstance;
+        Input::InputManager aInputManager;
+        Device aDevice;
+        Renderer aRenderer;
+        Systems::RenderSystem aRenderSystem;
+        Systems::ShadowSystem aShadowSystem;
+        Resource::ResourceManager aResourceManager;
         VkOffset2D sceneOffset{};
     };
 }

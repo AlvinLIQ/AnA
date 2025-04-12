@@ -75,6 +75,7 @@ namespace AnA
             std::vector<Buffer> frustumBuffers;
             void createMainCameraBuffers();
 
+            uint32_t recordedCallbacks = 0;
 /*
             std::vector<VkSampler> shadowSamplers;
             std::vector<Image> shadowImages;

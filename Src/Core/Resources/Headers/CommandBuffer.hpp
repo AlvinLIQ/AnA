@@ -23,7 +23,8 @@ namespace AnA
         VkCommandBufferBeginInfo beginInfo{};
         std::vector<VkCommandBuffer> buffers;
         VkCommandBufferLevel level;
-        int currentBufferIndex = 0;
+        size_t currentBufferIndex = 0;
+        size_t nextBufferIndex;
         void createCommandBuffer();
     };
 }

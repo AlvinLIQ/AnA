@@ -1,6 +1,5 @@
 #include "Headers/ShadowSystem.hpp"
 #include "../Resources/Headers/Shader.hpp"
-#include "../Resources/Headers/ResourceManager.hpp"
 
 using namespace AnA;
 using namespace Systems;
@@ -29,7 +28,7 @@ void ShadowSystem::RenderShadows(VkCommandBuffer commandBuffer, Meshes &meshes, 
     swapChain->SetViewport(commandBuffer, {}, extent);
     vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
     shader.GetPipeline()->Bind(commandBuffer);
-    std::vector<VkDescriptorSet> sets = shader.GetDescriptorSets()[Resource::ResourceManager::GetCurrent()->SecondaryCommandBufferPool.CurrentBufferIndex];
+    std::vector<VkDescriptorSet> sets = shader.GetDescriptorSets()[0];
     sets[DEFAULT_VERTEX_LAYOUT] = meshes.GetVertexDescriptor()->GetSets()[0];
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
         shader.GetPipelineLayout(), 0, 3,
@@ -44,7 +43,7 @@ void ShadowSystem::RenderShadowsIndirect(VkCommandBuffer commandBuffer, Meshes &
     swapChain->SetViewport(commandBuffer, {}, extent);
     vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
     shader.GetPipeline()->Bind(commandBuffer);
-    std::vector<VkDescriptorSet> sets = shader.GetDescriptorSets()[Resource::ResourceManager::GetCurrent()->SecondaryCommandBufferPool.CurrentBufferIndex];
+    std::vector<VkDescriptorSet> sets = shader.GetDescriptorSets()[0];
     sets[DEFAULT_VERTEX_LAYOUT] = meshes.GetVertexDescriptor()->GetSets()[0];
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
         shader.GetPipelineLayout(), 0, 3,
@@ -59,7 +58,7 @@ void ShadowSystem::RenderCascadedShadowsIndirect(VkCommandBuffer commandBuffer, 
     swapChain->SetViewport(commandBuffer, {}, extent);
     vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
     shader.GetPipeline()->Bind(commandBuffer);
-    std::vector<VkDescriptorSet> sets = shader.GetDescriptorSets()[Resource::ResourceManager::GetCurrent()->SecondaryCommandBufferPool.CurrentBufferIndex];
+    std::vector<VkDescriptorSet> sets = shader.GetDescriptorSets()[0];
     //sets[DEFAULT_VERTEX_LAYOUT] = meshes.GetSSBODescriptor()->GetSets()[0];
     auto pipelineLayout = shader.GetPipelineLayout();
     /*

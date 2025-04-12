@@ -126,11 +126,16 @@ void ResourceManager::Update()
     {
         SceneObjects.CommitBufferUpdate();
     }
+    recordedCallbacks = 0;
     for (auto& recordCallBackInfo : RecordCallBacks)
     {
         if (recordCallBackInfo.needRecord())
         {
+            if (!recordedCallbacks)
+                SecondaryCommandBufferPool.Reset();
+            
             recordCallBackInfo.recordCallBack(recordCallBackInfo.offset, recordCallBackInfo.extent);
+            ++recordedCallbacks;
         }
     }
 }

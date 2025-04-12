@@ -16,15 +16,19 @@ namespace AnA
         const bool enableValidationLayers = true;
     #endif
 
+    class Window;
+
     class Instance
     {
     public:
         Instance();
+        Instance(Window& window);
         ~Instance();
 
         VkInstance &GetInstance();
     private:
         VkInstance instance;
+        VkSurfaceKHR surface{VK_NULL_HANDLE};
         void createInstance();
 
         std::vector<const char*> getGLFWExtensions();

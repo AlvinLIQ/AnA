@@ -21,12 +21,12 @@ EditorApp::~EditorApp()
 void EditorApp::Init()
 {
     App::Init();
-    aResourceManager->MainControl = InitControl();
+    aResourceManager.MainControl = InitControl();
     sceneOffset.x = EDITOR_LEFT_PANEL_WIDTH;
-    aInputManager->GlobalProfile.flag = Input::InputProfileFlags::None;
+    aInputManager.GlobalProfile.flag = Input::InputProfileFlags::None;
     Input::KeyMapConfig keyMapConfig;
     keyMapConfig.keyCode = GLFW_KEY_TAB;
-    keyMapConfig.param = aInputManager;
+    keyMapConfig.param = &aInputManager;
     keyMapConfig.callBack = [](void* param)
     {
         auto aInputManager = (Input::InputManager*)param;
@@ -44,15 +44,15 @@ void EditorApp::Init()
             aInputManager->SetActiveProfile(0);
         }
     };
-    aInputManager->GlobalProfile.keyMapConfigs.push_back(keyMapConfig);
-    Controls::Control::GetInputProfile(aResourceManager->MainControl, aInputManager->GetProfiles());
+    aInputManager.GlobalProfile.keyMapConfigs.push_back(keyMapConfig);
+    Controls::Control::GetInputProfile(aResourceManager.MainControl, aInputManager.GetProfiles());
 }
 
 void EditorApp::onLoop()
 {
-    aResourceManager->MainCameraInfo.near = 0.05f + ((Controls::Slider*)controlMap["nearSlider"])->Value * (32.0f - 0.05f);
-    aResourceManager->MainCameraInfo.far = ((Controls::Slider*)controlMap["farSlider"])->Value * 32.0f;
-    aResourceManager->MainCameraInfo.UpdateCameraPerspective(aResourceManager->MainCamera);
+    aResourceManager.MainCameraInfo.near = 0.05f + ((Controls::Slider*)controlMap["nearSlider"])->Value * (32.0f - 0.05f);
+    aResourceManager.MainCameraInfo.far = ((Controls::Slider*)controlMap["farSlider"])->Value * 32.0f;
+    aResourceManager.MainCameraInfo.UpdateCameraPerspective(aResourceManager.MainCamera);
 }
 
 void EditorApp::loadModelButton_Click(void* control, PointerEventArgs& args)

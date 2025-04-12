@@ -22,6 +22,7 @@ VkCommandBufferUsageFlags usageFlags, bool async) : aDevice{mDevice}, async{asyn
     beginInfo.pInheritanceInfo = nullptr;
 
     buffers.resize(commandBufferCount);
+    nextBufferIndex = NextBufferIndex;
     createCommandBuffer();
 }
 
@@ -47,57 +48,57 @@ CommandBuffer::~CommandBuffer()
 VkCommandBuffer& CommandBuffer::Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo)
 {
     beginInfo.pInheritanceInfo = pInheritanceInfo;
-    if (vkBeginCommandBuffer(buffers[NextBufferIndex], &beginInfo) != VK_SUCCESS)
+    if (vkBeginCommandBuffer(buffers[nextBufferIndex], &beginInfo) != VK_SUCCESS)
         throw std::runtime_error("Failed to begin command buffer!");
-    SwapChain::GetCurrent()->SetViewport(buffers[NextBufferIndex]);
-    return buffers[NextBufferIndex];
+    SwapChain::GetCurrent()->SetViewport(buffers[nextBufferIndex]);
+    return buffers[nextBufferIndex];
 }
 
 VkCommandBuffer& CommandBuffer::Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo, VkOffset2D offset)
 {
     beginInfo.pInheritanceInfo = pInheritanceInfo;
-    if (vkBeginCommandBuffer(buffers[NextBufferIndex], &beginInfo) != VK_SUCCESS)
+    if (vkBeginCommandBuffer(buffers[nextBufferIndex], &beginInfo) != VK_SUCCESS)
         throw std::runtime_error("Failed to begin command buffer!");
     auto extent = SwapChain::GetCurrent()->GetExtent();
     VkViewport viewport = {(float)offset.x, (float)offset.y, static_cast<float>(extent.width - offset.x), 
         static_cast<float>(extent.height - offset.y), 0.0f, 1.0f};
     VkRect2D scissor = {offset, {extent.width - offset.x, extent.height - offset.y}};
-    vkCmdSetViewport(buffers[NextBufferIndex], 0, 1, &viewport);
-    vkCmdSetScissor(buffers[NextBufferIndex], 0, 1, &scissor);
-    return buffers[NextBufferIndex];
+    vkCmdSetViewport(buffers[nextBufferIndex], 0, 1, &viewport);
+    vkCmdSetScissor(buffers[nextBufferIndex], 0, 1, &scissor);
+    return buffers[nextBufferIndex];
 }
 
 VkCommandBuffer& CommandBuffer::Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo, VkOffset2D offset, VkExtent2D extent)
 {
     beginInfo.pInheritanceInfo = pInheritanceInfo;
-    if (vkBeginCommandBuffer(buffers[NextBufferIndex], &beginInfo) != VK_SUCCESS)
+    if (vkBeginCommandBuffer(buffers[nextBufferIndex], &beginInfo) != VK_SUCCESS)
         throw std::runtime_error("Failed to begin command buffer!");
     VkViewport viewport = {0.0f, 0.0f, static_cast<float>(extent.width), static_cast<float>(extent.height), 0.0f, 1.0f};
     VkRect2D scissor = {offset, extent};
-    vkCmdSetViewport(buffers[NextBufferIndex], 0, 1, &viewport);
-    vkCmdSetScissor(buffers[NextBufferIndex], 0, 1, &scissor);
-    return buffers[NextBufferIndex];
+    vkCmdSetViewport(buffers[nextBufferIndex], 0, 1, &viewport);
+    vkCmdSetScissor(buffers[nextBufferIndex], 0, 1, &scissor);
+    return buffers[nextBufferIndex];
 }
 
 VkCommandBuffer& CommandBuffer::Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo, VkOffset2D ltOffset, VkOffset2D rbOffset)
 {
     beginInfo.pInheritanceInfo = pInheritanceInfo;
-    if (vkBeginCommandBuffer(buffers[NextBufferIndex], &beginInfo) != VK_SUCCESS)
+    if (vkBeginCommandBuffer(buffers[nextBufferIndex], &beginInfo) != VK_SUCCESS)
         throw std::runtime_error("Failed to begin command buffer!");
     auto extent = SwapChain::GetCurrent()->GetExtent();
     VkViewport viewport = {0.0f, 0.0f, static_cast<float>(extent.width - ltOffset.x - rbOffset.x),
         static_cast<float>(extent.height - ltOffset.y - rbOffset.y), 0.0f, 1.0f};
     VkRect2D scissor = {ltOffset, extent};
-    vkCmdSetViewport(buffers[NextBufferIndex], 0, 1, &viewport);
-    vkCmdSetScissor(buffers[NextBufferIndex], 0, 1, &scissor);
-    return buffers[NextBufferIndex];
+    vkCmdSetViewport(buffers[nextBufferIndex], 0, 1, &viewport);
+    vkCmdSetScissor(buffers[nextBufferIndex], 0, 1, &scissor);
+    return buffers[nextBufferIndex];
 }
 
 void CommandBuffer::End()
 {
-    int nextBufferIndex = NextBufferIndex;
     vkEndCommandBuffer(buffers[nextBufferIndex]);
     currentBufferIndex = nextBufferIndex;
+    nextBufferIndex = NextBufferIndex;
 }
 
 const VkCommandBuffer& CommandBuffer::Get() const

@@ -17,13 +17,12 @@ namespace AnA
         Window();
         ~Window();
 
-        int Init();
         void StartLoop();
         void CloseLoop();
 
-        void CreateWindowSurface(Instance* aInstance)
+        void CreateWindowSurface(Instance* instance)
         {
-            if (glfwCreateWindowSurface(aInstance->GetInstance(), window, nullptr, &surface) != VK_SUCCESS)
+            if (glfwCreateWindowSurface(instance->GetInstance(), window, nullptr, &surface) != VK_SUCCESS)
                 throw std::runtime_error("Failed to create window surface!");
         }
 
@@ -44,9 +43,9 @@ namespace AnA
         static void FramebufferResizeCallback(GLFWwindow* window, int width, int height);
     private:
         GLFWwindow* window;
-        VkSurfaceKHR surface;
+        VkSurfaceKHR surface{VK_NULL_HANDLE};
 
-
+        int init();
         void mainLoop();
     };
 }

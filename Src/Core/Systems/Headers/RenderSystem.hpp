@@ -16,8 +16,8 @@ namespace AnA
 
             void RenderShapes(VkCommandBuffer commandBuffer, Shapes& shapes, Shader& shader);
             void RenderShapesIndirect(VkCommandBuffer commandBuffer, Shapes& shapes, Shader& shader);
-            void RenderMeshes(VkCommandBuffer commandBuffer, Meshes& meshes, Shader& shader);
-            void RenderMeshesIndirect(VkCommandBuffer commandBuffer, Meshes& meshes, Shader& shader);
+            void RenderMeshes(VkCommandBuffer commandBuffer, Meshes& meshes, Shader& shader, uint32_t bufferIndex);
+            void RenderMeshesIndirect(VkCommandBuffer commandBuffer, Meshes& meshes, Shader& shader, uint32_t bufferIndex);
             static RenderSystem* GetCurrent();
         private:
             Device* aDevice;
