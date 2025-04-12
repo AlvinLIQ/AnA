@@ -669,15 +669,16 @@ void Meshes::buildMeshletsWithOptimizer()
                 maxBounding = glm::max(maxBounding, mesh.vertices[uniqueVertexIndices[i + meshletInfo.vertex_offset]].position);
             }
             meshlet.center = (minBounding + maxBounding) * 0.5f;
+            auto model = mesh.transform.mat3();
+            meshlet.center = model * meshlet.center + mesh.transform.translation;
             for (uint32_t i = 0; i < meshlet.vertexCount; i++)
             {
                 float distance = glm::distance(meshlet.center, 
-                    mesh.vertices[uniqueVertexIndices[i + meshletInfo.vertex_offset]].position);
+                    model * mesh.vertices[uniqueVertexIndices[i + meshletInfo.vertex_offset]].position + mesh.transform.translation);
                 if (distance > meshlet.radius)
                     meshlet.radius = distance;
 
             }
-            meshlet.center = mesh.transform.mat3() * meshlet.center + mesh.transform.translation;
             meshlets.push_back(meshlet);
         }
     }
