@@ -322,16 +322,19 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
     if (!stbtt_InitFont(&info, (const unsigned char*)fontData.data(), 0))
         throw std::runtime_error("failed to init font");
 
-    const float scale = 0.0001f;
+    const float scale = 1.0f / 660.0f;
     characters.resize(range);
     for (int cid = 0; cid < range; cid++)
     {
         int glyphIndex = stbtt_FindGlyphIndex(&info, cid);
         stbtt_vertex* vertices;
         int vertexCount = stbtt_GetGlyphShape(&info, glyphIndex, &vertices);
-        characters[cid].paths = {};
-        auto& paths = characters[cid].paths;
+        auto& character = characters[cid];
+        character.paths = {};
+        auto& paths = character.paths;
         std::vector<glm::vec2> currentPath{};
+        glm::vec2 minBounding{std::numeric_limits<float>::max()};
+        glm::vec2 maxBounding{-std::numeric_limits<float>::max()};
         for (int i = 0; i < vertexCount; i++)
         {
             auto& vertex = vertices[i];
@@ -345,6 +348,8 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
                     }
                 case STBTT_vline:
                     currentPath.push_back({(float)vertex.x * scale, (float)vertex.y * scale});
+                    minBounding = glm::min(minBounding, currentPath.back());
+                    maxBounding = glm::max(maxBounding, currentPath.back());
                     break;
                 case STBTT_vcurve:
                 {
@@ -360,8 +365,12 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
                         glm::vec2 l1 = p1 + t2 * (float)j;
                         glm::vec2 t3 = (l1 - l0) / (float)step;
                         currentPath.push_back(l0 + t3 * (float)j);
+                        minBounding = glm::min(minBounding, currentPath.back());
+                        maxBounding = glm::max(maxBounding, currentPath.back());
                     }
                     currentPath.push_back(p2);
+                    minBounding = glm::min(minBounding, currentPath.back());
+                    maxBounding = glm::max(maxBounding, currentPath.back());
                 }
                     break;
                 case STBTT_vcubic:
@@ -381,13 +390,20 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
                                 3 * it * t * t * p2 +
                                 t * t * t * p3;
                         currentPath.push_back(pt);
+                        minBounding = glm::min(minBounding, currentPath.back());
+                        maxBounding = glm::max(maxBounding, currentPath.back());
                     }
                 }
                     break;
             }
         }
         if (currentPath.size())
+        {
             paths.push_back(currentPath);
+        }
+        character.center = (minBounding + maxBounding) * 0.5f;
+        character.height = std::abs(maxBounding.y - minBounding.y);
+        character.width = std::abs(maxBounding.x - minBounding.x);
     }
 }
 

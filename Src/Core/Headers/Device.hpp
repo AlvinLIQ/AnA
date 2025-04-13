@@ -56,6 +56,9 @@ namespace AnA
     struct Character
     {
         std::vector<std::vector<glm::vec2>> paths;
+        glm::vec2 center;
+        float width;
+        float height;
     };
     namespace Controls
     {
