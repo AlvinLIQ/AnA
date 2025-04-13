@@ -4,6 +4,11 @@
 
 using namespace AnA;
 
+Texture::Texture()
+{
+    
+}
+
 Texture::Texture(const char* filename, Device* mDevice) : aDevice{ mDevice }
 {
     aDevice->CreateTextureImage(filename, &textureImage, &textureImageMemory);
@@ -24,13 +29,7 @@ Texture::Texture(const char* text, int& width, int& height, float lineHeight, De
 
 Texture::~Texture()
 {
-    auto& device = aDevice->GetLogicalDevice();
-
-    vkDestroySampler(device, imageInfo.sampler, nullptr);
-    vkDestroyImageView(device, imageInfo.imageView, nullptr);
-
-    vkDestroyImage(device, textureImage, nullptr);
-    vkFreeMemory(device, textureImageMemory, nullptr);
+    cleanup();
 }
 
 VkImageView& Texture::GetImageView()
@@ -62,4 +61,17 @@ void Texture::init()
     //     0, 1, Resource::ResourceManager::GetCurrent()->Shaders[0]->GetDescriptors()[DEFAULT_SAMPLER_LAYOUT]->GetLayout(),
     //     VK_SHADER_STAGE_FRAGMENT_BIT, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
     
+}
+
+void Texture::cleanup()
+{
+    if (!aDevice)
+        return;
+    auto& device = aDevice->GetLogicalDevice();
+
+    vkDestroySampler(device, imageInfo.sampler, nullptr);
+    vkDestroyImageView(device, imageInfo.imageView, nullptr);
+
+    vkDestroyImage(device, textureImage, nullptr);
+    vkFreeMemory(device, textureImageMemory, nullptr);
 }

@@ -139,7 +139,7 @@ void Control::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageI
     shapeBuffer[shapeCount].color = Color;
     if (imageInfos.size() <= shapeCount)
     {
-        imageInfos.resize(shapeCount + 1);
+        imageInfos.resize(shapeCount + MaxBatchSize);
     }
     imageInfos[shapeCount] = this->GetDescriptorImageInfo();
     shapeCount++;

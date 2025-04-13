@@ -35,7 +35,8 @@ void TextBlock::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInf
 
 void TextBlock::Text(const char* newText)
 {
-    //TextBlock::~TextBlock();
+    if (texture)
+        delete texture;
     text = newText;
     int width = 0, height = 0;
     //float* scale = GetScale();

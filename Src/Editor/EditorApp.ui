@@ -8,9 +8,9 @@
         <TextBlock Text="Save Scene"/>
     </Button>
     <ListView Name="modelList" Orientation="Vertical" HorizontalAlignment="Stretch" RenderMode="Passive" Color="0.2f, 0.2f, 0.2"/>
-    <TextBlock Text="Near"/>
+    <TextBlock Text="Near" Color="0.8f, 0.8f, 0.8f"/>
     <Slider Name="nearSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.0f"/>
-    <TextBlock Text="Far"/>
+    <TextBlock Text="Far" Color="0.8f, 0.8f, 0.8f"/>
     <Slider Name="farSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="1.0f"/>
     <!--Scene HorizontalAlignment="Stretch" ImageInfo="Resource::ResourceManager::GetCurrent()->ShadowMap.GetDescriptorImageInfos()[0]"
         ControlSize="0.0f, 0.3f"/-->

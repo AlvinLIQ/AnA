@@ -8,6 +8,7 @@
 #include "Lights.hpp"
 #include "Texture.hpp"
 #include "ShadowMap.hpp"
+//#include <map>
 
 #define ANA_INCLUDE_CONTROL
 
@@ -62,7 +63,8 @@ namespace AnA
 #ifdef ANA_INCLUDE_CONTROL
             AnA::Controls::Control* MainControl = NULL;
 #endif
-            std::unordered_map<uint32_t, Texture> TextureMap;
+            std::unordered_map<uint32_t, Texture> TextureMap{};
+            //std::map<char, Texture> CharacterMap{};
             AnA::Resource::ShadowMap ShadowMap;
             ThreadPool<void()> TaskPool{MAX_FRAMES_IN_FLIGHT};
             CommandBufferPool SecondaryCommandBufferPool;
@@ -83,6 +85,7 @@ namespace AnA
             void createShadowFramebuffers();
             void cleanupShadowResources();*/
             void createDefaultShaders();
+            void initTextures();
         };
     }
 }

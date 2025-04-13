@@ -26,10 +26,7 @@ ResourceManager::ResourceManager(Device* mDevice) :
 #ifdef ANA_INCLUDE_CONTROL
     Controls::Control::InitControl(SwapChain::GetCurrent());
 #endif
-    TextureMap.try_emplace(DEFAULT_TEXTURE_ID, (uint32_t)0xFFFFFFFF, mDevice);
-    TextureMap.try_emplace(1, (uint32_t)0xFFCC9999, mDevice);
-    TextureMap.try_emplace(2, (uint32_t)0xFF99CC99, mDevice);
-    TextureMap.try_emplace(3, (uint32_t)0xFF9999CC, mDevice);
+    initTextures();
 }
 
 ResourceManager::~ResourceManager()
@@ -285,4 +282,21 @@ void ResourceManager::createDefaultShaders()
     Shaders.emplace_back(aDevice, Mesh_task, Mesh_mesh, Mesh_frag, renderPass
         , descriptorConfig);
     //std::vector<Descriptor::DescriptorConfig> emptyConfig{};
+}
+
+void ResourceManager::initTextures()
+{
+    TextureMap.try_emplace(DEFAULT_TEXTURE_ID, (uint32_t)0xFFFFFFFF, aDevice);
+    TextureMap.try_emplace(1, (uint32_t)0xFFCC9999, aDevice);
+    TextureMap.try_emplace(2, (uint32_t)0xFF99CC99, aDevice);
+    TextureMap.try_emplace(3, (uint32_t)0xFF9999CC, aDevice);
+/*
+    char chStr[2];
+    chStr[1] = '\0';
+    uint32_t width = 0, height = 0;
+    for (unsigned char i = 1; i < 128; i++)
+    {
+        chStr[0] = (char)i;
+        CharacterMap.try_emplace(static_cast<char>(i), chStr, width, height, 0, aDevice, 1.0f, 1.0f);
+    }*/
 }
