@@ -28,7 +28,7 @@ App::App() : aWindow(),
     aDevice(aInstance.GetInstance(), aWindow.GetSurface()),
     aRenderer(aWindow, &aDevice),
     aRenderSystem(&aDevice, aRenderer.GetSwapChain()),
-    aShadowSystem(&aDevice, &aRenderer.GetSwapChain()),
+    aShadowSystem(&aRenderer.GetSwapChain()),
     aResourceManager(&aDevice)
 
 {

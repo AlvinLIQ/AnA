@@ -315,6 +315,82 @@ void Device::CreateTextImage(const char* text, int& width, int& height, float li
 
 #endif
 
+void Device::BuildFontVertices(std::vector<Character>& characters, int range)
+{
+    auto fontData = ReadFile("Fonts/SourceCodePro-Black.otf");
+    stbtt_fontinfo info{};
+    if (!stbtt_InitFont(&info, (const unsigned char*)fontData.data(), 0))
+        throw std::runtime_error("failed to init font");
+
+    const float scale = 0.0001f;
+    characters.resize(range);
+    for (int cid = 0; cid < range; cid++)
+    {
+        int glyphIndex = stbtt_FindGlyphIndex(&info, cid);
+        stbtt_vertex* vertices;
+        int vertexCount = stbtt_GetGlyphShape(&info, glyphIndex, &vertices);
+        characters[cid].paths = {};
+        auto& paths = characters[cid].paths;
+        std::vector<glm::vec2> currentPath{};
+        for (int i = 0; i < vertexCount; i++)
+        {
+            auto& vertex = vertices[i];
+            switch(vertex.type)
+            {
+                case STBTT_vmove:
+                    if (currentPath.size())
+                    {
+                        paths.push_back(currentPath);
+                        currentPath = {};
+                    }
+                case STBTT_vline:
+                    currentPath.push_back({(float)vertex.x * scale, (float)vertex.y * scale});
+                    break;
+                case STBTT_vcurve:
+                {
+                    glm::vec2 p0 = currentPath.back();
+                    glm::vec2 p1 = {(float)vertex.cx * scale, (float)vertex.cy * scale};
+                    glm::vec2 p2 = {(float)vertex.x * scale, (float)vertex.y * scale};
+                    const int step = 7;
+                    glm::vec2 t1 = (p1 - p0) / (float)step;
+                    glm::vec2 t2 = (p2 - p1) / (float)step;
+                    for (int j = 0; j < step; j++)
+                    {
+                        glm::vec2 l0 = p0 + t1 * (float)j;
+                        glm::vec2 l1 = p1 + t2 * (float)j;
+                        glm::vec2 t3 = (l1 - l0) / (float)step;
+                        currentPath.push_back(l0 + t3 * (float)j);
+                    }
+                    currentPath.push_back(p2);
+                }
+                    break;
+                case STBTT_vcubic:
+                {
+                    glm::vec2 p0 = currentPath.back();
+                    glm::vec2 p1 = {vertex.cx * scale, vertex.cy * scale};
+                    glm::vec2 p2 = {vertex.cx1 * scale, vertex.cy1 * scale};
+                    glm::vec2 p3 = {vertex.x * scale, vertex.y * scale};
+
+                    const int steps = 10;
+                    for (int j = 1; j <= steps; ++j)
+                    {
+                        float t = float(j) / steps;
+                        float it = 1.0f - t;
+                        glm::vec2 pt = it * it * it * p0 +
+                                3 * it * it * t * p1 +
+                                3 * it * t * t * p2 +
+                                t * t * t * p3;
+                        currentPath.push_back(pt);
+                    }
+                }
+                    break;
+            }
+        }
+        if (currentPath.size())
+            paths.push_back(currentPath);
+    }
+}
+
 void Device::CreateSampler(VkSampler* pSampler, enum VkSamplerAddressMode samplerAddressMode, VkBorderColor borderColor, VkCompareOp compareOp)
 {
     vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);

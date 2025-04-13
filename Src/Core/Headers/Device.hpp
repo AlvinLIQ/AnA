@@ -5,6 +5,7 @@
 #include <vector>
 #include <fstream>
 #include <vulkan/vulkan.h>
+#include <glm/glm.hpp>
 #include "Utils.hpp"
 
 #define INCLUDE_STB_IMAGE
@@ -52,6 +53,10 @@ namespace AnA
     }
     class Shader;
     class Texture;
+    struct Character
+    {
+        std::vector<std::vector<glm::vec2>> paths;
+    };
     namespace Controls
     {
         class Control;
@@ -89,6 +94,8 @@ namespace AnA
         void CreateTextImage(const char* text, int& width, int& height, float lineHeight, VkImage* pTextImage, VkDeviceMemory* pTextMemory, float scaleX = 1.0f, float scaleY = 1.0f);
         void CreateTextImage(const String& text, int& width, int& height, float lineHeight, VkImage* pTextImage, VkDeviceMemory* pTextMemory);
         #endif
+
+        void BuildFontVertices(std::vector<Character>& characters, int range = 128);
 
         void CreateSampler(VkSampler* pSampler, enum VkSamplerAddressMode samplerAddressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT, VkBorderColor borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK, VkCompareOp compareOp = VK_COMPARE_OP_ALWAYS);
 

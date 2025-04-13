@@ -1,7 +1,6 @@
 #include "Headers/ResourceManager.hpp"
 #include "../Headers/SwapChain.hpp"
 #include "../Headers/ShaderCodes.hpp"
-#include <vulkan/vulkan_core.h>
 
 using namespace AnA;
 using namespace Resource;
@@ -290,6 +289,8 @@ void ResourceManager::initTextures()
     TextureMap.try_emplace(1, (uint32_t)0xFFCC9999, aDevice);
     TextureMap.try_emplace(2, (uint32_t)0xFF99CC99, aDevice);
     TextureMap.try_emplace(3, (uint32_t)0xFF9999CC, aDevice);
+
+    aDevice->BuildFontVertices(Characters);
 /*
     char chStr[2];
     chStr[1] = '\0';
