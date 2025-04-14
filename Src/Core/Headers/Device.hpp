@@ -56,6 +56,8 @@ namespace AnA
     struct Character
     {
         std::vector<std::vector<glm::vec2>> paths;
+        std::vector<glm::vec2> vertices;
+        std::vector<uint32_t> indices;
         glm::vec2 center;
         float width;
         float height;

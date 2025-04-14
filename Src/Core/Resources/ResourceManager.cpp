@@ -263,8 +263,22 @@ void ResourceManager::createDefaultShaders()
 
     Shaders.emplace_back(aDevice, CascadedShadowMapping_vert, offscreenRenderPass
         , CascadedShadowMapping_frag, descriptorConfig, sizeof(uint32_t));
+/*
+    Descriptor::DescriptorConfig chVertexConfig{};
+    chVertexConfig.binding = 0;
+    chVertexConfig.descriptorCount = 0;
+    chVertexConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    chVertexConfig.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    Descriptor::DescriptorConfig chConfig{};
+    chConfig.binding = 1;
+    chConfig.descriptorCount = 0;
+    chConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    chConfig.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
-    
+    std::vector<std::vector<Descriptor::DescriptorConfig>> textDescriptorSetConfigs = {{chVertexConfig, chConfig}, {chVertexConfig, chConfig}};
+    Shaders.emplace_back(aDevice, Text_vert, Text_frag, renderPass, 
+        textDescriptorSetConfigs, VK_PRIMITIVE_TOPOLOGY_LINE_STRIP, sizeof(uint32_t));
+*/
     Descriptor::DescriptorConfig meshletConfig{};
     meshletConfig.binding = 0;
     meshletConfig.descriptorCount = 0;

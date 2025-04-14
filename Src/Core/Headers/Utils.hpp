@@ -1,6 +1,8 @@
 #pragma once
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
+#include <cassert>
 
 inline double random_double() {
 	// Returns a random real in [0,1).
@@ -151,7 +153,9 @@ namespace AnA
 		{
 			if (len == (size_t)-1)
 				len = strlen(str);
-			_index = _capacity = len;
+			
+			Resize(len);
+			_index = _capacity;
 			_str = new char[len + 1];
 			memcpy(_str, str, len);
 			_str[len] = '\0';
@@ -161,7 +165,8 @@ namespace AnA
 		{
 			if (len == (size_t)-1)
 				len = strlen(str);
-			_str = new char[(_capacity = reserve_size) + 1];
+			assert(reserve_size >= len);
+			Resize(reserve_size);
 			_index = len;
 			memcpy(_str, str, len);
 			_str[_index] = '\0';
@@ -170,7 +175,18 @@ namespace AnA
 		{
 			delete _str;
 		}
-		String(const String&) = delete;
+		String(const String& str)
+		{
+			if (_str && _capacity)
+				delete _str;
+			_index = str._index;
+			if (_index > 0)
+			{
+				_str = new char[_index + 1];
+				_capacity = _index;
+			}
+			Copy(str);
+		}
 		String& operator=(const String&) = delete;
 		String(String&& str) noexcept
 		{
@@ -199,7 +215,7 @@ namespace AnA
 		{
 			size_t len = _index + str._index;
 			TryResize(len);
-			memcpy(&_str[_index], str._str, str._index);
+			memcpy(&_str[_index], str._str, str._index + 1);
 			_index = len;
 			return *this;
 		}
@@ -230,11 +246,17 @@ namespace AnA
 		{
 			if (len == _capacity)
 				return;
-			char* newStr = new char[len];
-			memcpy(&newStr[_index], _str, _index);
-			char* tmp = _str;
-			_str = newStr;
-			delete tmp;
+			char* newStr = new char[len + 1];
+			if (_index && _str)
+			{
+				memcpy(newStr, _str, std::min(len, _index) + 1);
+				char* tmp = _str;
+				_str = newStr;
+				delete tmp;
+			}
+			else
+				_str = newStr;
+
 			_capacity = len;
 		}
 		void Copy(const String& str, size_t offset = 0)

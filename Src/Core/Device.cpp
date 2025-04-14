@@ -8,10 +8,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "Headers/Buffer.hpp"
 #include "../3rdParty/stb/stb_image.h"
+#endif
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "../3rdParty/stb/stb_truetype.h"
-#endif
-
 
 using namespace AnA;
 
@@ -356,7 +355,7 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
                     glm::vec2 p0 = currentPath.back();
                     glm::vec2 p1 = {(float)vertex.cx * scale, (float)vertex.cy * scale};
                     glm::vec2 p2 = {(float)vertex.x * scale, (float)vertex.y * scale};
-                    const int step = 7;
+                    const int step = 5;
                     glm::vec2 t1 = (p1 - p0) / (float)step;
                     glm::vec2 t2 = (p2 - p1) / (float)step;
                     for (int j = 0; j < step; j++)
@@ -380,7 +379,7 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
                     glm::vec2 p2 = {vertex.cx1 * scale, vertex.cy1 * scale};
                     glm::vec2 p3 = {vertex.x * scale, vertex.y * scale};
 
-                    const int steps = 10;
+                    const int steps = 5;
                     for (int j = 1; j <= steps; ++j)
                     {
                         float t = float(j) / steps;

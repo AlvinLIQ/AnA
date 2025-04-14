@@ -178,6 +178,8 @@ void Meshes::Append(std::vector<Model::Vertex>& vertices, std::vector<uint32_t>&
     mesh.indexOffset = indexCount;
     mesh.vertices = vertices;
     mesh.indices = indices;
+    for (auto& index : mesh.indices)
+        index += vertexCount;
     vertexCount += mesh.vertices.size();
     indexCount += mesh.indices.size();
     auto& textureMap = Resource::ResourceManager::GetCurrent()->TextureMap;
@@ -345,10 +347,11 @@ void Meshes::UpdateAll()
         vertexBuffers[nextIndex].Map(0, vertexBuffers[nextIndex].GetSize());
         indexBuffers[nextIndex].Map(0, indexBuffers[nextIndex].GetSize());
         UpdateMeshlets();
+        CommitBufferUpdate(&vertexBuffers[nextIndex], &indexBuffers[nextIndex]);
 
         createSSBODescriptor();
         updateSSBODescriptor();
-        UpdateBuffers({0, meshes.size()});
+        //UpdateBuffers({0, meshes.size()});
         commandBufferNeedUpdate = true;
         return;
     }
@@ -434,7 +437,7 @@ void Meshes::UpdateMeshlets()
     auto drawMeshTaskCommand = (glm::uvec3*)drawMeshIndirectBuffer.GetMappedData();
     uint32_t numofGroup = (static_cast<uint32_t>(meshlets.size()) + numOfGroup - 1) / numOfGroup;
     glm::uvec3 groupSize;
-    groupSize.x = std::min(numofGroup, 2u);
+    groupSize.x = numofGroup;
     groupSize.y = 1;
     groupSize.z = 1;
     *drawMeshTaskCommand = groupSize;
@@ -496,13 +499,11 @@ void Meshes::createSSBODescriptor()
     vertexDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT, 
         1,
         vertexDescriptorSetLayout,
-        VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_MESH_BIT_EXT);
+        VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
     meshDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT, 
         2,
         meshDescriptorSetLayout,
-        VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-        VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_TASK_BIT_EXT);
+        VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
 }
 
 void Meshes::updateSSBODescriptor()
@@ -549,8 +550,8 @@ void Meshes::appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageI
         auto descriptor = new Descriptor(aDevice, 1, 
             batchSize,
             descriptorSetLayout,
-            VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            VK_SHADER_STAGE_FRAGMENT_BIT);
+            VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+            );
         descriptor->UpdateDescriptorSets(&textureInfos[offset], textureInfos.size() - offset, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
         samplersDescriptors.push_back(descriptor);
     }

@@ -62,7 +62,8 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode
 }
 
 Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, 
-    const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, VkDeviceSize pushConstantSize) : aDevice{mDevice}
+    const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass,
+    const VkPrimitiveTopology vertexTopology, VkDeviceSize pushConstantSize) : aDevice{mDevice}
 {
     std::vector<std::vector<Descriptor::DescriptorConfig>> descriptorSetConfigs;
     Resource::ResourceManager::GetCurrent()->GetDefaultDescriptorSetConfig(descriptorSetConfigs);
@@ -76,11 +77,12 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode
     {
         pipelineLayout = *pDefaultPipelineLayout;
     }
-    pipeline = new Pipeline(mDevice, vertShaderCode, fragShaderCode, renderPass, pipelineLayout);
+    pipeline = new Pipeline(mDevice, vertShaderCode, fragShaderCode, renderPass, pipelineLayout, vertexTopology);
 }
 
 Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, 
-    std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs, VkDeviceSize pushConstantSize) : aDevice{mDevice}
+    std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs,
+    const VkPrimitiveTopology vertexTopology, VkDeviceSize pushConstantSize) : aDevice{mDevice}
 {
     createDescriptors(descriptorSetConfigs);
 

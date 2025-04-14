@@ -10,14 +10,14 @@ Shapes::Shapes(Device* mDeivce) : aDevice{mDeivce}
     samplersDescriptor = new Descriptor(aDevice, 1, 
         MaxBatchSize,
         samplerLayout,
-        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-        VK_SHADER_STAGE_FRAGMENT_BIT);
+        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+        );
     auto& ssboLayout = Resource::ResourceManager::GetCurrent()->Shaders[1].GetDescriptors()[DEFAULT_VERTEX_LAYOUT]->GetLayout();
     ssboDescriptor = new Descriptor(aDevice, 1, 
         1,
         ssboLayout,
-        VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-        VK_SHADER_STAGE_VERTEX_BIT);
+        VK_DESCRIPTOR_TYPE_STORAGE_BUFFER
+        );
     shapeBuffer = Buffer(aDevice, sizeof(Shape) * MaxBatchSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
     shapeBuffer.Map(0, shapeBuffer.GetSize());
     VkDescriptorBufferInfo bufferInfo;
