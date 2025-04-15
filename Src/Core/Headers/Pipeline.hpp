@@ -139,7 +139,7 @@ namespace AnA
                 return dConfig;
             }
             static PipelineConfig GetForDepthTest(VkShaderModule vertexShaderModule, VkShaderModule fragShaderModule,
-                VkPipelineLayout &pipelineLayout, VkRenderPass &renderPass, VkSampleCountFlagBits msaaSamplers, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
+                VkPipelineLayout &pipelineLayout, VkRenderPass &renderPass, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
             {
                 PipelineConfig dConfig;
                 int stageCount = 0;
@@ -365,7 +365,7 @@ namespace AnA
         Pipeline(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
         Pipeline(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
         Pipeline(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst, const std::vector<unsigned char>& fragShaderCode, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-        Pipeline(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+        Pipeline(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst);
         Pipeline(Device* mDevice, PipelineConfig pipelineConfig);
         Pipeline(Device* mDevice, const char* computeShaderFile, VkPipelineLayout &mPipelineLayout);
         Pipeline(Device* mDevice, const std::vector<unsigned char>& computeShaderCode, VkPipelineLayout &mPipelineLayout);

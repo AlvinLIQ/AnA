@@ -94,7 +94,7 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode
     {
         pipelineLayout = *pDefaultPipelineLayout;
     }
-    pipeline = new Pipeline(mDevice, vertShaderCode, fragShaderCode, renderPass, pipelineLayout);
+    pipeline = new Pipeline(mDevice, vertShaderCode, fragShaderCode, renderPass, pipelineLayout, vertexTopology);
 }
 
 Shader::Shader(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, 

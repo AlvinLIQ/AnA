@@ -54,7 +54,7 @@ Descriptor::Descriptor(Device* mDevice, VkSampler& sampler, VkImageView& imageVi
 }
 
 Descriptor::Descriptor(Device* mDevice, VkSampler& sampler, VkImageView& imageView, VkImageLayout imageLayout, uint32_t binding, 
-        uint32_t descriptorSetCount, VkDescriptorSetLayout descriptorSetLayout, VkShaderStageFlags stageFlags, const VkDescriptorType descriptorType
+        uint32_t descriptorSetCount, VkDescriptorSetLayout descriptorSetLayout, const VkDescriptorType descriptorType
         ) : setLayout(descriptorSetLayout)
 {
     aDevice = mDevice;

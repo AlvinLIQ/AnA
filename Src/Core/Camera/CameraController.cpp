@@ -51,7 +51,7 @@ void CameraController::GetInputProfile(Input::InputProfile& inputProfile)
 
 CameraController::CameraController(Camera &mCamera) : aCamera {mCamera}
 {
-    CameraController::CameraCallbackParam param{aCamera};
+    CameraController::CameraCallbackParam param{aCamera, 0};
     for (int i = 0; i < MOVEMENTSIZE; i++)
     {
         param.id = i;
@@ -85,7 +85,7 @@ void CameraController::Rotate(CameraController::CameraCallbackParam* param)
     param->aCamera.CameraTransform.rotation[posIndex] -= (param->id & 1 ? -rotateStep : rotateStep) * param->aCamera.GetSpeedRatio() * 6.283;
 }
 
-void CameraController::CursorMoved(Camera* camera, CursorPosition &duration, int leftButtonAction)
+void CameraController::CursorMoved(Camera* camera, CursorPosition &duration, int )
 {
     const float rotateSpeed = camera->GetSpeedRatio() * 6.283 * 80.;
     camera->CameraTransform.rotation.y = glm::mod(camera->CameraTransform.rotation.y + (float)duration.x * rotateSpeed, glm::two_pi<float>());

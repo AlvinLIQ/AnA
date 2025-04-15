@@ -139,9 +139,9 @@ bool Instance::checkValidationLayerSupport()
 }
 
 VKAPI_ATTR VkBool32 VKAPI_CALL Instance::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-                                                    VkDebugUtilsMessageTypeFlagsEXT messageType,
+                                                    VkDebugUtilsMessageTypeFlagsEXT ,
                                                     const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-                                                    void* pUserData)
+                                                    void* )
 {
     if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
         std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;

@@ -50,7 +50,7 @@ void InputManager::Check()
     //checkProfile(GlobalProfile);
 }
 
-void InputManager::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+void InputManager::keyCallback(GLFWwindow* , int key, int , int action, int )
 {
     auto &keyMapConfigs = _aInputManager->GlobalProfile.keyMapConfigs;
     for (auto &keyMapConfig : keyMapConfigs)

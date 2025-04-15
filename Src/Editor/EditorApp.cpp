@@ -55,7 +55,7 @@ void EditorApp::onLoop()
     aResourceManager.MainCameraInfo.UpdateCameraPerspective(aResourceManager.MainCamera);
 }
 
-void EditorApp::loadModelButton_Click(void* control, PointerEventArgs& args)
+void EditorApp::loadModelButton_Click(void* , PointerEventArgs& )
 {
     FileDialog fileDialog{};
     auto path = fileDialog.Run();
@@ -68,7 +68,7 @@ void EditorApp::loadModelButton_Click(void* control, PointerEventArgs& args)
     ((Controls::StackPanel*)((EditorApp*)App::GetCurrent())->controlMap["modelList"])->Child((Controls::Control*)new Controls::TextBlock(path.c_str(), {0.8f, 0.8f, 0.8f}));
 }
 
-void EditorApp::saveSceneButton_Click(void* control, PointerEventArgs& args)
+void EditorApp::saveSceneButton_Click(void* , PointerEventArgs& )
 {
     FileDialog fileDialog{"--save"};
     auto path = fileDialog.Run();
@@ -82,7 +82,7 @@ void EditorApp::saveSceneButton_Click(void* control, PointerEventArgs& args)
     fclose(f);*/
 }
 
-void EditorApp::exitButton_Click(void* control, PointerEventArgs& args)
+void EditorApp::exitButton_Click(void* , PointerEventArgs& )
 {
     exit(0);
 }

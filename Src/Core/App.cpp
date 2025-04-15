@@ -234,16 +234,6 @@ void App::uiLoop()
     }
 }
 
-void App::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-    /*
-    _uiParam[0] = key;
-    _uiParam[1] = action;
-    _uiSignal = UI_SIGNAL_KEY;
-   */
-    //glfwGetKey
-}
-
 void RenderShapesIndirect(VkCommandBuffer commandBuffer)
 {
     auto aResourceManager = Resource::ResourceManager::GetCurrent();
@@ -259,17 +249,17 @@ void App::createRecordCallBacks()
     RecordCallBacks.emplace_back([]() 
     {
         return _aApp->commandBufferNeedUpdate;
-    }, [](VkOffset2D& offset, VkExtent2D& extent)
+    }, [](VkOffset2D& offset, VkExtent2D& )
     {
         auto aResourceManager = Resource::ResourceManager::GetCurrent();
         auto& aRenderer = _aApp->GetRenderer();        
-        aResourceManager->SecondaryCommandBufferPool.Enqueue([](VkCommandBuffer secondaryCommandBuffer, size_t index)
+        aResourceManager->SecondaryCommandBufferPool.Enqueue([](VkCommandBuffer secondaryCommandBuffer, size_t )
         {
             auto aResourceManager = Resource::ResourceManager::GetCurrent();
             Systems::RenderSystem::GetCurrent()->RenderMeshesIndirect(secondaryCommandBuffer, 
                 aResourceManager->SceneObjects, 
                 aResourceManager->Shaders.back(), aResourceManager->SecondaryCommandBufferPool.CurrentBufferIndex);
-        }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), _aApp->GetSceneOffset());
+        }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), offset);
         /*
         aRenderer.RecordOffscreenSecondaryCommandBuffer([](VkCommandBuffer offScreenSecondaryCommandBuffer)
         {
@@ -283,7 +273,7 @@ void App::createRecordCallBacks()
     {
         auto aResourceManager = Resource::ResourceManager::GetCurrent();
         return aResourceManager->MainControl != nullptr && _aApp->commandBufferNeedUpdate;
-    }, [](VkOffset2D& offset, VkExtent2D& extent)
+    }, [](VkOffset2D& offset, VkExtent2D& )
     {
         //record controls here
         auto aResourceManager = Resource::ResourceManager::GetCurrent();
@@ -296,7 +286,7 @@ void App::createRecordCallBacks()
         shapes.Offset = offset;
         shapes.Extent = controlExtent;
         shapes.PrepareDraw(aResourceManager->MainControl);
-        aResourceManager->SecondaryCommandBufferPool.Enqueue([](VkCommandBuffer secondaryCommandBuffer, size_t index)
+        aResourceManager->SecondaryCommandBufferPool.Enqueue([](VkCommandBuffer secondaryCommandBuffer, size_t )
         {
             RenderShapesIndirect(secondaryCommandBuffer);
         }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), offset, controlExtent);

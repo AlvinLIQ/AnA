@@ -21,7 +21,7 @@ namespace AnA
             AlignmentType VerticalAlignment {ControlVerticalAlignment};
 
             POS_F ControlOffset {};
-            POS_F GetActualControlOffset(SIZE_F renderSize);
+            POS_F GetActualControlOffset();
 
             SIZE_F ControlSize {AnA::ControlSize};
             SIZE_F GetSizeForRender();

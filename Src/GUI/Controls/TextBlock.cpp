@@ -27,7 +27,7 @@ TextBlock::~TextBlock()
 void TextBlock::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
     auto size = GetSizeForRender();
-    auto offset = GetActualControlOffset(size);
+    auto offset = GetActualControlOffset();
     this->Transform.scale = {size.Width, size.Height, 1.f};
     this->Transform.translation = {offset.x, offset.y, 0.f};
     ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);

@@ -82,7 +82,7 @@ namespace AnA
 		{
 			return data[i];
 		}
-		const size_t Size() const
+		size_t Size() const
 		{
 			return size;
 		}
@@ -227,11 +227,11 @@ namespace AnA
 		{
 			return _str;
 		}
-		const size_t Length() const
+		size_t Length() const
 		{
 			return _index;
 		}
-		const size_t Size() const
+		size_t Size() const
 		{
 			return _capacity;
 		}

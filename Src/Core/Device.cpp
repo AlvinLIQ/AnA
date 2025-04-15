@@ -162,9 +162,9 @@ void Device::CreateColorImage(const uint32_t color, VkImage* pTexImage, VkDevice
     imageInfo.flags = 0;
     CreateImage(&imageInfo, pTexImage, pTexMemory);
 
-    TransitionImageLayout(*pTexImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    TransitionImageLayout(*pTexImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
     CopyBufferToImage(aBuffer.GetBuffer(), *pTexImage, imageInfo.extent);
-    TransitionImageLayout(*pTexImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    TransitionImageLayout(*pTexImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
 #ifdef INCLUDE_STB_IMAGE
@@ -200,9 +200,9 @@ void Device::CreateTextureImage(const char* imagePath, VkImage* pTexImage, VkDev
     imageInfo.flags = 0;
     CreateImage(&imageInfo, pTexImage, pTexMemory);
 
-    TransitionImageLayout(*pTexImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    TransitionImageLayout(*pTexImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
     CopyBufferToImage(aBuffer.GetBuffer(), *pTexImage, imageInfo.extent);
-    TransitionImageLayout(*pTexImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    TransitionImageLayout(*pTexImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
 void Device::CreateTextImage(const char* text, int& width, int& height, float lineHeight, VkImage* pTextImage, VkDeviceMemory* pTextMemory, float scaleX, float scaleY)
@@ -307,9 +307,9 @@ void Device::CreateTextImage(const char* text, int& width, int& height, float li
     imageInfo.flags = 0;
     CreateImage(&imageInfo, pTextImage, pTextMemory);
 
-    TransitionImageLayout(*pTextImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    TransitionImageLayout(*pTextImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
     CopyBufferToImage(aBuffer.GetBuffer(), *pTextImage, imageInfo.extent);
-    TransitionImageLayout(*pTextImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    TransitionImageLayout(*pTextImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
 #endif
@@ -340,11 +340,12 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
             switch(vertex.type)
             {
                 case STBTT_vmove:
-                    if (currentPath.size())
+                    if (!currentPath.empty())
                     {
                         paths.push_back(currentPath);
                         currentPath = {};
                     }
+                    [[fallthrough]];
                 case STBTT_vline:
                     currentPath.push_back({(float)vertex.x * scale, (float)vertex.y * scale});
                     minBounding = glm::min(minBounding, currentPath.back());
@@ -589,7 +590,7 @@ std::vector<VkDescriptorSetLayoutBinding> Device::CreateLayoutBindings(uint32_t 
     return layoutBindings;
 }
 
-void Device::TransitionImageLayout(VkImage &image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
+void Device::TransitionImageLayout(VkImage &image, VkImageLayout oldLayout, VkImageLayout newLayout)
 {
     VkCommandBuffer commandBuffer = beginSingleTimeCommands();
     VkImageMemoryBarrier barrier{};
@@ -958,7 +959,7 @@ void Device::CreateCommandPool(VkCommandPoolCreateFlags flags, VkCommandPool* po
 
     VkCommandPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    poolInfo.flags = flags;
     poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsAndComputeFamily.value();
 
     if (vkCreateCommandPool(logicalDevice, &poolInfo, 

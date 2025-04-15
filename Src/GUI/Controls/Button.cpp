@@ -5,12 +5,12 @@
 using namespace AnA;
 using namespace AnA::Controls;
 
-void Button_PointerEntered(Button* control, PointerEventArgs& args)
+void Button_PointerEntered(Button* control, PointerEventArgs& )
 {
     control->Color = ButtonPointerMovedBackgroundColor;
 }
 
-void Button_PointerExited(Button* control, PointerEventArgs& args)
+void Button_PointerExited(Button* control, PointerEventArgs& )
 {
     control->Color = ButtonBackgroundColor;
 }

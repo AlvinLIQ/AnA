@@ -41,8 +41,7 @@ const VkPrimitiveTopology vertexTopology) : aDevice{mDevice}, renderPass {mRende
 Pipeline::Pipeline(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, 
     const std::vector<unsigned char>& meshShaderCode, const std::vector<unsigned char>& fragShaderCode, 
     VkRenderPass &mRenderPass, 
-    VkPipelineLayout &mPipelineLayoutconst, 
-    const VkPrimitiveTopology vertexTopology) : aDevice{mDevice}, renderPass{mRenderPass}, pipelineLayout{mPipelineLayoutconst}
+    VkPipelineLayout &mPipelineLayoutconst) : aDevice{mDevice}, renderPass{mRenderPass}, pipelineLayout{mPipelineLayoutconst}
 {
     createMeshShaderPipeline(taskShaderCode, meshShaderCode, fragShaderCode);
 }
@@ -101,7 +100,7 @@ void Pipeline::createGraphicsPipeline(const std::vector<unsigned char>& vertShad
 {
     VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
 
-    PipelineConfig pipelineConfig = pipelineConfig.GetForDepthTest(vertShaderModule, VK_NULL_HANDLE, pipelineLayout, renderPass, aDevice->GetMaxUsableSampleCount(), vertexTopology); 
+    PipelineConfig pipelineConfig = pipelineConfig.GetForDepthTest(vertShaderModule, VK_NULL_HANDLE, pipelineLayout, renderPass, vertexTopology); 
     
     auto logicalDevice = aDevice->GetLogicalDevice();
 
@@ -116,7 +115,7 @@ void Pipeline::createGraphicsPipeline(const std::vector<unsigned char>& vertShad
     VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
     VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
 
-    PipelineConfig pipelineConfig = pipelineConfig.GetForDepthTest(vertShaderModule, fragShaderModule, pipelineLayout, renderPass, aDevice->GetMaxUsableSampleCount(), vertexTopology); 
+    PipelineConfig pipelineConfig = pipelineConfig.GetForDepthTest(vertShaderModule, fragShaderModule, pipelineLayout, renderPass, vertexTopology); 
     
     auto logicalDevice = aDevice->GetLogicalDevice();
 

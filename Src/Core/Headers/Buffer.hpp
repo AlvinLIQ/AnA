@@ -97,7 +97,7 @@ namespace AnA
         {
             return mappedData;
         }
-        const VkDeviceSize GetSize() const
+        VkDeviceSize GetSize() const
         {
             return bufferSize;
         }

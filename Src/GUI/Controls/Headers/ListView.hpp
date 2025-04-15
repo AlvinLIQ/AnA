@@ -10,7 +10,7 @@ namespace AnA
         {
         public:
             ListView();
-            const int SelectionIndex() const
+            int SelectionIndex() const
             {
                 return selectionIndex;
             }

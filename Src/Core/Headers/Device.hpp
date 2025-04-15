@@ -117,7 +117,7 @@ namespace AnA
         static VkDescriptorSetLayoutBinding CreateLayoutBinding(uint32_t binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags, uint32_t descriptorCount = 1);
         static std::vector<VkDescriptorSetLayoutBinding> CreateLayoutBindings(uint32_t binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags, uint32_t descriptorCount = 1);
 
-        void TransitionImageLayout(VkImage& image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+        void TransitionImageLayout(VkImage& image, VkImageLayout oldLayout, VkImageLayout newLayout);
         void WaitBufferIdle(VkBuffer &buffer);
         struct QueueFamilyIndices
         {

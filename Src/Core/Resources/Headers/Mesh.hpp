@@ -54,7 +54,7 @@ namespace AnA
         void Draw(VkCommandBuffer commandBuffer);
         void DrawIndirect(VkCommandBuffer commandBuffer);
         void DrawIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout);
-        void DrawMesh(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout);
+        void DrawMesh(VkCommandBuffer commandBuffer);
         void DrawMesh(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout);
         void DrawMeshIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout);
         bool NeedUpdate()

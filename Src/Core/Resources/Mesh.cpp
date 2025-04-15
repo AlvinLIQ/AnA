@@ -225,7 +225,7 @@ void Meshes::DrawIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescripto
     vkCmdDrawIndexedIndirectCount(commandBuffer, drawIndexedIndirectBuffer.GetBuffer(), 0, countBuffer.GetBuffer(), 0, 1, sizeof(VkDrawIndexedIndirectCommand));
 }
 
-void Meshes::DrawMesh(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
+void Meshes::DrawMesh(VkCommandBuffer commandBuffer)
 {
     aDevice->vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
 }

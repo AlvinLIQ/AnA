@@ -48,7 +48,7 @@ namespace AnA
             {
                 speedRatio = newRatio;
             }
-            const float GetSpeedRatio() const
+            float GetSpeedRatio() const
             {
                 return speedRatio;
             }

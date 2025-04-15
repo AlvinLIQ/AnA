@@ -14,7 +14,8 @@ StackPanel::~StackPanel()
 
 void StackPanel::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
-    GetActualControlOffset(GetSizeForRender());
+    GetSizeForRender();
+    GetActualControlOffset();
     StackPanel::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
 }
 
@@ -59,6 +60,7 @@ void StackPanel::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorIma
             break;
         case Stretch:
             ((float*)&size)[o] = ((float*)&maxSize)[o];
+            [[fallthrough]];
         default:
             ((float*)&offset)[o] = ((float*)&renderOffset)[o] * 0.5f;
             break;

@@ -17,7 +17,7 @@ Control::~Control()
     
 }
 
-POS_F Control::GetActualControlOffset(SIZE_F renderSize)
+POS_F Control::GetActualControlOffset()
 {
     float* pOffset = (float*)&renderOffset;
     float* pSize = (float*)&this->renderSize;
@@ -67,7 +67,7 @@ SIZE_F Control::GetSizeForRender()
 void Control::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
     GetSizeForRender();
-    GetActualControlOffset(renderSize);
+    GetActualControlOffset();
     ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
 }
 
