@@ -84,7 +84,7 @@ void Model::CreateMeshFromFile(const char *filePath, std::vector<Vertex>& vertic
     if (!tinyobj::LoadObj(&attrib,& shapes,& materials,& warn,& err, filePath, "Models/"))
         throw std::runtime_error(warn + err);
 
-    std::unordered_map<Vertex, Index, VertexHash> verticesMap;
+    std::unordered_map<Vertex, Index, VertexHash> vertexMap;
     for (const auto& shape : shapes)
     {
         for (size_t i = 0; i < shape.mesh.indices.size(); i++)
@@ -138,15 +138,15 @@ void Model::CreateMeshFromFile(const char *filePath, std::vector<Vertex>& vertic
                     attrib.texcoords[2 * index.texcoord_index + 1],
                 };
             }
-            auto result = verticesMap.find(vertex);
-            if (result != verticesMap.end())
+            auto result = vertexMap.find(vertex);
+            if (result != vertexMap.end())
             {
                 indices.push_back(result->second + vertexOffset);
             }
             else
             {
-                verticesMap.insert(std::pair<Vertex, Index>(vertex, vertices.size()));
-                indices.push_back(static_cast<Index>(vertices.size() + vertexOffset));
+                indices.push_back(static_cast<Index>(vertexMap.size() + vertexOffset));
+                vertexMap.insert(std::pair<Vertex, Index>(vertex, vertexMap.size()));
                 vertices.push_back(vertex);
             }
         }

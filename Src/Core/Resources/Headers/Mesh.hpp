@@ -10,8 +10,8 @@ namespace AnA
     struct Mesh
     {
         AnA::Transform transform;
-        std::vector<Model::Vertex> vertices;
-        std::vector<Model::Index> indices;
+        uint32_t vertexCount;
+        uint32_t indexCount;
         uint32_t vertexOffset;
         uint32_t indexOffset;
         uint32_t textureId{};
@@ -52,7 +52,6 @@ namespace AnA
         void RemoveAt(std::vector<uint32_t> meshIndices);
         void Bind(VkCommandBuffer commandBuffer);
         void Draw(VkCommandBuffer commandBuffer);
-        void Draw(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout, size_t offset, size_t size);
         void DrawIndirect(VkCommandBuffer commandBuffer);
         void DrawIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout);
         void DrawMesh(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout);
@@ -105,8 +104,10 @@ namespace AnA
         bool EnableUpdate = false;
     private:
         Device* aDevice;
+        std::vector<Model::Vertex> vertices{};
         std::vector<Buffer> vertexBuffers{};
         size_t vertexCount = 0;
+        std::vector<Model::Index> indices{};
         std::vector<Buffer> indexBuffers{};
         size_t indexCount = 0;
         Buffer drawIndexedIndirectBuffer{};
@@ -115,7 +116,7 @@ namespace AnA
         std::vector<Mesh> meshes;
         uint32_t batchSize;
         std::vector<Range> updateQueue{};
-        void commitVertexBufferUpdate(Model::Vertex* vertices, Model::Index* indices, Range& updateRange);
+        void applyVertexBufferUpdate(Model::Vertex* vertices, Model::Index* indices, Range& updateRange);
         uint32_t maxUpdateRange = 0;
         bool commandBufferNeedUpdate = false;
         std::unordered_map<uint32_t, uint32_t> textureIdMap{};
