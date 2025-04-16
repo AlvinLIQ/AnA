@@ -340,7 +340,7 @@ void Meshes::UpdateMeshlets()
 {
     //buildMeshlets();
     buildMeshletsWithOptimizer();
-    uint32_t minMeshletBufferSize = (meshletVertexCount + meshletIndexCount / 3 + 1 +
+    uint32_t minMeshletBufferSize = (meshletVertexCount + meshletIndexCount / 4 + 1 +
         3 * meshlets.size()) * sizeof(uint32_t);
     if (!meshletBuffers[nextIndex].GetBuffer() || 
         meshletBuffers[nextIndex].GetSize() < minMeshletBufferSize)
