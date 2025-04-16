@@ -29,7 +29,7 @@ void ShadowSystem::RenderShadows(VkCommandBuffer commandBuffer, Meshes &meshes, 
     vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
     shader.GetPipeline()->Bind(commandBuffer);
     std::vector<VkDescriptorSet> sets = shader.GetDescriptorSets()[0];
-    sets[DEFAULT_VERTEX_LAYOUT] = meshes.GetVertexDescriptor()->GetSets()[0];
+    sets[DEFAULT_VERTEX_LAYOUT] = meshes.GetVertexDescriptorSet();
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
         shader.GetPipelineLayout(), 0, 3,
         sets.data(), 0, nullptr);
@@ -44,7 +44,7 @@ void ShadowSystem::RenderShadowsIndirect(VkCommandBuffer commandBuffer, Meshes &
     vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
     shader.GetPipeline()->Bind(commandBuffer);
     std::vector<VkDescriptorSet> sets = shader.GetDescriptorSets()[0];
-    sets[DEFAULT_VERTEX_LAYOUT] = meshes.GetVertexDescriptor()->GetSets()[0];
+    sets[DEFAULT_VERTEX_LAYOUT] = meshes.GetMeshDescriptorSet();
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
         shader.GetPipelineLayout(), 0, 3,
         sets.data(), 0, nullptr);

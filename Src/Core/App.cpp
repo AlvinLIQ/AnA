@@ -106,9 +106,6 @@ void App::Run()
     auto prevTime = std::chrono::high_resolution_clock::now();
     aResourceManager.UpdateCamera(aRenderer.GetAspect());
     std::vector<MeshInfo> meshInfos;
-    bool pressed = false;
-    for (int i = 0; i < 1000; i++)
-        meshInfos.push_back({"Models/cube.obj", {{random_double(), random_double() - 2.0f, random_double() + 5.0f}, {random_double(), random_double(), random_double()}}, (uint32_t)rand() % 4});
     const char cTitle[] = "AnA FPS:";
     AnA::String title{cTitle, sizeof(cTitle), sizeof(cTitle) + 10};
     int frameCount = 0;
@@ -116,15 +113,6 @@ void App::Run()
     while(!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
-        //Test Mesh Appending at runtime
-        if (!pressed && glfwGetKey(aWindow.GetGLFWwindow(), GLFW_KEY_F) == GLFW_PRESS)
-        {
-            pressed = true;
-            aResourceManager.TaskPool.Enqueue([this, &meshInfos]()
-            {
-                aResourceManager.SceneObjects.Append(meshInfos);
-            });
-        }
         auto curTime = std::chrono::high_resolution_clock::now();
         float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(curTime - prevTime).count();
         prevTime = curTime;

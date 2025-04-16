@@ -51,6 +51,12 @@ void RenderSystem::RenderMeshesIndirect(VkCommandBuffer commandBuffer, Meshes &m
     shader.GetPipeline()->Bind(commandBuffer);
     //aSwapChain.SetViewport(commandBuffer, App::GetCurrent()->GetSceneOffset());
     std::vector<VkDescriptorSet>& sets = shader.GetDescriptorSets()[bufferIndex];
+    sets[DEFAULT_VERTEX_LAYOUT] = meshes.GetVertexDescriptorSet();
+    sets[DEFAULT_SAMPLER_LAYOUT] = meshes.GetSamplersDescriptorSet();
+    sets[DEFAULT_MESHLET_LAYOUT] = meshes.GetMeshDescriptorSet();
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+    shader.GetPipelineLayout(), 0, static_cast<uint32_t>(sets.size()),
+    sets.data(), 0, nullptr);
 
-    meshes.DrawMeshIndirect(commandBuffer, sets, shader.GetPipelineLayout());
+    meshes.DrawMeshIndirect(commandBuffer);
 }

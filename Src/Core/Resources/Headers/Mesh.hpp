@@ -56,6 +56,7 @@ namespace AnA
         void DrawIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout);
         void DrawMesh(VkCommandBuffer commandBuffer);
         void DrawMesh(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout);
+        void DrawMeshIndirect(VkCommandBuffer commandBuffer);
         void DrawMeshIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout);
         bool NeedUpdate()
         {
@@ -97,9 +98,25 @@ namespace AnA
 
             return batchCount;
         }
-        Descriptor* GetVertexDescriptor()
+        const Descriptor* GetVertexDescriptor() const
         {
             return vertexDescriptor;
+        }
+        const Descriptor* GetMeshDescriptor() const
+        {
+            return meshDescriptor;
+        }
+        VkDescriptorSet GetVertexDescriptorSet() const
+        {
+            return vertexDescriptor->GetSets()[currentBufferIndex];
+        }
+        VkDescriptorSet GetMeshDescriptorSet() const
+        {
+            return meshDescriptor->GetSets()[currentBufferIndex];
+        }
+        VkDescriptorSet GetSamplersDescriptorSet() const
+        {
+            return samplersDescriptors[0]->GetSets()[0];
         }
         bool EnableUpdate = false;
     private:

@@ -242,6 +242,13 @@ void Meshes::DrawMesh(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet
     aDevice->vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
 }
 
+void Meshes::DrawMeshIndirect(VkCommandBuffer commandBuffer)
+{
+    aDevice->vkCmdDrawMeshTasksIndirectCountEXT(commandBuffer, drawMeshIndirectBuffer.GetBuffer(), 0, 
+        countBuffer.GetBuffer(), 
+        0, 1, sizeof(VkDrawMeshTasksIndirectCommandEXT));
+}
+
 void Meshes::DrawMeshIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout)
 {
     sets[DEFAULT_VERTEX_LAYOUT] = vertexDescriptor->GetSets()[currentBufferIndex];
@@ -362,7 +369,9 @@ void Meshes::UpdateMeshlets()
         auto& meshlet = meshlets[i];
         buffer[bufferId++] = vertexOffset + primitiveOffset + (i * 2) + static_cast<uint32_t>(meshlets.size());
         vertexOffset += meshlet.vertexCount;
-        primitiveOffset += meshlet.indexCount / 3;
+        primitiveOffset += (meshlet.indexCount >> 2);
+        if (meshlet.indexCount & 3)
+            primitiveOffset++;
 
         cullingBuffer[i] = glm::vec4(meshlet.center, meshlet.radius);
     }
@@ -373,12 +382,21 @@ void Meshes::UpdateMeshlets()
 
         for (uint32_t i = 0; i < meshlet.vertexCount; i++)
             buffer[bufferId++] = meshlet.vertices[i];
+        auto indexBuffer = (uint8_t*)(&buffer[bufferId]);
+        for (uint32_t i = 0; i < meshlet.indexCount; i++)
+        {
+            indexBuffer[i] = meshlet.indices[i];
+        }
+        bufferId += (meshlet.indexCount >> 2);
+        if (meshlet.indexCount & 3)
+            bufferId++;
+        /*
         for (uint32_t i = 0; i < meshlet.indexCount; i += 3)
         {
             buffer[bufferId++] = (meshlet.indices[i] << 0u) |
                 (meshlet.indices[i + 1] << 8u) |
                 (meshlet.indices[i + 2] << 16u);
-        }
+        }*/
     }
 
     auto drawMeshTaskCommand = (glm::uvec3*)drawMeshIndirectBuffer.GetMappedData();
