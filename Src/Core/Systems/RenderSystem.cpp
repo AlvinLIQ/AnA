@@ -38,25 +38,8 @@ void RenderSystem::RenderShapesIndirect(CommandBuffer& commandBuffer, Shapes& sh
     shapes.DrawIndirect(commandBuffer, shader.GetPipelineLayout());
 }
 
-void RenderSystem::RenderMeshes(CommandBuffer& commandBuffer, Meshes &meshes, Shader& shader, uint32_t bufferIndex)
+void RenderSystem::RenderIndirect(CommandBuffer& commandBuffer, Renderable& renderable, uint32_t bufferIndex)
 {
-    shader.GetPipeline()->Bind(commandBuffer);
-    std::vector<VkDescriptorSet>& sets = shader.GetDescriptorSets()[bufferIndex];
-
-    meshes.DrawMesh(commandBuffer, sets, shader.GetPipelineLayout());
-}
-
-void RenderSystem::RenderMeshesIndirect(CommandBuffer& commandBuffer, Meshes &meshes, Shader& shader, uint32_t bufferIndex)
-{
-    shader.GetPipeline()->Bind(commandBuffer);
-    //aSwapChain.SetViewport(commandBuffer, App::GetCurrent()->GetSceneOffset());
-    std::vector<VkDescriptorSet>& sets = shader.GetDescriptorSets()[bufferIndex];
-    sets[DEFAULT_VERTEX_LAYOUT] = meshes.GetVertexDescriptorSet();
-    sets[DEFAULT_SAMPLER_LAYOUT] = meshes.GetSamplersDescriptorSet();
-    sets[DEFAULT_MESHLET_LAYOUT] = meshes.GetMeshDescriptorSet();
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-    shader.GetPipelineLayout(), 0, static_cast<uint32_t>(sets.size()),
-    sets.data(), 0, nullptr);
-
-    meshes.DrawMeshIndirect(commandBuffer);
+    renderable.Bind(commandBuffer, bufferIndex);
+    renderable.DrawIndirect(commandBuffer);
 }

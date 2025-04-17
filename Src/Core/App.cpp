@@ -244,9 +244,9 @@ void App::createRecordCallBacks()
         aResourceManager->SecondaryCommandBufferPool.Enqueue([](CommandBuffer& secondaryCommandBuffer, size_t )
         {
             auto aResourceManager = Resource::ResourceManager::GetCurrent();
-            Systems::RenderSystem::GetCurrent()->RenderMeshesIndirect(secondaryCommandBuffer, 
+            Systems::RenderSystem::GetCurrent()->RenderIndirect(secondaryCommandBuffer, 
                 aResourceManager->SceneObjects, 
-                aResourceManager->Shaders.back(), aResourceManager->SecondaryCommandBufferPool.CurrentBufferIndex);
+                aResourceManager->SecondaryCommandBufferPool.CurrentBufferIndex);
         }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), offset);
         /*
         aRenderer.RecordOffscreenSecondaryCommandBuffer([](CommandBuffer& offScreenSecondaryCommandBuffer)

@@ -775,18 +775,18 @@ void Device::pickPhysicalDevice()
             std::string deviceName = physicalDeviceProperties.deviceName;
             if (physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
                 currentScore += 10;
-            if (deviceName.find("AMD") != (uint32_t)-1)
+            if (deviceName.find("AMD") != (size_t)-1)
             {
                 currentScore += 3;
-                if (deviceName.find("RX") != (uint32_t)-1)
-                    currentScore += 2;
+                if (deviceName.find("RX") != (size_t)-1)
+                    currentScore += 4;
             }
-            else if (deviceName.find("NVIDIA") != (uint32_t)-1)
+            else if (deviceName.find("NVIDIA") != (size_t)-1)
             {
                 currentScore += 3;
-                if (deviceName.find("RTX") != (uint32_t)-1)
-                    currentScore += 2;
-                else if (deviceName.find("GTX") != (uint32_t)-1)
+                if (deviceName.find("RTX") != (size_t)-1)
+                    currentScore += 4;
+                else if (deviceName.find("GTX") != (size_t)-1)
                     currentScore += 1;
             }
             if (currentScore > bestScore)
@@ -824,7 +824,15 @@ bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device)
 
     std::vector<VkExtensionProperties> availableExtensions(extensionCount);
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
-
+    availableDeviceExtensions.clear();
+    for (auto& ext : availableExtensions)
+        availableDeviceExtensions.insert(ext.extensionName);
+#ifdef ENABLE_MESH_SHADER
+    if ((meshShaderSupport = (availableDeviceExtensions.find(VK_EXT_MESH_SHADER_EXTENSION_NAME) != availableDeviceExtensions.end())))
+    {
+        deviceExtensions.push_back(VK_EXT_MESH_SHADER_EXTENSION_NAME);
+    }
+#endif
     std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
 
     for (const auto &extension : availableExtensions)
@@ -892,12 +900,13 @@ void Device::createLogicalDevice()
     shaderDrawParametersFeatures.pNext = &nestedCommandBufferFeatures;
     //VkPhysicalDeviceFeatures deviceFeatures1{};
     //vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures1);
-
+#ifdef ENABLE_MESH_SHADER
     VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures = {};
     meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
     meshShaderFeatures.meshShader = VK_TRUE;
     meshShaderFeatures.taskShader = VK_TRUE;
     meshShaderFeatures.pNext = &shaderDrawParametersFeatures;
+#endif
 
     VkPhysicalDeviceFeatures2 deviceFeatures2{};
     deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
@@ -906,7 +915,11 @@ void Device::createLogicalDevice()
     deviceFeatures2.features.sampleRateShading = VK_TRUE;
     deviceFeatures2.features.shaderSampledImageArrayDynamicIndexing = VK_TRUE;
     deviceFeatures2.features.vertexPipelineStoresAndAtomics = VK_TRUE;
+#ifdef ENABLE_MESH_SHADER
     deviceFeatures2.pNext = &meshShaderFeatures;
+#else
+    deviceFeatures2.pNext = &shaderDrawParametersFeatures;
+#endif
 
     VkDeviceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;

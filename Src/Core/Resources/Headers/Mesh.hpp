@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include "Renderable.hpp"
 #include "Model.hpp"
 #include "Descriptor.hpp"
 #include "CommandBuffer.hpp"
@@ -40,7 +41,7 @@ namespace AnA
         static void ExtractFrustumPlanes(const glm::mat4& m, FrustumPlanes& fp);
     };
 
-    class Meshes
+    class Meshes : public Renderable
     {
     public:
         Meshes(Device* mDevice);
@@ -52,6 +53,7 @@ namespace AnA
         void RemoveAt(Range removeRange);
         void RemoveAt(std::vector<uint32_t> meshIndices);
         void Bind(CommandBuffer& commandBuffer);
+        void Bind(CommandBuffer& commandBuffer, uint32_t bufferIndex);
         void Draw(CommandBuffer& commandBuffer);
         void DrawIndirect(CommandBuffer& commandBuffer);
         void DrawIndirect(CommandBuffer& commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout);
@@ -73,7 +75,7 @@ namespace AnA
         }
         void CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer);
         void CommitBufferUpdate();
-        void UpdateAll();
+        void Update();
         void UpdateBuffers(Range updateRange);
         void UpdateMeshlets();
         void UpdateVertexPositions(Mesh& mesh);

@@ -3,12 +3,15 @@
 #include <cstdint>
 #include <optional>
 #include <vector>
+#include <set>
 #include <fstream>
 #include <vulkan/vulkan.h>
 #include <glm/glm.hpp>
 #include "Utils.hpp"
 
 #define INCLUDE_STB_IMAGE
+
+#define ENABLE_MESH_SHADER
 
 #define MAX_FRAMES_IN_FLIGHT 2
 
@@ -165,6 +168,10 @@ namespace AnA
             return physicalDeviceProperties;
         }
 
+        bool MeshShaderSupport() const
+        {
+            return meshShaderSupport;
+        }
         PFN_vkCmdDrawMeshTasksEXT vkCmdDrawMeshTasksEXT{ VK_NULL_HANDLE };
         PFN_vkCmdDrawMeshTasksIndirectCountEXT vkCmdDrawMeshTasksIndirectCountEXT{ VK_NULL_HANDLE };
     private:
@@ -173,20 +180,20 @@ namespace AnA
         VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
         void pickPhysicalDevice();
 
-        const std::vector<const char*> deviceExtensions = 
+        std::vector<const char*> deviceExtensions = 
         {
             VK_KHR_SWAPCHAIN_EXTENSION_NAME,
             VK_EXT_NESTED_COMMAND_BUFFER_EXTENSION_NAME,
-            VK_EXT_MESH_SHADER_EXTENSION_NAME,
-            VK_KHR_SPIRV_1_4_EXTENSION_NAME,
-            VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME
         };
         std::vector<VkSampleCountFlagBits> usableSamples{};
         void checkUsableSamples();
 
+        std::set<std::string> availableDeviceExtensions;
         bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 
         bool isDeviceSuitable(VkPhysicalDevice device);
+
+        bool meshShaderSupport = false;
 
         VkDevice logicalDevice;
         VkQueue graphicsQueue;
