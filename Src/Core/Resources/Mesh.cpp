@@ -93,8 +93,10 @@ Meshes::Meshes(Device* mDevice) : aDevice{mDevice}
 
 Meshes::~Meshes()
 {
-    delete vertexDescriptor;
-    delete meshDescriptor;
+    if (meshDescriptor != nullptr)
+        delete vertexDescriptor;
+    if (meshDescriptor != nullptr)
+        delete meshDescriptor;
     for (auto& descriptor : samplersDescriptors)
         delete descriptor;
 }
