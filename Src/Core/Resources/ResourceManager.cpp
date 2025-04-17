@@ -165,7 +165,9 @@ void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Desc
     pConfig->binding = 0;
     pConfig->descriptorCount = 0;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_MESH_BIT_EXT;
+    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    if (aDevice->MeshShaderSupport())
+        pConfig->stageFlags |= VK_SHADER_STAGE_MESH_BIT_EXT;
 /*
     pConfig = &descriptorConfigs[DEFAULT_MESHLET_LAYOUT];
     pConfig->binding = 0;
@@ -279,21 +281,24 @@ void ResourceManager::createDefaultShaders()
     Shaders.emplace_back(aDevice, Text_vert, Text_frag, renderPass, 
         textDescriptorSetConfigs, VK_PRIMITIVE_TOPOLOGY_LINE_STRIP, sizeof(uint32_t));
 */
-    Descriptor::DescriptorConfig meshletConfig{};
-    meshletConfig.binding = 0;
-    meshletConfig.descriptorCount = 0;
-    meshletConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    meshletConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-    Descriptor::DescriptorConfig meshletCullingConfig{};
-    meshletCullingConfig.binding = 1;
-    meshletCullingConfig.descriptorCount = 0;
-    meshletCullingConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    meshletCullingConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT;
+    if (aDevice->MeshShaderSupport())
+    {
+        Descriptor::DescriptorConfig meshletConfig{};
+        meshletConfig.binding = 0;
+        meshletConfig.descriptorCount = 0;
+        meshletConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        meshletConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+        Descriptor::DescriptorConfig meshletCullingConfig{};
+        meshletCullingConfig.binding = 1;
+        meshletCullingConfig.descriptorCount = 0;
+        meshletCullingConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        meshletCullingConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT;
 
-    descriptorConfig.push_back({meshletConfig, meshletCullingConfig});
+        descriptorConfig.push_back({meshletConfig, meshletCullingConfig});
 
-    Shaders.emplace_back(aDevice, Mesh_task, Mesh_mesh, Mesh_frag, renderPass
-        , descriptorConfig);
+        Shaders.emplace_back(aDevice, Mesh_task, Mesh_mesh, Mesh_frag, renderPass
+            , descriptorConfig);
+    }
     //std::vector<Descriptor::DescriptorConfig> emptyConfig{};
 }
 

@@ -237,7 +237,7 @@ void App::createRecordCallBacks()
     RecordCallBacks.emplace_back([]() 
     {
         return _aApp->commandBufferNeedUpdate;
-    }, [](VkOffset2D& offset, VkExtent2D& )
+    }, [](VkOffset2D& , VkExtent2D& )
     {
         auto aResourceManager = Resource::ResourceManager::GetCurrent();
         auto& aRenderer = _aApp->GetRenderer();        
@@ -247,14 +247,14 @@ void App::createRecordCallBacks()
             Systems::RenderSystem::GetCurrent()->RenderIndirect(secondaryCommandBuffer, 
                 aResourceManager->SceneObjects, 
                 aResourceManager->SecondaryCommandBufferPool.CurrentBufferIndex);
-        }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), offset);
+        }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), _aApp->GetSceneOffset());
         /*
         aRenderer.RecordOffscreenSecondaryCommandBuffer([](CommandBuffer& offScreenSecondaryCommandBuffer)
         {
             //RenderShadowsIndirect(offScreenSecondaryCommandBuffer);
         });*/
         aResourceManager->SceneObjects.EndCommandBufferUpdate();
-    }, sceneOffset);
+    }, GetSceneOffset());
 #ifdef ANA_INCLUDE_CONTROL
 
     RecordCallBacks.emplace_back([]()

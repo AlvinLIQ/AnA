@@ -82,7 +82,8 @@ Descriptor::Descriptor(Device* mDevice, uint32_t descriptorSetCount, uint32_t de
     aDevice->CreateDescriptorPool(descriptorSetCount, pool, descriptorType, VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT);
     VkDescriptorSetVariableDescriptorCountAllocateInfoEXT countInfo{};
     countInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO;
-    countInfo.pDescriptorCounts = &descriptorCount;
+    std::vector<uint32_t> counts(descriptorSetCount, descriptorCount);
+    countInfo.pDescriptorCounts = counts.data();
     countInfo.descriptorSetCount = descriptorSetCount;
     aDevice->CreateDescriptorSets(descriptorSetCount, pool, descriptorSetLayout, sets, &countInfo);
 }

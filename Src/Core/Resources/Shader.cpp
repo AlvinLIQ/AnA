@@ -122,7 +122,8 @@ Shader::Shader(Device* mDevice, Pipeline::PipelineConfig pipelineConfig,
 
 Shader::~Shader()
 {
-    delete pipeline;
+    if (pipeline != nullptr)
+        delete pipeline;
     for (auto& descriptor : descriptors)
         delete descriptor;
     if (pipelineLayout != VK_NULL_HANDLE)
@@ -165,7 +166,9 @@ void Shader::createPipelineLayout(VkDeviceSize pushConstantSize)
     if (pushConstantSize)
     {
         VkPushConstantRange range;
-        range.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+        range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+        if (aDevice->MeshShaderSupport())
+            range.stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT;
         range.offset = 0;
         range.size = pushConstantSize;
         pipelineLayoutInfo.pushConstantRangeCount = 1;

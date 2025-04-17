@@ -72,7 +72,7 @@ void main()
 {
     //outColor = vec4(baseColor, 1.0);
     vec4 texColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord);
-    if (texColor.a <= 0.2)
+    if (texColor.a < 0.5)
         discard;
     outColor = vec4(baseColor.x * texColor.x, baseColor.y * texColor.y, baseColor.z * texColor.z, 1.0);
 }
