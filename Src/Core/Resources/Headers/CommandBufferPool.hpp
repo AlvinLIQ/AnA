@@ -32,7 +32,7 @@ namespace AnA
             CurrentBufferIndex = (CurrentBufferIndex + 1) % MAX_FRAMES_IN_FLIGHT;
             ThreadPool::Reset();
         }
-        void ExecuteRecordedBuffer(VkCommandBuffer& commandBuffer)
+        void ExecuteRecordedBuffer(CommandBuffer& commandBuffer)
         {
             std::unique_lock<std::mutex> lock(queue_mutex_);
             if (!recordedCommandBuffers.size())
@@ -46,7 +46,7 @@ namespace AnA
             ThreadPool::Enqueue([this, recordCallBack, pInheritanceInfo](CommandBuffer* commandBuffer, size_t index)
             {
                 auto& _commandBuffer = commandBuffer->Begin(pInheritanceInfo);
-                recordCallBack(_commandBuffer, index);
+                recordCallBack(*commandBuffer, index);
                 commandBuffer->End();
                 std::unique_lock<std::mutex> lock(queue_mutex_);
                 recordedCommandBuffers.push_back(_commandBuffer);
@@ -57,7 +57,7 @@ namespace AnA
             ThreadPool::Enqueue([this, recordCallBack, pInheritanceInfo, offset](CommandBuffer* commandBuffer, size_t index)
             {
                 auto& _commandBuffer = commandBuffer->Begin(pInheritanceInfo, offset);
-                recordCallBack(_commandBuffer, index);
+                recordCallBack(*commandBuffer, index);
                 commandBuffer->End();
                 std::unique_lock<std::mutex> lock(queue_mutex_);
                 recordedCommandBuffers.push_back(_commandBuffer);
@@ -68,7 +68,7 @@ namespace AnA
             ThreadPool::Enqueue([this, recordCallBack, pInheritanceInfo, offset, extent](CommandBuffer* commandBuffer, size_t index)
             {
                 auto& _commandBuffer = commandBuffer->Begin(pInheritanceInfo, offset, extent);
-                recordCallBack(_commandBuffer, index);
+                recordCallBack(*commandBuffer, index);
                 commandBuffer->End();
                 std::unique_lock<std::mutex> lock(queue_mutex_);
                 recordedCommandBuffers.push_back(_commandBuffer);

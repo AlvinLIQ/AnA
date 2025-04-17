@@ -48,9 +48,9 @@ namespace AnA
             return swapChainFramebuffers[CurrentImage];
         }
 
-        void SetViewport(VkCommandBuffer& commandBuffer);
-        void SetViewport(VkCommandBuffer& commandBuffer, VkOffset2D offset);
-        static void SetViewport(VkCommandBuffer& commandBuffer, VkOffset2D offset, VkExtent2D extent);
+        void SetViewport(CommandBuffer& commandBuffer);
+        void SetViewport(CommandBuffer& commandBuffer, VkOffset2D offset);
+        static void SetViewport(CommandBuffer& commandBuffer, VkOffset2D offset, VkExtent2D extent);
 
         VkSemaphore& GetCurrentSemaphore();
 

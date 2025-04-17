@@ -24,7 +24,7 @@ RenderSystem* RenderSystem::GetCurrent()
     return currentRenderSystem;
 }
 
-void RenderSystem::RenderShapes(VkCommandBuffer commandBuffer, Shapes& shapes, Shader& shader)
+void RenderSystem::RenderShapes(CommandBuffer& commandBuffer, Shapes& shapes, Shader& shader)
 {
     shader.GetPipeline()->Bind(commandBuffer);
     auto resourceManager = Resource::ResourceManager::GetCurrent();
@@ -32,13 +32,13 @@ void RenderSystem::RenderShapes(VkCommandBuffer commandBuffer, Shapes& shapes, S
     shapes.Draw(commandBuffer, shader.GetPipelineLayout());
 }
 
-void RenderSystem::RenderShapesIndirect(VkCommandBuffer commandBuffer, Shapes& shapes, Shader& shader)
+void RenderSystem::RenderShapesIndirect(CommandBuffer& commandBuffer, Shapes& shapes, Shader& shader)
 {
     shader.GetPipeline()->Bind(commandBuffer);
     shapes.DrawIndirect(commandBuffer, shader.GetPipelineLayout());
 }
 
-void RenderSystem::RenderMeshes(VkCommandBuffer commandBuffer, Meshes &meshes, Shader& shader, uint32_t bufferIndex)
+void RenderSystem::RenderMeshes(CommandBuffer& commandBuffer, Meshes &meshes, Shader& shader, uint32_t bufferIndex)
 {
     shader.GetPipeline()->Bind(commandBuffer);
     std::vector<VkDescriptorSet>& sets = shader.GetDescriptorSets()[bufferIndex];
@@ -46,7 +46,7 @@ void RenderSystem::RenderMeshes(VkCommandBuffer commandBuffer, Meshes &meshes, S
     meshes.DrawMesh(commandBuffer, sets, shader.GetPipelineLayout());
 }
 
-void RenderSystem::RenderMeshesIndirect(VkCommandBuffer commandBuffer, Meshes &meshes, Shader& shader, uint32_t bufferIndex)
+void RenderSystem::RenderMeshesIndirect(CommandBuffer& commandBuffer, Meshes &meshes, Shader& shader, uint32_t bufferIndex)
 {
     shader.GetPipeline()->Bind(commandBuffer);
     //aSwapChain.SetViewport(commandBuffer, App::GetCurrent()->GetSceneOffset());

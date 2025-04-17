@@ -198,23 +198,23 @@ void Meshes::RemoveAt(std::vector<uint32_t> meshIndices)
     UpdateAll();
 }
 
-void Meshes::Bind(VkCommandBuffer commandBuffer)
+void Meshes::Bind(CommandBuffer& commandBuffer)
 {
     vkCmdBindIndexBuffer(commandBuffer, indexBuffers[currentBufferIndex].GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
     ((VkDrawIndexedIndirectCommand*)drawIndexedIndirectBuffer.GetMappedData())->indexCount = indexBuffers[currentBufferIndex].GetSize() / sizeof(Model::Index);
 }
 
-void Meshes::Draw(VkCommandBuffer commandBuffer)
+void Meshes::Draw(CommandBuffer& commandBuffer)
 {
     vkCmdDrawIndexed(commandBuffer, indexBuffers[currentBufferIndex].GetSize() / sizeof(Model::Index), 1, 0, 0, 0);
 }
 
-void Meshes::DrawIndirect(VkCommandBuffer commandBuffer)
+void Meshes::DrawIndirect(CommandBuffer& commandBuffer)
 {
     vkCmdDrawIndexedIndirectCount(commandBuffer, drawIndexedIndirectBuffer.GetBuffer(), 0, countBuffer.GetBuffer(), 0, 1, sizeof(VkDrawIndexedIndirectCommand));
 }
 
-void Meshes::DrawIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout)
+void Meshes::DrawIndirect(CommandBuffer& commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout)
 {    
     sets[DEFAULT_VERTEX_LAYOUT] = vertexDescriptor->GetSets()[currentBufferIndex];
     sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors.front()->GetSets()[currentBufferIndex];
@@ -225,12 +225,12 @@ void Meshes::DrawIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescripto
     vkCmdDrawIndexedIndirectCount(commandBuffer, drawIndexedIndirectBuffer.GetBuffer(), 0, countBuffer.GetBuffer(), 0, 1, sizeof(VkDrawIndexedIndirectCommand));
 }
 
-void Meshes::DrawMesh(VkCommandBuffer commandBuffer)
+void Meshes::DrawMesh(CommandBuffer& commandBuffer)
 {
     aDevice->vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
 }
 
-void Meshes::DrawMesh(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout)
+void Meshes::DrawMesh(CommandBuffer& commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout)
 {
     sets[DEFAULT_VERTEX_LAYOUT] = vertexDescriptor->GetSets()[currentBufferIndex];
     sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors.front()->GetSets()[0];
@@ -242,14 +242,14 @@ void Meshes::DrawMesh(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet
     aDevice->vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
 }
 
-void Meshes::DrawMeshIndirect(VkCommandBuffer commandBuffer)
+void Meshes::DrawMeshIndirect(CommandBuffer& commandBuffer)
 {
     aDevice->vkCmdDrawMeshTasksIndirectCountEXT(commandBuffer, drawMeshIndirectBuffer.GetBuffer(), 0, 
         countBuffer.GetBuffer(), 
         0, 1, sizeof(VkDrawMeshTasksIndirectCommandEXT));
 }
 
-void Meshes::DrawMeshIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout)
+void Meshes::DrawMeshIndirect(CommandBuffer& commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout)
 {
     sets[DEFAULT_VERTEX_LAYOUT] = vertexDescriptor->GetSets()[currentBufferIndex];
     sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors.front()->GetSets()[0];
@@ -350,7 +350,7 @@ void Meshes::UpdateMeshlets()
             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | 
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-        meshletBuffers[nextIndex].Map(0, meshletBuffers[nextIndex].GetSize());
+        meshletBuffers[nextIndex].Map(0, VK_WHOLE_SIZE);
 
         meshletCullingBuffers[nextIndex] = Buffer(aDevice, meshlets.size() * sizeof(glm::vec4),
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
@@ -406,6 +406,13 @@ void Meshes::UpdateMeshlets()
     groupSize.y = 1;
     groupSize.z = 1;
     *drawMeshTaskCommand = groupSize;
+
+    VkMappedMemoryRange meshletMemoryRange{};
+    meshletMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+    meshletMemoryRange.memory = meshletBuffers[nextIndex].GetBufferMemory();
+    meshletMemoryRange.offset = 0;
+    meshletMemoryRange.size = VK_WHOLE_SIZE;
+    vkFlushMappedMemoryRanges(aDevice->GetLogicalDevice(), 1, &meshletMemoryRange);
 }
 
 void Meshes::UpdateVertexPositions(Mesh& mesh)
@@ -453,6 +460,13 @@ void Meshes::applyVertexBufferUpdate(Model::Vertex* vertexBufferData, Model::Ind
         }
         memcpy(&indexBufferData[mesh.indexOffset], &indices[mesh.indexOffset], mesh.indexCount * sizeof(Model::Index));
     }
+    VkMappedMemoryRange vertexMemoryRange{};
+    vertexMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+    vertexMemoryRange.memory = vertexBuffers[nextIndex].GetBufferMemory();
+    vertexMemoryRange.offset = 0;
+    vertexMemoryRange.size = VK_WHOLE_SIZE;
+    
+    vkFlushMappedMemoryRanges(aDevice->GetLogicalDevice(), 1, &vertexMemoryRange);
 }
 
 void Meshes::createSSBODescriptor()

@@ -47,6 +47,7 @@ namespace AnA
         return buffer;
     }
     class Buffer;
+    class CommandBuffer;
     namespace Cameras
     {
         class Camera;
@@ -68,8 +69,8 @@ namespace AnA
     }
     class Window;
 
-    typedef void(*RecordCallBack)(VkCommandBuffer commandBuffer);
-    typedef void(*RecordCallBackEx)(VkCommandBuffer commandBuffer, size_t index);
+    typedef void(*RecordCallBack)(CommandBuffer& commandBuffer);
+    typedef void(*RecordCallBackEx)(CommandBuffer& commandBuffer, size_t index);
     typedef bool(*BoolCallBack)();
     typedef void(*NormalCallBack)();
     typedef void(*ViewportCallBack)(VkOffset2D& offset, VkExtent2D& extent);

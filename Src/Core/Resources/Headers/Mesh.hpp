@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include "Model.hpp"
 #include "Descriptor.hpp"
+#include "CommandBuffer.hpp"
 #include "../../Headers/Types.hpp"
 
 namespace AnA
@@ -50,14 +51,14 @@ namespace AnA
         void RemoveAt(uint32_t meshIndex);
         void RemoveAt(Range removeRange);
         void RemoveAt(std::vector<uint32_t> meshIndices);
-        void Bind(VkCommandBuffer commandBuffer);
-        void Draw(VkCommandBuffer commandBuffer);
-        void DrawIndirect(VkCommandBuffer commandBuffer);
-        void DrawIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout);
-        void DrawMesh(VkCommandBuffer commandBuffer);
-        void DrawMesh(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout);
-        void DrawMeshIndirect(VkCommandBuffer commandBuffer);
-        void DrawMeshIndirect(VkCommandBuffer commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout);
+        void Bind(CommandBuffer& commandBuffer);
+        void Draw(CommandBuffer& commandBuffer);
+        void DrawIndirect(CommandBuffer& commandBuffer);
+        void DrawIndirect(CommandBuffer& commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout);
+        void DrawMesh(CommandBuffer& commandBuffer);
+        void DrawMesh(CommandBuffer& commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout);
+        void DrawMeshIndirect(CommandBuffer& commandBuffer);
+        void DrawMeshIndirect(CommandBuffer& commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout);
         bool NeedUpdate()
         {
             return updateQueue.size();

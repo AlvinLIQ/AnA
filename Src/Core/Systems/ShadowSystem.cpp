@@ -22,7 +22,7 @@ ShadowSystem* ShadowSystem::GetCurrent()
     return _shadowSystem;
 }
 
-void ShadowSystem::RenderShadows(VkCommandBuffer commandBuffer, Meshes &meshes, Shader& shader)
+void ShadowSystem::RenderShadows(CommandBuffer& commandBuffer, Meshes &meshes, Shader& shader)
 {
     VkExtent2D extent = {SHADOW_MAP_DIM, SHADOW_MAP_DIM};
     swapChain->SetViewport(commandBuffer, {}, extent);
@@ -37,7 +37,7 @@ void ShadowSystem::RenderShadows(VkCommandBuffer commandBuffer, Meshes &meshes, 
     meshes.Draw(commandBuffer);
 }
 
-void ShadowSystem::RenderShadowsIndirect(VkCommandBuffer commandBuffer, Meshes &meshes, Shader& shader)
+void ShadowSystem::RenderShadowsIndirect(CommandBuffer& commandBuffer, Meshes &meshes, Shader& shader)
 {
     VkExtent2D extent = {SHADOW_MAP_DIM, SHADOW_MAP_DIM};
     swapChain->SetViewport(commandBuffer, {}, extent);
@@ -52,7 +52,7 @@ void ShadowSystem::RenderShadowsIndirect(VkCommandBuffer commandBuffer, Meshes &
     meshes.DrawIndirect(commandBuffer);
 }
 
-void ShadowSystem::RenderCascadedShadowsIndirect(VkCommandBuffer commandBuffer, Meshes &meshes, Shader& shader, uint32_t& index)
+void ShadowSystem::RenderCascadedShadowsIndirect(CommandBuffer& commandBuffer, Meshes &meshes, Shader& shader, uint32_t& index)
 {
     VkExtent2D extent = {SHADOW_MAP_DIM, SHADOW_MAP_DIM};
     swapChain->SetViewport(commandBuffer, {}, extent);

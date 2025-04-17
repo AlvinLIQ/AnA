@@ -67,7 +67,7 @@ namespace AnA
         VkOffset2D actualSceneOffset{};
     protected:
         virtual void createRecordCallBacks();
-        virtual void onCommandBufferRecording(VkCommandBuffer& commandBuffer);
+        virtual void onCommandBufferRecording(CommandBuffer& commandBuffer);
         virtual void onLoop();
         Window aWindow;
         Instance aInstance;

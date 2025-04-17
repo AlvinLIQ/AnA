@@ -58,20 +58,20 @@ namespace AnA
         {
             return inheritanceInfos[renderPassType];
         }
-        VkCommandBuffer BeginFrame();
+        CommandBuffer* BeginFrame();
 
         void RecordOffscreenSecondaryCommandBuffer(RecordCallBack recordCallBack);
-        void ExecuteOffscreenSecondaryCommandBuffer(VkCommandBuffer commandBuffer);
+        void ExecuteOffscreenSecondaryCommandBuffer(CommandBuffer& commandBuffer);
 
         void EndFrame();
-        void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer);
-        void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkSubpassContents contents);
-        void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2D& offset);
-        void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2D& offset, VkExtent2D& extent);
-        void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2D& ltOffset, VkOffset2D& rbOffset);
+        void BeginSwapChainRenderPass(CommandBuffer& commandBuffer);
+        void BeginSwapChainRenderPass(CommandBuffer& commandBuffer, VkSubpassContents contents);
+        void BeginSwapChainRenderPass(CommandBuffer& commandBuffer, VkOffset2D& offset);
+        void BeginSwapChainRenderPass(CommandBuffer& commandBuffer, VkOffset2D& offset, VkExtent2D& extent);
+        void BeginSwapChainRenderPass(CommandBuffer& commandBuffer, VkOffset2D& ltOffset, VkOffset2D& rbOffset);
 
-        void EndRenderPass(VkCommandBuffer commandBuffer);
-        void BeginOffscreenRenderPass(VkCommandBuffer commandBuffer, VkFramebuffer& framebuffer, VkSubpassContents contents = VK_SUBPASS_CONTENTS_INLINE);
+        void EndRenderPass(CommandBuffer& commandBuffer);
+        void BeginOffscreenRenderPass(CommandBuffer& commandBuffer, VkFramebuffer& framebuffer, VkSubpassContents contents = VK_SUBPASS_CONTENTS_INLINE);
     private:
         Window& aWindow;
         Device* aDevice;

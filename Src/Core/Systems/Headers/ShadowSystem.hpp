@@ -13,9 +13,9 @@ namespace AnA
             ~ShadowSystem();
             static ShadowSystem* GetCurrent();
 
-            void RenderShadows(VkCommandBuffer commandBuffer, Meshes& meshes, Shader& shader);
-            void RenderShadowsIndirect(VkCommandBuffer commandBuffer, Meshes &meshes, Shader& shader);
-            void RenderCascadedShadowsIndirect(VkCommandBuffer commandBuffer, Meshes &meshes, Shader& shader, uint32_t& index);
+            void RenderShadows(CommandBuffer& commandBuffer, Meshes& meshes, Shader& shader);
+            void RenderShadowsIndirect(CommandBuffer& commandBuffer, Meshes &meshes, Shader& shader);
+            void RenderCascadedShadowsIndirect(CommandBuffer& commandBuffer, Meshes &meshes, Shader& shader, uint32_t& index);
         private:
             //Device* aDevice;
             SwapChain* swapChain;

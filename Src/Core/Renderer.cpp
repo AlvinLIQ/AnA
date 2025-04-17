@@ -23,7 +23,7 @@ Renderer::~Renderer()
     delete aSwapChain;
 }
 
-VkCommandBuffer Renderer::BeginFrame()
+CommandBuffer* Renderer::BeginFrame()
 {
     assert(!isFrameStarted && "Can't call BeginFrame while already in progress!");
     auto result = aSwapChain->AcquireNextImage();
@@ -40,20 +40,20 @@ VkCommandBuffer Renderer::BeginFrame()
     needUpdate = false;
     isFrameStarted = true;
 
-    auto commandBuffer = commandBuffers.Begin();
-    return commandBuffer;
+    commandBuffers.Begin();
+    return &commandBuffers;
 }
 
 void Renderer::RecordOffscreenSecondaryCommandBuffer(RecordCallBack recordCallBack)
 {
     //aSwapChain->WaitForFences();
-    auto& secondaryCommandBuffer = offscreenSecondaryCommandBuffers.Begin(&inheritanceInfos[RENDER_PASS_TYPE_OFFSCREEN]);
-    recordCallBack(secondaryCommandBuffer);
+    offscreenSecondaryCommandBuffers.Begin(&inheritanceInfos[RENDER_PASS_TYPE_OFFSCREEN]);
+    recordCallBack(offscreenSecondaryCommandBuffers);
 
     offscreenSecondaryCommandBuffers.End();
 }
 
-void Renderer::ExecuteOffscreenSecondaryCommandBuffer(VkCommandBuffer commandBuffer)
+void Renderer::ExecuteOffscreenSecondaryCommandBuffer(CommandBuffer& commandBuffer)
 {
     vkCmdExecuteCommands(commandBuffer, 
     1, 
@@ -81,7 +81,7 @@ void Renderer::EndFrame()
     isFrameStarted = false;
 }
 
-void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer)
+void Renderer::BeginSwapChainRenderPass(CommandBuffer& commandBuffer)
 {
     assert(isFrameStarted && "Can't call BeginSwapChainRenderPass while frame is not in progress!");
     auto swapChainExtent = aSwapChain->GetExtent();
@@ -97,7 +97,7 @@ void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer)
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE_AND_SECONDARY_COMMAND_BUFFERS_EXT);
 }
 
-void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkSubpassContents contents)
+void Renderer::BeginSwapChainRenderPass(CommandBuffer& commandBuffer, VkSubpassContents contents)
 {
     assert(isFrameStarted && "Can't call BeginSwapChainRenderPass while frame is not in progress!");
     auto swapChainExtent = aSwapChain->GetExtent();
@@ -113,7 +113,7 @@ void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkSubpass
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, contents);
 }
 
-void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2D& offset)
+void Renderer::BeginSwapChainRenderPass(CommandBuffer& commandBuffer, VkOffset2D& offset)
 {
     assert(isFrameStarted && "Can't call BeginSwapChainRenderPass while frame is not in progress!");
     auto swapChainExtent = aSwapChain->GetExtent();
@@ -129,7 +129,7 @@ void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
 }
 
-void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2D& offset, VkExtent2D& extent)
+void Renderer::BeginSwapChainRenderPass(CommandBuffer& commandBuffer, VkOffset2D& offset, VkExtent2D& extent)
 {
     assert(isFrameStarted && "Can't call BeginSwapChainRenderPass while frame is not in progress!");
     //auto swapChainExtent = aSwapChain->GetExtent();
@@ -145,7 +145,7 @@ void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
 }
 
-void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2D& ltOffset, VkOffset2D& rbOffset)
+void Renderer::BeginSwapChainRenderPass(CommandBuffer& commandBuffer, VkOffset2D& ltOffset, VkOffset2D& rbOffset)
 {
     assert(isFrameStarted && "Can't call BeginSwapChainRenderPass while frame is not in progress!");
     auto swapChainExtent = aSwapChain->GetExtent();
@@ -161,14 +161,14 @@ void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer, VkOffset2
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
 }
 
-void Renderer::EndRenderPass(VkCommandBuffer commandBuffer)
+void Renderer::EndRenderPass(CommandBuffer& commandBuffer)
 {
     assert(isFrameStarted && "Can't call EndSwapChainRenderPass while frame is not in progress!");
 
     vkCmdEndRenderPass(commandBuffer);
 }
 
-void Renderer::BeginOffscreenRenderPass(VkCommandBuffer commandBuffer, VkFramebuffer& framebuffer, VkSubpassContents contents)
+void Renderer::BeginOffscreenRenderPass(CommandBuffer& commandBuffer, VkFramebuffer& framebuffer, VkSubpassContents contents)
 {
     VkExtent2D extent = {SHADOW_MAP_DIM, SHADOW_MAP_DIM};
 

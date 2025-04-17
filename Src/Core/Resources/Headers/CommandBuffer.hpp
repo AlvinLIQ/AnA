@@ -9,6 +9,10 @@ namespace AnA
         CommandBuffer(Device* mDevice, int commandBufferCount, VkCommandBufferLevel commandBufferlevel, VkCommandBufferUsageFlags usageFlags, bool async = false);
         CommandBuffer(Device* mDevice, int commandBufferCount, VkCommandBufferLevel commandBufferlevel, VkCommandBufferBeginInfo& commandBufferBeginInfo);
         ~CommandBuffer();
+        operator VkCommandBuffer() const
+        {
+            return buffers[nextBufferIndex];
+        }
 
         VkCommandBuffer& Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo = nullptr);
         VkCommandBuffer& Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo, VkOffset2D offset);

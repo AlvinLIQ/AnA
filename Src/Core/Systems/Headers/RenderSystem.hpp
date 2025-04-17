@@ -14,10 +14,10 @@ namespace AnA
             RenderSystem(Device* mDevice, SwapChain& mSwapChain);
             ~RenderSystem();
 
-            void RenderShapes(VkCommandBuffer commandBuffer, Shapes& shapes, Shader& shader);
-            void RenderShapesIndirect(VkCommandBuffer commandBuffer, Shapes& shapes, Shader& shader);
-            void RenderMeshes(VkCommandBuffer commandBuffer, Meshes& meshes, Shader& shader, uint32_t bufferIndex);
-            void RenderMeshesIndirect(VkCommandBuffer commandBuffer, Meshes& meshes, Shader& shader, uint32_t bufferIndex);
+            void RenderShapes(CommandBuffer& commandBuffer, Shapes& shapes, Shader& shader);
+            void RenderShapesIndirect(CommandBuffer& commandBuffer, Shapes& shapes, Shader& shader);
+            void RenderMeshes(CommandBuffer& commandBuffer, Meshes& meshes, Shader& shader, uint32_t bufferIndex);
+            void RenderMeshesIndirect(CommandBuffer& commandBuffer, Meshes& meshes, Shader& shader, uint32_t bufferIndex);
             static RenderSystem* GetCurrent();
         private:
             Device* aDevice;

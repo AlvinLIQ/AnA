@@ -50,7 +50,7 @@ VkCommandBuffer& CommandBuffer::Begin(VkCommandBufferInheritanceInfo* pInheritan
     beginInfo.pInheritanceInfo = pInheritanceInfo;
     if (vkBeginCommandBuffer(buffers[nextBufferIndex], &beginInfo) != VK_SUCCESS)
         throw std::runtime_error("Failed to begin command buffer!");
-    SwapChain::GetCurrent()->SetViewport(buffers[nextBufferIndex]);
+    SwapChain::GetCurrent()->SetViewport(*this);
     return buffers[nextBufferIndex];
 }
 

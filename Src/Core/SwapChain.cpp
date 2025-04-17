@@ -1,4 +1,5 @@
 #include "Headers/SwapChain.hpp"
+#include "Resources/Headers/CommandBuffer.hpp"
 #include <algorithm>
 #include <limits>
 
@@ -129,13 +130,13 @@ std::vector<VkFramebuffer> SwapChain::GetSwapChainFramebuffers()
     return swapChainFramebuffers;
 }
 
-void SwapChain::SetViewport(VkCommandBuffer& commandBuffer)
+void SwapChain::SetViewport(CommandBuffer& commandBuffer)
 {
     vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 }
 
-void SwapChain::SetViewport(VkCommandBuffer& commandBuffer, VkOffset2D offset)
+void SwapChain::SetViewport(CommandBuffer& commandBuffer, VkOffset2D offset)
 {
     VkViewport _viewport = {(float)offset.x, (float)offset.y, static_cast<float>(swapChainExtent.width - offset.x), 
         static_cast<float>(swapChainExtent.height - offset.y), 0.0f, 1.0f};
@@ -144,7 +145,7 @@ void SwapChain::SetViewport(VkCommandBuffer& commandBuffer, VkOffset2D offset)
     vkCmdSetScissor(commandBuffer, 0, 1, &_scissor);
 }
 
-void SwapChain::SetViewport(VkCommandBuffer& commandBuffer, VkOffset2D offset, VkExtent2D extent)
+void SwapChain::SetViewport(CommandBuffer& commandBuffer, VkOffset2D offset, VkExtent2D extent)
 {
     VkViewport _viewport = {(float)offset.x, (float)offset.y, static_cast<float>(extent.width), 
         static_cast<float>(extent.height), 0.0f, 1.0f};

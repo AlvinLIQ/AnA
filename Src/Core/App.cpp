@@ -141,7 +141,7 @@ void App::Run()
         //Record Primary Command Buffer
         if (auto commandBuffer = aRenderer.BeginFrame())
         {
-            onCommandBufferRecording(commandBuffer);
+            onCommandBufferRecording(*commandBuffer);
             aRenderer.EndFrame();
         }
     }
@@ -222,7 +222,7 @@ void App::uiLoop()
     }
 }
 
-void RenderShapesIndirect(VkCommandBuffer commandBuffer)
+void RenderShapesIndirect(CommandBuffer& commandBuffer)
 {
     auto aResourceManager = Resource::ResourceManager::GetCurrent();
     auto aRenderSystem = Systems::RenderSystem::GetCurrent();
@@ -241,7 +241,7 @@ void App::createRecordCallBacks()
     {
         auto aResourceManager = Resource::ResourceManager::GetCurrent();
         auto& aRenderer = _aApp->GetRenderer();        
-        aResourceManager->SecondaryCommandBufferPool.Enqueue([](VkCommandBuffer secondaryCommandBuffer, size_t )
+        aResourceManager->SecondaryCommandBufferPool.Enqueue([](CommandBuffer& secondaryCommandBuffer, size_t )
         {
             auto aResourceManager = Resource::ResourceManager::GetCurrent();
             Systems::RenderSystem::GetCurrent()->RenderMeshesIndirect(secondaryCommandBuffer, 
@@ -249,12 +249,12 @@ void App::createRecordCallBacks()
                 aResourceManager->Shaders.back(), aResourceManager->SecondaryCommandBufferPool.CurrentBufferIndex);
         }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), offset);
         /*
-        aRenderer.RecordOffscreenSecondaryCommandBuffer([](VkCommandBuffer offScreenSecondaryCommandBuffer)
+        aRenderer.RecordOffscreenSecondaryCommandBuffer([](CommandBuffer& offScreenSecondaryCommandBuffer)
         {
             //RenderShadowsIndirect(offScreenSecondaryCommandBuffer);
         });*/
         aResourceManager->SceneObjects.EndCommandBufferUpdate();
-    });
+    }, sceneOffset);
 #ifdef ANA_INCLUDE_CONTROL
 
     RecordCallBacks.emplace_back([]()
@@ -274,7 +274,7 @@ void App::createRecordCallBacks()
         shapes.Offset = offset;
         shapes.Extent = controlExtent;
         shapes.PrepareDraw(aResourceManager->MainControl);
-        aResourceManager->SecondaryCommandBufferPool.Enqueue([](VkCommandBuffer secondaryCommandBuffer, size_t )
+        aResourceManager->SecondaryCommandBufferPool.Enqueue([](CommandBuffer& secondaryCommandBuffer, size_t )
         {
             RenderShapesIndirect(secondaryCommandBuffer);
         }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), offset, controlExtent);
@@ -282,7 +282,7 @@ void App::createRecordCallBacks()
 #endif
 }
 
-void App::onCommandBufferRecording(VkCommandBuffer& commandBuffer)
+void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
 {
     if (!aResourceManager.SecondaryCommandBufferPool.GetCommandBufferCount() || !aResourceManager.SceneObjects.GetMeshCount())
         return;
