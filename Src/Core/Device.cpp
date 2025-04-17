@@ -909,15 +909,13 @@ void Device::createLogicalDevice()
     deviceFeatures2.features.shaderSampledImageArrayDynamicIndexing = VK_TRUE;
     deviceFeatures2.features.vertexPipelineStoresAndAtomics = VK_TRUE;
 #ifdef ENABLE_MESH_SHADER
+    VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures = {};
+    meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
+    meshShaderFeatures.meshShader = VK_TRUE;
+    meshShaderFeatures.taskShader = VK_TRUE;
+    meshShaderFeatures.pNext = &shaderDrawParametersFeatures;
     if (meshShaderSupport)
-    {
-        VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures = {};
-        meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
-        meshShaderFeatures.meshShader = VK_TRUE;
-        meshShaderFeatures.taskShader = VK_TRUE;
-        meshShaderFeatures.pNext = &shaderDrawParametersFeatures;
         deviceFeatures2.pNext = &meshShaderFeatures;
-    }
     else
         deviceFeatures2.pNext = &shaderDrawParametersFeatures;
 
