@@ -2,6 +2,7 @@
 #include "../../Headers/Types.hpp"
 #include "../../Headers/Device.hpp"
 #include "../../Headers/Buffer.hpp"
+#include "Renderable.hpp"
 #include "Descriptor.hpp"
 
 namespace AnA
@@ -17,7 +18,7 @@ namespace AnA
         glm::vec3 Color{1.0f};
         uint32_t TextureId{0};
     };
-    class Shapes
+    class Shapes : public Renderable
     {
     public:
         Shapes()
@@ -56,8 +57,17 @@ namespace AnA
         }
         ~Shapes();
         void PrepareDraw(Controls::Control* control);
-        void Draw(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout);
-        void DrawIndirect(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout);
+        void Bind(CommandBuffer& commandBuffer, uint32_t bufferIndex);
+        void Draw(CommandBuffer& commandBuffer);
+        void DrawIndirect(CommandBuffer& commandBuffer);
+        void Update()
+        {
+            
+        }
+        bool NeedUpdate()
+        {
+            return false;
+        }
         VkOffset2D Offset;
         VkExtent2D Extent;
     private:
@@ -69,5 +79,6 @@ namespace AnA
         Descriptor* samplersDescriptor{nullptr};
         uint32_t shapeCount{};
         std::vector<VkDescriptorImageInfo> imageInfos{};
+        VkDescriptorSet sets[2];
     };
 }

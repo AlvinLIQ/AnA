@@ -49,22 +49,25 @@ void Shapes::PrepareDraw(Controls::Control* control)
     control->PrepareDraw((Shape*)shapeBuffer.GetMappedData(), imageInfos, newShapeCount);
     ((VkDrawIndirectCommand*)indirectBuffer.GetMappedData())->vertexCount = (shapeCount = newShapeCount) * 6;
     samplersDescriptor->UpdateDescriptorSets(imageInfos.data(), newShapeCount, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+    sets[0] = ssboDescriptor->GetSets()[0];
+    sets[1] = samplersDescriptor->GetSets()[0];
 }
 
-void Shapes::Draw(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
+void Shapes::Bind(CommandBuffer& commandBuffer, uint32_t)
 {
-    VkDescriptorSet sets[] = { ssboDescriptor->GetSets()[0], samplersDescriptor->GetSets()[0] };
+    auto& shader = Resource::ResourceManager::GetCurrent()->Shaders[1];
+    shader.GetPipeline()->Bind(commandBuffer);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, 
-    pipelineLayout, 0, numsof(sets), 
-    sets, 0, nullptr);
+        shader.GetPipelineLayout(), 0, numsof(sets), 
+        sets, 0, nullptr);
+}
+
+void Shapes::Draw(CommandBuffer& commandBuffer)
+{
     vkCmdDraw(commandBuffer, shapeCount * 6, 1, 0, 0);
 }
 
-void Shapes::DrawIndirect(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
+void Shapes::DrawIndirect(CommandBuffer& commandBuffer)
 {
-    VkDescriptorSet sets[] = { ssboDescriptor->GetSets()[0], samplersDescriptor->GetSets()[0] };
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, 
-    pipelineLayout, 0, numsof(sets), 
-    sets, 0, nullptr);
     vkCmdDrawIndirectCount(commandBuffer, indirectBuffer.GetBuffer(), 0, countBuffer.GetBuffer(), 0, 1, sizeof(VkDrawIndirectCommand));
 }

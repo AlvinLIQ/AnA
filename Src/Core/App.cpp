@@ -222,15 +222,6 @@ void App::uiLoop()
     }
 }
 
-void RenderShapesIndirect(CommandBuffer& commandBuffer)
-{
-    auto aResourceManager = Resource::ResourceManager::GetCurrent();
-    auto aRenderSystem = Systems::RenderSystem::GetCurrent();
-    aRenderSystem->RenderShapesIndirect(commandBuffer, 
-        aResourceManager->Shapes, 
-        aResourceManager->Shaders[1]);
-}
-
 void App::createRecordCallBacks()
 {
     auto& RecordCallBacks = aResourceManager.RecordCallBacks;
@@ -276,7 +267,10 @@ void App::createRecordCallBacks()
         shapes.PrepareDraw(aResourceManager->MainControl);
         aResourceManager->SecondaryCommandBufferPool.Enqueue([](CommandBuffer& secondaryCommandBuffer, size_t )
         {
-            RenderShapesIndirect(secondaryCommandBuffer);
+            auto aResourceManager = Resource::ResourceManager::GetCurrent();
+            auto aRenderSystem = Systems::RenderSystem::GetCurrent();
+            aRenderSystem->RenderIndirect(secondaryCommandBuffer, 
+                aResourceManager->Shapes);
         }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), offset, controlExtent);
     });
 #endif
