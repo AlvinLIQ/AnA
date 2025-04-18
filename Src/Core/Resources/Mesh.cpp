@@ -381,7 +381,7 @@ void Meshes::UpdateMeshlets()
         return;
     //buildMeshlets();
     buildMeshletsWithOptimizer();
-    uint32_t minMeshletBufferSize = (meshletVertexCount + meshletIndexCount / 4 + 1 +
+    uint32_t minMeshletBufferSize = (meshletVertexCount + meshletIndexCount / 3 + 1 +
         3 * meshlets.size()) * sizeof(uint32_t);
     if (!meshletBuffers[nextIndex].GetBuffer() || 
         meshletBuffers[nextIndex].GetSize() < minMeshletBufferSize)
@@ -393,7 +393,7 @@ void Meshes::UpdateMeshlets()
 
         meshletBuffers[nextIndex].Map(0, VK_WHOLE_SIZE);
 
-        meshletCullingBuffers[nextIndex] = Buffer(aDevice, meshlets.size() * sizeof(glm::vec4),
+        meshletCullingBuffers[nextIndex] = Buffer(aDevice, meshlets.size() * sizeof(BoundingSphere),
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | 
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
@@ -401,7 +401,7 @@ void Meshes::UpdateMeshlets()
     }
     uint32_t bufferId = 0;
     uint32_t* buffer = (uint32_t*)meshletBuffers[nextIndex].GetMappedData();
-    glm::vec4* cullingBuffer = (glm::vec4*)meshletCullingBuffers[nextIndex].GetMappedData();
+    BoundingSphere* cullingBuffer = (BoundingSphere*)meshletCullingBuffers[nextIndex].GetMappedData();
     uint32_t vertexOffset = 0, primitiveOffset = 0;
     if (meshlets.empty())
         buffer[0] = 0;
@@ -414,7 +414,9 @@ void Meshes::UpdateMeshlets()
         if (meshlet.indexCount & 3)
             primitiveOffset++;
 
-        cullingBuffer[i] = glm::vec4(meshlet.center, meshlet.radius);
+        cullingBuffer[i].center = meshlet.center;
+        cullingBuffer[i].radius = meshlet.radius;
+        cullingBuffer[i].normal = meshlet.normal;
     }
     for (auto& meshlet : meshlets)
     {
@@ -692,10 +694,14 @@ void Meshes::buildMeshletsWithOptimizer()
                 meshlet.vertices[i] = uniqueVertexIndices[i + meshletInfo.vertex_offset] + mesh.vertexOffset;
                 minBounding = glm::min(minBounding, vertices[meshlet.vertices[i]].position);
                 maxBounding = glm::max(maxBounding, vertices[meshlet.vertices[i]].position);
+
+                meshlet.normal += vertices[meshlet.vertices[i]].normal;
             }
             meshlet.center = (minBounding + maxBounding) * 0.5f;
             auto model = mesh.transform.mat3();
             meshlet.center = model * meshlet.center + mesh.transform.translation;
+            meshlet.normal = glm::normalize(meshlet.normal);
+            meshlet.cutoff = 1.0f;
             for (uint32_t i = 0; i < meshlet.vertexCount; i++)
             {
                 float distance = glm::distance(meshlet.center, 
@@ -703,6 +709,7 @@ void Meshes::buildMeshletsWithOptimizer()
                 if (distance > meshlet.radius)
                     meshlet.radius = distance;
 
+                meshlet.cutoff = std::min(meshlet.cutoff, glm::dot(vertices[meshlet.vertices[i]].normal, meshlet.normal));
             }
             meshlets.push_back(meshlet);
         }

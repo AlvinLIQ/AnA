@@ -1,7 +1,6 @@
 project('AnA', ['c', 'cpp'],
-    default_options: ['c_std=c23', 'cpp_std=c++23'])
+    default_options: ['c_std=c23', 'cpp_std=c++23', 'warning_level=everything'])
 
-add_project_arguments('-Wall', '-Wextra', '-Wpedantic', language: 'cpp')
 add_project_link_arguments('-fuse-ld=lld', language: 'cpp')
 vulkan_dep = dependency('vulkan', required: true)  # Vulkan SDK
 if host_machine.system() == 'windows'

@@ -25,6 +25,8 @@ namespace AnA
         uint32_t indexCount;
         uint32_t vertexCount;
         glm::vec3 center;
+        glm::vec3 normal;
+        float cutoff;
         float radius;
     };
 
@@ -39,6 +41,14 @@ namespace AnA
     {
         glm::vec4 planes[6];
         static void ExtractFrustumPlanes(const glm::mat4& m, FrustumPlanes& fp);
+    };
+
+    struct BoundingSphere
+    {
+        glm::vec3 center;
+        float radius;
+        glm::vec3 normal;
+        float cutoff;
     };
 
     class Meshes : public Renderable

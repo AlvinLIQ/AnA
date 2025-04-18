@@ -27,6 +27,12 @@ namespace AnA
         VkOffset2D offset;
         VkExtent2D extent;
     };
+    struct MeshShaderOutput
+    {
+        uint32_t meshletCount;
+        uint32_t vertexCount;
+        uint32_t triangleCount;
+    };
     namespace Resource
     {
         class ResourceManager
@@ -39,6 +45,7 @@ namespace AnA
             std::vector<Cascade>& GetCascades();
 
             static void GetBufferInfos(std::vector<Buffer>& buffers, std::vector<VkDescriptorBufferInfo>& bufferInfos);
+            static void GetBufferInfos(Buffer* buffers, uint32_t bufferSize, std::vector<VkDescriptorBufferInfo>& bufferInfos);
             static void GetImageInfos(const std::vector<Image>& images, const std::vector<VkSampler>& samplers, std::vector<VkDescriptorImageInfo>& imageInfos);
 
             //Built-in resources
@@ -71,6 +78,9 @@ namespace AnA
             //ThreadPool<void(CommandBuffer*)> SecondaryCommandBufferPool{};
             void RecreateResources();
             std::vector<RecordCallBackInfo> RecordCallBacks{};
+#ifdef ENABLE_MESH_SHADER
+            MeshShaderOutput MeshShaderOutputData;
+#endif
         private:
             Device* aDevice;
             std::vector<Buffer> mainCameraBuffers;

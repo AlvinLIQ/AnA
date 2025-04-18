@@ -2,11 +2,14 @@
 #extension GL_EXT_mesh_shader : require
 #extension GL_KHR_shader_subgroup_ballot : require
 
-#ifndef __GLSL_CG_DATA_TYPES
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
-#else
-layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
-#endif
+
+layout(set = 1, binding = 0) uniform CameraBufferObject {
+    mat4 proj;
+    mat4 view;
+    vec2 resolution;
+} cbo;
+
 layout(set = 1, binding = 1) uniform Frustum
 {
     vec4 planes[6];
@@ -17,9 +20,17 @@ layout(std430, set = 6, binding = 0) buffer meshletSSBO
     uint meshlets[];
 } msbo;
 
-layout(std140, set = 6, binding = 1) buffer meshletCullingSSBO
+struct BoundingSphere
 {
-    vec4 cullings[];
+    vec3 center;
+    float radius;
+    vec3 normal;
+    float cutoff;
+};
+
+layout(std430, set = 6, binding = 1) buffer meshletCullingSSBO
+{
+    BoundingSphere boundings[];
 } mcsbo;
 
 taskPayloadSharedEXT struct {
@@ -39,13 +50,33 @@ bool isSphereInsideFrustum(vec3 center, float radius)
     return true;
 }
 
+bool isMeshletFacingCamera(vec3 center, vec3 normal, float cutoff)
+{
+    vec3 viewCenter = (cbo.view * vec4(center, 1.0)).xyz;
+    vec3 viewNormal = normalize((cbo.view * vec4(normal, 0.0)).xyz);
+
+    vec3 toCam = normalize(-viewCenter);
+    float dotNV = dot(viewNormal, toCam);
+
+    if (dotNV <= cutoff)
+        return false;
+    
+    return true;
+}
+
+bool isMeshletVisible(uint meshletId)
+{
+    BoundingSphere boundingSphere = mcsbo.boundings[meshletId];
+    return  isSphereInsideFrustum(boundingSphere.center, boundingSphere.radius);// && 
+            //isMeshletFacingCamera(boundingSphere.center, boundingSphere.normal, boundingSphere.cutoff);
+}
+
 void main()
 {
     uint globalID = gl_GlobalInvocationID.x;
     if (globalID >= msbo.meshlets[0])
         return;
-    vec4 culling = mcsbo.cullings[globalID];
-    bool visible = isSphereInsideFrustum(culling.xyz, culling.w);
+    bool visible = isMeshletVisible(globalID);
     
     uvec4 ballot = subgroupBallot(visible);
     if (visible)

@@ -71,6 +71,18 @@ void ResourceManager::GetBufferInfos(std::vector<Buffer>& buffers, std::vector<V
     }
 }
 
+void ResourceManager::GetBufferInfos(Buffer* buffers, uint32_t bufferSize, std::vector<VkDescriptorBufferInfo>& bufferInfos)
+{
+    bufferInfos.resize(bufferSize);
+    for (size_t i = 0; i < bufferInfos.size(); i++)
+    {
+        auto& bufferInfo = bufferInfos[i];
+        bufferInfo.buffer = buffers[i].GetBuffer();
+        bufferInfo.offset = 0;
+        bufferInfo.range = buffers[i].GetSize();
+    }
+}
+
 void ResourceManager::GetImageInfos(const std::vector<Image>& images, const std::vector<VkSampler>& samplers, std::vector<VkDescriptorImageInfo>& imageInfos)
 {
     imageInfos.resize(images.size());
@@ -179,7 +191,7 @@ void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Desc
     pConfig->binding = 0;
     pConfig->descriptorCount = 1;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_MESH_BIT_EXT;
+    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_TASK_BIT_EXT;
     GetBufferInfos(mainCameraBuffers, pConfig->bufferInfos);
     descriptorSetConfigs[DEFAULT_UBO_LAYOUT].resize(2);
     pConfig = &descriptorSetConfigs[DEFAULT_UBO_LAYOUT][1];
@@ -243,7 +255,7 @@ void ResourceManager::createMainCameraBuffers()
     frustumBuffers.resize(mainCameraBuffers.size());
     for (auto& frustumBuffer : frustumBuffers)
     {
-        frustumBuffer = Buffer(aDevice, sizeof(FrustumPlanes), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
+        frustumBuffer = Buffer(aDevice, sizeof(FrustumPlanes) + sizeof(glm::mat4), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         frustumBuffer.Map(0, frustumBuffer.GetSize());
     }
@@ -293,8 +305,13 @@ void ResourceManager::createDefaultShaders()
         meshletCullingConfig.descriptorCount = 0;
         meshletCullingConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         meshletCullingConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT;
+        Descriptor::DescriptorConfig outputConfig{};
+        outputConfig.binding = 2;
+        outputConfig.descriptorCount = 0;
+        outputConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        outputConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT;
 
-        descriptorConfig.push_back({meshletConfig, meshletCullingConfig});
+        descriptorConfig.push_back({meshletConfig, meshletCullingConfig, outputConfig});
 
         Shaders.emplace_back(aDevice, Mesh_task, Mesh_mesh, Mesh_frag, renderPass
             , descriptorConfig);
