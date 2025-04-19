@@ -12,6 +12,7 @@ layout(location = 0) out vec4 outColor;
 layout(set = 1, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
+	mat4 invView;
     vec2 resolution;
 } cbo;
 

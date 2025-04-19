@@ -694,22 +694,50 @@ void Meshes::buildMeshletsWithOptimizer()
                 meshlet.vertices[i] = uniqueVertexIndices[i + meshletInfo.vertex_offset] + mesh.vertexOffset;
                 minBounding = glm::min(minBounding, vertices[meshlet.vertices[i]].position);
                 maxBounding = glm::max(maxBounding, vertices[meshlet.vertices[i]].position);
+            }
+            auto model = mesh.transform.mat3();
+            std::vector<glm::vec3> normals(meshletInfo.triangle_count);
+            for (uint32_t i = 0; i < meshletInfo.triangle_count; i++)
+            {
+                uint32_t i0 = meshlet.indices[i + 0];
+                uint32_t i1 = meshlet.indices[i + 1];
+                uint32_t i2 = meshlet.indices[i + 2];
 
-                meshlet.normal += vertices[meshlet.vertices[i]].normal;
+                glm::vec3 v0 = model * vertices[i0].position + mesh.transform.translation;
+                glm::vec3 v1 = model * vertices[i1].position + mesh.transform.translation;
+                glm::vec3 v2 = model * vertices[i2].position + mesh.transform.translation;
+
+                glm::vec3 tan0 = v1 - v0;
+                glm::vec3 tan1 = v2 - v0;
+                normals[i] = glm::cross(tan0, tan1);
+                float len = glm::length(normals[i]);
+                if (len == 0.0f)
+                    normals[i] = glm::vec3(1.0f, .0f, .0f);
+                else
+                    normals[i] /= len;
+
+                meshlet.normal += normals[i];
             }
             meshlet.center = (minBounding + maxBounding) * 0.5f;
-            auto model = mesh.transform.mat3();
             meshlet.center = model * meshlet.center + mesh.transform.translation;
-            meshlet.normal = glm::normalize(meshlet.normal);
             meshlet.cutoff = 1.0f;
+            float len = length(meshlet.normal);
+            if (len == 0.0f)
+                meshlet.normal = glm::vec3(1.0f, .0f, .0f);
+            else
+                meshlet.normal = meshlet.normal / len;
+            for (uint32_t i = 0; i < meshletInfo.triangle_count; i++)
+            {
+                float dp = glm::dot(meshlet.normal, normals[i]);
+                meshlet.cutoff = std::min(meshlet.cutoff, dp);
+            }
+            meshlet.cutoff = meshlet.cutoff < 0.0f ? 1.0f : sqrtf(1 - meshlet.cutoff * meshlet.cutoff);
             for (uint32_t i = 0; i < meshlet.vertexCount; i++)
             {
                 float distance = glm::distance(meshlet.center, 
                     model * vertices[uniqueVertexIndices[i + meshletInfo.vertex_offset] + mesh.vertexOffset].position + mesh.transform.translation);
                 if (distance > meshlet.radius)
                     meshlet.radius = distance;
-
-                meshlet.cutoff = std::min(meshlet.cutoff, glm::dot(vertices[meshlet.vertices[i]].normal, meshlet.normal));
             }
             meshlets.push_back(meshlet);
         }

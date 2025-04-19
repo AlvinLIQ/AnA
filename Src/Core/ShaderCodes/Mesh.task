@@ -7,6 +7,7 @@ layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 layout(set = 1, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
+    mat4 invView;
     vec2 resolution;
 } cbo;
 
@@ -50,25 +51,16 @@ bool isSphereInsideFrustum(vec3 center, float radius)
     return true;
 }
 
-bool isMeshletFacingCamera(vec3 center, vec3 normal, float cutoff)
+bool isMeshletFacingCamera(vec3 center, vec3 normal, float radius, float cutoff)
 {
-    vec3 viewCenter = (cbo.view * vec4(center, 1.0)).xyz;
-    vec3 viewNormal = normalize((cbo.view * vec4(normal, 0.0)).xyz);
-
-    vec3 toCam = normalize(-viewCenter);
-    float dotNV = dot(viewNormal, toCam);
-
-    if (dotNV <= cutoff)
-        return false;
-    
-    return true;
+    return dot(normal, center) < cutoff;
 }
 
 bool isMeshletVisible(uint meshletId)
 {
     BoundingSphere boundingSphere = mcsbo.boundings[meshletId];
     return  isSphereInsideFrustum(boundingSphere.center, boundingSphere.radius);// && 
-            //isMeshletFacingCamera(boundingSphere.center, boundingSphere.normal, boundingSphere.cutoff);
+            //isMeshletFacingCamera(boundingSphere.center, boundingSphere.normal, boundingSphere.radius, boundingSphere.cutoff);
 }
 
 void main()

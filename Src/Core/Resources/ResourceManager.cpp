@@ -116,6 +116,7 @@ void ResourceManager::UpdateCameraBuffer()
     Cameras::CameraBufferObject& cbo = *(Cameras::CameraBufferObject*)mainCameraBuffers[currentFrame].GetMappedData();
     cbo.proj = proj;
     cbo.view = view;
+    cbo.invView = MainCamera.GetInverseView();
     //cbo.invView = MainCamera.GetInverseView();
 
     auto extent = SwapChain::GetCurrent()->GetExtent();

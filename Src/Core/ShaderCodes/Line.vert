@@ -10,6 +10,7 @@ layout(location = 0) out vec3 fragColor;
 layout(set = 0, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
+    mat4 invView;
     vec2 resolution;
 } cbo;
 
