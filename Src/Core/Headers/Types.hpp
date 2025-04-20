@@ -77,4 +77,13 @@ namespace AnA
         double y;
     };
     typedef glm::vec<2, uint32_t> Range;
+    struct Int32
+    {
+        int32_t operator=(int32_t newVal)
+        {
+            val = newVal;
+            return val;
+        }
+        int32_t val;
+    };
 }

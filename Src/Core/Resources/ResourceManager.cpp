@@ -113,16 +113,19 @@ void ResourceManager::UpdateCameraBuffer()
     auto& proj = MainCamera.GetProjectionMatrix();
     auto& view = MainCamera.GetView();
     uint32_t currentFrame = SwapChain::GetCurrent()->CurrentFrame;
-    Cameras::CameraBufferObject& cbo = *(Cameras::CameraBufferObject*)mainCameraBuffers[currentFrame].GetMappedData();
+    Cameras::CameraBufferObject& cbo = *static_cast<Cameras::CameraBufferObject*>(mainCameraBuffers[currentFrame].GetMappedData());
     cbo.proj = proj;
     cbo.view = view;
-    cbo.position = MainCamera.GetInverseView()[3];
     //cbo.invView = MainCamera.GetInverseView();
 
     auto extent = SwapChain::GetCurrent()->GetExtent();
-    cbo.resolution = {(float)extent.width, (float)extent.height};
-    FrustumPlanes::ExtractFrustumPlanes(proj * view, MainCameraFrustumPlanes);
-    memcpy(frustumBuffers[currentFrame].GetMappedData(), &MainCameraFrustumPlanes, sizeof(FrustumPlanes));
+    cbo.resolution = {static_cast<float>(extent.width), static_cast<float>(extent.height)};
+    if (!LockCamera)
+    {
+        cbo.position = MainCamera.GetInverseView()[3];
+        FrustumPlanes::ExtractFrustumPlanes(proj * view, MainCameraFrustumPlanes);
+        memcpy(frustumBuffers[currentFrame].GetMappedData(), &MainCameraFrustumPlanes, sizeof(FrustumPlanes));
+    }
 }
 
 void ResourceManager::Update()
@@ -163,7 +166,7 @@ void ResourceManager::RecreateResources()
     std::vector<std::vector<Descriptor::DescriptorConfig>> configs;
     GetDefaultDescriptorSetConfig(configs);
     auto deafultShadowSamplerConfig = configs[DEFAULT_SHADOW_SAMPLER_LAYOUT].begin();
-    for (int i = 0; i < 1; i++)
+    for (size_t i = 0; i < 1; i++)
     {
         Shaders[i].GetDescriptors()[DEFAULT_SHADOW_SAMPLER_LAYOUT]->UpdateDescriptorSets(*deafultShadowSamplerConfig);
     }
@@ -322,10 +325,10 @@ void ResourceManager::createDefaultShaders()
 
 void ResourceManager::initTextures()
 {
-    TextureMap.try_emplace(DEFAULT_TEXTURE_ID, (uint32_t)0xFFFFFFFF, aDevice);
-    TextureMap.try_emplace(1, (uint32_t)0xFFCC9999, aDevice);
-    TextureMap.try_emplace(2, (uint32_t)0xFF99CC99, aDevice);
-    TextureMap.try_emplace(3, (uint32_t)0xFF9999CC, aDevice);
+    TextureMap.try_emplace(DEFAULT_TEXTURE_ID, 0xFFFFFFFFu, aDevice);
+    TextureMap.try_emplace(1, 0xFFCC9999u, aDevice);
+    TextureMap.try_emplace(2, 0xFF99CC99u, aDevice);
+    TextureMap.try_emplace(3, 0xFF9999CCu, aDevice);
 
     aDevice->BuildFontVertices(Characters);
 /*

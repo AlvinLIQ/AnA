@@ -12,7 +12,7 @@ namespace AnA
         {
         public:
             EditorApp();
-            ~EditorApp();
+            virtual ~EditorApp();
             void Init();
             Controls::Control* InitControl();
         private:
@@ -21,7 +21,7 @@ namespace AnA
             static void exitButton_Click(void* control, PointerEventArgs& args);
             std::unordered_map<std::string, Controls::Control*> controlMap;
         protected:
-            void onLoop();
+            void onLoop() override;
         };
     }
 }

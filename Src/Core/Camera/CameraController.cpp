@@ -19,9 +19,9 @@ void CameraController::GetCameraKeyMapConfigs(std::vector<Input::KeyMapConfig> &
 {
     Input::KeyMapConfig config;
 
-    config.callBack = (void(*)(void*))CameraController::Move;
+    config.callBack = reinterpret_cast<Input::RegularCallBack>(CameraController::Move);
 
-    for (int i = 0; i < MOVEMENTSIZE; i++)
+    for (size_t i = 0; i < MOVEMENTSIZE; i++)
     {
         config.keyCode = keyCodes[i];
         config.param = &movements[i];
@@ -33,7 +33,7 @@ void CameraController::GetCameraCursorConfigs(std::vector<Input::CursorConfig> &
 {
     Input::CursorConfig config;
     config.param = &aCamera;
-    config.callBack = (Input::CursorCallBack)CameraController::CursorMoved;
+    config.callBack = reinterpret_cast<Input::CursorCallBack>(CameraController::CursorMoved);
     configs.push_back(config);
 }
 
@@ -45,7 +45,7 @@ void CameraController::GetInputProfile(Input::InputProfile& inputProfile)
     inputProfile.param = &aCamera;
     inputProfile.callback = [](void* camera)
     {
-        ((Camera*)camera)->UpdateViewMatrix();
+        static_cast<Camera*>(camera)->UpdateViewMatrix();
     };
 }
 
@@ -66,7 +66,7 @@ void CameraController::Move(CameraController::CameraCallbackParam* param)
     glm::vec3 moveDirection;
     if (posIndex == ANA_MOVE_LEFTRIGHT)
     {
-        moveDirection = {cos(roY), 0.f, -sin(roY)};
+        moveDirection = {cosf(roY), 0.f, -sinf(roY)};
     }
     else if (posIndex == ANA_MOVE_UPDOWN)
     {
@@ -74,7 +74,7 @@ void CameraController::Move(CameraController::CameraCallbackParam* param)
     }
     else if (posIndex == ANA_MOVE_FORWARDBACK)
     {
-        moveDirection = {sin(roY), 0.f, cos(roY)};
+        moveDirection = {sinf(roY), 0.f, cosf(roY)};
     }
     param->aCamera.offset -= param->id & 1 ? -moveDirection : moveDirection;
 }
@@ -82,14 +82,14 @@ void CameraController::Move(CameraController::CameraCallbackParam* param)
 void CameraController::Rotate(CameraController::CameraCallbackParam* param)
 {
     int posIndex = param->id >> 1;
-    param->aCamera.CameraTransform.rotation[posIndex] -= (param->id & 1 ? -rotateStep : rotateStep) * param->aCamera.GetSpeedRatio() * 6.283;
+    param->aCamera.CameraTransform.rotation[posIndex] -= (param->id & 1 ? -rotateStep : rotateStep) * param->aCamera.GetSpeedRatio() * 6.283f;
 }
 
 void CameraController::CursorMoved(Camera* camera, CursorPosition &duration, int )
 {
-    const float rotateSpeed = camera->GetSpeedRatio() * 6.283 * 80.;
-    camera->CameraTransform.rotation.y = glm::mod(camera->CameraTransform.rotation.y + (float)duration.x * rotateSpeed, glm::two_pi<float>());
-    camera->CameraTransform.rotation.x -= (float)duration.y * rotateSpeed;
+    const float rotateSpeed = camera->GetSpeedRatio() * 6.283f * 80.f;
+    camera->CameraTransform.rotation.y = glm::mod(camera->CameraTransform.rotation.y + static_cast<float>(duration.x) * rotateSpeed, glm::two_pi<float>());
+    camera->CameraTransform.rotation.x -= static_cast<float>(duration.y) * rotateSpeed;
 
     const float yLock = .2f * glm::two_pi<float>();
     camera->CameraTransform.rotation.x = glm::clamp(camera->CameraTransform.rotation.x, -yLock, yLock);

@@ -36,8 +36,8 @@ layout (set = 5, binding = 0) uniform UBO {
 	Cascade[SHADOW_MAP_CASCADE_COUNT] cascades;
 } ubo;
 
-const vec3 LIGHT_DIRECTION = normalize(vec3(1., -3., 1.));
-const vec3 LIGHT_COLOR = vec3(0.95, 0.7, 0.95);
+const vec3 LIGHT_POS = vec3(4., -2., 1.);
+const vec3 LIGHT_COLOR = vec3(0.6, 0.7, 0.5);
 
 const mat4 biasMat = mat4( 
 	0.5, 0.0, 0.0, 0.0,
@@ -62,8 +62,9 @@ float textureProj(vec4 shadowCoord, vec2 offset, uint cascadeIndex)
 
 void main()
 {
-    float pointLightIntensity = max(dot(normalSpace, normalize(LIGHT_DIRECTION - vertex)), 0);
-    float diffuseLightItensity = max(dot(normalSpace, normalize(lbo.direction)), 0);
+    float pointLightIntensity = max(dot(normalSpace, normalize(LIGHT_POS - vertex)), 0);
+    float diffuseLightItensity = ((dot(normalSpace, normalize(lbo.direction))) + 2.0) * 0.5;
+
 	/*
     uint cascadeIndex = 0;
 	for(uint i = 0; i < SHADOW_MAP_CASCADE_COUNT - 1; ++i) {

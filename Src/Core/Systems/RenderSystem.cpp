@@ -7,7 +7,7 @@ using namespace AnA::Cameras;
 
 RenderSystem* currentRenderSystem = nullptr;
 
-RenderSystem::RenderSystem(Device* mDevice, SwapChain& mSwapChain) : aDevice{mDevice}, aSwapChain {mSwapChain}
+RenderSystem::RenderSystem()
 {
     currentRenderSystem = this;
 }

@@ -54,6 +54,7 @@ namespace AnA
             Cameras::Camera LightCamera;
             Cameras::CameraInfo LightCameraInfo{glm::radians(45.0f), 1.0, 0.05f, 32.0f};
             FrustumPlanes MainCameraFrustumPlanes{};
+            bool LockCamera = false;
             void UpdateCamera(float aspect);
             void UpdateCameraBuffer();
             void Update();

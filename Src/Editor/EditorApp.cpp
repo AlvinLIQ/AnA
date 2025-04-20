@@ -15,7 +15,6 @@ EditorApp::EditorApp() : App()
 
 EditorApp::~EditorApp()
 {
-
 }
 
 void EditorApp::Init()
@@ -29,7 +28,7 @@ void EditorApp::Init()
     keyMapConfig.param = &aInputManager;
     keyMapConfig.callBack = [](void* param)
     {
-        auto aInputManager = (Input::InputManager*)param;
+        auto aInputManager = reinterpret_cast<Input::InputManager*>(param);
         /*
         auto& activeProfile = aInputManager->GetActiveProfile();
         aInputManager->ProcessProfileFlag((activeProfile.flag ^= Input::Disabled) & Input::Disabled ? 
@@ -45,13 +44,21 @@ void EditorApp::Init()
         }
     };
     aInputManager.GlobalProfile.keyMapConfigs.push_back(keyMapConfig);
+    keyMapConfig.keyCode = GLFW_KEY_F;
+    keyMapConfig.param = &aResourceManager;
+    keyMapConfig.callBack = [](void *param)
+    {
+        auto resourceManager = reinterpret_cast<Resource::ResourceManager*>(param);
+        resourceManager->LockCamera = !resourceManager->LockCamera;
+    };
+    aInputManager.GlobalProfile.keyMapConfigs.push_back(keyMapConfig);
     Controls::Control::GetInputProfile(aResourceManager.MainControl, aInputManager.GetProfiles());
 }
 
 void EditorApp::onLoop()
 {
-    aResourceManager.MainCameraInfo.near = 0.05f + ((Controls::Slider*)controlMap["nearSlider"])->Value * (32.0f - 0.05f);
-    aResourceManager.MainCameraInfo.far = ((Controls::Slider*)controlMap["farSlider"])->Value * 32.0f;
+    aResourceManager.MainCameraInfo.near = 0.05f + static_cast<Controls::Slider*>(controlMap["nearSlider"])->Value * (32.0f - 0.05f);
+    aResourceManager.MainCameraInfo.far = static_cast<Controls::Slider*>(controlMap["farSlider"])->Value * 32.0f;
     aResourceManager.MainCameraInfo.UpdateCameraPerspective(aResourceManager.MainCamera);
 }
 
@@ -65,7 +72,10 @@ void EditorApp::loadModelButton_Click(void* , PointerEventArgs& )
     memcpy(mesh.filePath, path.c_str(), path.length() + 1);
     mesh.tetureId = 0;
     Resource::ResourceManager::GetCurrent()->SceneObjects.Append(std::vector<MeshInfo>(1, mesh));
-    ((Controls::StackPanel*)((EditorApp*)App::GetCurrent())->controlMap["modelList"])->Child((Controls::Control*)new Controls::TextBlock(path.c_str(), {0.8f, 0.8f, 0.8f}));
+    auto panel = 
+            static_cast<Controls::StackPanel*>(static_cast<EditorApp*>(App::GetCurrent())->controlMap["modelList"]);
+    panel->Child(static_cast<Controls::Control*>(new Controls::TextBlock(path.c_str(), 
+                                {0.8f, 0.8f, 0.8f, 1.0f})));
 }
 
 void EditorApp::saveSceneButton_Click(void* , PointerEventArgs& )
@@ -96,7 +106,7 @@ int main()
     auto scene = ReadFile("Scenes/scene.ana");
     auto& meshes = Resource::ResourceManager::GetCurrent()->SceneObjects;
     meshes.EnableUpdate = true;
-    meshes.Append((MeshInfo*)scene.data(), scene.size() / sizeof(MeshInfo));
+    meshes.Append(reinterpret_cast<MeshInfo*>(scene.data()), scene.size() / sizeof(MeshInfo));
     editor.Run();
     return 0;
 }

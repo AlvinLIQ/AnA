@@ -102,9 +102,9 @@ namespace AnA
             return bufferSize;
         }
 
-        void CopyToBuffer(Buffer& srcBuffer, VkDeviceSize bufferSize)
+        void CopyToBuffer(Buffer& srcBuffer, VkDeviceSize dataSize)
         {
-            aDevice->CopyBuffer(srcBuffer.GetBuffer(), buffer, bufferSize);
+            aDevice->CopyBuffer(srcBuffer.GetBuffer(), buffer, dataSize);
         }
 
         void CopyToBuffer(Buffer& srcBuffer, uint32_t regionCount, const VkBufferCopy* regions)
@@ -117,10 +117,10 @@ namespace AnA
             vkCmdCopyBuffer(commandBuffer, srcBuffer.GetBuffer(), buffer, regionCount, regions);
         }
 
-        void CopyToBuffer(const void* data, VkDeviceSize bufferSize)
+        void CopyToBuffer(const void* data, VkDeviceSize dataSize)
         {
             this->Map(0, bufferSize);
-            memcpy(this->GetMappedData(), data, bufferSize);
+            memcpy(this->GetMappedData(), data, dataSize);
             this->Unmap();
         }
     private:

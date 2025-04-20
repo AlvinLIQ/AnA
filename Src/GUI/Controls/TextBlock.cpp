@@ -6,12 +6,12 @@ using namespace AnA::Controls;
 
 TextBlock::TextBlock()
 {
-    Color = {};
+    Color = {0.0f, 0.0f, 0.0f, 1.0f};
     RenderMode(Absolute);
     ControlSize = {75.0f, ANA_TEXT_DEFAULT_LINE_HEIGHT};
 }
 
-TextBlock::TextBlock(const char* text, glm::vec3 color)
+TextBlock::TextBlock(const char* text, glm::vec4 color)
 {
     Color = color;
     RenderMode(Absolute);

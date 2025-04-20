@@ -17,7 +17,7 @@ namespace AnA
     {
     public:
         App();
-        ~App();
+        virtual ~App();
         
         App(const App&) = delete;
         App &operator=(const App&) = delete;
@@ -52,8 +52,8 @@ namespace AnA
         }
         VkOffset2D &GetSceneOffset()
         {
-            actualSceneOffset = {static_cast<int32_t>(sceneOffset.x * aRenderer.GetSwapChain().ScaleX), 
-                static_cast<int32_t>(sceneOffset.y * aRenderer.GetSwapChain().ScaleY)};
+            actualSceneOffset = {static_cast<int32_t>(static_cast<float>(sceneOffset.x) * aRenderer.GetSwapChain().ScaleX), 
+                static_cast<int32_t>(static_cast<float>(sceneOffset.y) * aRenderer.GetSwapChain().ScaleY)};
             return actualSceneOffset;
         }
     private:

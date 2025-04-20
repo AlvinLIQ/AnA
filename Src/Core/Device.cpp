@@ -172,7 +172,7 @@ void Device::CreateTextureImage(const char* imagePath, VkImage* pTexImage, VkDev
 {
     int texWidth, texHeight, texChannels;
     stbi_uc* pixels = stbi_load(imagePath, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-    VkDeviceSize imageSize = texWidth * texHeight * 4;
+    VkDeviceSize imageSize = static_cast<VkDeviceSize>(texWidth * texHeight * 4);
 
     if (!pixels)
         throw std::runtime_error("Failed to load texture image!");
@@ -209,11 +209,11 @@ void Device::CreateTextImage(const char* text, int& width, int& height, float li
 {
     auto fontData = ReadFile("Fonts/SourceCodePro-Black.otf");
     stbtt_fontinfo info{};
-    if (!stbtt_InitFont(&info, (const unsigned char*)fontData.data(), 0))
+    if (!stbtt_InitFont(&info, const_cast<const unsigned char*>(fontData.data()), 0))
         throw std::runtime_error("failed to init font");
     
-    int imageSize = (int)(width * height * scaleX * scaleY);
-    if (!lineHeight)
+    int imageSize = static_cast<int>(static_cast<float>(width * height) * scaleX * scaleY);
+    if (lineHeight <= 0.0f)
     {
         lineHeight = ANA_TEXT_DEFAULT_LINE_HEIGHT;
     }
@@ -224,8 +224,8 @@ void Device::CreateTextImage(const char* text, int& width, int& height, float li
     int hCharWidth, wCharWidth;
     stbtt_GetCodepointHMetrics(&info, L'a', &hCharWidth, NULL);
     stbtt_GetCodepointHMetrics(&info, L'里', &wCharWidth, NULL);
-    hCharWidth *= scale;
-    wCharWidth *= scale;
+    hCharWidth = static_cast<int>(static_cast<float>(hCharWidth) * scale);
+    wCharWidth = static_cast<int>(static_cast<float>(wCharWidth) * scale);
 
     if (!imageSize)
     {
@@ -234,20 +234,21 @@ void Device::CreateTextImage(const char* text, int& width, int& height, float li
             for (size_t i = 0; i < strlen(text); i++)
             {
                 width += (IS_ASCII_CHAR(text[i]) ? hCharWidth : wCharWidth);
-                width += stbtt_GetCodepointKernAdvance(&info, text[i], text[i + 1]) * scale;
+                width += static_cast<int>(
+                    static_cast<float>(stbtt_GetCodepointKernAdvance(&info, text[i], text[i + 1])) * scale);
             }
         }
-        height = lineHeight;
-        imageSize = width * scaleX * lineHeight;
+        height = static_cast<int>(lineHeight);
+        imageSize = static_cast<int>(static_cast<float>(width) * scaleX * lineHeight);
     }
 
-    std::vector<unsigned char> textBitmap(imageSize);
+    std::vector<unsigned char> textBitmap(static_cast<size_t>(imageSize));
 
     int ascent, descent, lineGap;
     stbtt_GetFontVMetrics(&info, &ascent, &descent, &lineGap);
 
-    ascent *= scale;
-    descent *= scale;
+    ascent = static_cast<int>(static_cast<float>(ascent) * scale);
+    descent = static_cast<int>(static_cast<float>(descent) * scale);
     for (size_t i = 0, x = 0; i < strlen(text); i++)
     {
         int l, t, r, b;
@@ -255,23 +256,23 @@ void Device::CreateTextImage(const char* text, int& width, int& height, float li
         
         int y = ascent + t;
 
-        int byteOffset = x + (y * width);
-        stbtt_MakeCodepointBitmap(&info, &textBitmap[byteOffset], r - l, b - t, width, scale, scale, text[i]);
+        int byteOffset = static_cast<int>(x) + (y * width);
+        stbtt_MakeCodepointBitmap(&info, &textBitmap[static_cast<size_t>(byteOffset)], r - l, b - t, width, scale, scale, text[i]);
 
         //int ax;
         //stbtt_GetCodepointHMetrics(&info, text[i], &ax, 0);
         //x += ax * scale;
-        x += (IS_ASCII_CHAR(text[i]) ? hCharWidth : wCharWidth);
+        x += static_cast<size_t>(IS_ASCII_CHAR(text[i]) ? hCharWidth : wCharWidth);
         
-        x += stbtt_GetCodepointKernAdvance(&info, text[i], text[i + 1]) * scale;
+        x += static_cast<size_t>(static_cast<float>(stbtt_GetCodepointKernAdvance(&info, text[i], text[i + 1])) * scale);
     }
 
-    int bufSize = imageSize * 4;
+    VkDeviceSize bufSize = static_cast<VkDeviceSize>(imageSize) * 4;
     Buffer aBuffer(this, bufSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    aBuffer.Map(0, bufSize);
+    aBuffer.Map(0, aBuffer.GetSize());
     //memcpy(aBuffer.Getconst stbtt_fontinfo *infoMappedData(), textBitmap.data(), static_cast<size_t>(imageSize));
-    auto bufData = (unsigned char*)aBuffer.GetMappedData();
-    for (int i = 0, j = 0; i < bufSize; i += 4, j++)
+    auto bufData = static_cast<unsigned char*>(aBuffer.GetMappedData());
+    for (VkDeviceSize i = 0, j = 0; i < bufSize; i += 4, j++)
     {
         if (textBitmap[j] >= 0xC0)
         {
@@ -318,17 +319,17 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
 {
     auto fontData = ReadFile("Fonts/SourceCodePro-Black.otf");
     stbtt_fontinfo info{};
-    if (!stbtt_InitFont(&info, (const unsigned char*)fontData.data(), 0))
+    if (!stbtt_InitFont(&info, const_cast<const unsigned char*>(fontData.data()), 0))
         throw std::runtime_error("failed to init font");
 
     const float scale = 1.0f / 660.0f;
-    characters.resize(range);
+    characters.resize(static_cast<size_t>(range));
     for (int cid = 0; cid < range; cid++)
     {
         int glyphIndex = stbtt_FindGlyphIndex(&info, cid);
         stbtt_vertex* vertices;
         int vertexCount = stbtt_GetGlyphShape(&info, glyphIndex, &vertices);
-        auto& character = characters[cid];
+        auto& character = characters[static_cast<size_t>(cid)];
         character.paths = {};
         auto& paths = character.paths;
         std::vector<glm::vec2> currentPath{};
@@ -347,24 +348,24 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
                     }
                     [[fallthrough]];
                 case STBTT_vline:
-                    currentPath.push_back({(float)vertex.x * scale, (float)vertex.y * scale});
+                    currentPath.push_back({static_cast<float>(vertex.x) * scale, static_cast<float>(vertex.y) * scale});
                     minBounding = glm::min(minBounding, currentPath.back());
                     maxBounding = glm::max(maxBounding, currentPath.back());
                     break;
                 case STBTT_vcurve:
                 {
                     glm::vec2 p0 = currentPath.back();
-                    glm::vec2 p1 = {(float)vertex.cx * scale, (float)vertex.cy * scale};
-                    glm::vec2 p2 = {(float)vertex.x * scale, (float)vertex.y * scale};
+                    glm::vec2 p1 = {static_cast<float>(vertex.cx) * scale, static_cast<float>(vertex.cy) * scale};
+                    glm::vec2 p2 = {static_cast<float>(vertex.x)  * scale, static_cast<float>(vertex.y)  * scale};
                     const int step = 5;
-                    glm::vec2 t1 = (p1 - p0) / (float)step;
-                    glm::vec2 t2 = (p2 - p1) / (float)step;
+                    glm::vec2 t1 = (p1 - p0) / static_cast<float>(step);
+                    glm::vec2 t2 = (p2 - p1) / static_cast<float>(step);
                     for (int j = 0; j < step; j++)
                     {
-                        glm::vec2 l0 = p0 + t1 * (float)j;
-                        glm::vec2 l1 = p1 + t2 * (float)j;
-                        glm::vec2 t3 = (l1 - l0) / (float)step;
-                        currentPath.push_back(l0 + t3 * (float)j);
+                        glm::vec2 l0 = p0 + t1 * static_cast<float>(j);
+                        glm::vec2 l1 = p1 + t2 * static_cast<float>(j);
+                        glm::vec2 t3 = (l1 - l0) / static_cast<float>(step);
+                        currentPath.push_back(l0 + t3 * static_cast<float>(j));
                         minBounding = glm::min(minBounding, currentPath.back());
                         maxBounding = glm::max(maxBounding, currentPath.back());
                     }
@@ -394,6 +395,8 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
                         maxBounding = glm::max(maxBounding, currentPath.back());
                     }
                 }
+                    break;
+                default:
                     break;
             }
         }
@@ -556,7 +559,7 @@ void Device::CreateDescriptorSets(uint32_t descriptorSetCount, VkDescriptorPool&
     {
         for (auto& write : writes[i])
             write.dstSet = descriptorSets[i];
-        vkUpdateDescriptorSets(logicalDevice, writes[i].size(), 
+        vkUpdateDescriptorSets(logicalDevice, static_cast<uint32_t>(writes[i].size()), 
             writes[i].data(), 0, nullptr);
     }
 }
@@ -689,7 +692,7 @@ Device::QueueFamilyIndices Device::FindQueueFamilies(VkPhysicalDevice device)
     std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
 
-    int i = 0;
+    uint32_t i = 0;
     for (const auto &queueFamily : queueFamilies)
     {
         //if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
@@ -775,18 +778,18 @@ void Device::pickPhysicalDevice()
             std::string deviceName = physicalDeviceProperties.deviceName;
             if (physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
                 currentScore += 10;
-            if (deviceName.find("AMD") != (size_t)-1)
+            if (deviceName.find("AMD") != -1llu)
             {
                 currentScore += 3;
-                if (deviceName.find("RX") != (size_t)-1)
+                if (deviceName.find("RX") != -1llu)
                     currentScore += 4;
             }
-            else if (deviceName.find("NVIDIA") != (size_t)-1)
+            else if (deviceName.find("NVIDIA") != -1llu)
             {
                 currentScore += 3;
-                if (deviceName.find("RTX") != (size_t)-1)
+                if (deviceName.find("RTX") != -1llu)
                     currentScore += 4;
-                else if (deviceName.find("GTX") != (size_t)-1)
+                else if (deviceName.find("GTX") != -1llu)
                     currentScore += 1;
             }
             if (currentScore > bestScore)

@@ -55,7 +55,7 @@ namespace AnA
     {
     public:
         Meshes(Device* mDevice);
-        ~Meshes();
+        virtual ~Meshes();
         void Append(const std::vector<MeshInfo>& meshInfos);
         void Append(const MeshInfo* meshInfos, size_t count);
         void Append(std::vector<Model::Vertex>& vertices, std::vector<uint32_t>& indices, Transform transform = {});
@@ -63,15 +63,15 @@ namespace AnA
         void RemoveAt(Range removeRange);
         void RemoveAt(std::vector<uint32_t> meshIndices);
         void Bind(CommandBuffer& commandBuffer);
-        void Bind(CommandBuffer& commandBuffer, uint32_t bufferIndex);
-        void Draw(CommandBuffer& commandBuffer);
-        void DrawIndirect(CommandBuffer& commandBuffer);
+        void Bind(CommandBuffer& commandBuffer, uint32_t bufferIndex) override;
+        void Draw(CommandBuffer& commandBuffer) override;
+        void DrawIndirect(CommandBuffer& commandBuffer) override;
         void DrawIndirect(CommandBuffer& commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout);
         void DrawMesh(CommandBuffer& commandBuffer);
         void DrawMesh(CommandBuffer& commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout);
         void DrawMeshIndirect(CommandBuffer& commandBuffer);
         void DrawMeshIndirect(CommandBuffer& commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout);
-        bool NeedUpdate()
+        bool NeedUpdate() override
         {
             return updateQueue.size();
         }
@@ -85,7 +85,7 @@ namespace AnA
         }
         void CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer);
         void CommitBufferUpdate();
-        void Update();
+        void Update() override;
         void UpdateBuffers(Range updateRange);
         void UpdateMeshlets();
         void UpdateVertexPositions(Mesh& mesh);
@@ -105,7 +105,7 @@ namespace AnA
         }
         uint32_t GetBatchCount() const
         {
-            uint32_t batchCount = meshes.size() / batchSize;
+            uint32_t batchCount = static_cast<uint32_t>(meshes.size()) / batchSize;
             if (meshes.size() % batchCount)
                 batchCount++;
 
@@ -162,9 +162,7 @@ namespace AnA
         std::vector<Buffer> meshletBuffers{};
         std::vector<Buffer> meshletCullingBuffers{};
         uint32_t numOfGroup = 64;
-        void buildMeshlets(
-            uint32_t maxVerticesPerMeshlet = 128,  // max number of vertices per meshlet
-            uint32_t maxIndicesPerMeshlet = 256 * 3);  // max number of indices per meshlet (i.e., triangles)
+        void buildMeshlets();
         void buildMeshletsWithOptimizer();
         uint8_t currentBufferIndex = 0;
         uint8_t nextIndex = 1 % MAX_FRAMES_IN_FLIGHT;

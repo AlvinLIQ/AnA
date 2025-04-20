@@ -8,22 +8,30 @@ using namespace Controls;
 
 void slider_Click(void* control, PointerEventArgs& args)
 {
-    auto slider = (Slider*)control;
+    if (args.Handled)
+        return;
+    args.Handled = true;
+    auto slider = static_cast<Slider*>(control);
+    slider->Focus();
     int o = slider->Orientation == AnA::Controls::Horizontal ? 0 : 1;
     auto offset = slider->RenderOffset();
     auto size = slider->RenderSize();
-    float pos = ((float)((double*)&args.Position)[o]) * (((float*)&size)[o] + ((float*)&offset)[o]) - ((float*)&offset)[o];
+    const float curPosF =  static_cast<float>(reinterpret_cast<double*>(&args.Position)[o]);
+    const float sizeF = reinterpret_cast<float*>(&size)[o];
+    const float offsetF = reinterpret_cast<float*>(&offset)[o];
+
+    float pos = curPosF * (sizeF + offsetF) - offsetF;
     if (pos < 0.0f)
     {
         pos = 0.0f;
     }
-    slider->Value = pos / ((float*)&size)[o];
+    slider->Value = pos / sizeF;
 }
 
 Slider::Slider()
 {
-    Color = {0.7, 0.7, 0.7};
-    button.Color = {0.6, 0.6, 0.6};
+    Color = {0.7, 0.7, 0.7, 1.0};
+    button.Color = {0.6, 0.6, 0.6, 1.0};
     PointerEvents[PointerEventType::Pressed].emplace_back(slider_Click);
 }
 
@@ -33,11 +41,13 @@ void Slider::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageIn
     //int invO = 1 - o;
     auto size = RenderSize();
     auto offset = RenderOffset();
-    float pos = std::max(std::min(Value * ((float*)&size)[o] * (((float*)&size)[o] - ((float*)&offset)[o]), ((float*)&size)[o] - SLIDER_HALF_SIZE), SLIDER_HALF_SIZE);
-    ((float*)&offset)[o] += (pos - 0.5f) * 2.0f;
+    float* size2F = reinterpret_cast<float*>(&size);
+    float* offset2F = reinterpret_cast<float*>(&offset);
+    float pos = std::max(std::min(Value * (size2F[o] * size2F[o] - offset2F[o]), size2F[o] - SLIDER_HALF_SIZE), SLIDER_HALF_SIZE);
+    offset2F[o] += (pos - 0.5f) * 2.0f;
 
     button.GetSizeForRender();
-    ((float*)&size)[o] = SLIDER_SIZE;
+    offset2F[o] = SLIDER_SIZE;
     button.RenderSize(size);
     button.RenderOffset(offset);
     button.ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);

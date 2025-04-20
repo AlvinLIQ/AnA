@@ -23,7 +23,7 @@ std::vector<Buffer>& Light::GetBuffers()
 
 void Light::UpdateBuffers(Cameras::Camera& lightCamera, uint32_t bufferIndex)
 {
-    auto& lightBufferObject = *(LightBufferObject*)buffers[bufferIndex].GetMappedData();
+    auto& lightBufferObject = *static_cast<LightBufferObject*>(buffers[bufferIndex].GetMappedData());
     //auto cameraPosition = glm::mat3(Resource::ResourceManager::GetCurrent()->MainCamera.GetInverseView()) * glm::vec3(Resource::ResourceManager::GetCurrent()->MainCamera.GetView()[3]);
     //auto target = cameraPosition - glm::vec3(Direction.x, Direction.y, Direction.z);
     //lightCamera.SetViewTarget(cameraPosition, target);
@@ -41,7 +41,7 @@ void Light::createBuffers()
         lightBuffer = Buffer(aDevice, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         lightBuffer.Map(0, bufferSize);
-        LightBufferObject& lbo = *((LightBufferObject*)lightBuffer.GetMappedData());
+        LightBufferObject& lbo = *static_cast<LightBufferObject*>(lightBuffer.GetMappedData());
         lbo.proj = glm::mat4{1.0f};
         lbo.view = glm::mat4{1.0f};
         lbo.direction = glm::normalize(Direction);

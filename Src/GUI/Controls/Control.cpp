@@ -19,8 +19,8 @@ Control::~Control()
 
 POS_F Control::GetActualControlOffset()
 {
-    float* pOffset = (float*)&renderOffset;
-    float* pSize = (float*)&this->renderSize;
+    float* pOffset = reinterpret_cast<float*>(&renderOffset);
+    float* pSize = reinterpret_cast<float*>(&this->renderSize);
     AlignmentType Alignments[]{HorizontalAlignment, VerticalAlignment};
     for (int i = 0; i < 2; i++)
     {
@@ -47,8 +47,8 @@ SIZE_F Control::GetSizeForRender()
 {
     if (renderMode == AlignType::Absolute)
     {
-        renderSize.Width = ControlSize.Width / (float)Extent.width;
-        renderSize.Height = ControlSize.Height / (float)Extent.height;
+        renderSize.Width = ControlSize.Width / static_cast<float>(Extent.width);
+        renderSize.Height = ControlSize.Height / static_cast<float>(Extent.height);
         renderSize.Width *= aSwapChain->ScaleX;
         renderSize.Height *= aSwapChain->ScaleY;
     }
@@ -107,6 +107,16 @@ void Control::Unfocus()
         focusedControl = nullptr;
 }
 
+void Control::ClearFocus()
+{
+    focusedControl = nullptr;
+}
+
+Control* Control::GetFocused()
+{
+    return focusedControl;
+}
+
 bool Control::IsInside(CursorPosition pos)
 {
     POS_F offset = {renderOffset.x * 0.5f + 0.5f - renderSize.Width * 0.5f, renderOffset.y * 0.5f + 0.5f - renderSize.Height * 0.5f};
@@ -123,7 +133,8 @@ bool Control::IsInside(CursorPosition pos)
 
 bool Control::IsInside(CursorPosition& pos, POS_F& offset, SIZE_F& size)
 {
-    return pos.x >= offset.x && pos.y >= offset.y && pos.x <= offset.x + size.Width && pos.y <= offset.y + size.Height;
+    return static_cast<float>(pos.x) >= offset.x && static_cast<float>(pos.y) >= offset.y && 
+    static_cast<float>(pos.x) <= offset.x + size.Width && static_cast<float>(pos.y) <= offset.y + size.Height;
 }
 
 VkDescriptorImageInfo Control::GetDescriptorImageInfo()
@@ -154,11 +165,15 @@ void Control::PointerEventTrigger(PointerEventArgs& args)
     if (eventType == PointerEventType::Moving)
     {
         if (cursorInside && !isInside)
+        {
             eventType = PointerEventType::Exited;
+            ClearFocus();
+        }
         else if (cursorInside && pressed)
         {
             eventType = PointerEventType::Released;
             pressed = false;
+            ClearFocus();
         }
         else if (!cursorInside && isInside)
             eventType = PointerEventType::Entered;
@@ -183,9 +198,23 @@ void Control::PointerEventTrigger(PointerEventArgs& args)
         }
     }
     cursorInside = isInside;
-    for (auto event : PointerEvents[eventType])
+    std::vector<PointerEventHandler>* events;
+    void* param;
+    if (focusedControl && eventType == Pressed)
     {
-        event(this, args);  
+        events = focusedControl->PointerEvents;
+        param = focusedControl;
+    }
+    else
+    {
+        events = PointerEvents;
+        param = this;
+    }
+    for (auto event : events[eventType])
+    {
+        event(param, args);
+        if (args.Handled)
+            break;
     }
 }
 
@@ -195,7 +224,8 @@ PointerEventType GetPointerEventType(int buttonAction)
     {
     case GLFW_PRESS:
         return PointerEventType::Pressed;
-
+    default:
+        break;
     }
     return PointerEventType::Moving;
 }
@@ -208,15 +238,15 @@ void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input:
     cursorConfig.param = mainControl;
     cursorConfig.callBack = [](void* param, CursorPosition& pos, int leftButtonAction)
     {
-        auto control = (Control*)param;
+        auto control = static_cast<Control*>(param);
         PointerEventArgs args;
         
         args.EventType = GetPointerEventType(leftButtonAction);
         args.TriggerType = PointerTriggerType::Mouse;
         auto extent = Control::GetSwapChainExtent();
         auto scale = Control::GetScale();
-        args.Position = {pos.x * scale[0] / ((float)control->Extent.width / (float)extent.width), 
-                        pos.y * scale[1] / ((float)control->Extent.height / (float)extent.height)};
+        args.Position = {pos.x * static_cast<double>(scale[0]) / (control->Extent.width / static_cast<double>(extent.width)), 
+                        pos.y * static_cast<double>(scale[1]) / (control->Extent.height / static_cast<double>(extent.height))};
         control->PointerEventTrigger(args);
         Resource::ResourceManager::GetCurrent()->Shapes.PrepareDraw(control);
     };

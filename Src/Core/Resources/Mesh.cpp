@@ -71,7 +71,8 @@ Meshes::Meshes(Device* mDevice) : aDevice{mDevice}
     drawIndexedIndirectBuffer = Buffer(aDevice, sizeof(VkDrawIndexedIndirectCommand), 
     VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
     drawIndexedIndirectBuffer.Map(0, drawIndexedIndirectBuffer.GetSize());
-    auto drawIndexedIndirectCommand = (VkDrawIndexedIndirectCommand*)drawIndexedIndirectBuffer.GetMappedData();
+    auto drawIndexedIndirectCommand = 
+        static_cast<VkDrawIndexedIndirectCommand*>(drawIndexedIndirectBuffer.GetMappedData());
     drawIndexedIndirectCommand->firstIndex = 0;
     drawIndexedIndirectCommand->firstInstance = 0;
     drawIndexedIndirectCommand->instanceCount = 1;
@@ -80,7 +81,7 @@ Meshes::Meshes(Device* mDevice) : aDevice{mDevice}
     drawMeshIndirectBuffer = Buffer(aDevice, sizeof(VkDrawMeshTasksIndirectCommandEXT), 
     VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
     drawMeshIndirectBuffer.Map(0, drawMeshIndirectBuffer.GetSize());
-    auto drawMeshIndirectCommand = (VkDrawMeshTasksIndirectCommandEXT*)drawMeshIndirectBuffer.GetMappedData();
+    auto drawMeshIndirectCommand = static_cast<VkDrawMeshTasksIndirectCommandEXT*>(drawMeshIndirectBuffer.GetMappedData());
     drawMeshIndirectCommand->groupCountX = 1;
     drawMeshIndirectCommand->groupCountY = 1;
     drawMeshIndirectCommand->groupCountZ = 1;
@@ -88,7 +89,7 @@ Meshes::Meshes(Device* mDevice) : aDevice{mDevice}
     countBuffer = Buffer(aDevice, 4, 
     VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
     countBuffer.Map(0, 4);
-    *(uint32_t*)countBuffer.GetMappedData() = 1;
+    *static_cast<uint32_t*>(countBuffer.GetMappedData()) = 1;
 }
 
 Meshes::~Meshes()
@@ -114,13 +115,13 @@ void Meshes::Append(const MeshInfo* meshInfos, size_t count)
         auto& meshInfo = meshInfos[i];
         Mesh mesh;
         mesh.transform = meshInfo.transform;
-        mesh.vertexOffset = vertexCount;
-        mesh.indexOffset = indexCount;
+        mesh.vertexOffset = static_cast<uint32_t>(vertexCount);
+        mesh.indexOffset = static_cast<uint32_t>(indexCount);
         Model::CreateMeshFromFile(meshInfo.filePath, vertices, indices, mesh.vertexOffset);
         vertexCount = static_cast<uint32_t>(vertices.size());
         indexCount = static_cast<uint32_t>(indices.size());
-        mesh.vertexCount = vertexCount - mesh.vertexOffset;
-        mesh.indexCount = indexCount - mesh.indexOffset;
+        mesh.vertexCount = static_cast<uint32_t>(vertexCount) - mesh.vertexOffset;
+        mesh.indexCount = static_cast<uint32_t>(indexCount) - mesh.indexOffset;
         auto& textureMap = Resource::ResourceManager::GetCurrent()->TextureMap;
         mesh.textureId = textureMap.find(meshInfo.tetureId) == textureMap.end() ? DEFAULT_TEXTURE_ID : meshInfo.tetureId;
         auto& texture = textureMap.at(mesh.textureId);
@@ -149,16 +150,16 @@ void Meshes::Append(std::vector<Model::Vertex>& meshVertices, std::vector<uint32
 
     Mesh mesh{};
     mesh.transform = transform;
-    mesh.vertexOffset = vertexCount;
-    mesh.indexOffset = indexCount;
+    mesh.vertexOffset = static_cast<uint32_t>(vertexCount);
+    mesh.indexOffset = static_cast<uint32_t>(indexCount);
     vertices.insert(meshVertices.end(), meshVertices.begin(), meshVertices.end());
     for (auto& index : meshIndices)
         index += vertexCount;
     indices.insert(meshIndices.end(), meshIndices.begin(), meshIndices.end());
     vertexCount = static_cast<uint32_t>(vertices.size());
     indexCount = static_cast<uint32_t>(indices.size());
-    mesh.vertexCount = vertexCount - mesh.vertexOffset;
-    mesh.indexCount = indexCount - mesh.indexOffset;
+    mesh.vertexCount = static_cast<uint32_t>(vertexCount) - mesh.vertexOffset;
+    mesh.indexCount = static_cast<uint32_t>(indexCount) - mesh.indexOffset;
 
     auto& textureMap = Resource::ResourceManager::GetCurrent()->TextureMap;
     auto& texture = textureMap.at(mesh.textureId);
@@ -203,7 +204,7 @@ void Meshes::RemoveAt(std::vector<uint32_t> meshIndices)
 void Meshes::Bind(CommandBuffer& commandBuffer)
 {
     vkCmdBindIndexBuffer(commandBuffer, indexBuffers[currentBufferIndex].GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
-    ((VkDrawIndexedIndirectCommand*)drawIndexedIndirectBuffer.GetMappedData())->indexCount = indexBuffers[currentBufferIndex].GetSize() / sizeof(Model::Index);
+    static_cast<VkDrawIndexedIndirectCommand*>(drawIndexedIndirectBuffer.GetMappedData())->indexCount = static_cast<uint32_t>(indexBuffers[currentBufferIndex].GetSize() / sizeof(Model::Index));
 }
 
 void Meshes::Bind(CommandBuffer& commandBuffer, uint32_t bufferIndex)
@@ -224,7 +225,7 @@ void Meshes::Bind(CommandBuffer& commandBuffer, uint32_t bufferIndex)
         shader->GetPipeline()->Bind(commandBuffer);
         sets = &shader->GetDescriptorSets()[bufferIndex];
         vkCmdBindIndexBuffer(commandBuffer, indexBuffers[currentBufferIndex].GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
-        ((VkDrawIndexedIndirectCommand*)drawIndexedIndirectBuffer.GetMappedData())->indexCount = indexBuffers[currentBufferIndex].GetSize() / sizeof(Model::Index);
+        static_cast<VkDrawIndexedIndirectCommand*>(drawIndexedIndirectBuffer.GetMappedData())->indexCount = static_cast<uint32_t>(indexBuffers[currentBufferIndex].GetSize() / sizeof(Model::Index));
     }
     (*sets)[DEFAULT_VERTEX_LAYOUT] = vertexDescriptor->GetSets()[currentBufferIndex];
     (*sets)[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors.front()->GetSets()[0];
@@ -238,7 +239,7 @@ void Meshes::Draw(CommandBuffer& commandBuffer)
     if (aDevice->MeshShaderSupport())
         aDevice->vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
     else
-        vkCmdDrawIndexed(commandBuffer, indexBuffers[currentBufferIndex].GetSize() / sizeof(Model::Index), 1, 0, 0, 0);
+        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indexBuffers[currentBufferIndex].GetSize() / sizeof(Model::Index)), 1, 0, 0, 0);
 }
 
 void Meshes::DrawIndirect(CommandBuffer& commandBuffer)
@@ -304,20 +305,20 @@ void Meshes::DrawMeshIndirect(CommandBuffer& commandBuffer, std::vector<VkDescri
 
 void Meshes::CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer)
 {
-    auto vertices = ((Model::Vertex*)newVertBuffer->GetMappedData());
-    auto indices = ((Model::Index*)newIndexBuffer->GetMappedData());
+    auto bufferVertices = static_cast<Model::Vertex*>(newVertBuffer->GetMappedData());
+    auto bufferIndices = static_cast<Model::Index*>(newIndexBuffer->GetMappedData());
 
-    Range updateRange = {0, (uint32_t)meshes.size()};
-    applyVertexBufferUpdate(vertices, indices, updateRange);
+    Range updateRange = {0, static_cast<uint32_t>(meshes.size())};
+    applyVertexBufferUpdate(bufferVertices, bufferIndices, updateRange);
 }
 
 void Meshes::CommitBufferUpdate()
 {
-    auto vertices = ((Model::Vertex*)vertexBuffers[currentBufferIndex].GetMappedData());
-    auto indices = ((Model::Index*)indexBuffers[currentBufferIndex].GetMappedData());
+    auto bufferVertices = static_cast<Model::Vertex*>(vertexBuffers[currentBufferIndex].GetMappedData());
+    auto bufferIndices = static_cast<Model::Index*>(indexBuffers[currentBufferIndex].GetMappedData());
     for (auto& updateRange : updateQueue)
     {
-        applyVertexBufferUpdate(vertices, indices, updateRange);
+        applyVertexBufferUpdate(bufferVertices, bufferIndices, updateRange);
     }
     updateQueue.clear();
 }
@@ -382,7 +383,7 @@ void Meshes::UpdateMeshlets()
     //buildMeshlets();
     buildMeshletsWithOptimizer();
     uint32_t minMeshletBufferSize = (meshletVertexCount + meshletIndexCount / 3 + 1 +
-        3 * meshlets.size()) * sizeof(uint32_t);
+        3 * static_cast<uint32_t>(meshlets.size())) * sizeof(uint32_t);
     if (!meshletBuffers[nextIndex].GetBuffer() || 
         meshletBuffers[nextIndex].GetSize() < minMeshletBufferSize)
     {
@@ -400,15 +401,15 @@ void Meshes::UpdateMeshlets()
         meshletCullingBuffers[nextIndex].Map(0, meshletCullingBuffers[nextIndex].GetSize());
     }
     uint32_t bufferId = 0;
-    uint32_t* buffer = (uint32_t*)meshletBuffers[nextIndex].GetMappedData();
-    BoundingSphere* cullingBuffer = (BoundingSphere*)meshletCullingBuffers[nextIndex].GetMappedData();
+    uint32_t* buffer = static_cast<uint32_t*>(meshletBuffers[nextIndex].GetMappedData());
+    BoundingSphere* cullingBuffer = static_cast<BoundingSphere*>(meshletCullingBuffers[nextIndex].GetMappedData());
     uint32_t vertexOffset = 0, primitiveOffset = 0;
     if (meshlets.empty())
         buffer[0] = 0;
     for (size_t i = 0; i < meshlets.size(); i++)
     {
         auto& meshlet = meshlets[i];
-        buffer[bufferId++] = vertexOffset + primitiveOffset + (i * 2) + static_cast<uint32_t>(meshlets.size());
+        buffer[bufferId++] = vertexOffset + primitiveOffset + static_cast<uint32_t>(i * 2) + static_cast<uint32_t>(meshlets.size());
         vertexOffset += meshlet.vertexCount;
         primitiveOffset += (meshlet.indexCount >> 2);
         if (meshlet.indexCount & 3)
@@ -425,7 +426,7 @@ void Meshes::UpdateMeshlets()
 
         for (uint32_t i = 0; i < meshlet.vertexCount; i++)
             buffer[bufferId++] = meshlet.vertices[i];
-        auto indexBuffer = (uint8_t*)(&buffer[bufferId]);
+        auto indexBuffer = reinterpret_cast<uint8_t*>(&buffer[bufferId]);
         for (uint32_t i = 0; i < meshlet.indexCount; i++)
         {
             indexBuffer[i] = meshlet.indices[i];
@@ -442,7 +443,7 @@ void Meshes::UpdateMeshlets()
         }*/
     }
 
-    auto drawMeshTaskCommand = (glm::uvec3*)drawMeshIndirectBuffer.GetMappedData();
+    auto drawMeshTaskCommand = static_cast<glm::uvec3*>(drawMeshIndirectBuffer.GetMappedData());
     uint32_t numofGroup = (static_cast<uint32_t>(meshlets.size()) + numOfGroup - 1) / numOfGroup;
     glm::uvec3 groupSize;
     groupSize.x = numofGroup;
@@ -460,7 +461,7 @@ void Meshes::UpdateMeshlets()
 
 void Meshes::UpdateVertexPositions(Mesh& mesh)
 {
-    auto vertexBufferData = ((Model::Vertex*)vertexBuffers[currentBufferIndex].GetMappedData());
+    auto vertexBufferData = static_cast<Model::Vertex*>(vertexBuffers[currentBufferIndex].GetMappedData());
     glm::mat3 model = mesh.transform.mat3();
     for (size_t i = 0; i < mesh.vertexCount; i++)
     {
@@ -472,7 +473,7 @@ void Meshes::UpdateVertexPositions(Mesh& mesh)
 
 void Meshes::UpdateVertexPositions(Range updateRange)
 {
-    auto vertexBufferData = ((Model::Vertex*)vertexBuffers[currentBufferIndex].GetMappedData());
+    auto vertexBufferData = static_cast<Model::Vertex*>(vertexBuffers[currentBufferIndex].GetMappedData());
     for (uint32_t i = 0; i < updateRange.y; i++)
     {
         auto& mesh = meshes[updateRange.x + i];
@@ -561,12 +562,12 @@ void Meshes::appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageI
 {
     auto& descriptorSetLayout = 
         Resource::ResourceManager::GetCurrent()->Shaders[0].GetDescriptors()[DEFAULT_SAMPLER_LAYOUT]->GetLayout();
-    uint32_t remaining = (uint32_t)textureInfos.size() % batchSize;
-    uint32_t offset = (uint32_t)textureInfos.size() - remaining;
+    uint32_t remaining = static_cast<uint32_t>(textureInfos.size()) % batchSize;
+    uint32_t offset = static_cast<uint32_t>(textureInfos.size()) - remaining;
     textureInfos.insert(textureInfos.end(), imageInfos.begin(), imageInfos.end());
     if (remaining && samplersDescriptors.size())
     {
-        remaining = std::min(remaining + (uint32_t)imageInfos.size(), batchSize);
+        remaining = std::min(remaining + static_cast<uint32_t>(imageInfos.size()), batchSize);
         samplersDescriptors.back()->UpdateDescriptorSets(&textureInfos[offset], remaining, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
         offset += remaining;
     }
@@ -578,15 +579,15 @@ void Meshes::appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageI
             descriptorSetLayout,
             VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
             );
-        descriptor->UpdateDescriptorSets(&textureInfos[offset], textureInfos.size() - offset, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+        descriptor->UpdateDescriptorSets(&textureInfos[offset], static_cast<uint32_t>(textureInfos.size()) - offset, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
         samplersDescriptors.push_back(descriptor);
     }
 }
 
-void Meshes::buildMeshlets(
-    uint32_t maxVerticesPerMeshlet,  // max number of vertices per meshlet
-    uint32_t maxIndicesPerMeshlet)  // max number of indices per meshlet (i.e., triangles)
+void Meshes::buildMeshlets()
 {
+    constexpr uint32_t maxVerticesPerMeshlet = numsof(Meshlet::vertices);
+    constexpr uint32_t maxIndicesPerMeshlet = numsof(Meshlet::indices);
     meshlets.clear();
     meshletVertexCount = 0;
     meshletIndexCount = 0;
@@ -638,8 +639,8 @@ void Meshes::buildMeshlets(
 
 void Meshes::buildMeshletsWithOptimizer()
 {
-    constexpr size_t MaxVerts = 128;
-    constexpr size_t MaxTris = 256;
+    constexpr uint32_t maxVerticesPerMeshlet = numsof(Meshlet::vertices);
+    constexpr uint32_t maxIndicesPerMeshlet = numsof(Meshlet::indices);
 
     meshlets.clear();
     meshletVertexCount = 0;
@@ -651,10 +652,10 @@ void Meshes::buildMeshletsWithOptimizer()
         for (uint32_t i = 0; i < mesh.indexCount; i++)
             meshIndices[i] = indices[mesh.indexOffset + i] - mesh.vertexOffset;
         // Estimate output sizes
-        size_t maxMeshlets = meshopt_buildMeshletsBound(mesh.indexCount, MaxVerts, MaxTris);
+        size_t maxMeshlets = meshopt_buildMeshletsBound(mesh.indexCount, maxVerticesPerMeshlet, maxIndicesPerMeshlet / 3);
         std::vector<meshopt_Meshlet> meshopt_meshlets(maxMeshlets);
-        std::vector<uint32_t> uniqueVertexIndices(maxMeshlets * MaxVerts);
-        std::vector<uint8_t> primitiveIndices(maxMeshlets * MaxTris * 3);
+        std::vector<uint32_t> uniqueVertexIndices(maxMeshlets * maxVerticesPerMeshlet);
+        std::vector<uint8_t> primitiveIndices(maxMeshlets * maxIndicesPerMeshlet);
 
         size_t actualMeshletCount = meshopt_buildMeshlets(
             meshopt_meshlets.data(),
@@ -665,15 +666,15 @@ void Meshes::buildMeshletsWithOptimizer()
             &vertices[mesh.vertexOffset].position.x, // Optional vertex data pointer, can be nullptr
             mesh.vertexCount,
             sizeof(Model::Vertex),
-            MaxVerts,
-            MaxTris,
-            0.0f // flags
+            maxVerticesPerMeshlet,
+            maxIndicesPerMeshlet / 3,
+            0.3f
         );
 
         meshopt_meshlets.resize(actualMeshletCount);
         auto& last = meshopt_meshlets.back();
         uniqueVertexIndices.resize(last.vertex_offset + last.vertex_count);
-        primitiveIndices.resize(last.triangle_offset + ((last.triangle_count * 3 + 3) & ~3));
+        primitiveIndices.resize(last.triangle_offset + ((last.triangle_count * 3 + 3) & ~3u));
 
         for (auto& meshletInfo : meshopt_meshlets)
         {

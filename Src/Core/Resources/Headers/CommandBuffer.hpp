@@ -6,8 +6,8 @@ namespace AnA
     class CommandBuffer
     {
     public:
-        CommandBuffer(Device* mDevice, int commandBufferCount, VkCommandBufferLevel commandBufferlevel, VkCommandBufferUsageFlags usageFlags, bool async = false);
-        CommandBuffer(Device* mDevice, int commandBufferCount, VkCommandBufferLevel commandBufferlevel, VkCommandBufferBeginInfo& commandBufferBeginInfo);
+        CommandBuffer(Device* mDevice, size_t commandBufferCount, VkCommandBufferLevel commandBufferlevel, VkCommandBufferUsageFlags usageFlags, bool async = false);
+        CommandBuffer(Device* mDevice, size_t commandBufferCount, VkCommandBufferLevel commandBufferlevel, VkCommandBufferBeginInfo& commandBufferBeginInfo);
         ~CommandBuffer();
         operator VkCommandBuffer() const
         {

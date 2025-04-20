@@ -7,16 +7,17 @@ namespace AnA
 {
     namespace Input
     {
+        typedef void(*RegularCallBack)(void* param);
         struct KeyMapConfig
         {
             void* param;
-            void(*callBack)(void* param);
+            RegularCallBack callBack;
             int keyCode;
             int action = GLFW_PRESS;
         };
         typedef void(*CursorCallBack)(void* pParam, CursorPosition &curPos, int leftButtonAction);
         struct CursorConfig
-        {
+        { 
             void* param;
             CursorCallBack callBack;
             int action;
@@ -42,7 +43,7 @@ namespace AnA
 
             InputProfile& GetActiveProfile()
             {
-                return inputProfiles[activeProfileIndex];
+                return inputProfiles[static_cast<size_t>(activeProfileIndex)];
             }
 
             std::vector<InputProfile>& GetProfiles()

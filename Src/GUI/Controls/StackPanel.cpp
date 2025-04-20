@@ -28,47 +28,53 @@ void StackPanel::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorIma
     for (int i = 0; i < items.size(); i++)
     {
         auto size = items[i]->GetSizeForRender();
-        if (((float*)&size)[o] > maxSize)
-            maxSize = ((float*)&size)[o];
+        if (size2F[o] > maxSize)
+            maxSize = size2F[o];
     }*/
     SIZE_F size{};
     POS_F offset{};
-    if (items.size() && ((float*)&renderOffset)[invO] >= 0.0f)
+    float* size2F = reinterpret_cast<float*>(&size);
+    float* offset2F = reinterpret_cast<float*>(&offset);
+    float* maxSize2F = reinterpret_cast<float*>(&maxSize);
+    float* renderOffset2F = reinterpret_cast<float*>(&renderOffset);
+    if (items.size() && renderOffset2F[invO] >= 0.0f)
     {
-        ((float*)&offset)[invO] = -1.0f;
+        offset2F[invO] = -1.0f;
     }
-    ((float*)&offset)[invO] += ((float*)&renderOffset)[invO];
-    if (((float*)&maxSize)[invO] < 1.0f)
+    offset2F[invO] += renderOffset2F[invO];
+    if (maxSize2F[invO] < 1.0f)
     {
-        ((float*)&offset)[invO] -= ((float*)&maxSize)[invO];
+        offset2F[invO] -= maxSize2F[invO];
     }
     for (size_t i = 0; i < items.size(); i++)
     {
         items[i]->Aspect = Aspect;
         items[i]->Extent = Extent;
         auto _size = items[i]->GetSizeForRender();
-        ((float*)&offset)[invO] += ((float*)&size)[invO] + ((float*)&_size)[invO] + Spacing;
+        offset2F[invO] += size2F[invO] + reinterpret_cast<float*>(&_size)[invO] + Spacing;
         size = _size;
-        auto align = invO ? (AlignmentType*)&items[i]->HorizontalAlignment : &items[i]->VerticalAlignment;//(items[i] + offsets[o]);
-        switch (*align)
+        auto align = invO ? items[i]->HorizontalAlignment : items[i]->VerticalAlignment;//(items[i] + offsets[o]);
+        switch (align)
         {
         case Start:
-            ((float*)&offset)[o] = ((float*)&size)[o] - ((float*)&maxSize)[o] + ((float*)&renderOffset)[o];
+            offset2F[o] = size2F[o] - maxSize2F[o] + renderOffset2F[o];
             break;
         case End:
-            ((float*)&offset)[o] = ((float*)&maxSize)[o] - ((float*)&size)[o];
+            offset2F[o] = maxSize2F[o] - size2F[o];
             break;
         case Stretch:
-            ((float*)&size)[o] = ((float*)&maxSize)[o];
+            size2F[o] = maxSize2F[o];
+            [[fallthrough]];
+        case Center:
             [[fallthrough]];
         default:
-            ((float*)&offset)[o] = ((float*)&renderOffset)[o] * 0.5f;
+            offset2F[o] = renderOffset2F[o] * 0.5f;
             break;
         }
         items[i]->RenderOffset(offset);
         items[i]->RenderSize(size);
         items[i]->ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
-        ((float*)&maxSize)[invO] = std::max(((float*)&maxSize)[invO] ,(((float*)&offset)[invO] - ((float*)&renderOffset)[invO] + ((float*)&size)[invO]));
+        maxSize2F[invO] = std::max(maxSize2F[invO] ,(offset2F[invO] - renderOffset2F[invO] + size2F[invO]));
     }
     RenderSize(maxSize);
     Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);

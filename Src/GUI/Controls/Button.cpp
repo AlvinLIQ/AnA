@@ -17,14 +17,20 @@ void Button_PointerExited(Button* control, PointerEventArgs& )
 
 void Button_PointerPressed(Button* control, PointerEventArgs& args)
 {
+    if (args.Handled || !control->IsInside(args.Position) || (Control::GetFocused() && !control->IsFocused()))
+        return;
+    control->Focus();
     args.Handled = true;
     control->Color = ButtonPointerPressedBackgroundColor;
 }
 
 void Button_PointerReleased(Button* control, PointerEventArgs& args)
 {
-    args.Handled = true;
+    if (args.Handled)
+        return;
+
     control->Color = control->IsInside(args.Position) ? ButtonPointerMovedBackgroundColor : ButtonBackgroundColor;
+    args.Handled = false;
 }
 
 Button::Button() : ItemPresenter()
@@ -32,8 +38,8 @@ Button::Button() : ItemPresenter()
     RenderMode(Absolute);
     ControlSize = ButtonMinAbsoluteSize;
     Color = ButtonBackgroundColor;
-    PointerEvents[PointerEventType::Entered].push_back((PointerEventHandler)Button_PointerEntered);
-    PointerEvents[PointerEventType::Exited].push_back((PointerEventHandler)Button_PointerExited);
-    PointerEvents[PointerEventType::Pressed].push_back((PointerEventHandler)Button_PointerPressed);
-    PointerEvents[PointerEventType::Released].push_back((PointerEventHandler)Button_PointerReleased);
+    PointerEvents[PointerEventType::Entered].push_back(reinterpret_cast<PointerEventHandler>(Button_PointerEntered));
+    PointerEvents[PointerEventType::Exited].push_back(reinterpret_cast<PointerEventHandler>(Button_PointerExited));
+    PointerEvents[PointerEventType::Pressed].push_back(reinterpret_cast<PointerEventHandler>(Button_PointerPressed));
+    PointerEvents[PointerEventType::Released].push_back(reinterpret_cast<PointerEventHandler>(Button_PointerReleased));
 }

@@ -16,8 +16,8 @@ namespace AnA
             void RemoveChild(Control* targetItem);
             void RemoveChildAt(size_t index);
 
-            void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount);
-            virtual void PointerEventTrigger(PointerEventArgs& args);
+            void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
+            virtual void PointerEventTrigger(PointerEventArgs& args) override;
             float Spacing = 0.0f;
             POS_F Padding = {};
         protected:

@@ -15,7 +15,6 @@ App* _aApp;
 
 #define UI_SIGNAL_EXIT 0
 #define UI_SIGNAL_KEY 2
-#define UI_SIGNAL_MOUSE 4
 #define UI_SIGNAL_WAIT 1
 
 bool _uiLoopShouldEnd = false;
@@ -27,7 +26,7 @@ App::App() : aWindow(),
     aInputManager(aWindow),
     aDevice(aInstance.GetInstance(), aWindow.GetSurface()),
     aRenderer(aWindow, &aDevice),
-    aRenderSystem(&aDevice, aRenderer.GetSwapChain()),
+    aRenderSystem(),
     aShadowSystem(&aRenderer.GetSwapChain()),
     aResourceManager(&aDevice)
 
@@ -121,13 +120,13 @@ void App::Run()
         if (prevSecond >= 1.0f)
         {
             //Show FPS on title bar
-            auto fps = std::to_string((int)(frameCount / prevSecond));
+            auto fps = std::to_string(static_cast<int>(static_cast<float>(frameCount) / prevSecond));
             title.Copy(fps.c_str(), fps.length() + 1, sizeof(cTitle) - 1);
             glfwSetWindowTitle(aWindow.GetGLFWwindow(), title.Str());
             prevSecond = 0.0f;
             frameCount = 0;
         }
-        camera.SetSpeedRatio(frameTime * 2.0);
+        camera.SetSpeedRatio(frameTime * 2.0f);
         aInputManager.Check();
         //Update Resources
         commandBufferNeedUpdate = aResourceManager.SceneObjects.BeginCommandBufferUpdate() || aRenderer.NeedUpdate();
@@ -218,6 +217,8 @@ void App::uiLoop()
             break;
         case UI_SIGNAL_EXIT:
             return;
+        default:
+            break;
         }
     }
 }
@@ -258,8 +259,8 @@ void App::createRecordCallBacks()
         auto aResourceManager = Resource::ResourceManager::GetCurrent();
         auto& aRenderer = _aApp->GetRenderer();
         auto controlExtent = aRenderer.GetSwapChainExtent();
-        controlExtent.width = _aApp->GetSceneOffset().x;
-        aResourceManager->MainControl->Aspect = (float)controlExtent.width / (float)controlExtent.height;
+        controlExtent.width = static_cast<uint32_t>(_aApp->GetSceneOffset().x);
+        aResourceManager->MainControl->Aspect = static_cast<float>(controlExtent.width) / static_cast<float>(controlExtent.height);
         aResourceManager->MainControl->Extent = controlExtent;
         auto& shapes = aResourceManager->Shapes;
         shapes.Offset = offset;

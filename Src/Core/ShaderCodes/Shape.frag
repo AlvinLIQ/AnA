@@ -1,7 +1,7 @@
 #version 460
 #extension GL_EXT_nonuniform_qualifier : enable 
 
-layout(location = 0) in vec3 baseColor;
+layout(location = 0) in vec4 baseColor;
 layout(location = 1) in vec2 texCoord;
 layout(location = 2) flat in uint texIndex;
 layout(location = 0) out vec4 outColor;
@@ -74,5 +74,5 @@ void main()
     vec4 texColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord);
     if (texColor.a < 0.5)
         discard;
-    outColor = vec4(baseColor.x * texColor.x, baseColor.y * texColor.y, baseColor.z * texColor.z, 1.0);
+    outColor = vec4(baseColor.x * texColor.x, baseColor.y * texColor.y, baseColor.z * texColor.z, baseColor.w);
 }

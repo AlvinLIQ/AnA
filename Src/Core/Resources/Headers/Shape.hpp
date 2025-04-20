@@ -10,12 +10,12 @@ namespace AnA
     struct Shape
     {
         glm::mat4 transform{1.0f};
-        alignas(8) glm::vec3 color{1.0f};
+        glm::vec4 color{1.0f};
     };
     struct ShapeInfo
     {
         AnA::Transform Transform{};
-        glm::vec3 Color{1.0f};
+        glm::vec4 Color{1.0f};
         uint32_t TextureId{0};
     };
     class Shapes : public Renderable
@@ -55,16 +55,16 @@ namespace AnA
             }
             return *this;
         }
-        ~Shapes();
+        virtual ~Shapes();
         void PrepareDraw(Controls::Control* control);
-        void Bind(CommandBuffer& commandBuffer, uint32_t bufferIndex);
-        void Draw(CommandBuffer& commandBuffer);
-        void DrawIndirect(CommandBuffer& commandBuffer);
-        void Update()
+        void Bind(CommandBuffer& commandBuffer, uint32_t bufferIndex) override;
+        void Draw(CommandBuffer& commandBuffer) override;
+        void DrawIndirect(CommandBuffer& commandBuffer) override;
+        void Update() override
         {
             
         }
-        bool NeedUpdate()
+        bool NeedUpdate() override
         {
             return false;
         }

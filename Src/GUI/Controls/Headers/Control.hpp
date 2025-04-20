@@ -79,6 +79,8 @@ namespace AnA
             bool IsFocused();
             void Focus();
             void Unfocus();
+            static void ClearFocus();
+            static Control* GetFocused();
             
             bool IsInside(CursorPosition pos);
             static bool IsInside(CursorPosition& pos, POS_F& offset, SIZE_F& size);

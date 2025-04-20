@@ -47,7 +47,7 @@ void Model::CreateModelFromFile(Device* mDevice, const char *filePath, std::shar
     {
         for (k = 0; k < 3; k++)
         {
-            glm::vec3 xBase = glm::normalize(modelInfo.vertices[modelInfo.indices[i + sets[k].y]].position - modelInfo.vertices[modelInfo.indices[i + sets[k].x]].position);
+            glm::vec3 xBase = glm::normalize(modelInfo.vertices[modelInfo.indices[i + static_cast<size_t>(sets[k].y)]].position - modelInfo.vertices[modelInfo.indices[i + static_cast<size_t>(sets[k].x)]].position);
             glm::vec3 yBase = glm::mat3({0.0, -1.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 0.0, 1.0}) * xBase;
             glm::vec3 zBase = glm::mat3({1.0, 0.0, 0.0}, {0.0, 0.0, 1.0}, {0.0, 1.0, 0.0}) * xBase;
             glm::mat3 transform{xBase, yBase, zBase};
@@ -70,7 +70,7 @@ void Model::CreateModelFromFile(Device* mDevice, const char *filePath, std::shar
             modelInfo.vertexProjections.push_back(currentProjection);
         }
     }
-    modelInfo.indexStep = modelInfo.vertices.size();
+    modelInfo.indexStep = static_cast<Index>(modelInfo.vertices.size());
     model = std::make_shared<Model>(mDevice, modelInfo);
 }
 
@@ -96,9 +96,9 @@ void Model::CreateMeshFromFile(const char *filePath, std::vector<Vertex>& vertic
             {
                 vertex.position =
                 {
-                    attrib.vertices[3 * index.vertex_index],
-                    attrib.vertices[3 * index.vertex_index + 1],
-                    attrib.vertices[3 * index.vertex_index + 2]
+                    attrib.vertices[3 * static_cast<size_t>(index.vertex_index)],
+                    attrib.vertices[3 * static_cast<size_t>(index.vertex_index) + 1],
+                    attrib.vertices[3 * static_cast<size_t>(index.vertex_index) + 2]
                 };
                 /*
                 auto colorIndex = 3 * index.vertex_index + 2;
@@ -125,23 +125,23 @@ void Model::CreateMeshFromFile(const char *filePath, std::vector<Vertex>& vertic
             {
                 vertex.normal =
                 {
-                    attrib.normals[3 * index.normal_index],
-                    attrib.normals[3 * index.normal_index + 1],
-                    attrib.normals[3 * index.normal_index + 2]
+                    attrib.normals[3 * static_cast<size_t>(index.normal_index)],
+                    attrib.normals[3 * static_cast<size_t>(index.normal_index) + 1],
+                    attrib.normals[3 * static_cast<size_t>(index.normal_index) + 2]
                 };
             }
             if (index.texcoord_index >= 0)
             {
                 vertex.uv =
                 {
-                    attrib.texcoords[2 * index.texcoord_index],
-                    attrib.texcoords[2 * index.texcoord_index + 1],
+                    attrib.texcoords[2 * static_cast<size_t>(index.texcoord_index)],
+                    attrib.texcoords[2 * static_cast<size_t>(index.texcoord_index) + 1],
                 };
             }
             auto result = vertexMap.find(vertex);
             if (result != vertexMap.end())
             {
-                indices.push_back(result->second + vertexOffset);
+                indices.push_back(result->second + static_cast<uint32_t>(vertexOffset));
             }
             else
             {
@@ -206,7 +206,7 @@ void Model::Draw(VkCommandBuffer commandBuffer, Index instanceIndex)
     if (hasIndexBuffer)
     {
         for (size_t i = 0; i < vertices.size(); i += indexStep)
-            vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, i, instanceIndex);
+            vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, static_cast<int32_t>(i), instanceIndex);
     }
     else
     {
