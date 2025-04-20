@@ -339,8 +339,8 @@ void Meshes::Update()
         //indexBuffer->CopyToBuffer(Indices.data(), Indices.size() * sizeof(Model::Index));
         vertexBuffers[nextIndex].Map(0, vertexBuffers[nextIndex].GetSize());
         indexBuffers[nextIndex].Map(0, indexBuffers[nextIndex].GetSize());
-        UpdateMeshlets();
         CommitBufferUpdate(&vertexBuffers[nextIndex], &indexBuffers[nextIndex]);
+        UpdateMeshlets();
 
         createSSBODescriptor();
         updateSSBODescriptor();
@@ -652,7 +652,6 @@ void Meshes::buildMeshletsWithOptimizer()
             meshIndices[i] = indices[mesh.indexOffset + i] - mesh.vertexOffset;
         // Estimate output sizes
         size_t maxMeshlets = meshopt_buildMeshletsBound(mesh.indexCount, MaxVerts, MaxTris);
-
         std::vector<meshopt_Meshlet> meshopt_meshlets(maxMeshlets);
         std::vector<uint32_t> uniqueVertexIndices(maxMeshlets * MaxVerts);
         std::vector<uint8_t> primitiveIndices(maxMeshlets * MaxTris * 3);
@@ -668,7 +667,7 @@ void Meshes::buildMeshletsWithOptimizer()
             sizeof(Model::Vertex),
             MaxVerts,
             MaxTris,
-            0 // flags
+            0.0f // flags
         );
 
         meshopt_meshlets.resize(actualMeshletCount);
@@ -696,42 +695,14 @@ void Meshes::buildMeshletsWithOptimizer()
                 maxBounding = glm::max(maxBounding, vertices[meshlet.vertices[i]].position);
             }
             auto model = mesh.transform.mat3();
-            std::vector<glm::vec3> normals(meshletInfo.triangle_count);
-            for (uint32_t i = 0; i < meshletInfo.triangle_count; i++)
-            {
-                uint32_t i0 = meshlet.indices[i + 0];
-                uint32_t i1 = meshlet.indices[i + 1];
-                uint32_t i2 = meshlet.indices[i + 2];
-
-                glm::vec3 v0 = model * vertices[i0].position + mesh.transform.translation;
-                glm::vec3 v1 = model * vertices[i1].position + mesh.transform.translation;
-                glm::vec3 v2 = model * vertices[i2].position + mesh.transform.translation;
-
-                glm::vec3 tan0 = v1 - v0;
-                glm::vec3 tan1 = v2 - v0;
-                normals[i] = glm::cross(tan0, tan1);
-                float len = glm::length(normals[i]);
-                if (len == 0.0f)
-                    normals[i] = glm::vec3(1.0f, .0f, .0f);
-                else
-                    normals[i] /= len;
-
-                meshlet.normal += normals[i];
-            }
             meshlet.center = (minBounding + maxBounding) * 0.5f;
             meshlet.center = model * meshlet.center + mesh.transform.translation;
-            meshlet.cutoff = 1.0f;
-            float len = length(meshlet.normal);
-            if (len == 0.0f)
-                meshlet.normal = glm::vec3(1.0f, .0f, .0f);
-            else
-                meshlet.normal = meshlet.normal / len;
-            for (uint32_t i = 0; i < meshletInfo.triangle_count; i++)
-            {
-                float dp = glm::dot(meshlet.normal, normals[i]);
-                meshlet.cutoff = std::min(meshlet.cutoff, dp);
-            }
-            meshlet.cutoff = meshlet.cutoff < 0.0f ? 1.0f : sqrtf(1 - meshlet.cutoff * meshlet.cutoff);
+            meshopt_Bounds bounds = meshopt_computeMeshletBounds(meshlet.vertices, 
+                &primitiveIndices[meshletInfo.triangle_offset], meshletInfo.triangle_count, 
+                    &vertices.data()->position.x, vertices.size(), sizeof(Model::Vertex));
+            meshlet.normal = glm::transpose(glm::inverse(model)) * glm::vec3(bounds.cone_axis[0], bounds.cone_axis[1], bounds.cone_axis[2]);
+            meshlet.cutoff = bounds.cone_cutoff;
+
             for (uint32_t i = 0; i < meshlet.vertexCount; i++)
             {
                 float distance = glm::distance(meshlet.center, 

@@ -2,7 +2,7 @@
 #include "../../Core/Headers/App.hpp"
 #include <unordered_map>
 
-#define EDITOR_LEFT_PANEL_WIDTH 300
+#define EDITOR_LEFT_PANEL_WIDTH 350
 
 namespace AnA
 {
