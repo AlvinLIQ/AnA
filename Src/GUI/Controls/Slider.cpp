@@ -43,11 +43,11 @@ void Slider::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageIn
     auto offset = RenderOffset();
     float* size2F = reinterpret_cast<float*>(&size);
     float* offset2F = reinterpret_cast<float*>(&offset);
-    float pos = std::max(std::min(Value * (size2F[o] * size2F[o] - offset2F[o]), size2F[o] - SLIDER_HALF_SIZE), SLIDER_HALF_SIZE);
+    float pos = std::max(std::min(Value * size2F[o] * (size2F[o] - offset2F[o]), size2F[o] - SLIDER_HALF_SIZE), SLIDER_HALF_SIZE);
     offset2F[o] += (pos - 0.5f) * 2.0f;
 
     button.GetSizeForRender();
-    offset2F[o] = SLIDER_SIZE;
+    size2F[o] = SLIDER_SIZE;
     button.RenderSize(size);
     button.RenderOffset(offset);
     button.ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);

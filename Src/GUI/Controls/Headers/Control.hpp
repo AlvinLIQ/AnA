@@ -74,7 +74,7 @@ namespace AnA
                 return renderSize;
             }
 
-            std::vector<PointerEventHandler> PointerEvents[PointerEventType::Moving + 1];
+            std::vector<PointerEventHandler> PointerEvents[PointerEventType::Moving + 1] = {};
 
             bool IsFocused();
             void Focus();

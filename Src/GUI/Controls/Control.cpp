@@ -167,7 +167,6 @@ void Control::PointerEventTrigger(PointerEventArgs& args)
         if (cursorInside && !isInside)
         {
             eventType = PointerEventType::Exited;
-            ClearFocus();
         }
         else if (cursorInside && pressed)
         {
@@ -198,21 +197,10 @@ void Control::PointerEventTrigger(PointerEventArgs& args)
         }
     }
     cursorInside = isInside;
-    std::vector<PointerEventHandler>* events;
-    void* param;
-    if (focusedControl && eventType == Pressed)
+    for (auto& event : PointerEvents[eventType])
     {
-        events = focusedControl->PointerEvents;
-        param = focusedControl;
-    }
-    else
-    {
-        events = PointerEvents;
-        param = this;
-    }
-    for (auto event : events[eventType])
-    {
-        event(param, args);
+        if (event)
+            event(this, args);
         if (args.Handled)
             break;
     }
