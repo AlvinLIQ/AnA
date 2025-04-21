@@ -668,7 +668,7 @@ void Meshes::buildMeshletsWithOptimizer()
             sizeof(Model::Vertex),
             maxVerticesPerMeshlet,
             maxIndicesPerMeshlet / 3,
-            0.3f
+            0.0f
         );
 
         meshopt_meshlets.resize(actualMeshletCount);
