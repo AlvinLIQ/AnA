@@ -42,7 +42,7 @@ namespace AnA
             throw std::runtime_error("Failed to open " + filename + "!");
         }
         
-        ssize_t fs = file.tellg();
+        std::streamsize fs = file.tellg();
         std::vector<unsigned char> buffer(static_cast<size_t>(fs));
         file.seekg(0);
         file.read(reinterpret_cast<char*>(buffer.data()), fs);

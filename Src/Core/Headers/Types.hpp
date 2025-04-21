@@ -158,7 +158,6 @@ namespace AnA
     typedef Var<int32_t> Int32;
     typedef Var<uint32_t> UInt32;
     typedef Var<size_t> SizeT;
-    typedef Var<ssize_t> SSizeT;
     typedef Var<float> Float;
     typedef Var<double> Double;
 
