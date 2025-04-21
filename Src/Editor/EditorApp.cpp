@@ -1,5 +1,6 @@
 #include "Headers/EditorApp.hpp"
 #include "Headers/FileDialog.hpp"
+#include "../GUI/Controls/Headers/ToggleSwitch.hpp"
 #include "../GUI/Controls/Headers/Slider.hpp"
 #include "../GUI/Controls/Headers/StackPanel.hpp"
 #include "../GUI/Controls/Headers/TextBlock.hpp"
@@ -44,19 +45,12 @@ void EditorApp::Init()
         }
     };
     aInputManager.GlobalProfile.keyMapConfigs.push_back(keyMapConfig);
-    keyMapConfig.keyCode = GLFW_KEY_F;
-    keyMapConfig.param = &aResourceManager;
-    keyMapConfig.callBack = [](void *param)
-    {
-        auto resourceManager = reinterpret_cast<Resource::ResourceManager*>(param);
-        resourceManager->LockCamera = !resourceManager->LockCamera;
-    };
-    aInputManager.GlobalProfile.keyMapConfigs.push_back(keyMapConfig);
     Controls::Control::GetInputProfile(aResourceManager.MainControl, aInputManager.GetProfiles());
 }
 
 void EditorApp::onLoop()
 {
+    aResourceManager.LockCamera = static_cast<Controls::ToggleSwitch*>(controlMap["camLockToggle"])->Toggled;
     aResourceManager.MainCameraInfo.near = 0.05f + static_cast<Controls::Slider*>(controlMap["nearSlider"])->Value * (32.0f - 0.05f);
     aResourceManager.MainCameraInfo.far = static_cast<Controls::Slider*>(controlMap["farSlider"])->Value * 32.0f;
     aResourceManager.MainCameraInfo.UpdateCameraPerspective(aResourceManager.MainCamera);
