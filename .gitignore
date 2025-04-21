@@ -9,6 +9,8 @@
 /xxdi.exe
 /push.sh
 
+ShaderCodes.hpp
+
 ui_parser
 ui_parser.exe
 .clangd
