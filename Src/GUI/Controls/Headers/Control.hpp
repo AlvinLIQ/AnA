@@ -20,12 +20,12 @@ namespace AnA
             AlignmentType HorizontalAlignment {ControlHorizontalAlignment};
             AlignmentType VerticalAlignment {ControlVerticalAlignment};
 
-            POS_F ControlOffset {};
-            POS_F GetActualControlOffset();
+            POS_2F ControlOffset {};
+            POS_2F GetActualControlOffset();
 
-            SIZE_F ControlSize {AnA::ControlSize};
-            SIZE_F GetSizeForRender();
-            void SizeRequest(SIZE_F newSize)
+            SIZE_2F ControlSize {AnA::ControlSize};
+            SIZE_2F GetSizeForRender();
+            void SizeRequest(SIZE_2F newSize)
             {
                 if (newSize.Width < minSize.Width || newSize.Height < minSize.Height || 
                     newSize.Width > maxSize.Width || newSize.Height > maxSize.Height)
@@ -50,6 +50,7 @@ namespace AnA
             VkExtent2D Extent;
 
             virtual void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount);
+            bool ProcessEventArgs(PointerEventArgs& args, PointerEventType& actualEventType);
             virtual void PointerEventTrigger(PointerEventArgs& args);
             static void InitControl(SwapChain* swapChain);
             static float* GetScale();
@@ -57,19 +58,19 @@ namespace AnA
             static Device* GetDevice();
             static void GetInputProfile(Control* mainControl, std::vector<Input::InputProfile>& profiles);
 
-            void RenderOffset(POS_F newOffset)
+            void RenderOffset(POS_2F newOffset)
             {
                 renderOffset = newOffset;
             }
-            POS_F RenderOffset()
+            POS_2F RenderOffset()
             {
                 return renderOffset;
             }
-            void RenderSize(SIZE_F newSize)
+            void RenderSize(SIZE_2F newSize)
             {
                 renderSize = newSize;
             }
-            SIZE_F RenderSize()
+            SIZE_2F RenderSize()
             {
                 return renderSize;
             }
@@ -79,23 +80,27 @@ namespace AnA
             bool IsFocused();
             void Focus();
             void Unfocus();
+            bool IsPressed() const
+            {
+                return pressed;
+            }
             static void ClearFocus();
             static Control* GetFocused();
             
             bool IsInside(CursorPosition pos);
-            static bool IsInside(CursorPosition& pos, POS_F& offset, SIZE_F& size);
+            static bool IsInside(CursorPosition& pos, POS_2F& offset, SIZE_2F& size);
 
             virtual VkDescriptorImageInfo GetDescriptorImageInfo();
             virtual void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount);
         private:
             AlignType renderMode {ControlRenderMode};
-            POS_F renderOffset{};
-            SIZE_F renderSize{};
+            POS_2F renderOffset{};
+            SIZE_2F renderSize{};
             bool cursorInside = false;
             bool pressed = false;
         protected:
-            SIZE_F minSize {ControlMinSize};
-            SIZE_F maxSize {std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
+            SIZE_2F minSize {ControlMinSize};
+            SIZE_2F maxSize {std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
         };
     }
 }

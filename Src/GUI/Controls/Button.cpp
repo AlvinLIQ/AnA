@@ -17,7 +17,7 @@ void Button_PointerExited(Button* control, PointerEventArgs& )
 
 void Button_PointerPressed(Button* control, PointerEventArgs& args)
 {
-    if (args.Handled || !control->IsInside(args.Position) || (Control::GetFocused() && !control->IsFocused()))
+    if (!control->IsInside(args.Position))
         return;
     control->Focus();
     args.Handled = true;
@@ -26,9 +26,6 @@ void Button_PointerPressed(Button* control, PointerEventArgs& args)
 
 void Button_PointerReleased(Button* control, PointerEventArgs& args)
 {
-    if (args.Handled)
-        return;
-
     control->Color = control->IsInside(args.Position) ? ButtonPointerMovedBackgroundColor : ButtonBackgroundColor;
     args.Handled = false;
 }

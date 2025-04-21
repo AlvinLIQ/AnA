@@ -57,8 +57,6 @@ void ItemsPresenter::RemoveChildAt(size_t index)
 
 void ItemsPresenter::PointerEventTrigger(PointerEventArgs& args)
 {
-    if (args.Handled)
-        return;
     for (auto& item : items)
     {
         item->PointerEventTrigger(args);

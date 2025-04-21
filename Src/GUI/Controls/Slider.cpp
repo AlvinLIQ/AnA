@@ -8,10 +8,10 @@ using namespace Controls;
 
 void slider_Click(void* control, PointerEventArgs& args)
 {
-    if (args.Handled)
+    auto slider = static_cast<Slider*>(control);
+    if (!slider->IsPressed())
         return;
     args.Handled = true;
-    auto slider = static_cast<Slider*>(control);
     slider->Focus();
     int o = slider->Orientation == AnA::Controls::Horizontal ? 0 : 1;
     auto offset = slider->RenderOffset();
@@ -32,7 +32,7 @@ Slider::Slider()
 {
     Color = {0.7, 0.7, 0.7, 1.0};
     button.Color = {0.6, 0.6, 0.6, 1.0};
-    PointerEvents[PointerEventType::Pressed].emplace_back(slider_Click);
+    PointerEvents[PointerEventType::Moving].emplace_back(slider_Click);
 }
 
 void Slider::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)

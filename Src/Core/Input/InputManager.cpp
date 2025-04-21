@@ -66,7 +66,7 @@ void InputManager::checkProfile(Input::InputProfile& inputProfile)
         return;
     auto window = aWindow.GetGLFWwindow();
     glfwGetCursorPos(window, &curPos.x, &curPos.y);
-    CursorPosition duration = {(curPos.x - prevPos.x) / (double)aWindow.Width, (curPos.y - prevPos.y) / (double)aWindow.Height};
+    CursorPosition duration = {(curPos.x - prevPos.x) / aWindow.Width.As<double>(), (curPos.y - prevPos.y) / aWindow.Height.As<double>()};
     cursorPos = {curPos.x / (double)aWindow.Width, curPos.y / (double)aWindow.Height};
     auto &cursorConfigs = inputProfile.cursorConfigs;
     int leftButton = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);

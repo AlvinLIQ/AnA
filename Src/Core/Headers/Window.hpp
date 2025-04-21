@@ -5,6 +5,7 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include "Instance.hpp"
+#include "Types.hpp"
 
 #define DEFAULT_WINDOW_WIDTH 1366
 #define DEFAULT_WINDOW_HEIGHT 768
@@ -36,8 +37,8 @@ namespace AnA
             return surface;
         }
 
-        int Width = DEFAULT_WINDOW_WIDTH;
-        int Height = DEFAULT_WINDOW_HEIGHT;
+        Int32 Width = DEFAULT_WINDOW_WIDTH;
+        Int32 Height = DEFAULT_WINDOW_HEIGHT;
 
         bool FramebufferResized = false;
         static void FramebufferResizeCallback(GLFWwindow* window, int width, int height);

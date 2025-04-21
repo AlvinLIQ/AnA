@@ -7,6 +7,8 @@ using namespace AnA::Controls;
 SwapChain* aSwapChain = nullptr;
 Control* pressedControl = nullptr;
 Control* focusedControl = nullptr;
+bool leftButtonPressed = false;
+POS_2F lastPressedPos{};
 
 Control::Control()
 {
@@ -17,7 +19,7 @@ Control::~Control()
     
 }
 
-POS_F Control::GetActualControlOffset()
+POS_2F Control::GetActualControlOffset()
 {
     float* pOffset = reinterpret_cast<float*>(&renderOffset);
     float* pSize = reinterpret_cast<float*>(&this->renderSize);
@@ -43,7 +45,7 @@ POS_F Control::GetActualControlOffset()
     return renderOffset;
 }
 
-SIZE_F Control::GetSizeForRender()
+SIZE_2F Control::GetSizeForRender()
 {
     if (renderMode == AlignType::Absolute)
     {
@@ -119,7 +121,7 @@ Control* Control::GetFocused()
 
 bool Control::IsInside(CursorPosition pos)
 {
-    POS_F offset = {renderOffset.x * 0.5f + 0.5f - renderSize.Width * 0.5f, renderOffset.y * 0.5f + 0.5f - renderSize.Height * 0.5f};
+    POS_2F offset = {renderOffset.x * 0.5f + 0.5f - renderSize.Width * 0.5f, renderOffset.y * 0.5f + 0.5f - renderSize.Height * 0.5f};
     if (HorizontalAlignment == Stretch)
     {
         offset.x = 0.0f;
@@ -131,7 +133,7 @@ bool Control::IsInside(CursorPosition pos)
     return IsInside(pos, offset, renderSize);
 }
 
-bool Control::IsInside(CursorPosition& pos, POS_F& offset, SIZE_F& size)
+bool Control::IsInside(CursorPosition& pos, POS_2F& offset, SIZE_2F& size)
 {
     return static_cast<float>(pos.x) >= offset.x && static_cast<float>(pos.y) >= offset.y && 
     static_cast<float>(pos.x) <= offset.x + size.Width && static_cast<float>(pos.y) <= offset.y + size.Height;
@@ -156,66 +158,84 @@ void Control::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageI
     shapeCount++;
 }
 
-void Control::PointerEventTrigger(PointerEventArgs& args)
+void RunPointerEvents(std::vector<PointerEventHandler>& events, void* param, PointerEventArgs& args)
 {
-    if (args.Handled)
-        return;
-    PointerEventType eventType = args.EventType;
-    bool isInside = IsInside(args.Position);
-    if (eventType == PointerEventType::Moving)
+    for (auto& event : events)
     {
-        if (cursorInside && !isInside)
-        {
-            eventType = PointerEventType::Exited;
-        }
-        else if (cursorInside && pressed)
-        {
-            eventType = PointerEventType::Released;
-            pressed = false;
-            ClearFocus();
-        }
-        else if (!cursorInside && isInside)
-            eventType = PointerEventType::Entered;
-        else if (!cursorInside && !isInside)
-            return;
-    }
-    else if (eventType == PointerEventType::Pressed)
-    {
-        if (!isInside)
-        {
-            if (cursorInside)
-            {
-                eventType = PointerEventType::Exited;
-                pressed = false;
-            }
-            else
-                return;
-        }
-        else
-        {
-            pressed = true;
-        }
-    }
-    cursorInside = isInside;
-    for (auto& event : PointerEvents[eventType])
-    {
-        if (event)
-            event(this, args);
         if (args.Handled)
             break;
+        if (event)
+            event(param, args);
     }
+}
+
+bool Control::ProcessEventArgs(PointerEventArgs& args, PointerEventType& actualEventType)
+{
+    bool result = true;
+    bool isInside = IsInside(args.Position);
+    actualEventType = args.EventType;
+    switch(args.EventType)
+    {
+    case Moving:
+        if (!cursorInside && isInside)
+        {
+            actualEventType = Entered;
+        }
+        else if (cursorInside && !isInside)
+        {
+            actualEventType = Exited;
+        }
+        else if (!isInside)
+        {
+            result = false;
+        }
+        break;
+    case Pressed:
+        result = isInside;
+        pressed = isInside;
+        break;
+    case Released:
+        result = isInside;
+        pressed = false;
+        break;
+    default:
+        result = true;
+        break;
+    }
+
+    cursorInside = isInside;
+    return result;
+}
+
+void Control::PointerEventTrigger(PointerEventArgs& args)
+{
+    PointerEventType actualEventType;
+    if (ProcessEventArgs(args, actualEventType))
+        RunPointerEvents(PointerEvents[actualEventType], this, args);
 }
 
 PointerEventType GetPointerEventType(int buttonAction)
 {
+    PointerEventType eventType = PointerEventType::Moving;
     switch (buttonAction)
     {
     case GLFW_PRESS:
-        return PointerEventType::Pressed;
+        if (!leftButtonPressed)
+        {
+            leftButtonPressed = true;
+            eventType = PointerEventType::Pressed;
+        }
+        break;
+    case GLFW_RELEASE:
+        if (leftButtonPressed)
+        {
+            leftButtonPressed = false;
+            eventType = PointerEventType::Released;
+        }
     default:
         break;
     }
-    return PointerEventType::Moving;
+    return eventType;
 }
 
 void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input::InputProfile>& profiles)
