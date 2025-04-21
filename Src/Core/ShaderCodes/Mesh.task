@@ -55,7 +55,8 @@ bool isMeshletFacingCamera(vec3 center, vec3 coneAxis, float radius, float cutof
 {
     vec3 toCam = center - cbo.position.xyz;
     float dp = dot(coneAxis, toCam);
-    return dp < cutoff * length(toCam) + radius;
+    const float compensation = 0.2;
+    return dp < cutoff * length(toCam) + radius + compensation;
 }
 
 bool isMeshletVisible(uint meshletId)
