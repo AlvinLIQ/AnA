@@ -49,10 +49,14 @@ namespace AnA
         {
             return aSwapChain->GetExtent();
         }
-        float GetAspect() const
+        Float GetAspect() const
         {
             auto swapChainextent = GetSwapChainExtent();
             return static_cast<float>(swapChainextent.width) / static_cast<float>(swapChainextent.height);
+        }
+        Float GetGPUTime()
+        {
+            return gpuTime;
         }
         VkCommandBufferInheritanceInfo& GetInheritanceInfo(RenderPassType renderPassType)
         {
@@ -79,6 +83,13 @@ namespace AnA
 
         CommandBuffer commandBuffers;
         CommandBuffer offscreenSecondaryCommandBuffers;
+
+        static constexpr uint32_t queriesPerFrame = 2;
+        uint32_t firstQuery = 0;
+        uint64_t timestamps[queriesPerFrame * MAX_FRAMES_IN_FLIGHT] = {};
+        Float gpuTime = 0.0f;
+        VkQueryPool timestampQueryPool {VK_NULL_HANDLE};
+        void createTimestampQueryPool();
 
         bool isFrameStarted = false;
 

@@ -266,11 +266,12 @@ namespace AnA
 		void Copy(const char* str, const size_t len, size_t offset = 0)
 		{
 			size_t endPos = len + offset;
-			if (endPos > _capacity)
-				Resize(endPos);
+			if (endPos + 1 > _capacity)
+				Resize(endPos + 1);
 			memcpy(&_str[offset], str, len);
 			if (endPos > _index)
 				_index = endPos;
+			_str[endPos] = '\0';
 		}
 	protected:
 		char* _str = nullptr;

@@ -90,6 +90,16 @@ namespace AnA
 
         }
 
+        operator T&()
+        {
+            return value;
+        }
+
+        operator const T&() const
+        {
+            return value;
+        }
+
         operator T() const
         {
             return value;
@@ -103,9 +113,9 @@ namespace AnA
         const T* operator&() const { return &value; };
 
         template<typename U>
-        Var<U> As() const
+        U As() const
         {
-            return static_cast<Var<U>>(*this);
+            return static_cast<U>(value);
         }
 
         Var operator+(const Var& var) const { return Var(value + var.value); }

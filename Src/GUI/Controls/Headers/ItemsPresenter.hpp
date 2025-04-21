@@ -19,7 +19,7 @@ namespace AnA
             void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
             virtual void PointerEventTrigger(PointerEventArgs& args) override;
             float Spacing = 0.0f;
-            POS_2F Padding = {};
+            Vec2 Padding = {};
         protected:
             std::vector<Control*> items;
         };

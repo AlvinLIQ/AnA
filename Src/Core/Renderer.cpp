@@ -12,6 +12,7 @@ Renderer::Renderer(Window& mWindow, Device* mDevice) : aWindow {mWindow}, aDevic
     offscreenSecondaryCommandBuffers(mDevice, MAX_FRAMES_IN_FLIGHT, VK_COMMAND_BUFFER_LEVEL_SECONDARY, VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT | VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT)
 {
     aSwapChain = new SwapChain(aDevice, aWindow.GetSurface(), aWindow.GetGLFWwindow());
+    createTimestampQueryPool();
     inheritanceInfos[RENDER_PASS_TYPE_ONSCREEN].sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
     inheritanceInfos[RENDER_PASS_TYPE_ONSCREEN].renderPass = aSwapChain->GetRenderPass();
     inheritanceInfos[RENDER_PASS_TYPE_OFFSCREEN].sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
@@ -20,6 +21,7 @@ Renderer::Renderer(Window& mWindow, Device* mDevice) : aWindow {mWindow}, aDevic
 
 Renderer::~Renderer()
 {
+    vkDestroyQueryPool(aDevice->GetLogicalDevice(), timestampQueryPool, nullptr);
     delete aSwapChain;
 }
 
@@ -41,6 +43,13 @@ CommandBuffer* Renderer::BeginFrame()
     isFrameStarted = true;
 
     commandBuffers.Begin();
+    firstQuery = aSwapChain->CurrentFrame * 2;
+    vkCmdResetQueryPool(commandBuffers, timestampQueryPool, 
+        firstQuery, queriesPerFrame);
+    if (timestamps[firstQuery + 1])
+        vkCmdWriteTimestamp(commandBuffers, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 
+            timestampQueryPool, firstQuery);
+
     return &commandBuffers;
 }
 
@@ -63,10 +72,29 @@ void Renderer::ExecuteOffscreenSecondaryCommandBuffer(CommandBuffer& commandBuff
 void Renderer::EndFrame()
 {
     assert(isFrameStarted && "Can't call EndFrame while frame is not in progress!");
+    if (timestamps[firstQuery + 2])
+        vkCmdWriteTimestamp(commandBuffers, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 
+            timestampQueryPool, firstQuery + 1);
     commandBuffers.End();
     auto commandBuffer = commandBuffers.Get();
     auto result = aSwapChain->SubmitCommandBuffers(&commandBuffer, 1); 
 
+    vkGetQueryPoolResults(
+        aDevice->GetLogicalDevice(),
+        timestampQueryPool,
+        firstQuery,
+        queriesPerFrame,
+        sizeof(timestamps),
+        timestamps,
+        sizeof(uint64_t) * queriesPerFrame,
+        VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WITH_AVAILABILITY_BIT);
+
+    if (timestamps[1] && timestamps[3])
+    {
+        const float timestampPeriod = aDevice->GetPhysicalDeviceProperties().limits.timestampPeriod;
+        gpuTime = float(timestamps[2] - timestamps[0]) * 
+                timestampPeriod / 1000000.0f;
+    }
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || aWindow.FramebufferResized)
     {
         aWindow.FramebufferResized = false;
@@ -187,4 +215,14 @@ void Renderer::BeginOffscreenRenderPass(CommandBuffer& commandBuffer, VkFramebuf
                         &renderPassBegin,
                         contents);
 
+}
+
+void Renderer::createTimestampQueryPool()
+{
+    VkQueryPoolCreateInfo queryPoolInfo = {};
+    queryPoolInfo.sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO;
+    queryPoolInfo.queryType = VK_QUERY_TYPE_TIMESTAMP;
+    queryPoolInfo.queryCount = queriesPerFrame * MAX_FRAMES_IN_FLIGHT;
+    vkCreateQueryPool(aDevice->GetLogicalDevice(), &queryPoolInfo, 
+        nullptr, &timestampQueryPool);
 }

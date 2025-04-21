@@ -1,10 +1,9 @@
 #pragma once
 #include "Device.hpp"
+#include "Types.hpp"
 
 #include <GLFW/glfw3.h>
-#include <sys/types.h>
 #include <vector>
-#include <vulkan/vulkan_core.h>
 
 #define INCLUDE_STB_IMAGE
 
@@ -22,7 +21,7 @@ namespace AnA
         SwapChain(Device* mDevice, VkSurfaceKHR &mSurface, GLFWwindow* mWindow);
         ~SwapChain();
 
-        float Scale[2];
+        Float Scale[2];
 
         VkResult AcquireNextImage();
 

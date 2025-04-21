@@ -28,18 +28,4 @@ namespace AnA
         bool Handled = false;
     };
     typedef void (*PointerEventHandler)(void* control, PointerEventArgs& args);
-    struct SIZE_2F
-    {
-        Float Width;
-        Float Height;
-    };
-    struct POS_2F
-    {
-        Float x;
-        Float y;
-        POS_2F operator+(POS_2F& B)
-        {
-            return {x + B.x, y + B.y};
-        }
-    };
 }

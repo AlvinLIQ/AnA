@@ -98,30 +98,32 @@ void App::Run()
     auto& activeProfile = aInputManager.GetActiveProfile();
     cameraController.GetInputProfile(activeProfile);
     aInputManager.SetActiveProfile(0);
-    //startUILoop(uiThread);
-    auto window = aWindow.GetGLFWwindow();
-    //camera.SetViewDirection({}, glm::vec3(0.5f, 0.f, 1.f));
-    //camera.SetViewTarget(glm::vec3(-1.f, -2.f, 2.f), glm::vec3(0.f, 0.f, 2.5f));
-    auto prevTime = std::chrono::high_resolution_clock::now();
     aResourceManager.UpdateCamera(aRenderer.GetAspect());
+
+    auto prevTime = std::chrono::high_resolution_clock::now();
+    std::chrono::time_point<std::chrono::high_resolution_clock> curTime;
+    Float frameTime, cpuTime, prevSecond;
+    Int32 frameCount = 0;
+
     std::vector<MeshInfo> meshInfos;
     const char cTitle[] = "AnA FPS:";
-    AnA::String title{cTitle, sizeof(cTitle), sizeof(cTitle) + 10};
-    int frameCount = 0;
-    float prevSecond = 0.0f;
+    AnA::String title{cTitle, sizeof(cTitle), sizeof(cTitle) + 20};
+
+    auto window = aWindow.GetGLFWwindow();
     while(!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
-        auto curTime = std::chrono::high_resolution_clock::now();
-        float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(curTime - prevTime).count();
+        curTime = std::chrono::high_resolution_clock::now();
+        frameTime = std::chrono::duration<float, std::chrono::seconds::period>(curTime - prevTime).count();
         prevTime = curTime;
         prevSecond += frameTime;
         frameCount++;
         if (prevSecond >= 1.0f)
         {
-            //Show FPS on title bar
-            auto fps = std::to_string(static_cast<int>(static_cast<float>(frameCount) / prevSecond));
-            title.Copy(fps.c_str(), fps.length() + 1, sizeof(cTitle) - 1);
+            auto info = std::to_string(static_cast<int>(frameCount.As<float>() / prevSecond)) +
+                " CPU Time: " + std::to_string(cpuTime * 1000.0f) + "ms GPU Time:" + 
+                std::to_string(aRenderer.GetGPUTime()) + "ms";
+            title.Copy(info.c_str(), info.length(), sizeof(cTitle) - 1);
             glfwSetWindowTitle(aWindow.GetGLFWwindow(), title.Str());
             prevSecond = 0.0f;
             frameCount = 0;
@@ -137,14 +139,15 @@ void App::Run()
         }
         aResourceManager.Update();
         onLoop();
+
         //Record Primary Command Buffer
         if (auto commandBuffer = aRenderer.BeginFrame())
         {
             onCommandBufferRecording(*commandBuffer);
             aRenderer.EndFrame();
         }
+        cpuTime = std::chrono::duration<float, std::chrono::seconds::period>(std::chrono::high_resolution_clock::now() - prevTime).count();
     }
-    //waitUILoop(uiThread);
     vkDeviceWaitIdle(aDevice.GetLogicalDevice());
 }
 

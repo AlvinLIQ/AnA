@@ -28,8 +28,8 @@ void TextBlock::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInf
 {
     auto size = GetSizeForRender();
     auto offset = GetActualControlOffset();
-    this->Transform.scale = {size.Width, size.Height, 1.f};
-    this->Transform.translation = {offset.x, offset.y, 0.f};
+    this->Transform.scale = {size.x(), size.y(), 1.f};
+    this->Transform.translation = {offset.x(), offset.y(), 0.f};
     ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
 }
 
@@ -38,10 +38,10 @@ void TextBlock::Text(const char* newText)
     if (texture)
         delete texture;
     text = newText;
-    int width = 0, height = 0;
+    Int32 width = 0, height = 0;
     //float* scale = GetScale();
     texture = new Texture(text.Str(), width, height, 0, Control::GetDevice());
-    ControlSize = {(float)width, (float)height};
+    ControlSize = {width.As<float>(), height.As<float>()};
 }
 
 const char* TextBlock::Text()

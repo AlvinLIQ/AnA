@@ -8,7 +8,7 @@ SwapChain* aSwapChain = nullptr;
 Control* pressedControl = nullptr;
 Control* focusedControl = nullptr;
 bool leftButtonPressed = false;
-POS_2F lastPressedPos{};
+Vec2 lastPressedPos{};
 
 Control::Control()
 {
@@ -19,7 +19,7 @@ Control::~Control()
     
 }
 
-POS_2F Control::GetActualControlOffset()
+Vec2 Control::GetActualControlOffset()
 {
     float* pOffset = reinterpret_cast<float*>(&renderOffset);
     float* pSize = reinterpret_cast<float*>(&this->renderSize);
@@ -38,21 +38,21 @@ POS_2F Control::GetActualControlOffset()
         }
     }
                 
-    renderOffset.x += ControlOffset.x;
-    renderOffset.y += ControlOffset.y;
-    renderOffset.x *= aSwapChain->ScaleX;
-    renderOffset.y *= aSwapChain->ScaleY;
+    renderOffset.x() += ControlOffset.x();
+    renderOffset.y() += ControlOffset.y();
+    renderOffset.x() *= aSwapChain->ScaleX;
+    renderOffset.y() *= aSwapChain->ScaleY;
     return renderOffset;
 }
 
-SIZE_2F Control::GetSizeForRender()
+Vec2 Control::GetSizeForRender()
 {
     if (renderMode == AlignType::Absolute)
     {
-        renderSize.Width = ControlSize.Width / static_cast<float>(Extent.width);
-        renderSize.Height = ControlSize.Height / static_cast<float>(Extent.height);
-        renderSize.Width *= aSwapChain->ScaleX;
-        renderSize.Height *= aSwapChain->ScaleY;
+        renderSize.x() = ControlSize.x() / static_cast<float>(Extent.width);
+        renderSize.y() = ControlSize.y() / static_cast<float>(Extent.height);
+        renderSize.x() *= aSwapChain->ScaleX;
+        renderSize.y() *= aSwapChain->ScaleY;
     }
     else if (renderMode == AlignType::Relative)
     {
@@ -60,7 +60,7 @@ SIZE_2F Control::GetSizeForRender()
     }
     else if (renderMode == AlignType::Auto)
     {
-        renderSize = {ControlSize.Width / Aspect, ControlSize.Height};
+        renderSize = {ControlSize.x() / Aspect, ControlSize.y()};
     }
 
     return renderSize;
@@ -78,9 +78,9 @@ void Control::InitControl(SwapChain* swapChain)
     aSwapChain = swapChain;
 }
 
-float* Control::GetScale()
+Float* Control::GetScale()
 {
-    return &aSwapChain->Scale[0];
+    return aSwapChain->Scale;
 }
 
 VkExtent2D Control::GetSwapChainExtent()
@@ -121,22 +121,22 @@ Control* Control::GetFocused()
 
 bool Control::IsInside(CursorPosition pos)
 {
-    POS_2F offset = {renderOffset.x * 0.5f + 0.5f - renderSize.Width * 0.5f, renderOffset.y * 0.5f + 0.5f - renderSize.Height * 0.5f};
+    Vec2 offset = {renderOffset.x() * 0.5f + 0.5f - renderSize.x() * 0.5f, renderOffset.y() * 0.5f + 0.5f - renderSize.y() * 0.5f};
     if (HorizontalAlignment == Stretch)
     {
-        offset.x = 0.0f;
+        offset.x() = 0.0f;
     }
     if (VerticalAlignment == Stretch)
     {
-        offset.y = 0.0f;
+        offset.y() = 0.0f;
     }
     return IsInside(pos, offset, renderSize);
 }
 
-bool Control::IsInside(CursorPosition& pos, POS_2F& offset, SIZE_2F& size)
+bool Control::IsInside(CursorPosition& pos, Vec2& offset, Vec2& size)
 {
-    return static_cast<float>(pos.x) >= offset.x && static_cast<float>(pos.y) >= offset.y && 
-    static_cast<float>(pos.x) <= offset.x + size.Width && static_cast<float>(pos.y) <= offset.y + size.Height;
+    return pos.x.As<float>() >= offset.x() && pos.y.As<float>() >= offset.y() && 
+    pos.x.As<float>() <= offset.x() + size.x() && pos.y.As<float>() <= offset.y() + size.y();
 }
 
 VkDescriptorImageInfo Control::GetDescriptorImageInfo()
@@ -146,8 +146,8 @@ VkDescriptorImageInfo Control::GetDescriptorImageInfo()
 
 void Control::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
-    this->Transform.scale = {renderSize.Width, renderSize.Height, 1.f};
-    this->Transform.translation = {renderOffset.x, renderOffset.y, 0.f};
+    this->Transform.scale = {renderSize.x(), renderSize.y(), 1.f};
+    this->Transform.translation = {renderOffset.x(), renderOffset.y(), 0.f};
     shapeBuffer[shapeCount].transform = Transform.mat4();
     shapeBuffer[shapeCount].color = Color;
     if (imageInfos.size() <= shapeCount)
@@ -253,7 +253,7 @@ void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input:
         args.TriggerType = PointerTriggerType::Mouse;
         auto extent = Control::GetSwapChainExtent();
         auto scale = Control::GetScale();
-        args.Position = {pos.x * static_cast<double>(scale[0]) / (control->Extent.width / static_cast<double>(extent.width)), 
+        args.Position = {pos.x * scale[0].As<double>() / (control->Extent.width / static_cast<double>(extent.width)), 
                         pos.y * static_cast<double>(scale[1]) / (control->Extent.height / static_cast<double>(extent.height))};
         control->PointerEventTrigger(args);
         Resource::ResourceManager::GetCurrent()->Shapes.PrepareDraw(control);
