@@ -108,8 +108,7 @@ int main()
     auto& meshes = Resource::ResourceManager::GetCurrent()->MainScene;
     meshes.Append(vertices, indices, {{-500.0, 1.0, -500.0}});
     meshes.Append(meshInfos.data(), meshInfos.size());
-    meshes.EnableUpdate = true;
-    meshes.UpdateAll();
+    meshes.Update();
     app.Run();
     return 0;
 }

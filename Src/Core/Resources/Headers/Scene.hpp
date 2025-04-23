@@ -132,7 +132,7 @@ namespace AnA
         {
             return samplersDescriptors[0]->GetSets()[0];
         }
-        bool EnableUpdate = false;
+        bool IsRunning = false;
     private:
         Device* aDevice;
         std::vector<Model::Vertex> vertices{};
@@ -168,5 +168,6 @@ namespace AnA
         void buildMeshletsWithOptimizer();
         uint8_t currentBufferIndex = 0;
         uint8_t nextIndex = 1 % MAX_FRAMES_IN_FLIGHT;
+        void updateAll();
     };
 }

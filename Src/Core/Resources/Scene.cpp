@@ -308,49 +308,19 @@ void Scene::CommitBufferUpdate()
 
 void Scene::Update()
 {
-    if (!vertexBuffers[currentBufferIndex].GetBuffer())
+    if (IsRunning)
     {
-        if (!EnableUpdate)
-            return;
-        vertexBuffers[nextIndex] = Buffer(aDevice, vertexCount * sizeof(Model::Vertex), 
-        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        //vertexBuffer->CopyToBuffer(Vertices.data(), Vertices.size() * sizeof(Model::Vertex));
-
-        indexBuffers[nextIndex] = Buffer(aDevice, indexCount * sizeof(Model::Index), 
-            VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        //indexBuffer->CopyToBuffer(Indices.data(), Indices.size() * sizeof(Model::Index));
-        vertexBuffers[nextIndex].Map(0, vertexBuffers[nextIndex].GetSize());
-        indexBuffers[nextIndex].Map(0, indexBuffers[nextIndex].GetSize());
-        CommitBufferUpdate(&vertexBuffers[nextIndex], &indexBuffers[nextIndex]);
-        UpdateMeshlets();
-
-        updateSSBODescriptor();
-        //UpdateBuffers({0, meshes.size()});
-        commandBufferNeedUpdate = true;
-        return;
+        Resource::ResourceManager::GetCurrent()->TaskPool.Enqueue([this]()
+        {
+            this->updateAll();
+        });
     }
-    Resource::ResourceManager::GetCurrent()->TaskPool.Enqueue([this]()
+    else
     {
-        vertexBuffers[nextIndex] = Buffer(aDevice, vertexCount * sizeof(Model::Vertex), 
-        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-        indexBuffers[nextIndex] = Buffer(aDevice, indexCount * sizeof(Model::Index), 
-            VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        vertexBuffers[nextIndex].Map(0, vertexBuffers[nextIndex].GetSize());
-        indexBuffers[nextIndex].Map(0, indexBuffers[nextIndex].GetSize());
-
-        
-        UpdateMeshlets();
-        CommitBufferUpdate(&vertexBuffers[nextIndex], &indexBuffers[nextIndex]);
-
-        updateSSBODescriptor();
-        commandBufferNeedUpdate = true;
-    });
+        updateAll();
+    }
 }
+
 
 void Scene::UpdateBuffers(Range updateRange)
 {
@@ -722,4 +692,27 @@ void Scene::buildMeshletsWithOptimizer()
             meshlets.push_back(meshlet);
         }
     }
+}
+
+void Scene::updateAll()
+{
+    if (vertexCount * sizeof(Model::Vertex) > vertexBuffers[nextIndex].GetSize())
+    {
+        vertexBuffers[nextIndex] = Buffer(aDevice, (vertexCount + 1000) * sizeof(Model::Vertex), 
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        vertexBuffers[nextIndex].Map(0, vertexBuffers[nextIndex].GetSize());
+    }
+    if (indexCount * sizeof(Model::Index) > indexBuffers[nextIndex].GetSize())
+    {
+        indexBuffers[nextIndex] = Buffer(aDevice, (indexCount + 1000) * sizeof(Model::Index), 
+            VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        indexBuffers[nextIndex].Map(0, indexBuffers[nextIndex].GetSize());
+    }
+    CommitBufferUpdate(&vertexBuffers[nextIndex], &indexBuffers[nextIndex]);
+    UpdateMeshlets();
+
+    updateSSBODescriptor();
+    commandBufferNeedUpdate = true;
 }

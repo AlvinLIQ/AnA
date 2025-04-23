@@ -99,7 +99,6 @@ int main()
     editor.Init();
     auto scene = ReadFile("Scenes/scene.ana");
     auto& meshes = Resource::ResourceManager::GetCurrent()->MainScene;
-    meshes.EnableUpdate = true;
     meshes.Append(reinterpret_cast<MeshInfo*>(scene.data()), scene.size() / sizeof(MeshInfo));
     editor.Run();
     return 0;
