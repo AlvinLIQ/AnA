@@ -2,7 +2,7 @@
 #include "../../Camera/Headers/Camera.hpp"
 #include "../../Headers/Threadpool.hpp"
 #include "CommandBufferPool.hpp"
-#include "Mesh.hpp"
+#include "Scene.hpp"
 #include "Descriptor.hpp"
 #include "Shader.hpp"
 #include "Lights.hpp"
@@ -61,7 +61,7 @@ namespace AnA
 
             void Resize();
 
-            Meshes SceneObjects;
+            Scene MainScene;
             std::vector<Shader> Shaders;
             void GetDefaultDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);
             void GetDefaultShapesDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);

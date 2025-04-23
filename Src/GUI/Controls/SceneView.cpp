@@ -1,19 +1,19 @@
-#include "Headers/Scene.hpp"
+#include "Headers/SceneView.hpp"
 
 using namespace AnA;
 using namespace Controls;
 
-Scene::Scene()
+SceneView::SceneView()
 {
     RenderMode(Relative);
 }
 
-Scene::~Scene()
+SceneView::~SceneView()
 {
 
 }
 
-VkDescriptorImageInfo Scene::GetDescriptorImageInfo()
+VkDescriptorImageInfo SceneView::GetDescriptorImageInfo()
 {
     if (imageInfo.has_value())
         return imageInfo.value();

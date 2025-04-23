@@ -65,7 +65,7 @@ void EditorApp::loadModelButton_Click(void* , PointerEventArgs& )
     MeshInfo mesh;
     memcpy(mesh.filePath, path.c_str(), path.length() + 1);
     mesh.tetureId = 0;
-    Resource::ResourceManager::GetCurrent()->SceneObjects.Append(std::vector<MeshInfo>(1, mesh));
+    Resource::ResourceManager::GetCurrent()->MainScene.Append(std::vector<MeshInfo>(1, mesh));
     auto panel = 
             static_cast<Controls::StackPanel*>(static_cast<EditorApp*>(App::GetCurrent())->controlMap["modelList"]);
     panel->Child(static_cast<Controls::Control*>(new Controls::TextBlock(path.c_str(), 
@@ -80,7 +80,7 @@ void EditorApp::saveSceneButton_Click(void* , PointerEventArgs& )
         return;
     /*
     FILE* f = fopen(path.c_str(), "wb");
-    auto objects = Resource::ResourceManager::GetCurrent()->SceneObjects;
+    auto objects = Resource::ResourceManager::GetCurrent()->MainScene;
     fwrite((const void*)objects.Get(), sizeof(Mesh), objects.GetMeshCount(), f);
 
     fclose(f);*/
@@ -98,7 +98,7 @@ int main()
     EditorApp editor{};
     editor.Init();
     auto scene = ReadFile("Scenes/scene.ana");
-    auto& meshes = Resource::ResourceManager::GetCurrent()->SceneObjects;
+    auto& meshes = Resource::ResourceManager::GetCurrent()->MainScene;
     meshes.EnableUpdate = true;
     meshes.Append(reinterpret_cast<MeshInfo*>(scene.data()), scene.size() / sizeof(MeshInfo));
     editor.Run();

@@ -51,11 +51,12 @@ namespace AnA
         float cutoff;
     };
 
-    class Meshes : public Renderable
+    class Scene : public Renderable
     {
     public:
-        Meshes(Device* mDevice);
-        virtual ~Meshes();
+        Scene(Device* mDevice);
+        virtual ~Scene();
+        void Init();
         void Append(const std::vector<MeshInfo>& meshInfos);
         void Append(const MeshInfo* meshInfos, size_t count);
         void Append(std::vector<Model::Vertex>& vertices, std::vector<uint32_t>& indices, Transform transform = {});
@@ -143,6 +144,7 @@ namespace AnA
         Buffer drawIndexedIndirectBuffer{};
         Buffer drawMeshIndirectBuffer{};
         Buffer countBuffer{};
+        void createIndirectBuffers();
         std::vector<Mesh> meshes;
         uint32_t batchSize;
         std::vector<Range> updateQueue{};

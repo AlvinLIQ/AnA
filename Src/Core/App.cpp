@@ -131,7 +131,7 @@ void App::Run()
         camera.SetSpeedRatio(frameTime * 2.0f);
         aInputManager.Check();
         //Update Resources
-        commandBufferNeedUpdate = aResourceManager.SceneObjects.BeginCommandBufferUpdate() || aRenderer.NeedUpdate();
+        commandBufferNeedUpdate = aResourceManager.MainScene.BeginCommandBufferUpdate() || aRenderer.NeedUpdate();
 
         if (aRenderer.NeedUpdate())
         {
@@ -240,7 +240,7 @@ void App::createRecordCallBacks()
         {
             auto aResourceManager = Resource::ResourceManager::GetCurrent();
             Systems::RenderSystem::GetCurrent()->RenderIndirect(secondaryCommandBuffer, 
-                aResourceManager->SceneObjects, 
+                aResourceManager->MainScene, 
                 aResourceManager->SecondaryCommandBufferPool.CurrentBufferIndex);
         }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), _aApp->GetSceneOffset());
         /*
@@ -248,7 +248,7 @@ void App::createRecordCallBacks()
         {
             //RenderShadowsIndirect(offScreenSecondaryCommandBuffer);
         });*/
-        aResourceManager->SceneObjects.EndCommandBufferUpdate();
+        aResourceManager->MainScene.EndCommandBufferUpdate();
     }, GetSceneOffset());
 #ifdef ANA_INCLUDE_CONTROL
 
@@ -282,7 +282,7 @@ void App::createRecordCallBacks()
 
 void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
 {
-    if (!aResourceManager.SecondaryCommandBufferPool.GetCommandBufferCount() || !aResourceManager.SceneObjects.GetMeshCount())
+    if (!aResourceManager.SecondaryCommandBufferPool.GetCommandBufferCount() || !aResourceManager.MainScene.GetMeshCount())
         return;
     //if (commandBufferNeedUpdate)
     //{
@@ -295,13 +295,13 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
             VK_SUBPASS_CONTENTS_INLINE);
         
         //aRenderer->ExecuteOffscreenSecondaryCommandBuffer(commandBuffer);
-        aShadowSystem->RenderCascadedShadowsIndirect(commandBuffer, aResourceManager->SceneObjects, aResourceManager->Shaders[2], i);
+        aShadowSystem->RenderCascadedShadowsIndirect(commandBuffer, aResourceManager->MainScene, aResourceManager->Shaders[2], i);
         aRenderer->EndRenderPass(commandBuffer);
     }*/
     //}
     aRenderer.BeginSwapChainRenderPass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE_AND_SECONDARY_COMMAND_BUFFERS_KHR);
     aResourceManager.SecondaryCommandBufferPool.ExecuteRecordedBuffer(commandBuffer);
-    //aRenderSystem.RenderMeshesIndirect(commandBuffer, aResourceManager.SceneObjects, aResourceManager.Shaders[0]);
+    //aRenderSystem.RenderSceneIndirect(commandBuffer, aResourceManager.MainScene, aResourceManager.Shaders[0]);
     //aRenderSystem.RenderShapesIndirect(commandBuffer, *aResourceManager.Shapes, aResourceManager.Shaders[1]);
     aRenderer.EndRenderPass(commandBuffer);
 }

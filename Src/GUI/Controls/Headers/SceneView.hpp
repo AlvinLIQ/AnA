@@ -7,11 +7,11 @@ namespace AnA
 {
     namespace Controls
     {
-        class Scene : public Control
+        class SceneView : public Control
         {
         public:
-            Scene();
-            ~Scene();
+            SceneView();
+            ~SceneView();
             void ImageInfo(VkDescriptorImageInfo _imageInfo)
             {
                 imageInfo = _imageInfo;

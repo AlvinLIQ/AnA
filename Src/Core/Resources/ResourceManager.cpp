@@ -8,7 +8,7 @@ using namespace Resource;
 ResourceManager* _resourceManager = nullptr;
 
 ResourceManager::ResourceManager(Device* mDevice) : 
-        SceneObjects(mDevice),
+        MainScene(mDevice),
         GlobalLight(mDevice),
         ShadowMap(mDevice),
         SecondaryCommandBufferPool(mDevice, 
@@ -20,6 +20,7 @@ ResourceManager::ResourceManager(Device* mDevice) :
     createMainCameraBuffers();
     //createShadowFramebuffers();
     createDefaultShaders();
+    MainScene.Init();
     Shapes = AnA::Shapes(mDevice);
     //Shapes = new AnA::Shapes(mDevice);
 #ifdef ANA_INCLUDE_CONTROL
@@ -41,7 +42,7 @@ ResourceManager::~ResourceManager()
     //   vkDestroySampler(logicalDevice, shadowSampler, nullptr);
     //cleanupShadowResources();
 
-    //delete SceneObjects;
+    //delete MainScene;
     //delete GlobalLight;
 #ifdef ANA_INCLUDE_CONTROL
     delete MainControl;
@@ -134,9 +135,9 @@ void ResourceManager::Update()
     uint32_t frameIndex = SwapChain::GetCurrent()->CurrentFrame;
     GlobalLight.UpdateBuffers(LightCamera, frameIndex);
     ShadowMap.UpdateBuffers(MainCamera, LightCamera, frameIndex);
-    if (SceneObjects.NeedUpdate())
+    if (MainScene.NeedUpdate())
     {
-        SceneObjects.CommitBufferUpdate();
+        MainScene.CommitBufferUpdate();
     }
     recordedCallbacks = 0;
     for (auto& recordCallBackInfo : RecordCallBacks)

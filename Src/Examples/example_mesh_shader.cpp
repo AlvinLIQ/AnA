@@ -105,7 +105,7 @@ int main()
     GenTerrain(vertices, indices, 1500.0f, 1500.0f);
     MeshShaderApp app;
     app.Init();
-    auto& meshes = Resource::ResourceManager::GetCurrent()->SceneObjects;
+    auto& meshes = Resource::ResourceManager::GetCurrent()->MainScene;
     meshes.Append(vertices, indices, {{-500.0, 1.0, -500.0}});
     meshes.Append(meshInfos.data(), meshInfos.size());
     meshes.EnableUpdate = true;
