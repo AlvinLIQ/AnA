@@ -286,18 +286,18 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
         return;
     //if (commandBufferNeedUpdate)
     //{
-    /*
-    uint32_t frameIndex = aRenderer->GetFrameIndex();
+    
+    uint32_t frameIndex = aRenderer.GetFrameIndex();
     for (uint32_t i = 0 ; i < SHADOW_MAP_CASCADE_COUNT; i++)
     {
-        aRenderer->BeginOffscreenRenderPass(commandBuffer, 
-            aResourceManager->ShadowMap.GetCascades()[i].framebuffers[frameIndex],
+        aRenderer.BeginOffscreenRenderPass(commandBuffer, 
+            aResourceManager.ShadowMap.GetCascades()[i].framebuffers[frameIndex],
             VK_SUBPASS_CONTENTS_INLINE);
         
         //aRenderer->ExecuteOffscreenSecondaryCommandBuffer(commandBuffer);
-        aShadowSystem->RenderCascadedShadowsIndirect(commandBuffer, aResourceManager->MainScene, aResourceManager->Shaders[2], i);
-        aRenderer->EndRenderPass(commandBuffer);
-    }*/
+        aShadowSystem.RenderCascadedShadowsIndirect(commandBuffer, aResourceManager.MainScene, aResourceManager.Shaders[2], i);
+        aRenderer.EndRenderPass(commandBuffer);
+    }
     //}
     aRenderer.BeginSwapChainRenderPass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE_AND_SECONDARY_COMMAND_BUFFERS_KHR);
     aResourceManager.SecondaryCommandBufferPool.ExecuteRecordedBuffer(commandBuffer);

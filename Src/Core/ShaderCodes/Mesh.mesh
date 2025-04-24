@@ -51,14 +51,6 @@ layout (set = 5, binding = 0) uniform UBO {
 	Cascade[SHADOW_MAP_CASCADE_COUNT] cascades;
 } ubo;
 
-struct Meshlet
-{
-   uint vertices[128];
-   uint indices[256*3];
-   uint indexCount;
-   uint vertexCount; 
-};
-
 layout(std430, set = 6, binding = 0) buffer meshletSSBO
 {
     uint meshlets[];
@@ -89,10 +81,10 @@ void main()
         vec4 viewPos = cbo.view * vertexPos;
         gl_MeshVerticesEXT[i].gl_Position = viewProj * vec4(vertex.position, 1.0);
         vertexOutput[i].texCoord = vertex.uv;
-        vertexOutput[i].texID = gl_WorkGroupID.x % 4;
+        vertexOutput[i].texID = vertex.texIndex;
         vertexOutput[i].normalSpace = vertex.normal;
         vertexOutput[i].vertexPosition = vertex.position;
-        vertexOutput[i].viewPos = viewPos;
+        vertexOutput[i].viewPos = ubo.cascades[3].viewProj * vertexPos;
     }
     iid += vertexCount;
     for (uint i = 0, j, offset, t; i < primitiveCount; i++)

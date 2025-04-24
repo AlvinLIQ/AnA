@@ -102,11 +102,11 @@ void ResourceManager::UpdateCamera(float aspect)
     MainCameraInfo.UpdateCameraPerspective(MainCamera);
     LightCameraInfo.aspect = aspect;
     //LightCameraInfo.UpdateCameraPerspective(LightCamera);
-    const float scale = 10.5f;
+    //const float scale = 10.5f;
     //LightCamera.SetOrthographicProjection(-scale * LightCameraInfo.aspect, -scale, scale * LightCameraInfo.aspect, scale, 
     //    -10.0f, 32.0f);
-    LightCamera.SetOrthographicProjection(-scale * LightCameraInfo.aspect, -scale, scale * LightCameraInfo.aspect, scale, 
-        -10.0f, 32.0f);
+    //LightCamera.SetOrthographicProjection(-scale * LightCameraInfo.aspect, -scale, scale * LightCameraInfo.aspect, scale, 
+    //    -10.0f, 32.0f);
 }
 
 void ResourceManager::UpdateCameraBuffer()
