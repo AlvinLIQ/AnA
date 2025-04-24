@@ -3,11 +3,13 @@
 layout(location = 0) out vec4 fragColor;
 layout(location = 1) out vec2 texCoord;
 layout(location = 2) out uint texIndex;
+layout(location = 3) out uint texLayer;
 
 struct Shape
 {
     mat4 transform;
     vec4 color;
+    uint texLayer;
 };
 
 layout(std140, set = 0, binding = 0) buffer SSBO
@@ -41,4 +43,5 @@ void main()
     fragColor = ssbo.shapes[index].color;
     texIndex = index;
     texCoord = uvs[vIndex];
+    texLayer = ssbo.shapes[index].texLayer;
 }

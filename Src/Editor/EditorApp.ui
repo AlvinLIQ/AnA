@@ -12,8 +12,10 @@
     <Slider Name="nearSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.0f"/>
     <TextBlock Text="Far" Color="0.8f, 0.8f, 0.8f, 1.0f"/>
     <Slider Name="farSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="1.0f"/>
-    <!--Scene HorizontalAlignment="Stretch" ImageInfo="Resource::ResourceManager::GetCurrent()->ShadowMap.GetDescriptorImageInfos()[0]"
-        ControlSize="0.0f, 0.3f"/-->
+    <TextBlock Text="Shadow Map" Color="0.8f, 0.8f, 0.8f, 1.0f"/>
+    <Slider Name="shadowMapSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="1.0f"/>
+    <SceneView Name="shadowMapView" HorizontalAlignment="Stretch" ImageInfo="Resource::ResourceManager::GetCurrent()->ShadowMap.GetDescriptorImageInfos()[0]"
+        ControlSize="0.0f, 0.3f" TextureLayer="0"/>
     <TextBlock Text="Lock Camera" Color="0.8f, 0.8f, 0.8f, 1.0f"/>
     <ToggleSwitch Name="camLockToggle" ControlSize="0.04f, 0.02f"/>
     <Button HorizontalAlignment="Start" Click="exitButton_Click">

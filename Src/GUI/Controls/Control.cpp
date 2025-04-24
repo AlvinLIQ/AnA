@@ -150,6 +150,7 @@ void Control::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageI
     this->Transform.translation = {renderOffset.x(), renderOffset.y(), 0.f};
     shapeBuffer[shapeCount].transform = Transform.mat4();
     shapeBuffer[shapeCount].color = Color;
+    shapeBuffer[shapeCount].texLayer = TextureLayer;
     if (imageInfos.size() <= shapeCount)
     {
         imageInfos.resize(shapeCount + MaxBatchSize);

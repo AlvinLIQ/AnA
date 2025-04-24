@@ -4,9 +4,10 @@
 layout(location = 0) in vec4 baseColor;
 layout(location = 1) in vec2 texCoord;
 layout(location = 2) flat in uint texIndex;
+layout(location = 3) flat in uint texLayer;
 layout(location = 0) out vec4 outColor;
 
-layout(set = 1, binding = 0) uniform sampler2D texSampler[];
+layout(set = 1, binding = 0) uniform sampler2DArray texSampler[];
 
 float rect(vec2 uv, float l, float t, float r, float b)
 {
@@ -71,7 +72,7 @@ float rounded_rect2(vec2 uv, vec2 offset, vec2 size, vec2 radius)
 void main()
 {
     //outColor = vec4(baseColor, 1.0);
-    vec4 texColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord);
+    vec4 texColor = texture(texSampler[nonuniformEXT(texIndex)], vec3(texCoord, texLayer));
     if (texColor.a < 0.5)
         discard;
     outColor = vec4(baseColor.x * texColor.x, baseColor.y * texColor.y, baseColor.z * texColor.z, baseColor.w);
