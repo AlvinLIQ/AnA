@@ -65,13 +65,15 @@ void main()
     float pointLightIntensity = max(dot(normalSpace, normalize(LIGHT_DIRECTION - vertex)), 0);
     float diffuseLightItensity = max(dot(normalSpace, normalize(lbo.direction)), 0);
 	
-    uint cascadeIndex = 0;
+    uint cascadeIndex = SHADOW_MAP_CASCADE_COUNT - 1;
 	for(uint i = 0; i < SHADOW_MAP_CASCADE_COUNT - 1; ++i) {
-		if(viewPos.z < ubo.cascades[i].split) {	
+		if(viewPos.z > ubo.cascades[i].split) {	
 			cascadeIndex = i + 1;
+			break;
 		}
 	}
-    vec4 shadowCoord = biasMat * ubo.cascades[0].viewProj * vec4(vertex, 1.0);
+	cascadeIndex = 3 - cascadeIndex;
+    vec4 shadowCoord = biasMat * ubo.cascades[cascadeIndex].viewProj * vec4(vertex, 1.0);
     float visibility = textureProj(shadowCoord, vec2(0.), cascadeIndex);
 
     vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility + pointLightIntensity * LIGHT_COLOR;

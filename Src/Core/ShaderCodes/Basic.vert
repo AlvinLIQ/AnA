@@ -89,7 +89,7 @@ void main() {
     gl_Position = cbo.proj * viewPos;
     outNormalSpace = normalize(vertex.normal);
     outVertex = vertexPos.xyz;
-    outViewPos = viewPos;
+    outViewPos = ubo.cascades[3].viewProj * vertexPos;
 
     outTexCoord = vertex.uv;
     outTexID = vertex.texIndex;
