@@ -10,7 +10,7 @@
 
 * [X] Mesh Shader
 * [ ] Animation System
-* [ ] Cascaded Shaodow Maps
+* [X] Cascaded Shaodow Maps
 * [ ] Fix Crappy Text Rendering
 
 ## Build&Run
