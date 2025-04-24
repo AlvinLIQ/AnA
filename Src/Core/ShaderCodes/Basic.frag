@@ -48,7 +48,7 @@ const mat4 biasMat = mat4(
 float textureProj(vec4 shadowCoord, vec2 offset, uint cascadeIndex)
 {
 	float shadow = 1.0;
-	float bias = 0.005;
+	float bias = 0.001;
 
 	if ( shadowCoord.z > -1.0 && shadowCoord.z < 1.0 ) {
 		float dist = texture(shadowSampler, vec3(shadowCoord.xy + offset, cascadeIndex)).r;
@@ -65,14 +65,13 @@ void main()
     float pointLightIntensity = max(dot(normalSpace, normalize(LIGHT_DIRECTION - vertex)), 0);
     float diffuseLightItensity = max(dot(normalSpace, normalize(lbo.direction)), 0);
 	
-    uint cascadeIndex = SHADOW_MAP_CASCADE_COUNT - 1;
-	for(uint i = 0; i < SHADOW_MAP_CASCADE_COUNT - 1; ++i) {
-		if(viewPos.z > ubo.cascades[i].split) {	
-			cascadeIndex = i + 1;
+    uint cascadeIndex = 0;
+	for(uint i = 1; i < SHADOW_MAP_CASCADE_COUNT; i++) {
+		if(viewPos.z < ubo.cascades[i].split) {	
+			cascadeIndex = i;
 			break;
 		}
 	}
-	cascadeIndex = 3 - cascadeIndex;
     vec4 shadowCoord = biasMat * ubo.cascades[cascadeIndex].viewProj * vec4(vertex, 1.0);
     float visibility = textureProj(shadowCoord, vec2(0.), cascadeIndex);
 

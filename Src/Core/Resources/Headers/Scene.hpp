@@ -112,6 +112,10 @@ namespace AnA
 
             return batchCount;
         }
+        std::vector<Model::Vertex>& GetVertices()
+        {
+            return vertices;
+        }
         const Descriptor* GetVertexDescriptor() const
         {
             return vertexDescriptor;

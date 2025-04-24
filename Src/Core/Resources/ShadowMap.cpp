@@ -49,7 +49,7 @@ void ShadowMap::UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, u
     //glm::vec3 lightPos = lightDir * 2.0f;
     //float cascadeSplits[SHADOW_MAP_CASCADE_COUNT];
     
-	float nearPlane = 0.01f;
+	float nearPlane = 0.5f;
 	float farPlane = 32.0f;
     float clipRange = farPlane - nearPlane;
     float cascadeSplits[SHADOW_MAP_CASCADE_COUNT];
@@ -116,7 +116,7 @@ void ShadowMap::UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, u
         light.SetOrthographicProjection(minExtents.x, minExtents.y, maxExtents.x, maxExtents.y, 0.0f, maxExtents.z - minExtents.z);
 		auto cbo = (CascadeBufferObject*)cascadeBuffers[bufferIndex].GetMappedData();
         cbo[i].viewProjMatrix = light.GetProjectionMatrix() * light.GetView();
-        cbo[i].splitDepth = (nearPlane + splitDist * clipRange) * -1.0f;
+        cbo[i].splitDepth = (nearPlane + splitDist * clipRange);
 
 	    lastSplitDist = cascadeSplits[i];
 	}    
