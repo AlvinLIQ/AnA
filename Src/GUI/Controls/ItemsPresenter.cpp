@@ -57,11 +57,16 @@ void ItemsPresenter::RemoveChildAt(size_t index)
 
 void ItemsPresenter::PointerEventTrigger(PointerEventArgs& args)
 {
+    if (GetFocused() && !IsFocused())
+    {
+        GetFocused()->PointerEventTrigger(args);
+        return;
+    }
     for (auto& item : items)
     {
-        item->PointerEventTrigger(args);
         if (args.Handled)
             return;
+        item->PointerEventTrigger(args);
     }
     Control::PointerEventTrigger(args);
 }

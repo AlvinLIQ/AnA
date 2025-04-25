@@ -188,7 +188,7 @@ bool Control::ProcessEventArgs(PointerEventArgs& args, PointerEventType& actualE
         }
         else if (!isInside)
         {
-            result = false;
+            result = IsFocused();
         }
         break;
     case Pressed:
@@ -232,6 +232,7 @@ PointerEventType GetPointerEventType(int buttonAction)
         {
             leftButtonPressed = false;
             eventType = PointerEventType::Released;
+            focusedControl = nullptr;
         }
     default:
         break;
@@ -256,7 +257,10 @@ void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input:
         auto scale = Control::GetScale();
         args.Position = {pos.x * scale[0].As<double>() / (control->Extent.width / static_cast<double>(extent.width)), 
                         pos.y * static_cast<double>(scale[1]) / (control->Extent.height / static_cast<double>(extent.height))};
-        control->PointerEventTrigger(args);
+        if (focusedControl && focusedControl != control)
+            focusedControl->PointerEventTrigger(args);
+        else
+            control->PointerEventTrigger(args);
         Resource::ResourceManager::GetCurrent()->Shapes.PrepareDraw(control);
     };
     profile.cursorConfigs.push_back(cursorConfig);
