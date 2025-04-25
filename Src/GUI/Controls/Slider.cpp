@@ -25,7 +25,7 @@ void slider_Click(void* control, PointerEventArgs& args)
     {
         pos = 0.0f;
     }
-    slider->Value = pos / sizeF;
+    slider->Value = std::min(1.0f, pos / sizeF);
 }
 
 Slider::Slider()
