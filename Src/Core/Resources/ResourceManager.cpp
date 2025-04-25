@@ -164,13 +164,6 @@ void ResourceManager::RecreateResources()
 {
     //cleanupShadowResources();
     //createShadowFramebuffers();
-    std::vector<std::vector<Descriptor::DescriptorConfig>> configs;
-    GetDefaultDescriptorSetConfig(configs);
-    auto deafultShadowSamplerConfig = configs[DEFAULT_SHADOW_SAMPLER_LAYOUT].begin();
-    for (size_t i = 0; i < 1; i++)
-    {
-        Shaders[i].GetDescriptors()[DEFAULT_SHADOW_SAMPLER_LAYOUT]->UpdateDescriptorSets(*deafultShadowSamplerConfig);
-    }
 }
 
 void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs)
@@ -224,7 +217,8 @@ void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Desc
     pConfig->descriptorCount = 1;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     pConfig->stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    GetImageInfos(ShadowMap.GetImages(), ShadowMap.GetSamplers(), pConfig->imageInfos);
+    pConfig->imageInfos = ShadowMap.GetDescriptorImageInfos();
+    //GetImageInfos(ShadowMap.GetImages(), ShadowMap.GetSamplers(), pConfig->imageInfos);
 
     ShadowMap.GetUBODescriptorConfig(&descriptorSetConfigs[DEFAULT_CASCADED_UBO_LAYOUT][0]);
 }
@@ -281,7 +275,7 @@ void ResourceManager::createDefaultShaders()
     auto offscreenRenderPass = SwapChain::GetCurrent()->GetOffscreenRenderPass();
 
     Shaders.emplace_back(aDevice, CascadedShadowMapping_vert, offscreenRenderPass
-        , CascadedShadowMapping_frag, descriptorConfig, sizeof(uint32_t));
+        , descriptorConfig, sizeof(uint32_t));
 /*
     Descriptor::DescriptorConfig chVertexConfig{};
     chVertexConfig.binding = 0;

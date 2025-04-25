@@ -63,7 +63,7 @@ float textureProj(vec4 shadowCoord, vec2 offset, uint cascadeIndex)
 float filterPCF(vec4 sc, uint cascadeIndex)
 {
 	ivec2 texDim = textureSize(shadowSampler, 0).xy;
-	float scale = 0.75;
+	float scale = 0.85;
 	float dx = scale * 1.0 / float(texDim.x);
 	float dy = scale * 1.0 / float(texDim.y);
 

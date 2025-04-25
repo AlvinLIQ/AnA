@@ -84,7 +84,7 @@ void main()
         vertexOutput[i].texID = vertex.texIndex;
         vertexOutput[i].normalSpace = vertex.normal;
         vertexOutput[i].vertexPosition = vertex.position;
-        vertexOutput[i].viewPos = ubo.cascades[3].viewProj * vertexPos;
+        vertexOutput[i].viewPos = viewPos;
     }
     iid += vertexCount;
     for (uint i = 0, j, offset, t; i < primitiveCount; i++)

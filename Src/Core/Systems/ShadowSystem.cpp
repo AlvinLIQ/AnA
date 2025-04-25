@@ -58,15 +58,17 @@ void ShadowSystem::RenderCascadedShadowsIndirect(CommandBuffer& commandBuffer, S
     swapChain->SetViewport(commandBuffer, {}, extent);
     vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
     shader.GetPipeline()->Bind(commandBuffer);
-    std::vector<VkDescriptorSet> sets = shader.GetDescriptorSets()[0];
-    //sets[DEFAULT_VERTEX_LAYOUT] = meshes.GetSSBODescriptor()->GetSets()[0];
+    std::vector<VkDescriptorSet>& sets = shader.GetDescriptorSets()[0];
     auto pipelineLayout = shader.GetPipelineLayout();
     /*
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
         pipelineLayout, 0, sets.size(),
         sets.data(), 0, nullptr);*/
+    VkShaderStageFlags stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+    if (swapChain->GetDevice()->MeshShaderSupport())
+        stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT;
     vkCmdPushConstants(commandBuffer, pipelineLayout, 
-            VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(uint32_t), &index);
+            stageFlags, 0, sizeof(uint32_t), &index);
     meshes.Bind(commandBuffer);
     meshes.DrawIndirect(commandBuffer, sets, pipelineLayout);
 }
