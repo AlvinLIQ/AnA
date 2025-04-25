@@ -497,13 +497,15 @@ void Scene::createSSBODescriptor()
     auto& vertexDescriptorSetLayout = 
         shaders.front().GetDescriptors()[DEFAULT_VERTEX_LAYOUT]->GetLayout();
     vertexDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT, 
-        1,
+        MaxBatchSize,
+        2,
         vertexDescriptorSetLayout,
         VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
     if (aDevice->MeshShaderSupport())
     {
         auto& meshDescriptorSetLayout = shaders.back().GetDescriptors()[DEFAULT_MESHLET_LAYOUT]->GetLayout();
         meshDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT, 
+            MaxBatchSize * 2,
             2,
             meshDescriptorSetLayout,
             VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
@@ -554,6 +556,7 @@ void Scene::appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageIn
     {
         auto descriptor = new Descriptor(aDevice, 1, 
             batchSize,
+            1,
             descriptorSetLayout,
             VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
             );

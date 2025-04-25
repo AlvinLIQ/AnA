@@ -3,7 +3,7 @@
 using namespace AnA;
 
 Descriptor::Descriptor(Device* mDevice, Buffer* buffers, VkDeviceSize bufferSize, uint32_t binding,
-    uint32_t descriptorSetCount, VkShaderStageFlags stageFlags,
+    uint32_t descriptorSetCount, uint32_t descriptorCount, VkShaderStageFlags stageFlags,
     const VkDescriptorType descriptorType) : aDevice{mDevice}
 {
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
@@ -16,20 +16,20 @@ Descriptor::Descriptor(Device* mDevice, Buffer* buffers, VkDeviceSize bufferSize
         throw std::runtime_error("Failed to create the DescriptorSetLayout");
     layoutCreated = true;
 
-    aDevice->CreateDescriptorPool(descriptorSetCount, pool, descriptorType);
+    aDevice->CreateDescriptorPool(descriptorSetCount, descriptorCount, pool, descriptorType);
     aDevice->CreateDescriptorSets(buffers, bufferSize, binding, descriptorSetCount, pool, setLayout, descriptorType, sets);
 }
 
 Descriptor::Descriptor(Device* mDevice, Buffer* buffers, VkDeviceSize bufferSize, uint32_t binding,
-    uint32_t descriptorSetCount, VkDescriptorSetLayout descriptorSetLayout,
+    uint32_t descriptorSetCount, uint32_t descriptorCount, VkDescriptorSetLayout descriptorSetLayout,
     const VkDescriptorType descriptorType) : aDevice{mDevice}
 {    
-    aDevice->CreateDescriptorPool(descriptorSetCount, pool, descriptorType);
+    aDevice->CreateDescriptorPool(descriptorSetCount, descriptorCount, pool, descriptorType);
     aDevice->CreateDescriptorSets(buffers, bufferSize, binding, descriptorSetCount, pool, descriptorSetLayout, descriptorType, sets);
 }
 
 Descriptor::Descriptor(Device* mDevice, VkSampler& sampler, VkImageView& imageView, VkImageLayout imageLayout, uint32_t binding, 
-        uint32_t descriptorSetCount, VkShaderStageFlags stageFlags, const VkDescriptorType descriptorType
+        uint32_t descriptorSetCount, uint32_t descriptorCount, VkShaderStageFlags stageFlags, const VkDescriptorType descriptorType
         ) : aDevice{mDevice}
 {
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
@@ -44,7 +44,7 @@ Descriptor::Descriptor(Device* mDevice, VkSampler& sampler, VkImageView& imageVi
 
     if (descriptorSetCount == 0)
         return;
-    aDevice->CreateDescriptorPool(descriptorSetCount, pool, descriptorType);
+    aDevice->CreateDescriptorPool(descriptorSetCount, descriptorCount, pool, descriptorType);
 
     VkDescriptorImageInfo imageInfo{};
     imageInfo.imageLayout = imageLayout;
@@ -54,13 +54,13 @@ Descriptor::Descriptor(Device* mDevice, VkSampler& sampler, VkImageView& imageVi
 }
 
 Descriptor::Descriptor(Device* mDevice, VkSampler& sampler, VkImageView& imageView, VkImageLayout imageLayout, uint32_t binding, 
-        uint32_t descriptorSetCount, VkDescriptorSetLayout descriptorSetLayout, const VkDescriptorType descriptorType
+        uint32_t descriptorSetCount, uint32_t descriptorCount, VkDescriptorSetLayout descriptorSetLayout, const VkDescriptorType descriptorType
         ) : setLayout(descriptorSetLayout)
 {
     aDevice = mDevice;
     if (descriptorSetCount == 0)
         return;
-    aDevice->CreateDescriptorPool(descriptorSetCount, pool, descriptorType);
+    aDevice->CreateDescriptorPool(descriptorSetCount, descriptorCount, pool, descriptorType);
 
     VkDescriptorImageInfo imageInfo{};
     imageInfo.imageLayout = imageLayout;
@@ -77,12 +77,12 @@ Descriptor::Descriptor(Device* mDevice, VkSampler& sampler, VkImageView& imageVi
     }
 }
 
-Descriptor::Descriptor(Device* mDevice, uint32_t descriptorSetCount, uint32_t descriptorCount, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorType descriptorType) : aDevice{mDevice}
+Descriptor::Descriptor(Device* mDevice, uint32_t descriptorSetCount, uint32_t descriptorCount, uint32_t bindingCount, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorType descriptorType) : aDevice{mDevice}
 {
-    aDevice->CreateDescriptorPool(descriptorSetCount, pool, descriptorType, VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT);
+    aDevice->CreateDescriptorPool(descriptorSetCount, descriptorCount * bindingCount, pool, descriptorType, VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT);
     VkDescriptorSetVariableDescriptorCountAllocateInfoEXT countInfo{};
     countInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO;
-    std::vector<uint32_t> counts(descriptorSetCount, descriptorCount);
+    std::vector<uint32_t> counts(descriptorSetCount, descriptorCount / descriptorSetCount / bindingCount);
     countInfo.pDescriptorCounts = counts.data();
     countInfo.descriptorSetCount = descriptorSetCount;
     aDevice->CreateDescriptorSets(descriptorSetCount, pool, descriptorSetLayout, sets, &countInfo);
@@ -117,7 +117,7 @@ Descriptor::Descriptor(Device* mDevice, Descriptor::DescriptorConfig* descriptor
         descriptorWrite.descriptorType = descriptorConfig.descriptorType;
         descriptorWrite.descriptorCount = descriptorConfig.descriptorCount;
         poolSize.type = descriptorConfig.descriptorType;
-        poolSize.descriptorCount = descriptorConfig.descriptorCount;
+        poolSize.descriptorCount = descriptorSetCount * descriptorConfig.descriptorCount;
 
         auto& layoutBinding = layoutBindings[i];
         layoutBinding = Device::CreateLayoutBinding(descriptorConfig.binding,

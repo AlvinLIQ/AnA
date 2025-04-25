@@ -9,11 +9,13 @@ Shapes::Shapes(Device* mDeivce) : aDevice{mDeivce}
     auto& samplerLayout = Resource::ResourceManager::GetCurrent()->Shaders[1].GetDescriptors()[1]->GetLayout();
     samplersDescriptor = new Descriptor(aDevice, 1, 
         MaxBatchSize,
+        1,
         samplerLayout,
         VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
         );
     auto& ssboLayout = Resource::ResourceManager::GetCurrent()->Shaders[1].GetDescriptors()[DEFAULT_VERTEX_LAYOUT]->GetLayout();
     ssboDescriptor = new Descriptor(aDevice, 1, 
+        1,
         1,
         ssboLayout,
         VK_DESCRIPTOR_TYPE_STORAGE_BUFFER

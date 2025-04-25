@@ -435,17 +435,17 @@ void Device::CreateSampler(VkSampler* pSampler, enum VkSamplerAddressMode sample
         throw std::runtime_error("Failed to create sampler");
 }
 
-void Device::CreateDescriptorPool(int descriptorCount, VkDescriptorPool& descriptorPool, VkDescriptorType descriptorType, VkCommandPoolCreateFlags flags)
+void Device::CreateDescriptorPool(uint32_t descriptorSetCount, uint32_t descriptorCount, VkDescriptorPool& descriptorPool, VkDescriptorType descriptorType, VkCommandPoolCreateFlags flags)
 {
     VkDescriptorPoolSize poolSizes[1];
     poolSizes[0].type = descriptorType;
-    poolSizes[0].descriptorCount = static_cast<uint32_t>(descriptorCount);
+    poolSizes[0].descriptorCount = static_cast<uint32_t>(descriptorCount * descriptorSetCount);
 
     VkDescriptorPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     poolInfo.poolSizeCount = numsof(poolSizes);
     poolInfo.pPoolSizes = poolSizes;
-    poolInfo.maxSets = static_cast<uint32_t>(descriptorCount);
+    poolInfo.maxSets = static_cast<uint32_t>(descriptorSetCount);
     poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT | flags;
     
     if (vkCreateDescriptorPool(logicalDevice, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
