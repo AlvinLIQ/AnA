@@ -97,6 +97,6 @@ void main()
     float visibility = filterPCF(shadowCoord, cascadeIndex);
 
     vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility + pointLightIntensity * LIGHT_COLOR;
-	outColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord) * vec4(finalLight, 1.0);
+	outColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord * 100.0) * vec4(finalLight, 1.0);
     //outColor = texture(shadowSampler, vec3(gl_FragCoord.xy / cbo.resolution, 2)).r * vec4(1.);
 }

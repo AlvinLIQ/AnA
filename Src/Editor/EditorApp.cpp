@@ -100,9 +100,10 @@ int main()
 {
     EditorApp editor{};
     editor.Init();
-    auto scene = ReadFile("Scenes/scene.ana");
-    auto& meshes = Resource::ResourceManager::GetCurrent()->MainScene;
-    meshes.Append(reinterpret_cast<MeshInfo*>(scene.data()), scene.size() / sizeof(MeshInfo));
+    auto sceneFile = ReadFile("Scenes/scene.ana");
+    ((MeshInfo*)sceneFile.data())->tetureId = 4;
+    auto& scene = Resource::ResourceManager::GetCurrent()->MainScene;
+    scene.Append(reinterpret_cast<MeshInfo*>(sceneFile.data()), sceneFile.size() / sizeof(MeshInfo));
     editor.Run();
     return 0;
 }
