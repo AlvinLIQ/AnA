@@ -1,0 +1,91 @@
+#version 460
+#extension GL_EXT_mesh_shader : require
+#extension GL_KHR_shader_subgroup_ballot : require
+
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+
+layout(set = 1, binding = 0) uniform CameraBufferObject {
+    mat4 proj;
+    mat4 view;
+    vec4 position;
+    vec2 resolution;
+} cbo;
+
+layout(set = 1, binding = 1) uniform Frustum
+{
+    vec4 planes[6];
+} frustum;
+
+layout(std430, set = 6, binding = 0) buffer meshletSSBO
+{
+    uint meshlets[];
+} msbo;
+
+struct BoundingSphere
+{
+    vec3 center;
+    float radius;
+    vec3 normal;
+    float cutoff;
+};
+
+#define SHADOW_MAP_CASCADE_COUNT 4
+
+layout(std430, set = 6, binding = 1) buffer meshletCullingSSBO
+{
+    BoundingSphere boundings[];
+} mcsbo;
+
+taskPayloadSharedEXT struct {
+    uint visibleIndices[512]; // max 512 visible meshlets per group
+    uint visibleCount;
+} taskData;
+
+bool isSphereInsideFrustum(vec3 center, float radius)
+{
+    for (int i = 0; i < 6; ++i)
+    {
+        vec4 plane = frustum.planes[i];
+        float d = dot(plane.xyz, center) + plane.w + radius;
+        if (d < 0)
+            return false;
+    }
+    return true;
+}
+
+bool isMeshletFacingCamera(vec3 center, vec3 coneAxis, float radius, float cutoff)
+{
+    vec3 toCam = center - cbo.position.xyz;
+    float dp = dot(coneAxis, toCam);
+    const float compensation = 0.013;
+    return dp < cutoff * length(toCam) + radius + compensation;
+}
+
+bool isMeshletVisible(uint meshletId)
+{
+    BoundingSphere boundingSphere = mcsbo.boundings[meshletId];
+    return  isSphereInsideFrustum(boundingSphere.center, boundingSphere.radius) && 
+            isMeshletFacingCamera(boundingSphere.center, boundingSphere.normal, boundingSphere.radius, boundingSphere.cutoff);
+}
+
+void main()
+{
+    uint globalID = gl_GlobalInvocationID.x;
+    if (globalID >= msbo.meshlets[0])
+        return;
+    bool visible = isMeshletVisible(globalID);
+    
+    uvec4 ballot = subgroupBallot(visible);
+    if (visible)
+    {
+        uint index = subgroupBallotExclusiveBitCount(ballot);
+        taskData.visibleIndices[index] = globalID;
+    }
+
+    if (gl_LocalInvocationIndex == 0)
+    {
+        uint total = subgroupBallotBitCount(ballot);
+        taskData.visibleCount = total;
+	    EmitMeshTasksEXT(total, 1, 1);
+    }
+}

@@ -1,5 +1,5 @@
 fs = import('fs')
-shader_sources = files('Basic.vert', 'Basic.frag', 'CascadedShadowMapping.vert', 'CascadedShadowMapping.frag',
+shader_sources = files('Basic.vert', 'Basic.frag', 'CascadedShadowMapping.vert',
     'Line.vert', 'Line.frag', 'ShadowMapping.vert', 'Shape.vert', 'Shape.frag', 'CollisionDetect.comp', 'Mesh.mesh', 'Mesh.task', 'Mesh.frag',
     'Text.vert', 'Text.frag')
 shader_outputs = []

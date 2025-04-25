@@ -4,16 +4,6 @@
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 layout(triangles, max_vertices = 128, max_primitives = 256) out;
 
-struct VertexOutput {
-    vec2 texCoord;
-    uint texID;
-    vec3 normalSpace;
-    vec3 vertexPosition;
-    vec4 viewPos;
-};
-
-layout(location = 0) out VertexOutput vertexOutput[];
-
 struct Vertex
 {
     vec3 position;
@@ -68,23 +58,17 @@ taskPayloadSharedEXT struct {
 
 void main()
 {
-	uint iid = msbo.meshlets[taskData.visibleIndices[gl_WorkGroupID.x]];
+    uint cid = gl_WorkGroupID.x % 4;
+	uint iid = msbo.meshlets[taskData.visibleIndices[cid]];
     uint vertexCount = msbo.meshlets[iid++];
     uint primitiveCount = msbo.meshlets[iid++];
     SetMeshOutputsEXT(vertexCount, primitiveCount);
 //gl_LocalInvocationIndex
-	mat4 viewProj = cbo.proj * cbo.view;
     for (uint i = 0; i < vertexCount; i++)
     {
         Vertex vertex = vsbo.vertices[msbo.meshlets[iid + i]];
         vec4 vertexPos = vec4(vertex.position, 1.0);
-        vec4 viewPos = cbo.view * vertexPos;
-        gl_MeshVerticesEXT[i].gl_Position = viewProj * vertexPos;
-        vertexOutput[i].texCoord = vertex.uv;
-        vertexOutput[i].texID = vertex.texIndex;
-        vertexOutput[i].normalSpace = vertex.normal;
-        vertexOutput[i].vertexPosition = vertex.position;
-        vertexOutput[i].viewPos = viewPos;
+        gl_MeshVerticesEXT[i].gl_Position = ubo.cascades[cid] * vertexPos;
     }
     iid += vertexCount;
     for (uint i = 0, j, offset, t; i < primitiveCount; i++)
