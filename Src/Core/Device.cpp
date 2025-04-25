@@ -543,8 +543,7 @@ void Device::CreateDescriptorSets(uint32_t descriptorSetCount, VkDescriptorPool&
     allocInfo.pSetLayouts = layouts.data();
     allocInfo.pNext = pNext;
     descriptorSets.resize(descriptorSetCount);
-    VkResult result;
-    if ((result = vkAllocateDescriptorSets(logicalDevice, &allocInfo, descriptorSets.data())) != VK_SUCCESS)
+    if (vkAllocateDescriptorSets(logicalDevice, &allocInfo, descriptorSets.data()) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to allocate descriptor sets!");
     }

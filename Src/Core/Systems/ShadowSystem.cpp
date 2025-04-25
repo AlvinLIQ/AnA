@@ -56,7 +56,7 @@ void ShadowSystem::RenderCascadedShadowsIndirect(CommandBuffer& commandBuffer, S
 {
     VkExtent2D extent = {SHADOW_MAP_DIM, SHADOW_MAP_DIM};
     swapChain->SetViewport(commandBuffer, {}, extent);
-    vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
+    vkCmdSetDepthBias(commandBuffer, 2.0f, 0.0f, 4.0f);
     shader.GetPipeline()->Bind(commandBuffer);
     std::vector<VkDescriptorSet>& sets = shader.GetDescriptorSets()[0];
     auto pipelineLayout = shader.GetPipelineLayout();

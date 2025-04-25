@@ -48,7 +48,7 @@ const mat4 biasMat = mat4(
 float textureProj(vec4 shadowCoord, vec2 offset, uint cascadeIndex)
 {
 	float shadow = 1.0;
-	float bias = 0.001;
+	float bias = 0.005;
 
 	if ( shadowCoord.z > -1.0 && shadowCoord.z < 1.0 ) {
 		float dist = texture(shadowSampler, vec3(shadowCoord.xy + offset, cascadeIndex)).r;
@@ -63,7 +63,7 @@ float textureProj(vec4 shadowCoord, vec2 offset, uint cascadeIndex)
 float filterPCF(vec4 sc, uint cascadeIndex)
 {
 	ivec2 texDim = textureSize(shadowSampler, 0).xy;
-	float scale = 0.85;
+	float scale = 0.75;
 	float dx = scale * 1.0 / float(texDim.x);
 	float dy = scale * 1.0 / float(texDim.y);
 
