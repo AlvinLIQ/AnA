@@ -282,8 +282,6 @@ void App::createRecordCallBacks()
 
 void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
 {
-    if (!aResourceManager.SecondaryCommandBufferPool.GetCommandBufferCount() || !aResourceManager.MainScene.GetMeshCount())
-        return;
     //if (commandBufferNeedUpdate)
     //{
     
@@ -298,7 +296,8 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
         aRenderer.EndRenderPass(commandBuffer);
     }
     aRenderer.BeginSwapChainRenderPass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE_AND_SECONDARY_COMMAND_BUFFERS_KHR);
-    aResourceManager.SecondaryCommandBufferPool.ExecuteRecordedBuffer(commandBuffer);
+    if (aResourceManager.SecondaryCommandBufferPool.GetCommandBufferCount())
+        aResourceManager.SecondaryCommandBufferPool.ExecuteRecordedBuffer(commandBuffer);
     aRenderer.EndRenderPass(commandBuffer);
 }
 

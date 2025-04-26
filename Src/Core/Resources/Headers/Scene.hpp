@@ -158,6 +158,7 @@ namespace AnA
         std::unordered_map<uint32_t, uint32_t> textureIdMap{};
         std::vector<VkDescriptorImageInfo> textureInfos;
         std::vector<Descriptor*> samplersDescriptors;
+        void createSamplerDescriptor();
         Descriptor* vertexDescriptor{nullptr}, *meshDescriptor{nullptr};
         void createSSBODescriptor();
         void updateSSBODescriptor();

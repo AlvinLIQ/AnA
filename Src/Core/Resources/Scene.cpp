@@ -80,6 +80,32 @@ void Scene::Init()
 
     meshletBuffers.resize(vertexBuffers.size());
     meshletCullingBuffers.resize(meshletBuffers.size());
+    for (uint i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    {
+        vertexBuffers[i] = Buffer(aDevice, (vertexCount + 1000) * sizeof(Model::Vertex), 
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        vertexBuffers[i].Map(0, VK_WHOLE_SIZE);
+
+        indexBuffers[i] = Buffer(aDevice, (indexCount + 1000) * sizeof(Model::Index), 
+        VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        indexBuffers[i].Map(0, VK_WHOLE_SIZE);
+    
+        meshletBuffers[i] = Buffer(aDevice, 100 * sizeof(Meshlet),
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | 
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+        meshletBuffers[i].Map(0, VK_WHOLE_SIZE);
+
+        meshletCullingBuffers[i] = Buffer(aDevice, 100 * sizeof(BoundingSphere),
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | 
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        meshletCullingBuffers[i].Map(0, meshletCullingBuffers[i].GetSize());
+    }
+    createSamplerDescriptor();
     //createBuffers();
     createIndirectBuffers();
     createSSBODescriptor();
@@ -540,12 +566,10 @@ void Scene::updateSSBODescriptor()
 
 void Scene::appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageInfos)
 {
-    auto& descriptorSetLayout = 
-        Resource::ResourceManager::GetCurrent()->Shaders[0].GetDescriptors()[DEFAULT_SAMPLER_LAYOUT]->GetLayout();
     uint32_t remaining = static_cast<uint32_t>(textureInfos.size()) % batchSize;
     uint32_t offset = static_cast<uint32_t>(textureInfos.size()) - remaining;
     textureInfos.insert(textureInfos.end(), imageInfos.begin(), imageInfos.end());
-    if (remaining && samplersDescriptors.size())
+    if (batchSize - remaining && samplersDescriptors.size())
     {
         remaining = std::min(remaining + static_cast<uint32_t>(imageInfos.size()), batchSize);
         samplersDescriptors.back()->UpdateDescriptorSets(&textureInfos[offset], remaining, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
@@ -554,15 +578,22 @@ void Scene::appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageIn
 
     if (offset < textureInfos.size())
     {
-        auto descriptor = new Descriptor(aDevice, 1, 
-            batchSize,
-            1,
-            descriptorSetLayout,
-            VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
-            );
-        descriptor->UpdateDescriptorSets(&textureInfos[offset], static_cast<uint32_t>(textureInfos.size()) - offset, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
-        samplersDescriptors.push_back(descriptor);
+        createSamplerDescriptor();
+        samplersDescriptors.back()->UpdateDescriptorSets(&textureInfos[offset], static_cast<uint32_t>(textureInfos.size()) - offset, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
     }
+}
+
+void Scene::createSamplerDescriptor()
+{
+    auto& descriptorSetLayout = 
+        Resource::ResourceManager::GetCurrent()->Shaders[0].GetDescriptors()[DEFAULT_SAMPLER_LAYOUT]->GetLayout();
+    auto descriptor = new Descriptor(aDevice, 1, 
+        batchSize,
+        1,
+        descriptorSetLayout,
+        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+        );
+    samplersDescriptors.push_back(descriptor);
 }
 
 void Scene::buildMeshlets()
