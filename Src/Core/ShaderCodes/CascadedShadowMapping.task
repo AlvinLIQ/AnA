@@ -29,7 +29,7 @@ struct BoundingSphere
     float cutoff;
 };
 
-#define SHADOW_MAP_CASCADE_COUNT 4
+#define SHADOW_MAP_CASCADE_COUNT 3
 
 layout(std430, set = 6, binding = 1) buffer meshletCullingSSBO
 {

@@ -27,7 +27,7 @@ layout(set = 2, binding = 0) uniform LightBufferObject {
 layout(set = 3, binding = 0) uniform sampler2D texSampler[];
 layout(set = 4, binding = 0) uniform sampler2DArray shadowSampler;
 
-#define SHADOW_MAP_CASCADE_COUNT 4
+#define SHADOW_MAP_CASCADE_COUNT 3
 struct Cascade {
     mat4 viewProj;
     float split;
@@ -48,7 +48,7 @@ const mat4 biasMat = mat4(
 float textureProj(vec4 shadowCoord, vec2 offset, uint cascadeIndex)
 {
 	float shadow = 1.0;
-	float bias = 0.005;
+	float bias = 0.003;
 
 	if ( shadowCoord.z > -1.0 && shadowCoord.z < 1.0 ) {
 		float dist = texture(shadowSampler, vec3(shadowCoord.xy + offset, cascadeIndex)).r;
@@ -85,10 +85,10 @@ void main()
     float pointLightIntensity = max(dot(normalSpace, normalize(LIGHT_POS - vertex)), 0);
     float diffuseLightItensity = ((dot(normalSpace, normalize(lbo.direction))) + 2.0) * 0.5;
 	
-    uint cascadeIndex = 0;
+    uint cascadeIndex = SHADOW_MAP_CASCADE_COUNT - 1;
 	for(uint i = 1; i < SHADOW_MAP_CASCADE_COUNT; i++) {
-		if(viewPos.z < ubo.cascades[i].split) {	
-			cascadeIndex = i;
+		if(viewPos.z + 8.0 < ubo.cascades[i].split) {	
+			cascadeIndex = i - 1;
 			break;
 		}
 	}
@@ -96,6 +96,6 @@ void main()
     float visibility = filterPCF(shadowCoord, cascadeIndex);
 
     vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility + pointLightIntensity * LIGHT_COLOR;
-	outColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord * 100.0) * vec4(finalLight, 1.0);
+	outColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord) * vec4(finalLight, 1.0);
     //outColor = texture(shadowSampler, vec3(gl_FragCoord.xy / cbo.resolution, 2)).r * vec4(1.);
 }

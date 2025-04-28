@@ -56,7 +56,7 @@ void EditorApp::onLoop()
     aResourceManager.MainCameraInfo.UpdateCameraPerspective(aResourceManager.MainCamera);
 
     (controlMap["shadowMapView"])->TextureLayer =
-        uint32_t(std::min(3.0f, static_cast<Controls::Slider*>(controlMap["shadowMapSlider"])->Value * 4.0f));
+        uint32_t(std::min(2.0f, static_cast<Controls::Slider*>(controlMap["shadowMapSlider"])->Value * 3.0f));
 }
 
 void EditorApp::loadModelButton_Click(void* , PointerEventArgs& )
