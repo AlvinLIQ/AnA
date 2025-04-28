@@ -67,8 +67,7 @@ void main()
     for (uint i = 0; i < vertexCount; i++)
     {
         Vertex vertex = vsbo.vertices[msbo.meshlets[iid + i]];
-        vec4 vertexPos = vec4(vertex.position, 1.0);
-        gl_MeshVerticesEXT[i].gl_Position = ubo.cascades[cid] * vertexPos;
+        gl_MeshVerticesEXT[i].gl_Position = ubo.cascades[cid].viewProj * vec4(vertex.position, 1.0);
     }
     iid += vertexCount;
     for (uint i = 0, j, offset, t; i < primitiveCount; i++)

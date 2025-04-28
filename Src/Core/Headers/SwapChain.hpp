@@ -27,7 +27,7 @@ namespace AnA
 
         VkResult SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint32_t commandBufferCount);
 
-        uint32_t CurrentFrame = 0;
+        uint32_t CurrentFrame = 1;
         uint32_t CurrentImage = 0;
 
         static SwapChain* GetCurrent();

@@ -53,7 +53,7 @@ float textureProj(vec4 shadowCoord, vec2 offset, uint cascadeIndex)
 	if ( shadowCoord.z > -1.0 && shadowCoord.z < 1.0 ) {
 		float dist = texture(shadowSampler, vec3(shadowCoord.xy + offset, cascadeIndex)).r;
 		if (shadowCoord.w > 0 && dist < shadowCoord.z - bias) {
-			shadow = 0.5;
+			shadow = 1.0 - (0.5 * smoothstep(21.0, 20.8, viewPos.z));
 		}
 	}
 	return shadow;
@@ -94,6 +94,9 @@ void main()
 	}
     vec4 shadowCoord = biasMat * ubo.cascades[cascadeIndex].viewProj * vec4(vertex, 1.0);
     float visibility = filterPCF(shadowCoord, cascadeIndex);
+	// when z > 28, shadow start to fade out
+	// f(1) = 0
+	// f(x) = 1
 
     vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility + pointLightIntensity * LIGHT_COLOR;
 	outColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord) * vec4(finalLight, 1.0);

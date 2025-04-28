@@ -30,6 +30,13 @@ struct BoundingSphere
 };
 
 #define SHADOW_MAP_CASCADE_COUNT 3
+struct Cascade {
+    mat4 viewProj;
+    float split;
+};
+layout (set = 5, binding = 0) uniform UBO {
+	Cascade[SHADOW_MAP_CASCADE_COUNT] cascades;
+} ubo;
 
 layout(std430, set = 6, binding = 1) buffer meshletCullingSSBO
 {
