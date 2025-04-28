@@ -87,7 +87,7 @@ void main()
 	
     uint cascadeIndex = SHADOW_MAP_CASCADE_COUNT - 1;
 	for(uint i = 1; i < SHADOW_MAP_CASCADE_COUNT; i++) {
-		if(viewPos.z + 8.0 < ubo.cascades[i].split) {	
+		if(viewPos.z + 8.5 < ubo.cascades[i].split) {	
 			cascadeIndex = i - 1;
 			break;
 		}

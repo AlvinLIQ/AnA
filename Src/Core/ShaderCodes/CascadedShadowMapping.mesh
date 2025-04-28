@@ -58,7 +58,7 @@ taskPayloadSharedEXT struct {
 
 void main()
 {
-    uint cid = gl_WorkGroupID.x % 4;
+    uint cid = gl_WorkGroupID.x % SHADOW_MAP_CASCADE_COUNT;
 	uint iid = msbo.meshlets[taskData.visibleIndices[cid]];
     uint vertexCount = msbo.meshlets[iid++];
     uint primitiveCount = msbo.meshlets[iid++];
