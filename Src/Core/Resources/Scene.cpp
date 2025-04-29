@@ -80,7 +80,7 @@ void Scene::Init()
 
     meshletBuffers.resize(vertexBuffers.size());
     meshletCullingBuffers.resize(meshletBuffers.size());
-    for (uint i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
         vertexBuffers[i] = Buffer(aDevice, (vertexCount + 1000) * sizeof(Model::Vertex), 
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
