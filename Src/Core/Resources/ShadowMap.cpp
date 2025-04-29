@@ -17,7 +17,7 @@ ShadowMap::~ShadowMap()
 }
 
 std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& inv, glm::vec3& center)
-{    
+{
     std::vector<glm::vec4> frustumCorners;
     frustumCorners.reserve(8);
     center = glm::vec3(0, 0, 0);
@@ -27,7 +27,7 @@ std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& inv, glm::ve
         {
             for (unsigned int z = 0; z < 2; ++z)
             {
-                const glm::vec4 pt = 
+                const glm::vec4 pt =
                     inv * glm::vec4(
                         2.0f * x - 1.0f,
                         2.0f * y - 1.0f,
@@ -39,7 +39,7 @@ std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& inv, glm::ve
         }
     }
     center /= float(frustumCorners.size());
-    
+
     return frustumCorners;
 }
 
@@ -48,7 +48,7 @@ void ShadowMap::UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, u
 	glm::vec3 lightDir = glm::normalize(glm::vec3(1.0f, 1.0f, 1.0f));
     //glm::vec3 lightPos = lightDir * 2.0f;
     //float cascadeSplits[SHADOW_MAP_CASCADE_COUNT];
-    
+
 	float nearPlane = 2.0f;
 	float farPlane = 32.0f;
     float clipRange = farPlane - nearPlane;
@@ -119,7 +119,7 @@ void ShadowMap::UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, u
         cbo[i].splitDepth = (nearPlane + splitDist * clipRange);
 
 	    lastSplitDist = cascadeSplits[i];
-	}    
+	}
 }
 
 void ShadowMap::GetUBODescriptorConfig(Descriptor::DescriptorConfig* pConfig)
@@ -198,8 +198,8 @@ void ShadowMap::createShadowResources()
         }
         if (samplersNotCreated)
             aDevice->CreateSampler(&samplers[i], VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE);
-		cascadeBuffers.emplace_back(aDevice, cascades.size() * sizeof(CascadeBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
-		VK_MEMORY_PROPERTY_HOST_COHERENT_BIT 
+		cascadeBuffers.emplace_back(aDevice, cascades.size() * sizeof(CascadeBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 				| VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 		cascadeBuffers[i].Map(0, cascades.size() * sizeof(CascadeBufferObject));
 

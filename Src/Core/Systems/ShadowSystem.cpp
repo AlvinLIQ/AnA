@@ -14,7 +14,7 @@ ShadowSystem::ShadowSystem(SwapChain* pSwapchain)// : aDevice{mDevice}
 
 ShadowSystem::~ShadowSystem()
 {
-    
+
 }
 
 ShadowSystem* ShadowSystem::GetCurrent()
@@ -67,7 +67,7 @@ void ShadowSystem::RenderCascadedShadowsIndirect(CommandBuffer& commandBuffer, S
     VkShaderStageFlags stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
     if (swapChain->GetDevice()->MeshShaderSupport())
         stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT;
-    vkCmdPushConstants(commandBuffer, pipelineLayout, 
+    vkCmdPushConstants(commandBuffer, pipelineLayout,
             stageFlags, 0, sizeof(uint32_t), &index);
     meshes.Bind(commandBuffer);
     meshes.DrawIndirect(commandBuffer, sets, pipelineLayout);

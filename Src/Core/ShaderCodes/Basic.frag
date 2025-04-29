@@ -1,11 +1,11 @@
 #version 460
-#extension GL_EXT_nonuniform_qualifier : enable 
+#extension GL_EXT_nonuniform_qualifier : enable
 
 layout(location = 0) in vec2 texCoord;
 layout(location = 1) flat in uint texIndex;
 layout(location = 2) in vec3 normalSpace;
 layout(location = 3) in vec3 vertex;
-layout(location = 4) in vec4 viewPos;
+layout(location = 4) in float viewPosZ;
 
 layout(location = 0) out vec4 outColor;
 
@@ -36,10 +36,10 @@ layout (set = 5, binding = 0) uniform UBO {
 	Cascade[SHADOW_MAP_CASCADE_COUNT] cascades;
 } ubo;
 
-const vec3 LIGHT_DIRECTION = normalize(vec3(1., -3., 1.));
-const vec3 LIGHT_COLOR = vec3(0.95, 0.7, 0.95);
+const vec3 LIGHT_POS = vec3(4., -2., 1.);
+const vec3 LIGHT_COLOR = vec3(0.6, 0.7, 0.5);
 
-const mat4 biasMat = mat4( 
+const mat4 biasMat = mat4(
 	0.5, 0.0, 0.0, 0.0,
 	0.0, 0.5, 0.0, 0.0,
 	0.0, 0.0, 1.0, 0.0,
@@ -48,12 +48,13 @@ const mat4 biasMat = mat4(
 float textureProj(vec4 shadowCoord, vec2 offset, uint cascadeIndex)
 {
 	float shadow = 1.0;
-	float bias = 0.001;
+	float bias = 0.003;
 
 	if ( shadowCoord.z > -1.0 && shadowCoord.z < 1.0 ) {
 		float dist = texture(shadowSampler, vec3(shadowCoord.xy + offset, cascadeIndex)).r;
 		if (shadowCoord.w > 0 && dist < shadowCoord.z - bias) {
-			shadow = 0.5;
+		    float edge = ubo.cascades[SHADOW_MAP_CASCADE_COUNT - 1].split * 0.9;
+			shadow = 1.0 - (0.5 * smoothstep(edge, edge - 0.2, viewPosZ));
 		}
 	}
 	return shadow;
@@ -70,7 +71,7 @@ float filterPCF(vec4 sc, uint cascadeIndex)
 	float shadowFactor = 0.0;
 	int count = 0;
 	int range = 1;
-	
+
 	for (int x = -range; x <= range; x++) {
 		for (int y = -range; y <= range; y++) {
 			shadowFactor += textureProj(sc, vec2(dx*x, dy*y), cascadeIndex);
@@ -80,15 +81,14 @@ float filterPCF(vec4 sc, uint cascadeIndex)
 	return shadowFactor / count;
 }
 
-
 void main()
 {
-    float pointLightIntensity = max(dot(normalSpace, normalize(LIGHT_DIRECTION - vertex)), 0);
-    float diffuseLightItensity = max(dot(normalSpace, normalize(lbo.direction)), 0);
-	
-    uint cascadeIndex = 0;
-	for(uint i = 1; i < SHADOW_MAP_CASCADE_COUNT; i++) {
-		if(viewPos.z < ubo.cascades[i].split) {	
+    float pointLightIntensity = max(dot(normalSpace, normalize(LIGHT_POS - vertex)), 0);
+    float diffuseLightItensity = ((dot(normalSpace, normalize(lbo.direction))) + 2.0) * 0.5;
+
+    uint cascadeIndex = SHADOW_MAP_CASCADE_COUNT - 1;
+	for(uint i = 0; i < SHADOW_MAP_CASCADE_COUNT - 1; i++) {
+		if(viewPosZ < ubo.cascades[i + 1].split) {
 			cascadeIndex = i;
 			break;
 		}

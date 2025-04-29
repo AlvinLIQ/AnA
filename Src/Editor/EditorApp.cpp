@@ -32,7 +32,7 @@ void EditorApp::Init()
         auto aInputManager = reinterpret_cast<Input::InputManager*>(param);
         /*
         auto& activeProfile = aInputManager->GetActiveProfile();
-        aInputManager->ProcessProfileFlag((activeProfile.flag ^= Input::Disabled) & Input::Disabled ? 
+        aInputManager->ProcessProfileFlag((activeProfile.flag ^= Input::Disabled) & Input::Disabled ?
             aInputManager->GlobalProfile.flag :
             activeProfile.flag);*/
         if (&aInputManager->GetActiveProfile() == aInputManager->GetProfiles().data())
@@ -51,8 +51,8 @@ void EditorApp::Init()
 void EditorApp::onLoop()
 {
     aResourceManager.LockCamera = static_cast<Controls::ToggleSwitch*>(controlMap["camLockToggle"])->Toggled;
-    aResourceManager.MainCameraInfo.near = 0.05f + static_cast<Controls::Slider*>(controlMap["nearSlider"])->Value * (32.0f - 0.05f);
-    aResourceManager.MainCameraInfo.far = static_cast<Controls::Slider*>(controlMap["farSlider"])->Value * 32.0f;
+    aResourceManager.MainCameraInfo.near = 0.05f + static_cast<Controls::Slider*>(controlMap["nearSlider"])->Value * (aResourceManager.MainCameraInfo.far - 0.05f);
+    aResourceManager.MainCameraInfo.far = static_cast<Controls::Slider*>(controlMap["farSlider"])->Value * aResourceManager.MainCameraInfo.far;
     aResourceManager.MainCameraInfo.UpdateCameraPerspective(aResourceManager.MainCamera);
 
     (controlMap["shadowMapView"])->TextureLayer =
@@ -69,9 +69,9 @@ void EditorApp::loadModelButton_Click(void* , PointerEventArgs& )
     memcpy(mesh.filePath, path.c_str(), path.length() + 1);
     mesh.tetureId = 0;
     Resource::ResourceManager::GetCurrent()->MainScene.Append(std::vector<MeshInfo>(1, mesh));
-    auto panel = 
+    auto panel =
             static_cast<Controls::StackPanel*>(static_cast<EditorApp*>(App::GetCurrent())->controlMap["modelList"]);
-    panel->Child(static_cast<Controls::Control*>(new Controls::TextBlock(path.c_str(), 
+    panel->Child(static_cast<Controls::Control*>(new Controls::TextBlock(path.c_str(),
                                 {0.8f, 0.8f, 0.8f, 1.0f})));
 }
 

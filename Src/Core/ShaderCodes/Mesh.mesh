@@ -9,7 +9,7 @@ struct VertexOutput {
     uint texID;
     vec3 normalSpace;
     vec3 vertexPosition;
-    vec4 viewPos;
+    float viewPosZ;
 };
 
 layout(location = 0) out VertexOutput vertexOutput[];
@@ -84,7 +84,7 @@ void main()
         vertexOutput[i].texID = vertex.texIndex;
         vertexOutput[i].normalSpace = vertex.normal;
         vertexOutput[i].vertexPosition = vertex.position;
-        vertexOutput[i].viewPos = viewPos;
+        vertexOutput[i].viewPosZ = viewPos.z / viewPos.w + ubo.cascades[1].split - ubo.cascades[0].split + 1.0;
     }
     iid += vertexCount;
     for (uint i = 0, j, offset, t; i < primitiveCount; i++)

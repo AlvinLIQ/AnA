@@ -1,11 +1,11 @@
 #version 460
-#extension GL_EXT_nonuniform_qualifier : enable 
+#extension GL_EXT_nonuniform_qualifier : enable
 
 layout(location = 0) in vec2 texCoord;
 layout(location = 1) flat in uint texIndex;
 layout(location = 2) in vec3 normalSpace;
 layout(location = 3) in vec3 vertex;
-layout(location = 4) in vec4 viewPos;
+layout(location = 4) in float viewPosZ;
 
 layout(location = 0) out vec4 outColor;
 
@@ -39,7 +39,7 @@ layout (set = 5, binding = 0) uniform UBO {
 const vec3 LIGHT_POS = vec3(4., -2., 1.);
 const vec3 LIGHT_COLOR = vec3(0.6, 0.7, 0.5);
 
-const mat4 biasMat = mat4( 
+const mat4 biasMat = mat4(
 	0.5, 0.0, 0.0, 0.0,
 	0.0, 0.5, 0.0, 0.0,
 	0.0, 0.0, 1.0, 0.0,
@@ -53,7 +53,8 @@ float textureProj(vec4 shadowCoord, vec2 offset, uint cascadeIndex)
 	if ( shadowCoord.z > -1.0 && shadowCoord.z < 1.0 ) {
 		float dist = texture(shadowSampler, vec3(shadowCoord.xy + offset, cascadeIndex)).r;
 		if (shadowCoord.w > 0 && dist < shadowCoord.z - bias) {
-			shadow = 1.0 - (0.5 * smoothstep(21.0, 20.8, viewPos.z));
+		    float edge = ubo.cascades[SHADOW_MAP_CASCADE_COUNT - 1].split * 0.9;
+			shadow = 1.0 - (0.5 * smoothstep(edge, edge - 0.2, viewPosZ));
 		}
 	}
 	return shadow;
@@ -70,7 +71,7 @@ float filterPCF(vec4 sc, uint cascadeIndex)
 	float shadowFactor = 0.0;
 	int count = 0;
 	int range = 1;
-	
+
 	for (int x = -range; x <= range; x++) {
 		for (int y = -range; y <= range; y++) {
 			shadowFactor += textureProj(sc, vec2(dx*x, dy*y), cascadeIndex);
@@ -84,19 +85,16 @@ void main()
 {
     float pointLightIntensity = max(dot(normalSpace, normalize(LIGHT_POS - vertex)), 0);
     float diffuseLightItensity = ((dot(normalSpace, normalize(lbo.direction))) + 2.0) * 0.5;
-	
+
     uint cascadeIndex = SHADOW_MAP_CASCADE_COUNT - 1;
-	for(uint i = 1; i < SHADOW_MAP_CASCADE_COUNT; i++) {
-		if(viewPos.z + 8.5 < ubo.cascades[i].split) {	
-			cascadeIndex = i - 1;
+	for(uint i = 0; i < SHADOW_MAP_CASCADE_COUNT - 1; i++) {
+		if(viewPosZ < ubo.cascades[i + 1].split) {
+			cascadeIndex = i;
 			break;
 		}
 	}
     vec4 shadowCoord = biasMat * ubo.cascades[cascadeIndex].viewProj * vec4(vertex, 1.0);
     float visibility = filterPCF(shadowCoord, cascadeIndex);
-	// when z > 28, shadow start to fade out
-	// f(1) = 0
-	// f(x) = 1
 
     vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility + pointLightIntensity * LIGHT_COLOR;
 	outColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord) * vec4(finalLight, 1.0);
