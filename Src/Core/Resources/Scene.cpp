@@ -212,6 +212,7 @@ void Scene::RemoveAt(std::vector<uint32_t> meshIndices)
 
 void Scene::Bind(CommandBuffer& commandBuffer)
 {
+    vkCmdSetPrimitiveTopology(commandBuffer, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
     vkCmdBindIndexBuffer(commandBuffer, indexBuffers[currentBufferIndex].GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
     static_cast<VkDrawIndexedIndirectCommand*>(drawIndexedIndirectBuffer.GetMappedData())->indexCount = static_cast<uint32_t>(indexBuffers[currentBufferIndex].GetSize() / sizeof(Model::Index));
 }
@@ -232,6 +233,8 @@ void Scene::Bind(CommandBuffer& commandBuffer, uint32_t bufferIndex)
     {
         shader = &Resource::ResourceManager::GetCurrent()->Shaders.front();
         shader->GetPipeline()->Bind(commandBuffer);
+        vkCmdSetPrimitiveTopology(commandBuffer, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+
         sets = &shader->GetDescriptorSets()[bufferIndex];
         vkCmdBindIndexBuffer(commandBuffer, indexBuffers[currentBufferIndex].GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
         static_cast<VkDrawIndexedIndirectCommand*>(drawIndexedIndirectBuffer.GetMappedData())->indexCount = static_cast<uint32_t>(indexBuffers[currentBufferIndex].GetSize() / sizeof(Model::Index));

@@ -762,9 +762,13 @@ void Device::pickPhysicalDevice()
     VkPhysicalDeviceMeshShaderPropertiesEXT _meshShaderProperties = {};
     _meshShaderProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_PROPERTIES_EXT;
 
+    VkPhysicalDeviceExtendedDynamicState3PropertiesEXT dynamicStateProperties{};
+    dynamicStateProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_3_PROPERTIES_EXT;
+    dynamicStateProperties.pNext = &_meshShaderProperties;
+
     VkPhysicalDeviceProperties2 deviceProperties2 = {};
     deviceProperties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
-    deviceProperties2.pNext = &_meshShaderProperties;
+    deviceProperties2.pNext = &dynamicStateProperties;
     for (const auto &device : devices)
     {
         currentScore = 0;
@@ -880,6 +884,10 @@ void Device::createLogicalDevice()
         queueCreateInfo.pQueuePriorities = &queuePriority;
         queueCreateInfos.push_back(queueCreateInfo);
     }
+
+    VkPhysicalDeviceExtendedDynamicState3FeaturesEXT dynamicState3Features{};
+    dynamicState3Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_FEATURES_EXT;
+
     VkPhysicalDeviceVulkan12Features vulkan12Features{};
     vulkan12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
     vulkan12Features.drawIndirectCount = VK_TRUE;
@@ -890,6 +898,7 @@ void Device::createLogicalDevice()
     vulkan12Features.descriptorBindingSampledImageUpdateAfterBind = VK_TRUE;
     vulkan12Features.runtimeDescriptorArray = VK_TRUE;
     vulkan12Features.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
+    vulkan12Features.pNext = &dynamicState3Features;
     
     VkPhysicalDeviceNestedCommandBufferFeaturesEXT nestedCommandBufferFeatures{};
     nestedCommandBufferFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_NESTED_COMMAND_BUFFER_FEATURES_EXT;

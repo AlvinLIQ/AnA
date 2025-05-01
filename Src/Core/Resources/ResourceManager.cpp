@@ -262,7 +262,7 @@ void ResourceManager::createMainCameraBuffers()
 
 void ResourceManager::createDefaultShaders()
 {
-    Shaders.reserve(5); // Reserve space for 3 default shaders
+    Shaders.reserve(5);
     auto renderPass = SwapChain::GetCurrent()->GetRenderPass();
     std::vector<std::vector<Descriptor::DescriptorConfig>> descriptorConfig;
     GetDefaultDescriptorSetConfig(descriptorConfig);
@@ -324,7 +324,6 @@ void ResourceManager::initTextures()
     TextureMap.try_emplace(1, 0xFFCC9999u, aDevice);
     TextureMap.try_emplace(2, 0xFF99CC99u, aDevice);
     TextureMap.try_emplace(3, 0xFF9999CCu, aDevice);
-    TextureMap.try_emplace(4, "Textures/wood.jfif", aDevice);
 
     aDevice->BuildFontVertices(Characters);
 /*
