@@ -8,10 +8,10 @@
 
 ## To do
 
-* [X] Mesh Shader
-* [ ] Animation System
-* [X] Cascaded Shaodow Maps
-* [ ] Fix Crappy Text Rendering
+* [ ] move descriptor sets model(vertices/indices) to resource manager
+* [ ] only pass pointers and count to shader/scene
+* [ ] consider using shared pointer for those resources
+* [ ] try pipeline cache
 
 ## Build&Run
 Clone the repo and submodules
