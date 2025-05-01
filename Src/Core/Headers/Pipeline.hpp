@@ -270,7 +270,7 @@ namespace AnA
                 dConfig.shaderStages[2].pName = "main";
 
                 dConfig.dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-                dConfig.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(dConfig.dynamicStates.size());
+                dConfig.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(dConfig.dynamicStates.size() - 1);
                 dConfig.dynamicStateInfo.pDynamicStates = dConfig.dynamicStates.data();
 
                 dConfig.vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;

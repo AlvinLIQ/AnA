@@ -104,7 +104,7 @@ void Shader::createPipelineLayout(VkDeviceSize pushConstantSize)
     if (descriptorCount)
     {
         descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
-        for (size_t i = 0; i < descriptors->size(); i++)
+        for (size_t i = 0; i < descriptorCount; i++)
         {
             auto& descriptor = descriptors->data()[i];
             descriptorSetLayouts[i] = descriptor.GetLayout();
@@ -117,7 +117,7 @@ void Shader::createPipelineLayout(VkDeviceSize pushConstantSize)
     }
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = descriptors->size();
+    pipelineLayoutInfo.setLayoutCount = descriptorCount;
     pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
     
     if (pushConstantSize)
