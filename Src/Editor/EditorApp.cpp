@@ -51,8 +51,8 @@ void EditorApp::Init()
 void EditorApp::onLoop()
 {
     aResourceManager.LockCamera = static_cast<Controls::ToggleSwitch*>(controlMap["camLockToggle"])->Toggled;
-    aResourceManager.MainCameraInfo.near = 0.05f + static_cast<Controls::Slider*>(controlMap["nearSlider"])->Value * (aResourceManager.MainCameraInfo.far - 0.05f);
-    aResourceManager.MainCameraInfo.far = static_cast<Controls::Slider*>(controlMap["farSlider"])->Value * aResourceManager.MainCameraInfo.far;
+    aResourceManager.MainCameraInfo.near = 0.05f + static_cast<Controls::Slider*>(controlMap["nearSlider"])->Value * (32.0f - 0.05f);
+    aResourceManager.MainCameraInfo.far = static_cast<Controls::Slider*>(controlMap["farSlider"])->Value * 32.0f;
     aResourceManager.MainCameraInfo.UpdateCameraPerspective(aResourceManager.MainCamera);
 
     (controlMap["shadowMapView"])->TextureLayer =

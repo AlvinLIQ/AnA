@@ -240,7 +240,7 @@ void App::createRecordCallBacks()
         {
             auto aResourceManager = Resource::ResourceManager::GetCurrent();
             Systems::RenderSystem::GetCurrent()->RenderIndirect(secondaryCommandBuffer, 
-                aResourceManager->MainScene, 
+                aResourceManager->MainScene, _aDevice->MeshShaderSupport() ? aResourceManager->Shaders.back() : aResourceManager->Shaders.front(),
                 aResourceManager->SecondaryCommandBufferPool.CurrentBufferIndex);
         }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), _aApp->GetSceneOffset());
         /*
@@ -274,7 +274,7 @@ void App::createRecordCallBacks()
             auto aResourceManager = Resource::ResourceManager::GetCurrent();
             auto aRenderSystem = Systems::RenderSystem::GetCurrent();
             aRenderSystem->RenderIndirect(secondaryCommandBuffer, 
-                aResourceManager->Shapes);
+                aResourceManager->Shapes, aResourceManager->Shaders[1]);
         }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), offset, controlExtent);
     });
 #endif

@@ -22,43 +22,11 @@ ShadowSystem* ShadowSystem::GetCurrent()
     return _shadowSystem;
 }
 
-void ShadowSystem::RenderShadows(CommandBuffer& commandBuffer, Scene &meshes, Shader& shader)
-{
-    VkExtent2D extent = {SHADOW_MAP_DIM, SHADOW_MAP_DIM};
-    swapChain->SetViewport(commandBuffer, {}, extent);
-    vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
-    shader.GetPipeline()->Bind(commandBuffer);
-    std::vector<VkDescriptorSet> sets = shader.GetDescriptorSets()[0];
-    sets[DEFAULT_VERTEX_LAYOUT] = meshes.GetVertexDescriptorSet();
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-        shader.GetPipelineLayout(), 0, 3,
-        sets.data(), 0, nullptr);
-    meshes.Bind(commandBuffer);
-    meshes.Draw(commandBuffer);
-}
-
-void ShadowSystem::RenderShadowsIndirect(CommandBuffer& commandBuffer, Scene &meshes, Shader& shader)
-{
-    VkExtent2D extent = {SHADOW_MAP_DIM, SHADOW_MAP_DIM};
-    swapChain->SetViewport(commandBuffer, {}, extent);
-    vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
-    shader.GetPipeline()->Bind(commandBuffer);
-    std::vector<VkDescriptorSet> sets = shader.GetDescriptorSets()[0];
-    sets[DEFAULT_VERTEX_LAYOUT] = meshes.GetMeshDescriptorSet();
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-        shader.GetPipelineLayout(), 0, 3,
-        sets.data(), 0, nullptr);
-    meshes.Bind(commandBuffer);
-    meshes.DrawIndirect(commandBuffer);
-}
-
-void ShadowSystem::RenderCascadedShadowsIndirect(CommandBuffer& commandBuffer, Scene &meshes, Shader& shader, uint32_t& index)
+void ShadowSystem::RenderCascadedShadowsIndirect(CommandBuffer& commandBuffer, Renderable &renderable, Shader& shader, uint32_t& index)
 {
     VkExtent2D extent = {SHADOW_MAP_DIM, SHADOW_MAP_DIM};
     swapChain->SetViewport(commandBuffer, {}, extent);
     vkCmdSetDepthBias(commandBuffer, 2.0f, 0.0f, 4.0f);
-    shader.GetPipeline()->Bind(commandBuffer);
-    std::vector<VkDescriptorSet>& sets = shader.GetDescriptorSets()[swapChain->CurrentFrame];
     auto pipelineLayout = shader.GetPipelineLayout();
     /*
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -69,6 +37,6 @@ void ShadowSystem::RenderCascadedShadowsIndirect(CommandBuffer& commandBuffer, S
         stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT;
     vkCmdPushConstants(commandBuffer, pipelineLayout,
             stageFlags, 0, sizeof(uint32_t), &index);
-    meshes.Bind(commandBuffer);
-    meshes.DrawIndirect(commandBuffer, sets, pipelineLayout);
+    renderable.Bind(commandBuffer, shader, swapChain->CurrentFrame);
+    renderable.DrawIndirect(commandBuffer);
 }

@@ -1,6 +1,6 @@
 #pragma once
 #include "../../Headers/SwapChain.hpp"
-#include "../../Resources/Headers/Scene.hpp"
+#include "../../Resources/Headers/Renderable.hpp"
 
 namespace AnA
 {
@@ -13,9 +13,7 @@ namespace AnA
             ~ShadowSystem();
             static ShadowSystem* GetCurrent();
 
-            void RenderShadows(CommandBuffer& commandBuffer, Scene& meshes, Shader& shader);
-            void RenderShadowsIndirect(CommandBuffer& commandBuffer, Scene &meshes, Shader& shader);
-            void RenderCascadedShadowsIndirect(CommandBuffer& commandBuffer, Scene &meshes, Shader& shader, uint32_t& index);
+            void RenderCascadedShadowsIndirect(CommandBuffer& commandBuffer, Renderable& renderable, Shader& shader, uint32_t& index);
         private:
             //Device* aDevice;
             SwapChain* swapChain;

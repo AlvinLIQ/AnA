@@ -55,9 +55,8 @@ void Shapes::PrepareDraw(Controls::Control* control)
     sets[1] = samplersDescriptor->GetSets()[0];
 }
 
-void Shapes::Bind(CommandBuffer& commandBuffer, uint32_t)
+void Shapes::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t)
 {
-    auto& shader = Resource::ResourceManager::GetCurrent()->Shaders[1];
     shader.GetPipeline()->Bind(commandBuffer);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, 
         shader.GetPipelineLayout(), 0, numsof(sets), 

@@ -63,11 +63,9 @@ namespace AnA
         void RemoveAt(uint32_t meshIndex);
         void RemoveAt(Range removeRange);
         void RemoveAt(std::vector<uint32_t> meshIndices);
-        void Bind(CommandBuffer& commandBuffer);
-        void Bind(CommandBuffer& commandBuffer, uint32_t bufferIndex) override;
+        void Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIndex) override;
         void Draw(CommandBuffer& commandBuffer) override;
         void DrawIndirect(CommandBuffer& commandBuffer) override;
-        void DrawIndirect(CommandBuffer& commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout);
         void DrawMesh(CommandBuffer& commandBuffer);
         void DrawMesh(CommandBuffer& commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout);
         void DrawMeshIndirect(CommandBuffer& commandBuffer);

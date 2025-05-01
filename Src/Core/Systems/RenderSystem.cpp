@@ -22,8 +22,8 @@ RenderSystem* RenderSystem::GetCurrent()
     return currentRenderSystem;
 }
 
-void RenderSystem::RenderIndirect(CommandBuffer& commandBuffer, Renderable& renderable, uint32_t bufferIndex)
+void RenderSystem::RenderIndirect(CommandBuffer& commandBuffer, Renderable& renderable, Shader& shader, uint32_t bufferIndex)
 {
-    renderable.Bind(commandBuffer, bufferIndex);
+    renderable.Bind(commandBuffer, shader, bufferIndex);
     renderable.DrawIndirect(commandBuffer);
 }
