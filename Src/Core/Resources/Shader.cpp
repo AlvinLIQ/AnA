@@ -3,8 +3,6 @@
 
 using namespace AnA;
 
-static VkPipelineLayout* pDefaultPipelineLayout = nullptr;
-
 Shader::Shader(Device* mDevice) : aDevice{mDevice}
 {
     
@@ -15,49 +13,26 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode
 {
     std::vector<std::vector<Descriptor::DescriptorConfig>> descriptorSetConfigs;
     Resource::ResourceManager::GetCurrent()->GetDefaultDescriptorSetConfig(descriptorSetConfigs);
-    createDescriptors(descriptorSetConfigs);
     
-    if (pDefaultPipelineLayout == nullptr)
-    {
-        createPipelineLayout(pushConstantSize);
-    }
-    else
-    {
-        pipelineLayout = *pDefaultPipelineLayout;
-    }
+    createPipelineLayout(pushConstantSize);
     pipeline = new Pipeline(mDevice, vertShaderCode, renderPass, pipelineLayout);
 }
 
 Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass, 
-    std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs, VkDeviceSize pushConstantSize) : aDevice{mDevice}
+    std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, VkDeviceSize pushConstantSize) : aDevice{mDevice}, 
+    descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}
 {
-    createDescriptors(descriptorSetConfigs);
-    
-    if (pDefaultPipelineLayout == nullptr)
-    {
-        createPipelineLayout(pushConstantSize);
-    }
-    else
-    {
-        pipelineLayout = *pDefaultPipelineLayout;
-    }
+    createPipelineLayout(pushConstantSize);
+
     pipeline = new Pipeline(mDevice, vertShaderCode, renderPass, pipelineLayout);
 }
 
 Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass, 
-    const std::vector<unsigned char>& fragShaderCode, std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs,
-    VkDeviceSize pushConstantSize) : aDevice{mDevice}
+    const std::vector<unsigned char>& fragShaderCode, std::vector<Descriptor>& _descriptors,
+    size_t actualDescriptorCount, VkDeviceSize pushConstantSize) : aDevice{mDevice}, descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}
 {
-    createDescriptors(descriptorSetConfigs);
-    
-    if (pDefaultPipelineLayout == nullptr)
-    {
-        createPipelineLayout(pushConstantSize);
-    }
-    else
-    {
-        pipelineLayout = *pDefaultPipelineLayout;
-    }
+    createPipelineLayout(pushConstantSize);
+
     pipeline = new Pipeline(mDevice, vertShaderCode, renderPass, pipelineLayout, fragShaderCode);
 }
 
@@ -67,65 +42,41 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode
 {
     std::vector<std::vector<Descriptor::DescriptorConfig>> descriptorSetConfigs;
     Resource::ResourceManager::GetCurrent()->GetDefaultDescriptorSetConfig(descriptorSetConfigs);
-    createDescriptors(descriptorSetConfigs);
 
-    if (pDefaultPipelineLayout == nullptr)
-    {
-        createPipelineLayout(pushConstantSize);
-    }
-    else
-    {
-        pipelineLayout = *pDefaultPipelineLayout;
-    }
+    createPipelineLayout(pushConstantSize);
     pipeline = new Pipeline(mDevice, vertShaderCode, fragShaderCode, renderPass, pipelineLayout, vertexTopology);
 }
 
 Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, 
-    std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs,
-    const VkPrimitiveTopology vertexTopology, VkDeviceSize pushConstantSize) : aDevice{mDevice}
+    std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, 
+    const VkPrimitiveTopology vertexTopology, VkDeviceSize pushConstantSize) : aDevice{mDevice}, descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}
 {
-    createDescriptors(descriptorSetConfigs);
+    createPipelineLayout(pushConstantSize);
 
-    if (pDefaultPipelineLayout == nullptr)
-    {
-        createPipelineLayout(pushConstantSize);
-    }
-    else
-    {
-        pipelineLayout = *pDefaultPipelineLayout;
-    }
     pipeline = new Pipeline(mDevice, vertShaderCode, fragShaderCode, renderPass, pipelineLayout, vertexTopology);
 }
 
-Shader::Shader(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, 
-    std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs, VkDeviceSize pushConstantSize) : aDevice{mDevice}
+Shader::Shader(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, 
+    const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, 
+    std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, VkDeviceSize pushConstantSize) : aDevice{mDevice}, 
+    descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}
 {
-    createDescriptors(descriptorSetConfigs);
+    createPipelineLayout(pushConstantSize);
 
-    if (pDefaultPipelineLayout == nullptr)
-    {
-        createPipelineLayout(pushConstantSize);
-    }
-    else
-    {
-        pipelineLayout = *pDefaultPipelineLayout;
-    }
     pipeline = new Pipeline(mDevice, taskShaderCode, meshShaderCode, fragShaderCode, renderPass, pipelineLayout);
 }
 
 Shader::Shader(Device* mDevice, Pipeline::PipelineConfig pipelineConfig, 
-    std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs) : aDevice{mDevice}
+    std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount) : aDevice{mDevice}, descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}
 {
     pipeline = new Pipeline(mDevice, pipelineConfig);
-    createDescriptors(descriptorSetConfigs);
 }
 
 Shader::~Shader()
 {
     if (pipeline != nullptr)
         delete pipeline;
-    for (auto& descriptor : descriptors)
-        delete descriptor;
+
     if (pipelineLayout != VK_NULL_HANDLE)
     {
         vkDestroyPipelineLayout(aDevice->GetLogicalDevice(), pipelineLayout, nullptr);
@@ -141,10 +92,6 @@ const VkPipelineLayout& Shader::GetPipelineLayout() const
 {
     return pipelineLayout;
 }
-const std::vector<Descriptor*>& Shader::GetDescriptors() const
-{
-    return descriptors;
-}
 
 std::vector<std::vector<VkDescriptorSet>>& Shader::GetDescriptorSets()
 {
@@ -153,14 +100,24 @@ std::vector<std::vector<VkDescriptorSet>>& Shader::GetDescriptorSets()
 
 void Shader::createPipelineLayout(VkDeviceSize pushConstantSize)
 {
-    std::vector<VkDescriptorSetLayout> descriptorSetLayouts(descriptors.size());
-    for (size_t i = 0; i < descriptors.size(); i++)
+    std::vector<VkDescriptorSetLayout> descriptorSetLayouts(descriptorCount);
+    if (descriptorCount)
     {
-        descriptorSetLayouts[i] = descriptors[i]->GetLayout();
+        descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
+        for (size_t i = 0; i < descriptors->size(); i++)
+        {
+            auto& descriptor = descriptors->data()[i];
+            descriptorSetLayouts[i] = descriptor.GetLayout();
+            for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+            {
+                descriptorSets[i].push_back(descriptor.GetSets().size() ? descriptor.GetSets()[i % (int)descriptor.GetSets().size()] :
+                nullptr);
+            }
+        }
     }
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = descriptors.size();
+    pipelineLayoutInfo.setLayoutCount = descriptors->size();
     pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
     
     if (pushConstantSize)
@@ -181,24 +138,7 @@ void Shader::createPipelineLayout(VkDeviceSize pushConstantSize)
     }
 }
 
-void Shader::createDescriptors(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs)
+const std::vector<Descriptor>& Shader::GetDescriptors() const
 {
-    descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
-    for (auto& descriptorConfigs : descriptorSetConfigs)
-    {
-        auto descriptor = new Descriptor(aDevice, descriptorConfigs.data(),
-            static_cast<uint32_t>(descriptorConfigs.size()), MAX_FRAMES_IN_FLIGHT);
-        descriptors.push_back(descriptor);
-        for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-        {
-            if (descriptor->GetSets().size())
-            {
-                descriptorSets[i].push_back(descriptor->GetSets()[i % (int)descriptor->GetSets().size()]);
-            }
-            else
-            {
-                descriptorSets[i].push_back(nullptr);
-            }
-        }
-    }
+    return *descriptors;
 }

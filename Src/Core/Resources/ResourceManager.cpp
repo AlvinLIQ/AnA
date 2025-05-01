@@ -19,6 +19,7 @@ ResourceManager::ResourceManager(Device* mDevice) :
     _resourceManager = this;
     createMainCameraBuffers();
     //createShadowFramebuffers();
+    createDefaultDescriptors();
     createDefaultShaders();
     MainScene.Init();
     Shapes = AnA::Shapes(mDevice);
@@ -178,13 +179,7 @@ void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Desc
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     if (aDevice->MeshShaderSupport())
         pConfig->stageFlags |= VK_SHADER_STAGE_MESH_BIT_EXT;
-/*
-    pConfig = &descriptorConfigs[DEFAULT_MESHLET_LAYOUT];
-    pConfig->binding = 0;
-    pConfig->descriptorCount = 0;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_MESH_BIT_EXT;
-*/
+
     pConfig = &descriptorSetConfigs[DEFAULT_UBO_LAYOUT][0];
     pConfig->binding = 0;
     pConfig->descriptorCount = 1;
@@ -260,38 +255,55 @@ void ResourceManager::createMainCameraBuffers()
     }
 }
 
+void ResourceManager::createDefaultDescriptors()
+{
+    std::vector<std::vector<Descriptor::DescriptorConfig>> descriptorSetConfigs;
+    GetDefaultDescriptorSetConfig(descriptorSetConfigs);
+    if (aDevice->MeshShaderSupport())
+    {
+        Descriptor::DescriptorConfig meshletConfig{};
+        meshletConfig.binding = 0;
+        meshletConfig.descriptorCount = 0;
+        meshletConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        meshletConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+        Descriptor::DescriptorConfig meshletCullingConfig{};
+        meshletCullingConfig.binding = 1;
+        meshletCullingConfig.descriptorCount = 0;
+        meshletCullingConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        meshletCullingConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT;
+        Descriptor::DescriptorConfig outputConfig{};
+        outputConfig.binding = 2;
+        outputConfig.descriptorCount = 0;
+        outputConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        outputConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT;
+
+        descriptorSetConfigs.push_back({meshletConfig, meshletCullingConfig, outputConfig});
+    }
+    Descriptor::CreateDescriptors(aDevice, descriptorSetConfigs, defaultDescriptors);
+
+    std::vector<std::vector<Descriptor::DescriptorConfig>> shapesDescriptorConfig;
+    GetDefaultShapesDescriptorSetConfig(shapesDescriptorConfig);
+
+    Descriptor::CreateDescriptors(aDevice, shapesDescriptorConfig, shapeDescriptors);
+}
+
 void ResourceManager::createDefaultShaders()
 {
     Shaders.reserve(5);
     auto renderPass = SwapChain::GetCurrent()->GetRenderPass();
     std::vector<std::vector<Descriptor::DescriptorConfig>> descriptorConfig;
     GetDefaultDescriptorSetConfig(descriptorConfig);
-    Shaders.emplace_back(aDevice, Basic_vert, Basic_frag, renderPass, descriptorConfig);
+    Shaders.emplace_back(aDevice, Basic_vert, Basic_frag, renderPass, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT);
 
     std::vector<std::vector<Descriptor::DescriptorConfig>> shapesDescriptorConfig;
     GetDefaultShapesDescriptorSetConfig(shapesDescriptorConfig);
-    Shaders.emplace_back(aDevice, Shape_vert, Shape_frag, renderPass, shapesDescriptorConfig);
+    Shaders.emplace_back(aDevice, Shape_vert, Shape_frag, renderPass, shapeDescriptors, SHAPE_DESCRIPTOR_SET_LAYOUT_COUNT);
 
     auto offscreenRenderPass = SwapChain::GetCurrent()->GetOffscreenRenderPass();
 
     Shaders.emplace_back(aDevice, CascadedShadowMapping_vert, offscreenRenderPass
-        , descriptorConfig, sizeof(uint32_t));
-/*
-    Descriptor::DescriptorConfig chVertexConfig{};
-    chVertexConfig.binding = 0;
-    chVertexConfig.descriptorCount = 0;
-    chVertexConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    chVertexConfig.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    Descriptor::DescriptorConfig chConfig{};
-    chConfig.binding = 1;
-    chConfig.descriptorCount = 0;
-    chConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    chConfig.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+        , defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, sizeof(uint32_t));
 
-    std::vector<std::vector<Descriptor::DescriptorConfig>> textDescriptorSetConfigs = {{chVertexConfig, chConfig}, {chVertexConfig, chConfig}};
-    Shaders.emplace_back(aDevice, Text_vert, Text_frag, renderPass, 
-        textDescriptorSetConfigs, VK_PRIMITIVE_TOPOLOGY_LINE_STRIP, sizeof(uint32_t));
-*/
     if (aDevice->MeshShaderSupport())
     {
         Descriptor::DescriptorConfig meshletConfig{};
@@ -313,7 +325,7 @@ void ResourceManager::createDefaultShaders()
         descriptorConfig.push_back({meshletConfig, meshletCullingConfig, outputConfig});
 
         Shaders.emplace_back(aDevice, Mesh_task, Mesh_mesh, Mesh_frag, renderPass
-            , descriptorConfig);
+            , defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
     }
     //std::vector<Descriptor::DescriptorConfig> emptyConfig{};
 }

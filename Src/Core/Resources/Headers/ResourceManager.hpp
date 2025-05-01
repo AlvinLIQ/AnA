@@ -97,6 +97,9 @@ namespace AnA
             void cleanupShadowResources();*/
             void createDefaultShaders();
             void initTextures();
+            void createDefaultDescriptors();
+            std::vector<Descriptor> defaultDescriptors;
+            std::vector<Descriptor> shapeDescriptors;
         };
     }
 }

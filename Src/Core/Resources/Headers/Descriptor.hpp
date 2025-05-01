@@ -37,6 +37,15 @@ namespace AnA
             uint32_t binding;
             VkShaderStageFlags stageFlags;
         };
+        static void CreateDescriptors(Device* aDevice, std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs, std::vector<Descriptor>& descriptors)
+        {
+            descriptors.reserve(descriptorSetConfigs.size());
+            for (auto& descriptorSetConfig : descriptorSetConfigs)
+            {
+                descriptors.emplace_back(aDevice, descriptorSetConfig.data(),
+                static_cast<uint32_t>(descriptorSetConfig.size()), MAX_FRAMES_IN_FLIGHT);
+            }
+        }
         Descriptor(Device* mDevice, Buffer* buffers, VkDeviceSize bufferSize, uint32_t binding, uint32_t descriptorSetCount, uint32_t descriptorCount, VkShaderStageFlags stageFlags, const VkDescriptorType descriptorType);
         Descriptor(Device* mDevice, Buffer* buffers, VkDeviceSize bufferSize, uint32_t binding, uint32_t descriptorSetCount, uint32_t descriptorCount, VkDescriptorSetLayout descriptorSetLayout, const VkDescriptorType descriptorType);
         Descriptor(Device* mDevice, VkSampler& sampler, VkImageView& imageView, VkImageLayout imageLayout, uint32_t binding, uint32_t descriptorSetCount, uint32_t descriptorCount, VkShaderStageFlags stageFlags, const VkDescriptorType descriptorType);
