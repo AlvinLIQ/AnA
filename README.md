@@ -7,7 +7,7 @@
 * Culling & LODs
 
 ## To do
-
+* [ ] MOVE CASCADED SHADOW MAPPING TO MESH SHADER
 * [ ] move descriptor sets model(vertices/indices) to resource manager
 * [ ] only pass pointers and count to shader/scene
 * [ ] consider using shared pointer for those resources
