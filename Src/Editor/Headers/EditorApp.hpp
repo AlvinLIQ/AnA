@@ -21,7 +21,7 @@ namespace AnA
             static void exitButton_Click(void* control, PointerEventArgs& args);
             std::unordered_map<std::string, Controls::Control*> controlMap;
         protected:
-            void onLoop() override;
+            static void onLoop();
         };
     }
 }

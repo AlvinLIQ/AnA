@@ -138,7 +138,8 @@ void App::Run()
             aResourceManager.Resize();
         }
         aResourceManager.Update();
-        onLoop();
+        if (loopCallback)
+            loopCallback();
 
         //Record Primary Command Buffer
         if (auto commandBuffer = aRenderer.BeginFrame())
@@ -299,9 +300,4 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     if (aResourceManager.SecondaryCommandBufferPool.GetCommandBufferCount())
         aResourceManager.SecondaryCommandBufferPool.ExecuteRecordedBuffer(commandBuffer);
     aRenderer.EndRenderPass(commandBuffer);
-}
-
-void App::onLoop()
-{
-    
 }

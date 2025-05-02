@@ -7,8 +7,7 @@
 * Culling & LODs
 
 ## To do
-* [ ] MOVE CASCADED SHADOW MAPPING TO MESH SHADER
-* [ ] use ray tracing instead of traditional shadow map when having multiple light sources 
+* [ ] use ray tracing instead of traditional shadow map when having multiple light sources (enable by default when mesh shader is supported)
 * [ ] move descriptor sets model(vertices/indices) to resource manager
 * [ ] only pass pointers and count to shader/scene
 * [ ] consider using shared pointer for those resources

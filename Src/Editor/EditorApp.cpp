@@ -50,13 +50,15 @@ void EditorApp::Init()
 
 void EditorApp::onLoop()
 {
-    aResourceManager.LockCamera = static_cast<Controls::ToggleSwitch*>(controlMap["camLockToggle"])->Toggled;
-    aResourceManager.MainCameraInfo.near = 0.05f + static_cast<Controls::Slider*>(controlMap["nearSlider"])->Value * (32.0f - 0.05f);
-    aResourceManager.MainCameraInfo.far = static_cast<Controls::Slider*>(controlMap["farSlider"])->Value * 32.0f;
+    auto& aResourceManager = *Resource::ResourceManager::GetCurrent();
+    auto editorApp = static_cast<EditorApp*>(App::GetCurrent());
+    aResourceManager.LockCamera = static_cast<Controls::ToggleSwitch*>(editorApp->controlMap["camLockToggle"])->Toggled;
+    aResourceManager.MainCameraInfo.near = 0.05f + static_cast<Controls::Slider*>(editorApp->controlMap["nearSlider"])->Value * (32.0f - 0.05f);
+    aResourceManager.MainCameraInfo.far = static_cast<Controls::Slider*>(editorApp->controlMap["farSlider"])->Value * 32.0f;
     aResourceManager.MainCameraInfo.UpdateCameraPerspective(aResourceManager.MainCamera);
 
-    (controlMap["shadowMapView"])->TextureLayer =
-        uint32_t(std::min(2.0f, static_cast<Controls::Slider*>(controlMap["shadowMapSlider"])->Value * 3.0f));
+    (editorApp->controlMap["shadowMapView"])->TextureLayer =
+        uint32_t(std::min(2.0f, static_cast<Controls::Slider*>(editorApp->controlMap["shadowMapSlider"])->Value * 3.0f));
 }
 
 void EditorApp::loadModelButton_Click(void* , PointerEventArgs& )

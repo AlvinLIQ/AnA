@@ -66,9 +66,8 @@ namespace AnA
         bool commandBufferNeedUpdate = false;
         VkOffset2D actualSceneOffset{};
     protected:
-        virtual void createRecordCallBacks();
-        virtual void onCommandBufferRecording(CommandBuffer& commandBuffer);
-        virtual void onLoop();
+        void createRecordCallBacks();
+        void onCommandBufferRecording(CommandBuffer& commandBuffer);
         Window aWindow;
         Instance aInstance;
         Input::InputManager aInputManager;
@@ -78,5 +77,6 @@ namespace AnA
         Systems::ShadowSystem aShadowSystem;
         Resource::ResourceManager aResourceManager;
         VkOffset2D sceneOffset{};
+        void(*loopCallback)() = nullptr;
     };
 }
