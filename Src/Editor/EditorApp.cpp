@@ -46,6 +46,7 @@ void EditorApp::Init()
     };
     aInputManager.GlobalProfile.keyMapConfigs.push_back(keyMapConfig);
     Controls::Control::GetInputProfile(aResourceManager.MainControl, aInputManager.GetProfiles());
+    loopCallback = EditorApp::onLoop;
 }
 
 void EditorApp::onLoop()
