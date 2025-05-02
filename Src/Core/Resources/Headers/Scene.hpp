@@ -5,6 +5,7 @@
 #include "Model.hpp"
 #include "Descriptor.hpp"
 #include "CommandBuffer.hpp"
+#include "../../Headers/Buffer.hpp"
 #include "../../Headers/Types.hpp"
 
 namespace AnA
@@ -17,6 +18,7 @@ namespace AnA
         uint32_t vertexOffset;
         uint32_t indexOffset;
         uint32_t textureId{};
+        std::shared_ptr<Model> model;
     };
     struct Meshlet
     {
@@ -106,10 +108,6 @@ namespace AnA
 
             return batchCount;
         }
-        std::vector<Model::Vertex>& GetVertices()
-        {
-            return vertices;
-        }
         const Descriptor* GetVertexDescriptor() const
         {
             return vertexDescriptor;
@@ -133,10 +131,8 @@ namespace AnA
         bool IsRunning = false;
     private:
         Device* aDevice;
-        std::vector<Model::Vertex> vertices{};
         std::vector<Buffer> vertexBuffers{};
         size_t vertexCount = 0;
-        std::vector<Model::Index> indices{};
         std::vector<Buffer> indexBuffers{};
         size_t indexCount = 0;
         Buffer drawIndexedIndirectBuffer{};

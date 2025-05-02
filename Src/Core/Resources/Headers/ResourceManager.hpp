@@ -72,6 +72,9 @@ namespace AnA
             AnA::Controls::Control* MainControl = NULL;
 #endif
             std::unordered_map<uint32_t, Texture> TextureMap{};
+            std::unordered_map<uint32_t, std::shared_ptr<Model>> ModelMap{};
+            std::unordered_map<std::string, uint32_t> ModelPathIndexMap{};
+            void CreateModel(const char* filePath, uint32_t& id);
             std::vector<Character> Characters{};
             AnA::Resource::ShadowMap ShadowMap;
             ThreadPool<void()> TaskPool{MAX_FRAMES_IN_FLIGHT};

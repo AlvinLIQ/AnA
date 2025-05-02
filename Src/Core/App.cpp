@@ -81,8 +81,8 @@ void App::CreateCubeModel(std::shared_ptr<Model>& model)
         {{.5f,  .5f, -.5f},  {0.0f, 0.0f, 1.0f}},
     };
 
-    Model::ModelInfo modelInfo = {vertices, {}, {}, 4, {0, 1, 2, 1, 2, 3}};
-    model = std::make_shared<Model>(_aDevice, modelInfo);
+    Model::ModelInfo modelInfo = {vertices, {}, {}, {0, 1, 2, 1, 2, 3}};
+    model = std::make_shared<Model>(modelInfo);
 }
 
 void App::Init()
@@ -168,8 +168,8 @@ std::shared_ptr<Model> &App::Get2DModel()
             {{-1.0f, 1.0f, 0.f}, {}, {0.0f, 1.0f}},
             {{1.0f, 1.0f, 0.f}, {}, {1.0f, 1.0f}}
         };
-        Model::ModelInfo modelInfo{vertices, {}, {}, 4, {0, 2, 1, 1, 2, 3}};
-        _2DModel = std::make_shared<Model>(_aDevice, modelInfo);
+        Model::ModelInfo modelInfo{vertices, {}, {}, {0, 2, 1, 1, 2, 3}};
+        _2DModel = std::make_shared<Model>(modelInfo);
     }
 
     return _2DModel;
@@ -177,7 +177,7 @@ std::shared_ptr<Model> &App::Get2DModel()
 
 void App::CreateModel(const Model::ModelInfo &modelInfo, std::shared_ptr<Model> &model)
 {
-    model = std::make_shared<Model>(_aDevice, modelInfo);
+    model = std::make_shared<Model>(modelInfo);
 }
 
 void App::startUILoop(std::thread &loopThread)
