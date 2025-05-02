@@ -628,8 +628,6 @@ void Scene::buildMeshletsWithOptimizer()
 
         for (auto& meshletInfo : meshopt_meshlets)
         {
-            glm::vec3 minBounding{std::numeric_limits<float>::max()};
-            glm::vec3 maxBounding{-std::numeric_limits<float>::max()};
             Meshlet meshlet{};
             meshlet.indexCount = static_cast<uint32_t>(meshletInfo.triangle_count) * 3;
             meshlet.vertexCount = static_cast<uint32_t>(meshletInfo.vertex_count);
@@ -642,17 +640,15 @@ void Scene::buildMeshletsWithOptimizer()
             for (uint32_t i = 0; i < meshlet.vertexCount; i++)
             {
                 meshlet.vertices[i] = uniqueVertexIndices[i + meshletInfo.vertex_offset] + mesh.vertexOffset;
-                minBounding = glm::min(minBounding, vertices[meshlet.vertices[i]].position);
-                maxBounding = glm::max(maxBounding, vertices[meshlet.vertices[i]].position);
             }
             auto model = mesh.transform.mat3();
-            meshlet.center = (minBounding + maxBounding) * 0.5f;
-            meshlet.center = model * meshlet.center + mesh.transform.translation;
             meshopt_Bounds bounds = meshopt_computeMeshletBounds(meshlet.vertices, 
                 &primitiveIndices[meshletInfo.triangle_offset], meshletInfo.triangle_count, 
                     &vertices.data()->position.x, vertices.size(), sizeof(Model::Vertex));
             meshlet.normal = glm::transpose(glm::inverse(model)) * glm::vec3(bounds.cone_axis[0], bounds.cone_axis[1], bounds.cone_axis[2]);
             meshlet.cutoff = bounds.cone_cutoff;
+            meshlet.center = {bounds.center[0], bounds.center[1], bounds.center[2]};
+            meshlet.center = model * meshlet.center + mesh.transform.translation;
 
             for (uint32_t i = 0; i < meshlet.vertexCount; i++)
             {
