@@ -70,9 +70,11 @@ bool isMeshletFacingCamera(vec3 center, vec3 coneAxis, float radius, float cutof
 
 bool isMeshletVisible(uint meshletId)
 {
+    /*
     BoundingSphere boundingSphere = mcsbo.boundings[meshletId];
     return  isSphereInsideFrustum(boundingSphere.center, boundingSphere.radius) && 
-            isMeshletFacingCamera(boundingSphere.center, boundingSphere.normal, boundingSphere.radius, boundingSphere.cutoff);
+            isMeshletFacingCamera(boundingSphere.center, boundingSphere.normal, boundingSphere.radius, boundingSphere.cutoff);*/
+    return true;
 }
 
 void main()

@@ -66,10 +66,6 @@ namespace AnA
         void Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIndex) override;
         void Draw(CommandBuffer& commandBuffer) override;
         void DrawIndirect(CommandBuffer& commandBuffer) override;
-        void DrawMesh(CommandBuffer& commandBuffer);
-        void DrawMesh(CommandBuffer& commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout);
-        void DrawMeshIndirect(CommandBuffer& commandBuffer);
-        void DrawMeshIndirect(CommandBuffer& commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout);
         bool NeedUpdate() override
         {
             return updateQueue.size();

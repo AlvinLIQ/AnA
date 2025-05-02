@@ -15,7 +15,7 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode
     Resource::ResourceManager::GetCurrent()->GetDefaultDescriptorSetConfig(descriptorSetConfigs);
     
     createPipelineLayout(pushConstantSize);
-    pipeline = new Pipeline(mDevice, vertShaderCode, renderPass, pipelineLayout);
+    pipeline = Pipeline(mDevice, vertShaderCode, renderPass, pipelineLayout);
 }
 
 Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass, 
@@ -24,7 +24,7 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode
 {
     createPipelineLayout(pushConstantSize);
 
-    pipeline = new Pipeline(mDevice, vertShaderCode, renderPass, pipelineLayout);
+    pipeline = Pipeline(mDevice, vertShaderCode, renderPass, pipelineLayout);
 }
 
 Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass, 
@@ -33,7 +33,7 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode
 {
     createPipelineLayout(pushConstantSize);
 
-    pipeline = new Pipeline(mDevice, vertShaderCode, renderPass, pipelineLayout, fragShaderCode);
+    pipeline = Pipeline(mDevice, vertShaderCode, renderPass, pipelineLayout, fragShaderCode);
 }
 
 Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, 
@@ -44,7 +44,7 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode
     Resource::ResourceManager::GetCurrent()->GetDefaultDescriptorSetConfig(descriptorSetConfigs);
 
     createPipelineLayout(pushConstantSize);
-    pipeline = new Pipeline(mDevice, vertShaderCode, fragShaderCode, renderPass, pipelineLayout, vertexTopology);
+    pipeline = Pipeline(mDevice, vertShaderCode, fragShaderCode, renderPass, pipelineLayout, vertexTopology);
 }
 
 Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, 
@@ -53,7 +53,7 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode
 {
     createPipelineLayout(pushConstantSize);
 
-    pipeline = new Pipeline(mDevice, vertShaderCode, fragShaderCode, renderPass, pipelineLayout, vertexTopology);
+    pipeline = Pipeline(mDevice, vertShaderCode, fragShaderCode, renderPass, pipelineLayout, vertexTopology);
 }
 
 Shader::Shader(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, 
@@ -63,34 +63,38 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& taskShaderCode
 {
     createPipelineLayout(pushConstantSize);
 
-    pipeline = new Pipeline(mDevice, taskShaderCode, meshShaderCode, fragShaderCode, renderPass, pipelineLayout);
+    pipeline = Pipeline(mDevice, taskShaderCode, meshShaderCode, fragShaderCode, renderPass, pipelineLayout);
+    hasMeshShader = true;
+}
+
+Shader::Shader(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, 
+    std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, VkRenderPass& renderPass, VkDeviceSize pushConstantSize) : aDevice{mDevice}, 
+    descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}
+{
+    createPipelineLayout(pushConstantSize);
+
+    pipeline = Pipeline(mDevice, taskShaderCode, meshShaderCode, pipelineLayout, renderPass);
+    hasMeshShader = true;
 }
 
 Shader::Shader(Device* mDevice, Pipeline::PipelineConfig pipelineConfig, 
     std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount) : aDevice{mDevice}, descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}
 {
-    pipeline = new Pipeline(mDevice, pipelineConfig);
+    pipeline = Pipeline(mDevice, pipelineConfig);
 }
 
 Shader::~Shader()
 {
-    if (pipeline != nullptr)
-        delete pipeline;
-
-    if (pipelineLayout != VK_NULL_HANDLE)
-    {
-        vkDestroyPipelineLayout(aDevice->GetLogicalDevice(), pipelineLayout, nullptr);
-        pipelineLayout = VK_NULL_HANDLE;
-    }
+    
 }
 
-Pipeline* Shader::GetPipeline() const
+const Pipeline& Shader::GetPipeline() const
 {
     return pipeline;
 }
-const VkPipelineLayout& Shader::GetPipelineLayout() const
+VkPipelineLayout Shader::GetPipelineLayout() const
 {
-    return pipelineLayout;
+    return pipeline.GetLayout();
 }
 
 std::vector<std::vector<VkDescriptorSet>>& Shader::GetDescriptorSets()

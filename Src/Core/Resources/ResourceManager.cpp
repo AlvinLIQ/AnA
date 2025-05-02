@@ -302,6 +302,8 @@ void ResourceManager::createDefaultShaders()
 
     if (aDevice->MeshShaderSupport())
     {
+        Shaders.emplace_back(aDevice, CascadedShadowMapping_task, CascadedShadowMapping_mesh,
+            defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, offscreenRenderPass, 0);
         Shaders.emplace_back(aDevice, Mesh_task, Mesh_mesh, Mesh_frag, renderPass
             , defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
     }

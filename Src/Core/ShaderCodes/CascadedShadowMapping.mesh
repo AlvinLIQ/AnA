@@ -63,7 +63,7 @@ void main()
     uint vertexCount = msbo.meshlets[iid++];
     uint primitiveCount = msbo.meshlets[iid++];
     SetMeshOutputsEXT(vertexCount, primitiveCount);
-//gl_LocalInvocationIndex
+
     for (uint i = 0; i < vertexCount; i++)
     {
         Vertex vertex = vsbo.vertices[msbo.meshlets[iid + i]];

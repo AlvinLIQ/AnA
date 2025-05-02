@@ -22,6 +22,8 @@ namespace AnA
             const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VkDeviceSize pushConstantSize = 0);
         Shader(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, 
             std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, VkDeviceSize pushConstantSize = 0);
+        Shader(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, 
+            std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, VkRenderPass& renderPass, VkDeviceSize pushConstantSize = 0);
 
         Shader(Device* mDevice, Pipeline::PipelineConfig pipelineConfig);
         Shader(Device* mDevice, Pipeline::PipelineConfig pipelineConfig, std::vector<Descriptor>& descriptors, size_t actualDescriptorCount);
@@ -30,7 +32,6 @@ namespace AnA
         Shader& operator=(const Shader&) = delete;
         Shader(Shader&& shader) noexcept : aDevice{shader.aDevice}, pipeline{shader.pipeline}, pipelineLayout{shader.pipelineLayout}, descriptorSets{shader.descriptorSets}
         {
-            shader.pipeline = nullptr;
             shader.pipelineLayout = VK_NULL_HANDLE;
             shader.descriptorSets.clear();
         }
@@ -44,7 +45,6 @@ namespace AnA
                 pipelineLayout = shader.pipelineLayout;
                 descriptorSets = shader.descriptorSets;
 
-                shader.pipeline = nullptr;
                 shader.pipelineLayout = VK_NULL_HANDLE;
                 shader.descriptorSets.clear();
             }
@@ -52,17 +52,23 @@ namespace AnA
         }
         ~Shader();
 
-        Pipeline* GetPipeline() const;
-        const VkPipelineLayout& GetPipelineLayout() const;
+        const Pipeline& GetPipeline() const;
+        VkPipelineLayout GetPipelineLayout() const;
         const std::vector<Descriptor>& GetDescriptors() const;
         std::vector<std::vector<VkDescriptorSet>>& GetDescriptorSets();
+
+        bool HasMeshShader() const
+        {
+            return hasMeshShader;
+        }
     private:
         Device* aDevice{nullptr};
-        Pipeline* pipeline{nullptr};
+        Pipeline pipeline{};
         VkPipelineLayout pipelineLayout{VK_NULL_HANDLE};
         void createPipelineLayout(VkDeviceSize pushConstantSize = 0);
         std::vector<std::vector<VkDescriptorSet>> descriptorSets;
         std::vector<Descriptor>* descriptors{nullptr};
         size_t descriptorCount = 0;
+        bool hasMeshShader = false;
     };
 }

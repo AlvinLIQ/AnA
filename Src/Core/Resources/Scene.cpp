@@ -213,8 +213,8 @@ void Scene::RemoveAt(std::vector<uint32_t> meshIndices)
 void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIndex)
 {
     auto& sets = shader.GetDescriptorSets()[bufferIndex];
-    shader.GetPipeline()->Bind(commandBuffer);
-    if (aDevice->MeshShaderSupport())
+    shader.GetPipeline().Bind(commandBuffer);
+    if (shader.HasMeshShader())
     {
         sets[DEFAULT_MESHLET_LAYOUT] = meshDescriptor->GetSets()[currentBufferIndex];
     }
@@ -234,11 +234,9 @@ void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIn
 
 void Scene::Draw(CommandBuffer& commandBuffer)
 {
-    if (aDevice->MeshShaderSupport())
-        aDevice->vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
-    else
-        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indexBuffers[currentBufferIndex].GetSize() / sizeof(Model::Index)), 1, 0, 0, 0);
-}
+    vkCmdDrawIndexedIndirectCount(commandBuffer, drawIndexedIndirectBuffer.GetBuffer(), 
+    0, countBuffer.GetBuffer(), 
+    0, 1, sizeof(VkDrawIndexedIndirectCommand));}
 
 void Scene::DrawIndirect(CommandBuffer& commandBuffer)
 {
@@ -250,44 +248,6 @@ void Scene::DrawIndirect(CommandBuffer& commandBuffer)
         vkCmdDrawIndexedIndirectCount(commandBuffer, drawIndexedIndirectBuffer.GetBuffer(), 
             0, countBuffer.GetBuffer(), 
             0, 1, sizeof(VkDrawIndexedIndirectCommand));
-}
-
-void Scene::DrawMesh(CommandBuffer& commandBuffer)
-{
-    aDevice->vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
-}
-
-void Scene::DrawMesh(CommandBuffer& commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout)
-{
-    sets[DEFAULT_VERTEX_LAYOUT] = vertexDescriptor->GetSets()[currentBufferIndex];
-    sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors.front()->GetSets()[0];
-    sets[DEFAULT_MESHLET_LAYOUT] = meshDescriptor->GetSets()[currentBufferIndex];
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-    pipelineLayout, 0, static_cast<uint32_t>(sets.size()),
-    sets.data(), 0, nullptr);
-
-    aDevice->vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
-}
-
-void Scene::DrawMeshIndirect(CommandBuffer& commandBuffer)
-{
-    aDevice->vkCmdDrawMeshTasksIndirectCountEXT(commandBuffer, drawMeshIndirectBuffer.GetBuffer(), 0, 
-        countBuffer.GetBuffer(), 
-        0, 1, sizeof(VkDrawMeshTasksIndirectCommandEXT));
-}
-
-void Scene::DrawMeshIndirect(CommandBuffer& commandBuffer, std::vector<VkDescriptorSet>& sets, VkPipelineLayout pipelineLayout)
-{
-    sets[DEFAULT_VERTEX_LAYOUT] = vertexDescriptor->GetSets()[currentBufferIndex];
-    sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors.front()->GetSets()[0];
-    sets[DEFAULT_MESHLET_LAYOUT] = meshDescriptor->GetSets()[currentBufferIndex];
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-    pipelineLayout, 0, static_cast<uint32_t>(sets.size()),
-    sets.data(), 0, nullptr);
-
-    aDevice->vkCmdDrawMeshTasksIndirectCountEXT(commandBuffer, drawMeshIndirectBuffer.GetBuffer(), 0, 
-        countBuffer.GetBuffer(), 
-        0, 1, sizeof(VkDrawMeshTasksIndirectCommandEXT));
 }
 
 void Scene::CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer)

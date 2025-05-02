@@ -46,6 +46,13 @@ Pipeline::Pipeline(Device* mDevice, const std::vector<unsigned char>& taskShader
     createMeshShaderPipeline(taskShaderCode, meshShaderCode, fragShaderCode);
 }
 
+Pipeline::Pipeline(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, 
+    const std::vector<unsigned char>& meshShaderCode, 
+    VkPipelineLayout &mPipelineLayoutconst, VkRenderPass &mRenderPass) : aDevice{mDevice}, renderPass{mRenderPass}, pipelineLayout{mPipelineLayoutconst}
+{
+    createMeshShaderPipeline(taskShaderCode, meshShaderCode);
+}
+
 Pipeline::Pipeline(Device* mDevice, const char* computeShaderFile, VkPipelineLayout &mPipelineLayout) : aDevice{mDevice}, pipelineLayout {mPipelineLayout}
 {
     createComputePipeline(computeShaderFile);
@@ -63,13 +70,26 @@ Pipeline::Pipeline(Device* mDevice, PipelineConfig pipelineConfig) : aDevice{mDe
 
 Pipeline::~Pipeline()
 {
-    auto logicalDevice = aDevice->GetLogicalDevice();
-    vkDestroyPipeline(logicalDevice, pipeline, nullptr);
+    Cleanup();
 }
 
-void Pipeline::Bind(VkCommandBuffer commandBuffer)
+void Pipeline::Bind(VkCommandBuffer commandBuffer) const
 {
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+}
+
+void Pipeline::Cleanup()
+{
+    if (pipeline != VK_NULL_HANDLE)
+    {
+        auto logicalDevice = aDevice->GetLogicalDevice();
+        vkDestroyPipeline(logicalDevice, pipeline, nullptr);
+    }
+    if (pipelineLayout != VK_NULL_HANDLE)
+    {
+        vkDestroyPipelineLayout(aDevice->GetLogicalDevice(), pipelineLayout, nullptr);
+        pipelineLayout = VK_NULL_HANDLE;
+    }
 }
 
 void Pipeline::createGraphicsPipeline(const std::string &vertShaderFileName, const std::string &fragShaderFileName, const VkPrimitiveTopology vertexTopology)
@@ -148,6 +168,20 @@ void Pipeline::createMeshShaderPipeline(const std::vector<unsigned char>& taskSh
     vkDestroyShaderModule(aDevice->GetLogicalDevice(), taskShaderModule, nullptr);
     vkDestroyShaderModule(aDevice->GetLogicalDevice(), meshShaderModule, nullptr);
     vkDestroyShaderModule(aDevice->GetLogicalDevice(), fragShaderModule, nullptr);
+}
+
+void Pipeline::createMeshShaderPipeline(const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode)
+{
+    VkShaderModule taskShaderModule = createShaderModule(taskShaderCode);
+    VkShaderModule meshShaderModule = createShaderModule(meshShaderCode);
+
+    auto pipelineConfig = PipelineConfig::GetForDepthTestMeshShader(taskShaderModule, meshShaderModule, pipelineLayout, renderPass);
+    
+    if (vkCreateGraphicsPipelines(aDevice->GetLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineConfig.pipelineInfo, nullptr, &pipeline) != VK_SUCCESS)
+        throw std::runtime_error("Failed to create pipeline!");
+
+    vkDestroyShaderModule(aDevice->GetLogicalDevice(), taskShaderModule, nullptr);
+    vkDestroyShaderModule(aDevice->GetLogicalDevice(), meshShaderModule, nullptr);
 }
 
 void Pipeline::createComputePipeline(const std::string& computeShaderFileName)
