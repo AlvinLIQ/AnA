@@ -62,6 +62,8 @@ namespace AnA
             void Resize();
 
             Scene MainScene;
+            //Test scene
+            //Scene Points;
             std::vector<Shader> Shaders;
             void GetDefaultDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);
             void GetDefaultShapesDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);

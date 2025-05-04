@@ -45,7 +45,7 @@ std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& inv, glm::ve
 
 void ShadowMap::UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, uint32_t bufferIndex)
 {
-	glm::vec3 lightDir = glm::normalize(glm::vec3(1.0f, 1.0f, 1.0f));
+	glm::vec3 lightDir = glm::normalize(-Resource::ResourceManager::GetCurrent()->GlobalLight.Direction);
     //glm::vec3 lightPos = lightDir * 2.0f;
     //float cascadeSplits[SHADOW_MAP_CASCADE_COUNT];
 

@@ -1,4 +1,5 @@
 #include "Headers/Model.hpp"
+#include "Headers/Device.hpp"
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
@@ -61,6 +62,7 @@ void Model::CreateModelFromFile(const char *filePath, std::shared_ptr<Model>& mo
     }*/
     modelInfo.indexStep = static_cast<Index>(modelInfo.vertices.size());
     model = std::make_shared<Model>(modelInfo);
+    model->Path = filePath;
 }
 
 void Model::CreateMeshFromFile(const char *filePath, std::vector<Vertex>& vertices, std::vector<Index>& indices, size_t vertexOffset)
@@ -138,6 +140,83 @@ void Model::CreateMeshFromFile(const char *filePath, std::vector<Vertex>& vertic
                 vertexMap.insert(std::pair<Vertex, Index>(vertex, vertexMap.size()));
                 vertices.push_back(vertex);
             }
+        }
+    }
+}
+
+void Model::CreateVerticesFromFile(const char *filePath, std::vector<Vertex> &vertices)
+{
+    auto data = ReadFile(filePath);
+    auto str = reinterpret_cast<char*>(data.data());
+    for (size_t j = 0; j < data.size();)
+    {
+        Model::Vertex vertex{};
+        sscanf(str + j, "%f,%f,%f\n", 
+            &vertex.position.x, &vertex.position.y, &vertex.position.z);
+
+        vertices.push_back(vertex);
+        while(str[j++] != '\n');
+    }
+}
+
+void CalculateNormal(std::vector<Model::Vertex>& vertices, size_t index, size_t period)
+{
+    size_t imp = index % period;
+    auto& left = imp ? vertices[index - 1] : vertices[index];
+    auto& right = imp != period - 1 ?  vertices[index + 1] : vertices[index];
+    auto& up = index >= period ? vertices[index - period] : vertices[index];
+    auto& down = index + period < vertices.size() ? vertices[index + period] : vertices[index];
+    auto v1 = right.position - left.position;
+    auto v2 = down.position - up.position;
+    vertices[index].normal = glm::normalize(glm::cross(v1, v2));
+
+}
+
+float Slope(const glm::vec3& v)
+{
+    float h = sqrtf(v.x * v.x + v.y * v.y);
+    return std::abs(v.z / h);
+}
+
+void Model::CreateTerrainFromVertices(std::vector<Vertex> &vertices, std::vector<Index> &indices, size_t period)
+{
+    assert(period > 1);
+    assert(vertices.size() % period == 0);
+    size_t rowCount = vertices.size() / period;
+    assert(rowCount > 1);
+    //offset = i, -period 0 1, -period, -period + 1, 1
+    Index a, b, c, d;
+    for (size_t i = period, vi; i < vertices.size(); i += period)
+    {
+        for (vi = 0; vi < period - 1; vi++)
+        {
+            a = vi + i;
+            b = vi + i - period;
+            c = vi + i + 1;
+            d = vi + i - period + 1;
+            
+            CalculateNormal(vertices, a, period);
+            CalculateNormal(vertices, c, period);
+            CalculateNormal(vertices, b, period);
+            CalculateNormal(vertices, d, period);
+
+            auto& va = vertices[a];
+            auto& vb = vertices[b];
+            auto& vc = vertices[c];
+            auto& vd = vertices[d];
+            if (glm::length(va.position - vb.position) + glm::length(vb.position - vc.position) + 
+                glm::length(vb.position - vd.position) + glm::length(vd.position - vc.position) + 
+                glm::length(va.position - vd.position) + glm::length(vc.position - va.position)  > 0.6f)
+                continue;
+
+
+            indices.push_back(a);
+            indices.push_back(b);
+            indices.push_back(c);
+            
+            indices.push_back(b);
+            indices.push_back(d);
+            indices.push_back(c);
         }
     }
 }

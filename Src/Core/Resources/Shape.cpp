@@ -61,7 +61,7 @@ void Shapes::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t)
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, 
         shader.GetPipelineLayout(), 0, numsof(sets), 
         sets, 0, nullptr);
-    vkCmdSetPrimitiveTopology(commandBuffer, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+    vkCmdSetPrimitiveTopology(commandBuffer, Topology);
 }
 
 void Shapes::Draw(CommandBuffer& commandBuffer)

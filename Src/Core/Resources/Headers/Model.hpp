@@ -68,8 +68,11 @@ namespace AnA
         ~Model();
 
         ModelInfo info{};
+        std::string Path = "";
 
         static void CreateModelFromFile(const char* filePath, std::shared_ptr<Model>& model);
         static void CreateMeshFromFile(const char *filePath, std::vector<Vertex>& vertices, std::vector<Index>& indices, size_t vertexOffset = 0);
+        static void CreateVerticesFromFile(const char* filePath, std::vector<Vertex>& vertices);
+        static void CreateTerrainFromVertices(std::vector<Vertex>& vertices, std::vector<Index> &terrainVertices, size_t period);
     };
 }

@@ -10,6 +10,7 @@ uint32_t modelId = 0;
 
 ResourceManager::ResourceManager(Device* mDevice) : 
         MainScene(mDevice),
+        //Points(mDevice),
         GlobalLight(mDevice),
         ShadowMap(mDevice),
         SecondaryCommandBufferPool(mDevice, 
@@ -23,6 +24,8 @@ ResourceManager::ResourceManager(Device* mDevice) :
     createDefaultDescriptors();
     createDefaultShaders();
     MainScene.Init();
+    //Points.Init();
+    //Points.Topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
     Shapes = AnA::Shapes(mDevice);
     //Shapes = new AnA::Shapes(mDevice);
 #ifdef ANA_INCLUDE_CONTROL
@@ -315,6 +318,7 @@ void ResourceManager::createDefaultShaders()
 
     Shaders.emplace_back(aDevice, CascadedShadowMapping_vert, offscreenRenderPass
         , defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, sizeof(uint32_t));
+    Shaders.emplace_back(aDevice, Point_vert, Point_frag, renderPass, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT);
 
     if (aDevice->MeshShaderSupport())
     {

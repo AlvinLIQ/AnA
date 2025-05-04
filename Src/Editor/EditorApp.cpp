@@ -60,6 +60,9 @@ void EditorApp::onLoop()
 
     (editorApp->controlMap["shadowMapView"])->TextureLayer =
         uint32_t(std::min(2.0f, static_cast<Controls::Slider*>(editorApp->controlMap["shadowMapSlider"])->Value * 3.0f));
+    aResourceManager.GlobalLight.Direction = {static_cast<Controls::Slider*>(editorApp->controlMap["lightX"])->Value * 10.0f - 5.0f,
+    static_cast<Controls::Slider*>(editorApp->controlMap["lightY"])->Value * 10.0f - 5.0f,
+    static_cast<Controls::Slider*>(editorApp->controlMap["lightZ"])->Value * 10.0f - 5.0f};
 }
 
 void EditorApp::loadModelButton_Click(void* , PointerEventArgs& )
@@ -84,12 +87,22 @@ void EditorApp::saveSceneButton_Click(void* , PointerEventArgs& )
     auto path = fileDialog.Run();
     if(path.empty())
         return;
-    /*
+    auto resourceManager = Resource::ResourceManager::GetCurrent();
     FILE* f = fopen(path.c_str(), "wb");
-    auto objects = Resource::ResourceManager::GetCurrent()->MainScene;
-    fwrite((const void*)objects.Get(), sizeof(Mesh), objects.GetMeshCount(), f);
+    auto& scene = resourceManager->MainScene;
+    auto meshCount = scene.GetMeshCount();
+    auto meshes = scene.Get();
+    for (size_t i = 0; i < meshCount; i++)
+    {
+        auto& mesh = meshes[i];
+        MeshInfo info{};
+        memcpy(info.filePath, mesh.model->Path.data(), mesh.model->Path.size());
+        info.tetureId = mesh.textureId;
+        info.transform = mesh.transform;
+        fwrite((const void*)&info, sizeof(MeshInfo), 1, f);
+    }
 
-    fclose(f);*/
+    fclose(f);
 }
 
 void EditorApp::exitButton_Click(void* , PointerEventArgs& )
@@ -103,8 +116,9 @@ int main()
 {
     EditorApp editor{};
     editor.Init();
-    auto sceneFile = ReadFile("Scenes/scene.ana");
     auto& scene = Resource::ResourceManager::GetCurrent()->MainScene;
+    
+    auto sceneFile = ReadFile("Scenes/scene.ana");
     scene.Append(reinterpret_cast<MeshInfo*>(sceneFile.data()), sceneFile.size() / sizeof(MeshInfo));
     editor.Run();
     return 0;

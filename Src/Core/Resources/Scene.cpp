@@ -222,7 +222,7 @@ void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIn
     }
     else
     {
-        vkCmdSetPrimitiveTopology(commandBuffer, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+        vkCmdSetPrimitiveTopology(commandBuffer, Topology);
 
         vkCmdBindIndexBuffer(commandBuffer, indexBuffers[currentBufferIndex].GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
         static_cast<VkDrawIndexedIndirectCommand*>(drawIndexedIndirectBuffer.GetMappedData())->indexCount = static_cast<uint32_t>(indexBuffers[currentBufferIndex].GetSize() / sizeof(Model::Index));
@@ -238,7 +238,8 @@ void Scene::Draw(CommandBuffer& commandBuffer)
 {
     vkCmdDrawIndexedIndirectCount(commandBuffer, drawIndexedIndirectBuffer.GetBuffer(), 
     0, countBuffer.GetBuffer(), 
-    0, 1, sizeof(VkDrawIndexedIndirectCommand));}
+    0, 1, sizeof(VkDrawIndexedIndirectCommand));
+}
 
 void Scene::DrawIndirect(CommandBuffer& commandBuffer)
 {
@@ -642,18 +643,25 @@ void Scene::buildMeshletsWithOptimizer()
             {
                 meshlet.indices[i] = primitiveIndices[i + meshletInfo.triangle_offset];
             }
+            glm::vec3 minBounding{std::numeric_limits<float>::max()};
+            glm::vec3 maxBounding{std::numeric_limits<float>::min()};
             for (uint32_t i = 0; i < meshlet.vertexCount; i++)
             {
                 meshlet.vertices[i] = uniqueVertexIndices[i + meshletInfo.vertex_offset] + mesh.vertexOffset;
+                auto& vertex = mesh.model->info.vertices[uniqueVertexIndices[i + meshletInfo.vertex_offset]];
+                minBounding = glm::min(minBounding, vertex.position);
+                maxBounding = glm::max(maxBounding, vertex.position);
             }
             auto model = mesh.transform.mat3();
+            
             meshopt_Bounds bounds = meshopt_computeMeshletBounds(&uniqueVertexIndices[meshletInfo.vertex_offset], 
                 &primitiveIndices[meshletInfo.triangle_offset], meshletInfo.triangle_count, 
                     &mesh.model->info.vertices.data()->position.x,
                     mesh.vertexCount, sizeof(Model::Vertex));
             meshlet.normal = glm::transpose(glm::inverse(model)) * glm::vec3(bounds.cone_axis[0], bounds.cone_axis[1], bounds.cone_axis[2]);
             meshlet.cutoff = bounds.cone_cutoff;
-            meshlet.center = {bounds.center[0], bounds.center[1], bounds.center[2]};
+            //meshlet.center = {bounds.center[0], bounds.center[1], bounds.center[2]};
+            meshlet.center = (minBounding + maxBounding) * 0.5f;
             meshlet.center = model * meshlet.center + mesh.transform.translation;
 
             for (uint32_t i = 0; i < meshlet.vertexCount; i++)

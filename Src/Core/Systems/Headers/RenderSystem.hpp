@@ -12,6 +12,7 @@ namespace AnA
             RenderSystem();
             ~RenderSystem();
 
+            void Render(CommandBuffer& commandBuffer, Renderable& renderable, Shader& shader, uint32_t bufferIndex = 0);
             void RenderIndirect(CommandBuffer& commandBuffer, Renderable& renderable, Shader& shader, uint32_t bufferIndex = 0);
             static RenderSystem* GetCurrent();
         };

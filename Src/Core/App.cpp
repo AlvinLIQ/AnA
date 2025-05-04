@@ -118,6 +118,13 @@ void App::Run()
         prevTime = curTime;
         prevSecond += frameTime;
         frameCount++;
+        
+        if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
+        {
+            auto& cameraView = aResourceManager.MainCamera.GetView();
+            for (int i = 0; i < 4; i++)
+                printf("%f, %f, %f, %f,\n", cameraView[i][0], cameraView[i][1], cameraView[i][2], cameraView[i][3]);
+        }
         if (prevSecond >= 1.0f)
         {
             auto info = std::to_string(static_cast<int>(frameCount.As<float>() / prevSecond)) +
@@ -235,21 +242,27 @@ void App::createRecordCallBacks()
         return _aApp->commandBufferNeedUpdate;
     }, [](VkOffset2D& , VkExtent2D& )
     {
-        auto aResourceManager = Resource::ResourceManager::GetCurrent();
-        auto& aRenderer = _aApp->GetRenderer();        
-        aResourceManager->SecondaryCommandBufferPool.Enqueue([](CommandBuffer& secondaryCommandBuffer, size_t )
+        auto& aResourceManager = _aApp->aResourceManager;
+        auto& aRenderer = _aApp->aRenderer;        
+        aResourceManager.SecondaryCommandBufferPool.Enqueue([](CommandBuffer& secondaryCommandBuffer, size_t )
         {
-            auto aResourceManager = Resource::ResourceManager::GetCurrent();
-            Systems::RenderSystem::GetCurrent()->RenderIndirect(secondaryCommandBuffer, 
-                aResourceManager->MainScene, _aDevice->MeshShaderSupport() ? aResourceManager->Shaders.back() : aResourceManager->Shaders.front(),
-                aResourceManager->SecondaryCommandBufferPool.CurrentBufferIndex);
+            auto& aResourceManager = _aApp->aResourceManager;
+            auto& aRenderSystem = _aApp->aRenderSystem;
+            aRenderSystem.RenderIndirect(secondaryCommandBuffer, 
+                aResourceManager.MainScene, 
+                _aDevice->MeshShaderSupport() ? aResourceManager.Shaders.back() : aResourceManager.Shaders.front(),
+                aResourceManager.SecondaryCommandBufferPool.CurrentBufferIndex);
+            /*
+            aRenderSystem.Render(secondaryCommandBuffer, 
+                aResourceManager.Points, aResourceManager.Shaders[3]);*/
+            
         }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), _aApp->GetSceneOffset());
         /*
         aRenderer.RecordOffscreenSecondaryCommandBuffer([](CommandBuffer& offScreenSecondaryCommandBuffer)
         {
             //RenderShadowsIndirect(offScreenSecondaryCommandBuffer);
         });*/
-        aResourceManager->MainScene.EndCommandBufferUpdate();
+        aResourceManager.MainScene.EndCommandBufferUpdate();
     }, GetSceneOffset());
 #ifdef ANA_INCLUDE_CONTROL
 
@@ -260,22 +273,22 @@ void App::createRecordCallBacks()
     }, [](VkOffset2D& offset, VkExtent2D& )
     {
         //record controls here
-        auto aResourceManager = Resource::ResourceManager::GetCurrent();
-        auto& aRenderer = _aApp->GetRenderer();
+        auto& aResourceManager = _aApp->aResourceManager;
+        auto& aRenderer = _aApp->aRenderer;
         auto controlExtent = aRenderer.GetSwapChainExtent();
         controlExtent.width = static_cast<uint32_t>(_aApp->GetSceneOffset().x);
-        aResourceManager->MainControl->Aspect = static_cast<float>(controlExtent.width) / static_cast<float>(controlExtent.height);
-        aResourceManager->MainControl->Extent = controlExtent;
-        auto& shapes = aResourceManager->Shapes;
+        aResourceManager.MainControl->Aspect = static_cast<float>(controlExtent.width) / static_cast<float>(controlExtent.height);
+        aResourceManager.MainControl->Extent = controlExtent;
+        auto& shapes = aResourceManager.Shapes;
         shapes.Offset = offset;
         shapes.Extent = controlExtent;
-        shapes.PrepareDraw(aResourceManager->MainControl);
-        aResourceManager->SecondaryCommandBufferPool.Enqueue([](CommandBuffer& secondaryCommandBuffer, size_t )
+        shapes.PrepareDraw(aResourceManager.MainControl);
+        aResourceManager.SecondaryCommandBufferPool.Enqueue([](CommandBuffer& secondaryCommandBuffer, size_t )
         {
-            auto aResourceManager = Resource::ResourceManager::GetCurrent();
-            auto aRenderSystem = Systems::RenderSystem::GetCurrent();
-            aRenderSystem->RenderIndirect(secondaryCommandBuffer, 
-                aResourceManager->Shapes, aResourceManager->Shaders[1]);
+            auto& aResourceManager = _aApp->aResourceManager;
+            auto& aRenderSystem = _aApp->aRenderSystem;
+            aRenderSystem.RenderIndirect(secondaryCommandBuffer, 
+                aResourceManager.Shapes, aResourceManager.Shaders[1]);
         }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), offset, controlExtent);
     });
 #endif

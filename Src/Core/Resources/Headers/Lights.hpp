@@ -33,7 +33,7 @@ namespace AnA
             Light(Device* mDevice);
             ~Light();
 
-            glm::vec3 Direction{1.0f,-3.0f, 1.0f};
+            glm::vec3 Direction{-1.0f,3.0f, 1.0f};
             glm::vec3 Color{0.25};
             float Ambient{0.2f};
             std::vector<Buffer>& GetBuffers();

@@ -54,7 +54,7 @@ float textureProj(vec4 shadowCoord, vec2 offset, uint cascadeIndex)
 		float dist = texture(shadowSampler, vec3(shadowCoord.xy + offset, cascadeIndex)).r;
 		if (shadowCoord.w > 0 && dist < shadowCoord.z - bias) {
 		    float edge = ubo.cascades[SHADOW_MAP_CASCADE_COUNT - 1].split * 0.9;
-			shadow = 1.0 - (0.5 * smoothstep(edge, edge - 0.2, viewPosZ));
+			shadow = 1.0 - (0.7 * smoothstep(edge, edge - 0.2, viewPosZ));
 		}
 	}
 	return shadow;

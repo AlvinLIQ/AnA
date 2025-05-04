@@ -11,5 +11,6 @@ namespace AnA
         virtual void DrawIndirect(CommandBuffer& commandBuffer) = 0;
         virtual void Update() = 0;
         virtual bool NeedUpdate() = 0;
+        VkPrimitiveTopology Topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     };
 }
