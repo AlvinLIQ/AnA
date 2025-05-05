@@ -118,7 +118,7 @@ int main()
     editor.Init();
     auto& scene = Resource::ResourceManager::GetCurrent()->MainScene;
     
-    auto sceneFile = ReadFile("Scenes/test.ana");
+    auto sceneFile = ReadFile("Scenes/scene.ana");
     scene.Append(reinterpret_cast<MeshInfo*>(sceneFile.data()), sceneFile.size() / sizeof(MeshInfo));
     editor.Run();
     return 0;

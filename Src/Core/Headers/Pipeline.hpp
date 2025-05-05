@@ -60,7 +60,7 @@ namespace AnA
 
                 dConfig.inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
                 dConfig.inputAssembly.topology = vertexTopology;
-                dConfig.inputAssembly.primitiveRestartEnable = VK_FALSE;
+                dConfig.inputAssembly.primitiveRestartEnable = VK_TRUE;
 
                 dConfig.viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
                 dConfig.viewportState.viewportCount = 1;

@@ -344,11 +344,14 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
                     if (!currentPath.empty())
                     {
                         paths.push_back(currentPath);
+                        character.indices.push_back(UINT_MAX);
                         currentPath = {};
                     }
                     [[fallthrough]];
                 case STBTT_vline:
+                    character.indices.push_back(character.vertices.size());
                     currentPath.push_back({static_cast<float>(vertex.x) * scale, static_cast<float>(vertex.y) * scale});
+                    character.vertices.push_back(currentPath.back());
                     minBounding = glm::min(minBounding, currentPath.back());
                     maxBounding = glm::max(maxBounding, currentPath.back());
                     break;
@@ -365,11 +368,15 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
                         glm::vec2 l0 = p0 + t1 * static_cast<float>(j);
                         glm::vec2 l1 = p1 + t2 * static_cast<float>(j);
                         glm::vec2 t3 = (l1 - l0) / static_cast<float>(step);
+                        character.indices.push_back(character.vertices.size());
                         currentPath.push_back(l0 + t3 * static_cast<float>(j));
+                        character.vertices.push_back(currentPath.back());
                         minBounding = glm::min(minBounding, currentPath.back());
                         maxBounding = glm::max(maxBounding, currentPath.back());
                     }
+                    character.indices.push_back(character.vertices.size());
                     currentPath.push_back(p2);
+                    character.vertices.push_back(currentPath.back());
                     minBounding = glm::min(minBounding, currentPath.back());
                     maxBounding = glm::max(maxBounding, currentPath.back());
                 }
@@ -390,7 +397,9 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
                                 3 * it * it * t * p1 +
                                 3 * it * t * t * p2 +
                                 t * t * t * p3;
+                        character.indices.push_back(character.vertices.size());
                         currentPath.push_back(pt);
+                        character.vertices.push_back(currentPath.back());
                         minBounding = glm::min(minBounding, currentPath.back());
                         maxBounding = glm::max(maxBounding, currentPath.back());
                     }
@@ -403,6 +412,7 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
         if (currentPath.size())
         {
             paths.push_back(currentPath);
+            character.indices.push_back(UINT_MAX);
         }
         character.center = (minBounding + maxBounding) * 0.5f;
         character.height = std::abs(maxBounding.y - minBounding.y);
@@ -885,8 +895,13 @@ void Device::createLogicalDevice()
         queueCreateInfos.push_back(queueCreateInfo);
     }
 
+    VkPhysicalDevicePrimitiveTopologyListRestartFeaturesEXT primitiveRestartFeatures{};
+    primitiveRestartFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRIMITIVE_TOPOLOGY_LIST_RESTART_FEATURES_EXT;
+    primitiveRestartFeatures.primitiveTopologyListRestart = VK_TRUE;
+
     VkPhysicalDeviceExtendedDynamicState3FeaturesEXT dynamicState3Features{};
     dynamicState3Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_FEATURES_EXT;
+    dynamicState3Features.pNext = &primitiveRestartFeatures;
 
     VkPhysicalDeviceVulkan12Features vulkan12Features{};
     vulkan12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
