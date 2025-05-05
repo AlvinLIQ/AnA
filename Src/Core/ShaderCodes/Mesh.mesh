@@ -2,7 +2,7 @@
 #extension GL_EXT_mesh_shader: require
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-layout(triangles, max_vertices = 128, max_primitives = 256) out;
+layout(triangles, max_vertices = 64, max_primitives = 124) out;
 
 struct VertexOutput {
     vec2 texCoord;

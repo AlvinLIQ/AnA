@@ -337,6 +337,7 @@ void Scene::UpdateMeshlets()
         cullingBuffer[i].center = meshlet.center;
         cullingBuffer[i].radius = meshlet.radius;
         cullingBuffer[i].normal = meshlet.normal;
+        cullingBuffer[i].coneApex = meshlet.coneApex;
     }
     for (auto& meshlet : meshlets)
     {
@@ -624,7 +625,7 @@ void Scene::buildMeshletsWithOptimizer()
             sizeof(Model::Vertex),
             maxVerticesPerMeshlet,
             maxIndicesPerMeshlet / 3,
-            0.0f
+            0.25f
         );
 
         meshopt_meshlets.resize(actualMeshletCount);
@@ -658,7 +659,8 @@ void Scene::buildMeshletsWithOptimizer()
                 &primitiveIndices[meshletInfo.triangle_offset], meshletInfo.triangle_count, 
                     &mesh.model->info.vertices.data()->position.x,
                     mesh.vertexCount, sizeof(Model::Vertex));
-            meshlet.normal = glm::transpose(glm::inverse(model)) * glm::vec3(bounds.cone_axis[0], bounds.cone_axis[1], bounds.cone_axis[2]);
+            meshlet.normal = glm::transpose(glm::inverse(model)) * *reinterpret_cast<glm::vec3*>(&bounds.cone_axis);
+            meshlet.coneApex = model * *reinterpret_cast<glm::vec3*>(&bounds.cone_apex) + mesh.transform.translation;
             meshlet.cutoff = bounds.cone_cutoff;
             //meshlet.center = {bounds.center[0], bounds.center[1], bounds.center[2]};
             meshlet.center = (minBounding + maxBounding) * 0.5f;
