@@ -48,12 +48,12 @@ const mat4 biasMat = mat4(
 float textureProj(vec4 shadowCoord, vec2 offset, uint cascadeIndex)
 {
 	float shadow = 1.0;
-	float bias = 0.003;
+	float bias = 0.0035;
 
 	if ( shadowCoord.z > -1.0 && shadowCoord.z < 1.0 ) {
 		float dist = texture(shadowSampler, vec3(shadowCoord.xy + offset, cascadeIndex)).r;
 		if (shadowCoord.w > 0 && dist < shadowCoord.z - bias) {
-		    float edge = ubo.cascades[SHADOW_MAP_CASCADE_COUNT - 1].split * 0.9;
+		    float edge = ubo.cascades[SHADOW_MAP_CASCADE_COUNT - 1].split * 0.7;
 			shadow = 1.0 - (0.5 * smoothstep(edge, edge - 0.2, viewPosZ));
 		}
 	}
@@ -86,12 +86,12 @@ void main()
     float pointLightIntensity = max(dot(normalSpace, normalize(LIGHT_POS - vertex)), 0);
     float diffuseLightItensity = ((dot(normalSpace, normalize(lbo.direction))) + 2.0) * 0.5;
 
-    uint cascadeIndex = SHADOW_MAP_CASCADE_COUNT - 1;
+    uint cascadeIndex = 0;
 	for(uint i = 0; i < SHADOW_MAP_CASCADE_COUNT - 1; i++) {
-		if(viewPosZ < ubo.cascades[i + 1].split) {
-			cascadeIndex = i;
+		if(viewPosZ > ubo.cascades[i].split)
+			cascadeIndex = i + 1;
+		else
 			break;
-		}
 	}
     vec4 shadowCoord = biasMat * ubo.cascades[cascadeIndex].viewProj * vec4(vertex, 1.0);
     float visibility = filterPCF(shadowCoord, cascadeIndex);
