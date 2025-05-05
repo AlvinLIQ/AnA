@@ -324,6 +324,7 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
 
     const float scale = 1.0f / 660.0f;
     characters.resize(static_cast<size_t>(range));
+    uint32_t indexCount = 0;
     for (int cid = 0; cid < range; cid++)
     {
         int glyphIndex = stbtt_FindGlyphIndex(&info, cid);
@@ -331,6 +332,7 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
         int vertexCount = stbtt_GetGlyphShape(&info, glyphIndex, &vertices);
         auto& character = characters[static_cast<size_t>(cid)];
         character.paths = {};
+        character.indexOffset = indexCount;
         auto& paths = character.paths;
         std::vector<glm::vec2> currentPath{};
         glm::vec2 minBounding{std::numeric_limits<float>::max()};
@@ -414,6 +416,7 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
             paths.push_back(currentPath);
             character.indices.push_back(UINT_MAX);
         }
+        indexCount += uint32_t(character.indices.size());
         character.center = (minBounding + maxBounding) * 0.5f;
         character.height = std::abs(maxBounding.y - minBounding.y);
         character.width = std::abs(maxBounding.x - minBounding.x);

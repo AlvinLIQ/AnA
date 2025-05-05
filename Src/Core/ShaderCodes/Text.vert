@@ -16,7 +16,7 @@ struct CharacterInfo{
     vec3 color;
 };
 
-layout(std140 ,set = 1, binding = 0) buffer CharacterInfoBufferObject {
+layout(std140, set = 1, binding = 0) buffer CharacterInfoBufferObject {
     CharacterInfo charInfos[];
 };
 
