@@ -49,7 +49,7 @@ void ShadowMap::UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, u
     //glm::vec3 lightPos = lightDir * 2.0f;
     //float cascadeSplits[SHADOW_MAP_CASCADE_COUNT];
 
-	float nearPlane = 3.0f;
+	float nearPlane = 2.0f;
 	float farPlane = 32.0f;
     float clipRange = farPlane - nearPlane;
     float cascadeSplits[SHADOW_MAP_CASCADE_COUNT];
@@ -70,7 +70,7 @@ void ShadowMap::UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, u
 	}
 
     glm::mat4 invCam = glm::inverse(camera.GetProjectionMatrix() * camera.GetView());
-    float aspect = Resource::ResourceManager::GetCurrent()->MainCameraInfo.aspect;
+    //float aspect = Resource::ResourceManager::GetCurrent()->MainCameraInfo.aspect;
 
 	// Calculate orthographic projection matrix for each cascade
 	float lastSplitDist = 0.0;
@@ -109,7 +109,6 @@ void ShadowMap::UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, u
 		}
 		radius = std::ceil(radius * 16.0f) / 16.0f;
 		glm::vec3 maxExtents = glm::vec3(radius);
-        maxExtents.x *= aspect;
 		glm::vec3 minExtents = -maxExtents;
 		//glm::mat4 lightViewMatrix = glm::lookAt(frustumCenter - lightDir * -minExtents.z, frustumCenter, glm::vec3(0.0f, 1.0f, 0.0f));
 		//glm::mat4 lightOrthoMatrix = glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f, maxExtents.z - minExtents.z);
