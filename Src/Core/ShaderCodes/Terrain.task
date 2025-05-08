@@ -10,6 +10,7 @@ layout(push_constant) uniform PushConsts {
 	float density;
     float height;
     uint texID;
+    uint calNormal;
 } push;
 
 taskPayloadSharedEXT struct {

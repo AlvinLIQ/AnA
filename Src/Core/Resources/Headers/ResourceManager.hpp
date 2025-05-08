@@ -37,6 +37,7 @@ namespace AnA
         float density;
         float height;
         uint32_t texture;
+        uint32_t calNormal;
     };
     namespace Resource
     {

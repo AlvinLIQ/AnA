@@ -1,6 +1,9 @@
 <StackPanel ControlSize="0.0f, 0.0f" Spacing="0.01f" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Orientation="Vertical"
 Color="0.156f, 0.156f, 0.156f, 1.0f" Padding="0.05f, 0.01f">
     <TextBlock Text="Mesh Shader" Color="1.0f, 1.0f, 1.0f, 1.0f"/>
+    <TextBlock Text="Terrain Light" Color="1.0f, 1.0f, 1.0f, 1.0f"/>
+    <ToggleSwitch Name="lightSwitch" Toggle="true"
+        VerticalAlignment="Start" HorizontalAlignment="Start" ControlSize="0.05f, 0.02f"/>
     <TextBlock Text="Terrain Texture" Color="1.0f, 1.0f, 1.0f, 1.0f"/>
     <ToggleSwitch Name="textureSwitch" Toggle="true"
         VerticalAlignment="Start" HorizontalAlignment="Start" ControlSize="0.05f, 0.02f"/>

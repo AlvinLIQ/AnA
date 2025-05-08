@@ -76,7 +76,7 @@ namespace AnA
         Resource::ResourceManager aResourceManager;
         VkOffset2D sceneOffset{};
         bool commandBufferNeedUpdate = false;
-        TerrainPushConstants terrainPushConstants = {0.5f, 5.0f, 0};
+        TerrainPushConstants terrainPushConstants = {0.5f, 5.0f, 0, 0};
         void(*loopCallback)() = nullptr;
     };
 }

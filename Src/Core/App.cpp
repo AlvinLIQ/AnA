@@ -106,7 +106,7 @@ void App::Run()
 
     std::vector<MeshInfo> meshInfos;
     const char cTitle[] = "AnA FPS:";
-    AnA::String title{cTitle, sizeof(cTitle), sizeof(cTitle) + 20};
+    AnA::String title{cTitle, sizeof(cTitle), sizeof(cTitle) + 40};
 
     auto window = aWindow.GetGLFWwindow();
     while(!glfwWindowShouldClose(window))
@@ -120,9 +120,11 @@ void App::Run()
 
         if (prevSecond >= 1.0f)
         {
+            auto terrainSize = std::to_string(uint32_t((terrainPushConstants.density + 0.1f) * 320.0f * 64.0f));
             auto info = std::to_string(static_cast<int>(frameCount.As<float>() / prevSecond)) +
                 " CPU Time: " + std::to_string(cpuTime * 1000.0f) + "ms GPU Time:" + 
-                std::to_string(aRenderer.GetGPUTime()) + "ms Record Time:" + std::to_string((cpuTime - cpuTimeBeforeRecord) * 1000.0f) + "ms";
+                std::to_string(aRenderer.GetGPUTime()) + "ms Record Time:" + std::to_string((cpuTime - cpuTimeBeforeRecord) * 1000.0f) + "ms Terrain Size:" +
+                terrainSize + "x" + terrainSize;
             title.Copy(info.c_str(), info.length(), sizeof(cTitle) - 1);
             glfwSetWindowTitle(aWindow.GetGLFWwindow(), title.Str());
             prevSecond = 0.0f;
@@ -256,7 +258,7 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     swapChain.SetViewport(commandBuffer, GetSceneOffset());
 
     aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.MainScene,aResourceManager.Shaders.back(), swapChain.CurrentFrame);
-/*
+
     auto& terrainShader = aResourceManager.Shaders[4];
     terrainShader.GetPipeline().Bind(commandBuffer);
     auto& sets = aResourceManager.Shaders.back().GetDescriptorSets()[swapChain.CurrentFrame];
@@ -264,7 +266,7 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     vkCmdPushConstants(commandBuffer, terrainShader.GetPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT
     | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, 0, sizeof(terrainPushConstants), &terrainPushConstants);
     aDevice.vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
-*/
+
     swapChain.SetViewport(commandBuffer, {}, {aResourceManager.Shapes.Extent});
     aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.Shapes, aResourceManager.Shaders[1], swapChain.CurrentFrame);
     aRenderer.EndRenderPass(commandBuffer);

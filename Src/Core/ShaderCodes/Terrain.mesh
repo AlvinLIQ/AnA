@@ -63,6 +63,7 @@ layout(push_constant) uniform PushConsts {
 	float density;
     float height;
     uint texID;
+    uint calNormal;
 } push;
 
 taskPayloadSharedEXT struct {
@@ -94,7 +95,7 @@ void main()
             gl_MeshVerticesEXT[id].gl_Position = viewProj * vec4(vertex, 1.0);
             vertexOutput[id].texCoord = vec2(x * 0.1, y * 0.1);
             vertexOutput[id].texID = push.texID;
-            vertexOutput[id].normalSpace = CalculateNormal(pos * push.height);
+            vertexOutput[id].normalSpace = push.calNormal == 1 ? CalculateNormal(pos * push.height) : vec3(0.);
             vertexOutput[id].vertexPosition = vertex;
             viewPos = cbo.view * vec4(vertex, 1.0);
             vertexOutput[id].viewPosZ = viewPos.z / viewPos.w + ubo.cascades[1].split - ubo.cascades[0].split + 1.0;
