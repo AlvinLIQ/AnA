@@ -13,3 +13,6 @@
 [submodule "Src/GUI/XML/rapidxml"]
 	path = Src/GUI/XML/rapidxml
 	url = https://github.com/dwd/rapidxml
+[submodule "Src/3rdParty/VulkanMemoryAllocator"]
+	path = Src/3rdParty/VulkanMemoryAllocator
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator
