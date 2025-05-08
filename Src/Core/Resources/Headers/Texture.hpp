@@ -16,10 +16,10 @@ namespace AnA
             cleanup();
             aDevice = texture.aDevice;
             textureImage = texture.textureImage;
-            textureImageMemory = texture.textureImageMemory;
+            allocation = texture.allocation;
             imageInfo = texture.imageInfo;
             texture.textureImage = VK_NULL_HANDLE;
-            texture.textureImageMemory = VK_NULL_HANDLE;
+            texture.allocation = VK_NULL_HANDLE;
             texture.imageInfo.imageView = VK_NULL_HANDLE;
             texture.imageInfo.sampler = VK_NULL_HANDLE;
         }
@@ -30,11 +30,11 @@ namespace AnA
                 cleanup();
                 aDevice = texture.aDevice;
                 textureImage = texture.textureImage;
-                textureImageMemory = texture.textureImageMemory;
+                allocation = texture.allocation;
                 imageInfo.imageView = texture.imageInfo.imageView;
                 imageInfo.sampler = texture.imageInfo.sampler;
                 texture.textureImage = VK_NULL_HANDLE;
-                texture.textureImageMemory = VK_NULL_HANDLE;
+                texture.allocation = VK_NULL_HANDLE;
                 texture.imageInfo.imageView = VK_NULL_HANDLE;
                 texture.imageInfo.sampler = VK_NULL_HANDLE;
             }
@@ -54,7 +54,7 @@ namespace AnA
         void cleanup();
 
         VkImage textureImage{VK_NULL_HANDLE};
-        VkDeviceMemory textureImageMemory{VK_NULL_HANDLE};
+        VmaAllocation allocation{VK_NULL_HANDLE};
         VkDescriptorImageInfo imageInfo;
     };
 }

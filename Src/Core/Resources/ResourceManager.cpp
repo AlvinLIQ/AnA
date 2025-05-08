@@ -282,16 +282,16 @@ void ResourceManager::createMainCameraBuffers()
     for (auto &cameraBuffer : mainCameraBuffers)
     {
         cameraBuffer = Buffer(aDevice, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
-            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        cameraBuffer.Map(0, bufferSize);
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        cameraBuffer.Map();
     }
 
     frustumBuffers.resize(mainCameraBuffers.size());
     for (auto& frustumBuffer : frustumBuffers)
     {
         frustumBuffer = Buffer(aDevice, sizeof(FrustumPlanes) + sizeof(glm::mat4), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
-            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        frustumBuffer.Map(0, frustumBuffer.GetSize());
+        VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        frustumBuffer.Map();
     }
 }
 

@@ -6,3 +6,5 @@ meshoptimizer_lib = static_library('meshoptimizer', ['meshoptimizer/src/allocato
     'meshoptimizer/src/overdrawanalyzer.cpp', 'meshoptimizer/src/stripifier.cpp', 'meshoptimizer/src/vfetchoptimizer.cpp',
     'meshoptimizer/src/overdrawoptimizer.cpp', 'meshoptimizer/src/vcacheanalyzer.cpp'], 
     cpp_args: ['-std=c++23'])
+
+vma_include = include_directories('VulkanMemoryAllocator/include', is_system: true)

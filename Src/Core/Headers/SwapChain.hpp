@@ -87,11 +87,11 @@ namespace AnA
         VkSampleCountFlagBits msaaSamplers;
 
         VkImage colorImage;
-        VkDeviceMemory colorImageMemory;
+        VmaAllocation colorImageAllocation;
         VkImageView colorImageView;
         void createColorResources();
         std::vector<VkImage> depthImages;
-        std::vector<VkDeviceMemory> depthImageMemorys;
+        std::vector<VmaAllocation> depthImageAllocations;
         std::vector<VkImageView> depthImageViews;
         void createDepthResources();
 

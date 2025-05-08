@@ -5,12 +5,12 @@ using namespace AnA;
 
 std::vector<Buffer*> replaceList{};
 
-Buffer::Buffer(Device* mDevice, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties) : aDevice{mDevice},
- bufferSize {size}, bufferUsage{usage}, bufferMemoryProperties{properties}
+Buffer::Buffer(Device* mDevice, VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memUsage) : aDevice{mDevice},
+ bufferSize {size}, bufferUsage{usage}
 {
     if (bufferSize)
     {
-        aDevice->CreateBuffer(size, usage, properties, &buffer, bufferMemory);
+        aDevice->CreateBuffer(size, usage, memUsage, buffer, allocation);
     }
 }
 
@@ -19,19 +19,23 @@ Buffer::~Buffer()
     cleanup();
 }
 
-VkResult Buffer::Map(VkDeviceSize offset, VkDeviceSize size)
+void Buffer::Map()
 {
-    assert(buffer && bufferMemory && "Called map on buffer before create");
-    return vkMapMemory(aDevice->GetLogicalDevice(), bufferMemory, offset, size, 0, &mappedData);
+    aDevice->MapBuffer(&mappedData, allocation);
 }
 
 void Buffer::Unmap()
 {
     if (mappedData)
     {
-        vkUnmapMemory(aDevice->GetLogicalDevice(), bufferMemory);
+        aDevice->UnmapBuffer(allocation);
         mappedData = nullptr;
     }
+}
+
+void Buffer::Flush()
+{
+    aDevice->FlushAllocation(allocation);
 }
 
 VkBuffer Buffer::GetBuffer()
@@ -43,7 +47,7 @@ void Buffer::cleanup()
 {
     if (aDevice)
     {
-        vkDestroyBuffer(aDevice->GetLogicalDevice(), buffer, nullptr);
-        vkFreeMemory(aDevice->GetLogicalDevice(), bufferMemory, nullptr);
+        Unmap();
+        aDevice->DestroyBuffer(buffer, allocation);
     }
 }

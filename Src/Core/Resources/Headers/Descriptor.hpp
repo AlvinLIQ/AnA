@@ -10,17 +10,16 @@ namespace AnA
         struct Image
         {
             VkImage image;
-            VkDeviceMemory imageMemory;
+            VmaAllocation allocation;
             VkImageView imageView;
             VkImageLayout imageLayout;
             VkImageType imageType;
             VkFormat format;
             VkExtent3D extent;
-            void cleanup(VkDevice device)
+            void cleanup(Device* device)
             {
-                vkDestroyImageView(device, imageView, nullptr);
-                vkDestroyImage(device, image, nullptr);
-                vkFreeMemory(device, imageMemory, nullptr);
+                vkDestroyImageView(device->GetLogicalDevice(), imageView, nullptr);
+                device->DestroyImage(image, allocation);
             }
         };
     }

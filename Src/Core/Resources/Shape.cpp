@@ -20,22 +20,22 @@ Shapes::Shapes(Device* mDeivce) : aDevice{mDeivce}
         ssboLayout,
         VK_DESCRIPTOR_TYPE_STORAGE_BUFFER
         );
-    shapeBuffer = Buffer(aDevice, sizeof(Shape) * MaxBatchSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    shapeBuffer.Map(0, shapeBuffer.GetSize());
+    shapeBuffer = Buffer(aDevice, sizeof(Shape) * MaxBatchSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+    shapeBuffer.Map();
     VkDescriptorBufferInfo bufferInfo;
     bufferInfo.buffer = shapeBuffer.GetBuffer();
     bufferInfo.offset = 0;
     bufferInfo.range = shapeBuffer.GetSize();
     ssboDescriptor->UpdateDescriptorSets(&bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-    indirectBuffer = Buffer(aDevice, sizeof(VkDrawIndirectCommand), VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    indirectBuffer.Map(0, indirectBuffer.GetSize());
+    indirectBuffer = Buffer(aDevice, sizeof(VkDrawIndirectCommand), VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+    indirectBuffer.Map();
     auto indirectCommand = ((VkDrawIndirectCommand*)indirectBuffer.GetMappedData());
     indirectCommand->firstInstance = 0;
     indirectCommand->firstVertex = 0;
     indirectCommand->instanceCount = 1;
     
-    countBuffer = Buffer(aDevice, 4, VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    countBuffer.Map(0, 4);
+    countBuffer = Buffer(aDevice, 4, VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+    countBuffer.Map();
     *((uint32_t*)countBuffer.GetMappedData()) = 1;
 }
 

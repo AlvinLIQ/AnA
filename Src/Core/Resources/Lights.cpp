@@ -39,8 +39,8 @@ void Light::createBuffers()
     for (auto &lightBuffer : buffers)
     {
         lightBuffer = Buffer(aDevice, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
-            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        lightBuffer.Map(0, bufferSize);
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        lightBuffer.Map();
         LightBufferObject& lbo = *static_cast<LightBufferObject*>(lightBuffer.GetMappedData());
         lbo.proj = glm::mat4{1.0f};
         lbo.view = glm::mat4{1.0f};

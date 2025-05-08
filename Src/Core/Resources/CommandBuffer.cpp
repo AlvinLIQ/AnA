@@ -45,7 +45,7 @@ CommandBuffer::~CommandBuffer()
     }
 }
 
-VkCommandBuffer& CommandBuffer::Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo)
+VkCommandBuffer CommandBuffer::Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo)
 {
     beginInfo.pInheritanceInfo = pInheritanceInfo;
     if (vkBeginCommandBuffer(buffers[nextBufferIndex], &beginInfo) != VK_SUCCESS)
@@ -54,7 +54,7 @@ VkCommandBuffer& CommandBuffer::Begin(VkCommandBufferInheritanceInfo* pInheritan
     return buffers[nextBufferIndex];
 }
 
-VkCommandBuffer& CommandBuffer::Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo, VkOffset2D offset)
+VkCommandBuffer CommandBuffer::Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo, VkOffset2D offset)
 {
     beginInfo.pInheritanceInfo = pInheritanceInfo;
     if (vkBeginCommandBuffer(buffers[nextBufferIndex], &beginInfo) != VK_SUCCESS)
@@ -70,7 +70,7 @@ VkCommandBuffer& CommandBuffer::Begin(VkCommandBufferInheritanceInfo* pInheritan
     return buffers[nextBufferIndex];
 }
 
-VkCommandBuffer& CommandBuffer::Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo, VkOffset2D offset, VkExtent2D extent)
+VkCommandBuffer CommandBuffer::Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo, VkOffset2D offset, VkExtent2D extent)
 {
     beginInfo.pInheritanceInfo = pInheritanceInfo;
     if (vkBeginCommandBuffer(buffers[nextBufferIndex], &beginInfo) != VK_SUCCESS)
@@ -82,7 +82,7 @@ VkCommandBuffer& CommandBuffer::Begin(VkCommandBufferInheritanceInfo* pInheritan
     return buffers[nextBufferIndex];
 }
 
-VkCommandBuffer& CommandBuffer::Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo, VkOffset2D ltOffset, VkOffset2D rbOffset)
+VkCommandBuffer CommandBuffer::Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo, VkOffset2D ltOffset, VkOffset2D rbOffset)
 {
     beginInfo.pInheritanceInfo = pInheritanceInfo;
     if (vkBeginCommandBuffer(buffers[nextBufferIndex], &beginInfo) != VK_SUCCESS)
@@ -103,7 +103,7 @@ void CommandBuffer::End()
     nextBufferIndex = NextBufferIndex;
 }
 
-const VkCommandBuffer& CommandBuffer::Get() const
+VkCommandBuffer CommandBuffer::Get() const
 {
     return buffers[currentBufferIndex];
 }

@@ -11,19 +11,19 @@ Texture::Texture()
 
 Texture::Texture(const char* filename, Device* mDevice) : aDevice{ mDevice }
 {
-    aDevice->CreateTextureImage(filename, &textureImage, &textureImageMemory);
+    aDevice->CreateTextureImage(filename, &textureImage, allocation);
     init();
 }
 
 Texture::Texture(const uint32_t color, Device* mDevice) : aDevice{ mDevice }
 {
-    aDevice->CreateColorImage(color, &textureImage, &textureImageMemory);
+    aDevice->CreateColorImage(color, &textureImage, allocation);
     init();
 }
 
 Texture::Texture(const char* text, int& width, int& height, float lineHeight, Device* mDevice, float scaleX, float scaleY) : aDevice{ mDevice }
 {
-    aDevice->CreateTextImage(text, width, height, lineHeight, &textureImage, &textureImageMemory, scaleX, scaleY);
+    aDevice->CreateTextImage(text, width, height, lineHeight, &textureImage, allocation, scaleX, scaleY);
     init();
 }
 
@@ -67,11 +67,10 @@ void Texture::cleanup()
 {
     if (!aDevice)
         return;
-    auto& device = aDevice->GetLogicalDevice();
+    auto device = aDevice->GetLogicalDevice();
 
     vkDestroySampler(device, imageInfo.sampler, nullptr);
     vkDestroyImageView(device, imageInfo.imageView, nullptr);
 
-    vkDestroyImage(device, textureImage, nullptr);
-    vkFreeMemory(device, textureImageMemory, nullptr);
+    aDevice->DestroyImage(textureImage, allocation);
 }

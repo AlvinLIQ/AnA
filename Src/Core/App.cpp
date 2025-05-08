@@ -256,7 +256,7 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     swapChain.SetViewport(commandBuffer, GetSceneOffset());
 
     aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.MainScene,aResourceManager.Shaders.back(), swapChain.CurrentFrame);
-
+/*
     auto& terrainShader = aResourceManager.Shaders[4];
     terrainShader.GetPipeline().Bind(commandBuffer);
     auto& sets = aResourceManager.Shaders.back().GetDescriptorSets()[swapChain.CurrentFrame];
@@ -264,7 +264,7 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     vkCmdPushConstants(commandBuffer, terrainShader.GetPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT
     | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, 0, sizeof(terrainPushConstants), &terrainPushConstants);
     aDevice.vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
-
+*/
     swapChain.SetViewport(commandBuffer, {}, {aResourceManager.Shapes.Extent});
     aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.Shapes, aResourceManager.Shaders[1], swapChain.CurrentFrame);
     aRenderer.EndRenderPass(commandBuffer);

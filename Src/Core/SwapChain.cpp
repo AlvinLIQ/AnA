@@ -358,7 +358,7 @@ void SwapChain::createColorResources()
     imageInfo.samples = msaaSamplers;
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     imageInfo.flags = 0;
-    aDevice->CreateImage(&imageInfo, &colorImage, &colorImageMemory);
+    aDevice->CreateImage(&imageInfo, &colorImage, colorImageAllocation);
     colorImageView = aDevice->CreateImageView(colorImage, colorFormat);
 }
 
@@ -371,7 +371,7 @@ void SwapChain::createDepthResources()
     auto imageCount = static_cast<uint32_t>(swapChainImages.size());
 
     depthImages.resize(imageCount);
-    depthImageMemorys.resize(imageCount);
+    depthImageAllocations.resize(imageCount);
     depthImageViews.resize(imageCount);
 
     for (size_t i = 0; i < depthImages.size(); i++)
@@ -392,7 +392,7 @@ void SwapChain::createDepthResources()
         imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         imageInfo.flags = 0;
 
-        aDevice->CreateImage(&imageInfo, &depthImages[i], &depthImageMemorys[i]);
+        aDevice->CreateImage(&imageInfo, &depthImages[i], depthImageAllocations[i]);
 
         VkImageViewCreateInfo viewInfo{};
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -574,7 +574,7 @@ void SwapChain::createSyncObjects()
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-    auto &device = aDevice->GetLogicalDevice();
+    auto device = aDevice->GetLogicalDevice();
     imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
@@ -592,8 +592,7 @@ void SwapChain::cleanupSwapChain()
 {
     auto device = aDevice->GetLogicalDevice();
     vkDestroyImageView(device, colorImageView, nullptr);
-    vkDestroyImage(device, colorImage, nullptr);
-    vkFreeMemory(device, colorImageMemory, nullptr);
+    aDevice->DestroyImage(colorImage, colorImageAllocation);
     for (size_t i = 0; i < swapChainFramebuffers.size(); i++)
         vkDestroyFramebuffer(device, swapChainFramebuffers[i], nullptr);
     for (auto imageView : swapChainImageViews)
@@ -601,8 +600,7 @@ void SwapChain::cleanupSwapChain()
     for (size_t i = 0; i < depthImages.size(); i++)
     {
         vkDestroyImageView(device, depthImageViews[i], nullptr);
-        vkDestroyImage(device, depthImages[i], nullptr);
-        vkFreeMemory(device, depthImageMemorys[i], nullptr);
+        aDevice->DestroyImage(depthImages[i], depthImageAllocations[i]);
     }
 
     vkDestroySwapchainKHR(device, swapChain, nullptr);

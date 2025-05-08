@@ -64,9 +64,10 @@ void Renderer::RecordOffscreenSecondaryCommandBuffer(RecordCallBack recordCallBa
 
 void Renderer::ExecuteOffscreenSecondaryCommandBuffer(CommandBuffer& commandBuffer)
 {
+    VkCommandBuffer cmd = offscreenSecondaryCommandBuffers.Get();
     vkCmdExecuteCommands(commandBuffer, 
     1, 
-    &offscreenSecondaryCommandBuffers.Get());
+    &cmd);
 }
 
 void Renderer::EndFrame()

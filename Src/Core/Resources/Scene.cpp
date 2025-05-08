@@ -84,26 +84,24 @@ void Scene::Init()
     {
         vertexBuffers[i] = Buffer(aDevice, (vertexCount + 1000) * sizeof(Model::Vertex), 
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        vertexBuffers[i].Map(0, VK_WHOLE_SIZE);
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        vertexBuffers[i].Map();
 
         indexBuffers[i] = Buffer(aDevice, (indexCount + 1000) * sizeof(Model::Index), 
         VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        indexBuffers[i].Map(0, VK_WHOLE_SIZE);
+        VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        indexBuffers[i].Map();
     
         meshletBuffers[i] = Buffer(aDevice, 100 * sizeof(Meshlet),
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | 
-            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
 
-        meshletBuffers[i].Map(0, VK_WHOLE_SIZE);
+        meshletBuffers[i].Map();
 
         meshletCullingBuffers[i] = Buffer(aDevice, 100 * sizeof(BoundingSphere),
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | 
-            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        meshletCullingBuffers[i].Map(0, meshletCullingBuffers[i].GetSize());
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        meshletCullingBuffers[i].Map();
     }
     createSamplerDescriptor();
     //createBuffers();
@@ -309,16 +307,14 @@ void Scene::UpdateMeshlets()
     {
         meshletBuffers[nextIndex] = Buffer(aDevice, minMeshletBufferSize,
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | 
-            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
 
-        meshletBuffers[nextIndex].Map(0, VK_WHOLE_SIZE);
+        meshletBuffers[nextIndex].Map();
 
         meshletCullingBuffers[nextIndex] = Buffer(aDevice, meshlets.size() * sizeof(BoundingSphere),
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | 
-            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        meshletCullingBuffers[nextIndex].Map(0, meshletCullingBuffers[nextIndex].GetSize());
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        meshletCullingBuffers[nextIndex].Map();
     }
     uint32_t bufferId = 0;
     uint32_t* buffer = static_cast<uint32_t*>(meshletBuffers[nextIndex].GetMappedData());
@@ -372,12 +368,7 @@ void Scene::UpdateMeshlets()
     groupSize.z = 1;
     *drawMeshTaskCommand = groupSize;
 
-    VkMappedMemoryRange meshletMemoryRange{};
-    meshletMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-    meshletMemoryRange.memory = meshletBuffers[nextIndex].GetBufferMemory();
-    meshletMemoryRange.offset = 0;
-    meshletMemoryRange.size = VK_WHOLE_SIZE;
-    vkFlushMappedMemoryRanges(aDevice->GetLogicalDevice(), 1, &meshletMemoryRange);
+    meshletBuffers[nextIndex].Flush();
 }
 
 void Scene::UpdateVertexPositions(Mesh& mesh)
@@ -428,20 +419,14 @@ void Scene::applyVertexBufferUpdate(Model::Vertex* vertexBufferData, Model::Inde
             indexBufferData[mesh.indexOffset + j] = mesh.model->info.indices[j] + mesh.vertexOffset;
         }
     }
-    VkMappedMemoryRange vertexMemoryRange{};
-    vertexMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-    vertexMemoryRange.memory = vertexBuffers[nextIndex].GetBufferMemory();
-    vertexMemoryRange.offset = 0;
-    vertexMemoryRange.size = VK_WHOLE_SIZE;
-    
-    vkFlushMappedMemoryRanges(aDevice->GetLogicalDevice(), 1, &vertexMemoryRange);
+    vertexBuffers[nextIndex].Flush();
 }
 
 void Scene::createIndirectBuffers()
 {
     drawIndexedIndirectBuffer = Buffer(aDevice, sizeof(VkDrawIndexedIndirectCommand), 
-    VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    drawIndexedIndirectBuffer.Map(0, drawIndexedIndirectBuffer.GetSize());
+    VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+    drawIndexedIndirectBuffer.Map();
     auto drawIndexedIndirectCommand = 
         static_cast<VkDrawIndexedIndirectCommand*>(drawIndexedIndirectBuffer.GetMappedData());
     drawIndexedIndirectCommand->firstIndex = 0;
@@ -450,16 +435,16 @@ void Scene::createIndirectBuffers()
     drawIndexedIndirectCommand->vertexOffset = 0;
 
     drawMeshIndirectBuffer = Buffer(aDevice, sizeof(VkDrawMeshTasksIndirectCommandEXT), 
-    VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    drawMeshIndirectBuffer.Map(0, drawMeshIndirectBuffer.GetSize());
+    VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+    drawMeshIndirectBuffer.Map();
     auto drawMeshIndirectCommand = static_cast<VkDrawMeshTasksIndirectCommandEXT*>(drawMeshIndirectBuffer.GetMappedData());
     drawMeshIndirectCommand->groupCountX = 1;
     drawMeshIndirectCommand->groupCountY = 1;
     drawMeshIndirectCommand->groupCountZ = 1;
 
     countBuffer = Buffer(aDevice, 4, 
-    VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    countBuffer.Map(0, 4);
+    VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+    countBuffer.Map();
     *static_cast<uint32_t*>(countBuffer.GetMappedData()) = 1;
 }
 
@@ -684,16 +669,14 @@ void Scene::updateAll()
     if (vertexCount * sizeof(Model::Vertex) > vertexBuffers[nextIndex].GetSize())
     {
         vertexBuffers[nextIndex] = Buffer(aDevice, (vertexCount + 1000) * sizeof(Model::Vertex), 
-        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        vertexBuffers[nextIndex].Map(0, vertexBuffers[nextIndex].GetSize());
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        vertexBuffers[nextIndex].Map();
     }
     if (indexCount * sizeof(Model::Index) > indexBuffers[nextIndex].GetSize())
     {
         indexBuffers[nextIndex] = Buffer(aDevice, (indexCount + 1000) * sizeof(Model::Index), 
-            VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        indexBuffers[nextIndex].Map(0, indexBuffers[nextIndex].GetSize());
+            VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        indexBuffers[nextIndex].Map();
     }
     CommitBufferUpdate(&vertexBuffers[nextIndex], &indexBuffers[nextIndex]);
     UpdateMeshlets();

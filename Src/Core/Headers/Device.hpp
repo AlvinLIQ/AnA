@@ -8,6 +8,7 @@
 #include <vulkan/vulkan.h>
 #include <glm/glm.hpp>
 #include "Utils.hpp"
+#include "../../3rdParty/VulkanMemoryAllocator/include/vk_mem_alloc.h"
 
 #define INCLUDE_STB_IMAGE
 
@@ -33,6 +34,11 @@
 #define SHAPE_DESCRIPTOR_SET_LAYOUT_COUNT 2
 
 #define MaxBatchSize 2048
+
+struct VmaAllocator_T;
+typedef VmaAllocator_T* VmaAllocator;
+struct VmaAllocation_T;
+typedef VmaAllocation_T* VmaAllocation;
 
 namespace AnA
 {
@@ -88,23 +94,28 @@ namespace AnA
         Device(VkInstance &mInstance, VkSurfaceKHR &mSurface);
         ~Device();
 
-        void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer* buffer, VkDeviceMemory& deviceMemory);
+        void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memUsage, VkBuffer& buffer, VmaAllocation& allocation);
+        void DestroyBuffer(VkBuffer buffer, VmaAllocation allocation);
+        void MapBuffer(void** data, VmaAllocation allocation);
+        void UnmapBuffer(VmaAllocation);
+        void FlushAllocation(VmaAllocation allocation);
         void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
         void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, uint32_t regionCount, const VkBufferCopy* copyRegions);
         void CopyBufferToImage(VkBuffer srcBuffer, VkImage& dstImage, VkExtent3D extent);
 
-        void CreateImage(VkImageCreateInfo* pCreateInfo, VkImage* pImage, VkDeviceMemory* pImageMemory);
+        void CreateImage(VkImageCreateInfo* pCreateInfo, VkImage* pImage, VmaAllocation& allocation);
+        void DestroyImage(VkImage image, VmaAllocation allocation);
         VkImageView CreateImageView(VkImage& image, VkFormat format, VkImageViewType viewType = VK_IMAGE_VIEW_TYPE_2D, 
             VkImageSubresourceRange subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 
             1, 0, 
             1});
 
-        void CreateColorImage(const uint32_t color, VkImage* pTexImage, VkDeviceMemory* pTexMemory);
+        void CreateColorImage(const uint32_t color, VkImage* pTexImage, VmaAllocation& allocation);
 
         #ifdef INCLUDE_STB_IMAGE
-        void CreateTextureImage(const char* imagePath, VkImage* pTexImage, VkDeviceMemory* pTexMemory);
-        void CreateTextImage(const char* text, int& width, int& height, float lineHeight, VkImage* pTextImage, VkDeviceMemory* pTextMemory, float scaleX = 1.0f, float scaleY = 1.0f);
-        void CreateTextImage(const String& text, int& width, int& height, float lineHeight, VkImage* pTextImage, VkDeviceMemory* pTextMemory);
+        void CreateTextureImage(const char* imagePath, VkImage* pTexImage, VmaAllocation& allocation);
+        void CreateTextImage(const char* text, int& width, int& height, float lineHeight, VkImage* pTextImage, VmaAllocation& allocation, float scaleX = 1.0f, float scaleY = 1.0f);
+        void CreateTextImage(const String& text, int& width, int& height, float lineHeight, VkImage* pTextImage, VmaAllocation& allocation);
         #endif
 
         void BuildFontVertices(std::vector<Character>& characters, int range = 128);
@@ -164,8 +175,8 @@ namespace AnA
 
         SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device);
 
-        VkDevice &GetLogicalDevice();
-        VkPhysicalDevice &GetPhysicalDevice();
+        VkDevice GetLogicalDevice();
+        VkPhysicalDevice GetPhysicalDevice();
         const VkPhysicalDeviceProperties& GetPhysicalDeviceProperties() const
         {
             return physicalDeviceProperties;
@@ -177,6 +188,8 @@ namespace AnA
         }
         PFN_vkCmdDrawMeshTasksEXT vkCmdDrawMeshTasksEXT{ VK_NULL_HANDLE };
         PFN_vkCmdDrawMeshTasksIndirectCountEXT vkCmdDrawMeshTasksIndirectCountEXT{ VK_NULL_HANDLE };
+
+        VmaAllocator GetAllocator();
     private:
         VkInstance& instance;
         VkSurfaceKHR surface;
@@ -205,12 +218,15 @@ namespace AnA
         VkQueue presentQueue;
         void createLogicalDevice();
 
-        VkCommandPool commandPool;
+        VkCommandPool commandPool{VK_NULL_HANDLE};
 
         VkCommandBuffer beginSingleTimeCommands();
         void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 
         VkPhysicalDeviceProperties physicalDeviceProperties{};
         VkPhysicalDeviceMeshShaderPropertiesEXT meshShaderProperties{};
+
+        VmaAllocator allocator{nullptr};
+        void createVmaAllocator();
     };
 }

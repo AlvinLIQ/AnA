@@ -12,43 +12,65 @@
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "../3rdParty/stb/stb_truetype.h"
 
+#define VMA_IMPLEMENTATION
+#define VMA_STATIC_VULKAN_FUNCTIONS 0
+#define VMA_DYNAMIC_VULKAN_FUNCTIONS 1
+#include "vk_mem_alloc.h"
+
 using namespace AnA;
 
 Device::Device(VkInstance &mInstance, VkSurfaceKHR &mSurface) : instance {mInstance}, surface {mSurface}
 {
     pickPhysicalDevice();
     createLogicalDevice();
+    createVmaAllocator();
     CreateCommandPool(VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT, &commandPool);
 }
+
 Device::~Device()
 {
     vkDestroyCommandPool(logicalDevice, commandPool, nullptr);
+    vmaDestroyAllocator(allocator);
     vkDestroyDevice(logicalDevice, nullptr);
 }
 
-void Device::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer* buffer, VkDeviceMemory& deviceMemory)
+void Device::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memUsage, VkBuffer& buffer, VmaAllocation& allocation)
 {
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.size = size;
     bufferInfo.usage = usage;
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+     
+    VmaAllocationCreateInfo allocInfo{};
+    allocInfo.usage = memUsage;
+    allocInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT;
+    if (usage == VK_BUFFER_USAGE_TRANSFER_DST_BIT || usage == VK_BUFFER_USAGE_TRANSFER_SRC_BIT)
+        allocInfo.flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_ALLOW_TRANSFER_INSTEAD_BIT;
+    
+    vmaCreateBuffer(allocator, &bufferInfo, &allocInfo, &buffer, &allocation, nullptr);
+}
 
-    if (vkCreateBuffer(logicalDevice, &bufferInfo, nullptr, buffer) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create vertex buffer!");
+void Device::DestroyBuffer(VkBuffer buffer, VmaAllocation allocation)
+{
+    if (!allocation)
+        return;
+    vmaDestroyBuffer(allocator, buffer, allocation);
+}
 
-    VkMemoryRequirements memRequirements;
-    vkGetBufferMemoryRequirements(logicalDevice, *buffer, &memRequirements);
+void Device::MapBuffer(void** data, VmaAllocation allocation)
+{
+    vmaMapMemory(allocator, allocation, data);
+}
 
-    VkMemoryAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, properties);
+void Device::UnmapBuffer(VmaAllocation allocation)
+{
+    vmaUnmapMemory(allocator, allocation);
+}
 
-    if (vkAllocateMemory(logicalDevice, &allocInfo, nullptr, &deviceMemory) != VK_SUCCESS)
-        throw std::runtime_error("Failed to allocate device memory!");
-
-    vkBindBufferMemory(logicalDevice, *buffer, deviceMemory, 0);
+void Device::FlushAllocation(VmaAllocation allocation)
+{
+    vmaFlushAllocation(allocator, allocation, 0, VK_WHOLE_SIZE);
 }
 
 void Device::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
@@ -92,25 +114,16 @@ void Device::CopyBufferToImage(VkBuffer srcBuffer, VkImage& dstImage, VkExtent3D
     endSingleTimeCommands(commandBuffer);
 }
 
-void Device::CreateImage(VkImageCreateInfo* pCreateInfo, VkImage* pImage, VkDeviceMemory* pImageMemory)
+void Device::CreateImage(VkImageCreateInfo* pCreateInfo, VkImage* pImage, VmaAllocation& allocation)
 {
-    if (vkCreateImage(logicalDevice, pCreateInfo, nullptr, pImage) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create Image!");
+    VmaAllocationCreateInfo allocInfo{};
+    allocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+    vmaCreateImage(allocator, pCreateInfo, &allocInfo, pImage, &allocation, nullptr);
+}
 
-    VkMemoryRequirements memRequirements;
-    vkGetImageMemoryRequirements(logicalDevice,* pImage, &memRequirements);
-
-    VkMemoryAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-    if (vkAllocateMemory(logicalDevice, &allocInfo, nullptr, pImageMemory) != VK_SUCCESS)
-    {
-        throw std::runtime_error("failed to allocate image memory!");
-    }
-
-    vkBindImageMemory(logicalDevice, *pImage, *pImageMemory, 0);
+void Device::DestroyImage(VkImage image, VmaAllocation allocation)
+{
+    vmaDestroyImage(allocator, image, allocation);
 }
 
 VkImageView Device::CreateImageView(VkImage& image, VkFormat format, VkImageViewType viewType, VkImageSubresourceRange subresourceRange)
@@ -138,10 +151,10 @@ VkImageView Device::CreateImageView(VkImage& image, VkFormat format, VkImageView
     return imageView;
 }
 
-void Device::CreateColorImage(const uint32_t color, VkImage* pTexImage, VkDeviceMemory* pTexMemory)
+void Device::CreateColorImage(const uint32_t color, VkImage* pTexImage, VmaAllocation& allocation)
 {
-    Buffer aBuffer(this, sizeof(color), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    aBuffer.Map(0, sizeof(color));
+    Buffer aBuffer(this, sizeof(color), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_HOST);
+    aBuffer.Map();
     memcpy(aBuffer.GetMappedData(), &color, sizeof(color));
     aBuffer.Unmap();
 
@@ -160,7 +173,7 @@ void Device::CreateColorImage(const uint32_t color, VkImage* pTexImage, VkDevice
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     imageInfo.flags = 0;
-    CreateImage(&imageInfo, pTexImage, pTexMemory);
+    CreateImage(&imageInfo, pTexImage, allocation);
 
     TransitionImageLayout(*pTexImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
     CopyBufferToImage(aBuffer.GetBuffer(), *pTexImage, imageInfo.extent);
@@ -168,7 +181,7 @@ void Device::CreateColorImage(const uint32_t color, VkImage* pTexImage, VkDevice
 }
 
 #ifdef INCLUDE_STB_IMAGE
-void Device::CreateTextureImage(const char* imagePath, VkImage* pTexImage, VkDeviceMemory* pTexMemory)
+void Device::CreateTextureImage(const char* imagePath, VkImage* pTexImage, VmaAllocation& allocation)
 {
     int texWidth, texHeight, texChannels;
     stbi_uc* pixels = stbi_load(imagePath, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
@@ -177,8 +190,8 @@ void Device::CreateTextureImage(const char* imagePath, VkImage* pTexImage, VkDev
     if (!pixels)
         throw std::runtime_error("Failed to load texture image!");
 
-    Buffer aBuffer(this, imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    aBuffer.Map(0, imageSize);
+    Buffer aBuffer(this, imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_HOST);
+    aBuffer.Map();
     memcpy(aBuffer.GetMappedData(), pixels, static_cast<size_t>(imageSize));
     aBuffer.Unmap();
     stbi_image_free(pixels);
@@ -198,14 +211,14 @@ void Device::CreateTextureImage(const char* imagePath, VkImage* pTexImage, VkDev
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     imageInfo.flags = 0;
-    CreateImage(&imageInfo, pTexImage, pTexMemory);
+    CreateImage(&imageInfo, pTexImage, allocation);
 
     TransitionImageLayout(*pTexImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
     CopyBufferToImage(aBuffer.GetBuffer(), *pTexImage, imageInfo.extent);
     TransitionImageLayout(*pTexImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
-void Device::CreateTextImage(const char* text, int& width, int& height, float lineHeight, VkImage* pTextImage, VkDeviceMemory* pTextMemory, float scaleX, float scaleY)
+void Device::CreateTextImage(const char* text, int& width, int& height, float lineHeight, VkImage* pTextImage, VmaAllocation& allocation, float scaleX, float scaleY)
 {
     auto fontData = ReadFile("Fonts/SourceCodePro-Black.otf");
     stbtt_fontinfo info{};
@@ -268,8 +281,8 @@ void Device::CreateTextImage(const char* text, int& width, int& height, float li
     }
 
     VkDeviceSize bufSize = static_cast<VkDeviceSize>(imageSize) * 4;
-    Buffer aBuffer(this, bufSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    aBuffer.Map(0, aBuffer.GetSize());
+    Buffer aBuffer(this, bufSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_HOST);
+    aBuffer.Map();
     //memcpy(aBuffer.Getconst stbtt_fontinfo *infoMappedData(), textBitmap.data(), static_cast<size_t>(imageSize));
     auto bufData = static_cast<unsigned char*>(aBuffer.GetMappedData());
     for (VkDeviceSize i = 0, j = 0; i < bufSize; i += 4, j++)
@@ -306,7 +319,7 @@ void Device::CreateTextImage(const char* text, int& width, int& height, float li
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     imageInfo.flags = 0;
-    CreateImage(&imageInfo, pTextImage, pTextMemory);
+    CreateImage(&imageInfo, pTextImage, allocation);
 
     TransitionImageLayout(*pTextImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
     CopyBufferToImage(aBuffer.GetBuffer(), *pTextImage, imageInfo.extent);
@@ -753,12 +766,12 @@ Device::SwapChainSupportDetails Device::QuerySwapChainSupport(VkPhysicalDevice d
     return details;
 }
 
-VkDevice &Device::GetLogicalDevice()
+VkDevice Device::GetLogicalDevice()
 {
     return logicalDevice;
 }
 
-VkPhysicalDevice &Device::GetPhysicalDevice()
+VkPhysicalDevice Device::GetPhysicalDevice()
 {
     return physicalDevice;
 }
@@ -1043,4 +1056,27 @@ void Device::endSingleTimeCommands(VkCommandBuffer commandBuffer)
     vkQueueWaitIdle(graphicsQueue);
 
     vkFreeCommandBuffers(logicalDevice, commandPool, 1, &commandBuffer);
+}
+
+VmaAllocator Device::GetAllocator()
+{
+    return allocator;
+}
+
+void Device::createVmaAllocator()
+{
+    VmaVulkanFunctions vulkanFunctions = {};
+    vulkanFunctions.vkGetInstanceProcAddr = &vkGetInstanceProcAddr;
+    vulkanFunctions.vkGetDeviceProcAddr = &vkGetDeviceProcAddr;
+    
+    VmaAllocatorCreateInfo allocatorCreateInfo = {};
+    allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT;
+    allocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_3;
+    allocatorCreateInfo.physicalDevice = physicalDevice;
+    allocatorCreateInfo.device = logicalDevice;
+    allocatorCreateInfo.instance = instance;
+    allocatorCreateInfo.pVulkanFunctions = &vulkanFunctions;
+    
+    if (vmaCreateAllocator(&allocatorCreateInfo, &allocator) != VK_SUCCESS)
+        throw std::runtime_error("failed to create vma allocator");
 }

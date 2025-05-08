@@ -164,7 +164,7 @@ void ShadowMap::createShadowResources()
         imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
         imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
         imageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-        aDevice->CreateImage(&imageInfo, &shadowImage.image, &shadowImage.imageMemory);
+        aDevice->CreateImage(&imageInfo, &shadowImage.image, shadowImage.allocation);
 
         VkImageViewCreateInfo imageViewInfo{};
         imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -200,9 +200,8 @@ void ShadowMap::createShadowResources()
         if (samplersNotCreated)
             aDevice->CreateSampler(&samplers[i], VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE);
 		cascadeBuffers.emplace_back(aDevice, cascades.size() * sizeof(CascadeBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-		VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-				| VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-		cascadeBuffers[i].Map(0, cascades.size() * sizeof(CascadeBufferObject));
+		VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+		cascadeBuffers[i].Map();
 
         descriptorImageInfos[i].imageLayout = shadowImage.imageLayout;
         descriptorImageInfos[i].imageView = shadowImage.imageView;
@@ -217,5 +216,5 @@ void ShadowMap::cleanupShadowResources()
     for (auto& cascade : cascades)
         cascade.cleanup(aDevice->GetLogicalDevice());
     for (auto& shadowImage : images)
-        shadowImage.cleanup(aDevice->GetLogicalDevice());
+        shadowImage.cleanup(aDevice);
 }

@@ -13,7 +13,7 @@ namespace AnA
         {
 
         }
-        Buffer(Device* mDevice, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties);
+        Buffer(Device* mDevice, VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memUsage);
         ~Buffer();
 //        Buffer(const Buffer&) = delete;
 //        Buffer &operator=(const Buffer&) = delete;
@@ -24,13 +24,12 @@ namespace AnA
             mappedData = buf.mappedData;
             buffer = buf.buffer;
             bufferSize = buf.bufferSize;
-            bufferMemory = buf.bufferMemory;
             bufferUsage = buf.bufferUsage;
-            bufferMemoryProperties = buf.bufferMemoryProperties;
+            allocation = buf.allocation;
             newBufferRecords = buf.newBufferRecords;
             buf.mappedData = nullptr;
             buf.buffer = VK_NULL_HANDLE;
-            buf.bufferMemory = VK_NULL_HANDLE;
+            buf.allocation = nullptr;
         }
         Buffer &operator=(Buffer&& buf) noexcept
         {
@@ -41,26 +40,22 @@ namespace AnA
                 mappedData = buf.mappedData;
                 buffer = buf.buffer;
                 bufferSize = buf.bufferSize;
-                bufferMemory = buf.bufferMemory;
                 bufferUsage = buf.bufferUsage;
-                bufferMemoryProperties = buf.bufferMemoryProperties;
+                allocation = buf.allocation;
                 newBufferRecords = buf.newBufferRecords;
                 buf.mappedData = nullptr;
                 buf.buffer = VK_NULL_HANDLE;
-                buf.bufferMemory = VK_NULL_HANDLE;
+                buf.allocation = nullptr;
             }
             return *this;
         }
-        VkResult Map(VkDeviceSize offset, VkDeviceSize size);
+        void Map();
         void Unmap();
 
         void UpdateData(void* newData, size_t dataSize);
+        void Flush();
 
         VkBuffer GetBuffer();
-        VkDeviceMemory GetBufferMemory()
-        {
-            return bufferMemory;
-        }
         void* GetMappedData()
         {
             return mappedData;
@@ -87,7 +82,7 @@ namespace AnA
 
         void CopyToBuffer(const void* data, VkDeviceSize dataSize)
         {
-            this->Map(0, bufferSize);
+            this->Map();
             memcpy(this->GetMappedData(), data, dataSize);
             this->Unmap();
         }
@@ -98,8 +93,7 @@ namespace AnA
         VkBuffer buffer = VK_NULL_HANDLE;
         VkDeviceSize bufferSize = 0;
         VkBufferUsageFlags bufferUsage;
-        VkDeviceMemory bufferMemory = VK_NULL_HANDLE;
-        VkMemoryPropertyFlags bufferMemoryProperties;
+        VmaAllocation allocation;
 
         int newBufferRecords = 0;
 
