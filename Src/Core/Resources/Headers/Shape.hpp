@@ -30,7 +30,7 @@ namespace AnA
         Shapes(Device* mDeivce);
         Shapes(const Shapes&) = delete;
         Shapes& operator=(const Shapes&) = delete;
-        Shapes(Shapes&& shapes) noexcept : aDevice{shapes.aDevice}, shapeBuffer{shapes.shapeBuffer}, indirectBuffer{shapes.indirectBuffer}, ssboDescriptor{shapes.ssboDescriptor}
+        Shapes(Shapes&& shapes) noexcept : aDevice{shapes.aDevice}, shapeBuffer{std::move(shapes.shapeBuffer)}, indirectBuffer{std::move(shapes.indirectBuffer)}, ssboDescriptor{shapes.ssboDescriptor}
         {
             shapeCount = shapes.shapeCount;
             shapes.samplersDescriptor = nullptr;
@@ -43,10 +43,10 @@ namespace AnA
             {
                 Shapes::~Shapes();
                 aDevice = shapes.aDevice;
-                shapeBuffer = shapes.shapeBuffer;
+                shapeBuffer = std::move(shapes.shapeBuffer);
                 shapeCount = shapes.shapeCount;
-                indirectBuffer = shapes.indirectBuffer;
-                countBuffer = shapes.countBuffer;
+                indirectBuffer = std::move(shapes.indirectBuffer);
+                countBuffer = std::move(shapes.countBuffer);
                 ssboDescriptor = shapes.ssboDescriptor;
                 samplersDescriptor = shapes.samplersDescriptor;
 
@@ -66,10 +66,7 @@ namespace AnA
         {
             
         }
-        bool NeedUpdate() override
-        {
-            return false;
-        }
+        bool NeedUpdate() override;
         VkOffset2D Offset;
         VkExtent2D Extent;
     private:
@@ -82,5 +79,6 @@ namespace AnA
         uint32_t shapeCount{};
         std::vector<VkDescriptorImageInfo> imageInfos{};
         VkDescriptorSet sets[2];
+        bool updated = false;
     };
 }

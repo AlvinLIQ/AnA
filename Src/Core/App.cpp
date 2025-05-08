@@ -88,7 +88,6 @@ void App::CreateCubeModel(std::shared_ptr<Model>& model)
 void App::Init()
 {
     //glfwSetKeyCallback(aWindow->GetGLFWwindow(), App::keyCallback);
-    createRecordCallBacks();
 }
 
 void App::Run()
@@ -102,7 +101,7 @@ void App::Run()
 
     auto prevTime = std::chrono::high_resolution_clock::now();
     std::chrono::time_point<std::chrono::high_resolution_clock> curTime;
-    Float frameTime, cpuTime, prevSecond;
+    Float frameTime, cpuTime, cpuTimeBeforeRecord, prevSecond;
     Int32 frameCount = 0;
 
     std::vector<MeshInfo> meshInfos;
@@ -118,18 +117,12 @@ void App::Run()
         prevTime = curTime;
         prevSecond += frameTime;
         frameCount++;
-        
-        if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
-        {
-            auto& cameraView = aResourceManager.MainCamera.GetView();
-            for (int i = 0; i < 4; i++)
-                printf("%f, %f, %f, %f,\n", cameraView[i][0], cameraView[i][1], cameraView[i][2], cameraView[i][3]);
-        }
+
         if (prevSecond >= 1.0f)
         {
             auto info = std::to_string(static_cast<int>(frameCount.As<float>() / prevSecond)) +
                 " CPU Time: " + std::to_string(cpuTime * 1000.0f) + "ms GPU Time:" + 
-                std::to_string(aRenderer.GetGPUTime()) + "ms";
+                std::to_string(aRenderer.GetGPUTime()) + "ms Record Time:" + std::to_string((cpuTime - cpuTimeBeforeRecord) * 1000.0f) + "ms";
             title.Copy(info.c_str(), info.length(), sizeof(cTitle) - 1);
             glfwSetWindowTitle(aWindow.GetGLFWwindow(), title.Str());
             prevSecond = 0.0f;
@@ -144,11 +137,22 @@ void App::Run()
         {
             aResourceManager.Resize();
         }
+        if (aResourceManager.Shapes.NeedUpdate())
+        {
+            auto controlExtent = aRenderer.GetSwapChainExtent();
+            controlExtent.width = static_cast<uint32_t>(_aApp->GetSceneOffset().x);
+            aResourceManager.MainControl->Aspect = static_cast<float>(controlExtent.width) / static_cast<float>(controlExtent.height);
+            aResourceManager.MainControl->Extent = controlExtent;
+            aResourceManager.Shapes.Extent = controlExtent;
+            aResourceManager.Shapes.PrepareDraw(aResourceManager.MainControl);
+        }
         aResourceManager.Update();
         if (loopCallback)
             loopCallback();
 
         //Record Primary Command Buffer
+        cpuTimeBeforeRecord = std::chrono::duration<float, std::chrono::seconds::period>(std::chrono::high_resolution_clock::now() - prevTime).count();
+
         if (auto commandBuffer = aRenderer.BeginFrame())
         {
             onCommandBufferRecording(*commandBuffer);
@@ -234,83 +238,34 @@ void App::uiLoop()
     }
 }
 
-void App::createRecordCallBacks()
-{
-    auto& RecordCallBacks = aResourceManager.RecordCallBacks;
-    RecordCallBacks.emplace_back([]() 
-    {
-        return _aApp->commandBufferNeedUpdate;
-    }, [](VkOffset2D& , VkExtent2D& )
-    {
-        auto& aResourceManager = _aApp->aResourceManager;
-        auto& aRenderer = _aApp->aRenderer;        
-        aResourceManager.SecondaryCommandBufferPool.Enqueue([](CommandBuffer& secondaryCommandBuffer, size_t )
-        {
-            auto& aResourceManager = _aApp->aResourceManager;
-            auto& aRenderSystem = _aApp->aRenderSystem;
-            aRenderSystem.RenderIndirect(secondaryCommandBuffer, 
-                aResourceManager.MainScene, 
-                _aDevice->MeshShaderSupport() ? aResourceManager.Shaders.back() : aResourceManager.Shaders.front(),
-                aResourceManager.SecondaryCommandBufferPool.CurrentBufferIndex);
-            /*
-            aRenderSystem.Render(secondaryCommandBuffer, 
-                aResourceManager.Points, aResourceManager.Shaders[3]);*/
-            
-        }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), _aApp->GetSceneOffset());
-        /*
-        aRenderer.RecordOffscreenSecondaryCommandBuffer([](CommandBuffer& offScreenSecondaryCommandBuffer)
-        {
-            //RenderShadowsIndirect(offScreenSecondaryCommandBuffer);
-        });*/
-        aResourceManager.MainScene.EndCommandBufferUpdate();
-    }, GetSceneOffset());
-#ifdef ANA_INCLUDE_CONTROL
-
-    RecordCallBacks.emplace_back([]()
-    {
-        auto aResourceManager = Resource::ResourceManager::GetCurrent();
-        return aResourceManager->MainControl != nullptr && _aApp->commandBufferNeedUpdate;
-    }, [](VkOffset2D& offset, VkExtent2D& )
-    {
-        //record controls here
-        auto& aResourceManager = _aApp->aResourceManager;
-        auto& aRenderer = _aApp->aRenderer;
-        auto controlExtent = aRenderer.GetSwapChainExtent();
-        controlExtent.width = static_cast<uint32_t>(_aApp->GetSceneOffset().x);
-        aResourceManager.MainControl->Aspect = static_cast<float>(controlExtent.width) / static_cast<float>(controlExtent.height);
-        aResourceManager.MainControl->Extent = controlExtent;
-        auto& shapes = aResourceManager.Shapes;
-        shapes.Offset = offset;
-        shapes.Extent = controlExtent;
-        shapes.PrepareDraw(aResourceManager.MainControl);
-        aResourceManager.SecondaryCommandBufferPool.Enqueue([](CommandBuffer& secondaryCommandBuffer, size_t )
-        {
-            auto& aResourceManager = _aApp->aResourceManager;
-            auto& aRenderSystem = _aApp->aRenderSystem;
-            aRenderSystem.RenderIndirect(secondaryCommandBuffer, 
-                aResourceManager.Shapes, aResourceManager.Shaders[1]);
-        }, &aRenderer.GetInheritanceInfo(RENDER_PASS_TYPE_ONSCREEN), offset, controlExtent);
-    });
-#endif
-}
-
 void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
 {
-    //if (commandBufferNeedUpdate)
-    //{
-    
-    uint32_t frameIndex = aRenderer.GetFrameIndex();
+    auto& swapChain = aRenderer.GetSwapChain();
+
     for (uint32_t i = 0 ; i < SHADOW_MAP_CASCADE_COUNT; i++)
     {
         aRenderer.BeginOffscreenRenderPass(commandBuffer, 
-            aResourceManager.ShadowMap.GetCascades()[i].framebuffers[frameIndex],
+            aResourceManager.ShadowMap.GetCascades()[i].framebuffers[swapChain.CurrentFrame],
             VK_SUBPASS_CONTENTS_INLINE);
         
         aShadowSystem.RenderCascadedShadowsIndirect(commandBuffer, aResourceManager.MainScene, aResourceManager.Shaders[2], i);
         aRenderer.EndRenderPass(commandBuffer);
     }
     aRenderer.BeginSwapChainRenderPass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE_AND_SECONDARY_COMMAND_BUFFERS_KHR);
-    if (aResourceManager.SecondaryCommandBufferPool.GetCommandBufferCount())
-        aResourceManager.SecondaryCommandBufferPool.ExecuteRecordedBuffer(commandBuffer);
+    
+    swapChain.SetViewport(commandBuffer, GetSceneOffset());
+
+    aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.MainScene,aResourceManager.Shaders.back(), swapChain.CurrentFrame);
+
+    auto& terrainShader = aResourceManager.Shaders[4];
+    terrainShader.GetPipeline().Bind(commandBuffer);
+    auto& sets = aResourceManager.Shaders.back().GetDescriptorSets()[swapChain.CurrentFrame];
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, terrainShader.GetPipelineLayout(), 0, 6, sets.data(), 0, nullptr);
+    vkCmdPushConstants(commandBuffer, terrainShader.GetPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT
+    | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, 0, sizeof(terrainPushConstants), &terrainPushConstants);
+    aDevice.vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
+
+    swapChain.SetViewport(commandBuffer, {}, {aResourceManager.Shapes.Extent});
+    aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.Shapes, aResourceManager.Shaders[1], swapChain.CurrentFrame);
     aRenderer.EndRenderPass(commandBuffer);
 }

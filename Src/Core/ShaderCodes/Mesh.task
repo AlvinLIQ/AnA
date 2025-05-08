@@ -55,7 +55,7 @@ bool isSphereInsideFrustum(vec3 center, float radius)
 
 bool isMeshletFacingCamera(vec3 coneApex, vec3 coneAxis, float radius, float cutoff)
 {
-    return dot(normalize(coneApex - cbo.position.xyz), -coneAxis) + radius * 0.5 >= cutoff;
+    return dot(normalize(coneApex - cbo.position.xyz), -coneAxis) + radius >= cutoff;
 }
 
 bool isMeshletVisible(uint meshletId)

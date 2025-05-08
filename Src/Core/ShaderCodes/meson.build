@@ -1,6 +1,7 @@
 fs = import('fs')
 shader_sources = files('Basic.vert', 'Basic.frag', 'CascadedShadowMapping.vert', 'Point.vert', 'Point.frag',
-    'Line.vert', 'Line.frag', 'ShadowMapping.vert', 'Shape.vert', 'Shape.frag', 'CollisionDetect.comp', 'Mesh.mesh', 'Mesh.task', 'Mesh.frag',
+    'Line.vert', 'Line.frag', 'ShadowMapping.vert', 'Shape.vert', 'Shape.frag', 'CollisionDetect.comp', 
+    'Mesh.mesh', 'Mesh.task', 'Mesh.frag', 'Terrain.mesh', 'Terrain.task',
     'Text.vert', 'Text.frag')
 shader_outputs = []
 shader_args = ['--target-env=vulkan1.3', '--target-spv=spv1.5']

@@ -26,7 +26,7 @@ Device::~Device()
     vkDestroyDevice(logicalDevice, nullptr);
 }
 
-void Device::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& deviceMemory)
+void Device::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer* buffer, VkDeviceMemory& deviceMemory)
 {
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -34,11 +34,11 @@ void Device::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryP
     bufferInfo.usage = usage;
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    if (vkCreateBuffer(logicalDevice, &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
+    if (vkCreateBuffer(logicalDevice, &bufferInfo, nullptr, buffer) != VK_SUCCESS)
         throw std::runtime_error("Failed to create vertex buffer!");
 
     VkMemoryRequirements memRequirements;
-    vkGetBufferMemoryRequirements(logicalDevice, buffer, &memRequirements);
+    vkGetBufferMemoryRequirements(logicalDevice, *buffer, &memRequirements);
 
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -48,10 +48,10 @@ void Device::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryP
     if (vkAllocateMemory(logicalDevice, &allocInfo, nullptr, &deviceMemory) != VK_SUCCESS)
         throw std::runtime_error("Failed to allocate device memory!");
 
-    vkBindBufferMemory(logicalDevice, buffer, deviceMemory, 0);
+    vkBindBufferMemory(logicalDevice, *buffer, deviceMemory, 0);
 }
 
-void Device::CopyBuffer(VkBuffer& srcBuffer, VkBuffer& dstBuffer, VkDeviceSize size)
+void Device::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
 {
     VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
@@ -62,7 +62,7 @@ void Device::CopyBuffer(VkBuffer& srcBuffer, VkBuffer& dstBuffer, VkDeviceSize s
     endSingleTimeCommands(commandBuffer);
 }
 
-void Device::CopyBuffer(VkBuffer& srcBuffer, VkBuffer& dstBuffer, uint32_t regionCount, const VkBufferCopy* copyRegions)
+void Device::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, uint32_t regionCount, const VkBufferCopy* copyRegions)
 {
     VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
@@ -71,7 +71,7 @@ void Device::CopyBuffer(VkBuffer& srcBuffer, VkBuffer& dstBuffer, uint32_t regio
     endSingleTimeCommands(commandBuffer);
 }
 
-void Device::CopyBufferToImage(VkBuffer& srcBuffer, VkImage& dstImage, VkExtent3D extent)
+void Device::CopyBufferToImage(VkBuffer srcBuffer, VkImage& dstImage, VkExtent3D extent)
 {
     VkCommandBuffer commandBuffer = beginSingleTimeCommands();
     VkBufferImageCopy region{};

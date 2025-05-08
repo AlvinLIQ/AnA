@@ -1,29 +1,12 @@
-#include "../Core/Headers/App.hpp"
+#include "Headers/example_mesh_shader.hpp"
 #include "FastNoise.h"  // Include FastNoise library
 
 using namespace AnA;
-
-class MeshShaderApp : public App
-{
-public:
-    MeshShaderApp() : App()
-    {
-        
-    }
-    ~MeshShaderApp()
-    {
-
-    }
-protected:
-    void onLoop()
-    {
-
-    }
-};
+using namespace Examples;
 
 std::vector<MeshInfo> meshInfos = 
 {
-    {"Models/cube.obj", {}},
+    {"Models/cube.obj", {}, 4},
     {"Models/bunny.obj", {{0.0f, -10.0f, 0.0f}, {30.0f, 30.0f, 30.0f}, {glm::pi<float>(), 0.0f, 0.0f}}}
 };
 
@@ -48,7 +31,7 @@ float getHeight(float x, float z, float scale = 0.1f, int octaves = 6, float lac
     noise.SetFractalLacunarity(lacunarity);
     
     // Generate the height using Perlin noise for the (x, z) coordinates
-    float height = noise.GetNoise(x, z);
+    float height = noise.GetNoise(x, z) * 15.0f;
 
     return height;
 }
@@ -75,13 +58,15 @@ glm::vec3 calculateNormal(int x, int z) {
 
 void GenTerrain(std::vector<Model::Vertex>& vertices, std::vector<uint32_t>& indices, float width, float height)
 {
-    for (float y = 0, x, z; y < height; y++)
+    for (float y = 0, x, z, ax, ay; y < height; y++)
     {
         for (x = 0; x < width; x++)
         {
+            ax = x / width * 1000.0f;
+            ay = y / height * 1000.0f;
             z = getHeight(x, y);
-            vertices.push_back({{x / width * 1000.0f, z, y / height * 1000.0f}, calculateNormal(x, y), 
-                {(float)((uint32_t)x % 2), (float)((uint32_t)y % 2)}});
+            vertices.push_back({{ax, z, ay}, calculateNormal(ax, ay), 
+                {(float)(x * 0.25), (float)(y * 0.25)}});
         }
     }
     for (uint32_t y = 0, x; y < static_cast<uint32_t>(height) - 1; y += 1)
@@ -100,15 +85,9 @@ void GenTerrain(std::vector<Model::Vertex>& vertices, std::vector<uint32_t>& ind
 
 int main()
 {
-    std::vector<Model::Vertex> vertices;
-    std::vector<uint32_t> indices;
-    GenTerrain(vertices, indices, 1500.0f, 1500.0f);
-    MeshShaderApp app;
+    example_mesh_shader app;
     app.Init();
-    auto& meshes = Resource::ResourceManager::GetCurrent()->MainScene;
-    meshes.Append(vertices, indices, {{-500.0, 1.0, -500.0}});
-    meshes.Append(meshInfos.data(), meshInfos.size());
-    meshes.Update();
+    Resource::ResourceManager::GetCurrent()->MainScene.Append(meshInfos);
     app.Run();
     return 0;
 }

@@ -156,7 +156,7 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
     Update();
 }
 
-void Scene::Append(std::vector<Model::Vertex>& meshVertices, std::vector<uint32_t>& meshIndices, Transform transform)
+void Scene::Append(std::vector<Model::Vertex>& meshVertices, std::vector<uint32_t>& meshIndices, Transform transform, uint textureId)
 {
     std::vector<VkDescriptorImageInfo> imageInfos{};
 
@@ -166,6 +166,7 @@ void Scene::Append(std::vector<Model::Vertex>& meshVertices, std::vector<uint32_
     mesh.indexOffset = static_cast<uint32_t>(indexCount);
     mesh.vertexCount = static_cast<uint32_t>(meshVertices.size());
     mesh.indexCount = static_cast<uint32_t>(meshIndices.size());
+    mesh.textureId = textureId;
     //temporary solution for now
     Model::ModelInfo info{meshVertices, {}, uint32_t(meshIndices.size()), meshIndices};
     mesh.model = std::make_shared<Model>(info);
@@ -625,7 +626,7 @@ void Scene::buildMeshletsWithOptimizer()
             sizeof(Model::Vertex),
             maxVerticesPerMeshlet,
             maxIndicesPerMeshlet / 3,
-            0.25f
+            0.05f
         );
 
         meshopt_meshlets.resize(actualMeshletCount);
@@ -661,7 +662,6 @@ void Scene::buildMeshletsWithOptimizer()
                     mesh.vertexCount, sizeof(Model::Vertex));
             meshlet.normal = glm::transpose(glm::inverse(model)) * *reinterpret_cast<glm::vec3*>(&bounds.cone_axis);
             meshlet.coneApex = model * *reinterpret_cast<glm::vec3*>(&bounds.cone_apex) + mesh.transform.translation;
-            meshlet.cutoff = bounds.cone_cutoff;
             //meshlet.center = {bounds.center[0], bounds.center[1], bounds.center[2]};
             meshlet.center = (minBounding + maxBounding) * 0.5f;
             meshlet.center = model * meshlet.center + mesh.transform.translation;

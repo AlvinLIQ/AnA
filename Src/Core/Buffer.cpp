@@ -10,7 +10,7 @@ Buffer::Buffer(Device* mDevice, VkDeviceSize size, VkBufferUsageFlags usage, VkM
 {
     if (bufferSize)
     {
-        aDevice->CreateBuffer(size, usage, properties, buffer, bufferMemory);
+        aDevice->CreateBuffer(size, usage, properties, &buffer, bufferMemory);
     }
 }
 
@@ -34,7 +34,7 @@ void Buffer::Unmap()
     }
 }
 
-VkBuffer& Buffer::GetBuffer()
+VkBuffer Buffer::GetBuffer()
 {
     return buffer;
 }

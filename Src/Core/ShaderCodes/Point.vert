@@ -10,7 +10,7 @@ struct Vertex
     uint texIndex;
 };
 
-layout(std140, set = 0, binding = 0) buffer VertexSSBO
+layout(std430, set = 0, binding = 0) buffer VertexSSBO
 {
     Vertex vertices[];
 } ssbo;

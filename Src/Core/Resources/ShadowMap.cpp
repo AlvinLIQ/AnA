@@ -50,7 +50,7 @@ void ShadowMap::UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, u
     //float cascadeSplits[SHADOW_MAP_CASCADE_COUNT];
 
 	float nearPlane = 2.0f;
-	float farPlane = 32.0f;
+	float farPlane = 28.0f;
     float clipRange = farPlane - nearPlane;
     float cascadeSplits[SHADOW_MAP_CASCADE_COUNT];
 

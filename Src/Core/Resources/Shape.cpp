@@ -53,6 +53,12 @@ void Shapes::PrepareDraw(Controls::Control* control)
     samplersDescriptor->UpdateDescriptorSets(imageInfos.data(), newShapeCount, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
     sets[0] = ssboDescriptor->GetSets()[0];
     sets[1] = samplersDescriptor->GetSets()[0];
+    updated = true;
+}
+
+bool Shapes::NeedUpdate()
+{
+    return !updated;
 }
 
 void Shapes::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t)

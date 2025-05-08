@@ -30,7 +30,7 @@ void ShadowSystem::RenderCascadedShadowsIndirect(CommandBuffer& commandBuffer, R
 
     VkShaderStageFlags stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
     if (swapChain->GetDevice()->MeshShaderSupport())
-        stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT;
+        stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
     auto pipelineLayout = shader.GetPipelineLayout();
     vkCmdPushConstants(commandBuffer, pipelineLayout,
             stageFlags, 0, sizeof(uint32_t), &index);

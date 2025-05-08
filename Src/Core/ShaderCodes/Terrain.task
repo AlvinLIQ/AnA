@@ -1,0 +1,26 @@
+#version 460
+#extension GL_EXT_mesh_shader : require
+
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+
+#define MAX_ROW_VERTICES 8
+#define MAX_COLUMN_VERTICES 8
+
+layout(push_constant) uniform PushConsts {
+	float density;
+    float height;
+    uint texID;
+} push;
+
+taskPayloadSharedEXT struct {
+    float scale;
+    vec3 center;
+} taskData;
+
+void main()
+{
+    taskData.scale = push.density < 0.9 ? 1. - push.density : 0.1;
+    uint mCount = uint(push.density + 0.1 * 320.0);
+    taskData.center = vec3(float(mCount * MAX_COLUMN_VERTICES) * taskData.scale * 0.5, 0., float(mCount * MAX_ROW_VERTICES) * taskData.scale * 0.5);
+    EmitMeshTasksEXT(mCount, mCount, 1);
+}

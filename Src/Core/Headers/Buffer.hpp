@@ -17,41 +17,9 @@ namespace AnA
         ~Buffer();
 //        Buffer(const Buffer&) = delete;
 //        Buffer &operator=(const Buffer&) = delete;
-        Buffer(Buffer& buf) noexcept
-        {
-            aDevice = buf.aDevice;
-            mappedData = buf.mappedData;
-            buffer = buf.buffer;
-            bufferSize = buf.bufferSize;
-            bufferMemory = buf.bufferMemory;
-            bufferUsage = buf.bufferUsage;
-            bufferMemoryProperties = buf.bufferMemoryProperties;
-            newBufferRecords = buf.newBufferRecords;
-            buf.mappedData = nullptr;
-            buf.buffer = VK_NULL_HANDLE;
-            buf.bufferMemory = VK_NULL_HANDLE;
-        }
-        Buffer &operator=(Buffer& buf) noexcept
-        {
-            if (&buf != this)
-            {
-                cleanup();
-                aDevice = buf.aDevice;
-                mappedData = buf.mappedData;
-                buffer = buf.buffer;
-                bufferSize = buf.bufferSize;
-                bufferMemory = buf.bufferMemory;
-                bufferUsage = buf.bufferUsage;
-                bufferMemoryProperties = buf.bufferMemoryProperties;
-                newBufferRecords = buf.newBufferRecords;
-                buf.mappedData = nullptr;
-                buf.buffer = VK_NULL_HANDLE;
-                buf.bufferMemory = VK_NULL_HANDLE;
-            }
-            return *this;
-        }
         Buffer(Buffer&& buf) noexcept
         {
+            cleanup();
             aDevice = buf.aDevice;
             mappedData = buf.mappedData;
             buffer = buf.buffer;
@@ -88,7 +56,7 @@ namespace AnA
 
         void UpdateData(void* newData, size_t dataSize);
 
-        VkBuffer& GetBuffer();
+        VkBuffer GetBuffer();
         VkDeviceMemory GetBufferMemory()
         {
             return bufferMemory;

@@ -19,8 +19,8 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode
 }
 
 Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass, 
-    std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, VkDeviceSize pushConstantSize) : aDevice{mDevice}, 
-    descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}
+    std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, size_t _descriptorOffset, VkDeviceSize pushConstantSize) : aDevice{mDevice}, 
+    descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}, descriptorOffset{_descriptorOffset}
 {
     createPipelineLayout(pushConstantSize);
 
@@ -29,7 +29,7 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode
 
 Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass, 
     const std::vector<unsigned char>& fragShaderCode, std::vector<Descriptor>& _descriptors,
-    size_t actualDescriptorCount, VkDeviceSize pushConstantSize) : aDevice{mDevice}, descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}
+    size_t actualDescriptorCount, size_t _descriptorOffset, VkDeviceSize pushConstantSize) : aDevice{mDevice}, descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}, descriptorOffset{_descriptorOffset}
 {
     createPipelineLayout(pushConstantSize);
 
@@ -48,8 +48,8 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode
 }
 
 Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, 
-    std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, 
-    const VkPrimitiveTopology vertexTopology, VkDeviceSize pushConstantSize) : aDevice{mDevice}, descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}
+    std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, size_t _descriptorOffset, 
+    const VkPrimitiveTopology vertexTopology, VkDeviceSize pushConstantSize) : aDevice{mDevice}, descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}, descriptorOffset{_descriptorOffset}
 {
     createPipelineLayout(pushConstantSize);
 
@@ -58,8 +58,8 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode
 
 Shader::Shader(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, 
     const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, 
-    std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, VkDeviceSize pushConstantSize) : aDevice{mDevice}, 
-    descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}
+    std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, size_t _descriptorOffset, VkDeviceSize pushConstantSize) : aDevice{mDevice}, 
+    descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}, descriptorOffset{_descriptorOffset}
 {
     createPipelineLayout(pushConstantSize);
 
@@ -68,8 +68,8 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& taskShaderCode
 }
 
 Shader::Shader(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, 
-    std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, VkRenderPass& renderPass, VkDeviceSize pushConstantSize) : aDevice{mDevice}, 
-    descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}
+    std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, size_t _descriptorOffset, VkRenderPass& renderPass, VkDeviceSize pushConstantSize) : aDevice{mDevice}, 
+    descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}, descriptorOffset{_descriptorOffset}
 {
     createPipelineLayout(pushConstantSize);
 
@@ -78,7 +78,7 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& taskShaderCode
 }
 
 Shader::Shader(Device* mDevice, Pipeline::PipelineConfig pipelineConfig, 
-    std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount) : aDevice{mDevice}, descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}
+    std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, size_t _descriptorOffset) : aDevice{mDevice}, descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}, descriptorOffset{_descriptorOffset}
 {
     pipeline = Pipeline(mDevice, pipelineConfig);
 }
@@ -110,7 +110,7 @@ void Shader::createPipelineLayout(VkDeviceSize pushConstantSize)
         descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
         for (size_t i = 0; i < descriptorCount; i++)
         {
-            auto& descriptor = descriptors->data()[i];
+            auto& descriptor = descriptors->data()[i + descriptorOffset];
             descriptorSetLayouts[i] = descriptor.GetLayout();
             for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
             {
@@ -129,7 +129,7 @@ void Shader::createPipelineLayout(VkDeviceSize pushConstantSize)
         VkPushConstantRange range;
         range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
         if (aDevice->MeshShaderSupport())
-            range.stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT;
+            range.stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
         range.offset = 0;
         range.size = pushConstantSize;
         pipelineLayoutInfo.pushConstantRangeCount = 1;

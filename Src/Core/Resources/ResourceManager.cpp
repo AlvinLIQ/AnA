@@ -12,10 +12,10 @@ ResourceManager::ResourceManager(Device* mDevice) :
         MainScene(mDevice),
         //Points(mDevice),
         GlobalLight(mDevice),
-        ShadowMap(mDevice),
-        SecondaryCommandBufferPool(mDevice, 
+        ShadowMap(mDevice)
+        /*SecondaryCommandBufferPool(mDevice, 
         VK_COMMAND_BUFFER_LEVEL_SECONDARY,
-        VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT | VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT)
+        VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT | VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT)*/
 {
     aDevice = mDevice;
     _resourceManager = this;
@@ -144,6 +144,7 @@ void ResourceManager::Update()
     {
         MainScene.CommitBufferUpdate();
     }
+    /*
     recordedCallbacks = 0;
     for (auto& recordCallBackInfo : RecordCallBacks)
     {
@@ -155,7 +156,7 @@ void ResourceManager::Update()
             recordCallBackInfo.recordCallBack(recordCallBackInfo.offset, recordCallBackInfo.extent);
             ++recordedCallbacks;
         }
-    }
+    }*/
 }
 
 void ResourceManager::Resize()
@@ -308,22 +309,23 @@ void ResourceManager::createDefaultDescriptors()
 
 void ResourceManager::createDefaultShaders()
 {
-    Shaders.reserve(5);
+    Shaders.reserve(6);
     auto renderPass = SwapChain::GetCurrent()->GetRenderPass();
-    Shaders.emplace_back(aDevice, Basic_vert, Basic_frag, renderPass, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT);
+    Shaders.emplace_back(aDevice, Basic_vert, Basic_frag, renderPass, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
 
-    Shaders.emplace_back(aDevice, Shape_vert, Shape_frag, renderPass, shapeDescriptors, SHAPE_DESCRIPTOR_SET_LAYOUT_COUNT);
+    Shaders.emplace_back(aDevice, Shape_vert, Shape_frag, renderPass, shapeDescriptors, SHAPE_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
 
     auto offscreenRenderPass = SwapChain::GetCurrent()->GetOffscreenRenderPass();
 
     Shaders.emplace_back(aDevice, CascadedShadowMapping_vert, offscreenRenderPass
-        , defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, sizeof(uint32_t));
-    Shaders.emplace_back(aDevice, Point_vert, Point_frag, renderPass, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT);
+        , defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(uint32_t));
+    Shaders.emplace_back(aDevice, Point_vert, Point_frag, renderPass, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
 
     if (aDevice->MeshShaderSupport())
     {
+        Shaders.emplace_back(aDevice, Terrain_task, Terrain_mesh, Mesh_frag, renderPass, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(TerrainPushConstants));
         Shaders.emplace_back(aDevice, Mesh_task, Mesh_mesh, Mesh_frag, renderPass
-            , defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
+            , defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0, 0);
     }
 }
 
@@ -333,6 +335,7 @@ void ResourceManager::initTextures()
     TextureMap.try_emplace(1, 0xFFCC9999u, aDevice);
     TextureMap.try_emplace(2, 0xFF99CC99u, aDevice);
     TextureMap.try_emplace(3, 0xFF9999CCu, aDevice);
+    TextureMap.try_emplace(4, "Textures/rock3.jpg", aDevice);
 
     aDevice->BuildFontVertices(Characters);
 /*

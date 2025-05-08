@@ -169,7 +169,6 @@ void CalculateNormal(std::vector<Model::Vertex>& vertices, size_t index, size_t 
     auto v1 = right.position - left.position;
     auto v2 = down.position - up.position;
     vertices[index].normal = glm::normalize(glm::cross(v1, v2));
-
 }
 
 float Slope(const glm::vec3& v)

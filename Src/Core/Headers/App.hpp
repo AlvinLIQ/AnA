@@ -63,10 +63,8 @@ namespace AnA
         static void uiLoop();
         static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-        bool commandBufferNeedUpdate = false;
         VkOffset2D actualSceneOffset{};
     protected:
-        void createRecordCallBacks();
         void onCommandBufferRecording(CommandBuffer& commandBuffer);
         Window aWindow;
         Instance aInstance;
@@ -77,6 +75,8 @@ namespace AnA
         Systems::ShadowSystem aShadowSystem;
         Resource::ResourceManager aResourceManager;
         VkOffset2D sceneOffset{};
+        bool commandBufferNeedUpdate = false;
+        TerrainPushConstants terrainPushConstants = {0.5f, 5.0f, 0};
         void(*loopCallback)() = nullptr;
     };
 }

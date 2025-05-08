@@ -1,7 +1,6 @@
 #pragma once
 #include "../../Camera/Headers/Camera.hpp"
 #include "../../Headers/Threadpool.hpp"
-#include "CommandBufferPool.hpp"
 #include "Scene.hpp"
 #include "Descriptor.hpp"
 #include "Shader.hpp"
@@ -32,6 +31,12 @@ namespace AnA
         uint32_t meshletCount;
         uint32_t vertexCount;
         uint32_t triangleCount;
+    };
+    struct TerrainPushConstants
+    {
+        float density;
+        float height;
+        uint32_t texture;
     };
     namespace Resource
     {
@@ -80,7 +85,7 @@ namespace AnA
             std::vector<Character> Characters{};
             AnA::Resource::ShadowMap ShadowMap;
             ThreadPool<void()> TaskPool{MAX_FRAMES_IN_FLIGHT};
-            CommandBufferPool SecondaryCommandBufferPool;
+            //CommandBufferPool SecondaryCommandBufferPool;
             //ThreadPool<void(CommandBuffer*)> SecondaryCommandBufferPool{};
             void RecreateResources();
             std::vector<RecordCallBackInfo> RecordCallBacks{};
@@ -93,7 +98,7 @@ namespace AnA
             std::vector<Buffer> frustumBuffers;
             void createMainCameraBuffers();
 
-            uint32_t recordedCallbacks = 0;
+            //uint32_t recordedCallbacks = 0;
 /*
             std::vector<VkSampler> shadowSamplers;
             std::vector<Image> shadowImages;

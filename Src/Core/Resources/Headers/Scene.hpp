@@ -64,7 +64,7 @@ namespace AnA
         void Init();
         void Append(const std::vector<MeshInfo>& meshInfos);
         void Append(const MeshInfo* meshInfos, size_t count);
-        void Append(std::vector<Model::Vertex>& vertices, std::vector<uint32_t>& indices, Transform transform = {});
+        void Append(std::vector<Model::Vertex>& vertices, std::vector<uint32_t>& indices, Transform transform = {}, uint32_t textureId = 0);
         void RemoveAt(uint32_t meshIndex);
         void RemoveAt(Range removeRange);
         void RemoveAt(std::vector<uint32_t> meshIndices);
