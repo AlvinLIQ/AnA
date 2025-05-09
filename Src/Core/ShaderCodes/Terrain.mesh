@@ -98,7 +98,7 @@ void main()
             vertexOutput[id].normalSpace = push.calNormal == 1 ? CalculateNormal(pos * push.height) : vec3(0.);
             vertexOutput[id].vertexPosition = vertex;
             viewPos = cbo.view * vec4(vertex, 1.0);
-            vertexOutput[id].viewPosZ = viewPos.z / viewPos.w + ubo.cascades[1].split - ubo.cascades[0].split + 1.0;
+            vertexOutput[id].viewPosZ = viewPos.z + ubo.cascades[1].split - ubo.cascades[0].split + 1.0;
             ++id;
         }
     }

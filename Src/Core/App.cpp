@@ -1,4 +1,4 @@
-#include "Headers/App.hpp" 
+#include "Headers/App.hpp"
 #include "Camera/Headers/CameraController.hpp"
 #include "Input/Headers/InputManager.hpp"
 #include <glm/detail/qualifier.hpp>
@@ -47,7 +47,7 @@ App* App::GetCurrent()
 
 void App::CreateCubeModel(std::shared_ptr<Model>& model)
 {
-    std::vector<Model::Vertex> vertices = 
+    std::vector<Model::Vertex> vertices =
     {
         // left (gray)
         {{-.5f, -.5f, -.5f},{-1.0f, 0.0f, 0.0f}},
@@ -122,7 +122,7 @@ void App::Run()
         {
             auto terrainSize = std::to_string(uint32_t((terrainPushConstants.density + 0.1f) * 320.0f * 64.0f));
             auto info = std::to_string(static_cast<int>(frameCount.As<float>() / prevSecond)) +
-                " CPU Time: " + std::to_string(cpuTime * 1000.0f) + "ms GPU Time:" + 
+                " CPU Time: " + std::to_string(cpuTime * 1000.0f) + "ms GPU Time:" +
                 std::to_string(aRenderer.GetGPUTime()) + "ms Record Time:" + std::to_string((cpuTime - cpuTimeBeforeRecord) * 1000.0f) + "ms Terrain Size:" +
                 terrainSize + "x" + terrainSize;
             title.Copy(info.c_str(), info.length(), sizeof(cTitle) - 1);
@@ -246,19 +246,19 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
 
     for (uint32_t i = 0 ; i < SHADOW_MAP_CASCADE_COUNT; i++)
     {
-        aRenderer.BeginOffscreenRenderPass(commandBuffer, 
+        aRenderer.BeginOffscreenRenderPass(commandBuffer,
             aResourceManager.ShadowMap.GetCascades()[i].framebuffers[swapChain.CurrentFrame],
             VK_SUBPASS_CONTENTS_INLINE);
-        
+
         aShadowSystem.RenderCascadedShadowsIndirect(commandBuffer, aResourceManager.MainScene, aResourceManager.Shaders[2], i);
         aRenderer.EndRenderPass(commandBuffer);
     }
     aRenderer.BeginSwapChainRenderPass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE_AND_SECONDARY_COMMAND_BUFFERS_KHR);
-    
+
     swapChain.SetViewport(commandBuffer, GetSceneOffset());
 
     aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.MainScene,aResourceManager.Shaders.back(), swapChain.CurrentFrame);
-
+/*
     auto& terrainShader = aResourceManager.Shaders[4];
     terrainShader.GetPipeline().Bind(commandBuffer);
     auto& sets = aResourceManager.Shaders.back().GetDescriptorSets()[swapChain.CurrentFrame];
@@ -266,7 +266,7 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     vkCmdPushConstants(commandBuffer, terrainShader.GetPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT
     | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, 0, sizeof(terrainPushConstants), &terrainPushConstants);
     aDevice.vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
-
+*/
     swapChain.SetViewport(commandBuffer, {}, {aResourceManager.Shapes.Extent});
     aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.Shapes, aResourceManager.Shaders[1], swapChain.CurrentFrame);
     aRenderer.EndRenderPass(commandBuffer);
