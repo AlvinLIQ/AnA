@@ -335,6 +335,7 @@ void Scene::UpdateMeshlets()
         cullingBuffer[i].radius = meshlet.radius;
         cullingBuffer[i].normal = meshlet.normal;
         cullingBuffer[i].coneApex = meshlet.coneApex;
+        cullingBuffer[i].cutoff = meshlet.cutoff;
     }
     for (auto& meshlet : meshlets)
     {
@@ -611,7 +612,7 @@ void Scene::buildMeshletsWithOptimizer()
             sizeof(Model::Vertex),
             maxVerticesPerMeshlet,
             maxIndicesPerMeshlet / 3,
-            0.05f
+            0.5f
         );
 
         meshopt_meshlets.resize(actualMeshletCount);
@@ -639,18 +640,25 @@ void Scene::buildMeshletsWithOptimizer()
                 minBounding = glm::min(minBounding, vertex.position);
                 maxBounding = glm::max(maxBounding, vertex.position);
             }
+            meshopt_optimizeMeshlet(meshlet.vertices, meshlet.indices, meshletInfo.triangle_count, meshletInfo.vertex_count);
+
             auto model = mesh.transform.mat3();
 
             meshopt_Bounds bounds = meshopt_computeMeshletBounds(&uniqueVertexIndices[meshletInfo.vertex_offset],
                 &primitiveIndices[meshletInfo.triangle_offset], meshletInfo.triangle_count,
                     &mesh.model->info.vertices.data()->position.x,
                     mesh.vertexCount, sizeof(Model::Vertex));
-            meshlet.normal = glm::transpose(glm::inverse(model)) * *reinterpret_cast<glm::vec3*>(&bounds.cone_axis);
-            meshlet.coneApex = model * *reinterpret_cast<glm::vec3*>(&bounds.cone_apex) + mesh.transform.translation;
+            meshlet.normal = model * *reinterpret_cast<glm::vec3*>(&bounds.cone_axis);
+            float len = glm::length(meshlet.normal);
+            if (len != 0.)
+                meshlet.normal /= len;
+            else
+                meshlet.normal = glm::vec3(1., 0., 0.);
+            meshlet.coneApex = glm::vec3(mesh.transform.mat4() * glm::vec4(*reinterpret_cast<glm::vec3*>(&bounds.cone_apex), 1.0f));
             //meshlet.center = {bounds.center[0], bounds.center[1], bounds.center[2]};
             meshlet.center = (minBounding + maxBounding) * 0.5f;
             meshlet.center = model * meshlet.center + mesh.transform.translation;
-
+            meshlet.cutoff = bounds.cone_cutoff;
             for (uint32_t i = 0; i < meshlet.vertexCount; i++)
             {
                 float distance = glm::distance(meshlet.center,

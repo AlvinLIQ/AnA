@@ -53,16 +53,16 @@ bool isSphereInsideFrustum(vec3 center, float radius)
     return true;
 }
 
-bool isMeshletFacingCamera(vec3 coneApex, vec3 coneAxis, float radius, float cutoff)
+bool isMeshletFacingCamera(vec3 coneApex, vec3 coneAxis, float cutoff)
 {
-    return dot(normalize(coneApex - cbo.position.xyz), -coneAxis) + radius >= cutoff;
+    return dot(normalize(coneApex - cbo.position.xyz), coneAxis) <= cutoff;
 }
 
 bool isMeshletVisible(uint meshletId)
 {
     BoundingSphere boundingSphere = mcsbo.boundings[meshletId];
     return  isSphereInsideFrustum(boundingSphere.center, boundingSphere.radius) && 
-            isMeshletFacingCamera(boundingSphere.coneApex, boundingSphere.normal, boundingSphere.radius, boundingSphere.cutoff);
+            isMeshletFacingCamera(boundingSphere.coneApex, boundingSphere.normal, boundingSphere.cutoff);
 }
 
 void main()
