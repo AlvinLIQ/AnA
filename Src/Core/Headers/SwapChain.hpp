@@ -32,7 +32,7 @@ namespace AnA
 
         static SwapChain* GetCurrent();
 
-        VkExtent2D GetExtent();
+        VkExtent2D& GetExtent();
 
         VkFormat GetFormat();
         VkFormat GetDepthFormat();
@@ -48,8 +48,9 @@ namespace AnA
         }
 
         void SetViewport(CommandBuffer& commandBuffer);
-        void SetViewport(CommandBuffer& commandBuffer, VkOffset2D offset);
-        static void SetViewport(CommandBuffer& commandBuffer, VkOffset2D offset, VkExtent2D extent);
+        void SetViewport(CommandBuffer& commandBuffer, VkOffset2D& offset);
+        static void SetViewport(CommandBuffer& commandBuffer, VkExtent2D& extent);
+        static void SetViewport(CommandBuffer& commandBuffer, VkOffset2D& offset, VkExtent2D& extent);
 
         VkSemaphore& GetCurrentSemaphore();
 

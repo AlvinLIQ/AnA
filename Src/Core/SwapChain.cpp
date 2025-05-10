@@ -95,7 +95,7 @@ SwapChain* SwapChain::GetCurrent()
     return _swapChain;
 }
 
-VkExtent2D SwapChain::GetExtent()
+VkExtent2D& SwapChain::GetExtent()
 {
     return swapChainExtent;
 }
@@ -136,18 +136,27 @@ void SwapChain::SetViewport(CommandBuffer& commandBuffer)
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 }
 
-void SwapChain::SetViewport(CommandBuffer& commandBuffer, VkOffset2D offset)
+void SwapChain::SetViewport(CommandBuffer& commandBuffer, VkOffset2D& offset)
 {
-    VkViewport _viewport = {(float)offset.x, (float)offset.y, static_cast<float>(swapChainExtent.width - offset.x), 
+    VkViewport _viewport = {(float)offset.x, (float)offset.y, static_cast<float>(swapChainExtent.width - offset.x),
         static_cast<float>(swapChainExtent.height - offset.y), 0.0f, 1.0f};
     VkRect2D _scissor = {offset, {swapChainExtent.width - offset.x, swapChainExtent.height - offset.y}};
     vkCmdSetViewport(commandBuffer, 0, 1, &_viewport);
     vkCmdSetScissor(commandBuffer, 0, 1, &_scissor);
 }
 
-void SwapChain::SetViewport(CommandBuffer& commandBuffer, VkOffset2D offset, VkExtent2D extent)
+void SwapChain::SetViewport(CommandBuffer& commandBuffer, VkExtent2D& extent)
 {
-    VkViewport _viewport = {(float)offset.x, (float)offset.y, static_cast<float>(extent.width), 
+    VkViewport _viewport = {0.0f, 0.0f, static_cast<float>(extent.width),
+        static_cast<float>(extent.height), 0.0f, 1.0f};
+    VkRect2D _scissor = {{0, 0}, extent};
+    vkCmdSetViewport(commandBuffer, 0, 1, &_viewport);
+    vkCmdSetScissor(commandBuffer, 0, 1, &_scissor);
+}
+
+void SwapChain::SetViewport(CommandBuffer& commandBuffer, VkOffset2D& offset, VkExtent2D& extent)
+{
+    VkViewport _viewport = {(float)offset.x, (float)offset.y, static_cast<float>(extent.width),
         static_cast<float>(extent.height), 0.0f, 1.0f};
     VkRect2D _scissor = {offset, {extent.width, extent.height}};
     vkCmdSetViewport(commandBuffer, 0, 1, &_viewport);
@@ -162,7 +171,7 @@ void SwapChain::RecreateSwapChain()
         glfwGetWindowSize(window, &width, &height);
         glfwWaitEvents();
     } while (width == 0 || height == 0);
-    
+
 
     vkDeviceWaitIdle(aDevice->GetLogicalDevice());
     cleanupSwapChain();
@@ -318,7 +327,7 @@ VkFormat SwapChain::findSupportedFormat(const std::vector<VkFormat>& candidates,
 
         if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features)
             return format;
-        else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) 
+        else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features)
             return format;
     }
 

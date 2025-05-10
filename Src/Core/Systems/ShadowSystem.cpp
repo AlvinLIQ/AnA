@@ -25,7 +25,7 @@ ShadowSystem* ShadowSystem::GetCurrent()
 void ShadowSystem::RenderCascadedShadowsIndirect(CommandBuffer& commandBuffer, Renderable &renderable, Shader& shader, uint32_t& index)
 {
     VkExtent2D extent = {SHADOW_MAP_DIM, SHADOW_MAP_DIM};
-    swapChain->SetViewport(commandBuffer, {}, extent);
+    swapChain->SetViewport(commandBuffer, extent);
     vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
 
     VkShaderStageFlags stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;

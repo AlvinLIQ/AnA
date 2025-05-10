@@ -20,7 +20,6 @@ EditorApp::~EditorApp()
 
 void EditorApp::Init()
 {
-    App::Init();
     aResourceManager.MainControl = InitControl();
     sceneOffset.x = EDITOR_LEFT_PANEL_WIDTH;
     aInputManager.GlobalProfile.flag = Input::InputProfileFlags::None;
@@ -47,6 +46,8 @@ void EditorApp::Init()
     aInputManager.GlobalProfile.keyMapConfigs.push_back(keyMapConfig);
     Controls::Control::GetInputProfile(aResourceManager.MainControl, aInputManager.GetProfiles());
     loopCallback = EditorApp::onLoop;
+
+    App::Init();
 }
 
 void EditorApp::onLoop()

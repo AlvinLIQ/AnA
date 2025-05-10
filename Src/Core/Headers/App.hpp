@@ -18,7 +18,7 @@ namespace AnA
     public:
         App();
         virtual ~App();
-        
+
         App(const App&) = delete;
         App &operator=(const App&) = delete;
 
@@ -52,8 +52,6 @@ namespace AnA
         }
         VkOffset2D &GetSceneOffset()
         {
-            actualSceneOffset = {static_cast<int32_t>(static_cast<float>(sceneOffset.x) * aRenderer.GetSwapChain().ScaleX), 
-                static_cast<int32_t>(static_cast<float>(sceneOffset.y) * aRenderer.GetSwapChain().ScaleY)};
             return actualSceneOffset;
         }
     private:
@@ -78,5 +76,10 @@ namespace AnA
         bool commandBufferNeedUpdate = false;
         TerrainPushConstants terrainPushConstants = {0.5f, 5.0f, 0, 0};
         void(*loopCallback)() = nullptr;
+        void updateSceneOffset()
+        {
+            actualSceneOffset = {static_cast<int32_t>(static_cast<float>(sceneOffset.x) * aRenderer.GetSwapChain().ScaleX),
+                            static_cast<int32_t>(static_cast<float>(sceneOffset.y) * aRenderer.GetSwapChain().ScaleY)};
+        }
     };
 }

@@ -88,6 +88,7 @@ void App::CreateCubeModel(std::shared_ptr<Model>& model)
 void App::Init()
 {
     //glfwSetKeyCallback(aWindow->GetGLFWwindow(), App::keyCallback);
+    updateSceneOffset();
 }
 
 void App::Run()
@@ -138,11 +139,12 @@ void App::Run()
         if (aRenderer.NeedUpdate())
         {
             aResourceManager.Resize();
+            updateSceneOffset();
         }
         if (aResourceManager.Shapes.NeedUpdate())
         {
             auto controlExtent = aRenderer.GetSwapChainExtent();
-            controlExtent.width = static_cast<uint32_t>(_aApp->GetSceneOffset().x);
+            controlExtent.width = static_cast<uint32_t>(actualSceneOffset.x);
             aResourceManager.MainControl->Aspect = static_cast<float>(controlExtent.width) / static_cast<float>(controlExtent.height);
             aResourceManager.MainControl->Extent = controlExtent;
             aResourceManager.Shapes.Extent = controlExtent;
@@ -255,9 +257,11 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     }
     aRenderer.BeginSwapChainRenderPass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE_AND_SECONDARY_COMMAND_BUFFERS_KHR);
 
-    swapChain.SetViewport(commandBuffer, GetSceneOffset());
+    swapChain.SetViewport(commandBuffer, actualSceneOffset);
 
-    aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.MainScene,aResourceManager.Shaders.back(), swapChain.CurrentFrame);
+    aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.MainScene,
+        aResourceManager.Shaders[aDevice.MeshShaderSupport() ? 5 : 0],
+        swapChain.CurrentFrame);
 /*
     auto& terrainShader = aResourceManager.Shaders[4];
     terrainShader.GetPipeline().Bind(commandBuffer);
@@ -267,7 +271,7 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, 0, sizeof(terrainPushConstants), &terrainPushConstants);
     aDevice.vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
 */
-    swapChain.SetViewport(commandBuffer, {}, {aResourceManager.Shapes.Extent});
+    swapChain.SetViewport(commandBuffer, aResourceManager.Shapes.Extent);
     aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.Shapes, aResourceManager.Shaders[1], swapChain.CurrentFrame);
     aRenderer.EndRenderPass(commandBuffer);
 }
