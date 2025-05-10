@@ -82,16 +82,16 @@ void Scene::Init()
     meshletCullingBuffers.resize(meshletBuffers.size());
     for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
-        vertexBuffers[i] = Buffer(aDevice, (vertexCount + 1000) * sizeof(Model::Vertex), 
+        vertexBuffers[i] = Buffer(aDevice, (vertexCount + 1000) * sizeof(Model::Vertex),
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         vertexBuffers[i].Map();
 
-        indexBuffers[i] = Buffer(aDevice, (indexCount + 1000) * sizeof(Model::Index), 
+        indexBuffers[i] = Buffer(aDevice, (indexCount + 1000) * sizeof(Model::Index),
         VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
         VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         indexBuffers[i].Map();
-    
+
         meshletBuffers[i] = Buffer(aDevice, 100 * sizeof(Meshlet),
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
@@ -154,7 +154,7 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
     Update();
 }
 
-void Scene::Append(std::vector<Model::Vertex>& meshVertices, std::vector<uint32_t>& meshIndices, Transform transform, uint textureId)
+void Scene::Append(std::vector<Model::Vertex>& meshVertices, std::vector<uint32_t>& meshIndices, Transform transform, uint32_t textureId)
 {
     std::vector<VkDescriptorImageInfo> imageInfos{};
 
@@ -235,20 +235,20 @@ void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIn
 
 void Scene::Draw(CommandBuffer& commandBuffer)
 {
-    vkCmdDrawIndexedIndirectCount(commandBuffer, drawIndexedIndirectBuffer.GetBuffer(), 
-    0, countBuffer.GetBuffer(), 
+    vkCmdDrawIndexedIndirectCount(commandBuffer, drawIndexedIndirectBuffer.GetBuffer(),
+    0, countBuffer.GetBuffer(),
     0, 1, sizeof(VkDrawIndexedIndirectCommand));
 }
 
 void Scene::DrawIndirect(CommandBuffer& commandBuffer)
 {
     if (aDevice->MeshShaderSupport())
-        aDevice->vkCmdDrawMeshTasksIndirectCountEXT(commandBuffer, drawMeshIndirectBuffer.GetBuffer(), 0, 
-            countBuffer.GetBuffer(), 
+        aDevice->vkCmdDrawMeshTasksIndirectCountEXT(commandBuffer, drawMeshIndirectBuffer.GetBuffer(), 0,
+            countBuffer.GetBuffer(),
             0, 1, sizeof(VkDrawMeshTasksIndirectCommandEXT));
     else
-        vkCmdDrawIndexedIndirectCount(commandBuffer, drawIndexedIndirectBuffer.GetBuffer(), 
-            0, countBuffer.GetBuffer(), 
+        vkCmdDrawIndexedIndirectCount(commandBuffer, drawIndexedIndirectBuffer.GetBuffer(),
+            0, countBuffer.GetBuffer(),
             0, 1, sizeof(VkDrawIndexedIndirectCommand));
 }
 
@@ -302,7 +302,7 @@ void Scene::UpdateMeshlets()
     buildMeshletsWithOptimizer();
     uint32_t minMeshletBufferSize = (meshletVertexCount + meshletIndexCount / 3 + 1 +
         3 * static_cast<uint32_t>(meshlets.size())) * sizeof(uint32_t);
-    if (!meshletBuffers[nextIndex].GetBuffer() || 
+    if (!meshletBuffers[nextIndex].GetBuffer() ||
         meshletBuffers[nextIndex].GetSize() < minMeshletBufferSize)
     {
         meshletBuffers[nextIndex] = Buffer(aDevice, minMeshletBufferSize,
@@ -424,17 +424,17 @@ void Scene::applyVertexBufferUpdate(Model::Vertex* vertexBufferData, Model::Inde
 
 void Scene::createIndirectBuffers()
 {
-    drawIndexedIndirectBuffer = Buffer(aDevice, sizeof(VkDrawIndexedIndirectCommand), 
+    drawIndexedIndirectBuffer = Buffer(aDevice, sizeof(VkDrawIndexedIndirectCommand),
     VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
     drawIndexedIndirectBuffer.Map();
-    auto drawIndexedIndirectCommand = 
+    auto drawIndexedIndirectCommand =
         static_cast<VkDrawIndexedIndirectCommand*>(drawIndexedIndirectBuffer.GetMappedData());
     drawIndexedIndirectCommand->firstIndex = 0;
     drawIndexedIndirectCommand->firstInstance = 0;
     drawIndexedIndirectCommand->instanceCount = 1;
     drawIndexedIndirectCommand->vertexOffset = 0;
 
-    drawMeshIndirectBuffer = Buffer(aDevice, sizeof(VkDrawMeshTasksIndirectCommandEXT), 
+    drawMeshIndirectBuffer = Buffer(aDevice, sizeof(VkDrawMeshTasksIndirectCommandEXT),
     VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
     drawMeshIndirectBuffer.Map();
     auto drawMeshIndirectCommand = static_cast<VkDrawMeshTasksIndirectCommandEXT*>(drawMeshIndirectBuffer.GetMappedData());
@@ -442,7 +442,7 @@ void Scene::createIndirectBuffers()
     drawMeshIndirectCommand->groupCountY = 1;
     drawMeshIndirectCommand->groupCountZ = 1;
 
-    countBuffer = Buffer(aDevice, 4, 
+    countBuffer = Buffer(aDevice, 4,
     VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
     countBuffer.Map();
     *static_cast<uint32_t*>(countBuffer.GetMappedData()) = 1;
@@ -451,9 +451,9 @@ void Scene::createIndirectBuffers()
 void Scene::createSSBODescriptor()
 {
     auto& shaders = Resource::ResourceManager::GetCurrent()->Shaders;
-    auto& vertexDescriptorSetLayout = 
+    auto& vertexDescriptorSetLayout =
         shaders.front().GetDescriptors()[DEFAULT_VERTEX_LAYOUT].GetLayout();
-    vertexDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT, 
+    vertexDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,
         MaxBatchSize,
         2,
         vertexDescriptorSetLayout,
@@ -461,7 +461,7 @@ void Scene::createSSBODescriptor()
     if (aDevice->MeshShaderSupport())
     {
         auto& meshDescriptorSetLayout = shaders.back().GetDescriptors()[DEFAULT_MESHLET_LAYOUT].GetLayout();
-        meshDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT, 
+        meshDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,
             MaxBatchSize * 2,
             2,
             meshDescriptorSetLayout,
@@ -470,25 +470,25 @@ void Scene::createSSBODescriptor()
 }
 
 void Scene::updateSSBODescriptor()
-{    
+{
     VkDescriptorBufferInfo bufferInfo;
     bufferInfo.buffer = vertexBuffers[nextIndex].GetBuffer();
     bufferInfo.offset = 0;
     bufferInfo.range = vertexBuffers[nextIndex].GetSize();
-    aDevice->UpdateDescriptorSet(bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 
+    aDevice->UpdateDescriptorSet(bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
         vertexDescriptor->GetSets()[nextIndex]);
     if (aDevice->MeshShaderSupport())
     {
         bufferInfo.buffer = meshletBuffers[nextIndex].GetBuffer();
         bufferInfo.offset = 0;
         bufferInfo.range = meshletBuffers[nextIndex].GetSize();
-        aDevice->UpdateDescriptorSet(bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 
+        aDevice->UpdateDescriptorSet(bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 
         meshDescriptor->GetSets()[nextIndex]);
         bufferInfo.buffer = meshletCullingBuffers[nextIndex].GetBuffer();
         bufferInfo.offset = 0;
         bufferInfo.range = meshletCullingBuffers[nextIndex].GetSize();
-        aDevice->UpdateDescriptorSet(bufferInfo, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 
+        aDevice->UpdateDescriptorSet(bufferInfo, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                 meshDescriptor->GetSets()[nextIndex]);
     }
     currentBufferIndex = nextIndex;
@@ -518,9 +518,9 @@ void Scene::appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageIn
 
 void Scene::createSamplerDescriptor()
 {
-    auto& descriptorSetLayout = 
+    auto& descriptorSetLayout =
         Resource::ResourceManager::GetCurrent()->Shaders[0].GetDescriptors()[DEFAULT_SAMPLER_LAYOUT].GetLayout();
-    auto descriptor = new Descriptor(aDevice, 1, 
+    auto descriptor = new Descriptor(aDevice, 1,
         batchSize,
         1,
         descriptorSetLayout,
@@ -542,7 +542,7 @@ void Scene::buildMeshlets()
         uint32_t totalIndices = mesh.indexCount;
         uint32_t indexOffset = 0;
         uint32_t indexEnd;
-        
+
         while  (indexOffset < totalIndices)
         {
             std::unordered_map<uint32_t, uint8_t> vertexMap{};
@@ -640,9 +640,9 @@ void Scene::buildMeshletsWithOptimizer()
                 maxBounding = glm::max(maxBounding, vertex.position);
             }
             auto model = mesh.transform.mat3();
-            
-            meshopt_Bounds bounds = meshopt_computeMeshletBounds(&uniqueVertexIndices[meshletInfo.vertex_offset], 
-                &primitiveIndices[meshletInfo.triangle_offset], meshletInfo.triangle_count, 
+
+            meshopt_Bounds bounds = meshopt_computeMeshletBounds(&uniqueVertexIndices[meshletInfo.vertex_offset],
+                &primitiveIndices[meshletInfo.triangle_offset], meshletInfo.triangle_count,
                     &mesh.model->info.vertices.data()->position.x,
                     mesh.vertexCount, sizeof(Model::Vertex));
             meshlet.normal = glm::transpose(glm::inverse(model)) * *reinterpret_cast<glm::vec3*>(&bounds.cone_axis);
@@ -653,8 +653,8 @@ void Scene::buildMeshletsWithOptimizer()
 
             for (uint32_t i = 0; i < meshlet.vertexCount; i++)
             {
-                float distance = glm::distance(meshlet.center, 
-                    model * mesh.model->info.vertices[uniqueVertexIndices[i + meshletInfo.vertex_offset]].position + 
+                float distance = glm::distance(meshlet.center,
+                    model * mesh.model->info.vertices[uniqueVertexIndices[i + meshletInfo.vertex_offset]].position +
                     mesh.transform.translation);
                 if (distance > meshlet.radius)
                     meshlet.radius = distance;
@@ -668,13 +668,13 @@ void Scene::updateAll()
 {
     if (vertexCount * sizeof(Model::Vertex) > vertexBuffers[nextIndex].GetSize())
     {
-        vertexBuffers[nextIndex] = Buffer(aDevice, (vertexCount + 1000) * sizeof(Model::Vertex), 
+        vertexBuffers[nextIndex] = Buffer(aDevice, (vertexCount + 1000) * sizeof(Model::Vertex),
         VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         vertexBuffers[nextIndex].Map();
     }
     if (indexCount * sizeof(Model::Index) > indexBuffers[nextIndex].GetSize())
     {
-        indexBuffers[nextIndex] = Buffer(aDevice, (indexCount + 1000) * sizeof(Model::Index), 
+        indexBuffers[nextIndex] = Buffer(aDevice, (indexCount + 1000) * sizeof(Model::Index),
             VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         indexBuffers[nextIndex].Map();
     }

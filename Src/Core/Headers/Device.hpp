@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <optional>
 #include <vector>
-#include <set>
 #include <fstream>
 #include <vulkan/vulkan.h>
 #include <glm/glm.hpp>
@@ -49,7 +48,7 @@ namespace AnA
         {
             throw std::runtime_error("Failed to open " + filename + "!");
         }
-        
+
         std::streamsize fs = file.tellg();
         std::vector<unsigned char> buffer(static_cast<size_t>(fs));
         file.seekg(0);
@@ -105,9 +104,9 @@ namespace AnA
 
         void CreateImage(VkImageCreateInfo* pCreateInfo, VkImage* pImage, VmaAllocation& allocation);
         void DestroyImage(VkImage image, VmaAllocation allocation);
-        VkImageView CreateImageView(VkImage& image, VkFormat format, VkImageViewType viewType = VK_IMAGE_VIEW_TYPE_2D, 
-            VkImageSubresourceRange subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 
-            1, 0, 
+        VkImageView CreateImageView(VkImage& image, VkFormat format, VkImageViewType viewType = VK_IMAGE_VIEW_TYPE_2D,
+            VkImageSubresourceRange subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0,
+            1, 0,
             1});
 
         void CreateColorImage(const uint32_t color, VkImage* pTexImage, VmaAllocation& allocation);
@@ -161,12 +160,12 @@ namespace AnA
         {
             return meshShaderProperties;
         }
-        
+
         QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
 
         uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
-        struct SwapChainSupportDetails 
+        struct SwapChainSupportDetails
         {
             VkSurfaceCapabilitiesKHR capabilities;
             std::vector<VkSurfaceFormatKHR> formats;
@@ -196,7 +195,7 @@ namespace AnA
         VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
         void pickPhysicalDevice();
 
-        std::vector<const char*> deviceExtensions = 
+        std::vector<const char*> deviceExtensions =
         {
             VK_KHR_SWAPCHAIN_EXTENSION_NAME,
             VK_EXT_NESTED_COMMAND_BUFFER_EXTENSION_NAME,
@@ -206,7 +205,6 @@ namespace AnA
         std::vector<VkSampleCountFlagBits> usableSamples{};
         void checkUsableSamples();
 
-        std::set<std::string> availableDeviceExtensions;
         bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 
         bool isDeviceSuitable(VkPhysicalDevice device);

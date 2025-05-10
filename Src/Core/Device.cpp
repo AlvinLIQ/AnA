@@ -41,13 +41,13 @@ void Device::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VmaMemory
     bufferInfo.size = size;
     bufferInfo.usage = usage;
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-     
+
     VmaAllocationCreateInfo allocInfo{};
     allocInfo.usage = memUsage;
     allocInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT;
     if (usage == VK_BUFFER_USAGE_TRANSFER_DST_BIT || usage == VK_BUFFER_USAGE_TRANSFER_SRC_BIT)
         allocInfo.flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_ALLOW_TRANSFER_INSTEAD_BIT;
-    
+
     vmaCreateBuffer(allocator, &bufferInfo, &allocInfo, &buffer, &allocation, nullptr);
 }
 
@@ -224,14 +224,14 @@ void Device::CreateTextImage(const char* text, int& width, int& height, float li
     stbtt_fontinfo info{};
     if (!stbtt_InitFont(&info, const_cast<const unsigned char*>(fontData.data()), 0))
         throw std::runtime_error("failed to init font");
-    
+
     int imageSize = static_cast<int>(static_cast<float>(width * height) * scaleX * scaleY);
     if (lineHeight <= 0.0f)
     {
         lineHeight = ANA_TEXT_DEFAULT_LINE_HEIGHT;
     }
     lineHeight *= scaleY;
-    
+
     float scale = stbtt_ScaleForPixelHeight(&info, lineHeight);
 
     int hCharWidth, wCharWidth;
@@ -266,7 +266,7 @@ void Device::CreateTextImage(const char* text, int& width, int& height, float li
     {
         int l, t, r, b;
         stbtt_GetCodepointBitmapBox(&info, text[i], scale, scale, &l, &t, &r, &b);
-        
+
         int y = ascent + t;
 
         int byteOffset = static_cast<int>(x) + (y * width);
@@ -276,7 +276,7 @@ void Device::CreateTextImage(const char* text, int& width, int& height, float li
         //stbtt_GetCodepointHMetrics(&info, text[i], &ax, 0);
         //x += ax * scale;
         x += static_cast<size_t>(IS_ASCII_CHAR(text[i]) ? hCharWidth : wCharWidth);
-        
+
         x += static_cast<size_t>(static_cast<float>(stbtt_GetCodepointKernAdvance(&info, text[i], text[i + 1])) * scale);
     }
 
@@ -473,7 +473,7 @@ void Device::CreateDescriptorPool(uint32_t descriptorSetCount, uint32_t descript
     poolInfo.pPoolSizes = poolSizes;
     poolInfo.maxSets = static_cast<uint32_t>(descriptorSetCount);
     poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT | flags;
-    
+
     if (vkCreateDescriptorPool(logicalDevice, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
         throw std::runtime_error("Failed to create descriptor pool!");
 }
@@ -486,7 +486,7 @@ void Device::CreateDescriptorPool(uint32_t descriptorSetCount, const VkDescripto
     poolInfo.pPoolSizes = poolSizes;
     poolInfo.maxSets = descriptorSetCount;
     poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT | flags;
-    
+
     if (vkCreateDescriptorPool(logicalDevice, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
         throw std::runtime_error("Failed to create descriptor pool!");
 }
@@ -514,7 +514,7 @@ void Device::CreateDescriptorSets(Buffer* buffers, VkDeviceSize bufferSize, uint
     allocInfo.descriptorSetCount = static_cast<uint32_t>(descriptorSetCount);
     allocInfo.pSetLayouts = layouts.data();
     descriptorSets.resize(descriptorSetCount);
-    
+
     if (vkAllocateDescriptorSets(logicalDevice, &allocInfo, descriptorSets.data()) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to allocate descriptor sets!");
@@ -539,7 +539,7 @@ void Device::CreateDescriptorSets(VkDescriptorImageInfo* imageInfos, uint32_t bi
     allocInfo.descriptorSetCount = static_cast<uint32_t>(descriptorSetCount);
     allocInfo.pSetLayouts = layouts.data();
     descriptorSets.resize(descriptorSetCount);
-    
+
     if (vkAllocateDescriptorSets(logicalDevice, &allocInfo, descriptorSets.data()) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to allocate descriptor sets!");
@@ -575,8 +575,8 @@ void Device::CreateDescriptorSets(uint32_t descriptorSetCount, VkDescriptorPool&
     }
 }
 
-void Device::CreateDescriptorSets(uint32_t descriptorSetCount, VkDescriptorPool& descriptorPool, 
-    VkDescriptorSetLayout& descriptorSetLayout, std::vector<VkDescriptorSet>& descriptorSets, 
+void Device::CreateDescriptorSets(uint32_t descriptorSetCount, VkDescriptorPool& descriptorPool,
+    VkDescriptorSetLayout& descriptorSetLayout, std::vector<VkDescriptorSet>& descriptorSets,
     std::vector<std::vector<VkWriteDescriptorSet>>& writes)
 {
     CreateDescriptorSets(descriptorSetCount, descriptorPool, descriptorSetLayout, descriptorSets, nullptr);
@@ -584,7 +584,7 @@ void Device::CreateDescriptorSets(uint32_t descriptorSetCount, VkDescriptorPool&
     {
         for (auto& write : writes[i])
             write.dstSet = descriptorSets[i];
-        vkUpdateDescriptorSets(logicalDevice, static_cast<uint32_t>(writes[i].size()), 
+        vkUpdateDescriptorSets(logicalDevice, static_cast<uint32_t>(writes[i].size()),
             writes[i].data(), 0, nullptr);
     }
 }
@@ -600,9 +600,9 @@ VkDescriptorSetLayoutBinding Device::CreateLayoutBinding(uint32_t binding, VkDes
     return layoutBinding;
 }
 
-std::vector<VkDescriptorSetLayoutBinding> Device::CreateLayoutBindings(uint32_t binding, 
-    VkDescriptorType descriptorType, 
-    VkShaderStageFlags stageFlags, 
+std::vector<VkDescriptorSetLayoutBinding> Device::CreateLayoutBindings(uint32_t binding,
+    VkDescriptorType descriptorType,
+    VkShaderStageFlags stageFlags,
     uint32_t descriptorCount)
 {
     std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
@@ -856,11 +856,16 @@ bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device)
 
     std::vector<VkExtensionProperties> availableExtensions(extensionCount);
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
-    availableDeviceExtensions.clear();
-    for (auto& ext : availableExtensions)
-        availableDeviceExtensions.insert(ext.extensionName);
+
 #ifdef ENABLE_MESH_SHADER
-    if ((meshShaderSupport = (availableDeviceExtensions.find(VK_EXT_MESH_SHADER_EXTENSION_NAME) != availableDeviceExtensions.end())))
+    VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures = {};
+    meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
+
+    VkPhysicalDeviceFeatures2 deviceFeatures = {};
+    deviceFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    deviceFeatures.pNext = &meshShaderFeatures;
+    vkGetPhysicalDeviceFeatures2(device, &deviceFeatures);
+    if ((meshShaderSupport = meshShaderFeatures.meshShader == VK_TRUE))
     {
         deviceExtensions.push_back(VK_EXT_MESH_SHADER_EXTENSION_NAME);
     }
@@ -930,7 +935,7 @@ void Device::createLogicalDevice()
     vulkan12Features.runtimeDescriptorArray = VK_TRUE;
     vulkan12Features.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
     vulkan12Features.pNext = &dynamicState3Features;
-    
+
     VkPhysicalDeviceNestedCommandBufferFeaturesEXT nestedCommandBufferFeatures{};
     nestedCommandBufferFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_NESTED_COMMAND_BUFFER_FEATURES_EXT;
     nestedCommandBufferFeatures.nestedCommandBufferSimultaneousUse = VK_TRUE;
@@ -1019,7 +1024,7 @@ void Device::CreateCommandPool(VkCommandPoolCreateFlags flags, VkCommandPool* po
     poolInfo.flags = flags;
     poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsAndComputeFamily.value();
 
-    if (vkCreateCommandPool(logicalDevice, &poolInfo, 
+    if (vkCreateCommandPool(logicalDevice, &poolInfo,
     nullptr, pool) != VK_SUCCESS)
         throw std::runtime_error("Failed to create command pool!");
 }
@@ -1031,14 +1036,14 @@ VkCommandBuffer Device::beginSingleTimeCommands()
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandPool = commandPool;
     allocInfo.commandBufferCount = 1;
-  
+
     VkCommandBuffer commandBuffer;
     vkAllocateCommandBuffers(logicalDevice, &allocInfo, &commandBuffer);
-  
+
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-  
+
     vkBeginCommandBuffer(commandBuffer, &beginInfo);
     return commandBuffer;
 }
@@ -1068,7 +1073,7 @@ void Device::createVmaAllocator()
     VmaVulkanFunctions vulkanFunctions = {};
     vulkanFunctions.vkGetInstanceProcAddr = &vkGetInstanceProcAddr;
     vulkanFunctions.vkGetDeviceProcAddr = &vkGetDeviceProcAddr;
-    
+
     VmaAllocatorCreateInfo allocatorCreateInfo = {};
     allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT;
     allocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_3;
@@ -1076,7 +1081,7 @@ void Device::createVmaAllocator()
     allocatorCreateInfo.device = logicalDevice;
     allocatorCreateInfo.instance = instance;
     allocatorCreateInfo.pVulkanFunctions = &vulkanFunctions;
-    
+
     if (vmaCreateAllocator(&allocatorCreateInfo, &allocator) != VK_SUCCESS)
         throw std::runtime_error("failed to create vma allocator");
 }
