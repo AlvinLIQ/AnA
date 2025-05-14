@@ -8,12 +8,12 @@ using namespace Resource;
 ResourceManager* _resourceManager = nullptr;
 uint32_t modelId = 0;
 
-ResourceManager::ResourceManager(Device* mDevice) : 
+ResourceManager::ResourceManager(Device* mDevice) :
         MainScene(mDevice),
         //Points(mDevice),
         GlobalLight(mDevice),
         ShadowMap(mDevice)
-        /*SecondaryCommandBufferPool(mDevice, 
+        /*SecondaryCommandBufferPool(mDevice,
         VK_COMMAND_BUFFER_LEVEL_SECONDARY,
         VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT | VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT)*/
 {
@@ -41,7 +41,7 @@ ResourceManager::~ResourceManager()
     //    delete shader;
     Shaders.clear();
     //delete Shapes;
-    
+
     //auto logicalDevice = aDevice->GetLogicalDevice();
     //for (auto& shadowSampler : shadowSamplers)
     //   vkDestroySampler(logicalDevice, shadowSampler, nullptr);
@@ -108,9 +108,9 @@ void ResourceManager::UpdateCamera(float aspect)
     LightCameraInfo.aspect = aspect;
     //LightCameraInfo.UpdateCameraPerspective(LightCamera);
     //const float scale = 10.5f;
-    //LightCamera.SetOrthographicProjection(-scale * LightCameraInfo.aspect, -scale, scale * LightCameraInfo.aspect, scale, 
+    //LightCamera.SetOrthographicProjection(-scale * LightCameraInfo.aspect, -scale, scale * LightCameraInfo.aspect, scale,
     //    -10.0f, 32.0f);
-    //LightCamera.SetOrthographicProjection(-scale * LightCameraInfo.aspect, -scale, scale * LightCameraInfo.aspect, scale, 
+    //LightCamera.SetOrthographicProjection(-scale * LightCameraInfo.aspect, -scale, scale * LightCameraInfo.aspect, scale,
     //    -10.0f, 32.0f);
 }
 
@@ -152,7 +152,7 @@ void ResourceManager::Update()
         {
             if (!recordedCallbacks)
                 SecondaryCommandBufferPool.Reset();
-            
+
             recordCallBackInfo.recordCallBack(recordCallBackInfo.offset, recordCallBackInfo.extent);
             ++recordedCallbacks;
         }
@@ -281,7 +281,7 @@ void ResourceManager::createMainCameraBuffers()
     mainCameraBuffers.resize(MAX_FRAMES_IN_FLIGHT);
     for (auto &cameraBuffer : mainCameraBuffers)
     {
-        cameraBuffer = Buffer(aDevice, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
+        cameraBuffer = Buffer(aDevice, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         cameraBuffer.Map();
     }
@@ -289,7 +289,7 @@ void ResourceManager::createMainCameraBuffers()
     frustumBuffers.resize(mainCameraBuffers.size());
     for (auto& frustumBuffer : frustumBuffers)
     {
-        frustumBuffer = Buffer(aDevice, sizeof(FrustumPlanes) + sizeof(glm::mat4), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
+        frustumBuffer = Buffer(aDevice, sizeof(FrustumPlanes) + sizeof(glm::mat4), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
         VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         frustumBuffer.Map();
     }
@@ -311,7 +311,7 @@ void ResourceManager::createDefaultShaders()
 {
     Shaders.reserve(6);
     auto renderPass = SwapChain::GetCurrent()->GetRenderPass();
-    Shaders.emplace_back(aDevice, Basic_vert, Basic_frag, renderPass, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
+    Shaders.emplace_back(aDevice, Basic_vert, Mesh_frag, renderPass, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
 
     Shaders.emplace_back(aDevice, Shape_vert, Shape_frag, renderPass, shapeDescriptors, SHAPE_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
 

@@ -74,6 +74,7 @@ void main()
     SetMeshOutputsEXT(vertexCount, primitiveCount);
 //gl_LocalInvocationIndex
 	mat4 viewProj = cbo.proj * cbo.view;
+    float zOffset = ubo.cascades[1].split - ubo.cascades[0].split;
     for (uint i = 0; i < vertexCount; i++)
     {
         Vertex vertex = vsbo.vertices[msbo.meshlets[iid + i]];
@@ -81,10 +82,10 @@ void main()
         vec4 viewPos = cbo.view * vertexPos;
         gl_MeshVerticesEXT[i].gl_Position = viewProj * vertexPos;
         vertexOutput[i].texCoord = vertex.uv;
-        vertexOutput[i].texID = gl_WorkGroupID.x % 4;
+        vertexOutput[i].texID = vertex.texIndex;
         vertexOutput[i].normalSpace = vertex.normal;
         vertexOutput[i].vertexPosition = vertex.position;
-        vertexOutput[i].viewPosZ = viewPos.z / viewPos.w + ubo.cascades[1].split - ubo.cascades[0].split + 1.0;
+        vertexOutput[i].viewPosZ = viewPos.z / viewPos.w + zOffset;
     }
     iid += vertexCount;
     for (uint i = 0, j, offset, t; i < primitiveCount; i++)

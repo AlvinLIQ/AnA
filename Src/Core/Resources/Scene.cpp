@@ -300,8 +300,8 @@ void Scene::UpdateMeshlets()
         return;
     //buildMeshlets();
     buildMeshletsWithOptimizer();
-    uint32_t minMeshletBufferSize = (meshletVertexCount + meshletIndexCount / 3 + 1 +
-        3 * static_cast<uint32_t>(meshlets.size())) * sizeof(uint32_t);
+    uint32_t minMeshletBufferSize = (meshletVertexCount + 1 +
+        3 * static_cast<uint32_t>(meshlets.size())) * sizeof(uint32_t) + meshletIndexCount + static_cast<uint32_t>(meshlets.size());
     if (!meshletBuffers[nextIndex].GetBuffer() ||
         meshletBuffers[nextIndex].GetSize() < minMeshletBufferSize)
     {
@@ -369,7 +369,7 @@ void Scene::UpdateMeshlets()
     groupSize.z = 1;
     *drawMeshTaskCommand = groupSize;
 
-    meshletBuffers[nextIndex].Flush();
+    //meshletBuffers[nextIndex].Flush();
 }
 
 void Scene::UpdateVertexPositions(Mesh& mesh)
@@ -585,8 +585,8 @@ void Scene::buildMeshlets()
 
 void Scene::buildMeshletsWithOptimizer()
 {
-    constexpr uint32_t maxVerticesPerMeshlet = numsof(Meshlet::vertices);
-    constexpr uint32_t maxIndicesPerMeshlet = numsof(Meshlet::indices);
+    const uint32_t maxVerticesPerMeshlet = numsof(Meshlet::vertices);
+    const uint32_t maxIndicesPerMeshlet = numsof(Meshlet::indices);
 
     meshlets.clear();
     meshletVertexCount = 0;

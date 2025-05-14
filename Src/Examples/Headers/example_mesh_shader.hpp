@@ -22,9 +22,9 @@ namespace AnA
             void Init()
             {
                 loopCallback = example_mesh_shader::onLoop;
-                App::Init();
                 aResourceManager.MainControl = InitControl();
                 sceneOffset.x = 350;
+                App::Init();
                 aInputManager.GlobalProfile.flag = Input::InputProfileFlags::None;
                 Input::KeyMapConfig keyMapConfig;
                 keyMapConfig.keyCode = GLFW_KEY_TAB;

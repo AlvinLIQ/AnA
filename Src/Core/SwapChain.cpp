@@ -66,8 +66,8 @@ VkResult SwapChain::SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint3
     submitInfo.pSignalSemaphores = signalSemaphores;
 
     vkResetFences(aDevice->GetLogicalDevice(), 1, &inFlightFences[CurrentFrame]);
-
-    if (vkQueueSubmit(aDevice->GetGraphicsQueue(), 1, &submitInfo, inFlightFences[CurrentFrame]) != VK_SUCCESS)
+    VkResult result;
+    if ((result = vkQueueSubmit(aDevice->GetGraphicsQueue(), 1, &submitInfo, inFlightFences[CurrentFrame])) != VK_SUCCESS)
     {
         throw std::runtime_error("failed to submit draw command buffer!");
     }
@@ -84,7 +84,7 @@ VkResult SwapChain::SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint3
 
     presentInfo.pImageIndices = &CurrentImage;
 
-    auto result = vkQueuePresentKHR(aDevice->GetPresentQueue(), &presentInfo);
+    result = vkQueuePresentKHR(aDevice->GetPresentQueue(), &presentInfo);
 
     CurrentFrame = (CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     return result;

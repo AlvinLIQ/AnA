@@ -123,7 +123,7 @@ void App::Run()
         {
             auto terrainSize = std::to_string(uint32_t((terrainPushConstants.density + 0.1f) * 320.0f * 64.0f));
             auto info = std::to_string(static_cast<int>(frameCount.As<float>() / prevSecond)) +
-                " CPU Time: " + std::to_string(cpuTime * 1000.0f) + "ms GPU Time:" +
+                " CPU Time: " + std::to_string(cpuTimeBeforeRecord * 1000.0f) + "ms GPU Time:" +
                 std::to_string(aRenderer.GetGPUTime()) + "ms Record Time:" + std::to_string((cpuTime - cpuTimeBeforeRecord) * 1000.0f) + "ms Terrain Size:" +
                 terrainSize + "x" + terrainSize;
             title.Copy(info.c_str(), info.length(), sizeof(cTitle) - 1);
@@ -245,7 +245,7 @@ void App::uiLoop()
 void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
 {
     auto& swapChain = aRenderer.GetSwapChain();
-
+/*
     for (uint32_t i = 0 ; i < SHADOW_MAP_CASCADE_COUNT; i++)
     {
         aRenderer.BeginOffscreenRenderPass(commandBuffer,
@@ -254,7 +254,7 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
 
         aShadowSystem.RenderCascadedShadowsIndirect(commandBuffer, aResourceManager.MainScene, aResourceManager.Shaders[2], i);
         aRenderer.EndRenderPass(commandBuffer);
-    }
+    }*/
     aRenderer.BeginSwapChainRenderPass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE_AND_SECONDARY_COMMAND_BUFFERS_KHR);
 
     swapChain.SetViewport(commandBuffer, actualSceneOffset);
