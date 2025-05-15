@@ -9,6 +9,8 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "../../3rdParty/tinyobjloader/tiny_obj_loader.h"
 
+#include "../../3rdParty/meshoptimizer/src/meshoptimizer.h"
+
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
 
@@ -21,6 +23,7 @@ using namespace AnA;
 Model::Model(const ModelInfo& modelInfo)
 {
     info = std::move(modelInfo);
+    buildMeshletsWithOptimizer();
 }
 
 Model::~Model()
@@ -217,5 +220,133 @@ void Model::CreateTerrainFromVertices(std::vector<Vertex> &vertices, std::vector
             indices.push_back(d);
             indices.push_back(c);
         }
+    }
+}
+
+void Model::buildMeshlets()
+{
+    constexpr uint32_t maxVerticesPerMeshlet = numsof(Meshlet::vertices);
+    constexpr uint32_t maxIndicesPerMeshlet = numsof(Meshlet::indices);
+    meshlets.clear();
+
+    uint32_t totalIndices = uint32_t(info.indices.size());
+    uint32_t indexOffset = 0;
+    uint32_t indexEnd;
+    while (indexOffset < totalIndices)
+    {
+        std::unordered_map<uint32_t, uint8_t> vertexMap{};
+        Meshlet meshlet{};
+        indexEnd = std::min(indexOffset + maxIndicesPerMeshlet, totalIndices);
+        for (; indexOffset < indexEnd; indexOffset+= 3)
+        {
+            uint32_t iid = indexOffset;
+            if (vertexMap.try_emplace(info.indices[iid], static_cast<uint8_t>(vertexMap.size())).second)
+            {
+                if (meshlet.vertexCount >= maxVerticesPerMeshlet)
+                    break;
+                meshlet.vertices[meshlet.vertexCount++] = info.indices[iid];
+            }
+            if (vertexMap.try_emplace(info.indices[iid + 1], static_cast<uint8_t>(vertexMap.size())).second)
+            {
+                if (meshlet.vertexCount >= maxVerticesPerMeshlet)
+                    break;
+                meshlet.vertices[meshlet.vertexCount++] = info.indices[iid + 1];
+            }
+            if (vertexMap.try_emplace(info.indices[iid + 2], static_cast<uint8_t>(vertexMap.size())).second)
+            {
+                if (meshlet.vertexCount > maxVerticesPerMeshlet)
+                    break;
+                meshlet.vertices[meshlet.vertexCount++] = info.indices[iid + 2];
+            }
+            meshlet.indices[meshlet.indexCount++] = vertexMap[info.indices[iid + 0]];
+            meshlet.indices[meshlet.indexCount++] = vertexMap[info.indices[iid + 1]];
+            meshlet.indices[meshlet.indexCount++] = vertexMap[info.indices[iid + 2]];
+        }
+        if (indexOffset < indexEnd)
+            indexOffset -= 3;
+        meshletIndexCount += meshlet.indexCount;
+        meshletVertexCount += meshlet.vertexCount;
+        meshlets.push_back(meshlet);
+    }
+}
+
+void Model::buildMeshletsWithOptimizer()
+{
+    const uint32_t maxVerticesPerMeshlet = numsof(Meshlet::vertices);
+    const uint32_t maxIndicesPerMeshlet = numsof(Meshlet::indices);
+
+    meshlets.clear();
+
+    auto& meshIndices = info.indices;
+    // Estimate output sizes
+    size_t maxMeshlets = meshopt_buildMeshletsBound(uint32_t(info.indices.size()), maxVerticesPerMeshlet, maxIndicesPerMeshlet / 3);
+    std::vector<meshopt_Meshlet> meshopt_meshlets(maxMeshlets);
+    std::vector<uint32_t> uniqueVertexIndices(maxMeshlets * maxVerticesPerMeshlet);
+    std::vector<uint8_t> primitiveIndices(maxMeshlets * maxIndicesPerMeshlet);
+    size_t actualMeshletCount = meshopt_buildMeshlets(
+        meshopt_meshlets.data(),
+        uniqueVertexIndices.data(),
+        primitiveIndices.data(),
+        meshIndices.data(),
+        meshIndices.size(),
+        &info.vertices.data()->position.x, // Optional vertex data pointer, can be nullptr
+        uint32_t(info.vertices.size()),
+        sizeof(Model::Vertex),
+        maxVerticesPerMeshlet,
+        maxIndicesPerMeshlet / 3,
+        0.5f
+    );
+    meshopt_meshlets.resize(actualMeshletCount);
+    auto& last = meshopt_meshlets.back();
+    uniqueVertexIndices.resize(last.vertex_offset + last.vertex_count);
+    primitiveIndices.resize(last.triangle_offset + ((last.triangle_count * 3 + 3) & ~3u));
+
+    for (auto& meshletInfo : meshopt_meshlets)
+    {
+        Meshlet meshlet{};
+        meshlet.indexCount = static_cast<uint32_t>(meshletInfo.triangle_count) * 3;
+        meshlet.vertexCount = static_cast<uint32_t>(meshletInfo.vertex_count);
+        meshletIndexCount += meshlet.indexCount;
+        meshletVertexCount += meshlet.vertexCount;
+        for (uint32_t i = 0; i < meshlet.indexCount; i++)
+        {
+            meshlet.indices[i] = primitiveIndices[i + meshletInfo.triangle_offset];
+        }
+        glm::vec3 minBounding{std::numeric_limits<float>::max()};
+        glm::vec3 maxBounding{std::numeric_limits<float>::min()};
+        for (uint32_t i = 0; i < meshlet.vertexCount; i++)
+        {
+            meshlet.vertices[i] = uniqueVertexIndices[i + meshletInfo.vertex_offset];
+            auto& vertex = info.vertices[meshlet.vertices[i]];
+            minBounding = glm::min(minBounding, vertex.position);
+            maxBounding = glm::max(maxBounding, vertex.position);
+        }
+        meshopt_optimizeMeshlet(meshlet.vertices, meshlet.indices, meshletInfo.triangle_count, meshletInfo.vertex_count);
+        meshopt_Bounds bounds = meshopt_computeMeshletBounds(&uniqueVertexIndices[meshletInfo.vertex_offset],
+            &primitiveIndices[meshletInfo.triangle_offset], meshletInfo.triangle_count,
+                &info.vertices.data()->position.x,
+                uint32_t(info.vertices.size()), sizeof(Model::Vertex));
+        meshlet.normal = *reinterpret_cast<glm::vec3*>(&bounds.cone_axis);
+        float len = glm::length(meshlet.normal);
+        if (len != 0.)
+            meshlet.normal /= len;
+        else
+            meshlet.normal = glm::vec3(1., 0., 0.);
+        meshlet.coneApex = *reinterpret_cast<glm::vec3*>(&bounds.cone_apex);
+        //meshlet.center = {bounds.center[0], bounds.center[1], bounds.center[2]};
+        meshlet.center = (minBounding + maxBounding) * 0.5f;
+        meshlet.center = meshlet.center;
+        meshlet.cutoff = bounds.cone_cutoff;
+        float maxDistance = 0.0f;
+        for (uint32_t i = 0; i < meshlet.vertexCount; i++)
+        {
+            float distance = glm::distance(meshlet.center, info.vertices[uniqueVertexIndices[i + meshletInfo.vertex_offset]].position);
+            if (distance > maxDistance)
+            {
+                maxDistance = distance;
+                meshlet.farVertexID = i;
+            }
+        }
+        meshlets.push_back(meshlet);
     }
 }

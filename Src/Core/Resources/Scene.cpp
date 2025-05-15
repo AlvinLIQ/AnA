@@ -1,7 +1,6 @@
 #include "Headers/Scene.hpp"
 #include "Headers/ResourceManager.hpp"
 #include "Headers/Texture.hpp"
-#include "../../3rdParty/meshoptimizer/src/meshoptimizer.h"
 
 using namespace AnA;
 
@@ -126,12 +125,21 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
         mesh.transform = meshInfo.transform;
         mesh.vertexOffset = static_cast<uint32_t>(vertexCount);
         mesh.indexOffset = static_cast<uint32_t>(indexCount);
-        resourceManager->CreateModel(meshInfo.filePath, meshId);
+        bool newModel = resourceManager->CreateModel(meshInfo.filePath, meshId);
         mesh.model = resourceManager->ModelMap[meshId];
         mesh.vertexCount = uint32_t(mesh.model->info.vertices.size());
         mesh.indexCount = uint32_t(mesh.model->info.indices.size());
+        if (newModel)
+        {
+            // fix this later
+        }
         vertexCount += mesh.vertexCount;
         indexCount += mesh.indexCount;
+        meshletIndexCount += mesh.model->meshletIndexCount;
+        meshletVertexCount += mesh.model->meshletVertexCount;
+        meshletCount += uint32_t(mesh.model->meshlets.size());
+        uniqueMeshlets.push_back(&mesh.model->meshlets);
+
         auto& textureMap = Resource::ResourceManager::GetCurrent()->TextureMap;
         mesh.textureId = textureMap.find(meshInfo.tetureId) == textureMap.end() ? DEFAULT_TEXTURE_ID : meshInfo.tetureId;
         auto& texture = textureMap.at(mesh.textureId);
@@ -170,6 +178,10 @@ void Scene::Append(std::vector<Model::Vertex>& meshVertices, std::vector<uint32_
     mesh.model = std::make_shared<Model>(info);
     vertexCount += mesh.vertexCount;
     indexCount += mesh.indexCount;
+    meshletIndexCount += uint32_t(mesh.model->meshletIndexCount);
+    meshletVertexCount += uint32_t(mesh.model->meshletVertexCount);
+    meshletCount += uint32_t(mesh.model->meshlets.size());
+    uniqueMeshlets.push_back(&mesh.model->meshlets);
 
     auto& textureMap = Resource::ResourceManager::GetCurrent()->TextureMap;
     auto& texture = textureMap.at(mesh.textureId);
@@ -298,10 +310,8 @@ void Scene::UpdateMeshlets()
 {
     if (!aDevice->MeshShaderSupport())
         return;
-    //buildMeshlets();
-    buildMeshletsWithOptimizer();
     uint32_t minMeshletBufferSize = (meshletVertexCount + 1 +
-        3 * static_cast<uint32_t>(meshlets.size())) * sizeof(uint32_t) + meshletIndexCount + static_cast<uint32_t>(meshlets.size());
+        3 * static_cast<uint32_t>(meshletCount)) * sizeof(uint32_t) + meshletIndexCount + static_cast<uint32_t>(meshletCount);
     if (!meshletBuffers[nextIndex].GetBuffer() ||
         meshletBuffers[nextIndex].GetSize() < minMeshletBufferSize)
     {
@@ -311,7 +321,7 @@ void Scene::UpdateMeshlets()
 
         meshletBuffers[nextIndex].Map();
 
-        meshletCullingBuffers[nextIndex] = Buffer(aDevice, meshlets.size() * sizeof(BoundingSphere),
+        meshletCullingBuffers[nextIndex] = Buffer(aDevice, meshletCount * sizeof(BoundingSphere),
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         meshletCullingBuffers[nextIndex].Map();
@@ -320,49 +330,59 @@ void Scene::UpdateMeshlets()
     uint32_t* buffer = static_cast<uint32_t*>(meshletBuffers[nextIndex].GetMappedData());
     BoundingSphere* cullingBuffer = static_cast<BoundingSphere*>(meshletCullingBuffers[nextIndex].GetMappedData());
     uint32_t vertexOffset = 0, primitiveOffset = 0;
-    if (meshlets.empty())
+    if (!meshletCount)
         buffer[0] = 0;
-    for (size_t i = 0; i < meshlets.size(); i++)
+    glm::vec3 t;
+    float len;
+    for (size_t j = 0, i = 0; j < meshes.size(); j++)
     {
-        auto& meshlet = meshlets[i];
-        buffer[bufferId++] = vertexOffset + primitiveOffset + static_cast<uint32_t>(i * 2) + static_cast<uint32_t>(meshlets.size());
-        vertexOffset += meshlet.vertexCount;
-        primitiveOffset += (meshlet.indexCount >> 2);
-        if (meshlet.indexCount & 3)
-            primitiveOffset++;
-
-        cullingBuffer[i].center = meshlet.center;
-        cullingBuffer[i].radius = meshlet.radius;
-        cullingBuffer[i].normal = meshlet.normal;
-        cullingBuffer[i].coneApex = meshlet.coneApex;
-        cullingBuffer[i].cutoff = meshlet.cutoff;
-    }
-    for (auto& meshlet : meshlets)
-    {
-        buffer[bufferId++] = meshlet.vertexCount;
-        buffer[bufferId++] = meshlet.indexCount / 3;
-
-        for (uint32_t i = 0; i < meshlet.vertexCount; i++)
-            buffer[bufferId++] = meshlet.vertices[i];
-        auto indexBuffer = reinterpret_cast<uint8_t*>(&buffer[bufferId]);
-        for (uint32_t i = 0; i < meshlet.indexCount; i++)
+        auto& mesh = meshes[j];
+        auto& meshlets = mesh.model->meshlets;
+        auto model = mesh.transform.mat4();
+        for (auto& meshlet : meshlets)
         {
-            indexBuffer[i] = meshlet.indices[i];
+            buffer[bufferId++] = vertexOffset + primitiveOffset + static_cast<uint32_t>(i << 1) + static_cast<uint32_t>(meshletCount);
+            vertexOffset += meshlet.vertexCount;
+            primitiveOffset += (meshlet.indexCount >> 2);
+            if (meshlet.indexCount & 3)
+                primitiveOffset++;
+
+            t = model * glm::vec4(meshlet.center, 1.0f);
+            cullingBuffer[i].center = t;
+            cullingBuffer[i].radius = glm::distance(t, 
+                glm::vec3(model * glm::vec4(mesh.model->info.vertices[meshlet.vertices[meshlet.farVertexID]].position, 1.0f)));
+            t = glm::mat3(model) * meshlet.normal;
+            len = glm::length(t);
+
+            cullingBuffer[i].normal = len == 0. ? glm::vec3(1.f, 0.f, 0.f) : t / len;
+            cullingBuffer[i].coneApex = model * glm::vec4(meshlet.coneApex, 1.0f);
+            cullingBuffer[i].cutoff = meshlet.cutoff;
+            ++i;
         }
-        bufferId += (meshlet.indexCount >> 2);
-        if (meshlet.indexCount & 3)
-            bufferId++;
-        /*
-        for (uint32_t i = 0; i < meshlet.indexCount; i += 3)
+    }
+    for (auto& mesh : meshes)
+    {
+        auto& meshlets = mesh.model->meshlets;
+        for (auto& meshlet : meshlets)
         {
-            buffer[bufferId++] = (meshlet.indices[i] << 0u) |
-                (meshlet.indices[i + 1] << 8u) |
-                (meshlet.indices[i + 2] << 16u);
-        }*/
+            buffer[bufferId++] = meshlet.vertexCount;
+            buffer[bufferId++] = meshlet.indexCount / 3;
+
+            for (uint32_t i = 0; i < meshlet.vertexCount; i++)
+                buffer[bufferId++] = meshlet.vertices[i] + mesh.vertexOffset;
+            auto indexBuffer = reinterpret_cast<uint8_t*>(&buffer[bufferId]);
+            for (uint32_t i = 0; i < meshlet.indexCount; i++)
+            {
+                indexBuffer[i] = meshlet.indices[i];
+            }
+            bufferId += (meshlet.indexCount >> 2);
+            if (meshlet.indexCount & 3)
+                bufferId++;
+        }
     }
 
     auto drawMeshTaskCommand = static_cast<glm::uvec3*>(drawMeshIndirectBuffer.GetMappedData());
-    uint32_t numofGroup = (static_cast<uint32_t>(meshlets.size()) + numOfGroup - 1) / numOfGroup;
+    uint32_t numofGroup = (static_cast<uint32_t>(meshletCount) + numOfGroup - 1) / numOfGroup;
     glm::uvec3 groupSize;
     groupSize.x = numofGroup;
     groupSize.y = 1;
@@ -528,148 +548,6 @@ void Scene::createSamplerDescriptor()
         VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
         );
     samplersDescriptors.push_back(descriptor);
-}
-
-void Scene::buildMeshlets()
-{
-    constexpr uint32_t maxVerticesPerMeshlet = numsof(Meshlet::vertices);
-    constexpr uint32_t maxIndicesPerMeshlet = numsof(Meshlet::indices);
-    meshlets.clear();
-    meshletVertexCount = 0;
-    meshletIndexCount = 0;
-    // Iterate over each mesh
-    for (const auto& mesh : meshes)
-    {
-        uint32_t totalIndices = mesh.indexCount;
-        uint32_t indexOffset = 0;
-        uint32_t indexEnd;
-
-        while  (indexOffset < totalIndices)
-        {
-            std::unordered_map<uint32_t, uint8_t> vertexMap{};
-            Meshlet meshlet{};
-            indexEnd = std::min(indexOffset + maxIndicesPerMeshlet, totalIndices);
-            for (; indexOffset < indexEnd; indexOffset+= 3)
-            {
-                uint32_t iid = indexOffset;
-                if (vertexMap.try_emplace(mesh.model->info.indices[iid], static_cast<uint8_t>(vertexMap.size())).second)
-                {
-                    if (meshlet.vertexCount >= maxVerticesPerMeshlet)
-                        break;
-                    meshlet.vertices[meshlet.vertexCount++] = mesh.model->info.indices[iid] + mesh.vertexOffset;
-                }
-                if (vertexMap.try_emplace(mesh.model->info.indices[iid + 1], static_cast<uint8_t>(vertexMap.size())).second)
-                {
-                    if (meshlet.vertexCount >= maxVerticesPerMeshlet)
-                        break;
-                    meshlet.vertices[meshlet.vertexCount++] = mesh.model->info.indices[iid + 1] + mesh.vertexOffset;
-                }
-                if (vertexMap.try_emplace(mesh.model->info.indices[iid + 2], static_cast<uint8_t>(vertexMap.size())).second)
-                {
-                    if (meshlet.vertexCount > maxVerticesPerMeshlet)
-                        break;
-                    meshlet.vertices[meshlet.vertexCount++] = mesh.model->info.indices[iid + 2] + mesh.vertexOffset;
-                }
-                meshlet.indices[meshlet.indexCount++] = vertexMap[mesh.model->info.indices[iid + 0]];
-                meshlet.indices[meshlet.indexCount++] = vertexMap[mesh.model->info.indices[iid + 1]];
-                meshlet.indices[meshlet.indexCount++] = vertexMap[mesh.model->info.indices[iid + 2]];
-            }
-            if (indexOffset < indexEnd)
-                indexOffset -= 3;
-            meshlets.push_back(meshlet);
-            meshletVertexCount += meshlet.vertexCount;
-            meshletIndexCount += meshlet.indexCount;
-        }
-    }
-}
-
-void Scene::buildMeshletsWithOptimizer()
-{
-    const uint32_t maxVerticesPerMeshlet = numsof(Meshlet::vertices);
-    const uint32_t maxIndicesPerMeshlet = numsof(Meshlet::indices);
-
-    meshlets.clear();
-    meshletVertexCount = 0;
-    meshletIndexCount = 0;
-
-    for (const auto& mesh : meshes)
-    {
-        auto& meshIndices = mesh.model->info.indices;
-        // Estimate output sizes
-        size_t maxMeshlets = meshopt_buildMeshletsBound(mesh.indexCount, maxVerticesPerMeshlet, maxIndicesPerMeshlet / 3);
-        std::vector<meshopt_Meshlet> meshopt_meshlets(maxMeshlets);
-        std::vector<uint32_t> uniqueVertexIndices(maxMeshlets * maxVerticesPerMeshlet);
-        std::vector<uint8_t> primitiveIndices(maxMeshlets * maxIndicesPerMeshlet);
-
-        size_t actualMeshletCount = meshopt_buildMeshlets(
-            meshopt_meshlets.data(),
-            uniqueVertexIndices.data(),
-            primitiveIndices.data(),
-            meshIndices.data(),
-            meshIndices.size(),
-            &mesh.model->info.vertices.data()->position.x, // Optional vertex data pointer, can be nullptr
-            mesh.vertexCount,
-            sizeof(Model::Vertex),
-            maxVerticesPerMeshlet,
-            maxIndicesPerMeshlet / 3,
-            0.5f
-        );
-
-        meshopt_meshlets.resize(actualMeshletCount);
-        auto& last = meshopt_meshlets.back();
-        uniqueVertexIndices.resize(last.vertex_offset + last.vertex_count);
-        primitiveIndices.resize(last.triangle_offset + ((last.triangle_count * 3 + 3) & ~3u));
-
-        for (auto& meshletInfo : meshopt_meshlets)
-        {
-            Meshlet meshlet{};
-            meshlet.indexCount = static_cast<uint32_t>(meshletInfo.triangle_count) * 3;
-            meshlet.vertexCount = static_cast<uint32_t>(meshletInfo.vertex_count);
-            meshletIndexCount += meshlet.indexCount;
-            meshletVertexCount += meshlet.vertexCount;
-            for (uint32_t i = 0; i < meshlet.indexCount; i++)
-            {
-                meshlet.indices[i] = primitiveIndices[i + meshletInfo.triangle_offset];
-            }
-            glm::vec3 minBounding{std::numeric_limits<float>::max()};
-            glm::vec3 maxBounding{std::numeric_limits<float>::min()};
-            for (uint32_t i = 0; i < meshlet.vertexCount; i++)
-            {
-                meshlet.vertices[i] = uniqueVertexIndices[i + meshletInfo.vertex_offset] + mesh.vertexOffset;
-                auto& vertex = mesh.model->info.vertices[uniqueVertexIndices[i + meshletInfo.vertex_offset]];
-                minBounding = glm::min(minBounding, vertex.position);
-                maxBounding = glm::max(maxBounding, vertex.position);
-            }
-            meshopt_optimizeMeshlet(meshlet.vertices, meshlet.indices, meshletInfo.triangle_count, meshletInfo.vertex_count);
-
-            auto model = mesh.transform.mat3();
-
-            meshopt_Bounds bounds = meshopt_computeMeshletBounds(&uniqueVertexIndices[meshletInfo.vertex_offset],
-                &primitiveIndices[meshletInfo.triangle_offset], meshletInfo.triangle_count,
-                    &mesh.model->info.vertices.data()->position.x,
-                    mesh.vertexCount, sizeof(Model::Vertex));
-            meshlet.normal = model * *reinterpret_cast<glm::vec3*>(&bounds.cone_axis);
-            float len = glm::length(meshlet.normal);
-            if (len != 0.)
-                meshlet.normal /= len;
-            else
-                meshlet.normal = glm::vec3(1., 0., 0.);
-            meshlet.coneApex = glm::vec3(mesh.transform.mat4() * glm::vec4(*reinterpret_cast<glm::vec3*>(&bounds.cone_apex), 1.0f));
-            //meshlet.center = {bounds.center[0], bounds.center[1], bounds.center[2]};
-            meshlet.center = (minBounding + maxBounding) * 0.5f;
-            meshlet.center = model * meshlet.center + mesh.transform.translation;
-            meshlet.cutoff = bounds.cone_cutoff;
-            for (uint32_t i = 0; i < meshlet.vertexCount; i++)
-            {
-                float distance = glm::distance(meshlet.center,
-                    model * mesh.model->info.vertices[uniqueVertexIndices[i + meshletInfo.vertex_offset]].position +
-                    mesh.transform.translation);
-                if (distance > meshlet.radius)
-                    meshlet.radius = distance;
-            }
-            meshlets.push_back(meshlet);
-        }
-    }
 }
 
 void Scene::updateAll()

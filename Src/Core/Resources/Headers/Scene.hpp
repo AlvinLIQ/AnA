@@ -158,12 +158,11 @@ namespace AnA
         void appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageInfos);
         uint32_t meshletVertexCount = 0;
         uint32_t meshletIndexCount = 0;
-        std::vector<Meshlet> meshlets;
+        uint32_t meshletCount = 0;
+        std::vector<std::vector<Model::Meshlet>*> uniqueMeshlets{};
         std::vector<Buffer> meshletBuffers{};
         std::vector<Buffer> meshletCullingBuffers{};
         uint32_t numOfGroup = 64;
-        void buildMeshlets();
-        void buildMeshletsWithOptimizer();
         uint8_t currentBufferIndex = 0;
         uint8_t nextIndex = 1 % MAX_FRAMES_IN_FLIGHT;
         void updateAll();

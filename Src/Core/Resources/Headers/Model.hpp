@@ -43,6 +43,19 @@ namespace AnA
             }
         };
 
+        struct Meshlet
+        {
+            uint32_t vertices[64];
+            uint8_t indices[124 * 3];
+            uint32_t indexCount;
+            uint32_t vertexCount;
+            uint32_t farVertexID;
+            glm::vec3 center;
+            glm::vec3 normal;
+            glm::vec3 coneApex;
+            float cutoff;
+        };
+
         struct BSPNode
         {
             BSPNode* left = nullptr;
@@ -71,9 +84,16 @@ namespace AnA
         ModelInfo info{};
         std::string Path = "";
 
+        std::vector<Meshlet> meshlets;
+        uint32_t meshletVertexCount = 0;
+        uint32_t meshletIndexCount = 0;
+
         static void CreateModelFromFile(const char* filePath, std::shared_ptr<Model>& model);
         static void CreateMeshFromFile(const char *filePath, std::vector<Vertex>& vertices, std::vector<Index>& indices, size_t vertexOffset = 0);
         static void CreateVerticesFromFile(const char* filePath, std::vector<Vertex>& vertices);
         static void CreateTerrainFromVertices(std::vector<Vertex>& vertices, std::vector<Index> &terrainVertices, size_t period);
+    private:
+        void buildMeshlets();
+        void buildMeshletsWithOptimizer();
     };
 }

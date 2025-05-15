@@ -260,19 +260,21 @@ void ResourceManager::GetDefaultShapesDescriptorSetConfig(std::vector<std::vecto
     pConfig->stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 }
 
-void ResourceManager::CreateModel(const char* filePath, uint32_t& id)
+bool ResourceManager::CreateModel(const char* filePath, uint32_t& id)
 {
     auto iter = ModelPathIndexMap.find(filePath);
     if (iter != ModelPathIndexMap.end())
     {
         id = iter->second;
-        return;
+        return false;
     }
     std::shared_ptr<Model> model;
     Model::CreateModelFromFile(filePath, model);
     ModelPathIndexMap.emplace(filePath, modelId);
     id = modelId;
     ModelMap.emplace(modelId++, model);
+
+    return true;
 }
 
 void ResourceManager::createMainCameraBuffers()
