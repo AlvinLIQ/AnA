@@ -94,6 +94,7 @@ namespace AnA
         void UpdateMeshlets();
         void UpdateVertexPositions(UniqueModel& model);
         void UpdateVertexPositions(Range updateRange);
+        void UpdateMeshTransform(uint32_t meshIndex);
 
         Mesh& At(size_t index)
         {

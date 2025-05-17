@@ -19,9 +19,8 @@ namespace AnA
         struct Vertex
         {
             glm::vec3 position{};
-            alignas(8) glm::vec3 normal{};
-            alignas(8) glm::vec2 uv{};
-            alignas(8) glm::uint32_t textureId{};
+            glm::vec3 normal{};
+            glm::vec2 uv{};
 
             bool operator==(const Vertex& vertex) const
             {

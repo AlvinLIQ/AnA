@@ -1,19 +1,11 @@
 #version 460
 
-layout(location = 0) out vec4 outVertexPos;
-
-struct Vertex
-{
-    vec3 position;
-    vec3 normal;
-    vec2 uv;
-    uint texIndex;
-};
+layout(location = 0) out vec4 outVertex;
 
 layout(std430, set = 0, binding = 0) buffer VertexSSBO
 {
-    Vertex vertices[];
-} ssbo;
+    float vertices[];
+};
 
 layout(set = 1, binding = 0) uniform CameraBufferObject {
     mat4 proj;
@@ -80,9 +72,8 @@ mat4 transform(vec3 scale, vec3 rotation, vec3 transition)
 
 void main() {
     gl_PointSize = 10;
-    Vertex vertex = ssbo.vertices[gl_VertexIndex];
-    vec4 vertexPos = vec4(vertex.position, 1.0);
-    outVertexPos = vertexPos;
-    vec4 viewPos = cbo.view * vec4(vertexPos.x, vertexPos.y + 10.0, vertexPos.zw);
-    gl_Position = cbo.proj * viewPos;
+    uint vertexOffset = gl_VertexIndex * 8;
+    vec4 vertexPos = vec4(vertices[vertexOffset + 0], vertices[vertexOffset + 1], vertices[vertexOffset + 2], 1.0);
+    gl_Position = cbo.proj * cbo.view * vertexPos;
+    outVertex = vertexPos;
 }

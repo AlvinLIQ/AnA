@@ -453,6 +453,14 @@ void Scene::UpdateVertexPositions(Range updateRange)
     }
 }
 
+void Scene::UpdateMeshTransform(uint32_t meshIndex)
+{
+    auto objectBufferData = static_cast<Object*>(objectBuffers[currentBufferIndex].GetMappedData());
+    glm::mat4 transform = meshes[meshIndex].transform.mat4();
+    transform[3].w = float(meshes[meshIndex].textureId);
+    objectBufferData[meshIndex].transform = transform;
+}
+
 void Scene::applyVertexBufferUpdate(Model::Vertex* vertexBufferData, Model::Index* indexBufferData, Range& updateRange)
 {
     for (uint32_t i = 0; i < updateRange.y; i++)

@@ -5,7 +5,6 @@ struct Vertex
     vec3 position;
     vec3 normal;
     vec2 uv;
-    uint texIndex;
 };
 
 layout(std430, set = 0, binding = 0) buffer VertexSSBO
