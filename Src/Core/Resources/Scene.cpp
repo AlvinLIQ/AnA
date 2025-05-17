@@ -76,9 +76,12 @@ void Scene::Init()
 {
     vertexBuffers.resize(MAX_FRAMES_IN_FLIGHT);
     indexBuffers.resize(vertexBuffers.size());
+    objectBuffers.resize(vertexBuffers.size());
 
     meshletBuffers.resize(vertexBuffers.size());
     meshletCullingBuffers.resize(meshletBuffers.size());
+    meshletIDBuffers.resize(meshletBuffers.size());
+    meshletIDCountBuffers.resize(meshletBuffers.size());
     for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
         vertexBuffers[i] = Buffer(aDevice, (vertexCount + 1000) * sizeof(Model::Vertex),
@@ -91,7 +94,12 @@ void Scene::Init()
         VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         indexBuffers[i].Map();
 
-        meshletBuffers[i] = Buffer(aDevice, 100 * sizeof(Meshlet),
+        objectBuffers[i] = Buffer(aDevice, (1000) * sizeof(Object),
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+        VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        objectBuffers[i].Map();
+
+        meshletBuffers[i] = Buffer(aDevice, 100 * sizeof(Model::Meshlet),
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
 
@@ -101,6 +109,16 @@ void Scene::Init()
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         meshletCullingBuffers[i].Map();
+
+        meshletIDBuffers[i] = Buffer(aDevice, sizeof(uint32_t),
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        meshletIDBuffers[i].Map();
+
+        meshletIDCountBuffers[i] = Buffer(aDevice, sizeof(uint32_t),
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        meshletIDCountBuffers[i].Map();
     }
     createSamplerDescriptor();
     //createBuffers();
@@ -123,22 +141,27 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
         uint32_t meshId;
         Mesh mesh;
         mesh.transform = meshInfo.transform;
-        mesh.vertexOffset = static_cast<uint32_t>(vertexCount);
-        mesh.indexOffset = static_cast<uint32_t>(indexCount);
         bool newModel = resourceManager->CreateModel(meshInfo.filePath, meshId);
-        mesh.model = resourceManager->ModelMap[meshId];
-        mesh.vertexCount = uint32_t(mesh.model->info.vertices.size());
-        mesh.indexCount = uint32_t(mesh.model->info.indices.size());
+        auto model = resourceManager->ModelMap[meshId];
+        mesh.vertexCount = uint32_t(model->info.vertices.size());
+        mesh.indexCount = uint32_t(model->info.indices.size());
         if (newModel)
         {
-            // fix this later
+            modelMap.emplace(meshId, uint32_t(uniqueModels.size()));
+            mesh.modelID = uint32_t(uniqueModels.size());
+            uniqueModels.push_back({uint32_t(vertexCount), uint32_t(indexCount), meshletCount, model});
+            vertexCount += mesh.vertexCount;
+            indexCount += mesh.indexCount;
+            meshletIndexCount += model->meshletIndexCount;
+            meshletVertexCount += model->meshletVertexCount;
+            meshletCount += uint32_t(model->meshlets.size());
         }
-        vertexCount += mesh.vertexCount;
-        indexCount += mesh.indexCount;
-        meshletIndexCount += mesh.model->meshletIndexCount;
-        meshletVertexCount += mesh.model->meshletVertexCount;
-        meshletCount += uint32_t(mesh.model->meshlets.size());
-        uniqueMeshlets.push_back(&mesh.model->meshlets);
+        else
+        {
+            mesh.modelID = modelMap[meshId];
+        }
+        for (uint32_t i = 0, meshletOffset = uniqueModels[mesh.modelID].meshletOffset; i < uint32_t(model->meshlets.size()); i++)
+            meshletIDs.push_back({meshletOffset + i, uint32_t(meshes.size())});
 
         auto& textureMap = Resource::ResourceManager::GetCurrent()->TextureMap;
         mesh.textureId = textureMap.find(meshInfo.tetureId) == textureMap.end() ? DEFAULT_TEXTURE_ID : meshInfo.tetureId;
@@ -168,21 +191,23 @@ void Scene::Append(std::vector<Model::Vertex>& meshVertices, std::vector<uint32_
 
     Mesh mesh{};
     mesh.transform = transform;
-    mesh.vertexOffset = static_cast<uint32_t>(vertexCount);
-    mesh.indexOffset = static_cast<uint32_t>(indexCount);
     mesh.vertexCount = static_cast<uint32_t>(meshVertices.size());
     mesh.indexCount = static_cast<uint32_t>(meshIndices.size());
     mesh.textureId = textureId;
     //temporary solution for now
     Model::ModelInfo info{meshVertices, {}, uint32_t(meshIndices.size()), meshIndices};
-    mesh.model = std::make_shared<Model>(info);
+    auto model = std::make_shared<Model>(info);
+    uint32_t meshId;
+    Resource::ResourceManager::GetCurrent()->AppendModel(model, meshId);
+    
+    meshletIndexCount += uint32_t(model->meshletIndexCount);
+    meshletVertexCount += uint32_t(model->meshletVertexCount);
+    modelMap.emplace(meshId, uint32_t(uniqueModels.size()));
+    mesh.modelID = uint32_t(uniqueModels.size());
+    uniqueModels.push_back({uint32_t(vertexCount), uint32_t(indexCount), meshletCount, model});
+    meshletCount += uint32_t(model->meshlets.size());
     vertexCount += mesh.vertexCount;
     indexCount += mesh.indexCount;
-    meshletIndexCount += uint32_t(mesh.model->meshletIndexCount);
-    meshletVertexCount += uint32_t(mesh.model->meshletVertexCount);
-    meshletCount += uint32_t(mesh.model->meshlets.size());
-    uniqueMeshlets.push_back(&mesh.model->meshlets);
-
     auto& textureMap = Resource::ResourceManager::GetCurrent()->TextureMap;
     auto& texture = textureMap.at(mesh.textureId);
     if (textureIdMap.find(mesh.textureId) == textureIdMap.end())
@@ -255,22 +280,29 @@ void Scene::Draw(CommandBuffer& commandBuffer)
 void Scene::DrawIndirect(CommandBuffer& commandBuffer)
 {
     if (aDevice->MeshShaderSupport())
+    {
         aDevice->vkCmdDrawMeshTasksIndirectCountEXT(commandBuffer, drawMeshIndirectBuffer.GetBuffer(), 0,
             countBuffer.GetBuffer(),
             0, 1, sizeof(VkDrawMeshTasksIndirectCommandEXT));
+    }
     else
         vkCmdDrawIndexedIndirectCount(commandBuffer, drawIndexedIndirectBuffer.GetBuffer(),
             0, countBuffer.GetBuffer(),
             0, 1, sizeof(VkDrawIndexedIndirectCommand));
 }
 
-void Scene::CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer)
+void Scene::CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer, Buffer* newObjectBuffer)
 {
     auto bufferVertices = static_cast<Model::Vertex*>(newVertBuffer->GetMappedData());
     auto bufferIndices = static_cast<Model::Index*>(newIndexBuffer->GetMappedData());
+    auto bufferObjects = static_cast<Object*>(newObjectBuffer->GetMappedData());
 
-    Range updateRange = {0, static_cast<uint32_t>(meshes.size())};
+    Range updateRange = {0, static_cast<uint32_t>(uniqueModels.size())};
     applyVertexBufferUpdate(bufferVertices, bufferIndices, updateRange);
+    for (size_t i = 0; i < meshes.size(); i++)
+    {
+        bufferObjects[i].transform = meshes[i].transform.mat4();
+    }
 }
 
 void Scene::CommitBufferUpdate()
@@ -326,19 +358,23 @@ void Scene::UpdateMeshlets()
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         meshletCullingBuffers[nextIndex].Map();
     }
+    if (meshletIDs.size() * sizeof(MeshletID) > meshletIDBuffers[nextIndex].GetSize())
+    {
+        meshletIDBuffers[nextIndex] = Buffer(aDevice, meshletIDs.size() * sizeof(MeshletID),
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        meshletIDBuffers[nextIndex].Map();
+    }
     uint32_t bufferId = 0;
     uint32_t* buffer = static_cast<uint32_t*>(meshletBuffers[nextIndex].GetMappedData());
     BoundingSphere* cullingBuffer = static_cast<BoundingSphere*>(meshletCullingBuffers[nextIndex].GetMappedData());
     uint32_t vertexOffset = 0, primitiveOffset = 0;
     if (!meshletCount)
         buffer[0] = 0;
-    glm::vec3 t;
-    float len;
-    for (size_t j = 0, i = 0; j < meshes.size(); j++)
+    for (size_t j = 0, i = 0; j < uniqueModels.size(); j++)
     {
-        auto& mesh = meshes[j];
-        auto& meshlets = mesh.model->meshlets;
-        auto model = mesh.transform.mat4();
+        auto& model = uniqueModels[j];
+        auto& meshlets = model.model->meshlets;
         for (auto& meshlet : meshlets)
         {
             buffer[bufferId++] = vertexOffset + primitiveOffset + static_cast<uint32_t>(i << 1) + static_cast<uint32_t>(meshletCount);
@@ -347,29 +383,24 @@ void Scene::UpdateMeshlets()
             if (meshlet.indexCount & 3)
                 primitiveOffset++;
 
-            t = model * glm::vec4(meshlet.center, 1.0f);
-            cullingBuffer[i].center = t;
-            cullingBuffer[i].radius = glm::distance(t, 
-                glm::vec3(model * glm::vec4(mesh.model->info.vertices[meshlet.vertices[meshlet.farVertexID]].position, 1.0f)));
-            t = glm::mat3(model) * meshlet.normal;
-            len = glm::length(t);
-
-            cullingBuffer[i].normal = len == 0. ? glm::vec3(1.f, 0.f, 0.f) : t / len;
-            cullingBuffer[i].coneApex = model * glm::vec4(meshlet.coneApex, 1.0f);
+            cullingBuffer[i].center = meshlet.center;
+            cullingBuffer[i].farVertexID = meshlet.farVertexID;
+            cullingBuffer[i].normal = meshlet.normal;
+            cullingBuffer[i].coneApex = meshlet.coneApex;
             cullingBuffer[i].cutoff = meshlet.cutoff;
             ++i;
         }
     }
-    for (auto& mesh : meshes)
+    for (auto& model : uniqueModels)
     {
-        auto& meshlets = mesh.model->meshlets;
+        auto& meshlets = model.model->meshlets;
         for (auto& meshlet : meshlets)
         {
             buffer[bufferId++] = meshlet.vertexCount;
             buffer[bufferId++] = meshlet.indexCount / 3;
 
             for (uint32_t i = 0; i < meshlet.vertexCount; i++)
-                buffer[bufferId++] = meshlet.vertices[i] + mesh.vertexOffset;
+                buffer[bufferId++] = meshlet.vertices[i] + model.vertexOffset;
             auto indexBuffer = reinterpret_cast<uint8_t*>(&buffer[bufferId]);
             for (uint32_t i = 0; i < meshlet.indexCount; i++)
             {
@@ -380,9 +411,10 @@ void Scene::UpdateMeshlets()
                 bufferId++;
         }
     }
-
+    memcpy(meshletIDBuffers[nextIndex].GetMappedData(), meshletIDs.data(), meshletIDs.size() * sizeof(MeshletID));
+    *static_cast<uint32_t*>(meshletIDCountBuffers[nextIndex].GetMappedData()) = uint32_t(meshletIDs.size());
     auto drawMeshTaskCommand = static_cast<glm::uvec3*>(drawMeshIndirectBuffer.GetMappedData());
-    uint32_t numofGroup = (static_cast<uint32_t>(meshletCount) + numOfGroup - 1) / numOfGroup;
+    uint32_t numofGroup = (static_cast<uint32_t>(meshletIDs.size()) + numOfGroup - 1) / numOfGroup;
     glm::uvec3 groupSize;
     groupSize.x = numofGroup;
     groupSize.y = 1;
@@ -392,15 +424,14 @@ void Scene::UpdateMeshlets()
     //meshletBuffers[nextIndex].Flush();
 }
 
-void Scene::UpdateVertexPositions(Mesh& mesh)
+void Scene::UpdateVertexPositions(UniqueModel& model)
 {
     auto vertexBufferData = static_cast<Model::Vertex*>(vertexBuffers[currentBufferIndex].GetMappedData());
-    glm::mat3 model = mesh.transform.mat3();
-    for (size_t i = 0; i < mesh.vertexCount; i++)
+    for (size_t i = 0; i < model.model->info.vertices.size(); i++)
     {
-        auto& vertex = vertexBufferData[mesh.vertexOffset + i];
-        auto& meshVertex = mesh.model->info.vertices[i];
-        vertex.position = model * meshVertex.position + mesh.transform.translation;
+        auto& vertex = vertexBufferData[model.vertexOffset + i];
+        auto& meshVertex = model.model->info.vertices[i];
+        vertex.position = meshVertex.position;
     }
 }
 
@@ -409,13 +440,12 @@ void Scene::UpdateVertexPositions(Range updateRange)
     auto vertexBufferData = static_cast<Model::Vertex*>(vertexBuffers[currentBufferIndex].GetMappedData());
     for (uint32_t i = 0; i < updateRange.y; i++)
     {
-        auto& mesh = meshes[updateRange.x + i];
-        glm::mat3 model = mesh.transform.mat3();
-        for (size_t j = 0; i < mesh.vertexCount; j++)
+        auto& model = uniqueModels[updateRange.x + i];
+        for (size_t j = 0; i < model.model->info.vertices.size(); j++)
         {
-            auto& vertex = vertexBufferData[mesh.vertexOffset + j];
-            auto& meshVertex = mesh.model->info.vertices[j];
-            vertex.position = model * meshVertex.position + mesh.transform.translation;
+            auto& vertex = vertexBufferData[model.vertexOffset + j];
+            auto& meshVertex = model.model->info.vertices[j];
+            vertex.position = meshVertex.position;
         }
     }
 }
@@ -424,20 +454,14 @@ void Scene::applyVertexBufferUpdate(Model::Vertex* vertexBufferData, Model::Inde
 {
     for (uint32_t i = 0; i < updateRange.y; i++)
     {
-        auto& mesh = meshes[i + updateRange.x];
-        glm::mat3 model = mesh.transform.mat3();
-        for (uint32_t j = 0; j < mesh.vertexCount; j++)
+        auto& model = uniqueModels[i + updateRange.x];
+        for (uint32_t j = 0; j < uint32_t(model.model->info.vertices.size()); j++)
         {
-            auto& vertex = vertexBufferData[mesh.vertexOffset + j];
-            auto& meshVertex = mesh.model->info.vertices[j];
-            vertex.position = model * meshVertex.position + mesh.transform.translation;
-            vertex.normal = meshVertex.normal;
-            vertex.uv = meshVertex.uv;
-            vertex.textureId = textureIdMap.at(mesh.textureId);
+            vertexBufferData[model.vertexOffset + j] = model.model->info.vertices[j];
         }
-        for (uint32_t j = 0; j < mesh.indexCount; j++)
+        for (uint32_t j = 0; j < uint32_t(model.model->info.indices.size()); j++)
         {
-            indexBufferData[mesh.indexOffset + j] = mesh.model->info.indices[j] + mesh.vertexOffset;
+            indexBufferData[model.indexOffset + j] = model.model->info.indices[j] + model.vertexOffset;
         }
     }
     vertexBuffers[nextIndex].Flush();
@@ -475,7 +499,7 @@ void Scene::createSSBODescriptor()
     auto& vertexDescriptorSetLayout =
         shaders.front().GetDescriptors()[DEFAULT_VERTEX_LAYOUT].GetLayout();
     vertexDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,
-        MaxBatchSize,
+        MaxBatchSize * 2,
         2,
         vertexDescriptorSetLayout,
         VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
@@ -483,34 +507,57 @@ void Scene::createSSBODescriptor()
     {
         auto& meshDescriptorSetLayout = shaders.back().GetDescriptors()[DEFAULT_MESHLET_LAYOUT].GetLayout();
         meshDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,
-            MaxBatchSize * 2,
-            2,
+            MaxBatchSize * 3 + 1,
+            4,
             meshDescriptorSetLayout,
             VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+        for (size_t i = 0; i < meshletIDCountBuffers.size(); i++)
+        {
+            VkDescriptorBufferInfo bufferInfo;
+            bufferInfo.buffer = meshletIDCountBuffers[i].GetBuffer();
+            bufferInfo.offset = 0;
+            bufferInfo.range = meshletIDCountBuffers[i].GetSize();
+            aDevice->UpdateDescriptorSet(bufferInfo, 3, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                    meshDescriptor->GetSets()[i]);
+        }
     }
 }
 
 void Scene::updateSSBODescriptor()
 {
+    //Vertex Buffer
     VkDescriptorBufferInfo bufferInfo;
     bufferInfo.buffer = vertexBuffers[nextIndex].GetBuffer();
     bufferInfo.offset = 0;
     bufferInfo.range = vertexBuffers[nextIndex].GetSize();
     aDevice->UpdateDescriptorSet(bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
         vertexDescriptor->GetSets()[nextIndex]);
+    //Object Buffer
+    bufferInfo.buffer = objectBuffers[nextIndex].GetBuffer();
+    bufferInfo.offset = 0;
+    bufferInfo.range = objectBuffers[nextIndex].GetSize();
+    aDevice->UpdateDescriptorSet(bufferInfo, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+        vertexDescriptor->GetSets()[nextIndex]);
     if (aDevice->MeshShaderSupport())
     {
+        //Meshlet Buffer
         bufferInfo.buffer = meshletBuffers[nextIndex].GetBuffer();
         bufferInfo.offset = 0;
         bufferInfo.range = meshletBuffers[nextIndex].GetSize();
         aDevice->UpdateDescriptorSet(bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-
+        //Meshlet Boundings Buffer
         meshDescriptor->GetSets()[nextIndex]);
         bufferInfo.buffer = meshletCullingBuffers[nextIndex].GetBuffer();
         bufferInfo.offset = 0;
         bufferInfo.range = meshletCullingBuffers[nextIndex].GetSize();
         aDevice->UpdateDescriptorSet(bufferInfo, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                 meshDescriptor->GetSets()[nextIndex]);
+        //Meshlet ID Buffer
+        bufferInfo.buffer = meshletIDBuffers[nextIndex].GetBuffer();
+        bufferInfo.offset = 0;
+        bufferInfo.range = meshletIDBuffers[nextIndex].GetSize();
+        aDevice->UpdateDescriptorSet(bufferInfo, 2, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                meshDescriptor->GetSets()[nextIndex]);  
     }
     currentBufferIndex = nextIndex;
     nextIndex = NextFrameIndex(currentBufferIndex);
@@ -564,7 +611,13 @@ void Scene::updateAll()
             VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         indexBuffers[nextIndex].Map();
     }
-    CommitBufferUpdate(&vertexBuffers[nextIndex], &indexBuffers[nextIndex]);
+    if (meshes.size() * sizeof(Object) > objectBuffers[nextIndex].GetSize())
+    {
+        objectBuffers[nextIndex] = Buffer(aDevice, (meshes.size() + 1000) * sizeof(Object),
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        objectBuffers[nextIndex].Map();
+    }
+    CommitBufferUpdate(&vertexBuffers[nextIndex], &indexBuffers[nextIndex], &objectBuffers[nextIndex]);
     UpdateMeshlets();
 
     updateSSBODescriptor();

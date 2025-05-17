@@ -15,22 +15,26 @@ namespace AnA
         AnA::Transform transform;
         uint32_t vertexCount;
         uint32_t indexCount;
+        uint32_t textureId{};
+        uint32_t modelID;
+    };
+    struct UniqueModel
+    {
         uint32_t vertexOffset;
         uint32_t indexOffset;
-        uint32_t textureId{};
+        uint32_t meshletOffset;
         std::shared_ptr<Model> model;
     };
-    struct Meshlet
+
+    struct Object
     {
-        uint32_t vertices[64];
-        uint8_t indices[124 * 3];
-        uint32_t indexCount;
-        uint32_t vertexCount;
-        glm::vec3 center;
-        glm::vec3 normal;
-        glm::vec3 coneApex;
-        float cutoff;
-        float radius;
+        glm::mat4 transform;
+    };
+
+    struct MeshletID
+    {
+        uint32_t meshletID;
+        uint32_t objectID;
     };
 
     struct MeshInfo
@@ -49,7 +53,7 @@ namespace AnA
     struct BoundingSphere
     {
         glm::vec3 center;
-        float radius;
+        uint32_t farVertexID;
         glm::vec3 normal;
         float cutoff;
         glm::vec3 coneApex;
@@ -83,12 +87,12 @@ namespace AnA
         {
             commandBufferNeedUpdate = false;
         }
-        void CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer);
+        void CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer, Buffer* newObjectBuffer);
         void CommitBufferUpdate();
         void Update() override;
         void UpdateBuffers(Range updateRange);
         void UpdateMeshlets();
-        void UpdateVertexPositions(Mesh& mesh);
+        void UpdateVertexPositions(UniqueModel& model);
         void UpdateVertexPositions(Range updateRange);
 
         Mesh& At(size_t index)
@@ -135,6 +139,7 @@ namespace AnA
     private:
         Device* aDevice;
         std::vector<Buffer> vertexBuffers{};
+        std::vector<Buffer> objectBuffers{};
         size_t vertexCount = 0;
         std::vector<Buffer> indexBuffers{};
         size_t indexCount = 0;
@@ -159,7 +164,11 @@ namespace AnA
         uint32_t meshletVertexCount = 0;
         uint32_t meshletIndexCount = 0;
         uint32_t meshletCount = 0;
-        std::vector<std::vector<Model::Meshlet>*> uniqueMeshlets{};
+        std::unordered_map<uint32_t, uint32_t> modelMap{};
+        std::vector<UniqueModel> uniqueModels{};
+        std::vector<MeshletID> meshletIDs{};
+        std::vector<Buffer> meshletIDCountBuffers{};
+        std::vector<Buffer> meshletIDBuffers{};
         std::vector<Buffer> meshletBuffers{};
         std::vector<Buffer> meshletCullingBuffers{};
         uint32_t numOfGroup = 64;

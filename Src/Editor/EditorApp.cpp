@@ -84,6 +84,7 @@ void EditorApp::loadModelButton_Click(void* , PointerEventArgs& )
 
 void EditorApp::saveSceneButton_Click(void* , PointerEventArgs& )
 {
+    /* Fix this later
     FileDialog fileDialog{"--save"};
     auto path = fileDialog.Run();
     if(path.empty())
@@ -103,7 +104,7 @@ void EditorApp::saveSceneButton_Click(void* , PointerEventArgs& )
         fwrite((const void*)&info, sizeof(MeshInfo), 1, f);
     }
 
-    fclose(f);
+    fclose(f);*/
 }
 
 void EditorApp::exitButton_Click(void* , PointerEventArgs& )

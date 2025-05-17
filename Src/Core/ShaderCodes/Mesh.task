@@ -4,6 +4,29 @@
 
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
+struct Vertex
+{
+    vec3 position;
+    vec3 normal;
+    vec2 uv;
+    uint texIndex;
+};
+
+layout(std430, set = 0, binding = 0) buffer VertexSSBO
+{
+    Vertex vertices[];
+} vsbo;
+
+struct Object
+{
+    mat4 transform;
+};
+
+layout(std430, set = 0, binding = 1) buffer ObjectSSBO
+{
+    Object objects[];
+};
+
 layout(set = 1, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
@@ -24,7 +47,7 @@ layout(std430, set = 6, binding = 0) buffer meshletSSBO
 struct BoundingSphere
 {
     vec3 center;
-    float radius;
+    uint farVertexID;
     vec3 normal;
     float cutoff;
     vec3 coneApex;
@@ -35,6 +58,22 @@ layout(std430, set = 6, binding = 1) buffer meshletCullingSSBO
 {
     BoundingSphere boundings[];
 } mcsbo;
+
+struct MeshletID
+{
+    uint meshletID;
+    uint objectID;
+};
+
+layout(std430, set = 6, binding = 2) buffer meshletIDSSBO
+{
+    MeshletID meshletIDs[];
+};
+
+layout(std430, set = 6, binding = 3) buffer MeshletIDCountSSBO
+{
+	uint meshletIDCount;
+};
 
 taskPayloadSharedEXT struct {
     uint visibleIndices[512]; // max 512 visible meshlets per group
@@ -60,15 +99,26 @@ bool isMeshletFacingCamera(vec3 coneApex, vec3 coneAxis, float cutoff)
 
 bool isMeshletVisible(uint meshletId)
 {
-    BoundingSphere boundingSphere = mcsbo.boundings[meshletId];
-    return  isSphereInsideFrustum(boundingSphere.center, boundingSphere.radius) && 
-            isMeshletFacingCamera(boundingSphere.coneApex, boundingSphere.normal, boundingSphere.cutoff);
+    MeshletID mid = meshletIDs[meshletId];
+    BoundingSphere boundingSphere = mcsbo.boundings[mid.meshletID];
+    uint vertexOffset = msbo.meshlets[mid.meshletID] + 3;
+    mat4 transform = objects[mid.objectID].transform;
+    vec3 center = (transform * vec4(boundingSphere.center, 1.0)).xyz;
+    float radius = distance(center, 
+        vec3(transform * vec4(vsbo.vertices[msbo.meshlets[vertexOffset + boundingSphere.farVertexID]].position, 1.0)));
+    vec3 normal = mat3(transform) * boundingSphere.normal;
+    float len = length(normal);
+    if (len != 0.)
+        normal /= len;
+    vec3 coneApex = (transform * vec4(boundingSphere.coneApex, 1.0)).xyz;
+    return  isSphereInsideFrustum(center, radius) && 
+            isMeshletFacingCamera(coneApex, normal, boundingSphere.cutoff);
 }
 
 void main()
 {
     uint globalID = gl_GlobalInvocationID.x;
-    if (globalID >= msbo.meshlets[0])
+    if (globalID >= meshletIDCount)
         return;
     bool visible = isMeshletVisible(globalID);
     

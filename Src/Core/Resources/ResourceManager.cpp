@@ -177,13 +177,22 @@ void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Desc
     descriptorSetConfigs.resize(DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT);
     for (auto& configs : descriptorSetConfigs)
         configs.resize(1);
+    descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT].resize(2);
     auto pConfig = &descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT][0];
     pConfig->binding = 0;
     pConfig->descriptorCount = 0;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     if (aDevice->MeshShaderSupport())
-        pConfig->stageFlags |= VK_SHADER_STAGE_MESH_BIT_EXT;
+        pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+
+    pConfig = &descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT][1];
+    pConfig->binding = 1;
+    pConfig->descriptorCount = 0;
+    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    if (aDevice->MeshShaderSupport())
+        pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
 
     pConfig = &descriptorSetConfigs[DEFAULT_UBO_LAYOUT][0];
     pConfig->binding = 0;
@@ -233,13 +242,18 @@ void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Desc
         meshletCullingConfig.descriptorCount = 0;
         meshletCullingConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         meshletCullingConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT;
-        Descriptor::DescriptorConfig outputConfig{};
-        outputConfig.binding = 2;
-        outputConfig.descriptorCount = 0;
-        outputConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-        outputConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT;
+        Descriptor::DescriptorConfig meshletIDConfig{};
+        meshletIDConfig.binding = 2;
+        meshletIDConfig.descriptorCount = 0;
+        meshletIDConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        meshletIDConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+        Descriptor::DescriptorConfig meshletIDCountConfig{};
+        meshletIDCountConfig.binding = 3;
+        meshletIDCountConfig.descriptorCount = 0;
+        meshletIDCountConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        meshletIDCountConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
 
-        descriptorSetConfigs.push_back({meshletConfig, meshletCullingConfig, outputConfig});
+        descriptorSetConfigs.push_back({meshletConfig, meshletCullingConfig, meshletIDConfig, meshletIDCountConfig});
     }
 }
 
@@ -275,6 +289,12 @@ bool ResourceManager::CreateModel(const char* filePath, uint32_t& id)
     ModelMap.emplace(modelId++, model);
 
     return true;
+}
+
+void ResourceManager::AppendModel(std::shared_ptr<Model> model, uint32_t& id)
+{
+    id = modelId;
+    ModelMap.emplace(modelId++, model);
 }
 
 void ResourceManager::createMainCameraBuffers()
@@ -327,7 +347,7 @@ void ResourceManager::createDefaultShaders()
     {
         Shaders.emplace_back(aDevice, Terrain_task, Terrain_mesh, Mesh_frag, renderPass, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(TerrainPushConstants));
         Shaders.emplace_back(aDevice, Mesh_task, Mesh_mesh, Mesh_frag, renderPass
-            , defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0, 0);
+            , defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(uint32_t));
     }
 }
 

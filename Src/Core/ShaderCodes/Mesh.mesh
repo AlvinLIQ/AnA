@@ -27,6 +27,16 @@ layout(std430, set = 0, binding = 0) buffer VertexSSBO
     Vertex vertices[];
 } vsbo;
 
+struct Object
+{
+    mat4 transform;
+};
+
+layout(std430, set = 0, binding = 1) buffer ObjectSSBO
+{
+    Object objects[];
+};
+
 layout(set = 1, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
@@ -56,6 +66,17 @@ layout(std430, set = 6, binding = 0) buffer meshletSSBO
     uint meshlets[];
 } msbo;
 
+struct MeshletID
+{
+    uint meshletID;
+    uint objectID;
+};
+
+layout(std430, set = 6, binding = 2) buffer meshletIDSSBO
+{
+    MeshletID meshletIDs[];
+};
+
 const uint bytesToBits[4] = {0u, 8u, 16u, 24u};
 const uint bytesMask[4] = {0xFFFFFFu, 0xFFFFFFu, 0xFFFF00u, 0xFF0000u};
 const uint rQBytesToBits[4] = {0u, 8u, 8u, 8u};
@@ -68,7 +89,8 @@ taskPayloadSharedEXT struct {
 
 void main()
 {
-	uint iid = msbo.meshlets[taskData.visibleIndices[gl_WorkGroupID.x]];
+    MeshletID mid = meshletIDs[taskData.visibleIndices[gl_WorkGroupID.x]];
+	uint iid = msbo.meshlets[mid.meshletID];
     uint vertexCount = msbo.meshlets[iid++];
     uint primitiveCount = msbo.meshlets[iid++];
     SetMeshOutputsEXT(vertexCount, primitiveCount);
@@ -78,7 +100,7 @@ void main()
     for (uint i = 0; i < vertexCount; i++)
     {
         Vertex vertex = vsbo.vertices[msbo.meshlets[iid + i]];
-        vec4 vertexPos = vec4(vertex.position, 1.0);
+        vec4 vertexPos = objects[mid.objectID].transform * vec4(vertex.position, 1.0);
         vec4 viewPos = cbo.view * vertexPos;
         gl_MeshVerticesEXT[i].gl_Position = viewProj * vertexPos;
         vertexOutput[i].texCoord = vertex.uv;
