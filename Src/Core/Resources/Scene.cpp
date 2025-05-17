@@ -299,9 +299,12 @@ void Scene::CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer, Bu
 
     Range updateRange = {0, static_cast<uint32_t>(uniqueModels.size())};
     applyVertexBufferUpdate(bufferVertices, bufferIndices, updateRange);
+    glm::mat4 transform;
     for (size_t i = 0; i < meshes.size(); i++)
     {
-        bufferObjects[i].transform = meshes[i].transform.mat4();
+        transform = meshes[i].transform.mat4();
+        transform[3].w = float(meshes[i].textureId);
+        bufferObjects[i].transform = transform;
     }
 }
 

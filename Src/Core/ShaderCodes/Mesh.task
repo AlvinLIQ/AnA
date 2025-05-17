@@ -103,6 +103,7 @@ bool isMeshletVisible(uint meshletId)
     BoundingSphere boundingSphere = mcsbo.boundings[mid.meshletID];
     uint vertexOffset = msbo.meshlets[mid.meshletID] + 3;
     mat4 transform = objects[mid.objectID].transform;
+    transform[3].w = 1.0;
     vec3 center = (transform * vec4(boundingSphere.center, 1.0)).xyz;
     float radius = distance(center, 
         vec3(transform * vec4(vsbo.vertices[msbo.meshlets[vertexOffset + boundingSphere.farVertexID]].position, 1.0)));
