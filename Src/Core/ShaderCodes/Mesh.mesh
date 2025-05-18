@@ -1,5 +1,9 @@
 #version 460
 #extension GL_EXT_mesh_shader: require
+#extension GL_EXT_scalar_block_layout: enable
+#extension GL_GOOGLE_include_directive : require
+
+#include "mesh.h"
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 layout(triangles, max_vertices = 64, max_primitives = 124) out;
@@ -14,9 +18,9 @@ struct VertexOutput {
 
 layout(location = 0) out VertexOutput vertexOutput[];
 
-layout(std430, set = 0, binding = 0) buffer VertexSSBO
+layout(scalar, set = 0, binding = 0) buffer VertexSSBO
 {
-    float vertices[];
+    Vertex vertices[];
 };
 
 struct Object
@@ -95,13 +99,13 @@ void main()
     
     for (uint i = 0, vertexOffset; i < vertexCount; i++)
     {
-        vertexOffset = msbo.meshlets[iid + i] * 8;
-        vec4 vertexPos = transform * vec4(vertices[vertexOffset + 0], vertices[vertexOffset + 1], vertices[vertexOffset + 2], 1.0);
+        Vertex vertex = vertices[msbo.meshlets[iid + i]];
+        vec4 vertexPos = transform * vec4(vertex.position, 1.0);
         vec4 viewPos = cbo.view * vertexPos;
         gl_MeshVerticesEXT[i].gl_Position = viewProj * vertexPos;
-        vertexOutput[i].texCoord = vec2(vertices[vertexOffset + 6], vertices[vertexOffset + 7]);
+        vertexOutput[i].texCoord = vertex.uv;
         vertexOutput[i].texID = texID;
-        vertexOutput[i].normalSpace = vec3(vertices[vertexOffset + 3], vertices[vertexOffset + 4], vertices[vertexOffset + 5]);
+        vertexOutput[i].normalSpace = vertex.normal;
         vertexOutput[i].vertexPosition = vertexPos.xyz;
         vertexOutput[i].viewPosZ = viewPos.z / viewPos.w + zOffset;
     }

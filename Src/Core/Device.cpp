@@ -935,6 +935,7 @@ void Device::createLogicalDevice()
     vulkan12Features.descriptorBindingSampledImageUpdateAfterBind = VK_TRUE;
     vulkan12Features.runtimeDescriptorArray = VK_TRUE;
     vulkan12Features.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
+    vulkan12Features.scalarBlockLayout = VK_TRUE;
     vulkan12Features.pNext = &dynamicState3Features;
 
     VkPhysicalDeviceNestedCommandBufferFeaturesEXT nestedCommandBufferFeatures{};

@@ -22,18 +22,6 @@ struct VertexOutput {
 
 layout(location = 0) out VertexOutput vertexOutput[];
 
-struct Vertex
-{
-    vec3 position;
-    vec3 normal;
-    vec2 uv;
-};
-
-layout(std430, set = 0, binding = 0) buffer VertexSSBO
-{
-    Vertex vertices[];
-} vsbo;
-
 layout(set = 1, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;

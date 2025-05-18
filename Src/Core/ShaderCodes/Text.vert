@@ -1,4 +1,5 @@
 #version 460
+#extension GL_EXT_scalar_block_layout: enable
 
 layout(location = 0) out vec3 fragColor;
 
@@ -6,7 +7,7 @@ struct Vertex{
     vec2 position;
 };
 
-layout(std140, set = 0, binding = 0) buffer VertexBufferObject {
+layout(scalar, set = 0, binding = 0) buffer VertexBufferObject {
     Vertex vertices[];
 };
 

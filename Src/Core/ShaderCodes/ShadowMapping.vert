@@ -1,13 +1,10 @@
 #version 460
+#extension GL_EXT_scalar_block_layout: enable
+#extension GL_GOOGLE_include_directive : require
 
-struct Vertex
-{
-    vec3 position;
-    vec3 normal;
-    vec2 uv;
-};
+#include "mesh.h"
 
-layout(std430, set = 0, binding = 0) buffer VertexSSBO
+layout(scalar, set = 0, binding = 0) buffer VertexSSBO
 {
     Vertex vertices[];
 } ssbo;
