@@ -1,6 +1,5 @@
-#version 460
-#extension GL_EXT_mesh_shader : require
-#extension GL_KHR_shader_subgroup_ballot : require
+#version 450
+#extension GL_EXT_mesh_shader: require
 #extension GL_EXT_scalar_block_layout: enable
 #extension GL_GOOGLE_include_directive : require
 
@@ -91,7 +90,7 @@ bool isMeshletVisible(uint meshletId)
         normal /= len;
     vec3 coneApex = (transform * vec4(boundingSphere.coneApex, 1.0)).xyz;
     return  isSphereInsideFrustum(center, radius, frustum.planes) &&
-            isMeshletFacingCamera(cbo.position.xyz, coneApex, normal, boundingSphere.cutoff);
+            isMeshletFacingCamera(lbo.position.xyz, coneApex, normal, boundingSphere.cutoff);
 }
 
 void main()
