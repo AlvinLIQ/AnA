@@ -121,11 +121,11 @@ void App::Run()
 
         if (prevSecond >= 1.0f)
         {
-            auto terrainSize = std::to_string(uint32_t((terrainPushConstants.density + 0.1f) * 320.0f * 64.0f));
             auto info = std::to_string(static_cast<int>(frameCount.As<float>() / prevSecond)) +
                 " CPU Time: " + std::to_string(cpuTimeBeforeRecord * 1000.0f) + "ms GPU Time:" +
-                std::to_string(aRenderer.GetGPUTime()) + "ms Record Time:" + std::to_string((cpuTime - cpuTimeBeforeRecord) * 1000.0f) + "ms Terrain Size:" +
-                terrainSize + "x" + terrainSize;
+                std::to_string(aRenderer.GetGPUTime()) + "ms Record Time:" + 
+                std::to_string((cpuTime - cpuTimeBeforeRecord) * 1000.0f) + "ms Window Size:" +
+                std::to_string(aWindow.Width) + "x" + std::to_string(aWindow.Height);
             title.Copy(info.c_str(), info.length(), sizeof(cTitle) - 1);
             glfwSetWindowTitle(aWindow.GetGLFWwindow(), title.Str());
             prevSecond = 0.0f;
