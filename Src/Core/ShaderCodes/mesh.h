@@ -1,3 +1,8 @@
+const uint bytesToBits[4] = {0u, 8u, 16u, 24u};
+const uint bytesMask[4] = {0xFFFFFFu, 0xFFFFFFu, 0xFFFF00u, 0xFF0000u};
+const uint rQBytesToBits[4] = {0u, 8u, 8u, 8u};
+const uint rQBytesMask[4] = {0x0u, 0x0u, 0xFFu, 0xFFFFu};
+
 struct Vertex
 {
     vec3 position;

@@ -136,12 +136,7 @@ void ShadowMap::GetUBODescriptorConfig(Descriptor::DescriptorConfig* pConfig)
 void ShadowMap::createShadowResources()
 {
     images.resize(MAX_FRAMES_IN_FLIGHT);
-	cascades.resize(SHADOW_MAP_CASCADE_COUNT);
-    for (auto& cascade : cascades)
-    {
-        cascade.imageViews.resize(images.size());
-        cascade.framebuffers.resize(images.size());
-    }
+    framebuffers.resize(images.size());
 	cascadeBuffers.reserve(images.size());
     descriptorImageInfos.resize(images.size());
     bool samplersNotCreated = samplers.empty();
@@ -175,31 +170,20 @@ void ShadowMap::createShadowResources()
         imageViewInfo.subresourceRange = { VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, SHADOW_MAP_CASCADE_COUNT };
 
         vkCreateImageView(aDevice->GetLogicalDevice(), &imageViewInfo, nullptr, &shadowImage.imageView);
-        for (uint32_t j = 0; j < cascades.size(); j++)
-        {
-            auto& cascade = cascades[j];
-            VkImageViewCreateInfo viewInfo{};
-            viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-			viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY;
-			viewInfo.format = swapChain->GetDepthFormat();
-			viewInfo.subresourceRange = { VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, j, 1 };
-			viewInfo.image = shadowImage.image;
-			vkCreateImageView(aDevice->GetLogicalDevice(), &viewInfo, nullptr, &cascade.imageViews[i]);
+        VkFramebufferCreateInfo framebufferInfo{};
+        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebufferInfo.renderPass = SwapChain::GetCurrent()->GetOffscreenRenderPass();
+        framebufferInfo.attachmentCount = 1;
+        framebufferInfo.pAttachments = &shadowImage.imageView;
 
-            VkFramebufferCreateInfo framebufferInfo{};
-            framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-            framebufferInfo.renderPass = SwapChain::GetCurrent()->GetOffscreenRenderPass();
-            framebufferInfo.attachmentCount = 1;
-            framebufferInfo.pAttachments = &cascade.imageViews[i];
+        framebufferInfo.width = imageInfo.extent.width;
+        framebufferInfo.height = imageInfo.extent.height;
+        framebufferInfo.layers = SHADOW_MAP_CASCADE_COUNT;
+        vkCreateFramebuffer(aDevice->GetLogicalDevice(), &framebufferInfo, nullptr, &framebuffers[i]);
 
-            framebufferInfo.width = imageInfo.extent.width;
-            framebufferInfo.height = imageInfo.extent.height;
-            framebufferInfo.layers = 1;
-            vkCreateFramebuffer(aDevice->GetLogicalDevice(), &framebufferInfo, nullptr, &cascade.framebuffers[i]);
-        }
         if (samplersNotCreated)
             aDevice->CreateSampler(&samplers[i], VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE);
-		cascadeBuffers.emplace_back(aDevice, cascades.size() * sizeof(CascadeBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		cascadeBuffers.emplace_back(aDevice, SHADOW_MAP_CASCADE_COUNT * sizeof(CascadeBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 		VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
 		cascadeBuffers[i].Map();
 
@@ -213,8 +197,8 @@ void ShadowMap::cleanupShadowResources()
 {
     for (auto& sampler : samplers)
         vkDestroySampler(aDevice->GetLogicalDevice(), sampler, nullptr);
-    for (auto& cascade : cascades)
-        cascade.cleanup(aDevice->GetLogicalDevice());
+    for (auto& framebuffer : framebuffers)
+        vkDestroyFramebuffer(aDevice->GetLogicalDevice(), framebuffer, nullptr);
     for (auto& shadowImage : images)
         shadowImage.cleanup(aDevice);
 }

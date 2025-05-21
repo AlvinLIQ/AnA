@@ -48,7 +48,6 @@ namespace AnA
             ~ResourceManager();
 
             static ResourceManager* GetCurrent();
-            std::vector<Cascade>& GetCascades();
 
             static void GetBufferInfos(std::vector<Buffer>& buffers, std::vector<VkDescriptorBufferInfo>& bufferInfos);
             static void GetBufferInfos(Buffer* buffers, uint32_t bufferSize, std::vector<VkDescriptorBufferInfo>& bufferInfos);

@@ -1,5 +1,6 @@
 #version 460
 #extension GL_EXT_scalar_block_layout: enable
+#extension GL_ARB_shader_viewport_layer_array: enable
 #extension GL_GOOGLE_include_directive : require
 
 #include "mesh.h"
@@ -43,4 +44,5 @@ void main()
     Vertex vertex = ssbo.vertices[gl_VertexIndex];
     vec4 vertexPos = vec4(vertex.position, 1.0);
     gl_Position = ubo.cascades[push.cascadeIndex].viewProj * vertexPos;
+    gl_Layer = cascadeIndex;
 }

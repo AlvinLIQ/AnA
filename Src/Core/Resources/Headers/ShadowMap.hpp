@@ -53,10 +53,6 @@ namespace AnA
                 return *this;
             }*/
             ~ShadowMap();
-            std::vector<Cascade>& GetCascades()
-            {
-                return cascades;
-            }
             std::vector<Image>& GetImages()
             {
                 return images;
@@ -73,6 +69,10 @@ namespace AnA
             {
                 return descriptorImageInfos;
             }
+            std::vector<VkFramebuffer>& GetFramebuffers()
+            {
+                return framebuffers;
+            }
             void UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, uint32_t bufferIndex);
             void GetUBODescriptorConfig(Descriptor::DescriptorConfig* pConfig);
         private:
@@ -80,9 +80,9 @@ namespace AnA
             float cascadeSplitLambda = 0.95f;
             std::vector<VkSampler> samplers;
             std::vector<Image> images;
-            std::vector<Cascade> cascades;
             std::vector<Buffer> cascadeBuffers;
             std::vector<VkDescriptorImageInfo> descriptorImageInfos;
+            std::vector<VkFramebuffer> framebuffers;
             void createShadowResources();
             void cleanupShadowResources();
         };

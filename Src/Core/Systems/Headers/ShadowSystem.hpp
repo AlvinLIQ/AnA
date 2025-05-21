@@ -13,7 +13,7 @@ namespace AnA
             ~ShadowSystem();
             static ShadowSystem* GetCurrent();
 
-            void RenderCascadedShadowsIndirect(CommandBuffer& commandBuffer, Renderable& renderable, Shader& shader, uint32_t& index);
+            void RenderCascadedShadowsIndirect(CommandBuffer& commandBuffer, Renderable& renderable, Shader& shader);
         private:
             //Device* aDevice;
             SwapChain* swapChain;

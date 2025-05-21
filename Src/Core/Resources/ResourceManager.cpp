@@ -59,12 +59,6 @@ ResourceManager* ResourceManager::GetCurrent()
     return _resourceManager;
 }
 
-std::vector<Cascade>& ResourceManager::GetCascades()
-{
-    return ShadowMap.GetCascades();
-    //return shadowFramebuffers;
-}
-
 void ResourceManager::GetBufferInfos(std::vector<Buffer>& buffers, std::vector<VkDescriptorBufferInfo>& bufferInfos)
 {
     bufferInfos.resize(buffers.size());
@@ -339,8 +333,8 @@ void ResourceManager::createDefaultShaders()
 
     auto offscreenRenderPass = SwapChain::GetCurrent()->GetOffscreenRenderPass();
 
-    Shaders.emplace_back(aDevice, CascadedShadowMapping_vert, offscreenRenderPass
-        , defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(uint32_t));
+    Shaders.emplace_back(aDevice, CascadedShadowMapping_task, CascadedShadowMapping_mesh, 
+        defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0, offscreenRenderPass, 0);
     Shaders.emplace_back(aDevice, Point_vert, Point_frag, renderPass, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
 
     if (aDevice->MeshShaderSupport())

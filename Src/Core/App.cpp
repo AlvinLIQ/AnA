@@ -141,7 +141,7 @@ void App::Run()
             aResourceManager.Resize();
             updateSceneOffset();
         }
-        if (aResourceManager.Shapes.NeedUpdate())
+        if (aRenderer.NeedUpdate() || aResourceManager.Shapes.NeedUpdate())
         {
             auto controlExtent = aRenderer.GetSwapChainExtent();
             controlExtent.width = static_cast<uint32_t>(actualSceneOffset.x);
@@ -246,15 +246,13 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
 {
     auto& swapChain = aRenderer.GetSwapChain();
 /*
-    for (uint32_t i = 0 ; i < SHADOW_MAP_CASCADE_COUNT; i++)
-    {
-        aRenderer.BeginOffscreenRenderPass(commandBuffer,
-            aResourceManager.ShadowMap.GetCascades()[i].framebuffers[swapChain.CurrentFrame],
-            VK_SUBPASS_CONTENTS_INLINE);
+    aRenderer.BeginOffscreenRenderPass(commandBuffer,
+        aResourceManager.ShadowMap.GetFramebuffers()[swapChain.CurrentFrame],
+        VK_SUBPASS_CONTENTS_INLINE);
 
-        aShadowSystem.RenderCascadedShadowsIndirect(commandBuffer, aResourceManager.MainScene, aResourceManager.Shaders[2], i);
-        aRenderer.EndRenderPass(commandBuffer);
-    }*/
+    aShadowSystem.RenderCascadedShadowsIndirect(commandBuffer, aResourceManager.MainScene, aResourceManager.Shaders[2]);
+    aRenderer.EndRenderPass(commandBuffer);
+*/
     aRenderer.BeginSwapChainRenderPass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE_AND_SECONDARY_COMMAND_BUFFERS_KHR);
 
     swapChain.SetViewport(commandBuffer, actualSceneOffset);
