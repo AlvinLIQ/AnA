@@ -1,5 +1,6 @@
 #version 460
 #extension GL_EXT_mesh_shader : require
+#extension GL_EXT_shader_8bit_storage: require
 #extension GL_KHR_shader_subgroup_ballot : require
 #extension GL_EXT_scalar_block_layout: enable
 #extension GL_GOOGLE_include_directive : require
@@ -35,38 +36,32 @@ layout(set = 1, binding = 1) uniform Frustum
     vec4 planes[6];
 } frustum;
 
-layout(std430, set = 6, binding = 0) buffer meshletSSBO
+layout(scalar, set = 6, binding = 0) buffer meshletSSBO
 {
-    uint meshlets[];
-} msbo;
-
-struct BoundingSphere
-{
-    vec3 center;
-    uint farVertexID;
-    vec3 normal;
-    float cutoff;
-    vec3 coneApex;
-    float shit;
+    Meshlet meshlets[];
 };
 
-layout(std430, set = 6, binding = 1) buffer meshletCullingSSBO
+layout(std430, set = 6, binding = 1) buffer meshletVertexSSBO
+{
+    uint vertices[];
+} mvsbo;
+
+layout(scalar, set = 6, binding = 2) buffer meshletIndexSSBO
+{
+    uint8_t primitives[];
+};
+
+layout(std430, set = 6, binding = 3) buffer meshletCullingSSBO
 {
     BoundingSphere boundings[];
 } mcsbo;
 
-struct MeshletID
-{
-    uint meshletID;
-    uint objectID;
-};
-
-layout(std430, set = 6, binding = 2) buffer meshletIDSSBO
+layout(scalar, set = 6, binding = 4) buffer meshletIDSSBO
 {
     MeshletID meshletIDs[];
 };
 
-layout(std430, set = 6, binding = 3) buffer MeshletIDCountSSBO
+layout(std430, set = 6, binding = 5) buffer MeshletIDCountSSBO
 {
 	uint meshletIDCount;
 };
@@ -76,15 +71,15 @@ taskPayloadSharedEXT struct {
     uint visibleCount;
 } taskData;
 
-bool isMeshletVisible(uint meshletId)
+bool isMeshletVisible(MeshletID mid)
 {
-    MeshletID mid = meshletIDs[meshletId];
+    Meshlet meshlet = meshlets[mid.meshletID];
     BoundingSphere boundingSphere = mcsbo.boundings[mid.meshletID];
     mat4 transform = objects[mid.objectID].transform;
     transform[3].w = 1.0;
     vec3 center = (transform * vec4(boundingSphere.center, 1.0)).xyz;
     float radius = distance(center,
-        vec3(transform * vec4(vertices[msbo.meshlets[msbo.meshlets[mid.meshletID] + 3 + boundingSphere.farVertexID]].position, 1.0)));
+        vec3(transform * vec4(vertices[mvsbo.vertices[meshlets[mid.meshletID].vertexOffset + mcsbo.boundings[mid.meshletID].farVertexID]].position, 1.0)));
     vec3 normal = mat3(transform) * boundingSphere.normal;
     float len = length(normal);
     if (len != 0.)
@@ -99,7 +94,7 @@ void main()
     uint globalID = gl_GlobalInvocationID.x;
     if (globalID >= meshletIDCount)
         return;
-    bool visible = isMeshletVisible(globalID);
+    bool visible = isMeshletVisible(meshletIDs[globalID]);
 
     uvec4 ballot = subgroupBallot(visible);
     if (visible)

@@ -10,6 +10,30 @@ struct Vertex
     vec2 uv;
 };
 
+struct Meshlet
+{
+    uint vertexOffset;
+    uint indexOffset;
+    uint vertexCount;
+    uint indexCount;
+};
+
+struct MeshletID
+{
+    uint meshletID;
+    uint objectID;
+};
+
+struct BoundingSphere
+{
+    vec3 center;
+    uint farVertexID;
+    vec3 normal;
+    float cutoff;
+    vec3 coneApex;
+    float shit;
+};
+
 bool isSphereInsideFrustum(in vec3 center, in float radius, in vec4 frustumPlanes[6])
 {
     for (int i = 0; i < 6; ++i)

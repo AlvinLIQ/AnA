@@ -231,23 +231,33 @@ void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Desc
         meshletConfig.descriptorCount = 0;
         meshletConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         meshletConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+        Descriptor::DescriptorConfig meshletVertexConfig{};
+        meshletVertexConfig.binding = 1;
+        meshletVertexConfig.descriptorCount = 0;
+        meshletVertexConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        meshletVertexConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+        Descriptor::DescriptorConfig meshletIndexConfig{};
+        meshletIndexConfig.binding = 2;
+        meshletIndexConfig.descriptorCount = 0;
+        meshletIndexConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        meshletIndexConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
         Descriptor::DescriptorConfig meshletCullingConfig{};
-        meshletCullingConfig.binding = 1;
+        meshletCullingConfig.binding = 3;
         meshletCullingConfig.descriptorCount = 0;
         meshletCullingConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         meshletCullingConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT;
         Descriptor::DescriptorConfig meshletIDConfig{};
-        meshletIDConfig.binding = 2;
+        meshletIDConfig.binding = 4;
         meshletIDConfig.descriptorCount = 0;
         meshletIDConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         meshletIDConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
         Descriptor::DescriptorConfig meshletIDCountConfig{};
-        meshletIDCountConfig.binding = 3;
+        meshletIDCountConfig.binding = 5;
         meshletIDCountConfig.descriptorCount = 0;
         meshletIDCountConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         meshletIDCountConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
 
-        descriptorSetConfigs.push_back({meshletConfig, meshletCullingConfig, meshletIDConfig, meshletIDCountConfig});
+        descriptorSetConfigs.push_back({meshletConfig, meshletVertexConfig, meshletIndexConfig, meshletCullingConfig, meshletIDConfig, meshletIDCountConfig});
     }
 }
 

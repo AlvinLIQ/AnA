@@ -1,5 +1,6 @@
 #version 460
 #extension GL_EXT_mesh_shader: require
+#extension GL_EXT_shader_8bit_storage: require
 #extension GL_EXT_scalar_block_layout: enable
 #extension GL_GOOGLE_include_directive : require
 
@@ -57,18 +58,22 @@ layout (set = 5, binding = 0) uniform UBO {
 	Cascade[SHADOW_MAP_CASCADE_COUNT] cascades;
 } ubo;
 
-layout(std430, set = 6, binding = 0) buffer meshletSSBO
+layout(scalar, set = 6, binding = 0) buffer meshletSSBO
 {
-    uint meshlets[];
-} msbo;
-
-struct MeshletID
-{
-    uint meshletID;
-    uint objectID;
+    Meshlet meshlets[];
 };
 
-layout(std430, set = 6, binding = 2) buffer meshletIDSSBO
+layout(std430, set = 6, binding = 1) buffer meshletVertexSSBO
+{
+    uint vertices[];
+} mvsbo;
+
+layout(scalar, set = 6, binding = 2) buffer meshletIndexSSBO
+{
+    uint8_t primitives[];
+};
+
+layout(scalar, set = 6, binding = 4) buffer meshletIDSSBO
 {
     MeshletID meshletIDs[];
 };
@@ -81,20 +86,19 @@ taskPayloadSharedEXT struct {
 void main()
 {
     MeshletID mid = meshletIDs[taskData.visibleIndices[gl_WorkGroupID.x]];
-	uint iid = msbo.meshlets[mid.meshletID];
-    uint vertexCount = msbo.meshlets[iid++];
-    uint primitiveCount = msbo.meshlets[iid++];
-    SetMeshOutputsEXT(vertexCount, primitiveCount);
-//gl_LocalInvocationIndex
+	Meshlet meshlet = meshlets[mid.meshletID];
+    uint primitiveCount = meshlet.indexCount / 3;
+    SetMeshOutputsEXT(meshlet.vertexCount, primitiveCount);
+
 	mat4 viewProj = cbo.proj * cbo.view;
     float zOffset = ubo.cascades[1].split - ubo.cascades[0].split;
     mat4 transform = objects[mid.objectID].transform;
     uint texID = uint(transform[3].w);
     transform[3].w = 1.0;
     
-    for (uint i = 0, vertexOffset; i < vertexCount; i++)
+    for (uint i = 0; i < meshlet.vertexCount; i++)
     {
-        Vertex vertex = vertices[msbo.meshlets[iid + i]];
+        Vertex vertex = vertices[mvsbo.vertices[meshlet.vertexOffset + i]];
         vec4 vertexPos = transform * vec4(vertex.position, 1.0);
         vec4 viewPos = cbo.view * vertexPos;
         gl_MeshVerticesEXT[i].gl_Position = viewProj * vertexPos;
@@ -104,18 +108,14 @@ void main()
         vertexOutput[i].vertexPosition = vertexPos.xyz;
         vertexOutput[i].viewPosZ = viewPos.z / viewPos.w + zOffset;
     }
-    iid += vertexCount;
-    for (uint i = 0, j, offset, t; i < primitiveCount; i++)
-    {
-        t = (i << 1) + i;
-        j = t >> 2;
-        offset = (t & 3);
-        uint packed =   ((msbo.meshlets[iid + j] >> rQBytesToBits[offset]) & bytesMask[offset]) | 
-                        (msbo.meshlets[iid + j + 1] & rQBytesMask[offset]);
 
+    for (uint i = 0, offset; i < primitiveCount; i++)
+    {
+        offset = meshlet.indexOffset + i * 3;
 	    gl_PrimitiveTriangleIndicesEXT[i] = uvec3(
-            (packed >> 0u) & 0xFFu, 
-            (packed >> 8u) & 0xFFu,
-            (packed >> 16u) & 0xFFu);
+            primitives[offset + 0], 
+            primitives[offset + 1],
+            primitives[offset + 2]
+        );
     }
 }

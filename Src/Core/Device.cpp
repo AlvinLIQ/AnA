@@ -988,6 +988,8 @@ void Device::createLogicalDevice()
     vulkan12Features.runtimeDescriptorArray = VK_TRUE;
     vulkan12Features.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
     vulkan12Features.scalarBlockLayout = VK_TRUE;
+    vulkan12Features.shaderInt8 = VK_TRUE;
+    vulkan12Features.storageBuffer8BitAccess = VK_TRUE;
     vulkan12Features.pNext = &dynamicState3Features;
 
     VkPhysicalDeviceNestedCommandBufferFeaturesEXT nestedCommandBufferFeatures{};
@@ -1009,6 +1011,7 @@ void Device::createLogicalDevice()
     deviceFeatures2.features.sampleRateShading = VK_TRUE;
     deviceFeatures2.features.shaderSampledImageArrayDynamicIndexing = VK_TRUE;
     deviceFeatures2.features.vertexPipelineStoresAndAtomics = VK_TRUE;
+    deviceFeatures2.features.fillModeNonSolid = VK_TRUE;
 #ifdef ENABLE_MESH_SHADER
     VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures = {};
     meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;

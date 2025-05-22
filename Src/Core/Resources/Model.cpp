@@ -321,7 +321,7 @@ void Model::buildMeshletsWithOptimizer()
             minBounding = glm::min(minBounding, vertex.position);
             maxBounding = glm::max(maxBounding, vertex.position);
         }
-        meshopt_optimizeMeshlet(meshlet.vertices, meshlet.indices, meshletInfo.triangle_count, meshletInfo.vertex_count);
+        //meshopt_optimizeMeshlet(meshlet.vertices, meshlet.indices, meshletInfo.triangle_count, meshletInfo.vertex_count);
         meshopt_Bounds bounds = meshopt_computeMeshletBounds(&uniqueVertexIndices[meshletInfo.vertex_offset],
             &primitiveIndices[meshletInfo.triangle_offset], meshletInfo.triangle_count,
                 &info.vertices.data()->position.x,

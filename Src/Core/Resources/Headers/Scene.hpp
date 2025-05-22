@@ -18,6 +18,13 @@ namespace AnA
         uint32_t textureId{};
         uint32_t modelID;
     };
+    struct MeshletInfo
+    {
+        uint32_t vertexOffset;
+        uint32_t indexOffset;
+        uint32_t vertexCount;
+        uint32_t indexCount;
+    };
     struct UniqueModel
     {
         uint32_t vertexOffset;
@@ -171,6 +178,8 @@ namespace AnA
         std::vector<Buffer> meshletIDCountBuffers{};
         std::vector<Buffer> meshletIDBuffers{};
         std::vector<Buffer> meshletBuffers{};
+        std::vector<Buffer> meshletVertexBuffers{};
+        std::vector<Buffer> meshletIndexBuffers{};
         std::vector<Buffer> meshletCullingBuffers{};
         uint32_t numOfGroup = 64;
         uint8_t currentBufferIndex = 0;

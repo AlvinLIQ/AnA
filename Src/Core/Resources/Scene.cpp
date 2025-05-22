@@ -79,6 +79,8 @@ void Scene::Init()
     objectBuffers.resize(vertexBuffers.size());
 
     meshletBuffers.resize(vertexBuffers.size());
+    meshletVertexBuffers.resize(meshletBuffers.size());
+    meshletIndexBuffers.resize(meshletBuffers.size());
     meshletCullingBuffers.resize(meshletBuffers.size());
     meshletIDBuffers.resize(meshletBuffers.size());
     meshletIDCountBuffers.resize(meshletBuffers.size());
@@ -99,11 +101,23 @@ void Scene::Init()
         VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         objectBuffers[i].Map();
 
-        meshletBuffers[i] = Buffer(aDevice, 100 * sizeof(Model::Meshlet),
+        meshletBuffers[i] = Buffer(aDevice, 100 * sizeof(MeshletInfo),
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
 
         meshletBuffers[i].Map();
+
+        meshletVertexBuffers[i] = Buffer(aDevice, 500 * sizeof(uint32_t),
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+
+        meshletVertexBuffers[i].Map();
+
+        meshletIndexBuffers[i] = Buffer(aDevice, 1000,
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+
+        meshletIndexBuffers[i].Map();
 
         meshletCullingBuffers[i] = Buffer(aDevice, 100 * sizeof(BoundingSphere),
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
@@ -200,14 +214,18 @@ void Scene::Append(std::vector<Model::Vertex>& meshVertices, std::vector<uint32_
     uint32_t meshId;
     Resource::ResourceManager::GetCurrent()->AppendModel(model, meshId);
     
-    meshletIndexCount += uint32_t(model->meshletIndexCount);
-    meshletVertexCount += uint32_t(model->meshletVertexCount);
     modelMap.emplace(meshId, uint32_t(uniqueModels.size()));
     mesh.modelID = uint32_t(uniqueModels.size());
     uniqueModels.push_back({uint32_t(vertexCount), uint32_t(indexCount), meshletCount, model});
-    meshletCount += uint32_t(model->meshlets.size());
     vertexCount += mesh.vertexCount;
     indexCount += mesh.indexCount;
+    meshletIndexCount += model->meshletIndexCount;
+    meshletVertexCount += model->meshletVertexCount;
+    meshletCount += uint32_t(model->meshlets.size());
+
+    for (uint32_t i = 0, meshletOffset = uniqueModels[mesh.modelID].meshletOffset; i < uint32_t(model->meshlets.size()); i++)
+        meshletIDs.push_back({meshletOffset + i, uint32_t(meshes.size())});
+
     auto& textureMap = Resource::ResourceManager::GetCurrent()->TextureMap;
     auto& texture = textureMap.at(mesh.textureId);
     if (textureIdMap.find(mesh.textureId) == textureIdMap.end())
@@ -345,8 +363,7 @@ void Scene::UpdateMeshlets()
 {
     if (!aDevice->MeshShaderSupport())
         return;
-    uint32_t minMeshletBufferSize = (meshletVertexCount + 1 +
-        3 * static_cast<uint32_t>(meshletCount)) * sizeof(uint32_t) + meshletIndexCount + static_cast<uint32_t>(meshletCount);
+    uint32_t minMeshletBufferSize = meshletCount * sizeof(MeshletInfo);
     if (!meshletBuffers[nextIndex].GetBuffer() ||
         meshletBuffers[nextIndex].GetSize() < minMeshletBufferSize)
     {
@@ -361,30 +378,49 @@ void Scene::UpdateMeshlets()
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         meshletCullingBuffers[nextIndex].Map();
     }
+    if (meshletVertexBuffers[nextIndex].GetSize() < meshletVertexCount * sizeof(uint32_t))
+    {
+        meshletVertexBuffers[nextIndex] = Buffer(aDevice, meshletVertexCount * sizeof(uint32_t),
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+
+        meshletVertexBuffers[nextIndex].Map();
+    }
+    if (meshletIndexBuffers[nextIndex].GetSize() < meshletIndexCount)
+    {
+        meshletIndexBuffers[nextIndex] = Buffer(aDevice, meshletIndexCount,
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+
+        meshletIndexBuffers[nextIndex].Map();
+    }
     if (meshletIDs.size() * sizeof(MeshletID) > meshletIDBuffers[nextIndex].GetSize())
     {
-        meshletIDBuffers[nextIndex] = Buffer(aDevice, meshletIDs.size() * sizeof(MeshletID),
+        meshletIDBuffers[nextIndex] = Buffer(aDevice, (meshletIDs.size() + 100) * sizeof(MeshletID),
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         meshletIDBuffers[nextIndex].Map();
     }
-    uint32_t bufferId = 0;
-    uint32_t* buffer = static_cast<uint32_t*>(meshletBuffers[nextIndex].GetMappedData());
+
+    MeshletInfo* meshletBuffer = static_cast<MeshletInfo*>(meshletBuffers[nextIndex].GetMappedData());
+    uint32_t* meshletVertexBuffer = static_cast<uint32_t*>(meshletVertexBuffers[nextIndex].GetMappedData());
+    uint8_t* meshletIndexBuffer = static_cast<uint8_t*>(meshletIndexBuffers[nextIndex].GetMappedData());
     BoundingSphere* cullingBuffer = static_cast<BoundingSphere*>(meshletCullingBuffers[nextIndex].GetMappedData());
-    uint32_t vertexOffset = 0, primitiveOffset = 0;
-    if (!meshletCount)
-        buffer[0] = 0;
+    uint32_t vertexOffset = 0, indexOffset = 0;
     for (size_t j = 0, i = 0; j < uniqueModels.size(); j++)
     {
         auto& model = uniqueModels[j];
         auto& meshlets = model.model->meshlets;
         for (auto& meshlet : meshlets)
         {
-            buffer[bufferId++] = vertexOffset + primitiveOffset + static_cast<uint32_t>(i << 1) + static_cast<uint32_t>(meshletCount);
+            meshletBuffer[i] = {vertexOffset, indexOffset, meshlet.vertexCount, meshlet.indexCount};
+            for (uint32_t i = 0; i < meshlet.vertexCount; i++)
+                meshletVertexBuffer[i + vertexOffset] = meshlet.vertices[i] + model.vertexOffset;
+            for (uint32_t i = 0; i < meshlet.indexCount; i++)
+                meshletIndexBuffer[i + indexOffset] = meshlet.indices[i];
+
             vertexOffset += meshlet.vertexCount;
-            primitiveOffset += (meshlet.indexCount >> 2);
-            if (meshlet.indexCount & 3)
-                primitiveOffset++;
+            indexOffset += meshlet.indexCount;
 
             cullingBuffer[i].center = meshlet.center;
             cullingBuffer[i].farVertexID = meshlet.farVertexID;
@@ -392,26 +428,6 @@ void Scene::UpdateMeshlets()
             cullingBuffer[i].coneApex = meshlet.coneApex;
             cullingBuffer[i].cutoff = meshlet.cutoff;
             ++i;
-        }
-    }
-    for (auto& model : uniqueModels)
-    {
-        auto& meshlets = model.model->meshlets;
-        for (auto& meshlet : meshlets)
-        {
-            buffer[bufferId++] = meshlet.vertexCount;
-            buffer[bufferId++] = meshlet.indexCount / 3;
-
-            for (uint32_t i = 0; i < meshlet.vertexCount; i++)
-                buffer[bufferId++] = meshlet.vertices[i] + model.vertexOffset;
-            auto indexBuffer = reinterpret_cast<uint8_t*>(&buffer[bufferId]);
-            for (uint32_t i = 0; i < meshlet.indexCount; i++)
-            {
-                indexBuffer[i] = meshlet.indices[i];
-            }
-            bufferId += (meshlet.indexCount >> 2);
-            if (meshlet.indexCount & 3)
-                bufferId++;
         }
     }
     memcpy(meshletIDBuffers[nextIndex].GetMappedData(), meshletIDs.data(), meshletIDs.size() * sizeof(MeshletID));
@@ -528,7 +544,7 @@ void Scene::createSSBODescriptor()
             bufferInfo.buffer = meshletIDCountBuffers[i].GetBuffer();
             bufferInfo.offset = 0;
             bufferInfo.range = meshletIDCountBuffers[i].GetSize();
-            aDevice->UpdateDescriptorSet(bufferInfo, 3, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+            aDevice->UpdateDescriptorSet(bufferInfo, 5, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                     meshDescriptor->GetSets()[i]);
         }
     }
@@ -556,18 +572,29 @@ void Scene::updateSSBODescriptor()
         bufferInfo.offset = 0;
         bufferInfo.range = meshletBuffers[nextIndex].GetSize();
         aDevice->UpdateDescriptorSet(bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-        //Meshlet Boundings Buffer
         meshDescriptor->GetSets()[nextIndex]);
+        bufferInfo.buffer = meshletVertexBuffers[nextIndex].GetBuffer();
+        bufferInfo.offset = 0;
+        bufferInfo.range = meshletVertexBuffers[nextIndex].GetSize();
+        aDevice->UpdateDescriptorSet(bufferInfo, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+        meshDescriptor->GetSets()[nextIndex]);
+        bufferInfo.buffer = meshletIndexBuffers[nextIndex].GetBuffer();
+        bufferInfo.offset = 0;
+        bufferInfo.range = meshletIndexBuffers[nextIndex].GetSize();
+        aDevice->UpdateDescriptorSet(bufferInfo, 2, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+        meshDescriptor->GetSets()[nextIndex]);
+
+        //Meshlet Boundings Buffer
         bufferInfo.buffer = meshletCullingBuffers[nextIndex].GetBuffer();
         bufferInfo.offset = 0;
         bufferInfo.range = meshletCullingBuffers[nextIndex].GetSize();
-        aDevice->UpdateDescriptorSet(bufferInfo, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+        aDevice->UpdateDescriptorSet(bufferInfo, 3, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                 meshDescriptor->GetSets()[nextIndex]);
         //Meshlet ID Buffer
         bufferInfo.buffer = meshletIDBuffers[nextIndex].GetBuffer();
         bufferInfo.offset = 0;
         bufferInfo.range = meshletIDBuffers[nextIndex].GetSize();
-        aDevice->UpdateDescriptorSet(bufferInfo, 2, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+        aDevice->UpdateDescriptorSet(bufferInfo, 4, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                 meshDescriptor->GetSets()[nextIndex]);  
     }
     currentBufferIndex = nextIndex;
