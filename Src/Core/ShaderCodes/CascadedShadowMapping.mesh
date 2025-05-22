@@ -73,7 +73,7 @@ taskPayloadSharedEXT struct {
 
 void main()
 {
-    MeshletID mid = meshletIDs[taskData.visibleIndices[gl_WorkGroupID.x]];
+    MeshletID mid = meshletIDs[gl_WorkGroupID.x];
 	uint iid = msbo.meshlets[mid.meshletID];
     uint vertexCount = msbo.meshlets[iid++];
     uint primitiveCount = msbo.meshlets[iid++];

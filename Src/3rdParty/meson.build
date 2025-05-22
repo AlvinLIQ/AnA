@@ -8,3 +8,4 @@ meshoptimizer_lib = static_library('meshoptimizer', ['meshoptimizer/src/allocato
     cpp_args: ['-std=c++23'])
 
 vma_include = include_directories('VulkanMemoryAllocator/include', is_system: true)
+cdt_include = include_directories('CDT/CDT/include', is_system: true)

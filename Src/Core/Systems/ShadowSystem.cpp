@@ -29,5 +29,6 @@ void ShadowSystem::RenderCascadedShadowsIndirect(CommandBuffer& commandBuffer, R
     vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
 
     renderable.Bind(commandBuffer, shader, swapChain->CurrentFrame);
-    renderable.DrawIndirect(commandBuffer);
+    swapChain->GetDevice()->vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
+    //renderable.DrawIndirect(commandBuffer);
 }

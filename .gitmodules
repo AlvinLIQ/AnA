@@ -16,3 +16,6 @@
 [submodule "Src/3rdParty/VulkanMemoryAllocator"]
 	path = Src/3rdParty/VulkanMemoryAllocator
 	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator
+[submodule "Src/3rdParty/CDT"]
+	path = Src/3rdParty/CDT
+	url = https://github.com/artem-ogre/CDT.git

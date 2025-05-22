@@ -122,6 +122,13 @@ int main()
     
     auto sceneFile = ReadFile("Scenes/scene.ana");
     scene.Append(reinterpret_cast<MeshInfo*>(sceneFile.data()), sceneFile.size() / sizeof(MeshInfo));
+    auto& ch = Resource::ResourceManager::GetCurrent()->Characters['A'];
+    std::vector<Model::Vertex> vertices{};
+    for (auto& vertex : ch.vertices)
+    {
+        vertices.push_back({glm::vec3(vertex.x, -vertex.y, 0.0f), {0.0f, 0.0f, 0.0f}, {}});
+    }
+    scene.Append(vertices, ch.indices, {{}, glm::vec3{4.0f}}, 0);
     editor.Run();
     return 0;
 }

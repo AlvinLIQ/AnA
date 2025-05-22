@@ -12,6 +12,8 @@
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "../3rdParty/stb/stb_truetype.h"
 
+#include "CDT.h"
+
 #define VMA_IMPLEMENTATION
 #define VMA_STATIC_VULKAN_FUNCTIONS 0
 #define VMA_DYNAMIC_VULKAN_FUNCTIONS 1
@@ -350,6 +352,10 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
         std::vector<glm::vec2> currentPath{};
         glm::vec2 minBounding{std::numeric_limits<float>::max()};
         glm::vec2 maxBounding{-std::numeric_limits<float>::max()};
+        CDT::Triangulation<float> cdt;
+        std::vector<CDT::Edge> edges{};
+        std::unordered_map<CDT::V2d<float>, uint32_t> vertexMap{};
+        uint32_t lastIndex = 0;
         for (int i = 0; i < vertexCount; i++)
         {
             auto& vertex = vertices[i];
@@ -359,14 +365,24 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
                     if (!currentPath.empty())
                     {
                         paths.push_back(currentPath);
-                        character.indices.push_back(UINT_MAX);
                         currentPath = {};
                     }
                     [[fallthrough]];
                 case STBTT_vline:
-                    character.indices.push_back(character.vertices.size());
+                {
                     currentPath.push_back({static_cast<float>(vertex.x) * scale, static_cast<float>(vertex.y) * scale});
-                    character.vertices.push_back(currentPath.back());
+                    auto iter = vertexMap.find(*reinterpret_cast<CDT::V2d<float>*>(&currentPath.back()));
+                    if (iter == vertexMap.end())
+                    {
+                        iter = vertexMap.emplace(*reinterpret_cast<CDT::V2d<float>*>(&currentPath.back()), character.vertices.size()).first;
+                        character.vertices.push_back(currentPath.back());
+                    }
+                    if (currentPath.size() > 1)
+                    {
+                        edges.push_back({lastIndex, iter->second});
+                    }
+                    lastIndex = iter->second;
+                }
                     minBounding = glm::min(minBounding, currentPath.back());
                     maxBounding = glm::max(maxBounding, currentPath.back());
                     break;
@@ -383,15 +399,33 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
                         glm::vec2 l0 = p0 + t1 * static_cast<float>(j);
                         glm::vec2 l1 = p1 + t2 * static_cast<float>(j);
                         glm::vec2 t3 = (l1 - l0) / static_cast<float>(step);
-                        character.indices.push_back(character.vertices.size());
                         currentPath.push_back(l0 + t3 * static_cast<float>(j));
-                        character.vertices.push_back(currentPath.back());
+                        auto iter = vertexMap.find(*reinterpret_cast<CDT::V2d<float>*>(&currentPath.back()));
+                        if (iter == vertexMap.end())
+                        {
+                            iter = vertexMap.emplace(*reinterpret_cast<CDT::V2d<float>*>(&currentPath.back()), character.vertices.size()).first;
+                            character.vertices.push_back(currentPath.back());
+                        }
+                        if (currentPath.size() > 1)
+                        {
+                            edges.push_back({lastIndex, iter->second});
+                        }
+                        lastIndex = iter->second;
                         minBounding = glm::min(minBounding, currentPath.back());
                         maxBounding = glm::max(maxBounding, currentPath.back());
                     }
-                    character.indices.push_back(character.vertices.size());
                     currentPath.push_back(p2);
-                    character.vertices.push_back(currentPath.back());
+                    auto iter = vertexMap.find(*reinterpret_cast<CDT::V2d<float>*>(&currentPath.back()));
+                    if (iter == vertexMap.end())
+                    {
+                        iter = vertexMap.emplace(*reinterpret_cast<CDT::V2d<float>*>(&currentPath.back()), character.vertices.size()).first;
+                        character.vertices.push_back(currentPath.back());
+                    }
+                    if (currentPath.size() > 1)
+                    {
+                        edges.push_back({lastIndex, iter->second});
+                    }
+                    lastIndex = iter->second;
                     minBounding = glm::min(minBounding, currentPath.back());
                     maxBounding = glm::max(maxBounding, currentPath.back());
                 }
@@ -412,9 +446,18 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
                                 3 * it * it * t * p1 +
                                 3 * it * t * t * p2 +
                                 t * t * t * p3;
-                        character.indices.push_back(character.vertices.size());
                         currentPath.push_back(pt);
-                        character.vertices.push_back(currentPath.back());
+                        auto iter = vertexMap.find(*reinterpret_cast<CDT::V2d<float>*>(&currentPath.back()));
+                        if (iter == vertexMap.end())
+                        {
+                            iter = vertexMap.emplace(*reinterpret_cast<CDT::V2d<float>*>(&currentPath.back()), character.vertices.size()).first;
+                            character.vertices.push_back(currentPath.back());
+                        }
+                        if (currentPath.size() > 1)
+                        {
+                            edges.push_back({lastIndex, iter->second});
+                        }
+                        lastIndex = iter->second;
                         minBounding = glm::min(minBounding, currentPath.back());
                         maxBounding = glm::max(maxBounding, currentPath.back());
                     }
@@ -427,7 +470,15 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
         if (currentPath.size())
         {
             paths.push_back(currentPath);
-            character.indices.push_back(UINT_MAX);
+        }
+        cdt.insertVertices(*reinterpret_cast<std::vector<CDT::V2d<float>>*>(&character.vertices));
+        cdt.insertEdges(edges);
+        cdt.eraseOuterTrianglesAndHoles();
+        for (auto& triangle : cdt.triangles)
+        {
+            character.indices.push_back(triangle.vertices[0]);
+            character.indices.push_back(triangle.vertices[1]);
+            character.indices.push_back(triangle.vertices[2]);
         }
         indexCount += uint32_t(character.indices.size());
         character.center = (minBounding + maxBounding) * 0.5f;

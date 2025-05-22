@@ -6,7 +6,7 @@
 
 #include "mesh.h"
 
-layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
 layout(scalar, set = 0, binding = 0) buffer VertexSSBO
 {
@@ -71,11 +71,6 @@ layout(std430, set = 6, binding = 3) buffer MeshletIDCountSSBO
 	uint meshletIDCount;
 };
 
-taskPayloadSharedEXT struct {
-    uint visibleIndices[512]; // max 512 visible meshlets per group
-    uint visibleCount;
-} taskData;
-
 bool isMeshletVisible(uint meshletId)
 {
     MeshletID mid = meshletIDs[meshletId];
@@ -90,22 +85,5 @@ bool isMeshletVisible(uint meshletId)
 
 void main()
 {
-    uint globalID = gl_GlobalInvocationID.x;
-    if (globalID >= meshletIDCount)
-        return;
-    bool visible = isMeshletVisible(globalID);
-
-    uvec4 ballot = subgroupBallot(visible);
-    if (visible)
-    {
-        uint index = subgroupBallotExclusiveBitCount(ballot);
-        taskData.visibleIndices[index] = globalID;
-    }
-
-    if (gl_LocalInvocationIndex == 0)
-    {
-        uint total = subgroupBallotBitCount(ballot);
-        taskData.visibleCount = total;
-	    EmitMeshTasksEXT(total, 3, 1);
-    }
+    EmitMeshTasksEXT(meshletIDCount, 3, 1);
 }
