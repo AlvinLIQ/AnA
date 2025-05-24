@@ -6,8 +6,8 @@ using namespace Examples;
 
 std::vector<MeshInfo> meshInfos = 
 {
-    {"Models/cube.obj", {{10.0f, 0.0f, 0.0f}}, 4},
-    {"Models/bunny.obj", {{0.0f, -10.0f, 0.0f}, {30.0f, 30.0f, 30.0f}, {glm::pi<float>(), 0.0f, 0.0f}}}
+    {"Models/cube.obj", {{10.0f, 0.0f, 0.0f}, glm::vec3{2.0}}, 4},
+    {"Models/bunny.obj", {{0.0f, -10.0f, 0.0f}, {30.0f, 30.0f, 30.0f}, {glm::pi<float>(), 0.0f, 0.0f}}, 0}
 };
 
 

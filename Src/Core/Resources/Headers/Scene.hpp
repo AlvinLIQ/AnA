@@ -94,7 +94,7 @@ namespace AnA
         {
             commandBufferNeedUpdate = false;
         }
-        void CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer, Buffer* newObjectBuffer);
+        void CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer, Buffer* newObjectBuffer, uint32_t offset = 0, size_t meshOffset = 0);
         void CommitBufferUpdate();
         void Update() override;
         void UpdateBuffers(Range updateRange);

@@ -309,19 +309,19 @@ void Scene::DrawIndirect(CommandBuffer& commandBuffer)
             0, 1, sizeof(VkDrawIndexedIndirectCommand));
 }
 
-void Scene::CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer, Buffer* newObjectBuffer)
+void Scene::CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer, Buffer* newObjectBuffer, uint32_t offset, size_t meshOffset)
 {
     auto bufferVertices = static_cast<Model::Vertex*>(newVertBuffer->GetMappedData());
     auto bufferIndices = static_cast<Model::Index*>(newIndexBuffer->GetMappedData());
     auto bufferObjects = static_cast<Object*>(newObjectBuffer->GetMappedData());
 
-    Range updateRange = {0, static_cast<uint32_t>(uniqueModels.size())};
+    Range updateRange = {offset, static_cast<uint32_t>(uniqueModels.size()) - offset};
     applyVertexBufferUpdate(bufferVertices, bufferIndices, updateRange);
     glm::mat4 transform;
-    for (size_t i = 0; i < meshes.size(); i++)
+    for (size_t i = meshOffset; i < meshes.size(); i++)
     {
         transform = meshes[i].transform.mat4();
-        transform[3].w = float(meshes[i].textureId);
+        transform[3].w = float(textureIdMap[meshes[i].textureId]);
         bufferObjects[i].transform = transform;
     }
 }
