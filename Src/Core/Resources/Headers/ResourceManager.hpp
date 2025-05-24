@@ -5,6 +5,7 @@
 #include "Descriptor.hpp"
 #include "Shader.hpp"
 #include "Lights.hpp"
+#include "Text.hpp"
 #include "Texture.hpp"
 #include "ShadowMap.hpp"
 //#include <map>
@@ -73,6 +74,7 @@ namespace AnA
             void GetDefaultDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);
             void GetDefaultShapesDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);
 
+            AnA::Text TextContext;
             Lights::Light GlobalLight;
             AnA::Shapes Shapes;
 #ifdef ANA_INCLUDE_CONTROL

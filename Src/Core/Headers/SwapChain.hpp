@@ -8,7 +8,7 @@
 #define INCLUDE_STB_IMAGE
 
 #define NextFrameIndex(X) ((X + 1) % MAX_FRAMES_IN_FLIGHT)
-#define SHADOW_MAP_DIM 1000
+#define SHADOW_MAP_DIM 2048
 
 #define ScaleX Scale[0]
 #define ScaleY Scale[1]

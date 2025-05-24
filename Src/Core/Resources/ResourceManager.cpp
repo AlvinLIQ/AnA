@@ -11,6 +11,7 @@ uint32_t modelId = 0;
 ResourceManager::ResourceManager(Device* mDevice) :
         MainScene(mDevice),
         //Points(mDevice),
+        TextContext(mDevice),
         GlobalLight(mDevice),
         ShadowMap(mDevice)
         /*SecondaryCommandBufferPool(mDevice,
@@ -343,7 +344,7 @@ void ResourceManager::createDefaultShaders()
 
     auto offscreenRenderPass = SwapChain::GetCurrent()->GetOffscreenRenderPass();
 
-    Shaders.emplace_back(aDevice, CascadedShadowMapping_task, CascadedShadowMapping_mesh, 
+    Shaders.emplace_back(aDevice, CascadedShadowMapping_task, CascadedShadowMapping_mesh,
         defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0, offscreenRenderPass, 0);
     Shaders.emplace_back(aDevice, Point_vert, Point_frag, renderPass, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
 

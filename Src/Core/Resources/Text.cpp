@@ -19,7 +19,7 @@ Text::Text(Device* mDevice) : aDevice{mDevice}
         countBuffers[i].Map();
         *reinterpret_cast<uint32_t*>(countBuffers[i].GetMappedData()) = 0u;
     }
-    charInfoDescriptor = new Descriptor(aDevice, charInfoBuffers, charInfoBuffers[0].GetSize(), 
+    charInfoDescriptor = new Descriptor(aDevice, charInfoBuffers, charInfoBuffers[0].GetSize(),
         0, 1, 1000, VK_SHADER_STAGE_VERTEX_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
 }
 
@@ -34,7 +34,7 @@ void Text::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferInd
     shader.GetPipeline().Bind(commandBuffer);
     auto& sets = shader.GetDescriptorSets()[bufferIndex];
     sets[1] = charInfoDescriptor->GetSets()[currentBufferIndex];
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, 
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
         shader.GetPipelineLayout(), 0, 2, sets.data(), 0, nullptr);
 }
 
@@ -45,9 +45,9 @@ void Text::Draw(CommandBuffer& commandBuffer)
 
 void Text::DrawIndirect(CommandBuffer& commandBuffer)
 {
-    aDevice->vkCmdDrawMeshTasksIndirectCountEXT(commandBuffer, drawCommandBuffer.GetBuffer(), 0, 
-        countBuffers[currentBufferIndex].GetBuffer(), 0, 
-        drawCount, 
+    aDevice->vkCmdDrawMeshTasksIndirectCountEXT(commandBuffer, drawCommandBuffer.GetBuffer(), 0,
+        countBuffers[currentBufferIndex].GetBuffer(), 0,
+        drawCount,
         sizeof(VkDrawMeshTasksIndirectCommandEXT));
 }
 
@@ -82,6 +82,9 @@ void Text::Update()
         index += chIndex;
         textIndex++;
     }
+    glm::uvec3* drawCommand = reinterpret_cast<glm::uvec3*>(drawCommandBuffer.GetMappedData());
+    *drawCommand = glm::uvec3(index, 1, 1);
+    *reinterpret_cast<uint32_t*>(countBuffers[nextIndex].GetMappedData()) = totalTextLen ? 1u : 0u;
 
     currentBufferIndex = nextIndex;
     nextIndex = (currentBufferIndex + 1) % MAX_FRAMES_IN_FLIGHT;
