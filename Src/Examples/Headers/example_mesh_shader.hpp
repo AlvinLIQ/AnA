@@ -56,7 +56,7 @@ namespace AnA
             static void onLoop()
             {
                 auto app = reinterpret_cast<example_mesh_shader*>(App::GetCurrent());
-                app->terrainPushConstants.density = (reinterpret_cast<Controls::Slider*>(app->controlMap["densitySlider"])->Value);
+                app->terrainPushConstants.density = (reinterpret_cast<Controls::Slider*>(app->controlMap["densitySlider"])->Value) + 0.1;
                 app->terrainPushConstants.height = (reinterpret_cast<Controls::Slider*>(app->controlMap["heightSlider"])->Value + 0.01f) * 10.0f;
                 app->terrainPushConstants.texture = reinterpret_cast<Controls::ToggleSwitch*>(app->controlMap["textureSwitch"])->Toggle() ? 0 : 1;
                 app->terrainPushConstants.calNormal = reinterpret_cast<Controls::ToggleSwitch*>(app->controlMap["lightSwitch"])->Toggle() ? 1 : 0;

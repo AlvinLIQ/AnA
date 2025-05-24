@@ -367,38 +367,28 @@ void Scene::UpdateMeshlets()
     if (!meshletBuffers[nextIndex].GetBuffer() ||
         meshletBuffers[nextIndex].GetSize() < minMeshletBufferSize)
     {
-        meshletBuffers[nextIndex] = Buffer(aDevice, minMeshletBufferSize,
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        meshletBuffers[nextIndex].Resize(minMeshletBufferSize);
 
         meshletBuffers[nextIndex].Map();
 
-        meshletCullingBuffers[nextIndex] = Buffer(aDevice, meshletCount * sizeof(BoundingSphere),
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        meshletCullingBuffers[nextIndex].Resize(meshletCount * sizeof(BoundingSphere));
         meshletCullingBuffers[nextIndex].Map();
     }
     if (meshletVertexBuffers[nextIndex].GetSize() < meshletVertexCount * sizeof(uint32_t))
     {
-        meshletVertexBuffers[nextIndex] = Buffer(aDevice, meshletVertexCount * sizeof(uint32_t),
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        meshletVertexBuffers[nextIndex].Resize(meshletVertexCount * sizeof(uint32_t));
 
         meshletVertexBuffers[nextIndex].Map();
     }
     if (meshletIndexBuffers[nextIndex].GetSize() < meshletIndexCount)
     {
-        meshletIndexBuffers[nextIndex] = Buffer(aDevice, meshletIndexCount,
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        meshletIndexBuffers[nextIndex].Resize(meshletIndexCount);
 
         meshletIndexBuffers[nextIndex].Map();
     }
     if (meshletIDs.size() * sizeof(MeshletID) > meshletIDBuffers[nextIndex].GetSize())
     {
-        meshletIDBuffers[nextIndex] = Buffer(aDevice, (meshletIDs.size() + 100) * sizeof(MeshletID),
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        meshletIDBuffers[nextIndex].Resize((meshletIDs.size() + 100) * sizeof(MeshletID));
         meshletIDBuffers[nextIndex].Map();
     }
 
@@ -639,20 +629,17 @@ void Scene::updateAll()
 {
     if (vertexCount * sizeof(Model::Vertex) > vertexBuffers[nextIndex].GetSize())
     {
-        vertexBuffers[nextIndex] = Buffer(aDevice, (vertexCount + 1000) * sizeof(Model::Vertex),
-        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        vertexBuffers[nextIndex].Resize((vertexCount + 1000) * sizeof(Model::Vertex));
         vertexBuffers[nextIndex].Map();
     }
     if (indexCount * sizeof(Model::Index) > indexBuffers[nextIndex].GetSize())
     {
-        indexBuffers[nextIndex] = Buffer(aDevice, (indexCount + 1000) * sizeof(Model::Index),
-            VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        indexBuffers[nextIndex].Resize((indexCount + 1000) * sizeof(Model::Index));
         indexBuffers[nextIndex].Map();
     }
     if (meshes.size() * sizeof(Object) > objectBuffers[nextIndex].GetSize())
     {
-        objectBuffers[nextIndex] = Buffer(aDevice, (meshes.size() + 1000) * sizeof(Object),
-        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        objectBuffers[nextIndex].Resize((meshes.size() + 1000) * sizeof(Object));
         objectBuffers[nextIndex].Map();
     }
     CommitBufferUpdate(&vertexBuffers[nextIndex], &indexBuffers[nextIndex], &objectBuffers[nextIndex]);

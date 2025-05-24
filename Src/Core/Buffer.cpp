@@ -6,7 +6,7 @@ using namespace AnA;
 std::vector<Buffer*> replaceList{};
 
 Buffer::Buffer(Device* mDevice, VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memUsage) : aDevice{mDevice},
- bufferSize {size}, bufferUsage{usage}
+ bufferSize {size}, bufferUsage{usage}, memoryUsage{memUsage}
 {
     if (bufferSize)
     {

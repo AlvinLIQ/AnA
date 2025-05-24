@@ -25,6 +25,7 @@ namespace AnA
             buffer = buf.buffer;
             bufferSize = buf.bufferSize;
             bufferUsage = buf.bufferUsage;
+            memoryUsage = buf.memoryUsage;
             allocation = buf.allocation;
             newBufferRecords = buf.newBufferRecords;
             buf.mappedData = nullptr;
@@ -41,6 +42,7 @@ namespace AnA
                 buffer = buf.buffer;
                 bufferSize = buf.bufferSize;
                 bufferUsage = buf.bufferUsage;
+                memoryUsage = buf.memoryUsage;
                 allocation = buf.allocation;
                 newBufferRecords = buf.newBufferRecords;
                 buf.mappedData = nullptr;
@@ -63,6 +65,12 @@ namespace AnA
         VkDeviceSize GetSize() const
         {
             return bufferSize;
+        }
+
+        void Resize(VkDeviceSize newSize)
+        {
+            if (newSize != bufferSize)
+                *this = Buffer(aDevice, newSize, bufferUsage, memoryUsage);
         }
 
         void CopyToBuffer(Buffer& srcBuffer, VkDeviceSize dataSize)
@@ -93,6 +101,7 @@ namespace AnA
         VkBuffer buffer = VK_NULL_HANDLE;
         VkDeviceSize bufferSize = 0;
         VkBufferUsageFlags bufferUsage;
+        VmaMemoryUsage memoryUsage;
         VmaAllocation allocation;
 
         int newBufferRecords = 0;

@@ -1,9 +1,67 @@
 #version 450
+#extension GL_EXT_mesh_shader: require
+#extension GL_EXT_shader_8bit_storage: require
+#extension GL_EXT_scalar_block_layout: enable
+#extension GL_GOOGLE_include_directive : require
+
+#include "mesh.h"
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 layout(triangles, max_vertices = 64, max_primitives = 128) out;
 
+layout(location = 0) out vec3 outColor[];
+
+layout(scalar, set = 0, binding = 0) buffer VertexBufferObject {
+    vec2 vertices[];
+};
+
+struct CharacterInfo{
+    vec2 scale;
+    vec2 offset;
+    vec3 color;
+    uint meshletID;
+};
+
+layout(scalar, set = 1, binding = 0) buffer CharacterInfoBufferObject {
+    CharacterInfo charInfos[];
+};
+
+layout(scalar, set = 2, binding = 0) buffer meshletSSBO
+{
+    Meshlet meshlets[];
+};
+
+layout(std430, set = 2, binding = 1) buffer meshletVertexSSBO
+{
+    uint vertices[];
+} mvsbo;
+
+layout(scalar, set = 2, binding = 2) buffer meshletIndexSSBO
+{
+    uint8_t primitives[];
+};
+
 void main()
 {
+    CharacterInfo chInfo = charInfos[gl_WorkGroupID.x];
+	Meshlet meshlet = meshlets[chInfo.meshletID];
+    uint primitiveCount = meshlet.indexCount / 3;
+    SetMeshOutputsEXT(meshlet.vertexCount, primitiveCount);
+    mat4 viewProj = cbo.proj * cbo.view;
+    for (uint i = 0; i < meshlet.vertexCount; i++)
+    {
+        vec2 pos = chInfo.scale * vertices[mvsbo.vertices[meshlet.vertexOffset + i]] + chInfo.offset;
+        gl_MeshVerticesEXT[i].gl_Position = viewProj * vec4(pos, 0.0, 1.0);
+        outColor[i] = chInfo.color;
+    }
 
+    for (uint i = 0, offset; i < primitiveCount; i++)
+    {
+        offset = meshlet.indexOffset + i * 3;
+	    gl_PrimitiveTriangleIndicesEXT[i] = uvec3(
+            primitives[offset + 0], 
+            primitives[offset + 1],
+            primitives[offset + 2]
+        );
+    }
 }

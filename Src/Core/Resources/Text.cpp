@@ -4,20 +4,21 @@
 
 using namespace AnA;
 
+uint32_t id = 0;
+
 Text::Text(Device* mDevice) : aDevice{mDevice}
 {
+    drawCommandBuffer = Buffer(aDevice, sizeof(VkDrawMeshTasksIndirectCommandEXT), VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+    drawCommandBuffer.Map();
     for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
-        charInfoBuffers[i] = Buffer(aDevice, sizeof(CharacterInfo) * 1000, VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, 
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        charInfoBuffers[i].Map(0, charInfoBuffers[i].GetSize());
+        charInfoBuffers[i] = Buffer(aDevice, sizeof(CharacterInfo) * 1000, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        charInfoBuffers[i].Map();
 
-        countBuffers[i] = Buffer(aDevice, sizeof(uint32_t), VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, 
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        countBuffers[i].Map(0, sizeof(uint32_t));
+        countBuffers[i] = Buffer(aDevice, sizeof(uint32_t), VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        countBuffers[i].Map();
         *reinterpret_cast<uint32_t*>(countBuffers[i].GetMappedData()) = 0u;
     }
-    drawCommands.resize(1000);
     charInfoDescriptor = new Descriptor(aDevice, charInfoBuffers, charInfoBuffers[0].GetSize(), 
         0, 1, 1000, VK_SHADER_STAGE_VERTEX_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
 }
@@ -39,37 +40,47 @@ void Text::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferInd
 
 void Text::Draw(CommandBuffer& commandBuffer)
 {
-    vkCmdDrawIndexedIndirectCount(commandBuffer, drawCommandBuffers[currentBufferIndex].GetBuffer(), 0, 
-        countBuffers[currentBufferIndex].GetBuffer(), 0, 
-        drawCount, 
-        sizeof(VkDrawIndexedIndirectCommand));
+    aDevice->vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
 }
 
 void Text::DrawIndirect(CommandBuffer& commandBuffer)
 {
-    vkCmdDrawIndexedIndirectCount(commandBuffer, drawCommandBuffers[currentBufferIndex].GetBuffer(), 0, 
+    aDevice->vkCmdDrawMeshTasksIndirectCountEXT(commandBuffer, drawCommandBuffer.GetBuffer(), 0, 
         countBuffers[currentBufferIndex].GetBuffer(), 0, 
         drawCount, 
-        sizeof(VkDrawIndexedIndirectCommand));
+        sizeof(VkDrawMeshTasksIndirectCommandEXT));
 }
 
 void Text::Update()
 {
-    drawCommands.clear();
     auto resourceManager = Resource::ResourceManager::GetCurrent();
-    uint32_t index = 0;
+    uint32_t index = 0, chIndex, textIndex = 0;
+    if (charInfoBuffers[nextIndex].GetSize() < totalTextLen * sizeof(CharacterInfo))
+    {
+        charInfoBuffers[nextIndex].Resize(totalTextLen * sizeof(CharacterInfo));
+    }
+    if (textBuffers[nextIndex].GetSize() < TextMap.size() * sizeof(TextData))
+    {
+        textBuffers[nextIndex].Resize(TextMap.size() * sizeof(TextData));
+    }
+
+    CharacterInfo* chInfoBuffer = reinterpret_cast<CharacterInfo*>(charInfoBuffers[nextIndex].GetMappedData());
+    TextData* textBuffer = reinterpret_cast<TextData*>(textBuffers[nextIndex].GetMappedData());
     for (auto& textInfo : TextMap)
     {
+        chIndex = 0;
+        textBuffer[textIndex].offset = textInfo.second.offset;
+        textBuffer[textIndex].scale = textInfo.second.scale;
         for (auto& ch : textInfo.second.text)
         {
             assert(ch < char(resourceManager->Characters.size()));
-            VkDrawIndexedIndirectCommand& drawIndexedCommand = drawCommands[index];
-            drawIndexedCommand.vertexOffset = 0;
-            drawIndexedCommand.firstIndex = resourceManager->Characters[ch].indexOffset;
-            drawIndexedCommand.indexCount = uint32_t(resourceManager->Characters[ch].indices.size());
-            drawIndexedCommand.firstInstance = index;
-            index++;
+            auto& chInfo = chInfoBuffer[index + chIndex];
+            chInfo.ch = ch;
+            chInfo.index = chIndex;
+            chIndex++;
         }
+        index += chIndex;
+        textIndex++;
     }
 
     currentBufferIndex = nextIndex;
@@ -78,5 +89,12 @@ void Text::Update()
 
 bool Text::NeedUpdate()
 {
-    return true;
+    return needUpdate;
+}
+
+uint32_t Text::Insert(const TextInfo& textInfo)
+{
+    TextMap.emplace(id, textInfo);
+    needUpdate = true;
+    return id++;
 }

@@ -20,8 +20,8 @@ taskPayloadSharedEXT struct {
 
 void main()
 {
-    taskData.scale = push.density < 0.9 ? 1. - push.density : 0.1;
-    uint mCount = uint(push.density + 0.1 * 320.0);
+    taskData.scale = 1.0;
+    uint mCount = uint(push.density * 100.0);
     taskData.center = vec3(float(mCount * MAX_COLUMN_VERTICES) * taskData.scale * 0.5, 0., float(mCount * MAX_ROW_VERTICES) * taskData.scale * 0.5);
     EmitMeshTasksEXT(mCount, mCount, 1);
 }

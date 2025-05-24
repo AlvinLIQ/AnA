@@ -49,7 +49,7 @@ void ShadowMap::UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, u
     //glm::vec3 lightPos = lightDir * 2.0f;
     //float cascadeSplits[SHADOW_MAP_CASCADE_COUNT];
 
-	float nearPlane = 1.5f;
+	float nearPlane = 1.4f;
 	float farPlane = 28.0f;
     float clipRange = farPlane - nearPlane;
     float cascadeSplits[SHADOW_MAP_CASCADE_COUNT];
