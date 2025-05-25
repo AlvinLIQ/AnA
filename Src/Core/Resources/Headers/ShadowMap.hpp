@@ -61,6 +61,10 @@ namespace AnA
             {
                 return samplers;
             }
+            std::vector<glm::mat4>& GetCascades()
+            {
+                return cascades;
+            }
             std::vector<Buffer>& GetCascadesBuffers()
             {
                 return cascadeBuffers;
@@ -73,6 +77,7 @@ namespace AnA
             {
                 return framebuffers;
             }
+            glm::vec4 FrustumPlanes[6];
             void UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, uint32_t bufferIndex);
             void GetUBODescriptorConfig(Descriptor::DescriptorConfig* pConfig);
         private:
@@ -81,6 +86,7 @@ namespace AnA
             std::vector<VkSampler> samplers;
             std::vector<Image> images;
             std::vector<Buffer> cascadeBuffers;
+            std::vector<glm::mat4> cascades;
             std::vector<VkDescriptorImageInfo> descriptorImageInfos;
             std::vector<VkFramebuffer> framebuffers;
             void createShadowResources();

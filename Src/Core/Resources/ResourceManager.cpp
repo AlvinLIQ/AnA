@@ -135,9 +135,18 @@ void ResourceManager::Update()
     uint32_t frameIndex = SwapChain::GetCurrent()->CurrentFrame;
     GlobalLight.UpdateBuffers(LightCamera, frameIndex);
     ShadowMap.UpdateBuffers(MainCamera, LightCamera, frameIndex);
+    if (!LockCamera)
+    {
+        FrustumPlanes::ExtractFrustumPlanes(ShadowMap.GetCascades()[0], *reinterpret_cast<FrustumPlanes*>(&ShadowMap.FrustumPlanes));
+        memcpy(&reinterpret_cast<FrustumPlanes*>(frustumBuffers[frameIndex].GetMappedData())[6], &ShadowMap.FrustumPlanes, sizeof(FrustumPlanes));
+    }
     if (MainScene.NeedUpdate())
     {
         MainScene.CommitBufferUpdate();
+    }
+    if (TextContext.NeedUpdate())
+    {
+        TextContext.Update();
     }
     /*
     recordedCallbacks = 0;
@@ -279,6 +288,48 @@ void ResourceManager::GetDefaultShapesDescriptorSetConfig(std::vector<std::vecto
     pConfig->stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 }
 
+void ResourceManager::GetDefaultTextDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs)
+{
+    descriptorSetConfigs.resize(2);
+    Descriptor::DescriptorConfig config;
+    config.binding = 0;
+    config.descriptorCount = 0;
+    config.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    config.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    if (aDevice->MeshShaderSupport())
+        config.stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+    descriptorSetConfigs[0].push_back(config);
+    descriptorSetConfigs[1].push_back(config);
+    config.binding = 1;
+    descriptorSetConfigs[1].push_back(config);
+
+    if (aDevice->MeshShaderSupport())
+    {
+        Descriptor::DescriptorConfig meshletConfig{};
+        meshletConfig.binding = 0;
+        meshletConfig.descriptorCount = 0;
+        meshletConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        meshletConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+        Descriptor::DescriptorConfig meshletVertexConfig{};
+        meshletVertexConfig.binding = 1;
+        meshletVertexConfig.descriptorCount = 0;
+        meshletVertexConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        meshletVertexConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+        Descriptor::DescriptorConfig meshletIndexConfig{};
+        meshletIndexConfig.binding = 2;
+        meshletIndexConfig.descriptorCount = 0;
+        meshletIndexConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        meshletIndexConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+        Descriptor::DescriptorConfig meshletIDCountConfig{};
+        meshletIDCountConfig.binding = 3;
+        meshletIDCountConfig.descriptorCount = 0;
+        meshletIDCountConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        meshletIDCountConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+
+        descriptorSetConfigs.push_back({meshletConfig, meshletVertexConfig, meshletIndexConfig, meshletIDCountConfig});
+    }
+}
+
 bool ResourceManager::CreateModel(const char* filePath, uint32_t& id)
 {
     auto iter = ModelPathIndexMap.find(filePath);
@@ -316,7 +367,7 @@ void ResourceManager::createMainCameraBuffers()
     frustumBuffers.resize(mainCameraBuffers.size());
     for (auto& frustumBuffer : frustumBuffers)
     {
-        frustumBuffer = Buffer(aDevice, sizeof(FrustumPlanes) + sizeof(glm::mat4), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+        frustumBuffer = Buffer(aDevice, 2 * sizeof(FrustumPlanes), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
         VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         frustumBuffer.Map();
     }
@@ -330,13 +381,16 @@ void ResourceManager::createDefaultDescriptors()
 
     std::vector<std::vector<Descriptor::DescriptorConfig>> shapesDescriptorConfig;
     GetDefaultShapesDescriptorSetConfig(shapesDescriptorConfig);
-
     Descriptor::CreateDescriptors(aDevice, shapesDescriptorConfig, shapeDescriptors);
+
+    std::vector<std::vector<Descriptor::DescriptorConfig>> textDescriptorConfig;
+    GetDefaultTextDescriptorSetConfig(textDescriptorConfig);
+    Descriptor::CreateDescriptors(aDevice, textDescriptorConfig, textDescriptors);
 }
 
 void ResourceManager::createDefaultShaders()
 {
-    Shaders.reserve(6);
+    Shaders.reserve(7);
     auto renderPass = SwapChain::GetCurrent()->GetRenderPass();
     Shaders.emplace_back(aDevice, Basic_vert, Mesh_frag, renderPass, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
 
@@ -353,6 +407,8 @@ void ResourceManager::createDefaultShaders()
         Shaders.emplace_back(aDevice, Terrain_task, Terrain_mesh, Mesh_frag, renderPass, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(TerrainPushConstants));
         Shaders.emplace_back(aDevice, Mesh_task, Mesh_mesh, Mesh_frag, renderPass
             , defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(uint32_t));
+        Shaders.emplace_back(aDevice, Text_task, Text_mesh, Text_frag, renderPass
+            , textDescriptors, 3, 0);
     }
 }
 

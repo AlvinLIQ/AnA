@@ -65,9 +65,14 @@ layout(scalar, set = 6, binding = 4) buffer meshletIDSSBO
     MeshletID meshletIDs[];
 };
 
+taskPayloadSharedEXT struct {
+    uint visibleIndices[512]; // max 512 visible meshlets per group
+    uint visibleCount;
+} taskData;
+
 void main()
 {
-    MeshletID mid = meshletIDs[gl_WorkGroupID.x];
+    MeshletID mid = meshletIDs[taskData.visibleIndices[gl_WorkGroupID.x]];
 	Meshlet meshlet = meshlets[mid.meshletID];
     uint primitiveCount = meshlet.indexCount / 3;
     SetMeshOutputsEXT(meshlet.vertexCount, primitiveCount);

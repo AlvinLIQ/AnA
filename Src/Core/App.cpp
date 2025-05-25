@@ -265,7 +265,7 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
 /*
     auto& terrainShader = aResourceManager.Shaders[4];
     terrainShader.GetPipeline().Bind(commandBuffer);
-    auto& sets = aResourceManager.Shaders.back().GetDescriptorSets()[swapChain.CurrentFrame];
+    auto& sets = aResourceManager[5].GetDescriptorSets()[swapChain.CurrentFrame];
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, terrainShader.GetPipelineLayout(), 0, 6, sets.data(), 0, nullptr);
     vkCmdPushConstants(commandBuffer, terrainShader.GetPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT
     | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, 0, sizeof(terrainPushConstants), &terrainPushConstants);

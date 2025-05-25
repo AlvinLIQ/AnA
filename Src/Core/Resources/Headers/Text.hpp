@@ -11,6 +11,7 @@ namespace AnA
     {
         char ch;
         uint32_t index;
+        uint32_t textIndex;
     };
     struct TextData
     {
@@ -34,18 +35,22 @@ namespace AnA
         void Update() override;
         bool NeedUpdate() override;
         uint32_t Insert(const TextInfo& textInfo);
-        std::unordered_map<uint32_t, TextInfo> TextMap{};
     private:
         Device* aDevice{nullptr};
         size_t totalTextLen = 0;
+        std::unordered_map<uint32_t, uint32_t> textMap{};
+        std::vector<TextInfo> textInfos{};
         Buffer textBuffers[MAX_FRAMES_IN_FLIGHT];
         Buffer charInfoBuffers[MAX_FRAMES_IN_FLIGHT];
-        Descriptor* charInfoDescriptor{nullptr};
         uint32_t currentBufferIndex = 0;
         uint32_t nextIndex = 1 % MAX_FRAMES_IN_FLIGHT;
         Buffer drawCommandBuffer;
         Buffer countBuffers[MAX_FRAMES_IN_FLIGHT];
         uint32_t drawCount = 0;
+        Descriptor* vertexDescriptor{};
+        Descriptor* charInfoDescriptor{};
+        Descriptor* meshDescriptor{};
+        void createSSBODescriptor();
         bool needUpdate = false;
     };
 }

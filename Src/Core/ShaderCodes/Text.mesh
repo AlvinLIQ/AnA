@@ -1,7 +1,8 @@
-#version 450
+#version 460
 #extension GL_EXT_mesh_shader: require
 #extension GL_EXT_shader_8bit_storage: require
-#extension GL_EXT_scalar_block_layout: enable
+#extension GL_EXT_scalar_block_layout: require
+#extension GL_EXT_shader_explicit_arithmetic_types_int8 : enable
 #extension GL_GOOGLE_include_directive : require
 
 #include "mesh.h"
@@ -15,15 +16,25 @@ layout(scalar, set = 0, binding = 0) buffer VertexBufferObject {
     vec2 vertices[];
 };
 
-struct CharacterInfo{
-    vec2 scale;
-    vec2 offset;
-    vec3 color;
-    uint meshletID;
+struct CharacterInfo
+{
+    uint8_t ch;
+    uint index;
+    uint textIndex;
 };
 
 layout(scalar, set = 1, binding = 0) buffer CharacterInfoBufferObject {
     CharacterInfo charInfos[];
+};
+
+struct TextData
+{
+    vec2 scale;
+    vec2 offset;
+};
+
+layout(scalar, set = 1, binding = 1) buffer TextDataBufferObject {
+    TextData textInfos[];
 };
 
 layout(scalar, set = 2, binding = 0) buffer meshletSSBO
@@ -44,15 +55,16 @@ layout(scalar, set = 2, binding = 2) buffer meshletIndexSSBO
 void main()
 {
     CharacterInfo chInfo = charInfos[gl_WorkGroupID.x];
-	Meshlet meshlet = meshlets[chInfo.meshletID];
+	Meshlet meshlet = meshlets[uint(chInfo.ch)];
+    TextData textInfo = textInfos[chInfo.textIndex];
     uint primitiveCount = meshlet.indexCount / 3;
     SetMeshOutputsEXT(meshlet.vertexCount, primitiveCount);
-    mat4 viewProj = cbo.proj * cbo.view;
     for (uint i = 0; i < meshlet.vertexCount; i++)
     {
-        vec2 pos = chInfo.scale * vertices[mvsbo.vertices[meshlet.vertexOffset + i]] + chInfo.offset;
-        gl_MeshVerticesEXT[i].gl_Position = viewProj * vec4(pos, 0.0, 1.0);
-        outColor[i] = chInfo.color;
+        vec2 pos = textInfo.scale * vertices[mvsbo.vertices[meshlet.vertexOffset + i]] + textInfo.offset;
+        pos.x += textInfo.scale.x * float(chInfo.index);
+        gl_MeshVerticesEXT[i].gl_Position = vec4(pos, 0.0, 1.0);
+        outColor[i] = vec3(1.);
     }
 
     for (uint i = 0, offset; i < primitiveCount; i++)

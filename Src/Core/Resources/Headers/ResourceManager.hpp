@@ -73,6 +73,7 @@ namespace AnA
             std::vector<Shader> Shaders;
             void GetDefaultDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);
             void GetDefaultShapesDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);
+            void GetDefaultTextDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);
 
             AnA::Text TextContext;
             Lights::Light GlobalLight;
@@ -113,6 +114,7 @@ namespace AnA
             void createDefaultDescriptors();
             std::vector<Descriptor> defaultDescriptors;
             std::vector<Descriptor> shapeDescriptors;
+            std::vector<Descriptor> textDescriptors;
         };
     }
 }

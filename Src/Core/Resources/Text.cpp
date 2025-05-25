@@ -15,12 +15,13 @@ Text::Text(Device* mDevice) : aDevice{mDevice}
         charInfoBuffers[i] = Buffer(aDevice, sizeof(CharacterInfo) * 1000, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         charInfoBuffers[i].Map();
 
+        textBuffers[i] = Buffer(aDevice, sizeof(TextData) * 10, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        textBuffers[i].Map();
+
         countBuffers[i] = Buffer(aDevice, sizeof(uint32_t), VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         countBuffers[i].Map();
         *reinterpret_cast<uint32_t*>(countBuffers[i].GetMappedData()) = 0u;
     }
-    charInfoDescriptor = new Descriptor(aDevice, charInfoBuffers, charInfoBuffers[0].GetSize(),
-        0, 1, 1000, VK_SHADER_STAGE_VERTEX_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
 }
 
 Text::~Text()
@@ -53,33 +54,33 @@ void Text::DrawIndirect(CommandBuffer& commandBuffer)
 
 void Text::Update()
 {
-    auto resourceManager = Resource::ResourceManager::GetCurrent();
     uint32_t index = 0, chIndex, textIndex = 0;
     if (charInfoBuffers[nextIndex].GetSize() < totalTextLen * sizeof(CharacterInfo))
     {
         charInfoBuffers[nextIndex].Resize(totalTextLen * sizeof(CharacterInfo));
     }
-    if (textBuffers[nextIndex].GetSize() < TextMap.size() * sizeof(TextData))
+    if (textBuffers[nextIndex].GetSize() < textInfos.size() * sizeof(TextData))
     {
-        textBuffers[nextIndex].Resize(TextMap.size() * sizeof(TextData));
+        textBuffers[nextIndex].Resize(textInfos.size() * sizeof(TextData));
     }
 
     CharacterInfo* chInfoBuffer = reinterpret_cast<CharacterInfo*>(charInfoBuffers[nextIndex].GetMappedData());
     TextData* textBuffer = reinterpret_cast<TextData*>(textBuffers[nextIndex].GetMappedData());
-    for (auto& textInfo : TextMap)
+    for (auto& textInfo : textInfos)
     {
         chIndex = 0;
-        textBuffer[textIndex].offset = textInfo.second.offset;
-        textBuffer[textIndex].scale = textInfo.second.scale;
-        for (auto& ch : textInfo.second.text)
+        textBuffer[textIndex].offset = textInfo.offset;
+        textBuffer[textIndex].scale = textInfo.scale;
+        for (auto& ch : textInfo.text)
         {
-            assert(ch < char(resourceManager->Characters.size()));
-            auto& chInfo = chInfoBuffer[index + chIndex];
+            //assert(ch < char(resourceManager->Characters.size()));
+            auto& chInfo = chInfoBuffer[index];
             chInfo.ch = ch;
             chInfo.index = chIndex;
+            chInfo.textIndex = textIndex;
             chIndex++;
+            index++;
         }
-        index += chIndex;
         textIndex++;
     }
     glm::uvec3* drawCommand = reinterpret_cast<glm::uvec3*>(drawCommandBuffer.GetMappedData());
@@ -88,6 +89,7 @@ void Text::Update()
 
     currentBufferIndex = nextIndex;
     nextIndex = (currentBufferIndex + 1) % MAX_FRAMES_IN_FLIGHT;
+    needUpdate = false;
 }
 
 bool Text::NeedUpdate()
@@ -97,7 +99,32 @@ bool Text::NeedUpdate()
 
 uint32_t Text::Insert(const TextInfo& textInfo)
 {
-    TextMap.emplace(id, textInfo);
+    textMap.emplace(id, uint32_t(textInfos.size()));
+    textInfos.push_back(textInfo);
     needUpdate = true;
     return id++;
+}
+
+void Text::createSSBODescriptor()
+{
+    auto& shaders = Resource::ResourceManager::GetCurrent()->Shaders;
+    auto& vertexDescriptorSetLayout =
+        shaders[6].GetDescriptors()[DEFAULT_VERTEX_LAYOUT].GetLayout();
+    vertexDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,
+        MaxBatchSize,
+        2,
+        vertexDescriptorSetLayout,
+        VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+    
+    charInfoDescriptor = new Descriptor(aDevice, charInfoBuffers, charInfoBuffers[0].GetSize(),
+        0, 1, 1000, VK_SHADER_STAGE_VERTEX_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+    if (aDevice->MeshShaderSupport())
+    {
+        auto& meshDescriptorSetLayout = shaders.back().GetDescriptors()[DEFAULT_MESHLET_LAYOUT].GetLayout();
+        meshDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,
+            MaxBatchSize * 3 + 1,
+            4,
+            meshDescriptorSetLayout,
+            VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+    }
 }

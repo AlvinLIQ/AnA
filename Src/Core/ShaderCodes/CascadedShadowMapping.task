@@ -7,7 +7,7 @@
 
 #include "mesh.h"
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
 layout(scalar, set = 0, binding = 0) buffer VertexSSBO
 {
@@ -34,6 +34,7 @@ layout(set = 1, binding = 0) uniform CameraBufferObject {
 layout(set = 1, binding = 1) uniform Frustum
 {
     vec4 planes[6];
+    vec4 lightPlanes[6];
 } frustum;
 
 
@@ -67,7 +68,42 @@ layout(std430, set = 6, binding = 5) buffer MeshletIDCountSSBO
 	uint meshletIDCount;
 };
 
+taskPayloadSharedEXT struct {
+    uint visibleIndices[512]; // max 512 visible meshlets per group
+    uint visibleCount;
+} taskData;
+
+bool isMeshletVisible(MeshletID mid)
+{
+    Meshlet meshlet = meshlets[mid.meshletID];
+    BoundingSphere boundingSphere = mcsbo.boundings[mid.meshletID];
+    mat4 transform = objects[mid.objectID].transform;
+    transform[3].w = 1.0;
+    vec3 center = (transform * vec4(boundingSphere.center, 1.0)).xyz;
+    float radius = distance(center,
+        vec3(transform * vec4(vertices[mvsbo.vertices[meshlets[mid.meshletID].vertexOffset + mcsbo.boundings[mid.meshletID].farVertexID]].position, 1.0)));
+
+    return  isSphereInsideFrustum(center, radius, frustum.lightPlanes);
+}
+
 void main()
 {
-    EmitMeshTasksEXT(meshletIDCount, 3, 1);
+    uint globalID = gl_GlobalInvocationID.x;
+    if (globalID >= meshletIDCount)
+        return;
+    bool visible = isMeshletVisible(meshletIDs[globalID]);
+
+    uvec4 ballot = subgroupBallot(visible);
+    if (visible)
+    {
+        uint index = subgroupBallotExclusiveBitCount(ballot);
+        taskData.visibleIndices[index] = globalID;
+    }
+
+    if (gl_LocalInvocationIndex == 0)
+    {
+        uint total = subgroupBallotBitCount(ballot);
+        taskData.visibleCount = total;
+	    EmitMeshTasksEXT(total, 2, 1);
+    }
 }

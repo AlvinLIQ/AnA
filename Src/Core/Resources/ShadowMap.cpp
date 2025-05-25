@@ -116,7 +116,9 @@ void ShadowMap::UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, u
         light.SetViewTarget(frustumCenter - lightDir * -minExtents.z, frustumCenter, glm::vec3(0, -1, 0));
         light.SetOrthographicProjection(minExtents.x, minExtents.y, maxExtents.x, maxExtents.y, 0.0f, maxExtents.z - minExtents.z);
 		auto cbo = (CascadeBufferObject*)cascadeBuffers[bufferIndex].GetMappedData();
-        cbo[i].viewProjMatrix = light.GetProjectionMatrix() * light.GetView();
+        cascades[i] = light.GetProjectionMatrix() * light.GetView();
+
+        cbo[i].viewProjMatrix = cascades[i];
         cbo[i].splitDepth = (nearPlane + splitDist * clipRange);
 
 	    lastSplitDist = cascadeSplits[i];
@@ -142,6 +144,7 @@ void ShadowMap::createShadowResources()
     bool samplersNotCreated = samplers.empty();
     if (samplersNotCreated)
         samplers.resize(images.size());
+    cascades.resize(SHADOW_MAP_CASCADE_COUNT);
     auto swapChain = SwapChain::GetCurrent();
     for (size_t i = 0; i < images.size(); i++)
     {
