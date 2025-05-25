@@ -5,7 +5,7 @@
 #include "../../Headers/Buffer.hpp"
 #include "Descriptor.hpp"
 
-#define SHADOW_MAP_CASCADE_COUNT 3
+#define SHADOW_MAP_CASCADE_COUNT 2
 
 namespace AnA
 {

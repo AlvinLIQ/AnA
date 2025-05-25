@@ -49,7 +49,7 @@ layout(set = 2, binding = 0) uniform LightBufferObject {
     float ambient;
 } lbo;
 
-#define SHADOW_MAP_CASCADE_COUNT 3
+#define SHADOW_MAP_CASCADE_COUNT 2
 struct Cascade {
     mat4 viewProj;
     float split;
@@ -91,7 +91,7 @@ void main()
     SetMeshOutputsEXT(meshlet.vertexCount, primitiveCount);
 
 	mat4 viewProj = cbo.proj * cbo.view;
-    float zOffset = ubo.cascades[1].split - ubo.cascades[0].split;
+    float zOffset = ubo.cascades[1].split - ubo.cascades[0].split * 1.75;
     mat4 transform = objects[mid.objectID].transform;
     uint texID = uint(transform[3].w);
     transform[3].w = 1.0;

@@ -27,7 +27,7 @@ layout(set = 2, binding = 0) uniform LightBufferObject {
 layout(set = 3, binding = 0) uniform sampler2D texSampler[];
 layout(set = 4, binding = 0) uniform sampler2DArray shadowSampler;
 
-#define SHADOW_MAP_CASCADE_COUNT 3
+#define SHADOW_MAP_CASCADE_COUNT 2
 struct Cascade {
     mat4 viewProj;
     float split;

@@ -471,6 +471,7 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
         {
             paths.push_back(currentPath);
         }
+        CDT::RemoveDuplicatesAndRemapEdges(*reinterpret_cast<std::vector<CDT::V2d<float>>*>(&character.vertices), edges);
         cdt.insertVertices(*reinterpret_cast<std::vector<CDT::V2d<float>>*>(&character.vertices));
         cdt.insertEdges(edges);
         cdt.eraseOuterTrianglesAndHoles();

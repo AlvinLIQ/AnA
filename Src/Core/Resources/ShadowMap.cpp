@@ -49,11 +49,11 @@ void ShadowMap::UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, u
     //glm::vec3 lightPos = lightDir * 2.0f;
     //float cascadeSplits[SHADOW_MAP_CASCADE_COUNT];
 
-	float nearPlane = 1.4f;
-	float farPlane = 28.0f;
+	float nearPlane = 0.5f;
+	float farPlane = 14.0f;
     float clipRange = farPlane - nearPlane;
-    float cascadeSplits[SHADOW_MAP_CASCADE_COUNT];
-
+    float cascadeSplits[SHADOW_MAP_CASCADE_COUNT] = {0.2f, 0.5f};
+/*
 	float minZ = nearPlane;
 	float maxZ = nearPlane + clipRange;
 
@@ -68,7 +68,7 @@ void ShadowMap::UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, u
 		float d = cascadeSplitLambda * (log - uniform) + uniform;
 		cascadeSplits[i] = (d - nearPlane) / clipRange;
 	}
-
+*/
     glm::mat4 invCam = glm::inverse(camera.GetProjectionMatrix() * camera.GetView());
     //float aspect = Resource::ResourceManager::GetCurrent()->MainCameraInfo.aspect;
 

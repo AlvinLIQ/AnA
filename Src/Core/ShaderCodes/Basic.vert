@@ -26,7 +26,7 @@ layout(set = 2, binding = 0) uniform LightBufferObject {
     float ambient;
 } lbo;
 
-#define SHADOW_MAP_CASCADE_COUNT 3
+#define SHADOW_MAP_CASCADE_COUNT 2
 struct Cascade {
     mat4 viewProj;
     float split;
