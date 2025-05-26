@@ -57,6 +57,8 @@ taskPayloadSharedEXT struct {
     uint textIndex;
 } taskData;
 
+const vec2 charSize = vec2(0.836363613, 0.99999994);
+
 void main()
 {
     CharacterInfo chInfo = charInfos[gl_WorkGroupID.x];
@@ -66,9 +68,9 @@ void main()
     SetMeshOutputsEXT(meshlet.vertexCount, primitiveCount);
     for (uint i = 0; i < meshlet.vertexCount; i++)
     {
-        vec2 pos = textInfo.scale * vertices[mvsbo.vertices[meshlet.vertexOffset + i]] + textInfo.offset;
-        pos.x += textInfo.scale.x * float(chInfo.index);
-        pos.y = -pos.y;
+        vec2 pos = textInfo.scale * charSize * vertices[mvsbo.vertices[meshlet.vertexOffset + i]] + textInfo.offset;
+        pos.x += textInfo.scale.x * charSize.x * float(chInfo.index) - 1.;
+        pos.y = -pos.y - charSize.y + textInfo.scale.y;
         gl_MeshVerticesEXT[i].gl_Position = vec4(pos, 0.0, 1.0);
         outColor[i] = vec3(0., 0., 0.);
     }
