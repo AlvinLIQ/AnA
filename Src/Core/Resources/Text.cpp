@@ -66,7 +66,7 @@ void Text::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferInd
 {
     shader.GetPipeline().Bind(commandBuffer);
     auto& sets = shader.GetDescriptorSets()[bufferIndex];
-    sets[0] = vertexDescriptor->GetSets()[0];
+    sets[0] = vertexDescriptor->GetSets()[currentBufferIndex];
     sets[1] = charInfoDescriptor->GetSets()[currentBufferIndex];
     sets[2] = meshDescriptor->GetSets()[currentBufferIndex];
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -82,7 +82,7 @@ void Text::DrawIndirect(CommandBuffer& commandBuffer)
 {
     aDevice->vkCmdDrawMeshTasksIndirectCountEXT(commandBuffer, drawCommandBuffer.GetBuffer(), 0,
         countBuffers[currentBufferIndex].GetBuffer(), 0,
-        drawCount,
+        1,
         sizeof(VkDrawMeshTasksIndirectCommandEXT));
 }
 
@@ -106,6 +106,8 @@ void Text::Update()
         chIndex = 0;
         textBuffer[textIndex].offset = textInfo.offset;
         textBuffer[textIndex].scale = textInfo.scale;
+        textBuffer[textIndex].chOffset = index;
+        textBuffer[textIndex].count = uint32_t(textInfo.text.length());
         for (auto& ch : textInfo.text)
         {
             //assert(ch < char(resourceManager->Characters.size()));
@@ -125,8 +127,8 @@ void Text::Update()
     }
     updateMeshlets(meshletOffset);
     glm::uvec3* drawCommand = reinterpret_cast<glm::uvec3*>(drawCommandBuffer.GetMappedData());
-    *drawCommand = glm::uvec3(index, 1, 1);
-    *reinterpret_cast<uint32_t*>(countBuffers[nextIndex].GetMappedData()) = totalTextLen ? 1u : 0u;
+    *drawCommand = glm::uvec3(textIndex, 1, 1);
+    *reinterpret_cast<uint32_t*>(countBuffers[nextIndex].GetMappedData()) = textIndex ? 1u : 0u;
 
     updateSSBODescriptor();
     currentBufferIndex = nextIndex;
@@ -150,7 +152,7 @@ uint32_t Text::Insert(const TextInfo& textInfo)
 void Text::updateMeshlets(size_t meshletOffset)
 {
     auto characters = Resource::ResourceManager::GetCurrent()->Characters;
-    auto meshletInfos = reinterpret_cast<MeshletInfo*>(vertexBuffer.GetMappedData());
+    auto meshletInfos = reinterpret_cast<MeshletInfo*>(meshletBuffers[nextIndex].GetMappedData());
     auto vertices = reinterpret_cast<glm::vec2*>(vertexBuffer.GetMappedData());
     auto meshletVertices = reinterpret_cast<uint32_t*>(meshletVertexBuffers[nextIndex].GetMappedData());
     auto meshletIndices = reinterpret_cast<uint8_t*>(meshletIndexBuffers[nextIndex].GetMappedData());

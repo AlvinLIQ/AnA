@@ -30,6 +30,7 @@ struct TextData
 {
     vec2 scale;
     vec2 offset;
+    uint chOffset;
     uint count;
 };
 
@@ -59,8 +60,8 @@ taskPayloadSharedEXT struct {
 void main()
 {
     CharacterInfo chInfo = charInfos[gl_WorkGroupID.x];
-	Meshlet meshlet = meshlets[uint(chInfo.ch)];
     TextData textInfo = textInfos[taskData.textIndex];
+	Meshlet meshlet = meshlets[uint(chInfo.ch) + textInfo.chOffset];
     uint primitiveCount = meshlet.indexCount / 3;
     SetMeshOutputsEXT(meshlet.vertexCount, primitiveCount);
     for (uint i = 0; i < meshlet.vertexCount; i++)

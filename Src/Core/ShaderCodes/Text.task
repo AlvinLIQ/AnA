@@ -27,6 +27,7 @@ struct TextData
 {
     vec2 scale;
     vec2 offset;
+    uint chOffset;
     uint count;
 };
 

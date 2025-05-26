@@ -16,6 +16,7 @@ namespace AnA
     {
         glm::vec2 scale;
         glm::vec2 offset;
+        uint32_t chOffset;
         uint32_t count;
     };
     struct TextInfo
