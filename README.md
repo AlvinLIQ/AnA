@@ -8,9 +8,11 @@
 
 ## To do
 * [ ] use ray tracing instead of traditional shadow map when having multiple light sources (enable by default when mesh shader is supported)
-* [ ] move descriptor sets model(vertices/indices) to resource manager
-* [ ] only pass pointers and count to shader/scene
-* [ ] consider using shared pointer for those resources
+* [X] move descriptor sets model(vertices/indices) to resource manager
+* [X] only pass pointers and count to shader/scene
+* [X] consider using shared pointer for those resources
+* [ ] optimize memory management
+* [ ] text x mesh shader
 * [ ] try pipeline cache
 
 ## Build&Run

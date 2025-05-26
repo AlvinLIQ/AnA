@@ -123,6 +123,7 @@ int main()
     
     auto sceneFile = ReadFile("Scenes/scene.ana");
     scene.Append(reinterpret_cast<MeshInfo*>(sceneFile.data()), sceneFile.size() / sizeof(MeshInfo));
+
     TextInfo textInfo;
     textInfo.offset = {0.2f, 0.1f};
     textInfo.scale = glm::vec2{0.1f};

@@ -25,6 +25,7 @@ ResourceManager::ResourceManager(Device* mDevice) :
     createDefaultDescriptors();
     createDefaultShaders();
     MainScene.Init();
+    TextContext.Init();
     //Points.Init();
     //Points.Topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
     Shapes = AnA::Shapes(mDevice);
@@ -320,13 +321,8 @@ void ResourceManager::GetDefaultTextDescriptorSetConfig(std::vector<std::vector<
         meshletIndexConfig.descriptorCount = 0;
         meshletIndexConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         meshletIndexConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-        Descriptor::DescriptorConfig meshletIDCountConfig{};
-        meshletIDCountConfig.binding = 3;
-        meshletIDCountConfig.descriptorCount = 0;
-        meshletIDCountConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-        meshletIDCountConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
 
-        descriptorSetConfigs.push_back({meshletConfig, meshletVertexConfig, meshletIndexConfig, meshletIDCountConfig});
+        descriptorSetConfigs.push_back({meshletConfig, meshletVertexConfig, meshletIndexConfig});
     }
 }
 

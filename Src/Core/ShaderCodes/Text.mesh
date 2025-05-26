@@ -20,7 +20,6 @@ struct CharacterInfo
 {
     uint8_t ch;
     uint index;
-    uint textIndex;
 };
 
 layout(scalar, set = 1, binding = 0) buffer CharacterInfoBufferObject {
@@ -31,6 +30,7 @@ struct TextData
 {
     vec2 scale;
     vec2 offset;
+    uint count;
 };
 
 layout(scalar, set = 1, binding = 1) buffer TextDataBufferObject {
@@ -52,19 +52,24 @@ layout(scalar, set = 2, binding = 2) buffer meshletIndexSSBO
     uint8_t primitives[];
 };
 
+taskPayloadSharedEXT struct {
+    uint textIndex;
+} taskData;
+
 void main()
 {
     CharacterInfo chInfo = charInfos[gl_WorkGroupID.x];
 	Meshlet meshlet = meshlets[uint(chInfo.ch)];
-    TextData textInfo = textInfos[chInfo.textIndex];
+    TextData textInfo = textInfos[taskData.textIndex];
     uint primitiveCount = meshlet.indexCount / 3;
     SetMeshOutputsEXT(meshlet.vertexCount, primitiveCount);
     for (uint i = 0; i < meshlet.vertexCount; i++)
     {
         vec2 pos = textInfo.scale * vertices[mvsbo.vertices[meshlet.vertexOffset + i]] + textInfo.offset;
         pos.x += textInfo.scale.x * float(chInfo.index);
+        pos.y = -pos.y;
         gl_MeshVerticesEXT[i].gl_Position = vec4(pos, 0.0, 1.0);
-        outColor[i] = vec3(1.);
+        outColor[i] = vec3(0., 0., 0.);
     }
 
     for (uint i = 0, offset; i < primitiveCount; i++)

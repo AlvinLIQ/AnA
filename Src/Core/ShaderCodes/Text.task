@@ -12,15 +12,26 @@ layout(scalar, set = 0, binding = 0) buffer VertexBufferObject {
     vec2 vertices[];
 };
 
-struct CharacterInfo{
-    vec2 scale;
-    vec2 offset;
-    vec3 color;
-    uint meshletID;
+struct CharacterInfo
+{
+    uint8_t ch;
+    uint index;
+    uint textIndex;
 };
 
 layout(scalar, set = 1, binding = 0) buffer CharacterInfoBufferObject {
     CharacterInfo charInfos[];
+};
+
+struct TextData
+{
+    vec2 scale;
+    vec2 offset;
+    uint count;
+};
+
+layout(scalar, set = 1, binding = 1) buffer TextDataBufferObject {
+    TextData textInfos[];
 };
 
 layout(scalar, set = 2, binding = 0) buffer meshletSSBO
@@ -43,7 +54,12 @@ layout(scalar, set = 2, binding = 3) buffer meshletCountSSBO
     uint meshletCount;
 };
 
+taskPayloadSharedEXT struct {
+    uint textIndex;
+} taskData;
+
 void main()
 {
-    EmitMeshTasksEXT(meshletCount, 1, 1);
+    taskData.textIndex = gl_WorkGroupID.x;
+    EmitMeshTasksEXT(textInfos[gl_WorkGroupID.x].count, 1, 1);
 }
