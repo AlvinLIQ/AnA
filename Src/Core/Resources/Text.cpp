@@ -71,6 +71,9 @@ void Text::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferInd
     sets[2] = meshDescriptor->GetSets()[currentBufferIndex];
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
         shader.GetPipelineLayout(), 0, 3, sets.data(), 0, nullptr);
+    glm::vec2 resolution = {float(commandBuffer.Extent.width), float(commandBuffer.Extent.height)};
+    vkCmdPushConstants(commandBuffer, shader.GetPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, 0, sizeof(glm::vec2), 
+        &resolution);
 }
 
 void Text::Draw(CommandBuffer& commandBuffer)
@@ -104,8 +107,9 @@ void Text::Update()
     for (auto& textInfo : textInfos)
     {
         chIndex = 0;
-        textBuffer[textIndex].offset = textInfo.offset;
-        textBuffer[textIndex].scale = textInfo.scale;
+        textBuffer[textIndex].size = textInfo.size;
+        textBuffer[textIndex].offset = textInfo.offset * 2.0f;
+        textBuffer[textIndex].color = textInfo.color;
         textBuffer[textIndex].chOffset = index;
         textBuffer[textIndex].count = uint32_t(textInfo.text.length());
         for (auto& ch : textInfo.text)

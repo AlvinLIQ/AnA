@@ -125,9 +125,10 @@ int main()
     scene.Append(reinterpret_cast<MeshInfo*>(sceneFile.data()), sceneFile.size() / sizeof(MeshInfo));
 
     TextInfo textInfo;
-    textInfo.offset = {0.0f, 0.0f};
-    textInfo.scale = glm::vec2{0.1f};
+    textInfo.offset = {0.5f, 0.5f};
+    textInfo.size = 100.0f;
     textInfo.text = "Ananas";
+    textInfo.color = {1.0f, 1.0f, 1.0f};
     resourceManager->TextContext.Insert(textInfo);
     editor.Run();
     return 0;

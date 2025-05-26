@@ -271,9 +271,9 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, 0, sizeof(terrainPushConstants), &terrainPushConstants);
     aDevice.vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
 */
+    swapChain.SetViewport(commandBuffer);
+    aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.TextContext, aResourceManager.Shaders[6], swapChain.CurrentFrame);
     swapChain.SetViewport(commandBuffer, aResourceManager.Shapes.Extent);
     aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.Shapes, aResourceManager.Shaders[1], swapChain.CurrentFrame);
-    swapChain.SetViewport(commandBuffer, actualSceneOffset);
-    aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.TextContext, aResourceManager.Shaders[6], swapChain.CurrentFrame);
     aRenderer.EndRenderPass(commandBuffer);
 }

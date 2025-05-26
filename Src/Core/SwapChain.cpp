@@ -134,6 +134,8 @@ void SwapChain::SetViewport(CommandBuffer& commandBuffer)
 {
     vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+    commandBuffer.Offset = scissor.offset;
+    commandBuffer.Extent = scissor.extent;
 }
 
 void SwapChain::SetViewport(CommandBuffer& commandBuffer, VkOffset2D& offset)
@@ -143,6 +145,8 @@ void SwapChain::SetViewport(CommandBuffer& commandBuffer, VkOffset2D& offset)
     VkRect2D _scissor = {offset, {swapChainExtent.width - offset.x, swapChainExtent.height - offset.y}};
     vkCmdSetViewport(commandBuffer, 0, 1, &_viewport);
     vkCmdSetScissor(commandBuffer, 0, 1, &_scissor);
+    commandBuffer.Offset = _scissor.offset;
+    commandBuffer.Extent = _scissor.extent;
 }
 
 void SwapChain::SetViewport(CommandBuffer& commandBuffer, VkExtent2D& extent)
@@ -152,6 +156,8 @@ void SwapChain::SetViewport(CommandBuffer& commandBuffer, VkExtent2D& extent)
     VkRect2D _scissor = {{0, 0}, extent};
     vkCmdSetViewport(commandBuffer, 0, 1, &_viewport);
     vkCmdSetScissor(commandBuffer, 0, 1, &_scissor);
+    commandBuffer.Offset = _scissor.offset;
+    commandBuffer.Extent = _scissor.extent;
 }
 
 void SwapChain::SetViewport(CommandBuffer& commandBuffer, VkOffset2D& offset, VkExtent2D& extent)
@@ -161,6 +167,8 @@ void SwapChain::SetViewport(CommandBuffer& commandBuffer, VkOffset2D& offset, Vk
     VkRect2D _scissor = {offset, {extent.width, extent.height}};
     vkCmdSetViewport(commandBuffer, 0, 1, &_viewport);
     vkCmdSetScissor(commandBuffer, 0, 1, &_scissor);
+    commandBuffer.Offset = _scissor.offset;
+    commandBuffer.Extent = _scissor.extent;
 }
 
 void SwapChain::RecreateSwapChain()

@@ -25,8 +25,9 @@ layout(scalar, set = 1, binding = 0) buffer CharacterInfoBufferObject {
 
 struct TextData
 {
-    vec2 scale;
+    float size;
     vec2 offset;
+    vec3 color;
     uint chOffset;
     uint count;
 };

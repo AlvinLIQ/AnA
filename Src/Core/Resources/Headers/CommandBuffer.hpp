@@ -20,6 +20,8 @@ namespace AnA
         VkCommandBuffer Begin(VkCommandBufferInheritanceInfo* pInheritanceInfo, VkOffset2D ltOffset, VkOffset2D rbOffset);
         void End();
         VkCommandBuffer Get() const;
+        VkOffset2D Offset;
+        VkExtent2D Extent;
     private:
         Device* aDevice;
         bool async;

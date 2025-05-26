@@ -28,8 +28,9 @@ layout(scalar, set = 1, binding = 0) buffer CharacterInfoBufferObject {
 
 struct TextData
 {
-    vec2 scale;
+    float size;
     vec2 offset;
+    vec3 color;
     uint chOffset;
     uint count;
 };
@@ -59,6 +60,10 @@ taskPayloadSharedEXT struct {
 
 const vec2 charSize = vec2(0.836363613, 0.99999994);
 
+layout(push_constant) uniform PushConsts {
+    vec2 resolution;
+} push;
+
 void main()
 {
     CharacterInfo chInfo = charInfos[gl_WorkGroupID.x];
@@ -66,13 +71,14 @@ void main()
 	Meshlet meshlet = meshlets[uint(chInfo.ch) + textInfo.chOffset];
     uint primitiveCount = meshlet.indexCount / 3;
     SetMeshOutputsEXT(meshlet.vertexCount, primitiveCount);
+    vec2 scale = vec2(textInfo.size / push.resolution.x, textInfo.size / push.resolution.y);
     for (uint i = 0; i < meshlet.vertexCount; i++)
     {
-        vec2 pos = textInfo.scale * charSize * vertices[mvsbo.vertices[meshlet.vertexOffset + i]] + textInfo.offset;
-        pos.x += textInfo.scale.x * charSize.x * float(chInfo.index) - 1.;
-        pos.y = -pos.y - charSize.y + textInfo.scale.y;
-        gl_MeshVerticesEXT[i].gl_Position = vec4(pos, 0.0, 1.0);
-        outColor[i] = vec3(0., 0., 0.);
+        vec2 pos = scale * charSize * vertices[mvsbo.vertices[meshlet.vertexOffset + i]];
+        pos.x += scale.x * charSize.x * float(chInfo.index) - 1.;
+        pos.y = -pos.y - charSize.y + scale.y;
+        gl_MeshVerticesEXT[i].gl_Position = vec4(pos + textInfo.offset, 0.0, 1.0);
+        outColor[i] = textInfo.color;
     }
 
     for (uint i = 0, offset; i < primitiveCount; i++)

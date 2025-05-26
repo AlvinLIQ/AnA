@@ -14,15 +14,17 @@ namespace AnA
     };
     struct TextData
     {
-        glm::vec2 scale;
+        float size;
         glm::vec2 offset;
+        glm::vec3 color;
         uint32_t chOffset;
         uint32_t count;
     };
     struct TextInfo
     {
-        glm::vec2 scale;
+        float size;
         glm::vec2 offset;
+        glm::vec3 color;
         std::string text;
     };
     class Text : public Renderable

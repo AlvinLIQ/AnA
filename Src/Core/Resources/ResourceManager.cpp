@@ -404,7 +404,7 @@ void ResourceManager::createDefaultShaders()
         Shaders.emplace_back(aDevice, Mesh_task, Mesh_mesh, Mesh_frag, renderPass
             , defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(uint32_t));
         Shaders.emplace_back(aDevice, Text_task, Text_mesh, Text_frag, renderPass
-            , textDescriptors, 3, 0);
+            , textDescriptors, 3, 0, sizeof(glm::vec2));
     }
 }
 
