@@ -132,22 +132,22 @@ void ResourceManager::UpdateCameraBuffer()
 
 void ResourceManager::Update()
 {
+    if (MainScene.NeedUpdate())
+    {
+        MainScene.Update();
+    }
+    if (TextContext.NeedUpdate())
+    {
+        TextContext.Update();
+    }
     UpdateCameraBuffer();
     uint32_t frameIndex = SwapChain::GetCurrent()->CurrentFrame;
     GlobalLight.UpdateBuffers(LightCamera, frameIndex);
     ShadowMap.UpdateBuffers(MainCamera, LightCamera, frameIndex);
     if (!LockCamera)
     {
-        FrustumPlanes::ExtractFrustumPlanes(ShadowMap.GetCascades()[0], *reinterpret_cast<FrustumPlanes*>(&ShadowMap.FrustumPlanes));
-        memcpy(&reinterpret_cast<FrustumPlanes*>(frustumBuffers[frameIndex].GetMappedData())[6], &ShadowMap.FrustumPlanes, sizeof(FrustumPlanes));
-    }
-    if (MainScene.NeedUpdate())
-    {
-        MainScene.CommitBufferUpdate();
-    }
-    if (TextContext.NeedUpdate())
-    {
-        TextContext.Update();
+        FrustumPlanes::ExtractFrustumPlanes(ShadowMap.GetCascades().back(), *reinterpret_cast<FrustumPlanes*>(&ShadowMap.FrustumPlanes));
+        memcpy(&reinterpret_cast<FrustumPlanes*>(frustumBuffers[frameIndex].GetMappedData())[1], &ShadowMap.FrustumPlanes, sizeof(FrustumPlanes));
     }
     /*
     recordedCallbacks = 0;

@@ -84,7 +84,7 @@ namespace AnA
         void DrawIndirect(CommandBuffer& commandBuffer) override;
         bool NeedUpdate() override
         {
-            return updateQueue.size();
+            return needUpdate;
         }
         bool BeginCommandBufferUpdate()
         {
@@ -160,7 +160,9 @@ namespace AnA
         std::vector<Range> updateQueue{};
         void applyVertexBufferUpdate(Model::Vertex* vertices, Model::Index* indices, Range& updateRange);
         uint32_t maxUpdateRange = 0;
+        bool needUpdate;
         bool commandBufferNeedUpdate = false;
+        std::mutex _mutex;
         std::unordered_map<uint32_t, uint32_t> textureIdMap{};
         std::vector<VkDescriptorImageInfo> textureInfos;
         std::vector<Descriptor*> samplersDescriptors;

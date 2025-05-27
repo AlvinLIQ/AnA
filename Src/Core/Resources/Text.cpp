@@ -91,6 +91,7 @@ void Text::DrawIndirect(CommandBuffer& commandBuffer)
 
 void Text::Update()
 {
+    needUpdate = false;
     uint32_t index = 0, chIndex, textIndex = 0;
     if (charInfoBuffers[nextIndex].GetSize() < totalTextLen * sizeof(CharacterInfo))
     {
@@ -135,9 +136,6 @@ void Text::Update()
     *reinterpret_cast<uint32_t*>(countBuffers[nextIndex].GetMappedData()) = textIndex ? 1u : 0u;
 
     updateSSBODescriptor();
-    currentBufferIndex = nextIndex;
-    nextIndex = (currentBufferIndex + 1) % MAX_FRAMES_IN_FLIGHT;
-    needUpdate = false;
 }
 
 bool Text::NeedUpdate()
@@ -251,4 +249,7 @@ void Text::updateSSBODescriptor()
         aDevice->UpdateDescriptorSet(bufferInfo, 2, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
         meshDescriptor->GetSets()[nextIndex]);
     }
+
+    currentBufferIndex = nextIndex;
+    nextIndex = (currentBufferIndex + 1) % MAX_FRAMES_IN_FLIGHT; 
 }

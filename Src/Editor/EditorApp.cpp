@@ -60,7 +60,7 @@ void EditorApp::onLoop()
     aResourceManager.MainCameraInfo.UpdateCameraPerspective(aResourceManager.MainCamera);
 
     (editorApp->controlMap["shadowMapView"])->TextureLayer =
-        uint32_t(std::min(2.0f, static_cast<Controls::Slider*>(editorApp->controlMap["shadowMapSlider"])->Value * 3.0f));
+        uint32_t(std::min(float(SHADOW_MAP_CASCADE_COUNT - 1), static_cast<Controls::Slider*>(editorApp->controlMap["shadowMapSlider"])->Value * float(SHADOW_MAP_CASCADE_COUNT)));
     aResourceManager.GlobalLight.Direction = {static_cast<Controls::Slider*>(editorApp->controlMap["lightX"])->Value * 10.0f - 5.0f,
     static_cast<Controls::Slider*>(editorApp->controlMap["lightY"])->Value * 10.0f - 5.0f,
     static_cast<Controls::Slider*>(editorApp->controlMap["lightZ"])->Value * 10.0f - 5.0f};
@@ -126,7 +126,7 @@ int main()
 
     TextInfo textInfo;
     textInfo.offset = {0.5f, 0.5f};
-    textInfo.size = 100.0f;
+    textInfo.size = 20.0f;
     textInfo.text = "Ananas";
     textInfo.color = {1.0f, 1.0f, 1.0f};
     resourceManager->TextContext.Insert(textInfo);

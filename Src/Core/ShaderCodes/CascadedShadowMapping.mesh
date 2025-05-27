@@ -34,6 +34,7 @@ layout(set = 1, binding = 0) uniform CameraBufferObject {
 layout(set = 1, binding = 1) uniform Frustum
 {
     vec4 planes[6];
+    vec4 lightPlanes[6];
 } frustum;
 
 #define SHADOW_MAP_CASCADE_COUNT 2

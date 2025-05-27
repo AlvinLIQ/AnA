@@ -196,7 +196,7 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
     {
         appendSamplersDescriptor(imageInfos);
     }
-    Update();
+    needUpdate = true;
 }
 
 void Scene::Append(std::vector<Model::Vertex>& meshVertices, std::vector<uint32_t>& meshIndices, Transform transform, uint32_t textureId)
@@ -243,27 +243,27 @@ void Scene::Append(std::vector<Model::Vertex>& meshVertices, std::vector<uint32_
     {
         appendSamplersDescriptor(imageInfos);
     }
-    Update();
+    needUpdate = true;
 }
 
 void Scene::RemoveAt(uint32_t meshIndex)
 {
     meshes.erase(meshes.begin() + meshIndex);
-    Update();
+    needUpdate = true;
 }
 
 void Scene::RemoveAt(Range removeRange)
 {
     for (uint32_t i = 0; i < removeRange.y; i++)
         meshes.erase(meshes.begin() + i + removeRange.x);
-    Update();
+    needUpdate = true;
 }
 
 void Scene::RemoveAt(std::vector<uint32_t> meshIndices)
 {
     for (auto& meshIndex : meshIndices)
         meshes.erase(meshes.begin() + meshIndex);
-    Update();
+    needUpdate = true;
 }
 
 void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIndex)
@@ -339,10 +339,12 @@ void Scene::CommitBufferUpdate()
 
 void Scene::Update()
 {
+    needUpdate = false;
     if (IsRunning)
     {
         Resource::ResourceManager::GetCurrent()->TaskPool.Enqueue([this]()
         {
+            Resource::ResourceManager::GetCurrent()->TaskPool.Join();
             this->updateAll();
         });
     }
@@ -627,6 +629,7 @@ void Scene::createSamplerDescriptor()
 
 void Scene::updateAll()
 {
+    std::unique_lock<std::mutex> unique_lock(_mutex);
     if (vertexCount * sizeof(Model::Vertex) > vertexBuffers[nextIndex].GetSize())
     {
         vertexBuffers[nextIndex].Resize((vertexCount + 1000) * sizeof(Model::Vertex));
