@@ -4,6 +4,7 @@
 #include "../../Headers/Buffer.hpp"
 #include <unordered_map>
 #include <string>
+#include <mutex>
 
 namespace AnA
 {
@@ -27,6 +28,12 @@ namespace AnA
         glm::vec3 color;
         std::string text;
     };
+    struct TextMapData
+    {
+        TextInfo textInfo;
+        uint32_t index;
+        uint32_t capacity;
+    };
     class Text : public Renderable
     {
     public:
@@ -38,15 +45,20 @@ namespace AnA
         void DrawIndirect(CommandBuffer& commandBuffer) override;
         void Update() override;
         bool NeedUpdate() override;
-        uint32_t Insert(const TextInfo& textInfo);
+        uint32_t Insert(const TextInfo& textInfo, uint32_t capacity = 0);
+        void Remove(uint32_t id);
+        void UpdateLayout(uint32_t id);
+        void UpdateText(uint32_t id, const std::string& text);
+        TextInfo* GetInfoById(uint32_t id);
     private:
         Device* aDevice{nullptr};
-        size_t totalTextLen = 0;
-        std::unordered_map<uint32_t, uint32_t> textMap{};
+        size_t totalCharCount = 0;
+        std::unordered_map<uint32_t, TextMapData> textMap{};
         std::unordered_map<char, char> characterMap{};
-        std::vector<TextInfo> textInfos{};
         std::vector<char> meshlets;
+        std::mutex _mutex;
         void updateMeshlets(size_t meshletOffset);
+        void updateAll();
         Buffer vertexBuffer;
         Buffer textBuffers[MAX_FRAMES_IN_FLIGHT];
         Buffer charInfoBuffers[MAX_FRAMES_IN_FLIGHT];
@@ -55,11 +67,10 @@ namespace AnA
         Buffer drawCommandBuffer;
         uint32_t meshletVertexCount = 0;
         uint32_t meshletIndexCount = 0;
-        Buffer meshletBuffers[MAX_FRAMES_IN_FLIGHT];
-        Buffer meshletVertexBuffers[MAX_FRAMES_IN_FLIGHT];
-        Buffer meshletIndexBuffers[MAX_FRAMES_IN_FLIGHT];
+        Buffer meshletBuffer;
+        Buffer meshletVertexBuffer;
+        Buffer meshletIndexBuffer;
         Buffer countBuffers[MAX_FRAMES_IN_FLIGHT];
-        uint32_t drawCount = 0;
         Descriptor* vertexDescriptor{};
         Descriptor* charInfoDescriptor{};
         Descriptor* meshDescriptor{};

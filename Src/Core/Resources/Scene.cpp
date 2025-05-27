@@ -340,20 +340,12 @@ void Scene::CommitBufferUpdate()
 void Scene::Update()
 {
     needUpdate = false;
-    if (IsRunning)
+    Resource::ResourceManager::GetCurrent()->TaskPool.Enqueue([this]()
     {
-        Resource::ResourceManager::GetCurrent()->TaskPool.Enqueue([this]()
-        {
-            Resource::ResourceManager::GetCurrent()->TaskPool.Join();
-            this->updateAll();
-        });
-    }
-    else
-    {
-        updateAll();
-    }
+        Resource::ResourceManager::GetCurrent()->TaskPool.Join();
+        this->updateAll();
+    });
 }
-
 
 void Scene::UpdateBuffers(Range updateRange)
 {

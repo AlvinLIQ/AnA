@@ -107,6 +107,13 @@ void EditorApp::saveSceneButton_Click(void* , PointerEventArgs& )
     fclose(f);*/
 }
 
+void EditorApp::appendTextButton_Click(void* , PointerEventArgs& )
+{
+    auto& aResourceManager = *Resource::ResourceManager::GetCurrent();
+    auto& textContext = aResourceManager.TextContext;
+    textContext.UpdateText(0, textContext.GetInfoById(0)->text + "ananas");
+}
+
 void EditorApp::exitButton_Click(void* , PointerEventArgs& )
 {
     exit(0);

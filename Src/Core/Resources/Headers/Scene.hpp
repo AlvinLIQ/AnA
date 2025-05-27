@@ -143,7 +143,6 @@ namespace AnA
         {
             return samplersDescriptors[0]->GetSets()[0];
         }
-        bool IsRunning = false;
     private:
         Device* aDevice;
         std::vector<Buffer> vertexBuffers{};

@@ -27,6 +27,26 @@ void Text::Init()
     drawCommandBuffer.Map();
     vertexBuffer = Buffer(aDevice, sizeof(glm::vec2) * 3000, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
     vertexBuffer.Map();
+    if (aDevice->MeshShaderSupport())
+    {
+        meshletBuffer = Buffer(aDevice, 100 * sizeof(MeshletInfo),
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+
+         meshletBuffer.Map();
+
+         meshletVertexBuffer = Buffer(aDevice, 500 * sizeof(uint32_t),
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+
+          meshletVertexBuffer.Map();
+
+         meshletIndexBuffer = Buffer(aDevice, 1000,
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+
+         meshletIndexBuffer.Map();
+    }
     for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
         charInfoBuffers[i] = Buffer(aDevice, sizeof(CharacterInfo) * 1000, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
@@ -38,26 +58,6 @@ void Text::Init()
         countBuffers[i] = Buffer(aDevice, sizeof(uint32_t), VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         countBuffers[i].Map();
         *reinterpret_cast<uint32_t*>(countBuffers[i].GetMappedData()) = 0u;
-        if (aDevice->MeshShaderSupport())
-        {
-            meshletBuffers[i] = Buffer(aDevice, 100 * sizeof(MeshletInfo),
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-
-            meshletBuffers[i].Map();
-
-            meshletVertexBuffers[i] = Buffer(aDevice, 500 * sizeof(uint32_t),
-                VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-                VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-
-            meshletVertexBuffers[i].Map();
-
-            meshletIndexBuffers[i] = Buffer(aDevice, 1000,
-                VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-                VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-
-            meshletIndexBuffers[i].Map();
-        }
     }
     createSSBODescriptor();
 }
@@ -92,21 +92,95 @@ void Text::DrawIndirect(CommandBuffer& commandBuffer)
 void Text::Update()
 {
     needUpdate = false;
-    uint32_t index = 0, chIndex, textIndex = 0;
-    if (charInfoBuffers[nextIndex].GetSize() < totalTextLen * sizeof(CharacterInfo))
+    Resource::ResourceManager::GetCurrent()->TaskPool.Enqueue([this]()
     {
-        charInfoBuffers[nextIndex].Resize(totalTextLen * sizeof(CharacterInfo));
+        this->updateAll();
+    });
+}
+
+bool Text::NeedUpdate()
+{
+    return needUpdate;
+}
+
+uint32_t Text::Insert(const TextInfo& textInfo, uint32_t capacity)
+{
+    TextMapData textMapData = {textInfo, 0, std::max(capacity, uint32_t(textInfo.text.size()))};
+    totalCharCount += textMapData.capacity;
+    textMap.emplace(id, std::move(textMapData));
+    needUpdate = true;
+    return id++;
+}
+
+void Text::Remove(uint32_t id)
+{
+    auto iter = textMap.find(id);
+    if (iter != textMap.end())
+    {
+        totalCharCount -= iter->second.capacity;
+        textMap.erase(iter);
+        needUpdate = true;
     }
-    if (textBuffers[nextIndex].GetSize() < textInfos.size() * sizeof(TextData))
+}
+
+void Text::UpdateLayout(uint32_t id)
+{
+    auto& textMapData = textMap[id];
+    TextData* textBuffer = reinterpret_cast<TextData*>(textBuffers[currentBufferIndex].GetMappedData());
+    textBuffer[textMapData.index].size = textMapData.textInfo.size;
+    textBuffer[textMapData.index].offset = textMapData.textInfo.offset * 2.0f;
+    textBuffer[textMapData.index].color = textMapData.textInfo.color;
+}
+
+void Text::UpdateText(uint32_t id, const std::string& text)
+{
+    auto& textMapData = textMap[id];
+    textMapData.textInfo.text = text;
+    if (uint32_t(text.length()) > textMapData.capacity)
     {
-        textBuffers[nextIndex].Resize(textInfos.size() * sizeof(TextData));
+        textMapData.capacity = uint32_t(text.length());
+        Update();
+    }
+    else
+    {
+        TextData* textBuffer = reinterpret_cast<TextData*>(textBuffers[currentBufferIndex].GetMappedData());
+        textBuffer[textMapData.index].count = uint32_t(textMapData.textInfo.text.length());
+        CharacterInfo* chInfoBuffer = reinterpret_cast<CharacterInfo*>(charInfoBuffers[nextIndex].GetMappedData());
+        uint32_t chOffset = textBuffer[textMapData.index].chOffset;
+        for (size_t i = 0; i < textMapData.textInfo.text.size(); i++)
+        {
+            auto& chInfo = chInfoBuffer[chOffset + i];
+            chInfo.ch = textMapData.textInfo.text[i];
+            chInfo.index = uint32_t(i);
+        }
+    }
+}
+
+TextInfo* Text::GetInfoById(uint32_t id)
+{
+    return &textMap[id].textInfo;
+}
+
+void Text::updateAll()
+{
+    std::unique_lock<std::mutex> lock(_mutex);
+    uint32_t index = 0, chIndex, textIndex = 0;
+    if (charInfoBuffers[nextIndex].GetSize() < totalCharCount * sizeof(CharacterInfo))
+    {
+        charInfoBuffers[nextIndex].Resize(totalCharCount * sizeof(CharacterInfo));
+    }
+    if (textBuffers[nextIndex].GetSize() < textMap.size() * sizeof(TextData))
+    {
+        textBuffers[nextIndex].Resize(textMap.size() * sizeof(TextData));
     }
 
     CharacterInfo* chInfoBuffer = reinterpret_cast<CharacterInfo*>(charInfoBuffers[nextIndex].GetMappedData());
     TextData* textBuffer = reinterpret_cast<TextData*>(textBuffers[nextIndex].GetMappedData());
     auto meshletOffset = meshlets.size();
-    for (auto& textInfo : textInfos)
+    for (auto& iter : textMap)
     {
+        iter.second.index = textIndex;
+        auto& textInfo = iter.second.textInfo;
         chIndex = 0;
         textBuffer[textIndex].size = textInfo.size;
         textBuffer[textIndex].offset = textInfo.offset * 2.0f;
@@ -138,26 +212,13 @@ void Text::Update()
     updateSSBODescriptor();
 }
 
-bool Text::NeedUpdate()
-{
-    return needUpdate;
-}
-
-uint32_t Text::Insert(const TextInfo& textInfo)
-{
-    textMap.emplace(id, uint32_t(textInfos.size()));
-    textInfos.push_back(textInfo);
-    needUpdate = true;
-    return id++;
-}
-
 void Text::updateMeshlets(size_t meshletOffset)
 {
     auto characters = Resource::ResourceManager::GetCurrent()->Characters;
-    auto meshletInfos = reinterpret_cast<MeshletInfo*>(meshletBuffers[nextIndex].GetMappedData());
+    auto meshletInfos = reinterpret_cast<MeshletInfo*>(meshletBuffer.GetMappedData());
     auto vertices = reinterpret_cast<glm::vec2*>(vertexBuffer.GetMappedData());
-    auto meshletVertices = reinterpret_cast<uint32_t*>(meshletVertexBuffers[nextIndex].GetMappedData());
-    auto meshletIndices = reinterpret_cast<uint8_t*>(meshletIndexBuffers[nextIndex].GetMappedData());
+    auto meshletVertices = reinterpret_cast<uint32_t*>(meshletVertexBuffer.GetMappedData());
+    auto meshletIndices = reinterpret_cast<uint8_t*>(meshletIndexBuffer.GetMappedData());
     for (size_t i = meshletOffset; i < meshlets.size(); i++)
     {
         auto& ch = characters[meshlets[i]];
@@ -233,19 +294,19 @@ void Text::updateSSBODescriptor()
     if (aDevice->MeshShaderSupport())
     {
         //Meshlet Buffer
-        bufferInfo.buffer = meshletBuffers[nextIndex].GetBuffer();
+        bufferInfo.buffer = meshletBuffer.GetBuffer();
         bufferInfo.offset = 0;
-        bufferInfo.range = meshletBuffers[nextIndex].GetSize();
+        bufferInfo.range = meshletBuffer.GetSize();
         aDevice->UpdateDescriptorSet(bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
         meshDescriptor->GetSets()[nextIndex]);
-        bufferInfo.buffer = meshletVertexBuffers[nextIndex].GetBuffer();
+        bufferInfo.buffer = meshletVertexBuffer.GetBuffer();
         bufferInfo.offset = 0;
-        bufferInfo.range = meshletVertexBuffers[nextIndex].GetSize();
+        bufferInfo.range = meshletVertexBuffer.GetSize();
         aDevice->UpdateDescriptorSet(bufferInfo, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
         meshDescriptor->GetSets()[nextIndex]);
-        bufferInfo.buffer = meshletIndexBuffers[nextIndex].GetBuffer();
+        bufferInfo.buffer = meshletIndexBuffer.GetBuffer();
         bufferInfo.offset = 0;
-        bufferInfo.range = meshletIndexBuffers[nextIndex].GetSize();
+        bufferInfo.range = meshletIndexBuffer.GetSize();
         aDevice->UpdateDescriptorSet(bufferInfo, 2, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
         meshDescriptor->GetSets()[nextIndex]);
     }
