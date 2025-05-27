@@ -107,13 +107,6 @@ void EditorApp::saveSceneButton_Click(void* , PointerEventArgs& )
     fclose(f);*/
 }
 
-void EditorApp::appendTextButton_Click(void* , PointerEventArgs& )
-{
-    auto& aResourceManager = *Resource::ResourceManager::GetCurrent();
-    auto& textContext = aResourceManager.TextContext;
-    textContext.UpdateText(0, textContext.GetInfoById(0)->text + "ananas");
-}
-
 void EditorApp::exitButton_Click(void* , PointerEventArgs& )
 {
     exit(0);
@@ -132,11 +125,11 @@ int main()
     scene.Append(reinterpret_cast<MeshInfo*>(sceneFile.data()), sceneFile.size() / sizeof(MeshInfo));
 
     TextInfo textInfo;
-    textInfo.offset = {0.5f, 0.5f};
+    textInfo.offset = {0.0f, 0.0f};
     textInfo.size = 20.0f;
-    textInfo.text = "Ananas";
-    textInfo.color = {1.0f, 1.0f, 1.0f};
-    resourceManager->TextContext.Insert(textInfo);
+    textInfo.text = "AnA";
+    textInfo.color = glm::vec3{0.7f};
+    resourceManager->TextContext.Insert(textInfo, 30);
     editor.Run();
     return 0;
 }

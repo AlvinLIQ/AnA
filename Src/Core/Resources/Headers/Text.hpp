@@ -68,7 +68,6 @@ namespace AnA
         uint32_t meshletVertexCount = 0;
         uint32_t meshletIndexCount = 0;
         Buffer meshletBuffer;
-        Buffer meshletVertexBuffer;
         Buffer meshletIndexBuffer;
         Buffer countBuffers[MAX_FRAMES_IN_FLIGHT];
         Descriptor* vertexDescriptor{};

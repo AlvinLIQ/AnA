@@ -44,12 +44,7 @@ layout(scalar, set = 2, binding = 0) buffer meshletSSBO
     Meshlet meshlets[];
 };
 
-layout(std430, set = 2, binding = 1) buffer meshletVertexSSBO
-{
-    uint vertices[];
-} mvsbo;
-
-layout(scalar, set = 2, binding = 2) buffer meshletIndexSSBO
+layout(scalar, set = 2, binding = 1) buffer meshletIndexSSBO
 {
     uint8_t primitives[];
 };
@@ -74,7 +69,7 @@ void main()
     vec2 scale = vec2(textInfo.size / push.resolution.x, textInfo.size / push.resolution.y);
     for (uint i = 0; i < meshlet.vertexCount; i++)
     {
-        vec2 pos = scale * charSize * vertices[mvsbo.vertices[meshlet.vertexOffset + i]];
+        vec2 pos = scale * charSize * vertices[meshlet.vertexOffset + i];
         pos.x += scale.x * charSize.x * float(chInfo.index) - 1.;
         pos.y = -pos.y - charSize.y + scale.y;
         gl_MeshVerticesEXT[i].gl_Position = vec4(pos + textInfo.offset, 0.0, 1.0);

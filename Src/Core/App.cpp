@@ -129,6 +129,7 @@ void App::Run()
                 terrainSize + "x" + terrainSize + " Window Size:" +
                 std::to_string(aWindow.Width) + "x" + std::to_string(aWindow.Height);
             title.Copy(info.c_str(), info.length(), sizeof(cTitle) - 1);
+            aResourceManager.TextContext.UpdateText(0, title.Str());
             glfwSetWindowTitle(aWindow.GetGLFWwindow(), title.Str());
             prevSecond = 0.0f;
             frameCount = 0;

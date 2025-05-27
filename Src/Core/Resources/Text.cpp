@@ -25,27 +25,21 @@ void Text::Init()
 {
     drawCommandBuffer = Buffer(aDevice, sizeof(VkDrawMeshTasksIndirectCommandEXT), VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
     drawCommandBuffer.Map();
-    vertexBuffer = Buffer(aDevice, sizeof(glm::vec2) * 3000, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+    vertexBuffer = Buffer(aDevice, sizeof(glm::vec2) * 6000, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
     vertexBuffer.Map();
     if (aDevice->MeshShaderSupport())
     {
-        meshletBuffer = Buffer(aDevice, 100 * sizeof(MeshletInfo),
+        meshletBuffer = Buffer(aDevice, 128 * sizeof(MeshletInfo),
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
 
-         meshletBuffer.Map();
+        meshletBuffer.Map();
 
-         meshletVertexBuffer = Buffer(aDevice, 500 * sizeof(uint32_t),
+        meshletIndexBuffer = Buffer(aDevice, 6000,
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
 
-          meshletVertexBuffer.Map();
-
-         meshletIndexBuffer = Buffer(aDevice, 1000,
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-
-         meshletIndexBuffer.Map();
+        meshletIndexBuffer.Map();
     }
     for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
@@ -143,16 +137,26 @@ void Text::UpdateText(uint32_t id, const std::string& text)
     }
     else
     {
+        _mutex.lock();
         TextData* textBuffer = reinterpret_cast<TextData*>(textBuffers[currentBufferIndex].GetMappedData());
-        textBuffer[textMapData.index].count = uint32_t(textMapData.textInfo.text.length());
-        CharacterInfo* chInfoBuffer = reinterpret_cast<CharacterInfo*>(charInfoBuffers[nextIndex].GetMappedData());
+        CharacterInfo* chInfoBuffer = reinterpret_cast<CharacterInfo*>(charInfoBuffers[currentBufferIndex].GetMappedData());
         uint32_t chOffset = textBuffer[textMapData.index].chOffset;
+        size_t meshletOffset = meshlets.size();
         for (size_t i = 0; i < textMapData.textInfo.text.size(); i++)
         {
             auto& chInfo = chInfoBuffer[chOffset + i];
-            chInfo.ch = textMapData.textInfo.text[i];
+            auto iter = characterMap.find(textMapData.textInfo.text[i]);
+            if (iter == characterMap.end())
+            {
+                iter = characterMap.emplace(textMapData.textInfo.text[i], char(meshlets.size())).first;
+                meshlets.push_back(textMapData.textInfo.text[i]);
+            }
+            chInfo.ch = iter->second;
             chInfo.index = uint32_t(i);
         }
+        updateMeshlets(meshletOffset);
+        textBuffer[textMapData.index].count = uint32_t(textMapData.textInfo.text.length());
+        _mutex.unlock();
     }
 }
 
@@ -210,6 +214,7 @@ void Text::updateAll()
     *reinterpret_cast<uint32_t*>(countBuffers[nextIndex].GetMappedData()) = textIndex ? 1u : 0u;
 
     updateSSBODescriptor();
+    printf("%u, %u, %lu\n", meshletVertexCount, meshletIndexCount, totalCharCount);
 }
 
 void Text::updateMeshlets(size_t meshletOffset)
@@ -217,7 +222,6 @@ void Text::updateMeshlets(size_t meshletOffset)
     auto characters = Resource::ResourceManager::GetCurrent()->Characters;
     auto meshletInfos = reinterpret_cast<MeshletInfo*>(meshletBuffer.GetMappedData());
     auto vertices = reinterpret_cast<glm::vec2*>(vertexBuffer.GetMappedData());
-    auto meshletVertices = reinterpret_cast<uint32_t*>(meshletVertexBuffer.GetMappedData());
     auto meshletIndices = reinterpret_cast<uint8_t*>(meshletIndexBuffer.GetMappedData());
     for (size_t i = meshletOffset; i < meshlets.size(); i++)
     {
@@ -225,7 +229,6 @@ void Text::updateMeshlets(size_t meshletOffset)
         for (size_t j = 0; j < ch.vertices.size(); j++)
         {
             vertices[meshletVertexCount + j] = ch.vertices[j];
-            meshletVertices[meshletVertexCount + j] = meshletVertexCount + j;
         }
         for (size_t j = 0; j < ch.indices.size(); j++)
         {
@@ -299,15 +302,10 @@ void Text::updateSSBODescriptor()
         bufferInfo.range = meshletBuffer.GetSize();
         aDevice->UpdateDescriptorSet(bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
         meshDescriptor->GetSets()[nextIndex]);
-        bufferInfo.buffer = meshletVertexBuffer.GetBuffer();
-        bufferInfo.offset = 0;
-        bufferInfo.range = meshletVertexBuffer.GetSize();
-        aDevice->UpdateDescriptorSet(bufferInfo, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-        meshDescriptor->GetSets()[nextIndex]);
         bufferInfo.buffer = meshletIndexBuffer.GetBuffer();
         bufferInfo.offset = 0;
         bufferInfo.range = meshletIndexBuffer.GetSize();
-        aDevice->UpdateDescriptorSet(bufferInfo, 2, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+        aDevice->UpdateDescriptorSet(bufferInfo, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
         meshDescriptor->GetSets()[nextIndex]);
     }
 

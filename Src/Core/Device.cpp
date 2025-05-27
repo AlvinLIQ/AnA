@@ -391,7 +391,7 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
                     glm::vec2 p0 = currentPath.back();
                     glm::vec2 p1 = {static_cast<float>(vertex.cx) * scale, static_cast<float>(vertex.cy) * scale};
                     glm::vec2 p2 = {static_cast<float>(vertex.x)  * scale, static_cast<float>(vertex.y)  * scale};
-                    const int step = 5;
+                    const int step = 3;
                     glm::vec2 t1 = (p1 - p0) / static_cast<float>(step);
                     glm::vec2 t2 = (p2 - p1) / static_cast<float>(step);
                     for (int j = 0; j < step; j++)
@@ -437,7 +437,7 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
                     glm::vec2 p2 = {vertex.cx1 * scale, vertex.cy1 * scale};
                     glm::vec2 p3 = {vertex.x * scale, vertex.y * scale};
 
-                    const int steps = 5;
+                    const int steps = 3;
                     for (int j = 1; j <= steps; ++j)
                     {
                         float t = float(j) / steps;
