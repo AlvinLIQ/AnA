@@ -48,11 +48,10 @@ const mat4 biasMat = mat4(
 float textureProj(vec4 shadowCoord, vec2 offset, uint cascadeIndex)
 {
 	float shadow = 1.0;
-	float bias = 0.0035;
 
 	if ( shadowCoord.z > -1.0 && shadowCoord.z < 1.0 ) {
 		float dist = texture(shadowSampler, vec3(shadowCoord.xy + offset, cascadeIndex)).r;
-		if (shadowCoord.w > 0 && dist < shadowCoord.z - bias) {
+		if (shadowCoord.w > 0 && dist < shadowCoord.z) {
 		    float edge = ubo.cascades[SHADOW_MAP_CASCADE_COUNT - 1].split * 3.0;
 			shadow = 1.0 - (0.5 * smoothstep(edge, edge - 2.0, viewPosZ));
 		}

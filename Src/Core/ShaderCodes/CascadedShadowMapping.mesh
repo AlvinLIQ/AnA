@@ -78,7 +78,6 @@ void main()
     uint primitiveCount = meshlet.indexCount / 3;
     SetMeshOutputsEXT(meshlet.vertexCount, primitiveCount);
 
-    float zOffset = cascades[1].split - cascades[0].split;
     mat4 transform = objects[mid.objectID].transform;
     transform[3].w = 1.0;
     
