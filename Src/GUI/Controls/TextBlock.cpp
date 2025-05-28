@@ -24,6 +24,8 @@ TextBlock::TextBlock(const char* text, glm::vec4 color)
 
 TextBlock::~TextBlock()
 {
+    auto& textContext = Resource::ResourceManager::GetCurrent()->TextContext;
+    textContext.Remove(id);
 }
 
 void TextBlock::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
@@ -50,7 +52,7 @@ void TextBlock::ApplyRenderInfo(Shape* , std::vector<VkDescriptorImageInfo>& , u
         auto& textContext = Resource::ResourceManager::GetCurrent()->TextContext;
         auto info = textContext.GetInfoById(id);
         info->color = FontColor;
-        
+
         info->offset = {offset.x() * 0.5f, offset.y() * 0.5f + 0.5f};
         textContext.UpdateLayout(id);
     }
