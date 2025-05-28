@@ -50,6 +50,7 @@ namespace AnA
         void UpdateLayout(uint32_t id);
         void UpdateText(uint32_t id, const std::string& text);
         TextInfo* GetInfoById(uint32_t id);
+        uint32_t GetTextCount();
     private:
         Device* aDevice{nullptr};
         size_t totalCharCount = 0;

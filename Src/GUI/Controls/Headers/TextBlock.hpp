@@ -18,11 +18,14 @@ namespace AnA
             void Text(const char* newText);
             const char* Text();
 
-            VkDescriptorImageInfo GetDescriptorImageInfo() override;
             bool IsWrapping;
+            Float FontSize = 25.0f;
+            glm::vec4 FontColor{0.0f, 0.0f, 0.0f, 1.0f};
+            virtual void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
+        private:
+            
         protected:
-            String text = "";
-            Texture* texture{nullptr};
+            uint32_t id = -1u;
         };
     }
 }

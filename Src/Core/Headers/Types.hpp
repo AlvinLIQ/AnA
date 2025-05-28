@@ -299,6 +299,23 @@ namespace AnA
         {
             return Vec{other.data[0] ? data[0] / other.data[0] : 0, other.data[1] ? data[1] / other.data[1] : 0};
         }
+        Vec operator+(const T& scalar) const
+        {
+            return Vec{data[0] + scalar, data[1] + scalar};
+        }
+        Vec operator-(const T& scalar) const
+        {
+            return Vec{data[0] - scalar, data[1] - scalar};
+        }
+        Vec operator*(const T& scalar) const
+        {
+            return Vec{data[0] * scalar, data[1] * scalar};
+        }
+        Vec operator/(const T& scalar) const
+        {
+            return Vec{data[0] / scalar, data[1] / scalar};
+        }
+
         Vec& operator+=(const Vec& other)
         {
             data[0] += other.data[0];

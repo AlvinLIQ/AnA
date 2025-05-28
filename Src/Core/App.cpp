@@ -102,8 +102,6 @@ void App::Run()
 
     auto prevTime = std::chrono::high_resolution_clock::now();
     std::chrono::time_point<std::chrono::high_resolution_clock> curTime;
-    Float frameTime, cpuTime, cpuTimeBeforeRecord, prevSecond;
-    Int32 frameCount = 0;
 
     std::vector<MeshInfo> meshInfos;
     const char cTitle[] = "AnA FPS:";
@@ -124,12 +122,12 @@ void App::Run()
             std::string terrainSize = std::to_string(int(terrainPushConstants.density * 320.0f * 32.0f));
             auto info = std::to_string(static_cast<int>(frameCount.As<float>() / prevSecond)) +
                 " CPU Time: " + std::to_string(cpuTimeBeforeRecord * 1000.0f) + "ms GPU Time:" +
-                std::to_string(aRenderer.GetGPUTime()) + "ms Record Time:" +
+                std::to_string(aRenderer.GetGPUTime()) + "ms Command Time:" +
                 std::to_string((cpuTime - cpuTimeBeforeRecord) * 1000.0f) + "ms Terrain Size:" +
                 terrainSize + "x" + terrainSize + " Window Size:" +
                 std::to_string(aWindow.Width) + "x" + std::to_string(aWindow.Height);
             title.Copy(info.c_str(), info.length(), sizeof(cTitle) - 1);
-            aResourceManager.TextContext.UpdateText(0, title.Str());
+            //aResourceManager.TextContext.UpdateText(0, title.Str());
             glfwSetWindowTitle(aWindow.GetGLFWwindow(), title.Str());
             prevSecond = 0.0f;
             frameCount = 0;

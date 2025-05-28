@@ -41,10 +41,25 @@ void ItemPresenter::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptor
 {
     if (item != nullptr)
     {
-        item->RenderOffset(RenderOffset());
         item->Extent = Extent;
         item->Aspect = Aspect;
-        item->RenderSize(item->GetSizeForRender());
+        auto itemRenderSize = item->GetSizeForRender();
+        item->RenderSize(itemRenderSize);
+        auto renderSize = RenderSize();
+        auto renderOffset = RenderOffset();
+        if (renderSize.x() < itemRenderSize.x())
+        {
+            renderOffset.x() = renderOffset.x() - renderSize.x() + itemRenderSize.x();
+            renderSize.x() = itemRenderSize.x();
+        }
+        if (renderSize.y() < itemRenderSize.y())
+        {
+            renderOffset.y() = renderOffset.y() - renderSize.y() + itemRenderSize.y();
+            renderSize.y() = itemRenderSize.y();
+        }
+        RenderSize(renderSize);
+        RenderOffset(renderOffset);
+        item->RenderOffset(RenderOffset());
         item->ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
     }
     Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);

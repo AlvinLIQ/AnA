@@ -123,13 +123,13 @@ int main()
     
     auto sceneFile = ReadFile("Scenes/scene.ana");
     scene.Append(reinterpret_cast<MeshInfo*>(sceneFile.data()), sceneFile.size() / sizeof(MeshInfo));
-
+/*
     TextInfo textInfo;
     textInfo.offset = {0.0f, 0.0f};
     textInfo.size = 20.0f;
     textInfo.text = "AnA";
-    textInfo.color = glm::vec3{0.7f};
-    resourceManager->TextContext.Insert(textInfo, 30);
+    textInfo.color = glm::vec3{0.3f};
+    resourceManager->TextContext.Insert(textInfo, 30);*/
     editor.Run();
     return 0;
 }

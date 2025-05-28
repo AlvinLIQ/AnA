@@ -61,9 +61,9 @@ layout(push_constant) uniform PushConsts {
 
 void main()
 {
-    CharacterInfo chInfo = charInfos[gl_WorkGroupID.x];
     TextData textInfo = textInfos[taskData.textIndex];
-	Meshlet meshlet = meshlets[uint(chInfo.ch) + textInfo.chOffset];
+    CharacterInfo chInfo = charInfos[gl_WorkGroupID.x + textInfo.chOffset];
+	Meshlet meshlet = meshlets[uint(chInfo.ch)];
     uint primitiveCount = meshlet.indexCount / 3;
     SetMeshOutputsEXT(meshlet.vertexCount, primitiveCount);
     vec2 scale = vec2(textInfo.size / push.resolution.x, textInfo.size / push.resolution.y);

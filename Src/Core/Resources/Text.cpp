@@ -99,6 +99,7 @@ bool Text::NeedUpdate()
 
 uint32_t Text::Insert(const TextInfo& textInfo, uint32_t capacity)
 {
+    std::unique_lock<std::mutex> lock(_mutex);
     TextMapData textMapData = {textInfo, 0, std::max(capacity, uint32_t(textInfo.text.size()))};
     totalCharCount += textMapData.capacity;
     textMap.emplace(id, std::move(textMapData));
@@ -108,6 +109,7 @@ uint32_t Text::Insert(const TextInfo& textInfo, uint32_t capacity)
 
 void Text::Remove(uint32_t id)
 {
+    std::unique_lock<std::mutex> lock(_mutex);
     auto iter = textMap.find(id);
     if (iter != textMap.end())
     {
@@ -162,7 +164,13 @@ void Text::UpdateText(uint32_t id, const std::string& text)
 
 TextInfo* Text::GetInfoById(uint32_t id)
 {
-    return &textMap[id].textInfo;
+    auto iter = textMap.find(id);
+    return iter == textMap.end() ? nullptr : &iter->second.textInfo;
+}
+
+uint32_t Text::GetTextCount()
+{
+    return uint32_t(textMap.size());
 }
 
 void Text::updateAll()
@@ -194,7 +202,7 @@ void Text::updateAll()
         for (auto& ch : textInfo.text)
         {
             //assert(ch < char(resourceManager->Characters.size()));
-            auto& chInfo = chInfoBuffer[index];
+            auto& chInfo = chInfoBuffer[index + chIndex];
             auto iter = characterMap.find(ch);
             if (iter == characterMap.end())
             {
@@ -204,13 +212,13 @@ void Text::updateAll()
             chInfo.ch = iter->second;
             chInfo.index = chIndex;
             chIndex++;
-            index++;
         }
+        index += iter.second.capacity;
         textIndex++;
     }
     updateMeshlets(meshletOffset);
     glm::uvec3* drawCommand = reinterpret_cast<glm::uvec3*>(drawCommandBuffer.GetMappedData());
-    *drawCommand = glm::uvec3(textIndex, 1, 1);
+    *drawCommand = glm::uvec3(uint32_t(textMap.size()), 1, 1);
     *reinterpret_cast<uint32_t*>(countBuffers[nextIndex].GetMappedData()) = textIndex ? 1u : 0u;
 
     updateSSBODescriptor();
