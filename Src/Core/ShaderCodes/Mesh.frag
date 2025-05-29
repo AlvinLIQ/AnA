@@ -53,7 +53,7 @@ float textureProj(vec4 shadowCoord, vec2 offset, uint cascadeIndex)
 		float dist = texture(shadowSampler, vec3(shadowCoord.xy + offset, cascadeIndex)).r;
 		if (shadowCoord.w > 0 && dist < shadowCoord.z) {
 		    float edge = ubo.cascades[SHADOW_MAP_CASCADE_COUNT - 1].split * 3.0;
-			shadow = 1.0 - (0.5 * smoothstep(edge, edge - 2.0, viewPosZ));
+			shadow = 1.0 - (0.5 * smoothstep(edge, edge - 2.0, gl_FragCoord.z));
 		}
 	}
 	return shadow;
@@ -63,7 +63,7 @@ float textureProj(vec4 shadowCoord, vec2 offset, uint cascadeIndex)
 float filterPCF(vec4 sc, uint cascadeIndex)
 {
 	ivec2 texDim = textureSize(shadowSampler, 0).xy;
-	float scale = 0.75;
+	float scale = 0.5;
 	float dx = scale * 1.0 / float(texDim.x);
 	float dy = scale * 1.0 / float(texDim.y);
 
@@ -83,7 +83,8 @@ float filterPCF(vec4 sc, uint cascadeIndex)
 void main()
 {
     float pointLightIntensity = max(dot(normalSpace, normalize(LIGHT_POS - vertex)), 0);
-    float diffuseLightItensity = ((dot(normalSpace, normalize(lbo.direction))) + 2.0) * 0.5;
+	float normalLightPos = dot(normalSpace, normalize(lbo.direction));
+    float diffuseLightItensity = (normalLightPos + 2.0) * 0.5;
 
     uint cascadeIndex = SHADOW_MAP_CASCADE_COUNT - 1;
 	for(uint i = 0; i < SHADOW_MAP_CASCADE_COUNT - 1; i++) {

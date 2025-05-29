@@ -86,7 +86,7 @@ namespace AnA
 
         static constexpr uint32_t queriesPerFrame = 2;
         uint32_t firstQuery = 0;
-        uint64_t timestamps[queriesPerFrame * MAX_FRAMES_IN_FLIGHT] = {};
+        uint64_t timestamps[queriesPerFrame * MAX_FRAMES_IN_FLIGHT] = {1, 1, 1, 1};
         Float gpuTime = 0.0f;
         VkQueryPool timestampQueryPool {VK_NULL_HANDLE};
         void createTimestampQueryPool();
