@@ -17,7 +17,7 @@ namespace AnA
             void Select(int index);
             void Select(Control* item);
 
-            void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount);
+            virtual void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
 
         private:
             int selectionIndex = -1;

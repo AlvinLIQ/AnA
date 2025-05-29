@@ -26,6 +26,11 @@ void ItemPresenter::Child(Control* newItem)
     item = newItem;
 }
 
+Control* ItemPresenter::Child()
+{
+    return item;
+}
+
 void ItemPresenter::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
     Control::PrepareDraw(shapeBuffer, imageInfos, shapeCount);
@@ -63,4 +68,10 @@ void ItemPresenter::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptor
         item->ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
     }
     Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
+}
+
+void ItemPresenter::PointerEventTrigger(PointerEventArgs& args)
+{
+    if (item != nullptr)
+        item->PointerEventTrigger(args);
 }
