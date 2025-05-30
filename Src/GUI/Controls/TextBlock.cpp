@@ -44,8 +44,6 @@ void TextBlock::ApplyRenderInfo(Shape* , std::vector<VkDescriptorImageInfo>& , u
     {
         auto swapChain = SwapChain::GetCurrent();
         auto swapChainExtent = swapChain->GetExtent();
-        auto renderSize = RenderSize();
-        auto renderOffset = RenderOffset();
         auto offset = Vec2{renderOffset.x() - renderSize.x() + 1.0f, renderOffset.y() - renderSize.y() * 0.5f};
         offset.x() *= float(Extent.width) / float(swapChainExtent.width);
         offset.y() *= float(Extent.height) / float(swapChainExtent.height);

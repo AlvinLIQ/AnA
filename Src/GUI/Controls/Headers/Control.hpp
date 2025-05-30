@@ -94,11 +94,11 @@ namespace AnA
             virtual void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount);
         private:
             AlignType renderMode {ControlRenderMode};
-            Vec2 renderOffset{};
-            Vec2 renderSize{};
             bool cursorInside = false;
             bool pressed = false;
         protected:
+            Vec2 renderOffset{};
+            Vec2 renderSize{};
             Vec2 minSize {ControlMinSize};
             Vec2 maxSize {std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
         };

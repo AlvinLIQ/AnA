@@ -1,27 +1,29 @@
-<StackPanel ControlSize="0.0f, 0.0f" Spacing="0.01f" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Orientation="Vertical"
-    Color="0.156f, 0.156f, 0.156f, 1.0f" Padding="0.05f, 0.01f">
-    <TextBlock Text="AnA" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
-    <Button HorizontalAlignment="Start" Click="loadModelButton_Click">
-        <TextBlock Text="Load Model"/>
-    </Button>
-    <Button HorizontalAlignment="Start" Click="saveSceneButton_Click">
-        <TextBlock Text="Save Scene"/>
-    </Button>
-    <ListView Name="modelList" Orientation="Vertical" HorizontalAlignment="Stretch" RenderMode="Passive" Color="0.2f, 0.2f, 0.2, 1.0f"/>
-    <TextBlock Text="Near" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
-    <Slider Name="nearSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.0f"/>
-    <TextBlock Text="Far" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
-    <Slider Name="farSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="1.0f"/>
-    <TextBlock Text="Shadow Map" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
-    <Slider Name="shadowMapSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.0f"/>
-    <SceneView Name="shadowMapView" HorizontalAlignment="Stretch" ImageInfo="Resource::ResourceManager::GetCurrent()->ShadowMap.GetDescriptorImageInfos()[0]"
-        ControlSize="0.0f, 0.3f" TextureLayer="0"/>
-    <Slider Name="lightX" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.24f"/>
-    <Slider Name="lightY" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.1f"/>
-    <Slider Name="lightZ" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.3f"/>
-    <TextBlock Text="Lock Camera" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
-    <ToggleSwitch Name="camLockToggle" ControlSize="0.04f, 0.02f"/>
-    <Button HorizontalAlignment="Start" Click="exitButton_Click">
-        <TextBlock Text="Exit"/>
-    </Button>
-</StackPanel>
+<PageView VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+    <StackPanel ControlSize="0.0f, 0.0f" Spacing="0.01f" Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+        Color="0.156f, 0.156f, 0.156f, 1.0f" Padding="0.05f, 0.01f">
+        <TextBlock Text="AnA" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
+        <Button HorizontalAlignment="Start" Click="loadModelButton_Click">
+            <TextBlock Text="Load Model"/>
+        </Button>
+        <Button HorizontalAlignment="Start" Click="saveSceneButton_Click">
+            <TextBlock Text="Save Scene"/>
+        </Button>
+        <ListView Name="modelList" Orientation="Vertical" HorizontalAlignment="Stretch" RenderMode="Passive" Color="0.2f, 0.2f, 0.2, 1.0f"/>
+        <TextBlock Text="Near" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
+        <Slider Name="nearSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.0f"/>
+        <TextBlock Text="Far" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
+        <Slider Name="farSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="1.0f"/>
+        <TextBlock Text="Shadow Map" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
+        <Slider Name="shadowMapSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.0f"/>
+        <SceneView Name="shadowMapView" HorizontalAlignment="Stretch" ImageInfo="Resource::ResourceManager::GetCurrent()->ShadowMap.GetDescriptorImageInfos()[0]"
+            ControlSize="0.0f, 0.3f" TextureLayer="0"/>
+        <Slider Name="lightX" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.24f"/>
+        <Slider Name="lightY" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.1f"/>
+        <Slider Name="lightZ" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.3f"/>
+        <TextBlock Text="Lock Camera" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
+        <ToggleSwitch Name="camLockToggle" ControlSize="0.04f, 0.02f"/>
+        <Button HorizontalAlignment="Start" Click="exitButton_Click">
+            <TextBlock Text="Exit"/>
+        </Button>
+    </StackPanel>
+</PageView>

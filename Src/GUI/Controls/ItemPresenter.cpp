@@ -33,13 +33,9 @@ Control* ItemPresenter::Child()
 
 void ItemPresenter::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
-    Control::PrepareDraw(shapeBuffer, imageInfos, shapeCount);
-    if (item != nullptr)
-    {
-        item->HorizontalAlignment = HorizontalContentAlignment;
-        item->VerticalAlignment = VerticalContentAlignment;
-        item->PrepareDraw(shapeBuffer, imageInfos, shapeCount);
-    }
+    GetSizeForRender();
+    GetActualControlOffset();
+    ItemPresenter::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
 }
 
 void ItemPresenter::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
@@ -49,9 +45,6 @@ void ItemPresenter::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptor
         item->Extent = Extent;
         item->Aspect = Aspect;
         auto itemRenderSize = item->GetSizeForRender();
-        item->RenderSize(itemRenderSize);
-        auto renderSize = RenderSize();
-        auto renderOffset = RenderOffset();
         if (renderSize.x() < itemRenderSize.x())
         {
             renderOffset.x() = renderOffset.x() - renderSize.x() + itemRenderSize.x();
@@ -62,9 +55,9 @@ void ItemPresenter::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptor
             renderOffset.y() = renderOffset.y() - renderSize.y() + itemRenderSize.y();
             renderSize.y() = itemRenderSize.y();
         }
-        RenderSize(renderSize);
-        RenderOffset(renderOffset);
-        item->RenderOffset(RenderOffset());
+        item->RenderOffset(renderOffset);
+        if (itemRenderSize.x() == 0.f || itemRenderSize.y() == 0.f)
+            item->RenderSize(renderSize);
         item->ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
     }
     Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
@@ -72,6 +65,7 @@ void ItemPresenter::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptor
 
 void ItemPresenter::PointerEventTrigger(PointerEventArgs& args)
 {
+    Control::PointerEventTrigger(args);
     if (item != nullptr)
         item->PointerEventTrigger(args);
 }

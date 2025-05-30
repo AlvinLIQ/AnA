@@ -13,7 +13,7 @@ namespace AnA
         
             float Value = 0.5f;
             Orientations Orientation{Horizontal};
-            void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount);
+            virtual void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
         private:
             Control button{};
         };
