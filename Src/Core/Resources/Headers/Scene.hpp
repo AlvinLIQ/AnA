@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <mutex>
 #include "Renderable.hpp"
 #include "Model.hpp"
 #include "Descriptor.hpp"
@@ -158,7 +159,6 @@ namespace AnA
         uint32_t batchSize;
         std::vector<Range> updateQueue{};
         void applyVertexBufferUpdate(Model::Vertex* vertices, Model::Index* indices, Range& updateRange);
-        uint32_t maxUpdateRange = 0;
         bool needUpdate;
         bool commandBufferNeedUpdate = false;
         std::mutex _mutex;
