@@ -21,4 +21,5 @@ void ToggleSwitch::Toggle(bool _toggled)
     Color = toggled ? 
                     glm::vec4{0.6f, 0.9f, 0.6f, 1.0f} : 
                     glm::vec4{0.9f, 0.3f, 0.3f, 1.0f};
+    RequestUpdate();
 }

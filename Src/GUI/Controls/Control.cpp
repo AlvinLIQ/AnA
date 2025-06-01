@@ -8,6 +8,7 @@ SwapChain* aSwapChain = nullptr;
 Control* pressedControl = nullptr;
 Control* focusedControl = nullptr;
 bool leftButtonPressed = false;
+bool needUpdate = false;
 Vec2 lastPressedPos{};
 
 Control::Control()
@@ -139,6 +140,21 @@ bool Control::IsInside(CursorPosition& pos, Vec2& offset, Vec2& size)
     pos.x.As<float>() <= offset.x() + size.x() && pos.y.As<float>() <= offset.y() + size.y();
 }
 
+bool Control::NeedUpdate()
+{
+    return needUpdate;
+}
+
+void Control::RequestUpdate()
+{
+    needUpdate = true;
+}
+
+void Control::EndUpdate()
+{
+    needUpdate = false;
+}
+
 VkDescriptorImageInfo Control::GetDescriptorImageInfo()
 {
     return Resource::ResourceManager::GetCurrent()->TextureMap.at(TextureId).GetImageInfo();
@@ -156,10 +172,11 @@ void Control::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageI
         imageInfos.resize(shapeCount + MaxBatchSize);
     }
     imageInfos[shapeCount] = this->GetDescriptorImageInfo();
+    shapeId = shapeCount;
     shapeCount++;
 }
 
-void RunPointerEvents(std::vector<PointerEventHandler>& events, void* param, PointerEventArgs& args)
+inline void RunPointerEvents(std::vector<PointerEventHandler>& events, void* param, PointerEventArgs& args)
 {
     for (auto& event : events)
     {
@@ -261,7 +278,6 @@ void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input:
             focusedControl->PointerEventTrigger(args);
         else
             control->PointerEventTrigger(args);
-        Resource::ResourceManager::GetCurrent()->Shapes.PrepareDraw(control);
     };
     profile.cursorConfigs.push_back(cursorConfig);
     profiles.push_back(profile);

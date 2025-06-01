@@ -29,6 +29,7 @@ void ItemsPresenter::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorIma
 void ItemsPresenter::Child(Control* newItem)
 {
     items.push_back(newItem);
+    RequestUpdate();
 }
 
 void ItemsPresenter::RemoveChild(Control* targetItem)
@@ -44,6 +45,7 @@ void ItemsPresenter::RemoveChild(Control* targetItem)
             break;
         }
     }
+    RequestUpdate();
 }
 
 void ItemsPresenter::RemoveChildAt(size_t index)
@@ -53,6 +55,7 @@ void ItemsPresenter::RemoveChildAt(size_t index)
     Control* targetItem = items[index];
     items.erase(items.begin() + index);
     delete targetItem;
+    RequestUpdate();
 }
 
 void ItemsPresenter::PointerEventTrigger(PointerEventArgs& args)

@@ -11,7 +11,7 @@ namespace AnA
     {
         glm::mat4 transform{1.0f};
         glm::vec4 color{1.0f};
-        alignas(16) uint32_t texLayer{0};
+        uint32_t texLayer{0};
     };
     struct ShapeInfo
     {
@@ -19,6 +19,7 @@ namespace AnA
         glm::vec4 Color{1.0f};
         uint32_t TextureId{0};
         uint32_t TextureLayer{0};
+        uint32_t shapeId;
     };
     class Shapes : public Renderable
     {

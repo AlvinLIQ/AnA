@@ -8,11 +8,13 @@ using namespace AnA::Controls;
 void Button_PointerEntered(Button* control, PointerEventArgs& )
 {
     control->Color = ButtonPointerMovedBackgroundColor;
+    Control::RequestUpdate();
 }
 
 void Button_PointerExited(Button* control, PointerEventArgs& )
 {
     control->Color = ButtonBackgroundColor;
+    Control::RequestUpdate();
 }
 
 void Button_PointerPressed(Button* control, PointerEventArgs& args)
@@ -22,6 +24,7 @@ void Button_PointerPressed(Button* control, PointerEventArgs& args)
     control->Focus();
     args.Handled = true;
     control->Color = ButtonPointerPressedBackgroundColor;
+    Control::RequestUpdate();
 }
 
 void Button_PointerReleased(Button* control, PointerEventArgs& args)

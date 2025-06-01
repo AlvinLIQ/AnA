@@ -17,6 +17,7 @@ namespace AnA
             void Text(const std::string& newText)
             {
                 text = newText;
+                RequestUpdate();
             }
             void Insert(size_t index, uint32_t ch);
         protected:

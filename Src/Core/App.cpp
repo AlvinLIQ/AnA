@@ -142,7 +142,7 @@ void App::Run()
             aResourceManager.Resize();
             updateSceneOffset();
         }
-        if (aRenderer.NeedUpdate() || aResourceManager.Shapes.NeedUpdate())
+        if (aResourceManager.MainControl->NeedUpdate() || aRenderer.NeedUpdate())
         {
             auto controlExtent = aRenderer.GetSwapChainExtent();
             controlExtent.width = static_cast<uint32_t>(actualSceneOffset.x);
@@ -150,6 +150,7 @@ void App::Run()
             aResourceManager.MainControl->Extent = controlExtent;
             aResourceManager.Shapes.Extent = controlExtent;
             aResourceManager.Shapes.PrepareDraw(aResourceManager.MainControl);
+            aResourceManager.MainControl->EndUpdate();
         }
         aResourceManager.Update();
         if (loopCallback)

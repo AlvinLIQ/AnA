@@ -90,6 +90,10 @@ namespace AnA
             bool IsInside(CursorPosition pos);
             static bool IsInside(CursorPosition& pos, Vec2& offset, Vec2& size);
 
+            static bool NeedUpdate();
+            static void RequestUpdate();
+            static void EndUpdate();
+
             virtual VkDescriptorImageInfo GetDescriptorImageInfo();
             virtual void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount);
         private:

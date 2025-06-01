@@ -11,7 +11,7 @@ namespace AnA
         public:
             PageView();
             ~PageView();
-            virtual void Child(Control* newItem) override;
+            void Child(Control* newItem) override;
             void PageIndex(uint32_t _pageIndex);
             uint32_t PageIndex();
         protected:

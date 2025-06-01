@@ -8,7 +8,7 @@ uint32_t id = 0;
 
 Text::Text(Device* mDevice) : aDevice{mDevice}
 {
-    
+
 }
 
 Text::~Text()
@@ -66,7 +66,7 @@ void Text::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferInd
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
         shader.GetPipelineLayout(), 0, 3, sets.data(), 0, nullptr);
     glm::vec2 resolution = {float(commandBuffer.Extent.width), float(commandBuffer.Extent.height)};
-    vkCmdPushConstants(commandBuffer, shader.GetPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, 0, sizeof(glm::vec2), 
+    vkCmdPushConstants(commandBuffer, shader.GetPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, 0, sizeof(glm::vec2),
         &resolution);
 }
 
@@ -224,7 +224,6 @@ void Text::updateAll()
     *reinterpret_cast<uint32_t*>(countBuffers[nextIndex].GetMappedData()) = textIndex ? 1u : 0u;
 
     updateSSBODescriptor();
-    printf("%u, %u, %lu\n", meshletVertexCount, meshletIndexCount, totalCharCount);
 }
 
 void Text::updateMeshlets(size_t meshletOffset)
@@ -245,7 +244,7 @@ void Text::updateMeshlets(size_t meshletOffset)
             meshletIndices[meshletIndexCount + j] = ch.indices[j];
         }
         meshletInfos[i].vertexOffset = meshletVertexCount;
-        meshletInfos[i].indexOffset = meshletIndexCount; 
+        meshletInfos[i].indexOffset = meshletIndexCount;
         meshletInfos[i].vertexCount = uint32_t(ch.vertices.size());
         meshletInfos[i].indexCount = uint32_t(ch.indices.size());
         meshletVertexCount += uint32_t(ch.vertices.size());
@@ -320,5 +319,5 @@ void Text::updateSSBODescriptor()
     }
 
     currentBufferIndex = nextIndex;
-    nextIndex = (currentBufferIndex + 1) % MAX_FRAMES_IN_FLIGHT; 
+    nextIndex = (currentBufferIndex + 1) % MAX_FRAMES_IN_FLIGHT;
 }

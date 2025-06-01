@@ -11,11 +11,23 @@ namespace AnA
         public:
             Slider();
         
-            float Value = 0.5f;
+            float Value()
+            {
+                return value;
+            }
+            void Value(float newValue)
+            {
+                if (value != newValue)
+                {
+                    value = newValue;
+                    RequestUpdate();
+                }
+            }
             Orientations Orientation{Horizontal};
-            virtual void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
+            void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
         private:
             Control button{};
+            float value = 0.5f;
         };
     }
 }
