@@ -114,11 +114,11 @@ void main()
             b = a + 1;
             c = a + MAX_COLUMN_VERTICES;
             d = b + MAX_COLUMN_VERTICES;
-#ifndef PER_PRIMITIVE_NORMAL
+#ifdef PER_PRIMITIVE_NORMAL
             primitiveNormals[id] = push.calNormal == 1 ? CalculateNormal(pos * push.height) : vec3(0.);
 #endif
             gl_PrimitiveTriangleIndicesEXT[id++] = uvec3(a, b, c);
-#ifndef PER_PRIMITIVE_NORMAL
+#ifdef PER_PRIMITIVE_NORMAL
             primitiveNormals[id] = push.calNormal == 1 ? CalculateNormal(pos * push.height) : vec3(0.);
 #endif
             gl_PrimitiveTriangleIndicesEXT[id++] = uvec3(c, b, d);

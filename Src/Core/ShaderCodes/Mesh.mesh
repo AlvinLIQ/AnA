@@ -121,7 +121,7 @@ void main()
         vertexOutput[i].viewPosZ = viewPos.z / viewPos.w + zOffset;
     }
 
-    for (uint i = 0, offset; i < primitiveCount; i++)
+    for (uint i = 0, offset; i < primitiveCount; )
     {
         offset = meshlet.indexOffset + i * 3;
 #ifdef PER_PRIMITIVE_NORMAL
@@ -135,5 +135,6 @@ void main()
             primitives[offset + 1],
             primitives[offset + 2]
         );
+        ++i;
     }
 }
