@@ -1,12 +1,21 @@
 #version 460
+#extension GL_EXT_mesh_shader: require
 #extension GL_EXT_nonuniform_qualifier : enable
+#extension GL_GOOGLE_include_directive : require
+
+#include "mesh.h"
 
 layout(location = 0) in vec2 texCoord;
 layout(location = 1) flat in uint texIndex;
+#ifdef PER_PRIMITIVE_NORMAL
+layout(location = 2) in vec3 vertex;
+layout(location = 3) in float viewPosZ;
+layout(location = 4) perprimitiveEXT flat in vec3 normalSpace;
+#else
 layout(location = 2) in vec3 normalSpace;
 layout(location = 3) in vec3 vertex;
 layout(location = 4) in float viewPosZ;
-
+#endif
 layout(location = 0) out vec4 outColor;
 
 layout(set = 1, binding = 0) uniform CameraBufferObject {

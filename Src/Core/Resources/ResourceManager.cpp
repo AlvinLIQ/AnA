@@ -383,7 +383,7 @@ void ResourceManager::createDefaultShaders()
 {
     Shaders.reserve(7);
     auto renderPass = SwapChain::GetCurrent()->GetRenderPass();
-    Shaders.emplace_back(aDevice, Basic_vert, Mesh_frag, renderPass, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
+    Shaders.emplace_back(aDevice, Basic_vert, Basic_frag, renderPass, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
 
     Shaders.emplace_back(aDevice, Shape_vert, Shape_frag, renderPass, shapeDescriptors, SHAPE_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
 

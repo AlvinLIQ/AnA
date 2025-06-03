@@ -9,6 +9,15 @@
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 layout(triangles, max_vertices = 64, max_primitives = 124) out;
 
+#ifdef PER_PRIMITIVE_NORMAL
+struct VertexOutput {
+    vec2 texCoord;
+    uint texID;
+    vec3 vertexPosition;
+    float viewPosZ;
+};
+layout(location = 4) perprimitiveEXT out vec3 primitiveNormals[];
+#else
 struct VertexOutput {
     vec2 texCoord;
     uint texID;
@@ -16,6 +25,7 @@ struct VertexOutput {
     vec3 vertexPosition;
     float viewPosZ;
 };
+#endif
 
 layout(location = 0) out VertexOutput vertexOutput[];
 
@@ -104,7 +114,9 @@ void main()
         gl_MeshVerticesEXT[i].gl_Position = viewProj * vertexPos;
         vertexOutput[i].texCoord = vertex.uv;
         vertexOutput[i].texID = texID;
+#ifndef PER_PRIMITIVE_NORMAL
         vertexOutput[i].normalSpace = vertex.normal;
+#endif
         vertexOutput[i].vertexPosition = vertexPos.xyz;
         vertexOutput[i].viewPosZ = viewPos.z / viewPos.w + zOffset;
     }
@@ -112,6 +124,12 @@ void main()
     for (uint i = 0, offset; i < primitiveCount; i++)
     {
         offset = meshlet.indexOffset + i * 3;
+#ifdef PER_PRIMITIVE_NORMAL
+        vec3 a = vertices[mvsbo.vertices[uint(primitives[offset + 0]) + meshlet.vertexOffset]].position;
+        vec3 b = vertices[mvsbo.vertices[uint(primitives[offset + 1]) + meshlet.vertexOffset]].position;
+        vec3 c = vertices[mvsbo.vertices[uint(primitives[offset + 2]) + meshlet.vertexOffset]].position;
+        primitiveNormals[i] = normalize(mat3(transform) * cross(normalize(b - a), normalize(c - a)));
+#endif
 	    gl_PrimitiveTriangleIndicesEXT[i] = uvec3(
             primitives[offset + 0], 
             primitives[offset + 1],

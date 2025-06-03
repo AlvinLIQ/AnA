@@ -3,6 +3,7 @@
 #extension GL_GOOGLE_include_directive : require
 
 #include "math.h"
+#include "mesh.h"
 
 #define MAX_ROW_VERTICES 8
 #define MAX_COLUMN_VERTICES 8
@@ -12,6 +13,15 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 layout(triangles, max_vertices = MAX_ROW_VERTICES * MAX_ROW_VERTICES, max_primitives = MAX_PRIMITIVES) out;
 
 
+#ifdef PER_PRIMITIVE_NORMAL
+struct VertexOutput {
+    vec2 texCoord;
+    uint texID;
+    vec3 vertexPosition;
+    float viewPosZ;
+};
+layout(location = 4) perprimitiveEXT out vec3 primitiveNormals[];
+#else
 struct VertexOutput {
     vec2 texCoord;
     uint texID;
@@ -19,6 +29,7 @@ struct VertexOutput {
     vec3 vertexPosition;
     float viewPosZ;
 };
+#endif
 
 layout(location = 0) out VertexOutput vertexOutput[];
 
@@ -82,7 +93,9 @@ void main()
             gl_MeshVerticesEXT[id].gl_Position = viewProj * vec4(vertex, 1.0);
             vertexOutput[id].texCoord = vec2(x * 0.1, y * 0.1);
             vertexOutput[id].texID = push.texID;
+#ifndef PER_PRIMITIVE_NORMAL
             vertexOutput[id].normalSpace = push.calNormal == 1 ? CalculateNormal(pos * push.height) : vec3(0.);
+#endif
             vertexOutput[id].vertexPosition = vertex;
             viewPos = cbo.view * vec4(vertex, 1.0);
             vertexOutput[id].viewPosZ = viewPos.z + ubo.cascades[1].split - ubo.cascades[0].split + 1.0;
@@ -92,6 +105,7 @@ void main()
 
     id = 0;
     uint a, b, c, d;
+
     for (uint y = 0, x; y < MAX_ROW_VERTICES - 1; y++)
     {
         for (x = 0; x < MAX_COLUMN_VERTICES - 1; x++)
@@ -100,7 +114,13 @@ void main()
             b = a + 1;
             c = a + MAX_COLUMN_VERTICES;
             d = b + MAX_COLUMN_VERTICES;
+#ifndef PER_PRIMITIVE_NORMAL
+            primitiveNormals[id] = push.calNormal == 1 ? CalculateNormal(pos * push.height) : vec3(0.);
+#endif
             gl_PrimitiveTriangleIndicesEXT[id++] = uvec3(a, b, c);
+#ifndef PER_PRIMITIVE_NORMAL
+            primitiveNormals[id] = push.calNormal == 1 ? CalculateNormal(pos * push.height) : vec3(0.);
+#endif
             gl_PrimitiveTriangleIndicesEXT[id++] = uvec3(c, b, d);
         }
     }
