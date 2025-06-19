@@ -198,7 +198,6 @@ namespace AnA
         std::vector<const char*> deviceExtensions =
         {
             VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-            VK_EXT_NESTED_COMMAND_BUFFER_EXTENSION_NAME,
             VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME,
             VK_EXT_PRIMITIVE_TOPOLOGY_LIST_RESTART_EXTENSION_NAME
         };

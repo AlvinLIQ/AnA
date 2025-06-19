@@ -993,15 +993,10 @@ void Device::createLogicalDevice()
     vulkan12Features.storageBuffer8BitAccess = VK_TRUE;
     vulkan12Features.pNext = &dynamicState3Features;
 
-    VkPhysicalDeviceNestedCommandBufferFeaturesEXT nestedCommandBufferFeatures{};
-    nestedCommandBufferFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_NESTED_COMMAND_BUFFER_FEATURES_EXT;
-    nestedCommandBufferFeatures.nestedCommandBufferSimultaneousUse = VK_TRUE;
-    nestedCommandBufferFeatures.nestedCommandBuffer = VK_TRUE;
-    nestedCommandBufferFeatures.pNext = &vulkan12Features;
     VkPhysicalDeviceShaderDrawParametersFeatures shaderDrawParametersFeatures{};
     shaderDrawParametersFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETERS_FEATURES;
     shaderDrawParametersFeatures.shaderDrawParameters = VK_TRUE;
-    shaderDrawParametersFeatures.pNext = &nestedCommandBufferFeatures;
+    shaderDrawParametersFeatures.pNext = &vulkan12Features;
     //VkPhysicalDeviceFeatures deviceFeatures1{};
     //vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures1);
 

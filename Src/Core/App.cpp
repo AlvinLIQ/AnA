@@ -255,7 +255,7 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     aShadowSystem.RenderCascadedShadowsIndirect(commandBuffer, aResourceManager.MainScene, aResourceManager.Shaders[2]);
     aRenderer.EndRenderPass(commandBuffer);
 
-    aRenderer.BeginSwapChainRenderPass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE_AND_SECONDARY_COMMAND_BUFFERS_KHR);
+    aRenderer.BeginSwapChainRenderPass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
 
     swapChain.SetViewport(commandBuffer, actualSceneOffset);
 
