@@ -35,24 +35,19 @@ SwapChain::~SwapChain()
 VkResult SwapChain::AcquireNextImage()
 {
     vkWaitForFences(aDevice->GetLogicalDevice(), 1, &inFlightFences[CurrentFrame], VK_TRUE, UINT64_MAX);
+    vkResetFences(aDevice->GetLogicalDevice(), 1, &inFlightFences[CurrentFrame]);
 
-    uint32_t imageIndex;
     VkResult result = vkAcquireNextImageKHR(aDevice->GetLogicalDevice(), swapChain, UINT64_MAX,
-                                 imageAvailableSemaphores[CurrentImage], VK_NULL_HANDLE, &imageIndex);
+                                 imageAvailableSemaphores[imageIndex], VK_NULL_HANDLE, &CurrentImage);
     return result;
 }
 
 VkResult SwapChain::SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint32_t commandBufferCount)
 {
-    if (imagesInFlight[CurrentImage] != VK_NULL_HANDLE)
-        vkWaitForFences(aDevice->GetLogicalDevice(), 1, &imagesInFlight[CurrentImage], VK_TRUE, UINT64_MAX);
-
-    imagesInFlight[CurrentImage] = inFlightFences[CurrentFrame];
-
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-    VkSemaphore waitSemaphores[] = {imageAvailableSemaphores[CurrentImage]};
+    VkSemaphore waitSemaphores[] = {imageAvailableSemaphores[imageIndex]};
     VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
     submitInfo.waitSemaphoreCount = 1;
     submitInfo.pWaitSemaphores = waitSemaphores;
@@ -61,11 +56,10 @@ VkResult SwapChain::SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint3
     submitInfo.commandBufferCount = commandBufferCount;
     submitInfo.pCommandBuffers = pCommandBuffers;
 
-    VkSemaphore signalSemaphores[] = {renderFinishedSemaphores[CurrentImage]};
+    VkSemaphore signalSemaphores[] = {renderFinishedSemaphores[imageIndex]};
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
-    vkResetFences(aDevice->GetLogicalDevice(), 1, &inFlightFences[CurrentFrame]);
     VkResult result;
     if ((result = vkQueueSubmit(aDevice->GetGraphicsQueue(), 1, &submitInfo, inFlightFences[CurrentFrame])) != VK_SUCCESS)
     {
@@ -87,7 +81,7 @@ VkResult SwapChain::SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint3
     result = vkQueuePresentKHR(aDevice->GetPresentQueue(), &presentInfo);
 
     CurrentFrame = (CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
-    CurrentImage = (CurrentImage + 1) % uint32_t(swapChainImages.size());
+    imageIndex = (imageIndex + 1) % imageCount;
     return result;
 }
 
@@ -262,7 +256,7 @@ void SwapChain::createSwapChain()
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
     createInfo.surface = surface;
 
-    uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
+    imageCount = swapChainSupport.capabilities.minImageCount + 1;
     if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount)
     {
         imageCount = swapChainSupport.capabilities.maxImageCount;
@@ -385,8 +379,6 @@ void SwapChain::createDepthResources()
     VkFormat depthFormat = findDepthFormat();
     swapChainDepthFormat = depthFormat;
     VkExtent2D swapChainExtent = GetExtent();
-
-    auto imageCount = static_cast<uint32_t>(swapChainImages.size());
 
     depthImages.resize(imageCount);
     depthImageAllocations.resize(imageCount);

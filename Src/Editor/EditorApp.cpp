@@ -123,13 +123,14 @@ int main()
     
     auto sceneFile = ReadFile("Scenes/scene.ana");
     scene.Append(reinterpret_cast<MeshInfo*>(sceneFile.data()), sceneFile.size() / sizeof(MeshInfo));
+    /*
     std::vector<Model::Vertex> vertices;
     std::vector<Model::Index> indices;
     Model::CreateVerticesFromFile("/home/alvin/Downloads/data4102-33_.txt", vertices);
     Model::CreateTerrainFromVertices(vertices, indices, 256);
 
     scene.Append(vertices, indices, {{0.0f, -8.0f, 0.0f}, glm::vec3{3.0f}, {0.35 * 3.14159, 0.0f, 0.0f}});
-/*
+
     TextInfo textInfo;
     textInfo.offset = {0.0f, 0.0f};
     textInfo.size = 20.0f;
