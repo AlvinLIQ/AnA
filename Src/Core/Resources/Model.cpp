@@ -180,6 +180,40 @@ float Slope(const glm::vec3& v)
     return std::abs(v.z / h);
 }
 
+bool Model::CreateQuad(std::vector<Vertex> &vertices, std::vector<Index> &indices, Index a, Index b, Index c, Index d)
+{
+    auto& va = vertices[a].position;
+    auto& vb = vertices[b].position;
+    auto& vc = vertices[c].position;
+    auto& vd = vertices[d].position;
+
+    glm::vec3 d1 = (vb - va);
+    glm::vec3 d2 = (vc - va);
+    glm::vec3 d3 = (vd - vb);
+    glm::vec3 d4 = (vc - vb);
+
+    float l = std::max(std::abs(glm::dot(glm::normalize(d1), glm::normalize(d2))), std::abs(glm::dot(glm::normalize(d3), glm::normalize(d4))));
+    if (d % 256 < 255)
+    {
+        l = std::max(l, std::abs(glm::dot(glm::normalize(vertices[d + 1].position - vb), glm::normalize(vertices[c + 1].position - vb))));
+        l = std::max(l, std::abs(glm::dot(glm::normalize(vertices[d + 1].position - va), glm::normalize(vertices[c + 1].position - va))));
+    }
+    float sl = glm::length(d1) + glm::length(d2) + glm::length(d3) + glm::length(d4);
+    if (sl > 0.4f)
+    {
+        return false;
+    }
+    
+    indices.push_back(a);
+    indices.push_back(b);
+    indices.push_back(c);
+    
+    indices.push_back(b);
+    indices.push_back(d);
+    indices.push_back(c);
+    return true;
+}
+
 void Model::CreateTerrainFromVertices(std::vector<Vertex> &vertices, std::vector<Index> &indices, size_t period)
 {
     assert(period > 1);
@@ -190,35 +224,22 @@ void Model::CreateTerrainFromVertices(std::vector<Vertex> &vertices, std::vector
     Index a, b, c, d;
     for (size_t i = period, vi; i < vertices.size(); i += period)
     {
+        a = i;
+        b = i - period;
         for (vi = 0; vi < period - 1; vi++)
         {
-            a = vi + i;
-            b = vi + i - period;
             c = vi + i + 1;
             d = vi + i - period + 1;
-            
-            CalculateNormal(vertices, a, period);
-            CalculateNormal(vertices, c, period);
-            CalculateNormal(vertices, b, period);
-            CalculateNormal(vertices, d, period);
 
-            auto& va = vertices[a];
-            auto& vb = vertices[b];
-            auto& vc = vertices[c];
-            auto& vd = vertices[d];
-            if (glm::length(va.position - vb.position) + glm::length(vb.position - vc.position) + 
-                glm::length(vb.position - vd.position) + glm::length(vd.position - vc.position) + 
-                glm::length(va.position - vd.position) + glm::length(vc.position - va.position)  > 0.6f)
-                continue;
+            Index t = c, u = d;
 
-
-            indices.push_back(a);
-            indices.push_back(b);
-            indices.push_back(c);
-            
-            indices.push_back(b);
-            indices.push_back(d);
-            indices.push_back(c);
+            while (t % period < period - 1 && u % period < period - 1 && !CreateQuad(vertices, indices, a, b, t, u))
+            {
+                ++t;
+                ++u;
+            }
+            a = c;
+            b = d;
         }
     }
 }

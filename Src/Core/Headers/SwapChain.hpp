@@ -9,6 +9,8 @@
 
 #define NextFrameIndex(X) ((X + 1) % MAX_FRAMES_IN_FLIGHT)
 #define SHADOW_MAP_DIM 4096
+#define SHADOW_MAP_WIDTH 3840
+#define SHADOW_MAP_HEIGHT 3840
 
 #define ScaleX Scale[0]
 #define ScaleY Scale[1]

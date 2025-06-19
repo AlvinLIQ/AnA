@@ -409,7 +409,7 @@ namespace AnA
                 dConfig.rasterizer.lineWidth = 1.0f;
                 dConfig.rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
                 dConfig.rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
-                dConfig.rasterizer.depthBiasEnable = VK_TRUE;
+                dConfig.rasterizer.depthBiasEnable = VK_FALSE;
                 dConfig.rasterizer.depthBiasConstantFactor = 0.0f; // Optional
                 dConfig.rasterizer.depthBiasClamp = 0.0f;          // Optional
                 dConfig.rasterizer.depthBiasSlopeFactor = 0.0f;    // Optional

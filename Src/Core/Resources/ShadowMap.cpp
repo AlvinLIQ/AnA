@@ -154,7 +154,7 @@ void ShadowMap::createShadowResources()
         imageInfo.imageType = VK_IMAGE_TYPE_2D;
         imageInfo.format = swapChain->GetDepthFormat();
         imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        imageInfo.extent = {SHADOW_MAP_DIM, SHADOW_MAP_DIM, 1};
+        imageInfo.extent = {SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT, 1};
         shadowImage.extent = imageInfo.extent;
         shadowImage.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
         imageInfo.mipLevels = 1;

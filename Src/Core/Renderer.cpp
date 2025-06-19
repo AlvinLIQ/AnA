@@ -199,7 +199,7 @@ void Renderer::EndRenderPass(CommandBuffer& commandBuffer)
 
 void Renderer::BeginOffscreenRenderPass(CommandBuffer& commandBuffer, VkFramebuffer& framebuffer, VkSubpassContents contents)
 {
-    VkExtent2D extent = {SHADOW_MAP_DIM, SHADOW_MAP_DIM};
+    VkExtent2D extent = {SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT};
 
     VkRenderPassBeginInfo renderPassBegin;
     renderPassBegin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;

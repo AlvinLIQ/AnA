@@ -756,7 +756,7 @@ VkQueue &Device::GetPresentQueue()
 
 VkSampleCountFlagBits Device::GetMaxUsableSampleCount()
 {
-    return usableSamples.size() > 2 ? usableSamples[1] : usableSamples.front();
+    return usableSamples.size() > 3 ? usableSamples[2] : usableSamples.front();
 }
 
 Device::QueueFamilyIndices Device::FindQueueFamilies(VkPhysicalDevice device)

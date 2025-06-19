@@ -24,9 +24,9 @@ ShadowSystem* ShadowSystem::GetCurrent()
 
 void ShadowSystem::RenderCascadedShadowsIndirect(CommandBuffer& commandBuffer, Renderable &renderable, Shader& shader)
 {
-    VkExtent2D extent = {SHADOW_MAP_DIM, SHADOW_MAP_DIM};
+    VkExtent2D extent = {SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT};
     swapChain->SetViewport(commandBuffer, extent);
-    vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
+    //vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
 
     renderable.Bind(commandBuffer, shader, swapChain->CurrentFrame);
     renderable.DrawIndirect(commandBuffer);
