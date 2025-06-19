@@ -123,7 +123,7 @@ void Renderer::BeginSwapChainRenderPass(CommandBuffer& commandBuffer)
     renderPassInfo.renderArea.extent = swapChainExtent;
     renderPassInfo.clearValueCount = numsof(clearValues);
     renderPassInfo.pClearValues = clearValues;
-    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE_AND_SECONDARY_COMMAND_BUFFERS_EXT);
+    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 }
 
 void Renderer::BeginSwapChainRenderPass(CommandBuffer& commandBuffer, VkSubpassContents contents)
