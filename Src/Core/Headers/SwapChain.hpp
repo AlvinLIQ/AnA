@@ -8,7 +8,7 @@
 #define INCLUDE_STB_IMAGE
 
 #define NextFrameIndex(X) ((X + 1) % MAX_FRAMES_IN_FLIGHT)
-#define SHADOW_MAP_DIM 4096
+
 #define SHADOW_MAP_WIDTH 3840
 #define SHADOW_MAP_HEIGHT 3840
 
@@ -29,7 +29,7 @@ namespace AnA
 
         VkResult SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint32_t commandBufferCount);
 
-        uint32_t CurrentFrame = 0;
+        uint32_t CurrentFrame = 1;
         uint32_t CurrentImage = 0;
 
         static SwapChain* GetCurrent();
@@ -74,8 +74,6 @@ namespace AnA
 
         VkSwapchainKHR swapChain;
         std::vector<VkImage> swapChainImages;
-        uint32_t imageIndex = 0;
-        uint32_t imageCount = 0;
         VkFormat swapChainImageFormat;
         VkExtent2D swapChainExtent;
         VkViewport viewport;
