@@ -27,6 +27,8 @@ SwapChain::~SwapChain()
     vkDestroyRenderPass(device, renderPass, nullptr);
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
+        vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
+        vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
         vkDestroyFence(device, inFlightFences[i], nullptr);
     }
     cleanupSwapChain();
@@ -35,19 +37,22 @@ SwapChain::~SwapChain()
 VkResult SwapChain::AcquireNextImage()
 {
     vkWaitForFences(aDevice->GetLogicalDevice(), 1, &inFlightFences[CurrentFrame], VK_TRUE, UINT64_MAX);
-    vkResetFences(aDevice->GetLogicalDevice(), 1, &inFlightFences[CurrentFrame]);
 
-    VkResult result = vkAcquireNextImageKHR(aDevice->GetLogicalDevice(), swapChain, UINT64_MAX,
-                                 imageAvailableSemaphores[imageIndex], VK_NULL_HANDLE, &CurrentImage);
-    return result;
+    return vkAcquireNextImageKHR(aDevice->GetLogicalDevice(), swapChain, UINT64_MAX,
+                                 imageAvailableSemaphores[CurrentFrame], VK_NULL_HANDLE, &CurrentImage);
 }
 
 VkResult SwapChain::SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint32_t commandBufferCount)
 {
+    if (imagesInFlight[CurrentImage] != VK_NULL_HANDLE)
+        vkWaitForFences(aDevice->GetLogicalDevice(), 1, &imagesInFlight[CurrentImage], VK_TRUE, UINT64_MAX);
+
+    imagesInFlight[CurrentImage] = inFlightFences[CurrentFrame];
+
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-    VkSemaphore waitSemaphores[] = {imageAvailableSemaphores[imageIndex]};
+    VkSemaphore waitSemaphores[] = {imageAvailableSemaphores[CurrentFrame]};
     VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
     submitInfo.waitSemaphoreCount = 1;
     submitInfo.pWaitSemaphores = waitSemaphores;
@@ -56,10 +61,11 @@ VkResult SwapChain::SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint3
     submitInfo.commandBufferCount = commandBufferCount;
     submitInfo.pCommandBuffers = pCommandBuffers;
 
-    VkSemaphore signalSemaphores[] = {renderFinishedSemaphores[imageIndex]};
+    VkSemaphore signalSemaphores[] = {renderFinishedSemaphores[CurrentFrame]};
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
+    vkResetFences(aDevice->GetLogicalDevice(), 1, &inFlightFences[CurrentFrame]);
     VkResult result;
     if ((result = vkQueueSubmit(aDevice->GetGraphicsQueue(), 1, &submitInfo, inFlightFences[CurrentFrame])) != VK_SUCCESS)
     {
@@ -81,7 +87,6 @@ VkResult SwapChain::SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint3
     result = vkQueuePresentKHR(aDevice->GetPresentQueue(), &presentInfo);
 
     CurrentFrame = (CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
-    imageIndex = (imageIndex + 1) % imageCount;
     return result;
 }
 
@@ -193,7 +198,7 @@ Device* SwapChain::GetDevice()
 
 VkSemaphore& SwapChain::GetCurrentSemaphore()
 {
-    return renderFinishedSemaphores[CurrentImage];
+    return renderFinishedSemaphores[CurrentFrame];
 }
 
 VkSurfaceFormatKHR SwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats)
@@ -256,7 +261,7 @@ void SwapChain::createSwapChain()
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
     createInfo.surface = surface;
 
-    imageCount = swapChainSupport.capabilities.minImageCount + 1;
+    uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
     if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount)
     {
         imageCount = swapChainSupport.capabilities.maxImageCount;
@@ -379,6 +384,8 @@ void SwapChain::createDepthResources()
     VkFormat depthFormat = findDepthFormat();
     swapChainDepthFormat = depthFormat;
     VkExtent2D swapChainExtent = GetExtent();
+
+    auto imageCount = static_cast<uint32_t>(swapChainImages.size());
 
     depthImages.resize(imageCount);
     depthImageAllocations.resize(imageCount);
@@ -585,20 +592,16 @@ void SwapChain::createSyncObjects()
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
     auto device = aDevice->GetLogicalDevice();
-    imageAvailableSemaphores.resize(swapChainImages.size());
-    renderFinishedSemaphores.resize(swapChainImages.size());
+    imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+    renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
     imagesInFlight.resize(swapChainImages.size(), VK_NULL_HANDLE);
-    for (size_t i = 0; i < swapChainImages.size(); i++)
-    {
-        if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
-            vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS)
-            throw std::runtime_error("failed to create semaphores!");
-    }
     for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
-        if (vkCreateFence(device, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS)
-            throw std::runtime_error("failed to create fences!");
+        if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
+            vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
+            vkCreateFence(device, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS)
+            throw std::runtime_error("failed to create semaphores!");
     }
 }
 
@@ -608,11 +611,7 @@ void SwapChain::cleanupSwapChain()
     vkDestroyImageView(device, colorImageView, nullptr);
     aDevice->DestroyImage(colorImage, colorImageAllocation);
     for (size_t i = 0; i < swapChainFramebuffers.size(); i++)
-    {
-        vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
-        vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
         vkDestroyFramebuffer(device, swapChainFramebuffers[i], nullptr);
-    }
     for (auto imageView : swapChainImageViews)
         vkDestroyImageView(device, imageView, nullptr);
     for (size_t i = 0; i < depthImages.size(); i++)
