@@ -87,7 +87,7 @@ VkResult SwapChain::SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint3
 
     presentInfo.pImageIndices = &CurrentImage;
 
-    result = vkQueuePresentKHR(aDevice->GetPresentQueue(), &presentInfo);
+    vkQueuePresentKHR(aDevice->GetPresentQueue(), &presentInfo);
 
     CurrentFrame = (CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     imageIndex = (imageIndex + 1) % imageCount;
@@ -270,7 +270,6 @@ void SwapChain::createSwapChain()
     {
         imageCount = swapChainSupport.capabilities.maxImageCount;
     }
-    imageCount = MAX_FRAMES_IN_FLIGHT;
     createInfo.minImageCount = imageCount;
     createInfo.imageFormat = surfaceFormat.format;
     createInfo.imageColorSpace = surfaceFormat.colorSpace;
