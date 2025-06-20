@@ -59,7 +59,7 @@ void FrustumPlanes::ExtractFrustumPlanes(const glm::mat4& m, FrustumPlanes& fp)
 Scene::Scene(Device* mDevice) : aDevice{mDevice}
 {
     batchSize = MaxBatchSize;
-    numOfGroup = aDevice->GetMeshShaderProperties().maxPreferredTaskWorkGroupInvocations;
+    numOfGroup = 32;
 }
 
 Scene::~Scene()
