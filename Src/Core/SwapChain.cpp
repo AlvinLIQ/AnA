@@ -64,7 +64,7 @@ VkResult SwapChain::SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint3
     submitInfo.commandBufferCount = commandBufferCount;
     submitInfo.pCommandBuffers = pCommandBuffers;
 
-    VkSemaphore signalSemaphores[] = {renderFinishedSemaphores[imageIndex]};
+    VkSemaphore signalSemaphores[] = {renderFinishedSemaphores[CurrentImage]};
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
