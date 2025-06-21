@@ -82,7 +82,6 @@ namespace AnA
             void GetUBODescriptorConfig(Descriptor::DescriptorConfig* pConfig);
         private:
             Device* aDevice{nullptr};
-            float cascadeSplitLambda = 0.95f;
             std::vector<VkSampler> samplers;
             std::vector<Image> images;
             std::vector<Buffer> cascadeBuffers;

@@ -7,10 +7,10 @@
 
 #define MAX_ROW_VERTICES 8
 #define MAX_COLUMN_VERTICES 8
-#define MAX_PRIMITIVES (MAX_COLUMN_VERTICES - 1) * (MAX_ROW_VERTICES - 1) * 2
+#define MAX_TERRAIN_PRIMITIVES (MAX_COLUMN_VERTICES - 1) * (MAX_ROW_VERTICES - 1) * 2
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-layout(triangles, max_vertices = MAX_ROW_VERTICES * MAX_ROW_VERTICES, max_primitives = MAX_PRIMITIVES) out;
+layout(triangles, max_vertices = MAX_ROW_VERTICES * MAX_ROW_VERTICES, max_primitives = MAX_TERRAIN_PRIMITIVES) out;
 
 
 #ifdef PER_PRIMITIVE_NORMAL
@@ -72,7 +72,7 @@ taskPayloadSharedEXT struct {
 void main()
 {
     const uint vertexCount = MAX_ROW_VERTICES * MAX_COLUMN_VERTICES;
-    const uint primitiveCount = MAX_PRIMITIVES;
+    const uint primitiveCount = MAX_TERRAIN_PRIMITIVES;
     SetMeshOutputsEXT(vertexCount, primitiveCount);
     uint id = 0;
     mat4 viewProj = cbo.proj * cbo.view;

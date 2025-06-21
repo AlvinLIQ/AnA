@@ -59,7 +59,7 @@ void FrustumPlanes::ExtractFrustumPlanes(const glm::mat4& m, FrustumPlanes& fp)
 Scene::Scene(Device* mDevice) : aDevice{mDevice}
 {
     batchSize = MaxBatchSize;
-    numOfGroup = 32;
+    //numOfGroup = 32;
 }
 
 Scene::~Scene()
