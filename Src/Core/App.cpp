@@ -247,14 +247,14 @@ void App::uiLoop()
 void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
 {
     auto& swapChain = aRenderer.GetSwapChain();
-
+/*
     aRenderer.BeginOffscreenRenderPass(commandBuffer,
         aResourceManager.ShadowMap.GetFramebuffers()[swapChain.CurrentFrame],
         VK_SUBPASS_CONTENTS_INLINE);
 
     aShadowSystem.RenderCascadedShadowsIndirect(commandBuffer, aResourceManager.MainScene, aResourceManager.Shaders[2]);
     aRenderer.EndRenderPass(commandBuffer);
-
+*/
     aRenderer.BeginSwapChainRenderPass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
 
     swapChain.SetViewport(commandBuffer, actualSceneOffset);

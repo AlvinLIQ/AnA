@@ -62,7 +62,7 @@ float textureProj(vec4 shadowCoord, vec2 offset, uint cascadeIndex)
 		float dist = texture(shadowSampler, vec3(shadowCoord.xy + offset, cascadeIndex)).r;
 		if (shadowCoord.w > 0 && dist < shadowCoord.z + 0.00035) {
 		    float edge = ubo.cascades[SHADOW_MAP_CASCADE_COUNT - 1].split * 3.0;
-			shadow = 1.0 - (0.5 * smoothstep(edge, edge - 2.0, gl_FragCoord.z));
+			shadow = 1.0 - (0.5 * smoothstep(edge, edge - 2.0, viewPosZ));
 		}
 	}
 	return shadow;
@@ -94,7 +94,7 @@ void main()
     float pointLightIntensity = max(dot(normalSpace, normalize(LIGHT_POS - vertex)), 0);
 	float normalLightPos = dot(normalSpace, normalize(lbo.direction));
     float diffuseLightItensity = (normalLightPos + 2.0) * 0.5;
-
+/*
     uint cascadeIndex = SHADOW_MAP_CASCADE_COUNT - 1;
 	for(uint i = 0; i < SHADOW_MAP_CASCADE_COUNT - 1; i++) {
 		if(viewPosZ < ubo.cascades[i + 1].split) {
@@ -102,8 +102,8 @@ void main()
 			break;
 		}
 	}
-    vec4 shadowCoord = biasMat * ubo.cascades[cascadeIndex].viewProj * vec4(vertex, 1.0);
-    float visibility = filterPCF(shadowCoord, cascadeIndex);
+    vec4 shadowCoord = biasMat * ubo.cascades[cascadeIndex].viewProj * vec4(vertex, 1.0);*/
+    float visibility = 1.0;// filterPCF(shadowCoord, cascadeIndex);
 
     vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility + pointLightIntensity * LIGHT_COLOR;
 	outColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord) * vec4(finalLight, 1.0);

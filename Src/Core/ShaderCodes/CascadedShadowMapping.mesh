@@ -66,10 +66,7 @@ layout(scalar, set = 6, binding = 4) buffer meshletIDSSBO
     MeshletID meshletIDs[];
 };
 
-taskPayloadSharedEXT struct {
-    uint visibleIndices[512]; // max 512 visible meshlets per group
-    uint visibleCount;
-} taskData;
+taskPayloadSharedEXT MeshPayload taskData;
 
 void main()
 {

@@ -1,7 +1,7 @@
 #version 460
 #extension GL_EXT_mesh_shader: require
 #extension GL_EXT_shader_8bit_storage: require
-#extension GL_EXT_scalar_block_layout: enable
+#extension GL_EXT_scalar_block_layout: require
 #extension GL_GOOGLE_include_directive : require
 
 #include "mesh.h"
@@ -88,10 +88,7 @@ layout(scalar, set = 6, binding = 4) buffer meshletIDSSBO
     MeshletID meshletIDs[];
 };
 
-taskPayloadSharedEXT struct {
-    uint visibleIndices[512]; // max 512 visible meshlets per group
-    uint visibleCount;
-} taskData;
+taskPayloadSharedEXT MeshPayload taskData;
 
 shared vec3 worldVertices[MAX_VERTICES];
 

@@ -1,7 +1,7 @@
 #define PER_PRIMITIVE_NORMAL
 
-#define MAX_VERTICES 128
-#define MAX_PRIMITIVES 256
+#define MAX_VERTICES 64
+#define MAX_PRIMITIVES 124
 
 const uint bytesToBits[4] = {0u, 8u, 16u, 24u};
 const uint bytesMask[4] = {0xFFFFFFu, 0xFFFFFFu, 0xFFFF00u, 0xFF0000u};
@@ -27,6 +27,11 @@ struct MeshletID
 {
     uint meshletID;
     uint objectID;
+};
+
+struct MeshPayload
+{
+    uint visibleIndices[64];
 };
 
 struct BoundingSphere

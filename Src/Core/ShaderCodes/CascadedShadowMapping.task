@@ -68,10 +68,7 @@ layout(std430, set = 6, binding = 5) buffer MeshletIDCountSSBO
 	uint meshletIDCount;
 };
 
-taskPayloadSharedEXT struct {
-    uint visibleIndices[512]; // max 512 visible meshlets per group
-    uint visibleCount;
-} taskData;
+taskPayloadSharedEXT MeshPayload taskData;
 
 bool isMeshletVisible(MeshletID mid)
 {
@@ -103,7 +100,6 @@ void main()
     if (gl_LocalInvocationIndex == 0)
     {
         uint total = subgroupBallotBitCount(ballot);
-        taskData.visibleCount = total;
 	    EmitMeshTasksEXT(total, 2, 1);
     }
 }
