@@ -1,7 +1,6 @@
 #version 460
 #extension GL_EXT_mesh_shader : require
 #extension GL_EXT_shader_8bit_storage: require
-#extension GL_KHR_shader_subgroup_ballot : require
 #extension GL_EXT_scalar_block_layout: require
 #extension GL_GOOGLE_include_directive : require
 
@@ -19,7 +18,7 @@ struct Object
     mat4 transform;
 };
 
-layout(std430, set = 0, binding = 1) buffer ObjectSSBO
+layout(scalar, set = 0, binding = 1) buffer ObjectSSBO
 {
     Object objects[];
 };
@@ -41,7 +40,7 @@ layout(scalar, set = 6, binding = 0) buffer meshletSSBO
     Meshlet meshlets[];
 };
 
-layout(std430, set = 6, binding = 1) buffer meshletVertexSSBO
+layout(scalar, set = 6, binding = 1) buffer meshletVertexSSBO
 {
     uint vertices[];
 } mvsbo;
@@ -51,7 +50,7 @@ layout(scalar, set = 6, binding = 2) buffer meshletIndexSSBO
     uint8_t primitives[];
 };
 
-layout(std430, set = 6, binding = 3) buffer meshletCullingSSBO
+layout(scalar, set = 6, binding = 3) buffer meshletCullingSSBO
 {
     BoundingSphere boundings[];
 } mcsbo;
@@ -67,6 +66,7 @@ layout(std430, set = 6, binding = 5) buffer MeshletIDCountSSBO
 };
 
 taskPayloadSharedEXT MeshPayload taskData;
+shared uint visibleCount;
 
 bool isMeshletVisible(MeshletID mid)
 {
@@ -91,18 +91,18 @@ void main()
     uint globalID = gl_GlobalInvocationID.x;
     if (globalID >= meshletIDCount)
         return;
+
+    visibleCount = 0;
+    barrier();
     bool visible = isMeshletVisible(meshletIDs[globalID]);
 
-    uvec4 ballot = subgroupBallot(visible);
     if (visible)
     {
-        uint index = subgroupBallotExclusiveBitCount(ballot);
+        uint index = atomicAdd(visibleCount, 1);
         taskData.visibleIndices[index] = globalID;
     }
 
-    if (gl_LocalInvocationIndex == 0)
-    {
-        uint total = subgroupBallotBitCount(ballot);
-	    EmitMeshTasksEXT(total, 1, 1);
-    }
+    barrier();
+
+	EmitMeshTasksEXT(visibleCount, 1, 1);
 }

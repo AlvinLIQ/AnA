@@ -65,7 +65,6 @@ namespace AnA
         glm::vec3 normal;
         float cutoff;
         glm::vec3 coneApex;
-        float shit;
     };
 
     class Scene : public Renderable

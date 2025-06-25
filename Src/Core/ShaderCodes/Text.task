@@ -42,7 +42,7 @@ layout(scalar, set = 2, binding = 0) buffer meshletSSBO
     Meshlet meshlets[];
 };
 
-layout(std430, set = 2, binding = 1) buffer meshletVertexSSBO
+layout(scalar, set = 2, binding = 1) buffer meshletVertexSSBO
 {
     uint vertices[];
 } mvsbo;

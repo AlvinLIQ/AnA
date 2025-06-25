@@ -39,7 +39,7 @@ struct Object
     mat4 transform;
 };
 
-layout(std430, set = 0, binding = 1) buffer ObjectSSBO
+layout(scalar, set = 0, binding = 1) buffer ObjectSSBO
 {
     Object objects[];
 };
@@ -73,7 +73,7 @@ layout(scalar, set = 6, binding = 0) buffer meshletSSBO
     Meshlet meshlets[];
 };
 
-layout(std430, set = 6, binding = 1) buffer meshletVertexSSBO
+layout(scalar, set = 6, binding = 1) buffer meshletVertexSSBO
 {
     uint vertices[];
 } mvsbo;

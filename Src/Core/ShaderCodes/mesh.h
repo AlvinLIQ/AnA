@@ -1,7 +1,6 @@
-#define PER_PRIMITIVE_NORMAL
 
-#define MAX_VERTICES 64
-#define MAX_PRIMITIVES 124
+#define MAX_VERTICES 128
+#define MAX_PRIMITIVES 256
 
 const uint bytesToBits[4] = {0u, 8u, 16u, 24u};
 const uint bytesMask[4] = {0xFFFFFFu, 0xFFFFFFu, 0xFFFF00u, 0xFF0000u};
@@ -41,7 +40,6 @@ struct BoundingSphere
     vec3 normal;
     float cutoff;
     vec3 coneApex;
-    float shit;
 };
 
 bool isSphereInsideFrustum(in vec3 center, in float radius, in vec4 frustumPlanes[6])
