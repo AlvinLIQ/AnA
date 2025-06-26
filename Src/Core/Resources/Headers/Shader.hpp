@@ -24,6 +24,8 @@ namespace AnA
             std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, size_t _descriptorOffset, VkDeviceSize pushConstantSize = 0);
         Shader(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, 
             std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, size_t _descriptorOffset, VkRenderPass& renderPass, VkDeviceSize pushConstantSize = 0);
+        Shader(Device* mDevice, std::vector<ShaderInfo> shaderInfos, 
+            std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, size_t _descriptorOffset, VkDeviceSize pushConstantSize = 0);
 
         Shader(Device* mDevice, Pipeline::PipelineConfig pipelineConfig);
         Shader(Device* mDevice, Pipeline::PipelineConfig pipelineConfig, std::vector<Descriptor>& descriptors, size_t actualDescriptorCount, size_t _descriptorOffset);

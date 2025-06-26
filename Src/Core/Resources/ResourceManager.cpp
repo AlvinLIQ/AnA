@@ -379,6 +379,9 @@ void ResourceManager::createDefaultDescriptors()
     Descriptor::CreateDescriptors(aDevice, textDescriptorConfig, textDescriptors);
 }
 
+std::vector<VkPipelineShaderStageCreateInfo> shaderStageInfos{{VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+    VK_NULL_HANDLE, 0, VK_SHADER_STAGE_COMPUTE_BIT, 0, "main", VK_NULL_HANDLE}};
+
 void ResourceManager::createDefaultShaders()
 {
     Shaders.reserve(7);
