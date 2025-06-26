@@ -189,6 +189,8 @@ namespace AnA
         PFN_vkCmdDrawMeshTasksIndirectCountEXT vkCmdDrawMeshTasksIndirectCountEXT{ VK_NULL_HANDLE };
 
         VmaAllocator GetAllocator();
+
+        VkShaderModule CreateShaderModule(const std::vector<unsigned char>& code);
     private:
         VkInstance& instance;
         VkSurfaceKHR surface;

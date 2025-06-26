@@ -77,14 +77,14 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& taskShaderCode
     hasMeshShader = true;
 }
 
-Shader::Shader(Device* mDevice, std::vector<ShaderInfo> shaderInfos, 
+Shader::Shader(Device* mDevice, const std::vector<ShaderInfo>& shaderInfos, 
             std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, 
             size_t _descriptorOffset, VkDeviceSize pushConstantSize) : aDevice{mDevice}, 
     descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}, descriptorOffset{_descriptorOffset}
 {
     createPipelineLayout(pushConstantSize);
     Pipeline::PipelineConfig pipelineConfig = 
-        Pipeline::PipelineConfig::GetForDynamicRendering(shaderInfos, pipelineLayout, aDevice->GetMaxUsableSampleCount());
+        Pipeline::PipelineConfig::GetForDynamicRendering(mDevice, shaderInfos, pipelineLayout, aDevice->GetMaxUsableSampleCount());
     pipeline = Pipeline(mDevice, pipelineConfig);
     Pipeline::PipelineConfig::CleanupPipelineConfig(mDevice, pipelineConfig);
 }

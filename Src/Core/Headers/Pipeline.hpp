@@ -17,7 +17,7 @@ namespace AnA
 {
     struct ShaderInfo
     {
-        std::vector<char> codes;
+        std::vector<unsigned char> codes;
         VkPipelineCreateFlags flag;
         VkShaderStageFlagBits stage;
     };
@@ -480,7 +480,7 @@ namespace AnA
                 dConfig.pipelineInfo.subpass = 0;
                 return dConfig;
             }
-            static PipelineConfig GetForDynamicRendering(std::vector<ShaderInfo> shaderInfos,
+            static PipelineConfig GetForDynamicRendering(Device* aDevice, std::vector<ShaderInfo> shaderInfos,
                 VkPipelineLayout &pipelineLayout, VkSampleCountFlagBits msaaSamplers, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
             {
                 PipelineConfig dConfig;
@@ -491,6 +491,8 @@ namespace AnA
                     dConfig.shaderStages[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
                     dConfig.shaderStages[i].flags = shaderInfos[i].flag;
                     dConfig.shaderStages[i].stage = shaderInfos[i].stage;
+                    dConfig.shaderStages[i].module = aDevice->CreateShaderModule(shaderInfos[i].codes);
+                    dConfig.shaderStages[i].pName = "main";
                     isMeshShader = isMeshShader | (shaderInfos[i].stage & 
                         (VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_TASK_BIT_EXT | 
                         VK_SHADER_STAGE_MESH_BIT_NV | VK_SHADER_STAGE_TASK_BIT_NV));
@@ -554,7 +556,7 @@ namespace AnA
                 dConfig.colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
                 dConfig.colorBlending.logicOpEnable = VK_FALSE;
                 dConfig.colorBlending.logicOp = VK_LOGIC_OP_COPY; // Optional
-                dConfig.colorBlending.attachmentCount = 1;
+                dConfig.colorBlending.attachmentCount = 0;
                 dConfig.colorBlending.pAttachments = &dConfig.colorBlendAttachment;
                 dConfig.colorBlending.blendConstants[0] = 0.0f; // Optional
                 dConfig.colorBlending.blendConstants[1] = 0.0f; // Optional
@@ -588,7 +590,7 @@ namespace AnA
                 dConfig.pipelineInfo.layout = pipelineLayout;
 
                 dConfig.pipelineRenderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR;
-                dConfig.pipelineRenderingInfo.colorAttachmentCount = 1;
+                dConfig.pipelineRenderingInfo.colorAttachmentCount = 0;
                 dConfig.pipelineRenderingInfo.pColorAttachmentFormats = &dConfig.colorAttachmentFormat;
                 dConfig.pipelineRenderingInfo.depthAttachmentFormat = dConfig.depthAttachmentFormat;
                 dConfig.pipelineRenderingInfo.stencilAttachmentFormat = dConfig.depthAttachmentFormat;
@@ -687,7 +689,5 @@ namespace AnA
         void createMeshShaderPipeline(const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode);
         void createComputePipeline(const std::string &computeShaderFileName);
         void createComputePipeline(const std::vector<unsigned char>& computeShaderCode);
-
-        VkShaderModule createShaderModule(const std::vector<unsigned char> &code);
     };
 }

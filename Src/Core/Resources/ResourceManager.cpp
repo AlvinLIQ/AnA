@@ -379,14 +379,25 @@ void ResourceManager::createDefaultDescriptors()
     Descriptor::CreateDescriptors(aDevice, textDescriptorConfig, textDescriptors);
 }
 
-std::vector<VkPipelineShaderStageCreateInfo> shaderStageInfos{{VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-    VK_NULL_HANDLE, 0, VK_SHADER_STAGE_COMPUTE_BIT, 0, "main", VK_NULL_HANDLE}};
-
+const std::vector<ShaderInfo> basicShaderStageInfos{{Basic_vert, 0, VK_SHADER_STAGE_VERTEX_BIT},
+                                        {Basic_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};
+const std::vector<ShaderInfo> shapeShaderStageInfos{{Shape_vert, 0, VK_SHADER_STAGE_VERTEX_BIT},
+                                        {Shape_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};
+const std::vector<ShaderInfo> csmShaderStageInfos{{CascadedShadowMapping_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
+                                        {CascadedShadowMapping_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT}};
+const std::vector<ShaderInfo> terrainShaderStageInfos{{Terrain_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
+                                        {Terrain_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT}};
+const std::vector<ShaderInfo> meshShaderStageInfos{{Mesh_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
+                                        {Mesh_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT},
+                                            {Mesh_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};
+const std::vector<ShaderInfo> textShaderStageInfos{{Text_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
+                                        {Text_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT},
+                                            {Text_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};
 void ResourceManager::createDefaultShaders()
 {
     Shaders.reserve(7);
     auto renderPass = SwapChain::GetCurrent()->GetRenderPass();
-    Shaders.emplace_back(aDevice, Basic_vert, Basic_frag, renderPass, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
+    Shaders.emplace_back(aDevice, basicShaderStageInfos, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
 
     Shaders.emplace_back(aDevice, Shape_vert, Shape_frag, renderPass, shapeDescriptors, SHAPE_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
 

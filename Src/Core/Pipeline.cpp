@@ -102,8 +102,8 @@ void Pipeline::createGraphicsPipeline(const std::string &vertShaderFileName, con
 
 void Pipeline::createGraphicsPipeline(const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, const VkPrimitiveTopology vertexTopology)
 {
-    VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
-    VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
+    VkShaderModule vertShaderModule = aDevice->CreateShaderModule(vertShaderCode);
+    VkShaderModule fragShaderModule = aDevice->CreateShaderModule(fragShaderCode);
 
     PipelineConfig pipelineConfig = pipelineConfig.GetDefault(vertShaderModule, fragShaderModule, pipelineLayout, renderPass, aDevice->GetMaxUsableSampleCount(), vertexTopology); 
 
@@ -118,7 +118,7 @@ void Pipeline::createGraphicsPipeline(const std::vector<unsigned char>& vertShad
 
 void Pipeline::createGraphicsPipeline(const std::vector<unsigned char>& vertShaderCode, const VkPrimitiveTopology vertexTopology)
 {
-    VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
+    VkShaderModule vertShaderModule = aDevice->CreateShaderModule(vertShaderCode);
 
     PipelineConfig pipelineConfig = pipelineConfig.GetForDepthTest(vertShaderModule, VK_NULL_HANDLE, pipelineLayout, renderPass, vertexTopology); 
     
@@ -132,8 +132,8 @@ void Pipeline::createGraphicsPipeline(const std::vector<unsigned char>& vertShad
 
 void Pipeline::createGraphicsPipeline(const std::vector<unsigned char>& vertShaderCode, const VkPrimitiveTopology vertexTopology, const std::vector<unsigned char>& fragShaderCode)
 {
-    VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
-    VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
+    VkShaderModule vertShaderModule = aDevice->CreateShaderModule(vertShaderCode);
+    VkShaderModule fragShaderModule = aDevice->CreateShaderModule(fragShaderCode);
 
     PipelineConfig pipelineConfig = pipelineConfig.GetForDepthTest(vertShaderModule, fragShaderModule, pipelineLayout, renderPass, vertexTopology); 
     
@@ -156,9 +156,9 @@ void Pipeline::createGraphicsPipeline(PipelineConfig pipelineConfig)
 
 void Pipeline::createMeshShaderPipeline(const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, const std::vector<unsigned char>& fragShaderCode)
 {
-    VkShaderModule taskShaderModule = createShaderModule(taskShaderCode);
-    VkShaderModule meshShaderModule = createShaderModule(meshShaderCode);
-    VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
+    VkShaderModule taskShaderModule = aDevice->CreateShaderModule(taskShaderCode);
+    VkShaderModule meshShaderModule = aDevice->CreateShaderModule(meshShaderCode);
+    VkShaderModule fragShaderModule = aDevice->CreateShaderModule(fragShaderCode);
 
     auto pipelineConfig = PipelineConfig::GetForMeshShader(taskShaderModule, meshShaderModule, fragShaderModule, pipelineLayout, renderPass, aDevice->GetMaxUsableSampleCount());
     
@@ -172,8 +172,8 @@ void Pipeline::createMeshShaderPipeline(const std::vector<unsigned char>& taskSh
 
 void Pipeline::createMeshShaderPipeline(const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode)
 {
-    VkShaderModule taskShaderModule = createShaderModule(taskShaderCode);
-    VkShaderModule meshShaderModule = createShaderModule(meshShaderCode);
+    VkShaderModule taskShaderModule = aDevice->CreateShaderModule(taskShaderCode);
+    VkShaderModule meshShaderModule = aDevice->CreateShaderModule(meshShaderCode);
 
     auto pipelineConfig = PipelineConfig::GetForDepthTestMeshShader(taskShaderModule, meshShaderModule, pipelineLayout, renderPass);
     
@@ -192,7 +192,7 @@ void Pipeline::createComputePipeline(const std::string& computeShaderFileName)
 
 void Pipeline::createComputePipeline(const std::vector<unsigned char>& computeShaderCode)
 {
-    VkShaderModule computeShaderModule = createShaderModule(computeShaderCode);
+    VkShaderModule computeShaderModule = aDevice->CreateShaderModule(computeShaderCode);
 
     VkPipelineShaderStageCreateInfo computeShaderStageInfo{};
     computeShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -211,20 +211,4 @@ void Pipeline::createComputePipeline(const std::vector<unsigned char>& computeSh
     }
 
     vkDestroyShaderModule(aDevice->GetLogicalDevice(), computeShaderModule, nullptr);
-}
-
-VkShaderModule Pipeline::createShaderModule(const std::vector<unsigned char> &code)
-{
-    VkShaderModuleCreateInfo createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    createInfo.codeSize = code.size();
-    createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
-
-    VkShaderModule shaderModule;
-    if (vkCreateShaderModule(aDevice->GetLogicalDevice(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to create shader module!");
-    }
-
-    return shaderModule;
 }
