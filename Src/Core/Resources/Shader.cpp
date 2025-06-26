@@ -83,8 +83,10 @@ Shader::Shader(Device* mDevice, const std::vector<ShaderInfo>& shaderInfos,
     descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}, descriptorOffset{_descriptorOffset}
 {
     createPipelineLayout(pushConstantSize);
+    auto swapChain = SwapChain::GetCurrent();
     Pipeline::PipelineConfig pipelineConfig = 
-        Pipeline::PipelineConfig::GetForDynamicRendering(mDevice, shaderInfos, pipelineLayout, aDevice->GetMaxUsableSampleCount());
+        Pipeline::PipelineConfig::GetForDynamicRendering(mDevice, shaderInfos, pipelineLayout, 
+        swapChain->GetFormat(), swapChain->GetDepthFormat(), aDevice->GetMaxUsableSampleCount());
     pipeline = Pipeline(mDevice, pipelineConfig);
     Pipeline::PipelineConfig::CleanupPipelineConfig(mDevice, pipelineConfig);
 }

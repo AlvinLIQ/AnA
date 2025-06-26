@@ -383,6 +383,8 @@ const std::vector<ShaderInfo> basicShaderStageInfos{{Basic_vert, 0, VK_SHADER_ST
                                         {Basic_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};
 const std::vector<ShaderInfo> shapeShaderStageInfos{{Shape_vert, 0, VK_SHADER_STAGE_VERTEX_BIT},
                                         {Shape_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};
+const std::vector<ShaderInfo> pointShaderStageInfos{{Point_vert, 0, VK_SHADER_STAGE_VERTEX_BIT},
+                                        {Point_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};
 const std::vector<ShaderInfo> csmShaderStageInfos{{CascadedShadowMapping_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
                                         {CascadedShadowMapping_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT}};
 const std::vector<ShaderInfo> terrainShaderStageInfos{{Terrain_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
@@ -396,24 +398,19 @@ const std::vector<ShaderInfo> textShaderStageInfos{{Text_task, 0, VK_SHADER_STAG
 void ResourceManager::createDefaultShaders()
 {
     Shaders.reserve(7);
-    auto renderPass = SwapChain::GetCurrent()->GetRenderPass();
     Shaders.emplace_back(aDevice, basicShaderStageInfos, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
 
-    Shaders.emplace_back(aDevice, Shape_vert, Shape_frag, renderPass, shapeDescriptors, SHAPE_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
+    Shaders.emplace_back(aDevice, shapeShaderStageInfos, shapeDescriptors, SHAPE_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
 
-    auto offscreenRenderPass = SwapChain::GetCurrent()->GetOffscreenRenderPass();
+    Shaders.emplace_back(aDevice, csmShaderStageInfos, defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
 
-    Shaders.emplace_back(aDevice, CascadedShadowMapping_task, CascadedShadowMapping_mesh,
-        defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0, offscreenRenderPass, 0);
-    Shaders.emplace_back(aDevice, Point_vert, Point_frag, renderPass, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
+    Shaders.emplace_back(aDevice, pointShaderStageInfos, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
 
     if (aDevice->MeshShaderSupport())
     {
-        Shaders.emplace_back(aDevice, Terrain_task, Terrain_mesh, Mesh_frag, renderPass, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(TerrainPushConstants));
-        Shaders.emplace_back(aDevice, Mesh_task, Mesh_mesh, Mesh_frag, renderPass
-            , defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(uint32_t));
-        Shaders.emplace_back(aDevice, Text_task, Text_mesh, Text_frag, renderPass
-            , textDescriptors, 3, 0, sizeof(glm::vec2));
+        Shaders.emplace_back(aDevice, terrainShaderStageInfos, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(TerrainPushConstants));
+        Shaders.emplace_back(aDevice, meshShaderStageInfos, defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(uint32_t));
+        Shaders.emplace_back(aDevice, textShaderStageInfos, textDescriptors, 3, 0, sizeof(glm::vec2));
     }
 }
 

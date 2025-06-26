@@ -481,7 +481,7 @@ namespace AnA
                 return dConfig;
             }
             static PipelineConfig GetForDynamicRendering(Device* aDevice, std::vector<ShaderInfo> shaderInfos,
-                VkPipelineLayout &pipelineLayout, VkSampleCountFlagBits msaaSamplers, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
+                VkPipelineLayout &pipelineLayout, VkFormat colorFormat, VkFormat depthFormat, VkSampleCountFlagBits msaaSamplers, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
             {
                 PipelineConfig dConfig;
                 assert(shaderInfos.size() <= 3);
@@ -498,10 +498,10 @@ namespace AnA
                         VK_SHADER_STAGE_MESH_BIT_NV | VK_SHADER_STAGE_TASK_BIT_NV));
                     hasFragmentShader = hasFragmentShader | (shaderInfos[i].stage | VK_SHADER_STAGE_FRAGMENT_BIT);
                 }
-                if (hasFragmentShader)
-                    dConfig.dynamicStates.back() = VK_DYNAMIC_STATE_DEPTH_BIAS;
-                else if (isMeshShader)
+                if (isMeshShader)
                     dConfig.dynamicStates.pop_back();
+                if (!hasFragmentShader)
+                    dConfig.dynamicStates.push_back(VK_DYNAMIC_STATE_DEPTH_BIAS);
 
                 dConfig.dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
                 dConfig.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(dConfig.dynamicStates.size());
@@ -556,7 +556,7 @@ namespace AnA
                 dConfig.colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
                 dConfig.colorBlending.logicOpEnable = VK_FALSE;
                 dConfig.colorBlending.logicOp = VK_LOGIC_OP_COPY; // Optional
-                dConfig.colorBlending.attachmentCount = 0;
+                dConfig.colorBlending.attachmentCount = 1;
                 dConfig.colorBlending.pAttachments = &dConfig.colorBlendAttachment;
                 dConfig.colorBlending.blendConstants[0] = 0.0f; // Optional
                 dConfig.colorBlending.blendConstants[1] = 0.0f; // Optional
@@ -589,11 +589,15 @@ namespace AnA
 
                 dConfig.pipelineInfo.layout = pipelineLayout;
 
+                dConfig.pipelineInfo.pNext = &dConfig.pipelineRenderingInfo;
+
                 dConfig.pipelineRenderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR;
-                dConfig.pipelineRenderingInfo.colorAttachmentCount = 0;
+                dConfig.pipelineRenderingInfo.colorAttachmentCount = 1;
+                dConfig.colorAttachmentFormat = colorFormat;
+                dConfig.depthAttachmentFormat = depthFormat;
                 dConfig.pipelineRenderingInfo.pColorAttachmentFormats = &dConfig.colorAttachmentFormat;
                 dConfig.pipelineRenderingInfo.depthAttachmentFormat = dConfig.depthAttachmentFormat;
-                dConfig.pipelineRenderingInfo.stencilAttachmentFormat = dConfig.depthAttachmentFormat;
+                dConfig.pipelineRenderingInfo.stencilAttachmentFormat = VK_FORMAT_UNDEFINED;
 
                 dConfig.pipelineInfo.subpass = 0;
                 return dConfig;
@@ -673,7 +677,6 @@ namespace AnA
         {
             return pipelineLayout;
         }
-
     private:
         Device* aDevice;
         VkRenderPass renderPass;

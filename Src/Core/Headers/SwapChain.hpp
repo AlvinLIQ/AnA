@@ -115,5 +115,6 @@ namespace AnA
         void createSyncObjects();
 
         void cleanupSwapChain();
+        friend class Renderer;
     };
 }

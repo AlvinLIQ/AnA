@@ -255,12 +255,13 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     aShadowSystem.RenderCascadedShadowsIndirect(commandBuffer, aResourceManager.MainScene, aResourceManager.Shaders[2]);
     aRenderer.EndRenderPass(commandBuffer);
 */
-    aRenderer.BeginSwapChainRenderPass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
+    //aRenderer.BeginSwapChainRenderPass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
+    aRenderer.BeginRendering(commandBuffer);
 
     swapChain.SetViewport(commandBuffer, actualSceneOffset);
 
     aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.MainScene,
-        aResourceManager.Shaders[aDevice.MeshShaderSupport() ? 5 : 0],
+        aResourceManager.Shaders[5],
         swapChain.CurrentFrame);
 /*
     auto& terrainShader = aResourceManager.Shaders[4];
@@ -275,5 +276,5 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.TextContext, aResourceManager.Shaders[6], swapChain.CurrentFrame);
     swapChain.SetViewport(commandBuffer, aResourceManager.Shapes.Extent);
     aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.Shapes, aResourceManager.Shaders[1], swapChain.CurrentFrame);
-    aRenderer.EndRenderPass(commandBuffer);
+    aRenderer.EndRendering(commandBuffer);
 }

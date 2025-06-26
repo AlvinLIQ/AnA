@@ -190,6 +190,49 @@ void Renderer::BeginSwapChainRenderPass(CommandBuffer& commandBuffer, VkOffset2D
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
 }
 
+void Renderer::BeginRendering(CommandBuffer& commandBuffer)
+{
+    Device::ImageMemoryBarrier(commandBuffer, aSwapChain->swapChainImages[aSwapChain->CurrentImage], 
+        VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+    // Color attachment
+    VkRenderingAttachmentInfoKHR colorAttachmentInfo{};
+    colorAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR;
+    colorAttachmentInfo.imageView = aSwapChain->colorImageView;
+    colorAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    colorAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    colorAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    colorAttachmentInfo.clearValue = clearValues[0];
+    colorAttachmentInfo.resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT;
+    colorAttachmentInfo.resolveImageView = aSwapChain->swapChainImageViews[aSwapChain->CurrentImage];
+    colorAttachmentInfo.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    VkRenderingAttachmentInfoKHR depthAttachment{};
+    depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+    depthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+    depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    depthAttachment.imageView = aSwapChain->depthImageViews[aSwapChain->CurrentImage];
+    depthAttachment.clearValue = clearValues[1];
+
+    VkRenderingInfo renderingInfo{};
+    renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+    renderingInfo.renderArea.offset = {};
+    renderingInfo.renderArea.extent = aSwapChain->swapChainExtent;
+    renderingInfo.layerCount = 1;
+    renderingInfo.colorAttachmentCount = 1;
+    renderingInfo.pColorAttachments = &colorAttachmentInfo;
+    renderingInfo.pDepthAttachment = &depthAttachment;
+    aDevice->vkCmdBeginRenderingKHR(commandBuffer, &renderingInfo);
+}
+
+void Renderer::EndRendering(CommandBuffer& commandBuffer)
+{
+    aDevice->vkCmdEndRenderingKHR(commandBuffer);
+    Device::ImageMemoryBarrier(commandBuffer, aSwapChain->swapChainImages[aSwapChain->CurrentImage], 
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+}
+
 void Renderer::EndRenderPass(CommandBuffer& commandBuffer)
 {
     assert(isFrameStarted && "Can't call EndSwapChainRenderPass while frame is not in progress!");

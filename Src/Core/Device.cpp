@@ -1051,6 +1051,8 @@ void Device::createLogicalDevice()
     if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &logicalDevice) != VK_SUCCESS)
         throw std::runtime_error("Failed to create logical device!");
 
+    vkCmdBeginRenderingKHR = reinterpret_cast<PFN_vkCmdBeginRenderingKHR>(vkGetDeviceProcAddr(logicalDevice, "vkCmdBeginRenderingKHR"));
+    vkCmdEndRenderingKHR = reinterpret_cast<PFN_vkCmdEndRenderingKHR>(vkGetDeviceProcAddr(logicalDevice, "vkCmdEndRenderingKHR"));
     vkCmdDrawMeshTasksEXT = reinterpret_cast<PFN_vkCmdDrawMeshTasksEXT>(vkGetDeviceProcAddr(logicalDevice, "vkCmdDrawMeshTasksEXT"));
     vkCmdDrawMeshTasksIndirectCountEXT = reinterpret_cast<PFN_vkCmdDrawMeshTasksIndirectCountEXT>(vkGetDeviceProcAddr(logicalDevice, "vkCmdDrawMeshTasksIndirectCountEXT"));
     vkGetDeviceQueue(logicalDevice, indices.graphicsAndComputeFamily.value(), 0, &graphicsQueue);
@@ -1085,6 +1087,35 @@ void Device::CreateCommandPool(VkCommandPoolCreateFlags flags, VkCommandPool* po
     if (vkCreateCommandPool(logicalDevice, &poolInfo,
     nullptr, pool) != VK_SUCCESS)
         throw std::runtime_error("Failed to create command pool!");
+}
+
+void Device::ImageMemoryBarrier(VkCommandBuffer commandBuffer, VkImage image, VkImageLayout initLayout, VkImageLayout finalLayout)
+{
+    VkImageMemoryBarrier imageMemoryBarrier{};
+    imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    imageMemoryBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;  // Previous access (render pass)
+    imageMemoryBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;            // After present
+    imageMemoryBarrier.oldLayout = initLayout;
+    imageMemoryBarrier.newLayout = finalLayout;          // Target layout for presentation
+    imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    imageMemoryBarrier.image = image;  // Image to transition
+    imageMemoryBarrier.subresourceRange = {};
+    imageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    imageMemoryBarrier.subresourceRange.baseMipLevel = 0;
+    imageMemoryBarrier.subresourceRange.levelCount = 1;
+    imageMemoryBarrier.subresourceRange.baseArrayLayer = 0;
+    imageMemoryBarrier.subresourceRange.layerCount = 1;
+
+    // Record the barrier in the command buffer
+    vkCmdPipelineBarrier(commandBuffer,
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, // Stage before transition
+        VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,            // Stage after transition
+        0,                                           // Flags (none)
+        0, nullptr,                                  // No memory barriers
+        0, nullptr,                                   // No buffer barriers
+        1, &imageMemoryBarrier
+    );
 }
 
 VkCommandBuffer Device::beginSingleTimeCommands()

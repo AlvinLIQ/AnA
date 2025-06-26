@@ -74,6 +74,9 @@ namespace AnA
         void BeginSwapChainRenderPass(CommandBuffer& commandBuffer, VkOffset2D& offset, VkExtent2D& extent);
         void BeginSwapChainRenderPass(CommandBuffer& commandBuffer, VkOffset2D& ltOffset, VkOffset2D& rbOffset);
 
+        void BeginRendering(CommandBuffer& commandBuffer);
+        void EndRendering(CommandBuffer& commandBuffer);
+
         void EndRenderPass(CommandBuffer& commandBuffer);
         void BeginOffscreenRenderPass(CommandBuffer& commandBuffer, VkFramebuffer& framebuffer, VkSubpassContents contents = VK_SUBPASS_CONTENTS_INLINE);
     private:

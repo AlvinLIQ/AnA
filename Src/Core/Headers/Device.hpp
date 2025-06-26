@@ -187,10 +187,14 @@ namespace AnA
         }
         PFN_vkCmdDrawMeshTasksEXT vkCmdDrawMeshTasksEXT{ VK_NULL_HANDLE };
         PFN_vkCmdDrawMeshTasksIndirectCountEXT vkCmdDrawMeshTasksIndirectCountEXT{ VK_NULL_HANDLE };
+        PFN_vkCmdBeginRenderingKHR vkCmdBeginRenderingKHR{ VK_NULL_HANDLE };
+        PFN_vkCmdEndRenderingKHR vkCmdEndRenderingKHR{ VK_NULL_HANDLE };
 
         VmaAllocator GetAllocator();
 
         VkShaderModule CreateShaderModule(const std::vector<unsigned char>& code);
+
+        static void ImageMemoryBarrier(VkCommandBuffer commandBuffer, VkImage image, VkImageLayout initLayout, VkImageLayout finalLayout);
     private:
         VkInstance& instance;
         VkSurfaceKHR surface;
