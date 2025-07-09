@@ -44,7 +44,7 @@ void Instance::createInstance()
     }
     VkApplicationInfo appInfo = {
         VK_STRUCTURE_TYPE_APPLICATION_INFO, nullptr, "AnA", VK_MAKE_VERSION(1, 0, 0), "AnA Engine",
-        VK_MAKE_VERSION(1, 0, 0), VK_API_VERSION_1_3};
+        VK_MAKE_VERSION(1, 0, 0), VK_API_VERSION_1_4};
 
     auto glfwExtensions = getGLFWExtensions();
     if (!checkExtensions(glfwExtensions))
