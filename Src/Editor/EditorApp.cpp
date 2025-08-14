@@ -78,7 +78,7 @@ void EditorApp::loadModelButton_Click(void* , PointerEventArgs& )
     Resource::ResourceManager::GetCurrent()->MainScene.Append(std::vector<MeshInfo>(1, mesh));
     auto panel =
             static_cast<Controls::StackPanel*>(static_cast<EditorApp*>(App::GetCurrent())->controlMap["modelList"]);
-    panel->Child(static_cast<Controls::Control*>(new Controls::TextBlock(path.c_str(),
+    panel->Child(static_cast<Controls::Control*>(new Controls::TextBlock(path.substr(path.find_last_of('/') + 1).c_str(),
                                 {0.8f, 0.8f, 0.8f, 1.0f})));
 }
 
