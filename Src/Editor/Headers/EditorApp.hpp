@@ -19,6 +19,7 @@ namespace AnA
             static void loadModelButton_Click(void* control, PointerEventArgs& args);
             static void saveSceneButton_Click(void* control, PointerEventArgs& args);
             static void exitButton_Click(void* control, PointerEventArgs& args);
+            static void pageButton_Click(void* , PointerEventArgs& );
             std::unordered_map<std::string, Controls::Control*> controlMap;
         protected:
             static void onLoop();

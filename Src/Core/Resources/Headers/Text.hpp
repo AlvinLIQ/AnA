@@ -49,6 +49,7 @@ namespace AnA
         void Remove(uint32_t id);
         void UpdateLayout(uint32_t id);
         void UpdateText(uint32_t id, const std::string& text);
+        void ResetLayout();
         TextInfo* GetInfoById(uint32_t id);
         uint32_t GetTextCount();
     private:

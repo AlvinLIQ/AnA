@@ -4,6 +4,8 @@
 #include "../GUI/Controls/Headers/Slider.hpp"
 #include "../GUI/Controls/Headers/StackPanel.hpp"
 #include "../GUI/Controls/Headers/TextBlock.hpp"
+#include "../GUI/Controls/Headers/PageView.hpp"
+
 
 using namespace AnA;
 using namespace Editor;
@@ -110,6 +112,12 @@ void EditorApp::saveSceneButton_Click(void* , PointerEventArgs& )
 void EditorApp::exitButton_Click(void* , PointerEventArgs& )
 {
     exit(0);
+}
+
+void EditorApp::pageButton_Click(void* , PointerEventArgs& )
+{
+    auto pageView = static_cast<Controls::PageView*>(static_cast<EditorApp*>(App::GetCurrent())->controlMap["pageView"]);
+    pageView->PageIndex(1 - pageView->PageIndex());
 }
 
 //const VkDeviceSize offset = 0;

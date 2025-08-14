@@ -149,6 +149,7 @@ void App::Run()
             aResourceManager.MainControl->Aspect = static_cast<float>(controlExtent.width) / static_cast<float>(controlExtent.height);
             aResourceManager.MainControl->Extent = controlExtent;
             aResourceManager.Shapes.Extent = controlExtent;
+            aResourceManager.TextContext.ResetLayout();
             aResourceManager.Shapes.PrepareDraw(aResourceManager.MainControl);
             aResourceManager.MainControl->EndUpdate();
         }

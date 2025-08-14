@@ -30,6 +30,7 @@ void Button_PointerPressed(Button* control, PointerEventArgs& args)
 void Button_PointerReleased(Button* control, PointerEventArgs& args)
 {
     control->Color = control->IsInside(args.Position) ? ButtonPointerMovedBackgroundColor : ButtonBackgroundColor;
+    Control::RequestUpdate();
     args.Handled = false;
 }
 

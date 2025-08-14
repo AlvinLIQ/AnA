@@ -1,4 +1,4 @@
-<PageView VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+<PageView Name="pageView" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
     <StackPanel ControlSize="0.0f, 0.0f" Spacing="0.01f" Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
         Color="0.156f, 0.156f, 0.156f, 1.0f" Padding="0.05f, 0.01f">
         <TextBlock Text="AnA" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
@@ -24,6 +24,15 @@
         <ToggleSwitch Name="camLockToggle" ControlSize="0.04f, 0.02f"/>
         <Button HorizontalAlignment="Start" Click="exitButton_Click">
             <TextBlock Text="Exit"/>
+        </Button>
+        <Button Click="pageButton_Click">
+            <TextBlock Text="Test"/>
+        </Button>
+    </StackPanel>
+    <StackPanel ControlSize="0.0f, 0.0f" Spacing="0.01f" Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+        Color="0.156f, 0.156f, 0.156f, 1.0f" Padding="0.05f, 0.01f">
+        <Button Click="pageButton_Click">
+            <TextBlock Text="Back"/>
         </Button>
     </StackPanel>
 </PageView>

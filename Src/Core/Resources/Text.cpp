@@ -175,6 +175,17 @@ uint32_t Text::GetTextCount()
     return uint32_t(textMap.size());
 }
 
+void Text::ResetLayout()
+{
+    _mutex.lock();
+    TextData* textBuffer = reinterpret_cast<TextData*>(textBuffers[currentBufferIndex].GetMappedData());
+    for (size_t i = 0; i < textMap.size(); i++)
+    {
+        textBuffer[i].size = 0.0f;
+    }
+    _mutex.unlock();
+}
+
 void Text::updateAll()
 {
     std::unique_lock<std::mutex> lock(_mutex);
