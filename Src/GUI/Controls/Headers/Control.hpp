@@ -62,7 +62,7 @@ namespace AnA
             {
                 renderOffset = newOffset;
             }
-            Vec2 RenderOffset()
+            Vec2& RenderOffset()
             {
                 return renderOffset;
             }
@@ -70,7 +70,7 @@ namespace AnA
             {
                 renderSize = newSize;
             }
-            Vec2 RenderSize()
+            Vec2& RenderSize()
             {
                 return renderSize;
             }
