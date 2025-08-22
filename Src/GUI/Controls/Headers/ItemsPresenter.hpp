@@ -12,7 +12,10 @@ namespace AnA
             ~ItemsPresenter();
 
             virtual void Child(Control* newItem);
-            virtual void Child(Control* newItem, uint32_t x, uint32_t y) = 0;
+            virtual void Child(Control* , uint32_t , uint32_t )
+            {
+
+            }
             
             void RemoveChild(Control* targetItem);
             void RemoveChildAt(size_t index);
