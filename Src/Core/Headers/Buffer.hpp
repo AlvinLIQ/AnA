@@ -70,7 +70,9 @@ namespace AnA
         void Resize(VkDeviceSize newSize)
         {
             if (newSize != bufferSize)
+            {
                 *this = Buffer(aDevice, newSize, bufferUsage, memoryUsage);
+            }
         }
 
         void CopyToBuffer(Buffer& srcBuffer, VkDeviceSize dataSize)

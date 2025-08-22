@@ -62,14 +62,18 @@ void Grid::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo
 
             offset += cell.size;
         }
+    }
+    for (uint32_t i = 0, j; i < uint32_t(itemsPositions.size()); i++)
+    {
         for (j = 0; j < uint32_t(itemsPositions[i].size()); j++)
         {
             auto pos = itemsPositions[i][j];
-            auto& cell = cells[i][j];
-            items[pos]->RenderOffset()[i] = cell.offset;
-            items[pos]->RenderSize()[i] = cell.size;
-            if (i)
-                items[i]->ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
+            auto& cellX = cells[0][i], &cellY = cells[1][j];
+            items[pos]->RenderOffset()[0] = cellX.offset;
+            items[pos]->RenderOffset()[1] = cellY.offset;
+            items[pos]->RenderSize()[0] = cellX.size;
+            items[pos]->RenderSize()[1] = cellY.size;
+            items[pos]->ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
         }
     }
 }

@@ -21,7 +21,8 @@ Buffer::~Buffer()
 
 void Buffer::Map()
 {
-    aDevice->MapBuffer(&mappedData, allocation);
+    if (!mappedData)
+        aDevice->MapBuffer(&mappedData, allocation);
 }
 
 void Buffer::Unmap()
