@@ -63,6 +63,9 @@ taskPayloadSharedEXT struct {
 
 void main()
 {
+    if (textInfos[gl_WorkGroupID.x].size == 0.)
+        return;
+
     taskData.textIndex = gl_WorkGroupID.x;
     EmitMeshTasksEXT(textInfos[gl_WorkGroupID.x].count, 1, 1);
 }
