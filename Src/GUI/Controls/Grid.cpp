@@ -5,7 +5,7 @@ using namespace Controls;
 
 Grid::Grid()
 {
-
+    RenderMode(Relative);
 }
 
 Grid::~Grid()
@@ -38,10 +38,10 @@ void Grid::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo
     auto renderSize = GetSizeForRender();
     auto renderOffset = GetActualControlOffset();
     float maxSize, offset;
-    for (uint32_t i = 0, j, maxCells = 0; i < 2; i++)
+    for (uint32_t i = 0, j, maxCells; i < 2; i++)
     {
         maxSize = renderSize[i];
-        for (j = 0; j < uint32_t(cells[i].size()); j++)
+        for (j = 0, maxCells = 0; j < uint32_t(cells[i].size()); j++)
         {
             auto& cell = cells[i][j];
             if (cell.state)
@@ -69,6 +69,8 @@ void Grid::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo
         {
             auto pos = itemsPositions[i][j];
             auto& cellX = cells[0][i], &cellY = cells[1][j];
+            items[pos]->Extent = Extent;
+            items[pos]->Aspect = Aspect;
             items[pos]->RenderOffset()[0] = cellX.offset;
             items[pos]->RenderOffset()[1] = cellY.offset;
             items[pos]->RenderSize()[0] = cellX.size;
