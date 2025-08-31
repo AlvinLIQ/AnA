@@ -5,5 +5,5 @@ example_mesh_shader_ui = custom_target('Convert UI to cpp code',
   )
 example_mesh_shader = executable('example_mesh_shader', [example_mesh_shader_ui , 'example_mesh_shader.cpp'],
     link_with: [AnACore, AnAControls],
-    dependencies: [vulkan_dep, glfw_dep],
+    dependencies: [vulkan_dep, glfw_dep, glslang_dep],
     install: true, install_dir: meson.project_source_root())

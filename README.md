@@ -11,8 +11,8 @@
 * [X] move descriptor sets model(vertices/indices) to resource manager
 * [X] only pass pointers and count to shader/scene
 * [X] consider using shared pointer for those resources
-* [ ] optimize memory management
-* [ ] text x mesh shader
+* [X] optimize memory management(use VMA)
+* [X] text x mesh shader
 * [ ] try pipeline cache
 
 ## Build&Run

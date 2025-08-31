@@ -5,5 +5,5 @@ editor_ui = custom_target('Convert UI to cpp code',
   )
 AnA = executable('AnA', [editor_ui, 'EditorApp.cpp'], 
     link_with: [AnACore, AnAControls], 
-    dependencies: [vulkan_dep, glfw_dep],
+    dependencies: [vulkan_dep, glfw_dep, glslang_dep],
     install: true, install_dir: meson.project_source_root())

@@ -12,6 +12,7 @@ if host_machine.system() == 'windows'
 else
     glfw_dep = dependency('glfw3', required: true)      # GLFW
 endif
+glslang_dep = dependency('glslang', required: true)
 
 subdir('Src/3rdParty/')
 subdir('Src/Core/')
