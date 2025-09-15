@@ -4,12 +4,12 @@ shader_sources = files('Basic.vert', 'Basic.frag', 'CascadedShadowMapping.task',
     'Mesh.mesh', 'Mesh.task', 'Mesh.frag', 'Terrain.mesh', 'Terrain.task',
     'Text.task', 'Text.mesh', 'Text.frag')
 shader_outputs = []
-shader_args = ['--target-env=vulkan1.3', '--target-spv=spv1.5']
+shader_args = ['--target-env', 'vulkan1.3']
 foreach shader_source : shader_sources
   output_file = fs.name(shader_source) + '.spv'
   shader_output = custom_target('compile ' + fs.name(shader_source),
     output: output_file,
-    command: ['glslc', shader_source, '-o', '@OUTPUT@', shader_args],
+    command: ['glslangValidator', '-V', shader_source, '-o', '@OUTPUT@', shader_args],
     depend_files: [shader_source, 'mesh.h', 'math.h']
   )
   shader_outputs += shader_output
