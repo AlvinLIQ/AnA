@@ -379,20 +379,20 @@ void ResourceManager::createDefaultDescriptors()
     Descriptor::CreateDescriptors(aDevice, textDescriptorConfig, textDescriptors);
 }
 
-const std::vector<ShaderInfo> basicShaderStageInfos{{Basic_vert, 0, VK_SHADER_STAGE_VERTEX_BIT},
-                                        {Basic_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};
-const std::vector<ShaderInfo> shapeShaderStageInfos{{Shape_vert, 0, VK_SHADER_STAGE_VERTEX_BIT},
-                                        {Shape_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};
-const std::vector<ShaderInfo> pointShaderStageInfos{{Point_vert, 0, VK_SHADER_STAGE_VERTEX_BIT},
-                                        {Point_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};
-const std::vector<ShaderInfo> csmShaderStageInfos{{CascadedShadowMapping_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
-                                        {CascadedShadowMapping_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT}};
-const std::vector<ShaderInfo> terrainShaderStageInfos{{Terrain_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
-                                        {Terrain_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT}};
-const std::vector<ShaderInfo> meshShaderStageInfos{{Mesh_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
-                                        {Mesh_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT},
-                                            {Mesh_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};
-const std::vector<ShaderInfo> textShaderStageInfos{{Text_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
+std::vector<ShaderInfo> basicShaderStageInfos{{Basic_vert, 0, VK_SHADER_STAGE_VERTEX_BIT},
+                                  {Basic_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};
+std::vector<ShaderInfo> shapeShaderStageInfos{{Shape_vert, 0, VK_SHADER_STAGE_VERTEX_BIT},
+                                  {Shape_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};
+std::vector<ShaderInfo> pointShaderStageInfos{{Point_vert, 0, VK_SHADER_STAGE_VERTEX_BIT},
+                                  {Point_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};
+std::vector<ShaderInfo> csmShaderStageInfos{{CascadedShadowMapping_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
+                                  {CascadedShadowMapping_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT}};
+std::vector<ShaderInfo> terrainShaderStageInfos{{Terrain_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
+                                  {Terrain_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT}};
+std::vector<ShaderInfo> meshShaderStageInfos{{Mesh_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
+                                  {Mesh_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT},
+                                      {Mesh_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};
+std::vector<ShaderInfo> textShaderStageInfos{{Text_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
                                         {Text_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT},
                                             {Text_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};
 void ResourceManager::createDefaultShaders()

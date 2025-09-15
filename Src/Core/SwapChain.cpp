@@ -509,6 +509,24 @@ void SwapChain::createRenderPass()
         throw std::runtime_error("Failed to create render pass!");
 }
 
+void SwapChain::createOffscreenFramebuffer()
+{
+    offScreenFrameBuffer.width = swapChainExtent.width;
+    offScreenFrameBuffer.height = swapChainExtent.height;
+
+    offScreenFrameBuffer.position.format = VK_FORMAT_R16G16B16A16_SFLOAT;
+    offScreenFrameBuffer.position.extent = {offScreenFrameBuffer.width, offScreenFrameBuffer.height, 1};
+    offScreenFrameBuffer.position.create(aDevice, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+
+    offScreenFrameBuffer.normal.format = VK_FORMAT_R16G16B16A16_SFLOAT;
+    offScreenFrameBuffer.normal.extent = {offScreenFrameBuffer.width, offScreenFrameBuffer.height, 1};
+    offScreenFrameBuffer.normal.create(aDevice, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+
+    offScreenFrameBuffer.albedo.format = VK_FORMAT_R8G8B8A8_UNORM;
+    offScreenFrameBuffer.albedo.extent = {offScreenFrameBuffer.width, offScreenFrameBuffer.height, 1};
+    offScreenFrameBuffer.albedo.create(aDevice, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+}
+
 void SwapChain::createOffscreenRenderPass()
 {
     VkAttachmentDescription attachmentDescription{};

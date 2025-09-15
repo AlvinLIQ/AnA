@@ -20,6 +20,7 @@ namespace AnA
         std::vector<unsigned char> codes;
         VkPipelineCreateFlags flag;
         VkShaderStageFlagBits stage;
+        std::vector<uint32_t> spirv{};
     };
     class Pipeline
     {

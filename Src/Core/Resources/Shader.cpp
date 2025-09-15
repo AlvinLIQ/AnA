@@ -1,5 +1,7 @@
 #include "Headers/Shader.hpp"
 #include "Headers/ResourceManager.hpp"
+#include <glslang/Public/ShaderLang.h>
+#include <glslang/SPIRV/GlslangToSpv.h>
 
 using namespace AnA;
 
@@ -77,7 +79,7 @@ Shader::Shader(Device* mDevice, const std::vector<unsigned char>& taskShaderCode
     hasMeshShader = true;
 }
 
-Shader::Shader(Device* mDevice, const std::vector<ShaderInfo>& shaderInfos, 
+Shader::Shader(Device* mDevice, std::vector<ShaderInfo>& shaderInfos, 
             std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, 
             size_t _descriptorOffset, VkDeviceSize pushConstantSize) : aDevice{mDevice}, 
     descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}, descriptorOffset{_descriptorOffset}
@@ -100,6 +102,47 @@ Shader::Shader(Device* mDevice, Pipeline::PipelineConfig pipelineConfig,
 Shader::~Shader()
 {
     
+}
+
+EShLanguage ShaderStageToEshLanguage(VkShaderStageFlagBits stage)
+{
+    switch(stage)
+    {
+        case VK_SHADER_STAGE_VERTEX_BIT: return EShLangVertex;
+        case VK_SHADER_STAGE_FRAGMENT_BIT: return EShLangFragment;
+        case VK_SHADER_STAGE_MESH_BIT_EXT: return EShLangMesh;
+        case VK_SHADER_STAGE_TASK_BIT_EXT: return EShLangTask;
+        case VK_SHADER_STAGE_COMPUTE_BIT: return EShLangCompute;
+        default: return EShLangAnyHit;   
+    }
+}
+
+bool Shader::Compile(std::vector<ShaderInfo>& shaderInfos)
+{
+    for (auto& shaderInfo : shaderInfos)
+    {
+        EShLanguage lang = ShaderStageToEshLanguage(shaderInfo.stage);
+        glslang::TShader shader{lang};
+        auto code = reinterpret_cast<const char*>(shaderInfo.codes.data());
+        shader.setStrings(&code, 1);
+        shader.setEntryPoint("main");
+        shader.setSourceEntryPoint("main");
+
+        shader.setEnvInput(glslang::EShSourceGlsl, lang, glslang::EShClientVulkan, 100);
+        shader.setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_3);
+        shader.setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_6);
+        EShMessages messages = EShMsgDefault;
+        glslang::TProgram program;
+        program.addShader(&shader);
+    
+        if (!program.link(messages))
+        {
+            perror(program.getInfoLog());
+            return false;
+        }
+        //glslang::GlslangToSpv(*program.getIntermediate(lang), shaderInfo.spirv);
+    }
+    return true;
 }
 
 const Pipeline& Shader::GetPipeline() const

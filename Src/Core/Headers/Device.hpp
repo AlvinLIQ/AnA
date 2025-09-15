@@ -233,4 +233,40 @@ namespace AnA
         VmaAllocator allocator{nullptr};
         void createVmaAllocator();
     };
+
+    namespace Resource
+    {
+        struct Image
+        {
+            VkImage image;
+            VmaAllocation allocation;
+            VkImageView imageView;
+            VkImageLayout imageLayout;
+            VkImageType imageType;
+            VkFormat format;
+            VkExtent3D extent;
+            void create(Device* device, VkImageUsageFlags usage, uint32_t arrayLayers = 1)
+            {
+                VkImageCreateInfo imageInfo{};
+                imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+                imageInfo.imageType = VK_IMAGE_TYPE_2D;
+                imageInfo.format = format;
+                imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                imageInfo.extent = extent;
+                imageInfo.mipLevels = 1;
+                imageInfo.arrayLayers = arrayLayers;
+                imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+                imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+                imageInfo.usage = usage;
+
+                device->CreateImage(&imageInfo, &image, allocation);
+                device->CreateImageView(image, format); 
+            }
+            void cleanup(Device* device)
+            {
+                vkDestroyImageView(device->GetLogicalDevice(), imageView, nullptr);
+                device->DestroyImage(image, allocation);
+            }
+        };
+    }
 }

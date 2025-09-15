@@ -5,25 +5,6 @@
 
 namespace AnA
 {
-    namespace Resource
-    {
-        struct Image
-        {
-            VkImage image;
-            VmaAllocation allocation;
-            VkImageView imageView;
-            VkImageLayout imageLayout;
-            VkImageType imageType;
-            VkFormat format;
-            VkExtent3D extent;
-            void cleanup(Device* device)
-            {
-                vkDestroyImageView(device->GetLogicalDevice(), imageView, nullptr);
-                device->DestroyImage(image, allocation);
-            }
-        };
-    }
-
     class Descriptor
     {
     public:

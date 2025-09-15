@@ -102,6 +102,16 @@ namespace AnA
 
         VkRenderPass renderPass;
         void createRenderPass();
+        // Framebuffers holding the deferred attachments
+        struct FrameBuffer {
+            uint32_t width, height;
+            VkFramebuffer frameBuffer;
+            // One attachment for every component required for a deferred rendering setup
+            Resource::Image position, normal, albedo;
+            Resource::Image depth;
+            VkRenderPass renderPass;
+        } offScreenFrameBuffer{};
+        void createOffscreenFramebuffer();
         VkRenderPass offscreenRenderPass;
         void createOffscreenRenderPass();
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "../../Headers/Pipeline.hpp"
 #include "Descriptor.hpp"
+#include <glslang/Public/ShaderLang.h>
 
 namespace AnA
 {
@@ -24,7 +25,7 @@ namespace AnA
             std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, size_t _descriptorOffset, VkDeviceSize pushConstantSize = 0);
         Shader(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, 
             std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, size_t _descriptorOffset, VkRenderPass& renderPass, VkDeviceSize pushConstantSize = 0);
-        Shader(Device* mDevice, const std::vector<ShaderInfo>& shaderInfos, 
+        Shader(Device* mDevice, std::vector<ShaderInfo>& shaderInfos, 
             std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, size_t _descriptorOffset, VkDeviceSize pushConstantSize = 0);
 
         Shader(Device* mDevice, Pipeline::PipelineConfig pipelineConfig);
@@ -53,6 +54,7 @@ namespace AnA
             return *this;
         }
         ~Shader();
+        bool Compile(std::vector<ShaderInfo>& shaderInfos);
 
         const Pipeline& GetPipeline() const;
         VkPipelineLayout GetPipelineLayout() const;
