@@ -14,7 +14,8 @@ SwapChain::SwapChain(Device* mDevice,
     createColorResources();
     createDepthResources();
     createRenderPass();
-    createOffscreenRenderPass();
+    createOffscreenRenderpass();
+    createOffscreenFramebuffer();
     createFramebuffers();
     createSyncObjects();
 
@@ -23,7 +24,6 @@ SwapChain::SwapChain(Device* mDevice,
 SwapChain::~SwapChain()
 {
     auto device = aDevice->GetLogicalDevice();
-    vkDestroyRenderPass(device, offscreenRenderPass, nullptr);
     vkDestroyRenderPass(device, renderPass, nullptr);
     for (uint32_t i = 0 ; i < imageCount; i++)
     {
@@ -34,6 +34,8 @@ SwapChain::~SwapChain()
     {
         vkDestroyFence(device, inFlightFences[i], nullptr);
     }
+    vkDestroySampler(device, colorSampler, nullptr);
+    offScreenFrameBuffer.cleanup(aDevice);
     cleanupSwapChain();
 }
 
@@ -126,7 +128,7 @@ VkRenderPass &SwapChain::GetRenderPass()
 
 VkRenderPass &SwapChain::GetOffscreenRenderPass()
 {
-    return offscreenRenderPass;
+    return offScreenFrameBuffer.renderPass;
 }
 
 std::vector<VkFramebuffer> SwapChain::GetSwapChainFramebuffers()
@@ -193,6 +195,7 @@ void SwapChain::RecreateSwapChain()
     createColorResources();
     createDepthResources();
     createFramebuffers();
+    createOffscreenFramebuffer();
 }
 
 Device* SwapChain::GetDevice()
@@ -519,63 +522,122 @@ void SwapChain::createOffscreenFramebuffer()
     offScreenFrameBuffer.position.create(aDevice, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
 
     offScreenFrameBuffer.normal.format = VK_FORMAT_R16G16B16A16_SFLOAT;
-    offScreenFrameBuffer.normal.extent = {offScreenFrameBuffer.width, offScreenFrameBuffer.height, 1};
+    offScreenFrameBuffer.normal.extent = offScreenFrameBuffer.position.extent;
     offScreenFrameBuffer.normal.create(aDevice, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
 
     offScreenFrameBuffer.albedo.format = VK_FORMAT_R8G8B8A8_UNORM;
-    offScreenFrameBuffer.albedo.extent = {offScreenFrameBuffer.width, offScreenFrameBuffer.height, 1};
+    offScreenFrameBuffer.albedo.extent = offScreenFrameBuffer.position.extent;
     offScreenFrameBuffer.albedo.create(aDevice, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+
+    offScreenFrameBuffer.depth.format = swapChainDepthFormat;
+    offScreenFrameBuffer.depth.extent = offScreenFrameBuffer.position.extent;
+    offScreenFrameBuffer.depth.create(aDevice, 
+        VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, 1, 
+        { VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1 });
+
+
+    std::array<VkImageView, 4> attachments{};
+	attachments[0] = offScreenFrameBuffer.position.imageView;
+	attachments[1] = offScreenFrameBuffer.normal.imageView;
+	attachments[2] = offScreenFrameBuffer.albedo.imageView;
+	attachments[3] = offScreenFrameBuffer.depth.imageView;
+
+	VkFramebufferCreateInfo fbufCreateInfo = {};
+	fbufCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+	fbufCreateInfo.pNext = NULL;
+	fbufCreateInfo.renderPass = offScreenFrameBuffer.renderPass;
+	fbufCreateInfo.pAttachments = attachments.data();
+	fbufCreateInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+	fbufCreateInfo.width = offScreenFrameBuffer.width;
+	fbufCreateInfo.height = offScreenFrameBuffer.height;
+	fbufCreateInfo.layers = 1;
+	vkCreateFramebuffer(aDevice->GetLogicalDevice(), &fbufCreateInfo, nullptr, &offScreenFrameBuffer.frameBuffer);
+
+    aDevice->CreateSampler(&colorSampler, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 
+        VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE);
 }
 
-void SwapChain::createOffscreenRenderPass()
+void SwapChain::createOffscreenRenderpass()
 {
-    VkAttachmentDescription attachmentDescription{};
-	attachmentDescription.format = swapChainDepthFormat;
-	attachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
-	attachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;							// Clear depth at beginning of the render pass
-	attachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;						// We will read from depth, so it's important to store the depth attachment results
-	attachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	attachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	attachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;					// We don't care about initial layout of the attachment
-	attachmentDescription.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;// Attachment will be transitioned to shader read at render pass end
+    // Set up separate renderpass with references to the color and depth attachments
+	std::array<VkAttachmentDescription, 4> attachmentDescs = {};
+
+	// Init attachment properties
+	for (uint32_t i = 0; i < 4; ++i)
+	{
+		attachmentDescs[i].samples = VK_SAMPLE_COUNT_1_BIT;
+		attachmentDescs[i].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		attachmentDescs[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		attachmentDescs[i].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		attachmentDescs[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		if (i == 3)
+		{
+			attachmentDescs[i].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			attachmentDescs[i].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		}
+		else
+		{
+			attachmentDescs[i].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			attachmentDescs[i].finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		}
+	}
+
+	// Formats
+	attachmentDescs[0].format = VK_FORMAT_R16G16B16A16_SFLOAT;
+	attachmentDescs[1].format = VK_FORMAT_R16G16B16A16_SFLOAT;
+	attachmentDescs[2].format = VK_FORMAT_R8G8B8A8_UNORM;
+	attachmentDescs[3].format = swapChainDepthFormat;
+
+    std::vector<VkAttachmentReference> colorReferences;
+	colorReferences.push_back({ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
+	colorReferences.push_back({ 1, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
+	colorReferences.push_back({ 2, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
 
 	VkAttachmentReference depthReference = {};
-	depthReference.attachment = 0;
-	depthReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;			// Attachment will be used as depth/stencil during render pass
+	depthReference.attachment = 3;
+	depthReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 	VkSubpassDescription subpass = {};
 	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpass.colorAttachmentCount = 0;													// No color attachments
-	subpass.pDepthStencilAttachment = &depthReference;									// Reference to our depth attachment
+	subpass.pColorAttachments = colorReferences.data();
+	subpass.colorAttachmentCount = static_cast<uint32_t>(colorReferences.size());
+	subpass.pDepthStencilAttachment = &depthReference;
 
-    // Use subpass dependencies for layout transitions
-	std::vector<VkSubpassDependency> dependencies(2);
+	// Use subpass dependencies for attachment layout transitions
+	std::array<VkSubpassDependency, 3> dependencies{};
 
+	// Depth
 	dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
 	dependencies[0].dstSubpass = 0;
-	dependencies[0].srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-	dependencies[0].dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-	dependencies[0].srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-	dependencies[0].dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-	dependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+	dependencies[0].srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+	dependencies[0].dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+	dependencies[0].srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+	dependencies[0].dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+	// Color
+	dependencies[1].srcSubpass = VK_SUBPASS_EXTERNAL;
+	dependencies[1].dstSubpass = 0;
+	dependencies[1].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+	dependencies[1].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependencies[1].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+	dependencies[1].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
-	dependencies[1].srcSubpass = 0;
-	dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
-	dependencies[1].srcStageMask = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-	dependencies[1].dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-	dependencies[1].srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-	dependencies[1].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-	dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+	// Color
+	dependencies[2].srcSubpass = 0;
+	dependencies[2].dstSubpass = VK_SUBPASS_EXTERNAL;
+	dependencies[2].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependencies[2].dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+	dependencies[2].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+	dependencies[2].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
 
-    VkRenderPassCreateInfo renderPassInfo{};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    renderPassInfo.attachmentCount = 1;
-	renderPassInfo.pAttachments = &attachmentDescription;
+	VkRenderPassCreateInfo renderPassInfo = {};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	renderPassInfo.pAttachments = attachmentDescs.data();
+	renderPassInfo.attachmentCount = static_cast<uint32_t>(attachmentDescs.size());
 	renderPassInfo.subpassCount = 1;
 	renderPassInfo.pSubpasses = &subpass;
-    renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
+	renderPassInfo.dependencyCount = 3;
 	renderPassInfo.pDependencies = dependencies.data();
-    vkCreateRenderPass(aDevice->GetLogicalDevice(), &renderPassInfo, nullptr, &offscreenRenderPass);
+    vkCreateRenderPass(aDevice->GetLogicalDevice(), &renderPassInfo, nullptr, &offScreenFrameBuffer.renderPass);
 }
 
 void SwapChain::createFramebuffers()
@@ -632,6 +694,7 @@ void SwapChain::createSyncObjects()
 void SwapChain::cleanupSwapChain()
 {
     auto device = aDevice->GetLogicalDevice();
+    offScreenFrameBuffer.cleanupImages(aDevice);
     vkDestroyImageView(device, colorImageView, nullptr);
     aDevice->DestroyImage(colorImage, colorImageAllocation);
     for (size_t i = 0; i < swapChainFramebuffers.size(); i++)

@@ -8,12 +8,12 @@ using namespace Resource;
 
 ShadowMap::ShadowMap(Device* mDevice) : aDevice{mDevice}
 {
-    createShadowResources();
+    //createShadowResources();
 }
 
 ShadowMap::~ShadowMap()
 {
-    cleanupShadowResources();
+    //cleanupShadowResources();
 }
 
 std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& inv, glm::vec3& center)

@@ -109,11 +109,23 @@ namespace AnA
             // One attachment for every component required for a deferred rendering setup
             Resource::Image position, normal, albedo;
             Resource::Image depth;
-            VkRenderPass renderPass;
+            VkRenderPass renderPass{VK_NULL_HANDLE};
+            void cleanupImages(Device* device)
+            {
+                position.cleanup(device);
+                normal.cleanup(device);
+                albedo.cleanup(device);
+                depth.cleanup(device);
+                vkDestroyFramebuffer(device->GetLogicalDevice(), frameBuffer, nullptr);
+            }
+            void cleanup(Device* device)
+            {
+                vkDestroyRenderPass(device->GetLogicalDevice(), renderPass, nullptr);
+            }
         } offScreenFrameBuffer{};
+        VkSampler colorSampler{};
         void createOffscreenFramebuffer();
-        VkRenderPass offscreenRenderPass;
-        void createOffscreenRenderPass();
+        void createOffscreenRenderpass();
 
         std::vector<VkFramebuffer> swapChainFramebuffers;
         void createFramebuffers();

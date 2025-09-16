@@ -245,7 +245,10 @@ namespace AnA
             VkImageType imageType;
             VkFormat format;
             VkExtent3D extent;
-            void create(Device* device, VkImageUsageFlags usage, uint32_t arrayLayers = 1)
+            void create(Device* device, VkImageUsageFlags usage, uint32_t arrayLayers = 1, 
+                VkImageSubresourceRange subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0,
+                1, 0,
+                1})
             {
                 VkImageCreateInfo imageInfo{};
                 imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -260,12 +263,15 @@ namespace AnA
                 imageInfo.usage = usage;
 
                 device->CreateImage(&imageInfo, &image, allocation);
-                device->CreateImageView(image, format); 
+                imageView = device->CreateImageView(image, format, VK_IMAGE_VIEW_TYPE_2D, subresourceRange); 
             }
             void cleanup(Device* device)
             {
                 vkDestroyImageView(device->GetLogicalDevice(), imageView, nullptr);
                 device->DestroyImage(image, allocation);
+                imageView = VK_NULL_HANDLE;
+                image = VK_NULL_HANDLE;
+                allocation = {};
             }
         };
     }
