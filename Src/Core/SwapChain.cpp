@@ -552,9 +552,6 @@ void SwapChain::createOffscreenFramebuffer()
 	fbufCreateInfo.height = offScreenFrameBuffer.height;
 	fbufCreateInfo.layers = 1;
 	vkCreateFramebuffer(aDevice->GetLogicalDevice(), &fbufCreateInfo, nullptr, &offScreenFrameBuffer.frameBuffer);
-
-    aDevice->CreateSampler(&colorSampler, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 
-        VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE);
 }
 
 void SwapChain::createOffscreenRenderpass()
@@ -638,6 +635,8 @@ void SwapChain::createOffscreenRenderpass()
 	renderPassInfo.dependencyCount = 3;
 	renderPassInfo.pDependencies = dependencies.data();
     vkCreateRenderPass(aDevice->GetLogicalDevice(), &renderPassInfo, nullptr, &offScreenFrameBuffer.renderPass);
+    aDevice->CreateSampler(&colorSampler, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 
+        VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE);
 }
 
 void SwapChain::createFramebuffers()
