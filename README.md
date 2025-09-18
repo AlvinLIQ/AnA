@@ -8,11 +8,9 @@
 
 ## To do
 * [ ] use ray tracing instead of traditional shadow map when having multiple light sources (enable by default when mesh shader is supported)
-* [X] move descriptor sets model(vertices/indices) to resource manager
-* [X] only pass pointers and count to shader/scene
-* [X] consider using shared pointer for those resources
-* [X] optimize memory management(use VMA)
-* [X] text x mesh shader
+* [ ] SSAO
+* [ ] deferred shadows
+* [ ] clean deprecated stuff(renderpass, framebuffer, shadow map, ...)
 * [ ] try pipeline cache
 
 ## Build&Run
