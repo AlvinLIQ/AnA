@@ -5,11 +5,15 @@
 ## Currently working on
 
 * Culling & LODs
+* GUI
+* Lightning
 
 ## To do
 * [ ] use ray tracing instead of traditional shadow map when having multiple light sources (enable by default when mesh shader is supported)
 * [ ] SSAO
+* [ ] occlusion culling
 * [ ] deferred shadows
+* [ ] compress g-buffer
 * [ ] clean deprecated stuff(renderpass, framebuffer, shadow map, ...)
 * [ ] try pipeline cache
 
