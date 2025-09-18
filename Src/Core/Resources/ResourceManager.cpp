@@ -169,6 +169,32 @@ void ResourceManager::Resize()
     auto extent = SwapChain::GetCurrent()->GetExtent();
     UpdateCamera(static_cast<float>(extent.width) / static_cast<float>(extent.height));
     RecreateResources();
+
+    auto& framebuffers = SwapChain::GetCurrent()->GetOffscreenFramebuffers();
+    VkSampler colorSampler = SwapChain::GetCurrent()->GetColorSampler();
+    std::vector<std::vector<VkWriteDescriptorSet>> writes(2);
+    VkDescriptorImageInfo imageInfos[4 * MAX_FRAMES_IN_FLIGHT];
+    auto& sets = lightDescriptors[0].GetSets();
+    for (uint32_t i = 0, j; i < MAX_FRAMES_IN_FLIGHT; i++)
+    {
+        auto& framebuffer = framebuffers[i];
+        Image* images[4] = {&framebuffer.position, &framebuffer.normal, 
+            &framebuffer.albedo, &framebuffer.depth};
+        writes[i].resize(4);
+        for (j = 0; j < 4; j++)
+        {
+            imageInfos[i * 4 + j]= images[j]->GetDescriptorInfo(colorSampler);
+            auto& write = writes[i][j];
+            write = {};
+            write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            write.descriptorCount = 1;
+            write.pImageInfo = &imageInfos[i * 4 + j];
+            write.dstSet = sets[i];
+            write.dstBinding = j;
+        }
+    }
+    lightDescriptors[0].UpdateDescriptorSets(writes);
 }
 
 void ResourceManager::RecreateResources()
@@ -321,6 +347,45 @@ void ResourceManager::GetDefaultTextDescriptorSetConfig(std::vector<std::vector<
     }
 }
 
+void ResourceManager::GetDefaultLightDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs)
+{
+    descriptorSetConfigs.resize(1);
+    descriptorSetConfigs[0].resize(4);
+    auto& framebuffers = SwapChain::GetCurrent()->GetOffscreenFramebuffers();
+    VkSampler colorSampler = SwapChain::GetCurrent()->GetColorSampler();
+    for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    {
+        auto& framebuffer = framebuffers[i];
+        VkDescriptorImageInfo imageInfo;
+        imageInfo.sampler = colorSampler;
+
+        imageInfo.imageLayout = framebuffer.position.imageLayout;
+        imageInfo.imageView = framebuffer.position.imageView;
+        descriptorSetConfigs[0][0].imageInfos.push_back(imageInfo);
+
+        imageInfo.imageLayout = framebuffer.normal.imageLayout;
+        imageInfo.imageView = framebuffer.normal.imageView;
+        descriptorSetConfigs[0][1].imageInfos.push_back(imageInfo);
+
+        imageInfo.imageLayout = framebuffer.albedo.imageLayout;
+        imageInfo.imageView = framebuffer.albedo.imageView;
+        descriptorSetConfigs[0][2].imageInfos.push_back(imageInfo);
+
+        imageInfo.imageLayout = framebuffer.depth.imageLayout;
+        imageInfo.imageView = framebuffer.depth.imageView;
+        descriptorSetConfigs[0][3].imageInfos.push_back(imageInfo);
+
+    }
+    for (uint32_t i = 0; i < 4; i++)
+    {
+        auto& dConfig = descriptorSetConfigs[0][i];
+        dConfig.descriptorCount = 1;
+        dConfig.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        dConfig.binding = i;
+        dConfig.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    }
+}
+
 bool ResourceManager::CreateModel(const char* filePath, uint32_t& id)
 {
     auto iter = ModelPathIndexMap.find(filePath);
@@ -377,6 +442,10 @@ void ResourceManager::createDefaultDescriptors()
     std::vector<std::vector<Descriptor::DescriptorConfig>> textDescriptorConfig;
     GetDefaultTextDescriptorSetConfig(textDescriptorConfig);
     Descriptor::CreateDescriptors(aDevice, textDescriptorConfig, textDescriptors);
+
+    std::vector<std::vector<Descriptor::DescriptorConfig>> lightDescriptorConfig;
+    GetDefaultLightDescriptorSetConfig(lightDescriptorConfig);
+    Descriptor::CreateDescriptors(aDevice, lightDescriptorConfig, lightDescriptors);
 }
 
 std::vector<ShaderInfo> basicShaderStageInfos{{Basic_vert, 0, VK_SHADER_STAGE_VERTEX_BIT},
@@ -392,12 +461,14 @@ std::vector<ShaderInfo> terrainShaderStageInfos{{Terrain_task, 0, VK_SHADER_STAG
 std::vector<ShaderInfo> meshShaderStageInfos{{Mesh_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
                                   {Mesh_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT},
                                       {Mesh_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, true}};
+std::vector<ShaderInfo> lightShaderStageInfos{{Light_vert, 0, VK_SHADER_STAGE_VERTEX_BIT},
+                                {Light_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};                                      
 std::vector<ShaderInfo> textShaderStageInfos{{Text_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
                                         {Text_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT},
                                             {Text_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};
 void ResourceManager::createDefaultShaders()
 {
-    Shaders.reserve(7);
+    Shaders.reserve(8);
     Shaders.emplace_back(aDevice, basicShaderStageInfos, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
 
     Shaders.emplace_back(aDevice, shapeShaderStageInfos, shapeDescriptors, SHAPE_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
@@ -412,6 +483,7 @@ void ResourceManager::createDefaultShaders()
         Shaders.emplace_back(aDevice, meshShaderStageInfos, defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(uint32_t));
         Shaders.emplace_back(aDevice, textShaderStageInfos, textDescriptors, 3, 0, sizeof(glm::vec2));
     }
+    Shaders.emplace_back(aDevice, lightShaderStageInfos, lightDescriptors, 1, 0, 0);
 }
 
 void ResourceManager::initTextures()

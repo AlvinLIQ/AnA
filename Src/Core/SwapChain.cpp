@@ -30,9 +30,9 @@ SwapChain::~SwapChain()
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
         vkDestroyFence(device, inFlightFences[i], nullptr);
+        offScreenFrameBuffers[i].cleanup(aDevice);
     }
     vkDestroySampler(device, colorSampler, nullptr);
-    offScreenFrameBuffer.cleanup(aDevice);
     cleanupSwapChain();
 }
 
@@ -417,26 +417,33 @@ void SwapChain::createDepthResources()
 
 void SwapChain::createOffscreenFramebuffer()
 {
-    offScreenFrameBuffer.width = swapChainExtent.width;
-    offScreenFrameBuffer.height = swapChainExtent.height;
+    for (auto& offScreenFrameBuffer: offScreenFrameBuffers)
+    {
+        offScreenFrameBuffer.width = swapChainExtent.width;
+        offScreenFrameBuffer.height = swapChainExtent.height;
 
-    offScreenFrameBuffer.position.format = VK_FORMAT_R16G16B16A16_SFLOAT;
-    offScreenFrameBuffer.position.extent = {offScreenFrameBuffer.width, offScreenFrameBuffer.height, 1};
-    offScreenFrameBuffer.position.create(aDevice, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT);
+        offScreenFrameBuffer.position.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        offScreenFrameBuffer.position.format = VK_FORMAT_R16G16B16A16_SFLOAT;
+        offScreenFrameBuffer.position.extent = {offScreenFrameBuffer.width, offScreenFrameBuffer.height, 1};
+        offScreenFrameBuffer.position.create(aDevice, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 
-    offScreenFrameBuffer.normal.format = VK_FORMAT_R16G16B16A16_SFLOAT;
-    offScreenFrameBuffer.normal.extent = offScreenFrameBuffer.position.extent;
-    offScreenFrameBuffer.normal.create(aDevice, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT);
+        offScreenFrameBuffer.normal.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        offScreenFrameBuffer.normal.format = VK_FORMAT_R16G16B16A16_SFLOAT;
+        offScreenFrameBuffer.normal.extent = offScreenFrameBuffer.position.extent;
+        offScreenFrameBuffer.normal.create(aDevice, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 
-    offScreenFrameBuffer.albedo.format = VK_FORMAT_R8G8B8A8_UNORM;
-    offScreenFrameBuffer.albedo.extent = offScreenFrameBuffer.position.extent;
-    offScreenFrameBuffer.albedo.create(aDevice, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT);
+        offScreenFrameBuffer.albedo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        offScreenFrameBuffer.albedo.format = VK_FORMAT_R8G8B8A8_UNORM;
+        offScreenFrameBuffer.albedo.extent = offScreenFrameBuffer.position.extent;
+        offScreenFrameBuffer.albedo.create(aDevice, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 
-    offScreenFrameBuffer.depth.format = swapChainDepthFormat;
-    offScreenFrameBuffer.depth.extent = offScreenFrameBuffer.position.extent;
-    offScreenFrameBuffer.depth.create(aDevice, 
-        VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, 1, 
-        { VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1 });
+        offScreenFrameBuffer.depth.imageLayout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
+        offScreenFrameBuffer.depth.format = swapChainDepthFormat;
+        offScreenFrameBuffer.depth.extent = offScreenFrameBuffer.position.extent;
+        offScreenFrameBuffer.depth.create(aDevice, 
+            VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1, 
+            { VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1 });
+    }
 }
 
 void SwapChain::createOffscreenSampler()
@@ -475,7 +482,8 @@ void SwapChain::createSyncObjects()
 void SwapChain::cleanupSwapChain()
 {
     auto device = aDevice->GetLogicalDevice();
-    offScreenFrameBuffer.cleanupImages(aDevice);
+    for (auto& offScreenFrameBuffer : offScreenFrameBuffers)
+        offScreenFrameBuffer.cleanupImages(aDevice);
     vkDestroyImageView(device, colorImageView, nullptr);
     aDevice->DestroyImage(colorImage, colorImageAllocation);
 

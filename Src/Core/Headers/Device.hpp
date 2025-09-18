@@ -276,6 +276,15 @@ namespace AnA
                 image = VK_NULL_HANDLE;
                 allocation = {};
             }
+            VkDescriptorImageInfo GetDescriptorInfo(VkSampler sampler)
+            {
+                VkDescriptorImageInfo imageInfo;
+                imageInfo.imageLayout = imageLayout;
+                imageInfo.imageView = imageView;
+                imageInfo.sampler = sampler;
+
+                return imageInfo;
+            }
         };
     }
 }

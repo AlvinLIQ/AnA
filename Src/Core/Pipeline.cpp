@@ -63,7 +63,7 @@ Pipeline::Pipeline(Device* mDevice, const std::vector<unsigned char>& computeSha
     createComputePipeline(computeShaderCode);
 }
 
-Pipeline::Pipeline(Device* mDevice, PipelineConfig pipelineConfig) : aDevice{mDevice}, renderPass {pipelineConfig.pipelineInfo.renderPass}, pipelineLayout{pipelineConfig.pipelineInfo.layout}
+Pipeline::Pipeline(Device* mDevice, PipelineConfig& pipelineConfig) : aDevice{mDevice}, renderPass {pipelineConfig.pipelineInfo.renderPass}, pipelineLayout{pipelineConfig.pipelineInfo.layout}
 {
     createGraphicsPipeline(pipelineConfig);
 }
@@ -146,7 +146,7 @@ void Pipeline::createGraphicsPipeline(const std::vector<unsigned char>& vertShad
     vkDestroyShaderModule(logicalDevice, vertShaderModule, nullptr);
 }
 
-void Pipeline::createGraphicsPipeline(PipelineConfig pipelineConfig)
+void Pipeline::createGraphicsPipeline(PipelineConfig& pipelineConfig)
 {
     auto logicalDevice = aDevice->GetLogicalDevice();
 
@@ -211,4 +211,17 @@ void Pipeline::createComputePipeline(const std::vector<unsigned char>& computeSh
     }
 
     vkDestroyShaderModule(aDevice->GetLogicalDevice(), computeShaderModule, nullptr);
+}
+
+void Pipeline::createComputePipeline(PipelineConfig& pipelineConfig)
+{
+    VkComputePipelineCreateInfo computePipelineInfo{};
+    computePipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+    computePipelineInfo.layout = pipelineLayout;
+    computePipelineInfo.stage = pipelineConfig.shaderStages[0];
+
+    if (vkCreateComputePipelines(aDevice->GetLogicalDevice(), NULL, 1, &computePipelineInfo, nullptr, &pipeline) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create compute pipeline!");
+    }
 }

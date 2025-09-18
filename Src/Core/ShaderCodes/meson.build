@@ -1,6 +1,7 @@
 fs = import('fs')
-shader_sources = files('Basic.vert', 'Basic.frag', 'CascadedShadowMapping.task', 'CascadedShadowMapping.mesh', 'Point.vert', 'Point.frag',
-    'Line.vert', 'Line.frag', 'ShadowMapping.vert', 'Shape.vert', 'Shape.frag', 'CollisionDetect.comp', 
+shader_sources = files(
+    'Basic.vert', 'Basic.frag', 'CascadedShadowMapping.task', 'CascadedShadowMapping.mesh', 'Point.vert', 'Point.frag',
+    'Line.vert', 'Line.frag', 'ShadowMapping.vert', 'Shape.vert', 'Shape.frag', 'Light.comp', 'Light.vert', 'Light.frag', 
     'Mesh.mesh', 'Mesh.task', 'Mesh.frag', 'Terrain.mesh', 'Terrain.task',
     'Text.task', 'Text.mesh', 'Text.frag')
 shader_outputs = []

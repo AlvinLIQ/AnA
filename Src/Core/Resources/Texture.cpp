@@ -1,4 +1,5 @@
 #include "Headers/Texture.hpp"
+#include "../Headers/SwapChain.hpp"
 
 #define DEFAULT_FONT_SIZE 32.0f
 
@@ -55,7 +56,7 @@ void Texture::init()
 {
     imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     imageInfo.imageView = aDevice->CreateImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
-    aDevice->CreateSampler(&imageInfo.sampler);
+    imageInfo.sampler = SwapChain::GetCurrent()->GetColorSampler();
     //auto descriptors = Resource::ResourceManager::GetCurrent()->Shaders[0]->GetDescriptors();
     //descriptor = new Descriptor(aDevice, textureSampler, textureImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
     //     0, 1, Resource::ResourceManager::GetCurrent()->Shaders[0]->GetDescriptors()[DEFAULT_SAMPLER_LAYOUT]->GetLayout(),
@@ -69,7 +70,6 @@ void Texture::cleanup()
         return;
     auto device = aDevice->GetLogicalDevice();
 
-    vkDestroySampler(device, imageInfo.sampler, nullptr);
     vkDestroyImageView(device, imageInfo.imageView, nullptr);
 
     aDevice->DestroyImage(textureImage, allocation);

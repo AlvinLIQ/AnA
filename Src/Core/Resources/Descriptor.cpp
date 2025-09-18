@@ -133,7 +133,9 @@ Descriptor::Descriptor(Device* mDevice, Descriptor::DescriptorConfig* descriptor
             layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT_EXT;
             continue;
         }
-        else if (descriptorConfig.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER || descriptorConfig.descriptorType == VK_DESCRIPTOR_TYPE_SAMPLER)
+        else if (descriptorConfig.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER || 
+            descriptorConfig.descriptorType == VK_DESCRIPTOR_TYPE_SAMPLER || 
+            descriptorConfig.descriptorType == VK_DESCRIPTOR_TYPE_STORAGE_IMAGE)
         {
             for (uint32_t i = 0; i < descriptorSetCount; i++)
             {
@@ -259,5 +261,14 @@ void Descriptor::UpdateDescriptorSets(VkDescriptorBufferInfo* pBufferInfo, uint3
         descriptorWrite.pBufferInfo = pBufferInfo;
         vkUpdateDescriptorSets(aDevice->GetLogicalDevice(), 1,
             &descriptorWrite, 0, nullptr);
+    }
+}
+
+void Descriptor::UpdateDescriptorSets(std::vector<std::vector<VkWriteDescriptorSet>>& writes)
+{
+    for (size_t i = 0; i < sets.size(); i++)
+    {
+        vkUpdateDescriptorSets(aDevice->GetLogicalDevice(), writes[i].size(),
+            writes[i].data(), 0, nullptr);
     }
 }

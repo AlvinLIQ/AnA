@@ -57,6 +57,7 @@ namespace AnA
             VkFormat depthAttachmentFormat{};
             VkGraphicsPipelineCreateInfo pipelineInfo{};
             VkPipelineRenderingCreateInfoKHR pipelineRenderingInfo{};
+            bool hasComputeShader = false;
             std::vector<VkDynamicState> dynamicStates = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR, VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY };
             static PipelineConfig GetDefault(VkShaderModule vertexShaderModule, VkShaderModule fragShaderModule,
                 VkPipelineLayout &pipelineLayout, VkRenderPass &renderPass, VkSampleCountFlagBits msaaSamplers, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
@@ -514,7 +515,10 @@ namespace AnA
                         VK_SHADER_STAGE_MESH_BIT_NV | VK_SHADER_STAGE_TASK_BIT_NV));
                     hasFragmentShader = hasFragmentShader | (shaderInfos[i].stage | VK_SHADER_STAGE_FRAGMENT_BIT);
                     hasGBuffer = hasGBuffer | shaderInfos[i].hasGBuffer;
+                    dConfig.hasComputeShader = dConfig.hasComputeShader | (shaderInfos[i].stage & VK_SHADER_STAGE_COMPUTE_BIT);
                 }
+                if (dConfig.hasComputeShader)
+                    return dConfig;
                 if (isMeshShader)
                     dConfig.dynamicStates.pop_back();
                 if (!hasFragmentShader)
@@ -656,7 +660,7 @@ namespace AnA
         Pipeline(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst, const std::vector<unsigned char>& fragShaderCode, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
         Pipeline(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass &mRenderPass, VkPipelineLayout &mPipelineLayoutconst);
         Pipeline(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, VkPipelineLayout &mPipelineLayoutconst, VkRenderPass &mRenderPass);
-        Pipeline(Device* mDevice, PipelineConfig pipelineConfig);
+        Pipeline(Device* mDevice, PipelineConfig& pipelineConfig);
         Pipeline(Device* mDevice, const char* computeShaderFile, VkPipelineLayout &mPipelineLayout);
         Pipeline(Device* mDevice, const std::vector<unsigned char>& computeShaderCode, VkPipelineLayout &mPipelineLayout);
 
@@ -720,10 +724,11 @@ namespace AnA
         void createGraphicsPipeline(const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, const VkPrimitiveTopology vertexTopology);
         void createGraphicsPipeline(const std::vector<unsigned char>& vertShaderCode, const VkPrimitiveTopology vertexTopology);
         void createGraphicsPipeline(const std::vector<unsigned char>& vertShaderCode, const VkPrimitiveTopology vertexTopology, const std::vector<unsigned char>& fragShaderCode);
-        void createGraphicsPipeline(PipelineConfig pipelineConfig);
+        void createGraphicsPipeline(PipelineConfig& pipelineConfig);
         void createMeshShaderPipeline(const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, const std::vector<unsigned char>& fragShaderCode);
         void createMeshShaderPipeline(const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode);
         void createComputePipeline(const std::string &computeShaderFileName);
         void createComputePipeline(const std::vector<unsigned char>& computeShaderCode);
+        void createComputePipeline(PipelineConfig& pipelineConfig);
     };
 }

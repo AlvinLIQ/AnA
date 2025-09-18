@@ -251,7 +251,7 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
 
     aRenderer.BeginOffscreenRendering(commandBuffer);
 
-    swapChain.SetViewport(commandBuffer, actualSceneOffset);
+    swapChain.SetViewport(commandBuffer);
     aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.MainScene,
         aResourceManager.Shaders[5],
         swapChain.CurrentFrame);
@@ -259,6 +259,16 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     aRenderer.EndOffscreenRendering(commandBuffer);
     
     aRenderer.BeginRendering(commandBuffer);
+    swapChain.SetViewport(commandBuffer, actualSceneOffset);
+    auto& shader = aResourceManager.Shaders[7];
+    shader.GetPipeline().Bind(commandBuffer);
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, 
+        shader.GetPipelineLayout(), 
+        0, static_cast<uint32_t>(shader.GetDescriptorSets()[swapChain.CurrentFrame].size()), 
+        shader.GetDescriptorSets()[swapChain.CurrentFrame].data(), 
+        0, nullptr);
+    vkCmdSetPrimitiveTopology(commandBuffer, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+    vkCmdDraw(commandBuffer, 6, 1, 0, 0);
 
     swapChain.SetViewport(commandBuffer);
     aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.TextContext, aResourceManager.Shaders[6], swapChain.CurrentFrame);

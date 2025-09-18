@@ -73,7 +73,17 @@ namespace AnA
 
         FrameBuffer& GetOffscreenFramebuffer()
         {
-            return offScreenFrameBuffer;
+            return offScreenFrameBuffers[CurrentFrame];
+        }
+
+        std::array<FrameBuffer, 2>& GetOffscreenFramebuffers()
+        {
+            return offScreenFrameBuffers;
+        }
+
+        VkSampler& GetColorSampler()
+        {
+            return colorSampler;
         }
 
         void RecreateSwapChain();
@@ -118,7 +128,7 @@ namespace AnA
         std::vector<VkImageView> depthImageViews;
         void createDepthResources();
         // Framebuffers holding the deferred attachments
-        FrameBuffer offScreenFrameBuffer{};
+        std::array<FrameBuffer, MAX_FRAMES_IN_FLIGHT> offScreenFrameBuffers{};
         VkSampler colorSampler{};
         void createOffscreenFramebuffer();
         void createOffscreenSampler();
