@@ -1091,11 +1091,14 @@ void Device::CreateCommandPool(VkCommandPoolCreateFlags flags, VkCommandPool* po
         throw std::runtime_error("Failed to create command pool!");
 }
 
-void Device::ImageMemoryBarrier(VkCommandBuffer commandBuffer, VkImage image, VkImageLayout initLayout, VkImageLayout finalLayout)
+void Device::ImageMemoryBarrier(VkCommandBuffer commandBuffer, VkImage image, 
+    VkImageLayout initLayout, VkImageLayout finalLayout,
+    VkAccessFlags srcAccessMask, VkImageAspectFlags aspectMask, 
+    VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask)
 {
     VkImageMemoryBarrier imageMemoryBarrier{};
     imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    imageMemoryBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;  // Previous access (render pass)
+    imageMemoryBarrier.srcAccessMask = srcAccessMask;
     imageMemoryBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;            // After present
     imageMemoryBarrier.oldLayout = initLayout;
     imageMemoryBarrier.newLayout = finalLayout;          // Target layout for presentation
@@ -1103,7 +1106,7 @@ void Device::ImageMemoryBarrier(VkCommandBuffer commandBuffer, VkImage image, Vk
     imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     imageMemoryBarrier.image = image;  // Image to transition
     imageMemoryBarrier.subresourceRange = {};
-    imageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    imageMemoryBarrier.subresourceRange.aspectMask = aspectMask;
     imageMemoryBarrier.subresourceRange.baseMipLevel = 0;
     imageMemoryBarrier.subresourceRange.levelCount = 1;
     imageMemoryBarrier.subresourceRange.baseArrayLayer = 0;
@@ -1111,8 +1114,8 @@ void Device::ImageMemoryBarrier(VkCommandBuffer commandBuffer, VkImage image, Vk
 
     // Record the barrier in the command buffer
     vkCmdPipelineBarrier(commandBuffer,
-        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, // Stage before transition
-        VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,            // Stage after transition
+        srcStageMask, // Stage before transition
+        dstStageMask,            // Stage after transition
         0,                                           // Flags (none)
         0, nullptr,                                  // No memory barriers
         0, nullptr,                                   // No buffer barriers

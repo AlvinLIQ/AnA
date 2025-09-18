@@ -20,6 +20,7 @@ namespace AnA
         std::vector<unsigned char> codes;
         VkPipelineCreateFlags flag;
         VkShaderStageFlagBits stage;
+        bool hasGBuffer{false};
         std::vector<uint32_t> spirv{};
     };
     class Pipeline
@@ -37,9 +38,22 @@ namespace AnA
             VkPipelineRasterizationStateCreateInfo rasterizer{};
             VkPipelineMultisampleStateCreateInfo multiSampling{};
             VkPipelineColorBlendAttachmentState colorBlendAttachment{};
+            const VkPipelineColorBlendAttachmentState noBlendAttachment
+                                {.blendEnable = VK_FALSE, 
+                                    .srcColorBlendFactor = VK_BLEND_FACTOR_ZERO,
+                                    .dstColorBlendFactor = VK_BLEND_FACTOR_ZERO,
+                                    .colorBlendOp = VK_BLEND_OP_ADD,
+                                    .srcAlphaBlendFactor = VK_BLEND_FACTOR_ZERO,
+                                    .dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO,
+                                    .alphaBlendOp = VK_BLEND_OP_ADD,
+                                    .colorWriteMask = VK_COLOR_COMPONENT_R_BIT |
+                                    VK_COLOR_COMPONENT_G_BIT |
+                                    VK_COLOR_COMPONENT_B_BIT |
+                                    VK_COLOR_COMPONENT_A_BIT};
+            VkPipelineColorBlendAttachmentState colorBlendAttachments[3] = { noBlendAttachment, noBlendAttachment, noBlendAttachment };
             VkPipelineColorBlendStateCreateInfo colorBlending{};
             VkPipelineDepthStencilStateCreateInfo depthStencilInfo{};
-            VkFormat colorAttachmentFormat{};
+            VkFormat colorAttachmentFormats[3]{};
             VkFormat depthAttachmentFormat{};
             VkGraphicsPipelineCreateInfo pipelineInfo{};
             VkPipelineRenderingCreateInfoKHR pipelineRenderingInfo{};
@@ -482,11 +496,12 @@ namespace AnA
                 return dConfig;
             }
             static PipelineConfig GetForDynamicRendering(Device* aDevice, std::vector<ShaderInfo> shaderInfos,
-                VkPipelineLayout &pipelineLayout, VkFormat colorFormat, VkFormat depthFormat, VkSampleCountFlagBits msaaSamplers, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
+                VkPipelineLayout &pipelineLayout, VkFormat colorFormat, VkFormat depthFormat, VkSampleCountFlagBits msaaSamplers, 
+                const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
             {
                 PipelineConfig dConfig;
                 assert(shaderInfos.size() <= 3);
-                bool isMeshShader = false, hasFragmentShader = false;
+                bool isMeshShader = false, hasFragmentShader = false, hasGBuffer = false;
                 for (size_t i = 0; i < shaderInfos.size(); i++)
                 {
                     dConfig.shaderStages[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -498,6 +513,7 @@ namespace AnA
                         (VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_TASK_BIT_EXT | 
                         VK_SHADER_STAGE_MESH_BIT_NV | VK_SHADER_STAGE_TASK_BIT_NV));
                     hasFragmentShader = hasFragmentShader | (shaderInfos[i].stage | VK_SHADER_STAGE_FRAGMENT_BIT);
+                    hasGBuffer = hasGBuffer | shaderInfos[i].hasGBuffer;
                 }
                 if (isMeshShader)
                     dConfig.dynamicStates.pop_back();
@@ -593,10 +609,26 @@ namespace AnA
                 dConfig.pipelineInfo.pNext = &dConfig.pipelineRenderingInfo;
 
                 dConfig.pipelineRenderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR;
-                dConfig.pipelineRenderingInfo.colorAttachmentCount = 1;
-                dConfig.colorAttachmentFormat = colorFormat;
+                
                 dConfig.depthAttachmentFormat = depthFormat;
-                dConfig.pipelineRenderingInfo.pColorAttachmentFormats = &dConfig.colorAttachmentFormat;
+                if (hasGBuffer)
+                {
+                    dConfig.colorAttachmentFormats[0] = VK_FORMAT_R16G16B16A16_SFLOAT;
+                    dConfig.colorAttachmentFormats[1] = VK_FORMAT_R16G16B16A16_SFLOAT;
+                    dConfig.colorAttachmentFormats[2] = VK_FORMAT_R8G8B8A8_UNORM;
+                    dConfig.pipelineRenderingInfo.colorAttachmentCount = 3;
+
+                    dConfig.colorBlending.attachmentCount = 3;
+                    dConfig.colorBlending.pAttachments = dConfig.colorBlendAttachments;
+
+                    dConfig.multiSampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+                }
+                else
+                {
+                    dConfig.colorAttachmentFormats[0] = colorFormat;
+                    dConfig.pipelineRenderingInfo.colorAttachmentCount = 1;
+                }
+                dConfig.pipelineRenderingInfo.pColorAttachmentFormats = dConfig.colorAttachmentFormats;
                 dConfig.pipelineRenderingInfo.depthAttachmentFormat = dConfig.depthAttachmentFormat;
                 dConfig.pipelineRenderingInfo.stencilAttachmentFormat = VK_FORMAT_UNDEFINED;
 

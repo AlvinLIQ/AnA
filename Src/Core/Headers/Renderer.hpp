@@ -78,7 +78,9 @@ namespace AnA
         void EndRendering(CommandBuffer& commandBuffer);
 
         void EndRenderPass(CommandBuffer& commandBuffer);
-        void BeginOffscreenRenderPass(CommandBuffer& commandBuffer, VkFramebuffer& framebuffer, VkSubpassContents contents = VK_SUBPASS_CONTENTS_INLINE);
+        void BeginOffscreenRenderPass(CommandBuffer& commandBuffer, VkFramebuffer framebuffer, VkSubpassContents contents = VK_SUBPASS_CONTENTS_INLINE);
+        void BeginOffscreenRendering(CommandBuffer& commandBuffer);
+        void EndOffscreenRendering(CommandBuffer& commandBuffer);
     private:
         Window& aWindow;
         Device* aDevice;

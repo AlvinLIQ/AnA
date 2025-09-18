@@ -194,7 +194,10 @@ namespace AnA
 
         VkShaderModule CreateShaderModule(const std::vector<unsigned char>& code);
 
-        static void ImageMemoryBarrier(VkCommandBuffer commandBuffer, VkImage image, VkImageLayout initLayout, VkImageLayout finalLayout);
+        static void ImageMemoryBarrier(VkCommandBuffer commandBuffer, VkImage image, 
+            VkImageLayout initLayout, VkImageLayout finalLayout,
+            VkAccessFlags srcAccessMask, VkImageAspectFlags aspectMask,
+            VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask);
     private:
         VkInstance& instance;
         VkSurfaceKHR surface;

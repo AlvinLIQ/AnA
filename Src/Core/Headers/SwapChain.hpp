@@ -17,6 +17,27 @@
 
 namespace AnA
 {
+    struct FrameBuffer
+    {
+        uint32_t width, height;
+        VkFramebuffer frameBuffer;
+        // One attachment for every component required for a deferred rendering setup
+        Resource::Image position, normal, albedo;
+        Resource::Image depth;
+        VkRenderPass renderPass{VK_NULL_HANDLE};
+        void cleanupImages(Device* device)
+        {
+            position.cleanup(device);
+            normal.cleanup(device);
+            albedo.cleanup(device);
+            depth.cleanup(device);
+            vkDestroyFramebuffer(device->GetLogicalDevice(), frameBuffer, nullptr);
+        }
+        void cleanup(Device* device)
+        {
+            vkDestroyRenderPass(device->GetLogicalDevice(), renderPass, nullptr);
+        }
+    };
     class SwapChain
     {
     public:
@@ -57,6 +78,11 @@ namespace AnA
         VkSemaphore& GetCurrentSemaphore();
 
         std::vector<VkFramebuffer> GetSwapChainFramebuffers();
+
+        FrameBuffer& GetOffscreenFramebuffer()
+        {
+            return offScreenFrameBuffer;
+        }
 
         void RecreateSwapChain();
 
@@ -103,26 +129,7 @@ namespace AnA
         VkRenderPass renderPass;
         void createRenderPass();
         // Framebuffers holding the deferred attachments
-        struct FrameBuffer {
-            uint32_t width, height;
-            VkFramebuffer frameBuffer;
-            // One attachment for every component required for a deferred rendering setup
-            Resource::Image position, normal, albedo;
-            Resource::Image depth;
-            VkRenderPass renderPass{VK_NULL_HANDLE};
-            void cleanupImages(Device* device)
-            {
-                position.cleanup(device);
-                normal.cleanup(device);
-                albedo.cleanup(device);
-                depth.cleanup(device);
-                vkDestroyFramebuffer(device->GetLogicalDevice(), frameBuffer, nullptr);
-            }
-            void cleanup(Device* device)
-            {
-                vkDestroyRenderPass(device->GetLogicalDevice(), renderPass, nullptr);
-            }
-        } offScreenFrameBuffer{};
+        FrameBuffer offScreenFrameBuffer{};
         VkSampler colorSampler{};
         void createOffscreenFramebuffer();
         void createOffscreenRenderpass();

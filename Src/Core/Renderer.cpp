@@ -193,7 +193,9 @@ void Renderer::BeginSwapChainRenderPass(CommandBuffer& commandBuffer, VkOffset2D
 void Renderer::BeginRendering(CommandBuffer& commandBuffer)
 {
     Device::ImageMemoryBarrier(commandBuffer, aSwapChain->swapChainImages[aSwapChain->CurrentImage], 
-        VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_ASPECT_COLOR_BIT,
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
 
     // Color attachment
     VkRenderingAttachmentInfoKHR colorAttachmentInfo{};
@@ -230,7 +232,9 @@ void Renderer::EndRendering(CommandBuffer& commandBuffer)
 {
     aDevice->vkCmdEndRenderingKHR(commandBuffer);
     Device::ImageMemoryBarrier(commandBuffer, aSwapChain->swapChainImages[aSwapChain->CurrentImage], 
-        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_ASPECT_COLOR_BIT,
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
 }
 
 void Renderer::EndRenderPass(CommandBuffer& commandBuffer)
@@ -240,9 +244,13 @@ void Renderer::EndRenderPass(CommandBuffer& commandBuffer)
     vkCmdEndRenderPass(commandBuffer);
 }
 
-void Renderer::BeginOffscreenRenderPass(CommandBuffer& commandBuffer, VkFramebuffer& framebuffer, VkSubpassContents contents)
+void Renderer::BeginOffscreenRenderPass(CommandBuffer& commandBuffer, VkFramebuffer framebuffer, VkSubpassContents contents)
 {
-    VkExtent2D extent = {SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT};
+    VkClearValue offscreenClearValues[4]{};
+	offscreenClearValues[0].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
+	offscreenClearValues[1].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
+	offscreenClearValues[2].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
+	offscreenClearValues[3].depthStencil = { 1.0f, 0 };
 
     VkRenderPassBeginInfo renderPassBegin;
     renderPassBegin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -251,14 +259,89 @@ void Renderer::BeginOffscreenRenderPass(CommandBuffer& commandBuffer, VkFramebuf
     renderPassBegin.framebuffer = framebuffer;
     renderPassBegin.renderArea.offset.x = 0;
     renderPassBegin.renderArea.offset.y = 0;
-    renderPassBegin.renderArea.extent = extent;
-    renderPassBegin.clearValueCount = 1;
-    renderPassBegin.pClearValues = &clearValues[RENDER_PASS_TYPE_OFFSCREEN];
+    renderPassBegin.renderArea.extent = GetSwapChainExtent();
+    renderPassBegin.clearValueCount = 4;
+    renderPassBegin.pClearValues = offscreenClearValues;
 
     vkCmdBeginRenderPass(commandBuffer,
                         &renderPassBegin,
                         contents);
 
+}
+
+void Renderer::BeginOffscreenRendering(CommandBuffer& commandBuffer)
+{
+    auto& framebuffer = aSwapChain->GetOffscreenFramebuffer();
+    Device::ImageMemoryBarrier(commandBuffer, framebuffer.albedo.image, 
+        VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_ASPECT_COLOR_BIT,
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
+    Device::ImageMemoryBarrier(commandBuffer, framebuffer.position.image, 
+        VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_ASPECT_COLOR_BIT,
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
+    Device::ImageMemoryBarrier(commandBuffer, framebuffer.normal.image, 
+        VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_ASPECT_COLOR_BIT,
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
+    Device::ImageMemoryBarrier(commandBuffer, framebuffer.depth.image, 
+        VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+        VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_ASPECT_DEPTH_BIT,
+        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
+
+    // --- Color Attachments ---
+    std::array<VkRenderingAttachmentInfoKHR, 3> colorAttachments = {};
+
+    for (int i = 0; i < 3; ++i) {
+        colorAttachments[i].sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR;
+        colorAttachments[i].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        colorAttachments[i].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        colorAttachments[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        colorAttachments[i].clearValue = clearValues[0];
+    }
+	colorAttachments[0].imageView = framebuffer.position.imageView;
+	colorAttachments[1].imageView = framebuffer.normal.imageView;
+	colorAttachments[2].imageView = framebuffer.albedo.imageView;
+
+    VkRenderingAttachmentInfoKHR depthAttachment{};
+    depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+    depthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+    depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    depthAttachment.imageView = framebuffer.depth.imageView;
+    depthAttachment.clearValue = clearValues[1];
+
+    VkRenderingInfo renderingInfo{};
+    renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+    renderingInfo.renderArea.offset = {};
+    renderingInfo.renderArea.extent = aSwapChain->swapChainExtent;
+    renderingInfo.layerCount = 1;
+    renderingInfo.colorAttachmentCount = static_cast<uint32_t>(colorAttachments.size());
+    renderingInfo.pColorAttachments = colorAttachments.data();
+    renderingInfo.pDepthAttachment = &depthAttachment;
+    aDevice->vkCmdBeginRenderingKHR(commandBuffer, &renderingInfo);
+}
+
+void Renderer::EndOffscreenRendering(CommandBuffer& commandBuffer)
+{
+    aDevice->vkCmdEndRenderingKHR(commandBuffer);
+    auto& framebuffer = aSwapChain->GetOffscreenFramebuffer();
+    Device::ImageMemoryBarrier(commandBuffer, framebuffer.albedo.image, 
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_ASPECT_COLOR_BIT,
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
+    Device::ImageMemoryBarrier(commandBuffer, framebuffer.position.image, 
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_ASPECT_COLOR_BIT,
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
+    Device::ImageMemoryBarrier(commandBuffer, framebuffer.normal.image, 
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_ASPECT_COLOR_BIT,
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
+    Device::ImageMemoryBarrier(commandBuffer, framebuffer.depth.image, 
+        VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL,
+        VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_ASPECT_DEPTH_BIT,
+        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
 }
 
 void Renderer::createTimestampQueryPool()

@@ -519,15 +519,15 @@ void SwapChain::createOffscreenFramebuffer()
 
     offScreenFrameBuffer.position.format = VK_FORMAT_R16G16B16A16_SFLOAT;
     offScreenFrameBuffer.position.extent = {offScreenFrameBuffer.width, offScreenFrameBuffer.height, 1};
-    offScreenFrameBuffer.position.create(aDevice, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+    offScreenFrameBuffer.position.create(aDevice, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT);
 
     offScreenFrameBuffer.normal.format = VK_FORMAT_R16G16B16A16_SFLOAT;
     offScreenFrameBuffer.normal.extent = offScreenFrameBuffer.position.extent;
-    offScreenFrameBuffer.normal.create(aDevice, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+    offScreenFrameBuffer.normal.create(aDevice, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT);
 
     offScreenFrameBuffer.albedo.format = VK_FORMAT_R8G8B8A8_UNORM;
     offScreenFrameBuffer.albedo.extent = offScreenFrameBuffer.position.extent;
-    offScreenFrameBuffer.albedo.create(aDevice, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+    offScreenFrameBuffer.albedo.create(aDevice, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT);
 
     offScreenFrameBuffer.depth.format = swapChainDepthFormat;
     offScreenFrameBuffer.depth.extent = offScreenFrameBuffer.position.extent;

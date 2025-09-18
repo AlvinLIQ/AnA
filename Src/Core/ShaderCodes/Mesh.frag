@@ -16,7 +16,9 @@ layout(location = 2) in vec3 normalSpace;
 layout(location = 3) in vec3 vertex;
 layout(location = 4) in float viewPosZ;
 #endif
-layout(location = 0) out vec4 outColor;
+layout (location = 0) out vec4 outPosition;
+layout (location = 1) out vec4 outNormal;
+layout (location = 2) out vec4 outAlbedo;
 
 layout(set = 1, binding = 0) uniform CameraBufferObject {
     mat4 proj;
@@ -91,21 +93,7 @@ float filterPCF(vec4 sc, uint cascadeIndex)
 
 void main()
 {
-    float pointLightIntensity = max(dot(normalSpace, normalize(LIGHT_POS - vertex)), 0);
-	float normalLightPos = dot(normalSpace, normalize(lbo.direction));
-    float diffuseLightItensity = (normalLightPos + 2.0) * 0.5;
-/*
-    uint cascadeIndex = SHADOW_MAP_CASCADE_COUNT - 1;
-	for(uint i = 0; i < SHADOW_MAP_CASCADE_COUNT - 1; i++) {
-		if(viewPosZ < ubo.cascades[i + 1].split) {
-			cascadeIndex = i;
-			break;
-		}
-	}
-    vec4 shadowCoord = biasMat * ubo.cascades[cascadeIndex].viewProj * vec4(vertex, 1.0);*/
-    float visibility = 1.0;// filterPCF(shadowCoord, cascadeIndex);
-
-    vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility + pointLightIntensity * LIGHT_COLOR;
-	outColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord) * vec4(finalLight, 1.0);
-    //outColor = texture(shadowSampler, vec3(gl_FragCoord.xy / cbo.resolution, 2)).r * vec4(1.);
+    outPosition = vec4(vertex, 1.0);
+	outNormal = vec4(normalSpace, 1.0);
+	outAlbedo = texture(texSampler[nonuniformEXT(texIndex)], texCoord);
 }
