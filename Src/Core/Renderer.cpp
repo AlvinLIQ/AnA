@@ -13,10 +13,6 @@ Renderer::Renderer(Window& mWindow, Device* mDevice) : aWindow {mWindow}, aDevic
 {
     aSwapChain = new SwapChain(aDevice, aWindow.GetSurface(), aWindow.GetGLFWwindow());
     createTimestampQueryPool();
-    inheritanceInfos[RENDER_PASS_TYPE_ONSCREEN].sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
-    inheritanceInfos[RENDER_PASS_TYPE_ONSCREEN].renderPass = aSwapChain->GetRenderPass();
-    inheritanceInfos[RENDER_PASS_TYPE_OFFSCREEN].sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
-    inheritanceInfos[RENDER_PASS_TYPE_OFFSCREEN].renderPass = aSwapChain->GetOffscreenRenderPass();
 }
 
 Renderer::~Renderer()
@@ -110,86 +106,6 @@ void Renderer::EndFrame()
     isFrameStarted = false;
 }
 
-void Renderer::BeginSwapChainRenderPass(CommandBuffer& commandBuffer)
-{
-    assert(isFrameStarted && "Can't call BeginSwapChainRenderPass while frame is not in progress!");
-    auto swapChainExtent = aSwapChain->GetExtent();
-
-    VkRenderPassBeginInfo renderPassInfo{};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = aSwapChain->GetRenderPass();
-    renderPassInfo.framebuffer = aSwapChain->GetCurrentFramebuffer();
-    renderPassInfo.renderArea.offset = {};
-    renderPassInfo.renderArea.extent = swapChainExtent;
-    renderPassInfo.clearValueCount = numsof(clearValues);
-    renderPassInfo.pClearValues = clearValues;
-    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-}
-
-void Renderer::BeginSwapChainRenderPass(CommandBuffer& commandBuffer, VkSubpassContents contents)
-{
-    assert(isFrameStarted && "Can't call BeginSwapChainRenderPass while frame is not in progress!");
-    auto swapChainExtent = aSwapChain->GetExtent();
-
-    VkRenderPassBeginInfo renderPassInfo{};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = aSwapChain->GetRenderPass();
-    renderPassInfo.framebuffer = aSwapChain->GetCurrentFramebuffer();
-    renderPassInfo.renderArea.offset = {};
-    renderPassInfo.renderArea.extent = swapChainExtent;
-    renderPassInfo.clearValueCount = numsof(clearValues);
-    renderPassInfo.pClearValues = clearValues;
-    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, contents);
-}
-
-void Renderer::BeginSwapChainRenderPass(CommandBuffer& commandBuffer, VkOffset2D& offset)
-{
-    assert(isFrameStarted && "Can't call BeginSwapChainRenderPass while frame is not in progress!");
-    auto swapChainExtent = aSwapChain->GetExtent();
-
-    VkRenderPassBeginInfo renderPassInfo{};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = aSwapChain->GetRenderPass();
-    renderPassInfo.framebuffer = aSwapChain->GetCurrentFramebuffer();
-    renderPassInfo.renderArea.offset = offset;
-    renderPassInfo.renderArea.extent = {swapChainExtent.width - renderPassInfo.renderArea.offset.x, swapChainExtent.height - renderPassInfo.renderArea.offset.y};
-    renderPassInfo.clearValueCount = numsof(clearValues);
-    renderPassInfo.pClearValues = clearValues;
-    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
-}
-
-void Renderer::BeginSwapChainRenderPass(CommandBuffer& commandBuffer, VkOffset2D& offset, VkExtent2D& extent)
-{
-    assert(isFrameStarted && "Can't call BeginSwapChainRenderPass while frame is not in progress!");
-    //auto swapChainExtent = aSwapChain->GetExtent();
-
-    VkRenderPassBeginInfo renderPassInfo{};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = aSwapChain->GetRenderPass();
-    renderPassInfo.framebuffer = aSwapChain->GetCurrentFramebuffer();
-    renderPassInfo.renderArea.offset = offset;
-    renderPassInfo.renderArea.extent = extent;
-    renderPassInfo.clearValueCount = numsof(clearValues);
-    renderPassInfo.pClearValues = clearValues;
-    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
-}
-
-void Renderer::BeginSwapChainRenderPass(CommandBuffer& commandBuffer, VkOffset2D& ltOffset, VkOffset2D& rbOffset)
-{
-    assert(isFrameStarted && "Can't call BeginSwapChainRenderPass while frame is not in progress!");
-    auto swapChainExtent = aSwapChain->GetExtent();
-
-    VkRenderPassBeginInfo renderPassInfo{};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = aSwapChain->GetRenderPass();
-    renderPassInfo.framebuffer = aSwapChain->GetCurrentFramebuffer();
-    renderPassInfo.renderArea.offset = ltOffset;
-    renderPassInfo.renderArea.extent = {swapChainExtent.width - renderPassInfo.renderArea.offset.x - rbOffset.x, swapChainExtent.height - renderPassInfo.renderArea.offset.y - rbOffset.y};
-    renderPassInfo.clearValueCount = numsof(clearValues);
-    renderPassInfo.pClearValues = clearValues;
-    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
-}
-
 void Renderer::BeginRendering(CommandBuffer& commandBuffer)
 {
     Device::ImageMemoryBarrier(commandBuffer, aSwapChain->swapChainImages[aSwapChain->CurrentImage], 
@@ -242,31 +158,6 @@ void Renderer::EndRenderPass(CommandBuffer& commandBuffer)
     assert(isFrameStarted && "Can't call EndSwapChainRenderPass while frame is not in progress!");
 
     vkCmdEndRenderPass(commandBuffer);
-}
-
-void Renderer::BeginOffscreenRenderPass(CommandBuffer& commandBuffer, VkFramebuffer framebuffer, VkSubpassContents contents)
-{
-    VkClearValue offscreenClearValues[4]{};
-	offscreenClearValues[0].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
-	offscreenClearValues[1].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
-	offscreenClearValues[2].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
-	offscreenClearValues[3].depthStencil = { 1.0f, 0 };
-
-    VkRenderPassBeginInfo renderPassBegin;
-    renderPassBegin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassBegin.pNext = NULL;
-    renderPassBegin.renderPass = aSwapChain->GetOffscreenRenderPass();
-    renderPassBegin.framebuffer = framebuffer;
-    renderPassBegin.renderArea.offset.x = 0;
-    renderPassBegin.renderArea.offset.y = 0;
-    renderPassBegin.renderArea.extent = GetSwapChainExtent();
-    renderPassBegin.clearValueCount = 4;
-    renderPassBegin.pClearValues = offscreenClearValues;
-
-    vkCmdBeginRenderPass(commandBuffer,
-                        &renderPassBegin,
-                        contents);
-
 }
 
 void Renderer::BeginOffscreenRendering(CommandBuffer& commandBuffer)

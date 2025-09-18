@@ -13,10 +13,8 @@ SwapChain::SwapChain(Device* mDevice,
     createImageViews();
     createColorResources();
     createDepthResources();
-    createRenderPass();
-    createOffscreenRenderpass();
+    createOffscreenSampler();
     createOffscreenFramebuffer();
-    createFramebuffers();
     createSyncObjects();
 
     _swapChain = this;
@@ -24,7 +22,6 @@ SwapChain::SwapChain(Device* mDevice,
 SwapChain::~SwapChain()
 {
     auto device = aDevice->GetLogicalDevice();
-    vkDestroyRenderPass(device, renderPass, nullptr);
     for (uint32_t i = 0 ; i < imageCount; i++)
     {
         vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
@@ -121,21 +118,6 @@ uint32_t SwapChain::GetImageCount()
     return static_cast<uint32_t>(swapChainImageViews.size());
 }
 
-VkRenderPass &SwapChain::GetRenderPass()
-{
-    return renderPass;
-}
-
-VkRenderPass &SwapChain::GetOffscreenRenderPass()
-{
-    return offScreenFrameBuffer.renderPass;
-}
-
-std::vector<VkFramebuffer> SwapChain::GetSwapChainFramebuffers()
-{
-    return swapChainFramebuffers;
-}
-
 void SwapChain::SetViewport(CommandBuffer& commandBuffer)
 {
     vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
@@ -194,7 +176,6 @@ void SwapChain::RecreateSwapChain()
     createImageViews();
     createColorResources();
     createDepthResources();
-    createFramebuffers();
     createOffscreenFramebuffer();
 }
 
@@ -434,84 +415,6 @@ void SwapChain::createDepthResources()
     }
 }
 
-void SwapChain::createRenderPass()
-{
-    VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = swapChainImageFormat;
-    colorAttachment.samples = msaaSamplers;
-
-    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-
-    colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-
-    colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-    VkAttachmentDescription colorAttachmentResolve{};
-    colorAttachmentResolve.format = swapChainImageFormat;
-    colorAttachmentResolve.samples = VK_SAMPLE_COUNT_1_BIT;
-    colorAttachmentResolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    colorAttachmentResolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    colorAttachmentResolve.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    colorAttachmentResolve.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    colorAttachmentResolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachmentResolve.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-    VkAttachmentReference colorAttachmentRef{};
-    colorAttachmentRef.attachment = 0;
-    colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-    VkAttachmentReference colorAttachmentResolveRef{};
-    colorAttachmentResolveRef.attachment = 2;
-    colorAttachmentResolveRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-    VkAttachmentDescription depthAttachment{};
-    depthAttachment.format = findDepthFormat();
-    depthAttachment.samples = msaaSamplers;
-    depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-
-    VkAttachmentReference depthAttachmentRef{};
-    depthAttachmentRef.attachment = 1;
-    depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-    VkSubpassDescription subpass{};
-    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-
-    subpass.colorAttachmentCount = 1;
-    subpass.pColorAttachments = &colorAttachmentRef;
-    subpass.pResolveAttachments = &colorAttachmentResolveRef;
-    subpass.pDepthStencilAttachment = &depthAttachmentRef;
-
-    VkRenderPassCreateInfo createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-
-    const std::vector<VkAttachmentDescription> attachments = {colorAttachment, depthAttachment, colorAttachmentResolve};
-    createInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-    createInfo.pAttachments = attachments.data();
-    createInfo.subpassCount = 1;
-    createInfo.pSubpasses = &subpass;
-
-    VkSubpassDependency dependency{};
-    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-    dependency.dstSubpass = 0;
-    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-    dependency.srcAccessMask = 0;
-    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-    createInfo.dependencyCount = 1;
-    createInfo.pDependencies = &dependency;
-
-    if (vkCreateRenderPass(aDevice->GetLogicalDevice(), &createInfo, nullptr, &renderPass) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create render pass!");
-}
-
 void SwapChain::createOffscreenFramebuffer()
 {
     offScreenFrameBuffer.width = swapChainExtent.width;
@@ -534,133 +437,12 @@ void SwapChain::createOffscreenFramebuffer()
     offScreenFrameBuffer.depth.create(aDevice, 
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, 1, 
         { VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1 });
-
-
-    std::array<VkImageView, 4> attachments{};
-	attachments[0] = offScreenFrameBuffer.position.imageView;
-	attachments[1] = offScreenFrameBuffer.normal.imageView;
-	attachments[2] = offScreenFrameBuffer.albedo.imageView;
-	attachments[3] = offScreenFrameBuffer.depth.imageView;
-
-	VkFramebufferCreateInfo fbufCreateInfo = {};
-	fbufCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-	fbufCreateInfo.pNext = NULL;
-	fbufCreateInfo.renderPass = offScreenFrameBuffer.renderPass;
-	fbufCreateInfo.pAttachments = attachments.data();
-	fbufCreateInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-	fbufCreateInfo.width = offScreenFrameBuffer.width;
-	fbufCreateInfo.height = offScreenFrameBuffer.height;
-	fbufCreateInfo.layers = 1;
-	vkCreateFramebuffer(aDevice->GetLogicalDevice(), &fbufCreateInfo, nullptr, &offScreenFrameBuffer.frameBuffer);
 }
 
-void SwapChain::createOffscreenRenderpass()
+void SwapChain::createOffscreenSampler()
 {
-    // Set up separate renderpass with references to the color and depth attachments
-	std::array<VkAttachmentDescription, 4> attachmentDescs = {};
-
-	// Init attachment properties
-	for (uint32_t i = 0; i < 4; ++i)
-	{
-		attachmentDescs[i].samples = VK_SAMPLE_COUNT_1_BIT;
-		attachmentDescs[i].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		attachmentDescs[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		attachmentDescs[i].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		attachmentDescs[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		if (i == 3)
-		{
-			attachmentDescs[i].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			attachmentDescs[i].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-		}
-		else
-		{
-			attachmentDescs[i].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			attachmentDescs[i].finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		}
-	}
-
-	// Formats
-	attachmentDescs[0].format = VK_FORMAT_R16G16B16A16_SFLOAT;
-	attachmentDescs[1].format = VK_FORMAT_R16G16B16A16_SFLOAT;
-	attachmentDescs[2].format = VK_FORMAT_R8G8B8A8_UNORM;
-	attachmentDescs[3].format = swapChainDepthFormat;
-
-    std::vector<VkAttachmentReference> colorReferences;
-	colorReferences.push_back({ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
-	colorReferences.push_back({ 1, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
-	colorReferences.push_back({ 2, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
-
-	VkAttachmentReference depthReference = {};
-	depthReference.attachment = 3;
-	depthReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-	VkSubpassDescription subpass = {};
-	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpass.pColorAttachments = colorReferences.data();
-	subpass.colorAttachmentCount = static_cast<uint32_t>(colorReferences.size());
-	subpass.pDepthStencilAttachment = &depthReference;
-
-	// Use subpass dependencies for attachment layout transitions
-	std::array<VkSubpassDependency, 3> dependencies{};
-
-	// Depth
-	dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
-	dependencies[0].dstSubpass = 0;
-	dependencies[0].srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-	dependencies[0].dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-	dependencies[0].srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-	dependencies[0].dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
-	// Color
-	dependencies[1].srcSubpass = VK_SUBPASS_EXTERNAL;
-	dependencies[1].dstSubpass = 0;
-	dependencies[1].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-	dependencies[1].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	dependencies[1].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-	dependencies[1].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-	// Color
-	dependencies[2].srcSubpass = 0;
-	dependencies[2].dstSubpass = VK_SUBPASS_EXTERNAL;
-	dependencies[2].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	dependencies[2].dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-	dependencies[2].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-	dependencies[2].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-
-	VkRenderPassCreateInfo renderPassInfo = {};
-	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-	renderPassInfo.pAttachments = attachmentDescs.data();
-	renderPassInfo.attachmentCount = static_cast<uint32_t>(attachmentDescs.size());
-	renderPassInfo.subpassCount = 1;
-	renderPassInfo.pSubpasses = &subpass;
-	renderPassInfo.dependencyCount = 3;
-	renderPassInfo.pDependencies = dependencies.data();
-    vkCreateRenderPass(aDevice->GetLogicalDevice(), &renderPassInfo, nullptr, &offScreenFrameBuffer.renderPass);
     aDevice->CreateSampler(&colorSampler, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 
         VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE);
-}
-
-void SwapChain::createFramebuffers()
-{
-    swapChainFramebuffers.resize(swapChainImageViews.size());
-    for (size_t i = 0; i < swapChainImageViews.size(); i++)
-    {
-        const std::vector<VkImageView> attachments = {colorImageView, depthImageViews[i], swapChainImageViews[i]};
-
-        VkFramebufferCreateInfo framebufferInfo{};
-        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = renderPass;
-        framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-        framebufferInfo.pAttachments = attachments.data();
-        framebufferInfo.width = swapChainExtent.width;
-        framebufferInfo.height = swapChainExtent.height;
-        framebufferInfo.layers = 1;
-
-        if (vkCreateFramebuffer(aDevice->GetLogicalDevice(), &framebufferInfo, nullptr, &swapChainFramebuffers[i]) !=
-            VK_SUCCESS)
-        {
-            throw std::runtime_error("failed to create framebuffer!");
-        }
-    }
 }
 
 void SwapChain::createSyncObjects()
@@ -696,8 +478,7 @@ void SwapChain::cleanupSwapChain()
     offScreenFrameBuffer.cleanupImages(aDevice);
     vkDestroyImageView(device, colorImageView, nullptr);
     aDevice->DestroyImage(colorImage, colorImageAllocation);
-    for (size_t i = 0; i < swapChainFramebuffers.size(); i++)
-        vkDestroyFramebuffer(device, swapChainFramebuffers[i], nullptr);
+
     for (auto imageView : swapChainImageViews)
         vkDestroyImageView(device, imageView, nullptr);
     for (size_t i = 0; i < depthImages.size(); i++)

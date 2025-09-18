@@ -31,10 +31,6 @@ namespace AnA
             return needUpdate;
         }
 
-        VkRenderPass GetSwapChainRenderPass() const 
-        {
-            return aSwapChain->GetRenderPass();
-        }
         VkCommandBuffer GetCurrentCommandBuffer() const
         {
             assert(isFrameStarted && "Cannot get command buffer when frame not in progress!");
@@ -68,17 +64,10 @@ namespace AnA
         void ExecuteOffscreenSecondaryCommandBuffer(CommandBuffer& commandBuffer);
 
         void EndFrame();
-        void BeginSwapChainRenderPass(CommandBuffer& commandBuffer);
-        void BeginSwapChainRenderPass(CommandBuffer& commandBuffer, VkSubpassContents contents);
-        void BeginSwapChainRenderPass(CommandBuffer& commandBuffer, VkOffset2D& offset);
-        void BeginSwapChainRenderPass(CommandBuffer& commandBuffer, VkOffset2D& offset, VkExtent2D& extent);
-        void BeginSwapChainRenderPass(CommandBuffer& commandBuffer, VkOffset2D& ltOffset, VkOffset2D& rbOffset);
-
         void BeginRendering(CommandBuffer& commandBuffer);
         void EndRendering(CommandBuffer& commandBuffer);
 
         void EndRenderPass(CommandBuffer& commandBuffer);
-        void BeginOffscreenRenderPass(CommandBuffer& commandBuffer, VkFramebuffer framebuffer, VkSubpassContents contents = VK_SUBPASS_CONTENTS_INLINE);
         void BeginOffscreenRendering(CommandBuffer& commandBuffer);
         void EndOffscreenRendering(CommandBuffer& commandBuffer);
     private:

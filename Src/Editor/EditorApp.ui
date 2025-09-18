@@ -13,10 +13,7 @@
         <Slider Name="nearSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.0f"/>
         <TextBlock Text="Far" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
         <Slider Name="farSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="1.0f"/>
-        <TextBlock Text="Shadow Map" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
-        <Slider Name="shadowMapSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.0f"/>
-        <SceneView Name="shadowMapView" HorizontalAlignment="Stretch" ImageInfo="Resource::ResourceManager::GetCurrent()->ShadowMap.GetDescriptorImageInfos()[0]"
-            ControlSize="0.0f, 0.3f" TextureLayer="0"/>
+        <TextBlock Text="Light Direction" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
         <Slider Name="lightX" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.24f"/>
         <Slider Name="lightY" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.1f"/>
         <Slider Name="lightZ" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.3f"/>

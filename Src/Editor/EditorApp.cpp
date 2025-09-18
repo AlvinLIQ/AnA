@@ -61,8 +61,6 @@ void EditorApp::onLoop()
     aResourceManager.MainCameraInfo.far = static_cast<Controls::Slider*>(editorApp->controlMap["farSlider"])->Value() * 32.0f;
     aResourceManager.MainCameraInfo.UpdateCameraPerspective(aResourceManager.MainCamera);
 
-    (editorApp->controlMap["shadowMapView"])->TextureLayer =
-        uint32_t(std::min(float(SHADOW_MAP_CASCADE_COUNT - 1), static_cast<Controls::Slider*>(editorApp->controlMap["shadowMapSlider"])->Value() * float(SHADOW_MAP_CASCADE_COUNT)));
     aResourceManager.GlobalLight.Direction = {static_cast<Controls::Slider*>(editorApp->controlMap["lightX"])->Value() * 10.0f - 5.0f,
     static_cast<Controls::Slider*>(editorApp->controlMap["lightY"])->Value() * 10.0f - 5.0f,
     static_cast<Controls::Slider*>(editorApp->controlMap["lightZ"])->Value() * 10.0f - 5.0f};

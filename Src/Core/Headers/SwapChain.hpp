@@ -62,14 +62,6 @@ namespace AnA
 
         uint32_t GetImageCount();
 
-        VkRenderPass& GetRenderPass();
-        VkRenderPass& GetOffscreenRenderPass();
-
-        VkFramebuffer& GetCurrentFramebuffer()
-        {
-            return swapChainFramebuffers[CurrentImage];
-        }
-
         void SetViewport(CommandBuffer& commandBuffer);
         void SetViewport(CommandBuffer& commandBuffer, VkOffset2D& offset);
         static void SetViewport(CommandBuffer& commandBuffer, VkExtent2D& extent);
@@ -125,17 +117,11 @@ namespace AnA
         std::vector<VmaAllocation> depthImageAllocations;
         std::vector<VkImageView> depthImageViews;
         void createDepthResources();
-
-        VkRenderPass renderPass;
-        void createRenderPass();
         // Framebuffers holding the deferred attachments
         FrameBuffer offScreenFrameBuffer{};
         VkSampler colorSampler{};
         void createOffscreenFramebuffer();
-        void createOffscreenRenderpass();
-
-        std::vector<VkFramebuffer> swapChainFramebuffers;
-        void createFramebuffers();
+        void createOffscreenSampler();
 
         std::vector<VkSemaphore> imageAvailableSemaphores;
         std::vector<VkSemaphore> renderFinishedSemaphores;
