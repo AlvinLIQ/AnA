@@ -94,6 +94,10 @@ namespace AnA
             static void RequestUpdate();
             static void EndUpdate();
 
+            static bool TextLayoutNeedReset();
+            static void RequestTextLayoutReset();
+            static void EndTextLayoutReset();
+
             virtual VkDescriptorImageInfo GetDescriptorImageInfo();
             virtual void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount);
         private:

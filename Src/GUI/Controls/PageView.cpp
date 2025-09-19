@@ -27,6 +27,7 @@ void PageView::PageIndex(uint32_t _pageIndex)
     {
         pageIndex = _pageIndex;
         item = pages[pageIndex];
+        RequestTextLayoutReset();
     }
 }
 

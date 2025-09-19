@@ -9,6 +9,7 @@ Control* pressedControl = nullptr;
 Control* focusedControl = nullptr;
 bool leftButtonPressed = false;
 bool needUpdate = false;
+bool textLayoutNeedReset = false;
 Vec2 lastPressedPos{};
 
 Control::Control()
@@ -153,6 +154,21 @@ void Control::RequestUpdate()
 void Control::EndUpdate()
 {
     needUpdate = false;
+}
+
+bool Control::TextLayoutNeedReset()
+{
+    return textLayoutNeedReset;
+}
+
+void Control::RequestTextLayoutReset()
+{
+    textLayoutNeedReset = true;
+}
+
+void Control::EndTextLayoutReset()
+{
+    textLayoutNeedReset = false;
 }
 
 VkDescriptorImageInfo Control::GetDescriptorImageInfo()
