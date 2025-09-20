@@ -1,82 +1,13 @@
 #include "Headers/Shader.hpp"
-#include "Headers/ResourceManager.hpp"
-#include <glslang/Public/ShaderLang.h>
-#include <glslang/SPIRV/GlslangToSpv.h>
+#include "Headers/SwapChain.hpp"
+//#include <glslang/Public/ShaderLang.h>
+//#include <glslang/SPIRV/GlslangToSpv.h>
 
 using namespace AnA;
 
 Shader::Shader(Device* mDevice) : aDevice{mDevice}
 {
     
-}
-
-Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, 
-    VkRenderPass& renderPass, VkDeviceSize pushConstantSize) : aDevice{mDevice}
-{
-    std::vector<std::vector<Descriptor::DescriptorConfig>> descriptorSetConfigs;
-    Resource::ResourceManager::GetCurrent()->GetDefaultDescriptorSetConfig(descriptorSetConfigs);
-    
-    createPipelineLayout(pushConstantSize);
-    pipeline = Pipeline(mDevice, vertShaderCode, renderPass, pipelineLayout);
-}
-
-Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass, 
-    std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, size_t _descriptorOffset, VkDeviceSize pushConstantSize) : aDevice{mDevice}, 
-    descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}, descriptorOffset{_descriptorOffset}
-{
-    createPipelineLayout(pushConstantSize);
-
-    pipeline = Pipeline(mDevice, vertShaderCode, renderPass, pipelineLayout);
-}
-
-Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass, 
-    const std::vector<unsigned char>& fragShaderCode, std::vector<Descriptor>& _descriptors,
-    size_t actualDescriptorCount, size_t _descriptorOffset, VkDeviceSize pushConstantSize) : aDevice{mDevice}, descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}, descriptorOffset{_descriptorOffset}
-{
-    createPipelineLayout(pushConstantSize);
-
-    pipeline = Pipeline(mDevice, vertShaderCode, renderPass, pipelineLayout, fragShaderCode);
-}
-
-Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, 
-    const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass,
-    const VkPrimitiveTopology vertexTopology, VkDeviceSize pushConstantSize) : aDevice{mDevice}
-{
-    std::vector<std::vector<Descriptor::DescriptorConfig>> descriptorSetConfigs;
-    Resource::ResourceManager::GetCurrent()->GetDefaultDescriptorSetConfig(descriptorSetConfigs);
-
-    createPipelineLayout(pushConstantSize);
-    pipeline = Pipeline(mDevice, vertShaderCode, fragShaderCode, renderPass, pipelineLayout, vertexTopology);
-}
-
-Shader::Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, 
-    std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, size_t _descriptorOffset, 
-    const VkPrimitiveTopology vertexTopology, VkDeviceSize pushConstantSize) : aDevice{mDevice}, descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}, descriptorOffset{_descriptorOffset}
-{
-    createPipelineLayout(pushConstantSize);
-
-    pipeline = Pipeline(mDevice, vertShaderCode, fragShaderCode, renderPass, pipelineLayout, vertexTopology);
-}
-
-Shader::Shader(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, 
-    const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, 
-    std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, size_t _descriptorOffset, VkDeviceSize pushConstantSize) : aDevice{mDevice}, 
-    descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}, descriptorOffset{_descriptorOffset}
-{
-    createPipelineLayout(pushConstantSize);
-
-    pipeline = Pipeline(mDevice, taskShaderCode, meshShaderCode, fragShaderCode, renderPass, pipelineLayout);
-    hasMeshShader = true;
-}
-
-Shader::Shader(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, 
-    std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, size_t _descriptorOffset, VkRenderPass& renderPass, VkDeviceSize pushConstantSize) : aDevice{mDevice}, 
-    descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}, descriptorOffset{_descriptorOffset}
-{
-    createPipelineLayout(pushConstantSize);
-
-    pipeline = Pipeline(mDevice, taskShaderCode, meshShaderCode, pipelineLayout, renderPass);
-    hasMeshShader = true;
 }
 
 Shader::Shader(Device* mDevice, std::vector<ShaderInfo>& shaderInfos, 
@@ -117,8 +48,9 @@ EShLanguage ShaderStageToEshLanguage(VkShaderStageFlagBits stage)
     }
 }
 
-bool Shader::Compile(std::vector<ShaderInfo>& shaderInfos)
+bool Shader::Compile(std::vector<ShaderInfo>& )
 {
+    /*
     for (auto& shaderInfo : shaderInfos)
     {
         EShLanguage lang = ShaderStageToEshLanguage(shaderInfo.stage);
@@ -141,7 +73,7 @@ bool Shader::Compile(std::vector<ShaderInfo>& shaderInfos)
             return false;
         }
         //glslang::GlslangToSpv(*program.getIntermediate(lang), shaderInfo.spirv);
-    }
+    }*/
     return true;
 }
 
@@ -172,7 +104,7 @@ void Shader::createPipelineLayout(VkDeviceSize pushConstantSize)
             for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
             {
                 descriptorSets[i].push_back(descriptor.GetSets().size() ? descriptor.GetSets()[i % (int)descriptor.GetSets().size()] :
-                nullptr);
+                VK_NULL_HANDLE);
             }
         }
     }

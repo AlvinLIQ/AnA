@@ -859,18 +859,18 @@ void Device::pickPhysicalDevice()
             std::string deviceName = physicalDeviceProperties.deviceName;
             if (physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
                 currentScore += 10;
-            if (deviceName.find("AMD") != -1llu)
+            if (deviceName.find("AMD") != size_t(-1))
             {
                 currentScore += 3;
-                if (deviceName.find("RX") != -1llu)
+                if (deviceName.find("RX") != size_t(-1))
                     currentScore += 4;
             }
-            else if (deviceName.find("NVIDIA") != -1llu)
+            else if (deviceName.find("NVIDIA") != size_t(-1))
             {
                 currentScore += 3;
-                if (deviceName.find("RTX") != -1llu)
+                if (deviceName.find("RTX") != size_t(-1))
                     currentScore += 4;
-                else if (deviceName.find("GTX") != -1llu)
+                else if (deviceName.find("GTX") != size_t(-1))
                     currentScore += 1;
             }
             if (currentScore > bestScore)

@@ -149,9 +149,9 @@ namespace AnA
 		{
 
 		}
-		String(const char* str, size_t len = -1llu)
+		String(const char* str, size_t len = size_t(-1))
 		{
-			if (len == -1llu)
+			if (len == size_t(-1))
 				len = strlen(str);
 			
 			Resize(len);
@@ -163,7 +163,7 @@ namespace AnA
 		//reserve_size must be >= len
 		String(const char* str, size_t len, size_t reserve_size)
 		{
-			if (len == -1llu)
+			if (len == size_t(-1))
 				len = strlen(str);
 			assert(reserve_size >= len);
 			Resize(reserve_size);

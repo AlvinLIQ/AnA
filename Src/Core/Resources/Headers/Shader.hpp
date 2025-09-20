@@ -9,22 +9,6 @@ namespace AnA
     {
     public:
         Shader(Device* mDevice);
-        Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass, VkDeviceSize pushConstantSize = 0);
-        //Depth Test
-        Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass, std::vector<Descriptor>& _descriptors,
-            size_t actualDescriptorCount, size_t _descriptorOffset, VkDeviceSize pushConstantSize = 0);
-        //Depth Test
-        Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, VkRenderPass& renderPass, const std::vector<unsigned char>& fragShaderCode, 
-            std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, size_t _descriptorOffset, VkDeviceSize pushConstantSize = 0);
-        Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass,
-            const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VkDeviceSize pushConstantSize = 0);
-        Shader(Device* mDevice, const std::vector<unsigned char>& vertShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, 
-            std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, size_t _descriptorOffset, 
-            const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VkDeviceSize pushConstantSize = 0);
-        Shader(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, const std::vector<unsigned char>& fragShaderCode, VkRenderPass& renderPass, 
-            std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, size_t _descriptorOffset, VkDeviceSize pushConstantSize = 0);
-        Shader(Device* mDevice, const std::vector<unsigned char>& taskShaderCode, const std::vector<unsigned char>& meshShaderCode, 
-            std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, size_t _descriptorOffset, VkRenderPass& renderPass, VkDeviceSize pushConstantSize = 0);
         Shader(Device* mDevice, std::vector<ShaderInfo>& shaderInfos, 
             std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, size_t _descriptorOffset, VkDeviceSize pushConstantSize = 0);
 

@@ -4,6 +4,7 @@
 
 #include <GLFW/glfw3.h>
 #include <vector>
+#include <array>
 
 #define INCLUDE_STB_IMAGE
 

@@ -672,9 +672,9 @@ namespace AnA
             pipeline = newPipeline.pipeline;
             pipelineLayout = newPipeline.pipelineLayout;
             renderPass = newPipeline.renderPass;
-            newPipeline.pipeline = nullptr;
-            newPipeline.pipelineLayout = nullptr;
-            newPipeline.renderPass = nullptr;
+            newPipeline.pipeline = VK_NULL_HANDLE;
+            newPipeline.pipelineLayout = VK_NULL_HANDLE;
+            newPipeline.renderPass = VK_NULL_HANDLE;
         }
 
         Pipeline& operator=(Pipeline&& newPipeline)
@@ -685,9 +685,9 @@ namespace AnA
             pipeline = newPipeline.pipeline;
             pipelineLayout = newPipeline.pipelineLayout;
             renderPass = newPipeline.renderPass;
-            newPipeline.pipeline = nullptr;
-            newPipeline.pipelineLayout = nullptr;
-            newPipeline.renderPass = nullptr;
+            newPipeline.pipeline = VK_NULL_HANDLE;
+            newPipeline.pipelineLayout = VK_NULL_HANDLE;
+            newPipeline.renderPass = VK_NULL_HANDLE;
 
             return *this;
         }
@@ -700,9 +700,9 @@ namespace AnA
             pipeline = newPipeline.pipeline;
             pipelineLayout = newPipeline.pipelineLayout;
             renderPass = newPipeline.renderPass;
-            newPipeline.pipeline = nullptr;
-            newPipeline.pipelineLayout = nullptr;
-            newPipeline.renderPass = nullptr;
+            newPipeline.pipeline = VK_NULL_HANDLE;
+            newPipeline.pipelineLayout = VK_NULL_HANDLE;
+            newPipeline.renderPass = VK_NULL_HANDLE;
 
             return *this;
         }
