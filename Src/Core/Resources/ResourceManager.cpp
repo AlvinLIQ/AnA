@@ -460,7 +460,7 @@ std::vector<ShaderInfo> terrainShaderStageInfos{{Terrain_task, 0, VK_SHADER_STAG
                                   {Terrain_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT}};
 std::vector<ShaderInfo> meshShaderStageInfos{{Mesh_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
                                   {Mesh_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT},
-                                      {Mesh_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, true}};
+                                      {Mesh_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false}};
 std::vector<ShaderInfo> lightShaderStageInfos{{Light_vert, 0, VK_SHADER_STAGE_VERTEX_BIT},
                                 {Light_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};                                      
 std::vector<ShaderInfo> textShaderStageInfos{{Text_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
