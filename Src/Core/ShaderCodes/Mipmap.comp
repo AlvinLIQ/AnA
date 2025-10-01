@@ -1,0 +1,18 @@
+#version 460
+
+layout (local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+layout(set = 0, binding = 0) uniform sampler2D depthSampler;
+layout(set = 0, binding = 1) uniform writeonly image2D outImage;
+
+void main()
+{
+    ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
+    vec2 imageSize = vec2(textureSize(depthSampler, 0));
+    vec4 d = vec4(texelFetch(depthSampler, pos + ivec2(0, 0), 0).r,
+                texelFetch(depthSampler, pos + ivec2(1, 0), 0).r,
+                texelFetch(depthSampler, pos + ivec2(0, 1), 0).r,
+                texelFetch(depthSampler, pos + ivec2(1, 1), 0).r);
+    float depth = min(min(d.x, d.y), min(d.z, d.w));
+    imageStore(outImage, pos, depth);
+}
