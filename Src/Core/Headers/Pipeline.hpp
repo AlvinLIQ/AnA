@@ -596,7 +596,7 @@ namespace AnA
                 dConfig.depthStencilInfo.back = {};             // Optional
 
                 dConfig.pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-                dConfig.pipelineInfo.stageCount = shaderInfos.size();
+                dConfig.pipelineInfo.stageCount = uint32_t(shaderInfos.size());
                 dConfig.pipelineInfo.pStages = dConfig.shaderStages;
 
                 dConfig.pipelineInfo.pVertexInputState = &dConfig.vertexInputInfo;

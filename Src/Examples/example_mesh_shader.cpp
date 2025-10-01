@@ -41,10 +41,10 @@ glm::vec3 calculateNormal(int x, int z) {
 //    float heightCenter = getHeight(x, z);
 
     // Get the height of the neighboring points
-    float heightLeft = getHeight(x - 1, z);
-    float heightRight = getHeight(x + 1, z);
-    float heightUp = getHeight(x, z + 1);
-    float heightDown = getHeight(x, z - 1);
+    float heightLeft = getHeight(float(x - 1), float(z));
+    float heightRight = getHeight(float(x + 1), float(z));
+    float heightUp = getHeight(float(x), float(z + 1));
+    float heightDown = getHeight(float(x), float(z - 1));
 
     // Calculate the two vectors on the surface
     glm::vec3 v1(2.0f, heightRight - heightLeft, 0.0f);  // Horizontal vector (x-direction)
@@ -65,7 +65,7 @@ void GenTerrain(std::vector<Model::Vertex>& vertices, std::vector<uint32_t>& ind
             ax = x / width * 1000.0f;
             ay = y / height * 1000.0f;
             z = getHeight(x, y);
-            vertices.push_back({{ax, z, ay}, calculateNormal(ax, ay), 
+            vertices.push_back({{ax, z, ay}, calculateNormal(int(ax), int(ay)), 
                 {(float)(x * 0.25), (float)(y * 0.25)}});
         }
     }
