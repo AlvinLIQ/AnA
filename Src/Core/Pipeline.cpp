@@ -5,9 +5,15 @@ using namespace AnA;
 Pipeline::Pipeline(Device* mDevice, PipelineConfig& pipelineConfig) : aDevice{mDevice}, renderPass {pipelineConfig.pipelineInfo.renderPass}, pipelineLayout{pipelineConfig.pipelineInfo.layout}
 {
     if (pipelineConfig.shaderStages[0].stage == VK_SHADER_STAGE_COMPUTE_BIT)
+    {
+        bindPoint = VK_PIPELINE_BIND_POINT_COMPUTE;
         createComputePipeline(pipelineConfig);
+    }
     else
+    {
+        bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
         createGraphicsPipeline(pipelineConfig);
+    }
 }
 
 Pipeline::~Pipeline()
@@ -17,7 +23,7 @@ Pipeline::~Pipeline()
 
 void Pipeline::Bind(VkCommandBuffer commandBuffer) const
 {
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+    vkCmdBindPipeline(commandBuffer, bindPoint, pipeline);
 }
 
 void Pipeline::Cleanup()

@@ -664,6 +664,7 @@ namespace AnA
             pipeline = newPipeline.pipeline;
             pipelineLayout = newPipeline.pipelineLayout;
             renderPass = newPipeline.renderPass;
+            bindPoint = newPipeline.bindPoint;
             newPipeline.pipeline = VK_NULL_HANDLE;
             newPipeline.pipelineLayout = VK_NULL_HANDLE;
             newPipeline.renderPass = VK_NULL_HANDLE;
@@ -677,6 +678,7 @@ namespace AnA
             pipeline = newPipeline.pipeline;
             pipelineLayout = newPipeline.pipelineLayout;
             renderPass = newPipeline.renderPass;
+            bindPoint = newPipeline.bindPoint;
             newPipeline.pipeline = VK_NULL_HANDLE;
             newPipeline.pipelineLayout = VK_NULL_HANDLE;
             newPipeline.renderPass = VK_NULL_HANDLE;
@@ -692,6 +694,7 @@ namespace AnA
             pipeline = newPipeline.pipeline;
             pipelineLayout = newPipeline.pipelineLayout;
             renderPass = newPipeline.renderPass;
+            bindPoint = newPipeline.bindPoint;
             newPipeline.pipeline = VK_NULL_HANDLE;
             newPipeline.pipelineLayout = VK_NULL_HANDLE;
             newPipeline.renderPass = VK_NULL_HANDLE;
@@ -716,5 +719,7 @@ namespace AnA
         void createComputePipeline(const std::string &computeShaderFileName);
         void createComputePipeline(const std::vector<unsigned char>& computeShaderCode);
         void createComputePipeline(PipelineConfig& pipelineConfig);
+
+        VkPipelineBindPoint bindPoint;
     };
 }
