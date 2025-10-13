@@ -8,6 +8,7 @@
 #include "Text.hpp"
 #include "Texture.hpp"
 #include "ShadowMap.hpp"
+#include <mutex>
 //#include <map>
 
 #define ANA_INCLUDE_CONTROL
@@ -92,7 +93,12 @@ namespace AnA
             //CommandBufferPool SecondaryCommandBufferPool;
             //ThreadPool<void(CommandBuffer*)> SecondaryCommandBufferPool{};
             void RecreateResources();
-            std::vector<RecordCallBackInfo> RecordCallBacks{};
+            void AppendCallback(NormalCallBack callback)
+            {
+                std::unique_lock<std::mutex> lock(callbacksMutex);
+                callbacks.push_back(callback);
+            }
+            
 #ifdef ENABLE_MESH_SHADER
             MeshShaderOutput MeshShaderOutputData;
 #endif
@@ -102,6 +108,8 @@ namespace AnA
             std::vector<Buffer> frustumBuffers;
             void createMainCameraBuffers();
 
+            std::vector<NormalCallBack> callbacks{};
+            std::mutex callbacksMutex{};
             //uint32_t recordedCallbacks = 0;
 /*
             std::vector<VkSampler> shadowSamplers;

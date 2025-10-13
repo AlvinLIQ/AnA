@@ -147,6 +147,7 @@ void Scene::Append(const std::vector<MeshInfo>& meshInfos)
 
 void Scene::Append(const MeshInfo* meshInfos, size_t count)
 {
+    std::unique_lock<std::mutex> unique_lock(_mutex);
     std::vector<VkDescriptorImageInfo> imageInfos{};
     auto resourceManager = Resource::ResourceManager::GetCurrent();
     for (size_t i = 0; i < count; i++)
@@ -201,6 +202,7 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
 
 void Scene::Append(std::vector<Model::Vertex>& meshVertices, std::vector<uint32_t>& meshIndices, Transform transform, uint32_t textureId)
 {
+    std::unique_lock<std::mutex> unique_lock(_mutex);
     std::vector<VkDescriptorImageInfo> imageInfos{};
 
     Mesh mesh{};
@@ -492,6 +494,7 @@ void Scene::createIndirectBuffers()
     VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
     countBuffer.Map();
     *static_cast<uint32_t*>(countBuffer.GetMappedData()) = 1;
+    countBuffer.Unmap();
 }
 
 void Scene::createSSBODescriptor()

@@ -149,6 +149,15 @@ void ResourceManager::Update()
         FrustumPlanes::ExtractFrustumPlanes(ShadowMap.GetCascades().back(), *reinterpret_cast<FrustumPlanes*>(&ShadowMap.FrustumPlanes));
         memcpy(&reinterpret_cast<FrustumPlanes*>(frustumBuffers[frameIndex].GetMappedData())[1], &ShadowMap.FrustumPlanes, sizeof(FrustumPlanes));
     }
+    if (callbacks.size())
+    {
+        std::unique_lock<std::mutex> lock(callbacksMutex);
+        for (auto& callback : callbacks)
+        {
+            callback();
+        }
+        callbacks.clear();
+    }
     /*
     recordedCallbacks = 0;
     for (auto& recordCallBackInfo : RecordCallBacks)
