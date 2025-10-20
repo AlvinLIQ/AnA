@@ -113,9 +113,9 @@ void Shader::createPipelineLayout(VkDeviceSize pushConstantSize)
     pipelineLayoutInfo.setLayoutCount = descriptorCount;
     pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
     
+    VkPushConstantRange range;
     if (pushConstantSize)
     {
-        VkPushConstantRange range;
         range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
         if (aDevice->MeshShaderSupport())
             range.stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
