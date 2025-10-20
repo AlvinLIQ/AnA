@@ -71,7 +71,10 @@ namespace AnA
         {
             if (newSize != bufferSize)
             {
+                bool isMapped = mappedData;
                 *this = Buffer(aDevice, newSize, bufferUsage, memoryUsage);
+                if (isMapped)
+                    Map();
             }
         }
 

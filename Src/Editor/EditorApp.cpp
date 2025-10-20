@@ -68,18 +68,27 @@ void EditorApp::onLoop()
 
 void EditorApp::loadModelButton_Click(void* , PointerEventArgs& )
 {
-    FileDialog fileDialog{};
-    auto path = fileDialog.Run();
-    if (path.empty())
-        return;
-    MeshInfo mesh;
-    memcpy(mesh.filePath, path.c_str(), path.length() + 1);
-    mesh.tetureId = 0;
-    Resource::ResourceManager::GetCurrent()->MainScene.Append(std::vector<MeshInfo>(1, mesh));
-    auto panel =
-            static_cast<Controls::StackPanel*>(static_cast<EditorApp*>(App::GetCurrent())->controlMap["modelList"]);
-    panel->Child(static_cast<Controls::Control*>(new Controls::TextBlock(path.substr(path.find_last_of('/') + 1).c_str(),
-                                {0.8f, 0.8f, 0.8f, 1.0f})));
+    auto resourceManager = Resource::ResourceManager::GetCurrent();
+    resourceManager->TaskPool.Enqueue([resourceManager]()
+    {
+        FileDialog fileDialog{};
+        auto path = fileDialog.Run();
+        if (path.empty())
+            return;
+        MeshInfo mesh;
+        memcpy(mesh.filePath, path.c_str(), path.length() + 1);
+        mesh.tetureId = 0;
+        resourceManager->MainScene.Append(std::vector<MeshInfo>(1, mesh));
+        auto panel =
+                static_cast<Controls::StackPanel*>(static_cast<EditorApp*>(App::GetCurrent())->controlMap["modelList"]);
+        panel->Child(static_cast<Controls::Control*>(new Controls::TextBlock(path.substr(path.find_last_of('/') + 1).c_str(),
+                                    {0.8f, 0.8f, 0.8f, 1.0f})));
+        resourceManager->AppendCallback([]()
+        {
+            Control::RequestUpdate();
+        });
+        
+    });
 }
 
 void EditorApp::saveSceneButton_Click(void* , PointerEventArgs& )
