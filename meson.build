@@ -1,5 +1,5 @@
 project('AnA', ['c', 'cpp'],
-    default_options: ['c_std=c23', 'cpp_std=c++23', 'warning_level=2'])
+    default_options: ['c_std=c17', 'cpp_std=c++20', 'warning_level=2'])
 
 add_project_arguments(language: 'cpp')
 add_project_link_arguments('-fuse-ld=lld', language: 'cpp')
@@ -12,7 +12,14 @@ if host_machine.system() == 'windows'
 else
     glfw_dep = dependency('glfw3', required: true)      # GLFW
 endif
-glslang_dep = dependency('glslang', required: true)
+
+glslang_dep = dependency('glslang', required: false)
+conf_data = configuration_data()
+if glslang_dep.found()
+  conf_data.set('HAVE_GLSLANG', 1)
+else
+  conf_data.set('HAVE_GLSLANG', 0)
+endif
 
 subdir('Src/3rdParty/')
 subdir('Src/Core/')

@@ -1,2 +1,2 @@
 incdir = include_directories('rapidxml')
-ui_parser = executable('ui_parser', 'XMLToControl.cpp', include_directories : incdir, cpp_args: ['-std=c++23'])
+ui_parser = executable('ui_parser', 'XMLToControl.cpp', include_directories : incdir)
