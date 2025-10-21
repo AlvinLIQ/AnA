@@ -265,7 +265,7 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     aRenderer.BeginRendering(commandBuffer);
     swapChain.SetViewport(commandBuffer, actualSceneOffset);
     aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.MainScene,
-        aResourceManager.Shaders[5],
+        aDevice.MeshShaderSupport() ? aResourceManager.Shaders[5] : aResourceManager.Shaders[0],
         swapChain.CurrentFrame);
 
     swapChain.SetViewport(commandBuffer);

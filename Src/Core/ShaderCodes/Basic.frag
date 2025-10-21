@@ -86,15 +86,7 @@ void main()
     float pointLightIntensity = max(dot(normalSpace, normalize(LIGHT_POS - vertex)), 0);
     float diffuseLightItensity = ((dot(normalSpace, normalize(lbo.direction))) + 2.0) * 0.5;
 
-    uint cascadeIndex = SHADOW_MAP_CASCADE_COUNT - 1;
-	for(uint i = 0; i < SHADOW_MAP_CASCADE_COUNT - 1; i++) {
-		if(viewPosZ < ubo.cascades[i + 1].split) {
-			cascadeIndex = i;
-			break;
-		}
-	}
-    vec4 shadowCoord = biasMat * ubo.cascades[cascadeIndex].viewProj * vec4(vertex, 1.0);
-    float visibility = filterPCF(shadowCoord, cascadeIndex);
+    float visibility = 1.0;//filterPCF(shadowCoord, cascadeIndex);
 
     vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility + pointLightIntensity * LIGHT_COLOR;
 	outColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord) * vec4(finalLight, 1.0);

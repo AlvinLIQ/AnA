@@ -151,10 +151,12 @@ namespace AnA
         std::vector<Buffer> indexBuffers{};
         size_t indexCount = 0;
         Buffer drawIndexedIndirectBuffer{};
+        Buffer drawIndexedCountBuffer{};
         Buffer drawMeshIndirectBuffer{};
-        Buffer countBuffer{};
+        Buffer drawMeshCountBuffer{};
         void createIndirectBuffers();
-        std::vector<Mesh> meshes;
+        std::vector<Mesh> meshes{};
+        std::vector<VkDrawIndexedIndirectCommand> drawIndexedCommands{};
         uint32_t batchSize;
         std::vector<Range> updateQueue{};
         void applyVertexBufferUpdate(Model::Vertex* vertices, Model::Index* indices, Range& updateRange);

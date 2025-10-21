@@ -160,6 +160,7 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
         auto model = resourceManager->ModelMap[meshId];
         mesh.vertexCount = uint32_t(model->info.vertices.size());
         mesh.indexCount = uint32_t(model->info.indices.size());
+
         if (newModel)
         {
             modelMap.emplace(meshId, uint32_t(uniqueModels.size()));
@@ -175,6 +176,7 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
         {
             mesh.modelID = modelMap[meshId];
         }
+
         for (uint32_t i = 0, meshletOffset = uniqueModels[mesh.modelID].meshletOffset; i < uint32_t(model->meshlets.size()); i++)
             meshletIDs.push_back({meshletOffset + i, uint32_t(meshes.size())});
 
@@ -192,6 +194,16 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
             }
         }
         meshes.push_back(mesh);
+        
+        VkDrawIndexedIndirectCommand drawIndexedCommand;
+        drawIndexedCommand.firstInstance = 0;
+        drawIndexedCommand.instanceCount = 1;
+        drawIndexedCommand.indexCount = mesh.indexCount;
+        drawIndexedCommand.firstIndex = uniqueModels[mesh.modelID].indexOffset;
+        drawIndexedCommand.vertexOffset = 0;
+        static_cast<VkDrawIndexedIndirectCommand*>(drawIndexedIndirectBuffer.GetMappedData())[drawIndexedCommands.size()] = 
+            drawIndexedCommand;
+        drawIndexedCommands.push_back(drawIndexedCommand);
     }
     if (imageInfos.size())
     {
@@ -270,21 +282,36 @@ void Scene::RemoveAt(std::vector<uint32_t> meshIndices)
 
 void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIndex)
 {
-    auto& sets = shader.GetDescriptorSets()[bufferIndex];
-    shader.GetPipeline().Bind(commandBuffer);
-    sets[DEFAULT_MESHLET_LAYOUT] = meshDescriptor->GetSets()[currentBufferIndex];
-    sets[DEFAULT_VERTEX_LAYOUT] = vertexDescriptor->GetSets()[currentBufferIndex];
-    sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors.front()->GetSets()[0];
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-        shader.GetPipelineLayout(), 0, static_cast<uint32_t>(sets.size()),
-        sets.data(), 0, nullptr);
+    if (aDevice->MeshShaderSupport())
+    {
+        auto& sets = shader.GetDescriptorSets()[bufferIndex];
+        shader.GetPipeline().Bind(commandBuffer);
+        sets[DEFAULT_MESHLET_LAYOUT] = meshDescriptor->GetSets()[currentBufferIndex];
+        sets[DEFAULT_VERTEX_LAYOUT] = vertexDescriptor->GetSets()[currentBufferIndex];
+        sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors.front()->GetSets()[0];
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+            shader.GetPipelineLayout(), 0, static_cast<uint32_t>(sets.size()),
+            sets.data(), 0, nullptr);
+    }
+    else
+    {
+        auto& sets = shader.GetDescriptorSets()[bufferIndex];
+        shader.GetPipeline().Bind(commandBuffer);
+        sets[DEFAULT_VERTEX_LAYOUT] = vertexDescriptor->GetSets()[currentBufferIndex];
+        sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors.front()->GetSets()[0];
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+            shader.GetPipelineLayout(), 0, static_cast<uint32_t>(sets.size()),
+            sets.data(), 0, nullptr);
+    }
 }
 
 void Scene::Draw(CommandBuffer& commandBuffer)
 {
+    vkCmdSetPrimitiveTopology(commandBuffer, Topology);
+    vkCmdBindIndexBuffer(commandBuffer, indexBuffers[currentBufferIndex].GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
     vkCmdDrawIndexedIndirectCount(commandBuffer, drawIndexedIndirectBuffer.GetBuffer(),
-    0, countBuffer.GetBuffer(),
-    0, 1, sizeof(VkDrawIndexedIndirectCommand));
+    0, drawIndexedCountBuffer.GetBuffer(),
+    0, meshes.size(), sizeof(VkDrawIndexedIndirectCommand));
 }
 
 void Scene::DrawIndirect(CommandBuffer& commandBuffer)
@@ -292,13 +319,17 @@ void Scene::DrawIndirect(CommandBuffer& commandBuffer)
     if (aDevice->MeshShaderSupport())
     {
         aDevice->vkCmdDrawMeshTasksIndirectCountEXT(commandBuffer, drawMeshIndirectBuffer.GetBuffer(), 0,
-            countBuffer.GetBuffer(),
+            drawMeshCountBuffer.GetBuffer(),
             0, 1, sizeof(VkDrawMeshTasksIndirectCommandEXT));
     }
     else
+    {
+        vkCmdSetPrimitiveTopology(commandBuffer, Topology);
+        vkCmdBindIndexBuffer(commandBuffer, indexBuffers[currentBufferIndex].GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
         vkCmdDrawIndexedIndirectCount(commandBuffer, drawIndexedIndirectBuffer.GetBuffer(),
-            0, countBuffer.GetBuffer(),
-            0, 1, sizeof(VkDrawIndexedIndirectCommand));
+            0, drawIndexedCountBuffer.GetBuffer(),
+            0, meshes.size(), sizeof(VkDrawIndexedIndirectCommand));
+    }
 }
 
 void Scene::CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer, Buffer* newObjectBuffer, uint32_t offset, size_t meshOffset)
@@ -467,12 +498,14 @@ void Scene::applyVertexBufferUpdate(Model::Vertex* vertexBufferData, Model::Inde
             indexBufferData[model.indexOffset + j] = model.model->info.indices[j] + model.vertexOffset;
         }
     }
+    *static_cast<uint32_t*>(drawIndexedCountBuffer.GetMappedData()) = meshes.size();
+    
     vertexBuffers[nextIndex].Flush();
 }
 
 void Scene::createIndirectBuffers()
 {
-    drawIndexedIndirectBuffer = Buffer(aDevice, sizeof(VkDrawIndexedIndirectCommand),
+    drawIndexedIndirectBuffer = Buffer(aDevice, sizeof(VkDrawIndexedIndirectCommand) * 50,
     VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
     drawIndexedIndirectBuffer.Map();
     auto drawIndexedIndirectCommand =
@@ -490,11 +523,16 @@ void Scene::createIndirectBuffers()
     drawMeshIndirectCommand->groupCountY = 1;
     drawMeshIndirectCommand->groupCountZ = 1;
 
-    countBuffer = Buffer(aDevice, 4,
+    drawIndexedCountBuffer = Buffer(aDevice, 4,
     VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-    countBuffer.Map();
-    *static_cast<uint32_t*>(countBuffer.GetMappedData()) = 1;
-    countBuffer.Unmap();
+    drawIndexedCountBuffer.Map();
+    *static_cast<uint32_t*>(drawIndexedCountBuffer.GetMappedData()) = 0;
+
+    drawMeshCountBuffer = Buffer(aDevice, 4,
+    VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+    drawMeshCountBuffer.Map();
+    *static_cast<uint32_t*>(drawMeshCountBuffer.GetMappedData()) = 1;
+    drawMeshCountBuffer.Unmap();
 }
 
 void Scene::createSSBODescriptor()

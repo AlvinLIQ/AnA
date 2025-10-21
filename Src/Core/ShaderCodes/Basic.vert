@@ -11,6 +11,11 @@ layout(std430, set = 0, binding = 0) buffer VertexSSBO
     float vertices[];
 };
 
+layout(std430, set = 0, binding = 1) buffer ObjectSSBO
+{
+    mat4 objects[];
+};
+
 layout(set = 1, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
@@ -76,7 +81,10 @@ mat4 transform(vec3 scale, vec3 rotation, vec3 transition)
 
 void main() {
     uint vertexOffset = gl_VertexIndex * 8;
-    vec4 vertexPos = vec4(vertices[vertexOffset + 0], vertices[vertexOffset + 1], vertices[vertexOffset + 2], 1.0);
+    mat4 transform = objects[gl_DrawID];
+    uint texID = uint(transform[3].w);
+    transform[3].w = 1.0;
+    vec4 vertexPos = transform * vec4(vertices[vertexOffset + 0], vertices[vertexOffset + 1], vertices[vertexOffset + 2], 1.0);
     vec4 viewPos = cbo.view * vertexPos;
     gl_Position = cbo.proj * viewPos;
     outNormalSpace = vec3(vertices[vertexOffset + 3], vertices[vertexOffset + 4], vertices[vertexOffset + 5]);
@@ -84,5 +92,5 @@ void main() {
     outViewPosZ = viewPos.z / viewPos.w + ubo.cascades[1].split - ubo.cascades[0].split + 1.0;
 
     outTexCoord = vec2(vertices[vertexOffset + 6], vertices[vertexOffset + 7]);
-    outTexID = 0;
+    outTexID = texID;
 }
