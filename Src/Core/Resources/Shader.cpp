@@ -50,6 +50,7 @@ EShLanguage ShaderStageToEshLanguage(VkShaderStageFlagBits stage)
 
 bool Shader::Compile(std::vector<ShaderInfo>& shaderInfos)
 {
+#ifdef HAVE_GLSLANG
     glslang::InitializeProcess();
     for (auto& shaderInfo : shaderInfos)
     {
@@ -76,6 +77,7 @@ bool Shader::Compile(std::vector<ShaderInfo>& shaderInfos)
         //glslang::GlslangToSpv(*program.getIntermediate(lang), shaderInfo.spirv);
     }
     glslang::FinalizeProcess();
+#endif
     return true;
 }
 
@@ -115,9 +117,9 @@ void Shader::createPipelineLayout(VkDeviceSize pushConstantSize)
     pipelineLayoutInfo.setLayoutCount = descriptorCount;
     pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
     
+    VkPushConstantRange range;
     if (pushConstantSize)
     {
-        VkPushConstantRange range;
         range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
         if (aDevice->MeshShaderSupport())
             range.stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;

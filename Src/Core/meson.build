@@ -7,7 +7,6 @@ AnACore = static_library('AnACore', ['App.cpp', 'Buffer.cpp', 'Device.cpp', 'Ins
     'Input/InputManager.cpp', 'Resources/Descriptor.cpp', 'Resources/ResourceManager.cpp', 'Resources/Texture.cpp',
     'Resources/Text.cpp',
     'Physics/CollisionDetect.cpp', 'Resources/Lights.cpp', 'Resources/Shader.cpp', 'Systems/RenderSystem.cpp'],
-    cpp_args: ['-std=c++23'],
     include_directories : [vma_include, cdt_include],
     link_with: [meshoptimizer_lib],
     dependencies: [vulkan_dep, glfw_dep, glslang_dep],
