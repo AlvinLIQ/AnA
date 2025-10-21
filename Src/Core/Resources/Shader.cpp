@@ -48,9 +48,9 @@ EShLanguage ShaderStageToEshLanguage(VkShaderStageFlagBits stage)
     }
 }
 
+#ifdef HAVE_GLSLANG
 bool Shader::Compile(std::vector<ShaderInfo>& shaderInfos)
 {
-#ifdef HAVE_GLSLANG
     glslang::InitializeProcess();
     for (auto& shaderInfo : shaderInfos)
     {
@@ -77,9 +77,9 @@ bool Shader::Compile(std::vector<ShaderInfo>& shaderInfos)
         //glslang::GlslangToSpv(*program.getIntermediate(lang), shaderInfo.spirv);
     }
     glslang::FinalizeProcess();
-#endif
     return true;
 }
+#endif
 
 const Pipeline& Shader::GetPipeline() const
 {
