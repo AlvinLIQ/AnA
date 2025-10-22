@@ -924,6 +924,7 @@ bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device)
     deviceFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
     deviceFeatures.pNext = &meshShaderFeatures;
     vkGetPhysicalDeviceFeatures2(device, &deviceFeatures);
+    
     if (meshShaderFeatures.meshShader == VK_TRUE)
     {
         meshShaderSupport = true;

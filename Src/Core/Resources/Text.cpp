@@ -86,6 +86,10 @@ void Text::DrawIndirect(CommandBuffer& commandBuffer)
 void Text::Update()
 {
     needUpdate = false;
+    if (!aDevice->MeshShaderSupport())
+    {
+        return;
+    }
     Resource::ResourceManager::GetCurrent()->TaskPool.Enqueue([this]()
     {
         this->updateAll();
@@ -121,6 +125,8 @@ void Text::Remove(uint32_t id)
 
 void Text::UpdateLayout(uint32_t id)
 {
+    if (!aDevice->MeshShaderSupport())
+        return;
     _mutex.lock();
     auto& textMapData = textMap[id];
     TextData* textBuffer = reinterpret_cast<TextData*>(textBuffers[currentBufferIndex].GetMappedData());

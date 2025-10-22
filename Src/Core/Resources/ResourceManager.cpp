@@ -25,7 +25,8 @@ ResourceManager::ResourceManager(Device* mDevice) :
     createDefaultDescriptors();
     createDefaultShaders();
     MainScene.Init();
-    TextContext.Init();
+    if (aDevice->MeshShaderSupport())
+        TextContext.Init();
     //Points.Init();
     //Points.Topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
     Shapes = AnA::Shapes(mDevice);
@@ -482,8 +483,10 @@ void ResourceManager::createDefaultShaders()
 
     Shaders.emplace_back(aDevice, shapeShaderStageInfos, shapeDescriptors, SHAPE_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
 
-    Shaders.emplace_back(aDevice, csmShaderStageInfos, defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
-
+    if (aDevice->MeshShaderSupport())
+    {
+        Shaders.emplace_back(aDevice, csmShaderStageInfos, defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
+    }
     Shaders.emplace_back(aDevice, pointShaderStageInfos, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
 
     if (aDevice->MeshShaderSupport())

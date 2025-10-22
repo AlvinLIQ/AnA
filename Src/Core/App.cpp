@@ -104,7 +104,7 @@ void App::Run()
     std::chrono::time_point<std::chrono::high_resolution_clock> curTime;
 
     std::vector<MeshInfo> meshInfos;
-    const char cTitle[] = "AnA FPS:";
+    const char cTitle[] = "FPS:";
     AnA::String title{cTitle, sizeof(cTitle), sizeof(cTitle) + 40};
 
     auto window = aWindow.GetGLFWwindow();
@@ -129,6 +129,7 @@ void App::Run()
             title.Copy(info.c_str(), info.length(), sizeof(cTitle) - 1);
             //aResourceManager.TextContext.UpdateText(0, title.Str());
             glfwSetWindowTitle(aWindow.GetGLFWwindow(), title.Str());
+            //printf("{\"FPS\":%d}\r", frameCount.value);
             prevSecond = 0.0f;
             frameCount = 0;
         }
@@ -149,10 +150,13 @@ void App::Run()
             aResourceManager.MainControl->Aspect = static_cast<float>(controlExtent.width) / static_cast<float>(controlExtent.height);
             aResourceManager.MainControl->Extent = controlExtent;
             aResourceManager.Shapes.Extent = controlExtent;
-            if (Controls::Control::TextLayoutNeedReset())
+            if (aDevice.MeshShaderSupport())
             {
-                aResourceManager.TextContext.ResetLayout();
-                Controls::Control::EndTextLayoutReset();
+                if (Controls::Control::TextLayoutNeedReset())
+                {
+                    aResourceManager.TextContext.ResetLayout();
+                    Controls::Control::EndTextLayoutReset();
+                }
             }
             aResourceManager.Shapes.PrepareDraw(aResourceManager.MainControl);
             aResourceManager.MainControl->EndUpdate();
@@ -263,14 +267,14 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     aRenderer.EndOffscreenRendering(commandBuffer);
     */
     aRenderer.BeginRendering(commandBuffer);
-    swapChain.SetViewport(commandBuffer, actualSceneOffset);
+    swapChain.SetViewport(commandBuffer);
     aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.MainScene,
         aDevice.MeshShaderSupport() ? aResourceManager.Shaders[5] : aResourceManager.Shaders[0],
         swapChain.CurrentFrame);
-
+/*
     swapChain.SetViewport(commandBuffer);
     aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.TextContext, aResourceManager.Shaders[6], swapChain.CurrentFrame);
     swapChain.SetViewport(commandBuffer, aResourceManager.Shapes.Extent);
-    aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.Shapes, aResourceManager.Shaders[1], swapChain.CurrentFrame);
+    aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.Shapes, aResourceManager.Shaders[1], swapChain.CurrentFrame);*/
     aRenderer.EndRendering(commandBuffer);
 }
