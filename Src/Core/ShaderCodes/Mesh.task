@@ -104,5 +104,6 @@ void main()
 
     barrier();
 
-	EmitMeshTasksEXT((visibleCount + 63) / 64, 1, 1);
+    if (visibleCount > 0)
+	    EmitMeshTasksEXT(visibleCount, 1, 1);
 }

@@ -9,12 +9,10 @@ layout(location = 0) in vec2 texCoord;
 layout(location = 1) flat in uint texIndex;
 #ifdef PER_PRIMITIVE_NORMAL
 layout(location = 2) in vec3 vertex;
-layout(location = 3) in float viewPosZ;
 layout(location = 4) perprimitiveEXT flat in vec3 normalSpace;
 #else
 layout(location = 2) in vec3 normalSpace;
 layout(location = 3) in vec3 vertex;
-layout(location = 4) in float viewPosZ;
 #endif
 #ifdef DEFERRED
 layout (location = 0) out vec4 outPosition;
@@ -54,47 +52,6 @@ layout (set = 5, binding = 0) uniform UBO {
 const vec3 LIGHT_POS = vec3(4., 2., 1.);
 const vec3 LIGHT_COLOR = vec3(0.6, 0.7, 0.5);
 
-const mat4 biasMat = mat4(
-	0.5, 0.0, 0.0, 0.0,
-	0.0, 0.5, 0.0, 0.0,
-	0.0, 0.0, 1.0, 0.0,
-	0.5, 0.5, 0.0, 1.0 );
-
-float textureProj(vec4 shadowCoord, vec2 offset, uint cascadeIndex)
-{
-	float shadow = 1.0;
-
-	if ( shadowCoord.z > -1.0 && shadowCoord.z < 1.0 ) {
-		float dist = texture(shadowSampler, vec3(shadowCoord.xy + offset, cascadeIndex)).r;
-		if (shadowCoord.w > 0 && dist < shadowCoord.z + 0.00035) {
-		    float edge = ubo.cascades[SHADOW_MAP_CASCADE_COUNT - 1].split * 3.0;
-			shadow = 1.0 - (0.5 * smoothstep(edge, edge - 2.0, viewPosZ));
-		}
-	}
-	return shadow;
-
-}
-
-float filterPCF(vec4 sc, uint cascadeIndex)
-{
-	ivec2 texDim = textureSize(shadowSampler, 0).xy;
-	float scale = 0.5;
-	float dx = scale * 1.0 / float(texDim.x);
-	float dy = scale * 1.0 / float(texDim.y);
-
-	float shadowFactor = 0.0;
-	int count = 0;
-	int range = 1;
-
-	for (int x = -range; x <= range; x++) {
-		for (int y = -range; y <= range; y++) {
-			shadowFactor += textureProj(sc, vec2(dx*x, dy*y), cascadeIndex);
-			count++;
-		}
-	}
-	return shadowFactor / count;
-}
-
 void main()
 {
 #ifdef DEFERRED
@@ -105,15 +62,7 @@ void main()
 	float pointLightIntensity = max(dot(normalSpace, normalize(LIGHT_POS - vertex)), 0);
 	float normalLightPos = dot(normalSpace, normalize(lbo.direction));
     float diffuseLightItensity = (normalLightPos + 2.0) * 0.5;
-/*
-    uint cascadeIndex = SHADOW_MAP_CASCADE_COUNT - 1;
-	for(uint i = 0; i < SHADOW_MAP_CASCADE_COUNT - 1; i++) {
-		if(viewPosZ < ubo.cascades[i + 1].split) {
-			cascadeIndex = i;
-			break;
-		}
-	}
-    vec4 shadowCoord = biasMat * ubo.cascades[cascadeIndex].viewProj * vec4(vertex, 1.0);*/
+
     float visibility = 1.0;// filterPCF(shadowCoord, cascadeIndex);
 
     vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility + pointLightIntensity * LIGHT_COLOR;

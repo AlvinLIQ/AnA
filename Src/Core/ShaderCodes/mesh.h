@@ -1,6 +1,7 @@
 
 #define MAX_VERTICES 128
 #define MAX_PRIMITIVES 256
+#define TASK_WORKGROUP 64
 
 const uint bytesToBits[4] = {0u, 8u, 16u, 24u};
 const uint bytesMask[4] = {0xFFFFFFu, 0xFFFFFFu, 0xFFFF00u, 0xFF0000u};
@@ -30,7 +31,7 @@ struct MeshletID
 
 struct MeshPayload
 {
-    uint visibleIndices[64];
+    uint visibleIndices[TASK_WORKGROUP];
 };
 
 struct BoundingSphere

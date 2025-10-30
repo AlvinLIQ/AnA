@@ -6,7 +6,7 @@
 
 #include "mesh.h"
 
-layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = MAX_VERTICES, local_size_y = 1, local_size_z = 1) in;
 layout(triangles, max_vertices = MAX_VERTICES, max_primitives = MAX_PRIMITIVES) out;
 
 #ifdef PER_PRIMITIVE_NORMAL
@@ -14,7 +14,6 @@ struct VertexOutput {
     vec2 texCoord;
     uint texID;
     vec3 vertexPosition;
-    float viewPosZ;
 };
 layout(location = 4) perprimitiveEXT out vec3 primitiveNormals[];
 #else
@@ -23,7 +22,6 @@ struct VertexOutput {
     uint texID;
     vec3 normalSpace;
     vec3 vertexPosition;
-    float viewPosZ;
 };
 #endif
 
@@ -99,20 +97,18 @@ shared vec3 worldVertices[MAX_VERTICES];
 
 void main()
 {
-    if (gl_LocalInvocationIndex > meshletIDCount)
-        return;
-    MeshletID mid = meshletIDs[taskData.visibleIndices[gl_LocalInvocationIndex]];
+    MeshletID mid = meshletIDs[taskData.visibleIndices[gl_WorkGroupID.x]];
 	Meshlet meshlet = meshlets[mid.meshletID];
     uint primitiveCount = meshlet.indexCount / 3;
     SetMeshOutputsEXT(meshlet.vertexCount, primitiveCount);
 
 	mat4 viewProj = cbo.proj * cbo.view;
-    float zOffset = ubo.cascades[1].split - ubo.cascades[0].split * 1.75;
     mat4 transform = objects[mid.objectID].transform;
     uint texID = uint(transform[3].w);
     transform[3].w = 1.0;
     
-    for (uint i = 0; i < meshlet.vertexCount; i++)
+    uint i = gl_LocalInvocationID.x;
+    if (i < meshlet.vertexCount)
     {
         Vertex vertex = vertices[mvsbo.vertices[meshlet.vertexOffset + i]];
         vec4 vertexPos = transform * vec4(vertex.position, 1.0);
@@ -125,19 +121,21 @@ void main()
         vertexOutput[i].normalSpace = vertex.normal;
 #endif
         vertexOutput[i].vertexPosition = vertexPos.xyz;
-        vertexOutput[i].viewPosZ = viewPos.z / viewPos.w + zOffset;
     }
 
-    for (uint i = 0, offset = meshlet.indexOffset; i < primitiveCount; offset += 3)
+    barrier();
+
+    if (i < primitiveCount)
     {
+        uint indexOffset = meshlet.indexOffset + i * 3;
 	    gl_PrimitiveTriangleIndicesEXT[i] = uvec3(
-            primitives[offset + 0], 
-            primitives[offset + 1],
-            primitives[offset + 2]
+            primitives[indexOffset + 0], 
+            primitives[indexOffset + 1],
+            primitives[indexOffset + 2]
         );
-        vec3 a = worldVertices[uint(primitives[offset + 0])];
-        vec3 b = worldVertices[uint(primitives[offset + 1])];
-        vec3 c = worldVertices[uint(primitives[offset + 2])];
+        vec3 a = worldVertices[uint(primitives[indexOffset + 0])];
+        vec3 b = worldVertices[uint(primitives[indexOffset + 1])];
+        vec3 c = worldVertices[uint(primitives[indexOffset + 2])];
         vec3 normal = normalize(cross(b - a, c - a));
         vec3 coneApex = (a + b + c) / 3.0;
 
@@ -145,6 +143,5 @@ void main()
 #ifdef PER_PRIMITIVE_NORMAL
         primitiveNormals[i] = normal;
 #endif
-        ++i;
     }
 }
