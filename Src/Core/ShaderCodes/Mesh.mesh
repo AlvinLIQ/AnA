@@ -6,7 +6,7 @@
 
 #include "mesh.h"
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 layout(triangles, max_vertices = MAX_VERTICES, max_primitives = MAX_PRIMITIVES) out;
 
 #ifdef PER_PRIMITIVE_NORMAL
@@ -88,13 +88,20 @@ layout(scalar, set = 6, binding = 4) buffer meshletIDSSBO
     MeshletID meshletIDs[];
 };
 
+layout(std430, set = 6, binding = 5) buffer MeshletIDCountSSBO
+{
+	uint meshletIDCount;
+};
+
 taskPayloadSharedEXT MeshPayload taskData;
 
 shared vec3 worldVertices[MAX_VERTICES];
 
 void main()
 {
-    MeshletID mid = meshletIDs[taskData.visibleIndices[gl_WorkGroupID.x]];
+    if (gl_LocalInvocationIndex > meshletIDCount)
+        return;
+    MeshletID mid = meshletIDs[taskData.visibleIndices[gl_LocalInvocationIndex]];
 	Meshlet meshlet = meshlets[mid.meshletID];
     uint primitiveCount = meshlet.indexCount / 3;
     SetMeshOutputsEXT(meshlet.vertexCount, primitiveCount);
