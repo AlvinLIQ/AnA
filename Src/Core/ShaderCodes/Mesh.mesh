@@ -6,7 +6,7 @@
 
 #include "mesh.h"
 
-layout(local_size_x = MAX_VERTICES, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = MAX_PRIMITIVES, local_size_y = 1, local_size_z = 1) in;
 layout(triangles, max_vertices = MAX_VERTICES, max_primitives = MAX_PRIMITIVES) out;
 
 #ifdef PER_PRIMITIVE_NORMAL
