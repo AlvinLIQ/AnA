@@ -108,15 +108,27 @@ void Renderer::EndFrame()
 
 void Renderer::BeginRendering(CommandBuffer& commandBuffer)
 {
-    Device::ImageMemoryBarrier(commandBuffer, aSwapChain->swapChainImages[aSwapChain->CurrentImage], 
-        VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_ASPECT_COLOR_BIT,
-        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
+    Device::ImageMemoryBarrier2(
+        commandBuffer,
+        aSwapChain->swapChainImages[aSwapChain->CurrentImage],
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        VK_ACCESS_2_NONE,  // srcAccessMask
+        VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+        VK_PIPELINE_STAGE_2_NONE,
+        VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+        VK_IMAGE_ASPECT_COLOR_BIT
+    );
 
-    Device::ImageMemoryBarrier(commandBuffer, aSwapChain->depthImages[aSwapChain->CurrentImage], 
-        VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
-        VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_ASPECT_DEPTH_BIT,
-        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
+    Device::ImageMemoryBarrier2(commandBuffer, aSwapChain->depthImages[aSwapChain->CurrentImage], 
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+        VK_ACCESS_2_NONE,
+        VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+        VK_PIPELINE_STAGE_2_NONE,
+        VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT,
+        VK_IMAGE_ASPECT_DEPTH_BIT
+    );
 
     // Color attachment
     VkRenderingAttachmentInfoKHR colorAttachmentInfo{};
@@ -152,14 +164,27 @@ void Renderer::BeginRendering(CommandBuffer& commandBuffer)
 void Renderer::EndRendering(CommandBuffer& commandBuffer)
 {
     aDevice->vkCmdEndRenderingKHR(commandBuffer);
-    Device::ImageMemoryBarrier(commandBuffer, aSwapChain->swapChainImages[aSwapChain->CurrentImage], 
-        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_ASPECT_COLOR_BIT,
-        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
-    Device::ImageMemoryBarrier(commandBuffer, aSwapChain->depthImages[aSwapChain->CurrentImage], 
-        VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL,
-        VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_ASPECT_DEPTH_BIT,
-        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
+    Device::ImageMemoryBarrier2(
+        commandBuffer,
+        aSwapChain->swapChainImages[aSwapChain->CurrentImage],
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+        VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+        VK_ACCESS_2_NONE,
+        VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+        VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT,
+        VK_IMAGE_ASPECT_COLOR_BIT
+    );
+/*
+    Device::ImageMemoryBarrier2(commandBuffer, aSwapChain->depthImages[aSwapChain->CurrentImage], 
+        VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+        VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+        VK_ACCESS_2_SHADER_SAMPLED_READ_BIT,
+        VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT,
+        VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
+        VK_IMAGE_ASPECT_DEPTH_BIT
+    );*/
 }
 
 void Renderer::EndRenderPass(CommandBuffer& commandBuffer)

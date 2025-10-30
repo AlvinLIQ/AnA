@@ -15,7 +15,7 @@
         <Slider Name="farSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="1.0f"/>
         <TextBlock Text="Light Direction" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
         <Slider Name="lightX" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.24f"/>
-        <Slider Name="lightY" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.1f"/>
+        <Slider Name="lightY" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.9f"/>
         <Slider Name="lightZ" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.3f"/>
         <TextBlock Text="Lock Camera" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
         <ToggleSwitch Name="camLockToggle" ControlSize="0.04f, 0.02f"/>

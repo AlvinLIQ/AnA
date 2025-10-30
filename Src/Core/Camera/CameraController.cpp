@@ -13,7 +13,7 @@ using namespace AnA::Cameras;
 #define ANA_MOVE_UPDOWN 1
 #define ANA_MOVE_FORWARDBACK 2
 
-const int keyCodes[] = {GLFW_KEY_A, GLFW_KEY_D, GLFW_KEY_SPACE, GLFW_KEY_C, GLFW_KEY_S, GLFW_KEY_W};
+const int keyCodes[] = {GLFW_KEY_D, GLFW_KEY_A, GLFW_KEY_C,GLFW_KEY_SPACE, GLFW_KEY_S, GLFW_KEY_W};
 
 void CameraController::GetCameraKeyMapConfigs(std::vector<Input::KeyMapConfig> &configs)
 {
@@ -88,8 +88,8 @@ void CameraController::Rotate(CameraController::CameraCallbackParam* param)
 void CameraController::CursorMoved(Camera* camera, CursorPosition &duration, int )
 {
     const float rotateSpeed = camera->GetSpeedRatio() * 6.283f * 80.f;
-    camera->CameraTransform.rotation.y = glm::mod(camera->CameraTransform.rotation.y + static_cast<float>(duration.x) * rotateSpeed, glm::two_pi<float>());
-    camera->CameraTransform.rotation.x -= static_cast<float>(duration.y) * rotateSpeed;
+    camera->CameraTransform.rotation.y = glm::mod(camera->CameraTransform.rotation.y - static_cast<float>(duration.x) * rotateSpeed, glm::two_pi<float>());
+    camera->CameraTransform.rotation.x += static_cast<float>(duration.y) * rotateSpeed;
 
     const float yLock = .2f * glm::two_pi<float>();
     camera->CameraTransform.rotation.x = glm::clamp(camera->CameraTransform.rotation.x, -yLock, yLock);

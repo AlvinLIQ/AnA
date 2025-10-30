@@ -93,7 +93,6 @@ void EditorApp::loadModelButton_Click(void* , PointerEventArgs& )
 
 void EditorApp::saveSceneButton_Click(void* , PointerEventArgs& )
 {
-    /* Fix this later
     FileDialog fileDialog{"--save"};
     auto path = fileDialog.Run();
     if(path.empty())
@@ -107,13 +106,16 @@ void EditorApp::saveSceneButton_Click(void* , PointerEventArgs& )
     {
         auto& mesh = meshes[i];
         MeshInfo info{};
-        memcpy(info.filePath, mesh.model->Path.data(), mesh.model->Path.size());
+        auto& model = resourceManager->ModelMap[mesh.modelID];
+        memcpy(info.filePath, model->Path.data(), model->Path.size());
         info.tetureId = mesh.textureId;
         info.transform = mesh.transform;
+        info.transform.translation.y = -info.transform.translation.y;
+        info.transform.rotation.y = 0.0f;
         fwrite((const void*)&info, sizeof(MeshInfo), 1, f);
     }
 
-    fclose(f);*/
+    fclose(f);
 }
 
 void EditorApp::exitButton_Click(void* , PointerEventArgs& )
@@ -136,7 +138,7 @@ int main()
     auto resourceManager = Resource::ResourceManager::GetCurrent();
     auto& scene = resourceManager->MainScene;
     
-    auto sceneFile = ReadFile("Scenes/scene.ana");
+    auto sceneFile = ReadFile("Scenes/test.ana");
     scene.Append(reinterpret_cast<MeshInfo*>(sceneFile.data()), sceneFile.size() / sizeof(MeshInfo));
     /*
     std::vector<Model::Vertex> vertices;

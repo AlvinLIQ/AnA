@@ -267,14 +267,16 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     aRenderer.EndOffscreenRendering(commandBuffer);
     */
     aRenderer.BeginRendering(commandBuffer);
-    swapChain.SetViewport(commandBuffer);
+    swapChain.SetViewport(commandBuffer, actualSceneOffset);
     aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.MainScene,
         aDevice.MeshShaderSupport() ? aResourceManager.Shaders[5] : aResourceManager.Shaders[0],
         swapChain.CurrentFrame);
-/*
+
     swapChain.SetViewport(commandBuffer);
-    aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.TextContext, aResourceManager.Shaders[6], swapChain.CurrentFrame);
+    aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.TextContext, 
+        aResourceManager.Shaders[6], swapChain.CurrentFrame);
     swapChain.SetViewport(commandBuffer, aResourceManager.Shapes.Extent);
-    aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.Shapes, aResourceManager.Shaders[1], swapChain.CurrentFrame);*/
+    aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.Shapes, 
+        aResourceManager.Shaders[1], swapChain.CurrentFrame);
     aRenderer.EndRendering(commandBuffer);
 }

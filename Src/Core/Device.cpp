@@ -1093,6 +1093,53 @@ void Device::CreateCommandPool(VkCommandPoolCreateFlags flags, VkCommandPool* po
         throw std::runtime_error("Failed to create command pool!");
 }
 
+void Device::ImageMemoryBarrier2(
+    VkCommandBuffer commandBuffer,
+    VkImage image,
+    VkImageLayout oldLayout,
+    VkImageLayout newLayout,
+    VkAccessFlags2 srcAccessMask,
+    VkAccessFlags2 dstAccessMask,
+    VkPipelineStageFlags2 srcStageMask,
+    VkPipelineStageFlags2 dstStageMask,
+    VkImageAspectFlags aspectMask)
+{
+    VkImageMemoryBarrier2 imageBarrier{
+        .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+        .pNext = nullptr,
+        .srcStageMask = srcStageMask,
+        .srcAccessMask = srcAccessMask,
+        .dstStageMask = dstStageMask,
+        .dstAccessMask = dstAccessMask,
+        .oldLayout = oldLayout,
+        .newLayout = newLayout,
+        .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+        .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+        .image = image,
+        .subresourceRange = {
+            .aspectMask = aspectMask,
+            .baseMipLevel = 0,
+            .levelCount = 1,
+            .baseArrayLayer = 0,
+            .layerCount = 1,
+        },
+    };
+
+    VkDependencyInfo depInfo{
+        .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+        .pNext = nullptr,
+        .dependencyFlags = 0,
+        .memoryBarrierCount = 0,
+        .pMemoryBarriers = nullptr,
+        .bufferMemoryBarrierCount = 0,
+        .pBufferMemoryBarriers = nullptr,
+        .imageMemoryBarrierCount = 1,
+        .pImageMemoryBarriers = &imageBarrier,
+    };
+
+    vkCmdPipelineBarrier2(commandBuffer, &depInfo);
+}
+
 void Device::ImageMemoryBarrier(VkCommandBuffer commandBuffer, VkImage image, 
     VkImageLayout initLayout, VkImageLayout finalLayout,
     VkAccessFlags srcAccessMask, VkImageAspectFlags aspectMask, 
