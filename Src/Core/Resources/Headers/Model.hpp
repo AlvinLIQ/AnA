@@ -62,9 +62,16 @@ namespace AnA
             std::vector<Vertex>* vertices = nullptr;
         };
         typedef uint32_t Index;
-        
+
+        struct Node
+        {
+            std::vector<Index> indices{};
+            glm::mat4 transform{};
+        };
+
         struct ModelInfo
         {
+            std::vector<Node> nodes;
             std::vector<Vertex> vertices;
             std::vector<glm::vec2> vertexProjections;
             Index indexStep;
@@ -88,7 +95,8 @@ namespace AnA
         uint32_t meshletIndexCount = 0;
 
         static void CreateModelFromFile(const char* filePath, std::shared_ptr<Model>& model);
-        static void CreateMeshFromFile(const char *filePath, std::vector<Vertex>& vertices, std::vector<Index>& indices, size_t vertexOffset = 0);
+        static void CreateMeshFromFile(const char *filePath, std::vector<Vertex>& vertices, std::vector<Index>& indices,
+            std::vector<Node>& nodes, size_t vertexOffset = 0);
         static void CreateVerticesFromFile(const char* filePath, std::vector<Vertex>& vertices);
         static bool CreateQuad(std::vector<Vertex> &vertices, std::vector<Index> &indices, Index a, Index b, Index c, Index d);
         static void CreateTerrainFromVertices(std::vector<Vertex>& vertices, std::vector<Index> &terrainVertices, size_t period);

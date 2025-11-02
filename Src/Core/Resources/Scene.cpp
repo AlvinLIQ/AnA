@@ -223,7 +223,7 @@ void Scene::Append(std::vector<Model::Vertex>& meshVertices, std::vector<uint32_
     mesh.indexCount = static_cast<uint32_t>(meshIndices.size());
     mesh.textureId = textureId;
     //temporary solution for now
-    Model::ModelInfo info{meshVertices, {}, uint32_t(meshIndices.size()), meshIndices};
+    Model::ModelInfo info{{}, meshVertices, {}, uint32_t(meshIndices.size()), meshIndices};
     auto model = std::make_shared<Model>(info);
     uint32_t meshId;
     Resource::ResourceManager::GetCurrent()->AppendModel(model, meshId);

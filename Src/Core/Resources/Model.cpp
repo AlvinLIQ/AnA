@@ -34,7 +34,7 @@ Model::~Model()
 void Model::CreateModelFromFile(const char *filePath, std::shared_ptr<Model>& model)
 {
     ModelInfo modelInfo{};
-    CreateMeshFromFile(filePath, modelInfo.vertices, modelInfo.indices);
+    CreateMeshFromFile(filePath, modelInfo.vertices, modelInfo.indices, modelInfo.nodes);
 /*
     const glm::vec<2, int> sets[] = {{0, 1}, {0, 2}, {1, 2}};
     for (size_t i = 0, j, k = 0; i < modelInfo.indices.size(); i += k)
@@ -68,7 +68,8 @@ void Model::CreateModelFromFile(const char *filePath, std::shared_ptr<Model>& mo
     model->Path = filePath;
 }
 
-void Model::CreateMeshFromFile(const char *filePath, std::vector<Vertex>& vertices, std::vector<Index>& indices, size_t vertexOffset)
+void Model::CreateMeshFromFile(const char *filePath, std::vector<Vertex>& vertices, std::vector<Index>& indices, 
+    std::vector<Node>& nodes, size_t vertexOffset)
 {
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
@@ -81,6 +82,7 @@ void Model::CreateMeshFromFile(const char *filePath, std::vector<Vertex>& vertic
     std::unordered_map<Vertex, Index, VertexHash> vertexMap;
     for (const auto& shape : shapes)
     {
+        nodes.push_back({});
         for (size_t i = 0; i < shape.mesh.indices.size(); i++)
         {
             const auto& index = shape.mesh.indices[i];
@@ -136,10 +138,13 @@ void Model::CreateMeshFromFile(const char *filePath, std::vector<Vertex>& vertic
             if (result != vertexMap.end())
             {
                 indices.push_back(result->second + static_cast<uint32_t>(vertexOffset));
+                nodes.back().indices.push_back(result->second + static_cast<uint32_t>(vertexOffset));
             }
             else
             {
                 indices.push_back(static_cast<Index>(vertexMap.size() + vertexOffset));
+                nodes.back().indices.push_back(vertexMap.size() + vertexOffset);
+
                 vertexMap.insert(std::pair<Vertex, Index>(vertex, vertexMap.size()));
                 vertices.push_back(vertex);
             }
