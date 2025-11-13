@@ -857,7 +857,7 @@ void Device::pickPhysicalDevice()
             currentScore += deviceProperties2.properties.limits.framebufferColorSampleCounts & deviceProperties2.properties.limits.framebufferDepthSampleCounts;
             currentScore += deviceProperties2.properties.limits.storageImageSampleCounts + deviceProperties2.properties.limits.maxColorAttachments;
             std::string deviceName = physicalDeviceProperties.deviceName;
-            if (physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+            if (deviceProperties2.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
                 currentScore += 10;
             if (deviceName.find("AMD") != size_t(-1))
             {

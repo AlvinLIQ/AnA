@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Animation.hpp"
+
 #include <functional>
 #include <glm/fwd.hpp>
 #include <vulkan/vulkan_core.h>
@@ -88,6 +90,7 @@ namespace AnA
         ~Model();
 
         ModelInfo info{};
+        std::vector<Animation> Animations;
         std::string Path = "";
 
         std::vector<Meshlet> meshlets;

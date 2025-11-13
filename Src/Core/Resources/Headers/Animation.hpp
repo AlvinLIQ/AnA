@@ -2,6 +2,7 @@
 
 #include "../../Headers/Types.hpp"
 #include <vector>
+#include <string>
 
 namespace AnA
 {
@@ -12,8 +13,8 @@ namespace AnA
 
     struct Animation
     {
-    public:
-        uint32_t Position;
-        std::vector<KeyFrame> KeyFrames{};
+        uint32_t position;
+        std::vector<KeyFrame> keyFrames{};
+        std::string name;
     };
 }

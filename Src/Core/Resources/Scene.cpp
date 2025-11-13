@@ -124,7 +124,7 @@ void Scene::Init()
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         meshletCullingBuffers[i].Map();
 
-        meshletIDBuffers[i] = Buffer(aDevice, sizeof(uint32_t),
+        meshletIDBuffers[i] = Buffer(aDevice, 100 * sizeof(uint32_t),
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         meshletIDBuffers[i].Map();
