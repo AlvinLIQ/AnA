@@ -49,7 +49,7 @@ namespace AnA
 
         VkResult AcquireNextImage();
 
-        VkResult SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint32_t commandBufferCount);
+        VkResult SubmitCommandBuffer(VkCommandBuffer commandBuffer);
 
         uint32_t CurrentFrame = 0;
         uint32_t CurrentImage = 0;
@@ -128,6 +128,7 @@ namespace AnA
         std::vector<VmaAllocation> depthImageAllocations;
         std::vector<VkImageView> depthImageViews;
         void createDepthResources();
+        void initImages();
         // Framebuffers holding the deferred attachments
         std::array<FrameBuffer, MAX_FRAMES_IN_FLIGHT> offScreenFrameBuffers{};
         VkSampler colorSampler{};
@@ -137,7 +138,6 @@ namespace AnA
         std::vector<VkSemaphore> imageAvailableSemaphores;
         std::vector<VkSemaphore> renderFinishedSemaphores;
         std::vector<VkFence> inFlightFences;
-        std::vector<VkFence> imagesInFlight;
         void createSyncObjects();
 
         void cleanupSwapChain();

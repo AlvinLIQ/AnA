@@ -1,4 +1,8 @@
 #version 460
+#extension GL_EXT_scalar_block_layout: require
+#extension GL_GOOGLE_include_directive : require
+
+#include "mesh.h"
 
 layout(location = 0) out vec2 outTexCoord;
 layout(location = 1) out uint outTexID;
@@ -6,9 +10,9 @@ layout(location = 2) out vec3 outNormalSpace;
 layout(location = 3) out vec3 outVertex;
 layout(location = 4) out float outViewPosZ;
 
-layout(std430, set = 0, binding = 0) buffer VertexSSBO
+layout(scalar, set = 0, binding = 0) buffer VertexSSBO
 {
-    float vertices[];
+    Vertex vertices[];
 };
 
 layout(std430, set = 0, binding = 1) buffer ObjectSSBO
@@ -80,17 +84,17 @@ mat4 transform(vec3 scale, vec3 rotation, vec3 transition)
 }
 
 void main() {
-    uint vertexOffset = gl_VertexIndex * 8;
     mat4 transform = objects[gl_DrawID];
     uint texID = uint(transform[3].w);
     transform[3].w = 1.0;
-    vec4 vertexPos = transform * vec4(vertices[vertexOffset + 0], vertices[vertexOffset + 1], vertices[vertexOffset + 2], 1.0);
+    Vertex vertex = vertices[gl_VertexIndex];
+    vec4 vertexPos = transform * vec4(vertex.position, 1.0);
     vec4 viewPos = cbo.view * vertexPos;
     gl_Position = cbo.proj * viewPos;
-    outNormalSpace = vec3(vertices[vertexOffset + 3], vertices[vertexOffset + 4], vertices[vertexOffset + 5]);
+    outNormalSpace = vertex.normal;
     outVertex = vertexPos.xyz;
     outViewPosZ = viewPos.z / viewPos.w + ubo.cascades[1].split - ubo.cascades[0].split + 1.0;
 
-    outTexCoord = vec2(vertices[vertexOffset + 6], vertices[vertexOffset + 7]);
+    outTexCoord = vec2(vertex.uv);
     outTexID = texID;
 }

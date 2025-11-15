@@ -77,27 +77,27 @@ void Device::FlushAllocation(VmaAllocation allocation)
 
 void Device::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
 {
-    VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+    VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 
     VkBufferCopy copyRegion{};
     copyRegion.size = size;
     vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
 
-    endSingleTimeCommands(commandBuffer);
+    EndSingleTimeCommands(commandBuffer);
 }
 
 void Device::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, uint32_t regionCount, const VkBufferCopy* copyRegions)
 {
-    VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+    VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 
     vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, regionCount, copyRegions);
 
-    endSingleTimeCommands(commandBuffer);
+    EndSingleTimeCommands(commandBuffer);
 }
 
 void Device::CopyBufferToImage(VkBuffer srcBuffer, VkImage& dstImage, VkExtent3D extent)
 {
-    VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+    VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
     VkBufferImageCopy region{};
     region.bufferOffset = 0;
     region.bufferRowLength = 0;
@@ -113,7 +113,7 @@ void Device::CopyBufferToImage(VkBuffer srcBuffer, VkImage& dstImage, VkExtent3D
 
     vkCmdCopyBufferToImage(commandBuffer, srcBuffer, dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
         1, &region);
-    endSingleTimeCommands(commandBuffer);
+    EndSingleTimeCommands(commandBuffer);
 }
 
 void Device::CreateImage(VkImageCreateInfo* pCreateInfo, VkImage* pImage, VmaAllocation& allocation)
@@ -672,7 +672,7 @@ std::vector<VkDescriptorSetLayoutBinding> Device::CreateLayoutBindings(uint32_t 
 
 void Device::TransitionImageLayout(VkImage &image, VkImageLayout oldLayout, VkImageLayout newLayout)
 {
-    VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+    VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
     VkImageMemoryBarrier barrier{};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
     barrier.oldLayout = oldLayout;
@@ -721,7 +721,7 @@ void Device::TransitionImageLayout(VkImage &image, VkImageLayout oldLayout, VkIm
         1, &barrier
         );
 
-    endSingleTimeCommands(commandBuffer);
+    EndSingleTimeCommands(commandBuffer);
 }
 
 void Device::WaitBufferIdle(VkBuffer &buffer)
@@ -735,9 +735,9 @@ void Device::WaitBufferIdle(VkBuffer &buffer)
     bufferBarrier.buffer = buffer;
     bufferBarrier.offset = 0;
     bufferBarrier.size = VK_WHOLE_SIZE;
-    auto commandBuffer = beginSingleTimeCommands();
+    auto commandBuffer = BeginSingleTimeCommands();
     vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 1, &bufferBarrier, 0, nullptr);
-    endSingleTimeCommands(commandBuffer);
+    EndSingleTimeCommands(commandBuffer);
 }
 
 Device::QueueFamilyIndices Device::GetQueueFamiliesForCurrent()
@@ -1093,8 +1093,7 @@ void Device::CreateCommandPool(VkCommandPoolCreateFlags flags, VkCommandPool* po
         throw std::runtime_error("Failed to create command pool!");
 }
 
-void Device::ImageMemoryBarrier2(
-    VkCommandBuffer commandBuffer,
+VkImageMemoryBarrier2 Device::ImageMemoryBarrier2(
     VkImage image,
     VkImageLayout oldLayout,
     VkImageLayout newLayout,
@@ -1125,18 +1124,19 @@ void Device::ImageMemoryBarrier2(
         },
     };
 
-    VkDependencyInfo depInfo{
-        .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
-        .pNext = nullptr,
-        .dependencyFlags = 0,
-        .memoryBarrierCount = 0,
-        .pMemoryBarriers = nullptr,
-        .bufferMemoryBarrierCount = 0,
-        .pBufferMemoryBarriers = nullptr,
-        .imageMemoryBarrierCount = 1,
-        .pImageMemoryBarriers = &imageBarrier,
-    };
+    return imageBarrier;
+}
 
+void Device::PipelineBarrier2(VkCommandBuffer commandBuffer,
+    VkImageMemoryBarrier2* imageBarriers, uint32_t imageBarrierCount, 
+    VkBufferMemoryBarrier2* bufferBarriers, uint32_t bufferBarrierCount)
+{
+    VkDependencyInfo depInfo{};
+    depInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+    depInfo.pImageMemoryBarriers = imageBarriers;
+    depInfo.imageMemoryBarrierCount = imageBarrierCount;
+    depInfo.pBufferMemoryBarriers = bufferBarriers;
+    depInfo.bufferMemoryBarrierCount = bufferBarrierCount;
     vkCmdPipelineBarrier2(commandBuffer, &depInfo);
 }
 
@@ -1172,7 +1172,7 @@ void Device::ImageMemoryBarrier(VkCommandBuffer commandBuffer, VkImage image,
     );
 }
 
-VkCommandBuffer Device::beginSingleTimeCommands()
+VkCommandBuffer Device::BeginSingleTimeCommands()
 {
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -1191,7 +1191,7 @@ VkCommandBuffer Device::beginSingleTimeCommands()
     return commandBuffer;
 }
 
-void Device::endSingleTimeCommands(VkCommandBuffer commandBuffer)
+void Device::EndSingleTimeCommands(VkCommandBuffer commandBuffer)
 {
     vkEndCommandBuffer(commandBuffer);
 

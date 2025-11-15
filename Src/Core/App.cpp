@@ -272,9 +272,12 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
         aDevice.MeshShaderSupport() ? aResourceManager.Shaders[5] : aResourceManager.Shaders[0],
         swapChain.CurrentFrame);
 
-    swapChain.SetViewport(commandBuffer);
-    aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.TextContext, 
-        aResourceManager.Shaders[6], swapChain.CurrentFrame);
+    if (aDevice.MeshShaderSupport())
+    {
+        swapChain.SetViewport(commandBuffer);
+        aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.TextContext, 
+            aResourceManager.Shaders[6], swapChain.CurrentFrame);
+    }
     swapChain.SetViewport(commandBuffer, aResourceManager.Shapes.Extent);
     aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.Shapes, 
         aResourceManager.Shaders[1], swapChain.CurrentFrame);

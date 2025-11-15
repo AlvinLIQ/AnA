@@ -13,6 +13,7 @@ SwapChain::SwapChain(Device* mDevice,
     createImageViews();
     createColorResources();
     createDepthResources();
+    initImages();
     createOffscreenSampler();
     createOffscreenFramebuffer();
     createSyncObjects();
@@ -22,7 +23,7 @@ SwapChain::SwapChain(Device* mDevice,
 SwapChain::~SwapChain()
 {
     auto device = aDevice->GetLogicalDevice();
-    for (uint32_t i = 0 ; i < imageCount; i++)
+    for (size_t i = 0; i < renderFinishedSemaphores.size(); i++)
     {
         vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
         vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
@@ -39,37 +40,55 @@ SwapChain::~SwapChain()
 VkResult SwapChain::AcquireNextImage()
 {
     vkWaitForFences(aDevice->GetLogicalDevice(), 1, &inFlightFences[CurrentFrame], VK_TRUE, UINT64_MAX);
+    vkResetFences(aDevice->GetLogicalDevice(), 1, &inFlightFences[CurrentFrame]);
 
     return vkAcquireNextImageKHR(aDevice->GetLogicalDevice(), swapChain, UINT64_MAX,
-                                 imageAvailableSemaphores[imageIndex], VK_NULL_HANDLE, &CurrentImage);
+                                 imageAvailableSemaphores[imageIndex], VK_NULL_HANDLE, 
+                                 &CurrentImage);
 }
 
-VkResult SwapChain::SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint32_t commandBufferCount)
+VkResult SwapChain::SubmitCommandBuffer(VkCommandBuffer commandBuffer)
 {
-    if (imagesInFlight[CurrentImage] != VK_NULL_HANDLE)
-        vkWaitForFences(aDevice->GetLogicalDevice(), 1, &imagesInFlight[CurrentImage], VK_TRUE, UINT64_MAX);
+    VkSubmitInfo2 submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
 
-    imagesInFlight[CurrentImage] = inFlightFences[CurrentFrame];
+    VkSemaphoreSubmitInfoKHR waitSemaphoreSubmitInfo = 
+    {
+        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
+        .pNext = VK_NULL_HANDLE,
+        .semaphore = imageAvailableSemaphores[imageIndex],
+        .value = 1, // replaces VkTimelineSemaphoreSubmitInfo
+        .stageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT_KHR,
+        .deviceIndex = 0, // replaces VkDeviceGroupSubmitInfo
+    };
+    submitInfo.pWaitSemaphoreInfos = &waitSemaphoreSubmitInfo;
+    submitInfo.waitSemaphoreInfoCount = 1;
+    VkCommandBufferSubmitInfo commandBufferInfo = 
+    {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO,
+        .pNext = VK_NULL_HANDLE,
+        .commandBuffer = commandBuffer,
+        .deviceMask = 0
+    };
 
-    VkSubmitInfo submitInfo{};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.pCommandBufferInfos = &commandBufferInfo;
+    submitInfo.commandBufferInfoCount = 1;
 
-    VkSemaphore waitSemaphores[] = {imageAvailableSemaphores[imageIndex]};
-    VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-    submitInfo.waitSemaphoreCount = 1;
-    submitInfo.pWaitSemaphores = waitSemaphores;
-    submitInfo.pWaitDstStageMask = waitStages;
+    VkSemaphoreSubmitInfoKHR signalSemaphoreSubmitInfo = 
+    {
+        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
+        .pNext = VK_NULL_HANDLE,
+        .semaphore = renderFinishedSemaphores[CurrentImage],
+        .value = 2, // replaces VkTimelineSemaphoreSubmitInfo
+        .stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+        .deviceIndex = 0, // replaces VkDeviceGroupSubmitInfo
+    };
 
-    submitInfo.commandBufferCount = commandBufferCount;
-    submitInfo.pCommandBuffers = pCommandBuffers;
+    submitInfo.pSignalSemaphoreInfos = &signalSemaphoreSubmitInfo;
+    submitInfo.signalSemaphoreInfoCount = 1;
 
-    VkSemaphore signalSemaphores[] = {renderFinishedSemaphores[CurrentImage]};
-    submitInfo.signalSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = signalSemaphores;
-
-    vkResetFences(aDevice->GetLogicalDevice(), 1, &inFlightFences[CurrentFrame]);
     VkResult result;
-    if ((result = vkQueueSubmit(aDevice->GetGraphicsQueue(), 1, &submitInfo, inFlightFences[CurrentFrame])) != VK_SUCCESS)
+    if ((result = vkQueueSubmit2(aDevice->GetGraphicsQueue(), 1, &submitInfo, inFlightFences[CurrentFrame])) != VK_SUCCESS)
     {
         throw std::runtime_error("failed to submit draw command buffer!");
     }
@@ -78,7 +97,7 @@ VkResult SwapChain::SubmitCommandBuffers(VkCommandBuffer* pCommandBuffers, uint3
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
     presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = signalSemaphores;
+    presentInfo.pWaitSemaphores = &signalSemaphoreSubmitInfo.semaphore;
 
     VkSwapchainKHR swapChains[] = {swapChain};
     presentInfo.swapchainCount = 1;
@@ -176,6 +195,7 @@ void SwapChain::RecreateSwapChain()
     createImageViews();
     createColorResources();
     createDepthResources();
+    initImages();
     createOffscreenFramebuffer();
 }
 
@@ -186,7 +206,7 @@ Device* SwapChain::GetDevice()
 
 VkSemaphore& SwapChain::GetCurrentSemaphore()
 {
-    return renderFinishedSemaphores[CurrentFrame];
+    return renderFinishedSemaphores[CurrentImage];
 }
 
 VkSurfaceFormatKHR SwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats)
@@ -212,7 +232,7 @@ VkPresentModeKHR SwapChain::chooseSwapPresentMode(const std::vector<VkPresentMod
         }
     }
 
-    return VK_PRESENT_MODE_IMMEDIATE_KHR;
+    return availablePresentModes.back();
 }
 
 VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
@@ -373,9 +393,9 @@ void SwapChain::createDepthResources()
     swapChainDepthFormat = depthFormat;
     VkExtent2D swapChainExtent = GetExtent();
 
-    depthImages.resize(imageCount);
-    depthImageAllocations.resize(imageCount);
-    depthImageViews.resize(imageCount);
+    depthImages.resize(swapChainImages.size());
+    depthImageAllocations.resize(depthImages.size());
+    depthImageViews.resize(depthImages.size());
 
     for (size_t i = 0; i < depthImages.size(); i++)
     {
@@ -413,6 +433,44 @@ void SwapChain::createDepthResources()
             throw std::runtime_error("failed to create texture image view!");
         }
     }
+}
+
+void SwapChain::initImages()
+{
+    VkImageMemoryBarrier2 imageBarriers[32];
+    uint32_t imageBarrierCount = 0;
+    for (size_t i = 0; i < swapChainImages.size(); i++)
+    {
+        imageBarriers[imageBarrierCount++] = Device::ImageMemoryBarrier2(
+            swapChainImages[i],
+            VK_IMAGE_LAYOUT_UNDEFINED,
+            VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+            VK_ACCESS_2_NONE,
+            VK_ACCESS_2_NONE,
+            VK_PIPELINE_STAGE_2_NONE,
+            VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT,
+            VK_IMAGE_ASPECT_COLOR_BIT
+        );
+        imageBarriers[imageBarrierCount++] = Device::ImageMemoryBarrier2(
+            depthImages[i],
+            VK_IMAGE_LAYOUT_UNDEFINED,
+            VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+            VK_ACCESS_2_NONE,
+            VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT |
+                VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT,
+            VK_PIPELINE_STAGE_2_NONE,
+            VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT |
+                VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT,
+            VK_IMAGE_ASPECT_DEPTH_BIT
+        );
+    }
+    auto commandbuffer =aDevice->BeginSingleTimeCommands();
+    Device::PipelineBarrier2(commandbuffer, 
+        imageBarriers, 
+        imageBarrierCount, 
+        VK_NULL_HANDLE, 
+        0);
+    aDevice->EndSingleTimeCommands(commandbuffer);
 }
 
 void SwapChain::createOffscreenFramebuffer()
@@ -462,11 +520,10 @@ void SwapChain::createSyncObjects()
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
     auto device = aDevice->GetLogicalDevice();
-    imageAvailableSemaphores.resize(imageCount);
-    renderFinishedSemaphores.resize(imageCount);
+    imageAvailableSemaphores.resize(swapChainImages.size());
+    renderFinishedSemaphores.resize(imageAvailableSemaphores.size());
     inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
-    imagesInFlight.resize(imageCount, VK_NULL_HANDLE);
-    for (uint32_t i = 0 ; i < imageCount; i++)
+    for (uint32_t i = 0 ; i < imageAvailableSemaphores.size(); i++)
     {
         if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
             vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS)

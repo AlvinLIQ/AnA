@@ -32,7 +32,7 @@
 #define MESH_DESCRIPTOR_SET_LAYOUT_COUNT 7
 #define SHAPE_DESCRIPTOR_SET_LAYOUT_COUNT 2
 
-#define MaxBatchSize 2048
+#define MaxBatchSize 4096
 
 struct VmaAllocator_T;
 typedef VmaAllocator_T* VmaAllocator;
@@ -194,8 +194,7 @@ namespace AnA
 
         VkShaderModule CreateShaderModule(const std::vector<unsigned char>& code);
 
-        static void ImageMemoryBarrier2(
-            VkCommandBuffer commandBuffer,
+        static VkImageMemoryBarrier2 ImageMemoryBarrier2(
             VkImage image,
             VkImageLayout oldLayout,
             VkImageLayout newLayout,
@@ -204,10 +203,15 @@ namespace AnA
             VkPipelineStageFlags2 srcStageMask,
             VkPipelineStageFlags2 dstStageMask,
             VkImageAspectFlags aspectMask);
+        static void PipelineBarrier2(VkCommandBuffer commandBuffer, 
+            VkImageMemoryBarrier2* imageBarriers, uint32_t imageBarrierCount, 
+            VkBufferMemoryBarrier2* bufferBarriers, uint32_t bufferBarrierCount);
         static void ImageMemoryBarrier(VkCommandBuffer commandBuffer, VkImage image, 
             VkImageLayout initLayout, VkImageLayout finalLayout,
             VkAccessFlags srcAccessMask, VkImageAspectFlags aspectMask,
             VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask);
+        VkCommandBuffer BeginSingleTimeCommands();
+        void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
     private:
         VkInstance& instance;
         VkSurfaceKHR surface;
@@ -236,9 +240,6 @@ namespace AnA
         void createLogicalDevice();
 
         VkCommandPool commandPool{VK_NULL_HANDLE};
-
-        VkCommandBuffer beginSingleTimeCommands();
-        void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 
         VkPhysicalDeviceProperties physicalDeviceProperties{};
         VkPhysicalDeviceMeshShaderPropertiesEXT meshShaderProperties{};

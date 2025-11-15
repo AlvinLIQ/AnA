@@ -1,7 +1,5 @@
 #pragma once
 
-#define NDEBUG
-
 #include <vulkan/vulkan.h>
 #include <vector>
 
