@@ -2,12 +2,12 @@
 
 layout(location = 0) out vec4 outVertex;
 
-layout(std430, set = 0, binding = 0) buffer VertexSSBO
+layout(std430, set = 1, binding = 0) buffer VertexSSBO
 {
     float vertices[];
 };
 
-layout(set = 1, binding = 0) uniform CameraBufferObject {
+layout(set = 0, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
     vec4 position;

@@ -9,7 +9,7 @@
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 layout(triangles, max_vertices = MAX_VERTICES, max_primitives = MAX_PRIMITIVES) out;
 
-layout(scalar, set = 0, binding = 0) buffer VertexSSBO
+layout(scalar, set = 1, binding = 0) buffer VertexSSBO
 {
     Vertex vertices[];
 };
@@ -19,19 +19,19 @@ struct Object
     mat4 transform;
 };
 
-layout(scalar, set = 0, binding = 1) buffer ObjectSSBO
+layout(scalar, set = 1, binding = 1) buffer ObjectSSBO
 {
     Object objects[];
 };
 
-layout(set = 1, binding = 0) uniform CameraBufferObject {
+layout(set = 0, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
     vec4 position;
     vec2 resolution;
 } cbo;
 
-layout(set = 1, binding = 1) uniform Frustum
+layout(set = 0, binding = 1) uniform Frustum
 {
     vec4 planes[6];
     vec4 lightPlanes[6];

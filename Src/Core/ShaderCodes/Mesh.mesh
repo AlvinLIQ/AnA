@@ -27,7 +27,7 @@ struct VertexOutput {
 
 layout(location = 0) out VertexOutput vertexOutput[];
 
-layout(scalar, set = 0, binding = 0) buffer VertexSSBO
+layout(scalar, set = 1, binding = 0) buffer VertexSSBO
 {
     Vertex vertices[];
 };
@@ -37,12 +37,12 @@ struct Object
     mat4 transform;
 };
 
-layout(scalar, set = 0, binding = 1) buffer ObjectSSBO
+layout(scalar, set = 1, binding = 1) buffer ObjectSSBO
 {
     Object objects[];
 };
 
-layout(set = 1, binding = 0) uniform CameraBufferObject {
+layout(set = 0, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
     vec4 position;

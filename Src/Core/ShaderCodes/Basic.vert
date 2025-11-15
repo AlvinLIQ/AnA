@@ -10,17 +10,17 @@ layout(location = 2) out vec3 outNormalSpace;
 layout(location = 3) out vec3 outVertex;
 layout(location = 4) out float outViewPosZ;
 
-layout(scalar, set = 0, binding = 0) buffer VertexSSBO
+layout(scalar, set = 1, binding = 0) buffer VertexSSBO
 {
     Vertex vertices[];
 };
 
-layout(std430, set = 0, binding = 1) buffer ObjectSSBO
+layout(std430, set = 1, binding = 1) buffer ObjectSSBO
 {
     mat4 objects[];
 };
 
-layout(set = 1, binding = 0) uniform CameraBufferObject {
+layout(set = 0, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
     vec4 position;

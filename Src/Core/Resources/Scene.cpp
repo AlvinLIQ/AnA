@@ -282,27 +282,21 @@ void Scene::RemoveAt(std::vector<uint32_t> meshIndices)
 
 void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIndex)
 {
+    auto& sets = shader.GetDescriptorSets()[bufferIndex];
+    shader.GetPipeline().Bind(commandBuffer);
+    sets[DEFAULT_VERTEX_LAYOUT] = vertexDescriptor->GetSets()[currentBufferIndex];
+    sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors.front()->GetSets()[0];
     if (aDevice->MeshShaderSupport())
     {
-        auto& sets = shader.GetDescriptorSets()[bufferIndex];
-        shader.GetPipeline().Bind(commandBuffer);
         sets[DEFAULT_MESHLET_LAYOUT] = meshDescriptor->GetSets()[currentBufferIndex];
-        sets[DEFAULT_VERTEX_LAYOUT] = vertexDescriptor->GetSets()[currentBufferIndex];
-        sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors.front()->GetSets()[0];
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-            shader.GetPipelineLayout(), 0, static_cast<uint32_t>(sets.size()),
-            sets.data(), 0, nullptr);
     }
-    else
-    {
-        auto& sets = shader.GetDescriptorSets()[bufferIndex];
-        shader.GetPipeline().Bind(commandBuffer);
-        sets[DEFAULT_VERTEX_LAYOUT] = vertexDescriptor->GetSets()[currentBufferIndex];
-        sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors.front()->GetSets()[0];
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-            shader.GetPipelineLayout(), 0, static_cast<uint32_t>(sets.size()),
-            sets.data(), 0, nullptr);
-    }
+    const auto& offsets = 
+        Resource::ResourceManager::GetCurrent()->GetDefaultUBODynamicOffsets();
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+        shader.GetPipelineLayout(), 0, static_cast<uint32_t>(sets.size()),
+        sets.data(), 
+        static_cast<uint32_t>(offsets.size()), 
+        offsets.data());
 }
 
 void Scene::Draw(CommandBuffer& commandBuffer)

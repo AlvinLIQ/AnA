@@ -274,7 +274,7 @@ void Text::createSSBODescriptor()
     auto& shaders = Resource::ResourceManager::GetCurrent()->Shaders;
     auto& descriptors = shaders[6].GetDescriptors();
     auto& vertexDescriptorSetLayout =
-        descriptors[DEFAULT_VERTEX_LAYOUT].GetLayout();
+        descriptors[0].GetLayout();
     vertexDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,
         MaxBatchSize,
         1,

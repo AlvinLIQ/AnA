@@ -52,7 +52,15 @@ namespace AnA
             static ResourceManager* GetCurrent();
 
             static void GetBufferInfos(std::vector<Buffer>& buffers, std::vector<VkDescriptorBufferInfo>& bufferInfos);
-            static void GetBufferInfos(Buffer* buffers, uint32_t bufferSize, std::vector<VkDescriptorBufferInfo>& bufferInfos);
+            static void GetBufferInfos(Buffer* buffers, 
+                uint32_t bufferCount, 
+                std::vector<VkDescriptorBufferInfo>& bufferInfos);
+            static void GetBufferInfos(Buffer& buffer, 
+                uint32_t bufferCount, 
+                std::vector<VkDescriptorBufferInfo>& bufferInfos);
+            static void GetBufferInfos(Buffer& buffer, 
+                uint32_t bufferCount, 
+                std::vector<VkDescriptorBufferInfo>& bufferInfos, uint32_t stride);
             static void GetImageInfos(const std::vector<Image>& images, const std::vector<VkSampler>& samplers, std::vector<VkDescriptorImageInfo>& imageInfos);
 
             //Built-in resources
@@ -76,6 +84,10 @@ namespace AnA
             void GetDefaultShapesDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);
             void GetDefaultTextDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);
             void GetDefaultLightDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);
+            const std::array<uint32_t, 2>& GetDefaultUBODynamicOffsets() const
+            {
+                return uboDynamicOffsets;
+            }
             AnA::Text TextContext;
             Lights::Light GlobalLight;
             AnA::Shapes Shapes;
@@ -104,8 +116,8 @@ namespace AnA
 #endif
         private:
             Device* aDevice;
-            std::vector<Buffer> mainCameraBuffers;
-            std::vector<Buffer> frustumBuffers;
+            Buffer mainCameraBuffer;
+            Buffer frustumBuffer;
             void createMainCameraBuffers();
 
             std::vector<NormalCallBack> callbacks{};
@@ -124,6 +136,7 @@ namespace AnA
             std::vector<Descriptor> shapeDescriptors;
             std::vector<Descriptor> textDescriptors;
             std::vector<Descriptor> lightDescriptors;
+            std::array<uint32_t, 2> uboDynamicOffsets{0, 0};
         };
     }
 }

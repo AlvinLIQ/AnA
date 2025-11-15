@@ -5,12 +5,12 @@
 
 #include "mesh.h"
 
-layout(scalar, set = 0, binding = 0) buffer VertexSSBO
+layout(scalar, set = 1, binding = 0) buffer VertexSSBO
 {
     Vertex vertices[];
 } ssbo;
 
-layout(set = 1, binding = 0) uniform CameraBufferObject {
+layout(set = 0, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
     vec4 position;

@@ -74,15 +74,48 @@ void ResourceManager::GetBufferInfos(std::vector<Buffer>& buffers, std::vector<V
     }
 }
 
-void ResourceManager::GetBufferInfos(Buffer* buffers, uint32_t bufferSize, std::vector<VkDescriptorBufferInfo>& bufferInfos)
+void ResourceManager::GetBufferInfos(Buffer* buffers, 
+    uint32_t bufferCount, 
+    std::vector<VkDescriptorBufferInfo>& bufferInfos)
 {
-    bufferInfos.resize(bufferSize);
+    bufferInfos.resize(bufferCount);
     for (size_t i = 0; i < bufferInfos.size(); i++)
     {
         auto& bufferInfo = bufferInfos[i];
         bufferInfo.buffer = buffers[i].GetBuffer();
         bufferInfo.offset = 0;
         bufferInfo.range = buffers[i].GetSize();
+    }
+}
+
+void ResourceManager::GetBufferInfos(Buffer& buffer, 
+    uint32_t bufferCount, 
+    std::vector<VkDescriptorBufferInfo>& bufferInfos)
+{
+    bufferInfos.resize(bufferCount);
+    for (size_t i = 0; i < bufferInfos.size(); i++)
+    {
+        auto& bufferInfo = bufferInfos[i];
+        bufferInfo.buffer = buffer.GetBuffer();
+        bufferInfo.offset = 0;
+        bufferInfo.range = buffer.GetSize();
+    }
+}
+
+void ResourceManager::GetBufferInfos(Buffer& buffer, 
+    uint32_t bufferCount, 
+    std::vector<VkDescriptorBufferInfo>& bufferInfos, uint32_t stride)
+{
+    bufferInfos.resize(bufferCount);
+    VkDeviceSize offset = 0;
+    for (size_t i = 0; i < bufferInfos.size(); i++)
+    {
+        assert(offset + stride <= bufferInfos.size() && "buffer info out of range");
+        auto& bufferInfo = bufferInfos[i];
+        bufferInfo.buffer = buffer.GetBuffer();
+        bufferInfo.offset = offset;
+        bufferInfo.range = offset + stride;
+        offset += stride;
     }
 }
 
@@ -115,11 +148,13 @@ void ResourceManager::UpdateCameraBuffer()
 {
     auto& proj = MainCamera.GetProjectionMatrix();
     auto& view = MainCamera.GetView();
-    uint32_t currentFrame = SwapChain::GetCurrent()->CurrentFrame;
-    Cameras::CameraBufferObject& cbo = *static_cast<Cameras::CameraBufferObject*>(mainCameraBuffers[currentFrame].GetMappedData());
+    uint32_t bufferIndex = SwapChain::GetCurrent()->CurrentImage;
+    Cameras::CameraBufferObject& cbo = 
+        static_cast<Cameras::CameraBufferObject*>(mainCameraBuffer.GetMappedData())[bufferIndex];
     cbo.proj = proj;
     cbo.view = view;
     //cbo.invView = MainCamera.GetInverseView();
+    uboDynamicOffsets[0] = bufferIndex * sizeof(Cameras::CameraBufferObject);
 
     auto extent = SwapChain::GetCurrent()->GetExtent();
     cbo.resolution = {static_cast<float>(extent.width), static_cast<float>(extent.height)};
@@ -127,8 +162,11 @@ void ResourceManager::UpdateCameraBuffer()
     {
         cbo.position = MainCamera.GetInverseView()[3];
         FrustumPlanes::ExtractFrustumPlanes(proj * view, MainCameraFrustumPlanes);
-        memcpy(frustumBuffers[currentFrame].GetMappedData(), &MainCameraFrustumPlanes, sizeof(FrustumPlanes));
+        memcpy(&static_cast<FrustumPlanes*>(frustumBuffer.GetMappedData())[bufferIndex * 2], 
+            &MainCameraFrustumPlanes, 
+            sizeof(FrustumPlanes));
     }
+    uboDynamicOffsets[1] = bufferIndex * sizeof(FrustumPlanes) * 2;
 }
 
 void ResourceManager::Update()
@@ -145,11 +183,6 @@ void ResourceManager::Update()
     uint32_t frameIndex = SwapChain::GetCurrent()->CurrentFrame;
     GlobalLight.UpdateBuffers(LightCamera, frameIndex);
     ShadowMap.UpdateBuffers(MainCamera, LightCamera, frameIndex);
-    if (!LockCamera)
-    {
-        FrustumPlanes::ExtractFrustumPlanes(ShadowMap.GetCascades().back(), *reinterpret_cast<FrustumPlanes*>(&ShadowMap.FrustumPlanes));
-        memcpy(&reinterpret_cast<FrustumPlanes*>(frustumBuffers[frameIndex].GetMappedData())[1], &ShadowMap.FrustumPlanes, sizeof(FrustumPlanes));
-    }
     if (callbacks.size())
     {
         std::unique_lock<std::mutex> lock(callbacksMutex);
@@ -221,46 +254,64 @@ void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Desc
     descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT].resize(2);
     auto pConfig = &descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT][0];
     pConfig->binding = 0;
-    pConfig->descriptorCount = 0;
+    pConfig->descriptorCount = MaxBatchSize;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    pConfig->bindless = true;
     if (aDevice->MeshShaderSupport())
         pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
 
     pConfig = &descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT][1];
     pConfig->binding = 1;
-    pConfig->descriptorCount = 0;
+    pConfig->descriptorCount = MaxBatchSize;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    pConfig->bindless = true;
     if (aDevice->MeshShaderSupport())
         pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
 
+    descriptorSetConfigs[DEFAULT_UBO_LAYOUT].resize(2);
     pConfig = &descriptorSetConfigs[DEFAULT_UBO_LAYOUT][0];
     pConfig->binding = 0;
     pConfig->descriptorCount = 1;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_TASK_BIT_EXT;
-    GetBufferInfos(mainCameraBuffers, pConfig->bufferInfos);
-    descriptorSetConfigs[DEFAULT_UBO_LAYOUT].resize(2);
+    pConfig->bindless = false;
+    pConfig->bufferInfos.push_back(
+    {
+        mainCameraBuffer.GetBuffer(),
+        0,
+        sizeof(Cameras::CameraBufferObject)
+    });
+    pConfig->bufferInfos.push_back(pConfig->bufferInfos.back());
     pConfig = &descriptorSetConfigs[DEFAULT_UBO_LAYOUT][1];
     pConfig->binding = 1;
     pConfig->descriptorCount = 1;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
     pConfig->stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT;
-    GetBufferInfos(frustumBuffers, pConfig->bufferInfos);
+    pConfig->bindless = false;
+    pConfig->bufferInfos.push_back(
+    {
+        frustumBuffer.GetBuffer(),
+        0,
+        sizeof(FrustumPlanes) * 2
+    });
+    pConfig->bufferInfos.push_back(pConfig->bufferInfos.back());
 
     pConfig = &descriptorSetConfigs[DEFAULT_LIGHT_LAYOUT][0];
     pConfig->binding = 0;
     pConfig->descriptorCount = 1;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_MESH_BIT_EXT;
+    pConfig->bindless = false;
     GetBufferInfos(GlobalLight.GetBuffers(), pConfig->bufferInfos);
 
     pConfig = &descriptorSetConfigs[DEFAULT_SAMPLER_LAYOUT][0];
     pConfig->binding = 0;
-    pConfig->descriptorCount = 0;
+    pConfig->descriptorCount = MaxBatchSize;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     pConfig->stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    pConfig->bindless = true;
 
     pConfig = &descriptorSetConfigs[DEFAULT_SHADOW_SAMPLER_LAYOUT][0];
     pConfig->binding = 0;
@@ -268,6 +319,7 @@ void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Desc
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     pConfig->stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     pConfig->imageInfos = ShadowMap.GetDescriptorImageInfos();
+    pConfig->bindless = false;
     //GetImageInfos(ShadowMap.GetImages(), ShadowMap.GetSamplers(), pConfig->imageInfos);
 
     ShadowMap.GetUBODescriptorConfig(&descriptorSetConfigs[DEFAULT_CASCADED_UBO_LAYOUT][0]);
@@ -275,34 +327,40 @@ void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Desc
     {
         Descriptor::DescriptorConfig meshletConfig{};
         meshletConfig.binding = 0;
-        meshletConfig.descriptorCount = 0;
+        meshletConfig.descriptorCount = MaxBatchSize;
         meshletConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         meshletConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+        meshletConfig.bindless = true;
         Descriptor::DescriptorConfig meshletVertexConfig{};
         meshletVertexConfig.binding = 1;
-        meshletVertexConfig.descriptorCount = 0;
+        meshletVertexConfig.descriptorCount = MaxBatchSize;
         meshletVertexConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         meshletVertexConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+        meshletVertexConfig.bindless = true;
         Descriptor::DescriptorConfig meshletIndexConfig{};
         meshletIndexConfig.binding = 2;
-        meshletIndexConfig.descriptorCount = 0;
+        meshletIndexConfig.descriptorCount = MaxBatchSize;
         meshletIndexConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         meshletIndexConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+        meshletIndexConfig.bindless = true;
         Descriptor::DescriptorConfig meshletCullingConfig{};
         meshletCullingConfig.binding = 3;
-        meshletCullingConfig.descriptorCount = 0;
+        meshletCullingConfig.descriptorCount = MaxBatchSize;
         meshletCullingConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         meshletCullingConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT;
+        meshletCullingConfig.bindless = true;
         Descriptor::DescriptorConfig meshletIDConfig{};
         meshletIDConfig.binding = 4;
-        meshletIDConfig.descriptorCount = 0;
+        meshletIDConfig.descriptorCount = MaxBatchSize;
         meshletIDConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         meshletIDConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+        meshletIDConfig.bindless = true;
         Descriptor::DescriptorConfig meshletIDCountConfig{};
         meshletIDCountConfig.binding = 5;
-        meshletIDCountConfig.descriptorCount = 0;
+        meshletIDCountConfig.descriptorCount = MaxBatchSize;
         meshletIDCountConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         meshletIDCountConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+        meshletIDCountConfig.bindless = true;
 
         descriptorSetConfigs.push_back({meshletConfig, meshletVertexConfig, meshletIndexConfig, meshletCullingConfig, meshletIDConfig, meshletIDCountConfig});
     }
@@ -315,14 +373,16 @@ void ResourceManager::GetDefaultShapesDescriptorSetConfig(std::vector<std::vecto
         configs.resize(1);
     auto pConfig = descriptorSetConfigs[0].begin();
     pConfig->binding = 0;
-    pConfig->descriptorCount = 0;
+    pConfig->descriptorCount = MaxBatchSize;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    pConfig->bindless = true;
     pConfig = descriptorSetConfigs[1].begin();
     pConfig->binding = 0;
-    pConfig->descriptorCount = 0;
+    pConfig->descriptorCount = MaxBatchSize;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     pConfig->stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    pConfig->bindless = true;
 }
 
 void ResourceManager::GetDefaultTextDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs)
@@ -330,9 +390,10 @@ void ResourceManager::GetDefaultTextDescriptorSetConfig(std::vector<std::vector<
     descriptorSetConfigs.resize(2);
     Descriptor::DescriptorConfig config;
     config.binding = 0;
-    config.descriptorCount = 0;
+    config.descriptorCount = MaxBatchSize;
     config.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     config.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    config.bindless = true;
     if (aDevice->MeshShaderSupport())
         config.stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
     descriptorSetConfigs[0].push_back(config);
@@ -344,15 +405,16 @@ void ResourceManager::GetDefaultTextDescriptorSetConfig(std::vector<std::vector<
     {
         Descriptor::DescriptorConfig meshletConfig{};
         meshletConfig.binding = 0;
-        meshletConfig.descriptorCount = 0;
+        meshletConfig.descriptorCount = MaxBatchSize;
         meshletConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         meshletConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+        meshletConfig.bindless = true;
         Descriptor::DescriptorConfig meshletIndexConfig{};
         meshletIndexConfig.binding = 1;
-        meshletIndexConfig.descriptorCount = 0;
+        meshletIndexConfig.descriptorCount = MaxBatchSize;
         meshletIndexConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         meshletIndexConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-
+        meshletIndexConfig.bindless = true;
         descriptorSetConfigs.push_back({meshletConfig, meshletIndexConfig});
     }
 }
@@ -371,18 +433,22 @@ void ResourceManager::GetDefaultLightDescriptorSetConfig(std::vector<std::vector
 
         imageInfo.imageLayout = framebuffer.position.imageLayout;
         imageInfo.imageView = framebuffer.position.imageView;
+        descriptorSetConfigs[0][0].bindless = false;
         descriptorSetConfigs[0][0].imageInfos.push_back(imageInfo);
 
         imageInfo.imageLayout = framebuffer.normal.imageLayout;
         imageInfo.imageView = framebuffer.normal.imageView;
+        descriptorSetConfigs[0][1].bindless = false;
         descriptorSetConfigs[0][1].imageInfos.push_back(imageInfo);
 
         imageInfo.imageLayout = framebuffer.albedo.imageLayout;
         imageInfo.imageView = framebuffer.albedo.imageView;
+        descriptorSetConfigs[0][2].bindless = false;
         descriptorSetConfigs[0][2].imageInfos.push_back(imageInfo);
 
         imageInfo.imageLayout = framebuffer.depth.imageLayout;
         imageInfo.imageView = framebuffer.depth.imageView;
+        descriptorSetConfigs[0][3].bindless = false;
         descriptorSetConfigs[0][3].imageInfos.push_back(imageInfo);
 
     }
@@ -393,6 +459,7 @@ void ResourceManager::GetDefaultLightDescriptorSetConfig(std::vector<std::vector
         dConfig.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         dConfig.binding = i;
         dConfig.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+        dConfig.bindless = false;
     }
 }
 
@@ -421,22 +488,18 @@ void ResourceManager::AppendModel(std::shared_ptr<Model> model, uint32_t& id)
 
 void ResourceManager::createMainCameraBuffers()
 {
-    VkDeviceSize bufferSize = sizeof(Cameras::CameraBufferObject);
-    mainCameraBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-    for (auto &cameraBuffer : mainCameraBuffers)
-    {
-        cameraBuffer = Buffer(aDevice, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-        cameraBuffer.Map();
-    }
-
-    frustumBuffers.resize(mainCameraBuffers.size());
-    for (auto& frustumBuffer : frustumBuffers)
-    {
-        frustumBuffer = Buffer(aDevice, 2 * sizeof(FrustumPlanes), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+    uint32_t imageCount = SwapChain::GetCurrent()->GetImageCount();
+    mainCameraBuffer = Buffer(aDevice, 
+        imageCount * sizeof(Cameras::CameraBufferObject), 
+        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
         VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-        frustumBuffer.Map();
-    }
+    mainCameraBuffer.Map();
+
+    frustumBuffer = Buffer(aDevice, 
+        imageCount * 2 * sizeof(FrustumPlanes), 
+        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+        VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+    frustumBuffer.Map();
 }
 
 void ResourceManager::createDefaultDescriptors()

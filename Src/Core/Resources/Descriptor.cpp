@@ -104,10 +104,12 @@ Descriptor::Descriptor(Device* mDevice, Descriptor::DescriptorConfig* descriptor
     std::vector<VkDescriptorPoolSize> poolSizes{};
     std::vector<std::vector<VkWriteDescriptorSet>> writes(descriptorSetCount);
     VkDescriptorPoolCreateFlags poolFlags = 0;
-    uint32_t totalDescriptorCount = 0;
+    uint32_t totalDescriptorCount = 0, realDescriptorCount = 0;
     for (uint32_t i = 0; i < configCount; i++)
     {
         auto& descriptorConfig = descriptorConfigs[i];
+        realDescriptorCount = 
+            descriptorConfigs->bindless ? 0 : descriptorConfig.descriptorCount;
         VkDescriptorPoolSize poolSize{};
 
         VkWriteDescriptorSet descriptorWrite{};
@@ -115,19 +117,18 @@ Descriptor::Descriptor(Device* mDevice, Descriptor::DescriptorConfig* descriptor
         descriptorWrite.dstBinding = descriptorConfig.binding;
         descriptorWrite.dstArrayElement = 0;
         descriptorWrite.descriptorType = descriptorConfig.descriptorType;
-        descriptorWrite.descriptorCount = descriptorConfig.descriptorCount;
+        descriptorWrite.descriptorCount = realDescriptorCount;
         poolSize.type = descriptorConfig.descriptorType;
-        poolSize.descriptorCount = descriptorSetCount * descriptorConfig.descriptorCount;
+        poolSize.descriptorCount = descriptorSetCount * realDescriptorCount;
 
         auto& layoutBinding = layoutBindings[i];
         layoutBinding = Device::CreateLayoutBinding(descriptorConfig.binding,
         descriptorConfig.descriptorType, descriptorConfig.stageFlags, descriptorConfig.descriptorCount);
 
-        totalDescriptorCount += descriptorConfig.descriptorCount;
-        if (descriptorConfig.descriptorCount == 0)
+        totalDescriptorCount += realDescriptorCount;
+        if (descriptorConfig.bindless)
         {
             poolFlags |= VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT;
-            layoutBinding.descriptorCount = MaxBatchSize;
             bindingFlags.push_back(0);
 
             layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT_EXT;
@@ -171,9 +172,15 @@ Descriptor::Descriptor(Device* mDevice, Descriptor::DescriptorConfig* descriptor
     layoutCreated = true;
     if (!totalDescriptorCount)
         return;
-    aDevice->CreateDescriptorPool(descriptorSetCount, poolSizes.data(), static_cast<uint32_t>(poolSizes.size()),
+    aDevice->CreateDescriptorPool(descriptorSetCount, 
+        poolSizes.data(), 
+        static_cast<uint32_t>(poolSizes.size()),
         pool, poolFlags);
-    aDevice->CreateDescriptorSets(descriptorSetCount, pool, setLayout, sets, writes);
+    aDevice->CreateDescriptorSets(descriptorSetCount, 
+        pool, 
+        setLayout, 
+        sets, 
+        writes);
 }
 
 Descriptor::~Descriptor()

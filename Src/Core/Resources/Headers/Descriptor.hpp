@@ -16,6 +16,7 @@ namespace AnA
             std::vector<VkDescriptorImageInfo> imageInfos;
             uint32_t binding;
             VkShaderStageFlags stageFlags;
+            bool bindless;
         };
         static void CreateDescriptors(Device* aDevice, std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs, std::vector<Descriptor>& descriptors)
         {

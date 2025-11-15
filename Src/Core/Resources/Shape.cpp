@@ -13,7 +13,7 @@ Shapes::Shapes(Device* mDeivce) : aDevice{mDeivce}
         samplerLayout,
         VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
         );
-    auto& ssboLayout = Resource::ResourceManager::GetCurrent()->Shaders[1].GetDescriptors()[DEFAULT_VERTEX_LAYOUT].GetLayout();
+    auto& ssboLayout = Resource::ResourceManager::GetCurrent()->Shaders[1].GetDescriptors()[0].GetLayout();
     ssboDescriptor = new Descriptor(aDevice, 1, 
         1,
         1,

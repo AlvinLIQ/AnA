@@ -9,7 +9,7 @@ layout(location = 4) in float viewPosZ;
 
 layout(location = 0) out vec4 outColor;
 
-layout(set = 1, binding = 0) uniform CameraBufferObject {
+layout(set = 0, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
 	vec4 position;
