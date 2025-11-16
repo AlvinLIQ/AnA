@@ -82,12 +82,12 @@ void CameraController::Move(CameraController::CameraCallbackParam* param)
 void CameraController::Rotate(CameraController::CameraCallbackParam* param)
 {
     int posIndex = param->id >> 1;
-    param->aCamera.CameraTransform.rotation[posIndex] -= (param->id & 1 ? -rotateStep : rotateStep) * param->aCamera.GetSpeedRatio() * 6.283f;
+    param->aCamera.CameraTransform.rotation[posIndex] -= (param->id & 1 ? -rotateStep : rotateStep) * param->aCamera.GetRotateSpeed() * 6.283f;
 }
 
 void CameraController::CursorMoved(Camera* camera, CursorPosition &duration, int )
 {
-    const float rotateSpeed = camera->GetSpeedRatio() * 6.283f * 80.f;
+    const float rotateSpeed = camera->GetSpeedRatio() * camera->GetRotateSpeed() * 6.283f * 80.f;
     camera->CameraTransform.rotation.y = glm::mod(camera->CameraTransform.rotation.y - static_cast<float>(duration.x) * rotateSpeed, glm::two_pi<float>());
     camera->CameraTransform.rotation.x += static_cast<float>(duration.y) * rotateSpeed;
 

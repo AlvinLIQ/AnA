@@ -254,7 +254,7 @@ void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Desc
     descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT].resize(2);
     auto pConfig = &descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT][0];
     pConfig->binding = 0;
-    pConfig->descriptorCount = MaxBatchSize;
+    pConfig->descriptorCount = 1;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     pConfig->bindless = true;
@@ -263,7 +263,7 @@ void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Desc
 
     pConfig = &descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT][1];
     pConfig->binding = 1;
-    pConfig->descriptorCount = MaxBatchSize;
+    pConfig->descriptorCount = 1;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     pConfig->bindless = true;
@@ -327,37 +327,37 @@ void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Desc
     {
         Descriptor::DescriptorConfig meshletConfig{};
         meshletConfig.binding = 0;
-        meshletConfig.descriptorCount = MaxBatchSize;
+        meshletConfig.descriptorCount = 1;
         meshletConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         meshletConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
         meshletConfig.bindless = true;
         Descriptor::DescriptorConfig meshletVertexConfig{};
         meshletVertexConfig.binding = 1;
-        meshletVertexConfig.descriptorCount = MaxBatchSize;
+        meshletVertexConfig.descriptorCount = 1;
         meshletVertexConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         meshletVertexConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
         meshletVertexConfig.bindless = true;
         Descriptor::DescriptorConfig meshletIndexConfig{};
         meshletIndexConfig.binding = 2;
-        meshletIndexConfig.descriptorCount = MaxBatchSize;
+        meshletIndexConfig.descriptorCount = 1;
         meshletIndexConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         meshletIndexConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
         meshletIndexConfig.bindless = true;
         Descriptor::DescriptorConfig meshletCullingConfig{};
         meshletCullingConfig.binding = 3;
-        meshletCullingConfig.descriptorCount = MaxBatchSize;
+        meshletCullingConfig.descriptorCount = 1;
         meshletCullingConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         meshletCullingConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT;
         meshletCullingConfig.bindless = true;
         Descriptor::DescriptorConfig meshletIDConfig{};
         meshletIDConfig.binding = 4;
-        meshletIDConfig.descriptorCount = MaxBatchSize;
+        meshletIDConfig.descriptorCount = 1;
         meshletIDConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         meshletIDConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
         meshletIDConfig.bindless = true;
         Descriptor::DescriptorConfig meshletIDCountConfig{};
         meshletIDCountConfig.binding = 5;
-        meshletIDCountConfig.descriptorCount = MaxBatchSize;
+        meshletIDCountConfig.descriptorCount = 1;
         meshletIDCountConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         meshletIDCountConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
         meshletIDCountConfig.bindless = true;
@@ -373,7 +373,7 @@ void ResourceManager::GetDefaultShapesDescriptorSetConfig(std::vector<std::vecto
         configs.resize(1);
     auto pConfig = descriptorSetConfigs[0].begin();
     pConfig->binding = 0;
-    pConfig->descriptorCount = MaxBatchSize;
+    pConfig->descriptorCount = 1;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     pConfig->bindless = true;
@@ -390,7 +390,7 @@ void ResourceManager::GetDefaultTextDescriptorSetConfig(std::vector<std::vector<
     descriptorSetConfigs.resize(2);
     Descriptor::DescriptorConfig config;
     config.binding = 0;
-    config.descriptorCount = MaxBatchSize;
+    config.descriptorCount = 1;
     config.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     config.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     config.bindless = true;
@@ -405,13 +405,13 @@ void ResourceManager::GetDefaultTextDescriptorSetConfig(std::vector<std::vector<
     {
         Descriptor::DescriptorConfig meshletConfig{};
         meshletConfig.binding = 0;
-        meshletConfig.descriptorCount = MaxBatchSize;
+        meshletConfig.descriptorCount = 1;
         meshletConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         meshletConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
         meshletConfig.bindless = true;
         Descriptor::DescriptorConfig meshletIndexConfig{};
         meshletIndexConfig.binding = 1;
-        meshletIndexConfig.descriptorCount = MaxBatchSize;
+        meshletIndexConfig.descriptorCount = 1;
         meshletIndexConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         meshletIndexConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
         meshletIndexConfig.bindless = true;

@@ -535,7 +535,7 @@ void Scene::createSSBODescriptor()
     auto& vertexDescriptorSetLayout =
         shaders.front().GetDescriptors()[DEFAULT_VERTEX_LAYOUT].GetLayout();
     vertexDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,
-        MaxBatchSize * 2,
+        2 * MAX_FRAMES_IN_FLIGHT,
         2,
         vertexDescriptorSetLayout,
         VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
@@ -543,7 +543,7 @@ void Scene::createSSBODescriptor()
     {
         auto& meshDescriptorSetLayout = shaders[5].GetDescriptors()[DEFAULT_MESHLET_LAYOUT].GetLayout();
         meshDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,
-            MaxBatchSize * 3 + 1,
+            MAX_FRAMES_IN_FLIGHT * 4,
             4,
             meshDescriptorSetLayout,
             VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
@@ -557,6 +557,7 @@ void Scene::createSSBODescriptor()
                     meshDescriptor->GetSets()[i]);
         }
     }
+    updateSSBODescriptor();
 }
 
 void Scene::updateSSBODescriptor()

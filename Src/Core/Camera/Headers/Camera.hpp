@@ -52,6 +52,10 @@ namespace AnA
             {
                 return speedRatio;
             }
+            float GetRotateSpeed() const
+            {
+                return rotateSpeed;
+            }
 
             glm::vec3 offset{};
             Transform CameraTransform;
@@ -62,6 +66,7 @@ namespace AnA
             glm::mat4 inverseViewMatrix;
 
             float speedRatio = 1.0f;
+            float rotateSpeed = 8.0f;
         };
 
         struct CameraInfo

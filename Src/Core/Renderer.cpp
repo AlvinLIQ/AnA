@@ -108,7 +108,9 @@ void Renderer::EndFrame()
 
 void Renderer::BeginRendering(CommandBuffer& commandBuffer)
 {
-    VkImageMemoryBarrier2 imageBarrier = 
+    VkImageMemoryBarrier2 imageBarriers[] =
+    { 
+        {
         Device::ImageMemoryBarrier2(
             aSwapChain->swapChainImages[aSwapChain->CurrentImage],
             VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
@@ -118,8 +120,20 @@ void Renderer::BeginRendering(CommandBuffer& commandBuffer)
             VK_PIPELINE_STAGE_2_NONE,
             VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
             VK_IMAGE_ASPECT_COLOR_BIT
-        );
-    Device::PipelineBarrier2(commandBuffer, &imageBarrier, 1, 
+        )},
+        {
+        Device::ImageMemoryBarrier2(
+            aSwapChain->colorImage,
+            VK_IMAGE_LAYOUT_UNDEFINED,
+            VK_IMAGE_LAYOUT_GENERAL,
+            VK_ACCESS_2_NONE,
+            VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+            VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT,
+            VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+            VK_IMAGE_ASPECT_COLOR_BIT
+        )}
+    };
+    Device::PipelineBarrier2(commandBuffer, imageBarriers, numsof(imageBarriers), 
         nullptr, 0);
 
 
@@ -158,18 +172,22 @@ void Renderer::EndRendering(CommandBuffer& commandBuffer)
 {
     aDevice->vkCmdEndRenderingKHR(commandBuffer);
 
-    VkImageMemoryBarrier2 imageBarrier = Device::ImageMemoryBarrier2(
-        aSwapChain->swapChainImages[aSwapChain->CurrentImage],
-        VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL_KHR,
-        VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-        VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
-        VK_ACCESS_2_NONE,
-        VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
-        VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT,
-        VK_IMAGE_ASPECT_COLOR_BIT
-    );
+    VkImageMemoryBarrier2 imageBarriers[] = 
+    {
+        {
+            Device::ImageMemoryBarrier2(
+            aSwapChain->swapChainImages[aSwapChain->CurrentImage],
+            VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL_KHR,
+            VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+            VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+            VK_ACCESS_2_NONE,
+            VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+            VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT,
+            VK_IMAGE_ASPECT_COLOR_BIT)
+        }
+    };
     Device::PipelineBarrier2(commandBuffer, 
-        &imageBarrier, 1, 
+        imageBarriers, numsof(imageBarriers), 
         nullptr, 0);
 /*
     Device::ImageMemoryBarrier2(commandBuffer, aSwapChain->depthImages[aSwapChain->CurrentImage], 

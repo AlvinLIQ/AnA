@@ -276,14 +276,14 @@ void Text::createSSBODescriptor()
     auto& vertexDescriptorSetLayout =
         descriptors[0].GetLayout();
     vertexDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,
-        MaxBatchSize,
+        MAX_FRAMES_IN_FLIGHT,
         1,
         vertexDescriptorSetLayout,
         VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
     auto& charInfoDescriptorSetLayout =
         descriptors[1].GetLayout();
     charInfoDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,
-        MaxBatchSize * 2,
+        MAX_FRAMES_IN_FLIGHT * 2,
         2,
         charInfoDescriptorSetLayout,
         VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
@@ -291,11 +291,12 @@ void Text::createSSBODescriptor()
     {
         auto& meshDescriptorSetLayout = descriptors[2].GetLayout();
         meshDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,
-            MaxBatchSize * 3,
+            MAX_FRAMES_IN_FLIGHT * 3,
             3,
             meshDescriptorSetLayout,
             VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
     }
+    updateSSBODescriptor();
 }
 
 void Text::updateSSBODescriptor()
