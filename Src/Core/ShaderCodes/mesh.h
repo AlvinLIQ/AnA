@@ -31,6 +31,7 @@ struct MeshletID
 
 struct MeshPayload
 {
+    uint visibleCount;
     uint visibleIndices[TASK_WORKGROUP];
 };
 
@@ -41,6 +42,7 @@ struct BoundingSphere
     vec3 normal;
     float cutoff;
     vec3 coneApex;
+    float padding;
 };
 
 bool isSphereInsideFrustum(in vec3 center, in float radius, in vec4 frustumPlanes[6])

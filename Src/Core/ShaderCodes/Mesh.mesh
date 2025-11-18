@@ -37,7 +37,7 @@ struct Object
     mat4 transform;
 };
 
-layout(scalar, set = 1, binding = 1) buffer ObjectSSBO
+layout(std430, set = 1, binding = 1) buffer ObjectSSBO
 {
     Object objects[];
 };
@@ -66,24 +66,24 @@ layout (set = 5, binding = 0) uniform UBO {
 	Cascade[SHADOW_MAP_CASCADE_COUNT] cascades;
 } ubo;
 
-layout(scalar, set = 6, binding = 0) buffer meshletSSBO
+layout(std430, set = 6, binding = 0) buffer meshletSSBO
 {
     Meshlet meshlets[];
 };
 
-layout(scalar, set = 6, binding = 1) buffer meshletVertexSSBO
+layout(std430, set = 6, binding = 1) buffer meshletVertexSSBO
 {
     uint vertices[];
 } mvsbo;
 
-layout(scalar, set = 6, binding = 2) buffer meshletIndexSSBO
+layout(set = 6, binding = 2) buffer meshletIndexSSBO
 {
     uint8_t primitives[];
 };
 
 layout(scalar, set = 6, binding = 4) buffer meshletIDSSBO
 {
-    MeshletID meshletIDs[];
+    uint meshletIDs[];
 };
 
 layout(std430, set = 6, binding = 5) buffer MeshletIDCountSSBO
@@ -97,13 +97,15 @@ shared vec3 worldVertices[MAX_VERTICES];
 
 void main()
 {
-    MeshletID mid = meshletIDs[taskData.visibleIndices[gl_WorkGroupID.x]];
-	Meshlet meshlet = meshlets[mid.meshletID];
+    uint midOffset = taskData.visibleIndices[gl_WorkGroupID.x] << 1;
+    uint meshletID = meshletIDs[midOffset];
+    uint objectID = meshletIDs[midOffset ^ 1];
+	Meshlet meshlet = meshlets[meshletID];
     uint primitiveCount = meshlet.indexCount / 3;
     SetMeshOutputsEXT(meshlet.vertexCount, primitiveCount);
 
 	mat4 viewProj = cbo.proj * cbo.view;
-    mat4 transform = objects[mid.objectID].transform;
+    mat4 transform = objects[objectID].transform;
     uint texID = uint(transform[3].w);
     transform[3].w = 1.0;
     

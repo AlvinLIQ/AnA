@@ -2,6 +2,7 @@
 #extension GL_EXT_mesh_shader : require
 #extension GL_EXT_shader_8bit_storage: require
 #extension GL_EXT_scalar_block_layout: require
+#extension GL_KHR_shader_subgroup_ballot : require
 #extension GL_GOOGLE_include_directive : require
 
 #include "mesh.h"
@@ -35,7 +36,7 @@ layout(set = 0, binding = 1) uniform Frustum
     vec4 planes[6];
 } frustum;
 
-layout(scalar, set = 6, binding = 0) buffer meshletSSBO
+layout(std430, set = 6, binding = 0) buffer meshletSSBO
 {
     Meshlet meshlets[];
 };
@@ -45,19 +46,19 @@ layout(scalar, set = 6, binding = 1) buffer meshletVertexSSBO
     uint vertices[];
 } mvsbo;
 
-layout(scalar, set = 6, binding = 2) buffer meshletIndexSSBO
+layout(set = 6, binding = 2) buffer meshletIndexSSBO
 {
     uint8_t primitives[];
 };
 
-layout(scalar, set = 6, binding = 3) buffer meshletCullingSSBO
+layout(std430, set = 6, binding = 3) buffer meshletCullingSSBO
 {
     BoundingSphere boundings[];
 } mcsbo;
 
-layout(scalar, set = 6, binding = 4) buffer meshletIDSSBO
+layout(std430, set = 6, binding = 4) buffer meshletIDSSBO
 {
-    MeshletID meshletIDs[];
+    uint meshletIDs[];
 };
 
 layout(std430, set = 6, binding = 5) buffer MeshletIDCountSSBO
@@ -66,17 +67,16 @@ layout(std430, set = 6, binding = 5) buffer MeshletIDCountSSBO
 };
 
 taskPayloadSharedEXT MeshPayload taskData;
-shared uint visibleCount;
 
-bool isMeshletVisible(MeshletID mid)
+bool isMeshletVisible(uint meshletID, uint objectID)
 {
-    Meshlet meshlet = meshlets[mid.meshletID];
-    BoundingSphere boundingSphere = mcsbo.boundings[mid.meshletID];
-    mat4 transform = objects[mid.objectID].transform;
+    Meshlet meshlet = meshlets[meshletID];
+    BoundingSphere boundingSphere = mcsbo.boundings[meshletID];
+    mat4 transform = objects[objectID].transform;
     transform[3].w = 1.0;
     vec3 center = (transform * vec4(boundingSphere.center, 1.0)).xyz;
     float radius = distance(center,
-        vec3(transform * vec4(vertices[mvsbo.vertices[meshlets[mid.meshletID].vertexOffset + mcsbo.boundings[mid.meshletID].farVertexID]].position, 1.0)));
+        vec3(transform * vec4(vertices[mvsbo.vertices[meshlets[meshletID].vertexOffset + mcsbo.boundings[meshletID].farVertexID]].position, 1.0)));
     vec3 normal = mat3(transform) * boundingSphere.normal;
     float len = length(normal);
     if (len != 0.)
@@ -92,18 +92,19 @@ void main()
     if (globalID >= meshletIDCount)
         return;
 
-    visibleCount = 0;
-    barrier();
-    bool visible = isMeshletVisible(meshletIDs[globalID]);
+    bool visible = isMeshletVisible(meshletIDs[globalID << 1], meshletIDs[(globalID << 1) ^ 1]);
 
+    uvec4 ballot = subgroupBallot(visible);
     if (visible)
     {
-        uint index = atomicAdd(visibleCount, 1);
+        uint index = subgroupBallotExclusiveBitCount(ballot);
         taskData.visibleIndices[index] = globalID;
     }
 
-    barrier();
-
-    if (visibleCount > 0)
-	    EmitMeshTasksEXT(visibleCount, 1, 1);
+    if (gl_LocalInvocationIndex == 0)
+    {
+        uint total = subgroupBallotBitCount(ballot);
+        taskData.visibleCount = total;
+	    EmitMeshTasksEXT(total, 1, 1);
+    }
 }
