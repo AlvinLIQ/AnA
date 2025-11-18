@@ -104,7 +104,6 @@ namespace AnA
         VkSwapchainKHR swapChain;
         std::vector<VkImage> swapChainImages;
         uint32_t imageCount = 0;
-        uint32_t imageIndex = 0;
         VkFormat swapChainImageFormat;
         VkExtent2D swapChainExtent;
         VkViewport viewport;

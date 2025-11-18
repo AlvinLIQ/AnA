@@ -4,10 +4,11 @@
 #include <cassert>
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
+#include <vulkan/vulkan_core.h>
 
 using namespace AnA;
 
-Renderer::Renderer(Window& mWindow, Device* mDevice) : aWindow {mWindow}, aDevice{mDevice}, 
+Renderer::Renderer(Window& mWindow, Device* mDevice) : aWindow {mWindow}, aDevice{mDevice},
     commandBuffers{mDevice, MAX_FRAMES_IN_FLIGHT, VK_COMMAND_BUFFER_LEVEL_PRIMARY, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT},
     offscreenSecondaryCommandBuffers(mDevice, MAX_FRAMES_IN_FLIGHT, VK_COMMAND_BUFFER_LEVEL_SECONDARY, VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT | VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT)
 {
@@ -40,10 +41,10 @@ CommandBuffer* Renderer::BeginFrame()
 
     commandBuffers.Begin();
     firstQuery = aSwapChain->CurrentFrame * 2;
-    vkCmdResetQueryPool(commandBuffers, timestampQueryPool, 
+    vkCmdResetQueryPool(commandBuffers, timestampQueryPool,
         firstQuery, queriesPerFrame);
     if (timestamps[firstQuery + 1])
-        vkCmdWriteTimestamp(commandBuffers, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 
+        vkCmdWriteTimestamp(commandBuffers, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
             timestampQueryPool, firstQuery);
 
     return &commandBuffers;
@@ -61,8 +62,8 @@ void Renderer::RecordOffscreenSecondaryCommandBuffer(RecordCallBack recordCallBa
 void Renderer::ExecuteOffscreenSecondaryCommandBuffer(CommandBuffer& commandBuffer)
 {
     VkCommandBuffer cmd = offscreenSecondaryCommandBuffers.Get();
-    vkCmdExecuteCommands(commandBuffer, 
-    1, 
+    vkCmdExecuteCommands(commandBuffer,
+    1,
     &cmd);
 }
 
@@ -70,11 +71,11 @@ void Renderer::EndFrame()
 {
     assert(isFrameStarted && "Can't call EndFrame while frame is not in progress!");
     if (timestamps[firstQuery + 2])
-        vkCmdWriteTimestamp(commandBuffers, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 
+        vkCmdWriteTimestamp(commandBuffers, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
             timestampQueryPool, firstQuery + 1);
     commandBuffers.End();
     auto commandBuffer = commandBuffers.Get();
-    auto result = aSwapChain->SubmitCommandBuffer(commandBuffer); 
+    auto result = aSwapChain->SubmitCommandBuffer(commandBuffer);
 
     vkGetQueryPoolResults(
         aDevice->GetLogicalDevice(),
@@ -89,7 +90,7 @@ void Renderer::EndFrame()
     if (timestamps[1] && timestamps[3])
     {
         const float timestampPeriod = aDevice->GetPhysicalDeviceProperties().limits.timestampPeriod;
-        gpuTime = float(timestamps[2] - timestamps[0]) * 
+        gpuTime = float(timestamps[2] - timestamps[0]) *
                 timestampPeriod / 1000000.0f;
     }
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || aWindow.FramebufferResized)
@@ -109,7 +110,7 @@ void Renderer::EndFrame()
 void Renderer::BeginRendering(CommandBuffer& commandBuffer)
 {
     VkImageMemoryBarrier2 imageBarriers[] =
-    { 
+    {
         {
         Device::ImageMemoryBarrier2(
             aSwapChain->swapChainImages[aSwapChain->CurrentImage],
@@ -127,13 +128,13 @@ void Renderer::BeginRendering(CommandBuffer& commandBuffer)
             VK_IMAGE_LAYOUT_UNDEFINED,
             VK_IMAGE_LAYOUT_GENERAL,
             VK_ACCESS_2_NONE,
-            VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+            VK_ACCESS_2_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
             VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT,
             VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
             VK_IMAGE_ASPECT_COLOR_BIT
         )}
     };
-    Device::PipelineBarrier2(commandBuffer, imageBarriers, numsof(imageBarriers), 
+    Device::PipelineBarrier2(commandBuffer, imageBarriers, numsof(imageBarriers),
         nullptr, 0);
 
 
@@ -172,7 +173,7 @@ void Renderer::EndRendering(CommandBuffer& commandBuffer)
 {
     aDevice->vkCmdEndRenderingKHR(commandBuffer);
 
-    VkImageMemoryBarrier2 imageBarriers[] = 
+    VkImageMemoryBarrier2 imageBarriers[] =
     {
         {
             Device::ImageMemoryBarrier2(
@@ -186,11 +187,11 @@ void Renderer::EndRendering(CommandBuffer& commandBuffer)
             VK_IMAGE_ASPECT_COLOR_BIT)
         }
     };
-    Device::PipelineBarrier2(commandBuffer, 
-        imageBarriers, numsof(imageBarriers), 
+    Device::PipelineBarrier2(commandBuffer,
+        imageBarriers, numsof(imageBarriers),
         nullptr, 0);
 /*
-    Device::ImageMemoryBarrier2(commandBuffer, aSwapChain->depthImages[aSwapChain->CurrentImage], 
+    Device::ImageMemoryBarrier2(commandBuffer, aSwapChain->depthImages[aSwapChain->CurrentImage],
         VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
         VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
@@ -211,19 +212,19 @@ void Renderer::EndRenderPass(CommandBuffer& commandBuffer)
 void Renderer::BeginOffscreenRendering(CommandBuffer& commandBuffer)
 {
     auto& framebuffer = aSwapChain->GetOffscreenFramebuffer();
-    Device::ImageMemoryBarrier(commandBuffer, framebuffer.albedo.image, 
+    Device::ImageMemoryBarrier(commandBuffer, framebuffer.albedo.image,
         VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
         VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_ASPECT_COLOR_BIT,
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
-    Device::ImageMemoryBarrier(commandBuffer, framebuffer.position.image, 
+    Device::ImageMemoryBarrier(commandBuffer, framebuffer.position.image,
         VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
         VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_ASPECT_COLOR_BIT,
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
-    Device::ImageMemoryBarrier(commandBuffer, framebuffer.normal.image, 
+    Device::ImageMemoryBarrier(commandBuffer, framebuffer.normal.image,
         VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
         VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_ASPECT_COLOR_BIT,
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
-    Device::ImageMemoryBarrier(commandBuffer, framebuffer.depth.image, 
+    Device::ImageMemoryBarrier(commandBuffer, framebuffer.depth.image,
         VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
         VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_ASPECT_DEPTH_BIT,
         VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
@@ -265,19 +266,19 @@ void Renderer::EndOffscreenRendering(CommandBuffer& commandBuffer)
 {
     aDevice->vkCmdEndRenderingKHR(commandBuffer);
     auto& framebuffer = aSwapChain->GetOffscreenFramebuffer();
-    Device::ImageMemoryBarrier(commandBuffer, framebuffer.albedo.image, 
+    Device::ImageMemoryBarrier(commandBuffer, framebuffer.albedo.image,
         VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
         VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_ASPECT_COLOR_BIT,
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
-    Device::ImageMemoryBarrier(commandBuffer, framebuffer.position.image, 
+    Device::ImageMemoryBarrier(commandBuffer, framebuffer.position.image,
         VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
         VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_ASPECT_COLOR_BIT,
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
-    Device::ImageMemoryBarrier(commandBuffer, framebuffer.normal.image, 
+    Device::ImageMemoryBarrier(commandBuffer, framebuffer.normal.image,
         VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
         VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_ASPECT_COLOR_BIT,
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
-    Device::ImageMemoryBarrier(commandBuffer, framebuffer.depth.image, 
+    Device::ImageMemoryBarrier(commandBuffer, framebuffer.depth.image,
         VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL,
         VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_ASPECT_DEPTH_BIT,
         VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
@@ -289,6 +290,6 @@ void Renderer::createTimestampQueryPool()
     queryPoolInfo.sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO;
     queryPoolInfo.queryType = VK_QUERY_TYPE_TIMESTAMP;
     queryPoolInfo.queryCount = queriesPerFrame * MAX_FRAMES_IN_FLIGHT;
-    vkCreateQueryPool(aDevice->GetLogicalDevice(), &queryPoolInfo, 
+    vkCreateQueryPool(aDevice->GetLogicalDevice(), &queryPoolInfo,
         nullptr, &timestampQueryPool);
 }

@@ -1128,7 +1128,7 @@ VkImageMemoryBarrier2 Device::ImageMemoryBarrier2(
 }
 
 void Device::PipelineBarrier2(VkCommandBuffer commandBuffer,
-    VkImageMemoryBarrier2* imageBarriers, uint32_t imageBarrierCount, 
+    VkImageMemoryBarrier2* imageBarriers, uint32_t imageBarrierCount,
     VkBufferMemoryBarrier2* bufferBarriers, uint32_t bufferBarrierCount)
 {
     VkDependencyInfo depInfo{};
@@ -1140,9 +1140,9 @@ void Device::PipelineBarrier2(VkCommandBuffer commandBuffer,
     vkCmdPipelineBarrier2(commandBuffer, &depInfo);
 }
 
-void Device::ImageMemoryBarrier(VkCommandBuffer commandBuffer, VkImage image, 
+void Device::ImageMemoryBarrier(VkCommandBuffer commandBuffer, VkImage image,
     VkImageLayout initLayout, VkImageLayout finalLayout,
-    VkAccessFlags srcAccessMask, VkImageAspectFlags aspectMask, 
+    VkAccessFlags srcAccessMask, VkImageAspectFlags aspectMask,
     VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask)
 {
     VkImageMemoryBarrier imageMemoryBarrier{};
