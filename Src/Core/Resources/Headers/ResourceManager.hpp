@@ -65,7 +65,7 @@ namespace AnA
 
             //Built-in resources
             Cameras::Camera MainCamera;
-            Cameras::CameraInfo MainCameraInfo{glm::radians(60.0f), 1.0, 0.05f, 32.0f};
+            Cameras::CameraInfo MainCameraInfo{glm::radians(60.0f), 1.0, 0.05f, 1000.0f};
             Cameras::Camera LightCamera;
             Cameras::CameraInfo LightCameraInfo{glm::radians(45.0f), 1.0, 0.05f, 32.0f};
             FrustumPlanes MainCameraFrustumPlanes{};

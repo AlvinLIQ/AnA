@@ -7,3 +7,8 @@ example_mesh_shader = executable('example_mesh_shader', [example_mesh_shader_ui 
     link_with: [AnACore, AnAControls],
     dependencies: [vulkan_dep, glfw_dep, glslang_dep],
     install: true, install_dir: meson.project_source_root())
+
+benchmarker = executable('benchmarker', ['benchmark.cpp'],
+    link_with: [AnACore, AnAControls],
+    dependencies: [vulkan_dep, glfw_dep, glslang_dep],
+    install: true, install_dir: meson.project_source_root())

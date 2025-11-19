@@ -63,7 +63,7 @@ namespace AnA
 
         VkOffset2D actualSceneOffset{};
     protected:
-        void onCommandBufferRecording(CommandBuffer& commandBuffer);
+        virtual void onCommandBufferRecording(CommandBuffer& commandBuffer);
         Window aWindow;
         Instance aInstance;
         Input::InputManager aInputManager;
