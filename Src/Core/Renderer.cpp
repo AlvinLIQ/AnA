@@ -121,17 +121,6 @@ void Renderer::BeginRendering(CommandBuffer& commandBuffer)
             VK_PIPELINE_STAGE_2_NONE,
             VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
             VK_IMAGE_ASPECT_COLOR_BIT
-        )},
-        {
-        Device::ImageMemoryBarrier2(
-            aSwapChain->colorImage,
-            VK_IMAGE_LAYOUT_UNDEFINED,
-            VK_IMAGE_LAYOUT_GENERAL,
-            VK_ACCESS_2_NONE,
-            VK_ACCESS_2_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
-            VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT,
-            VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
-            VK_IMAGE_ASPECT_COLOR_BIT
         )}
     };
     Device::PipelineBarrier2(commandBuffer, imageBarriers, numsof(imageBarriers),

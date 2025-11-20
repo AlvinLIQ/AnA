@@ -2,6 +2,7 @@
 /.cache/
 /Shaders/
 /build/
+/release/
 /AnA
 /AnA.exe
 /example
