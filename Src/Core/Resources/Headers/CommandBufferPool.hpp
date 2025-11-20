@@ -45,7 +45,7 @@ namespace AnA
         {
             ThreadPool::Enqueue([this, recordCallBack, pInheritanceInfo](CommandBuffer* commandBuffer, size_t index)
             {
-                auto& _commandBuffer = commandBuffer->Begin(pInheritanceInfo);
+                auto _commandBuffer = commandBuffer->Begin(pInheritanceInfo);
                 recordCallBack(*commandBuffer, index);
                 commandBuffer->End();
                 std::unique_lock<std::mutex> lock(queue_mutex_);
@@ -56,7 +56,7 @@ namespace AnA
         {
             ThreadPool::Enqueue([this, recordCallBack, pInheritanceInfo, offset](CommandBuffer* commandBuffer, size_t index)
             {
-                auto& _commandBuffer = commandBuffer->Begin(pInheritanceInfo, offset);
+                auto _commandBuffer = commandBuffer->Begin(pInheritanceInfo, offset);
                 recordCallBack(*commandBuffer, index);
                 commandBuffer->End();
                 std::unique_lock<std::mutex> lock(queue_mutex_);
@@ -67,7 +67,7 @@ namespace AnA
         {
             ThreadPool::Enqueue([this, recordCallBack, pInheritanceInfo, offset, extent](CommandBuffer* commandBuffer, size_t index)
             {
-                auto& _commandBuffer = commandBuffer->Begin(pInheritanceInfo, offset, extent);
+                auto _commandBuffer = commandBuffer->Begin(pInheritanceInfo, offset, extent);
                 recordCallBack(*commandBuffer, index);
                 commandBuffer->End();
                 std::unique_lock<std::mutex> lock(queue_mutex_);

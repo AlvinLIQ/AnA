@@ -28,11 +28,38 @@ public:
                     {}}, uint32_t(random() % 10)});
             }
         }
+        aResourceManager.MainCamera.CameraTransform.translation.x = 2.5f;
         scene.Append(meshInfos);
     }
+
+    void Init()
+    {
+        aInputManager.GlobalProfile.flag = AnA::Input::InputProfileFlags::None;
+        AnA::Input::InputProfile profile{};
+        profile.flag = AnA::Input::InputProfileFlags::None;
+        aInputManager.GetProfiles().push_back(profile);
+        aInputManager.SetActiveProfile(1);        
+    }
+private:
+    float totalTime = 0.0f;
+    glm::vec3 direction = glm::vec3{1.0f};
 protected:
     virtual void onCommandBufferRecording(AnA::CommandBuffer& commandBuffer) override
     {
+        aResourceManager.MainCamera.CameraTransform.translation.y = sinf(totalTime) + 1.5f;
+        aResourceManager.MainCamera.offset.z += 5.5f * direction.z;
+        if (aResourceManager.MainCamera.CameraTransform.translation.z >= 95.0f)
+        {
+            direction.z = -1.0f;
+            aResourceManager.MainCamera.CameraTransform.rotation.y = glm::pi<float>();
+        }
+        else if (aResourceManager.MainCamera.CameraTransform.translation.z <= -95.0f)
+        {
+            direction.z = 1.0f;
+            aResourceManager.MainCamera.CameraTransform.rotation.y = 0.0f;
+        }
+        aResourceManager.MainCamera.UpdateViewMatrix();
+        totalTime += frameTime;
         auto& swapChain = aRenderer.GetSwapChain();
         aRenderer.BeginRendering(commandBuffer);
         swapChain.SetViewport(commandBuffer);

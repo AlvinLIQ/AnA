@@ -8,7 +8,7 @@
       "type": "lldb-dap",
       "request": "launch",
       "name": "Debug",
-      "program": "${workspaceFolder}/benchmarker",
+      "program": "${workspaceFolder}/AnA",
       "args": [],
       "cwd": "${workspaceFolder}"
     },
