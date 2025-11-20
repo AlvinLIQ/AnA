@@ -47,20 +47,35 @@ public:
 private:
     float totalTime = 0.0f;
     glm::vec3 direction = glm::vec3{1.0f};
+    float rotateYAnimationResult = 0.0f;
+    bool rotationStarted = false;
 protected:
     virtual void onCommandBufferRecording(AnA::CommandBuffer& commandBuffer) override
     {
         aResourceManager.MainCamera.CameraTransform.translation.y = sinf(totalTime) + 1.5f;
         aResourceManager.MainCamera.offset.z += 5.5f * direction.z;
+        if (rotationStarted)
+        {
+            aResourceManager.MainCamera.CameraTransform.rotation.y += frameTime * glm::pi<float>();
+            if (aResourceManager.MainCamera.CameraTransform.rotation.y >= rotateYAnimationResult)
+            {
+                aResourceManager.MainCamera.CameraTransform.rotation.y = rotateYAnimationResult;
+                while (aResourceManager.MainCamera.CameraTransform.rotation.y >= glm::two_pi<float>())
+                    aResourceManager.MainCamera.CameraTransform.rotation.y -= glm::two_pi<float>();
+                rotationStarted = false;
+            }
+        }
         if (aResourceManager.MainCamera.CameraTransform.translation.z >= 95.0f)
         {
             direction.z = -1.0f;
-            aResourceManager.MainCamera.CameraTransform.rotation.y = glm::pi<float>();
+            rotationStarted = true;
+            rotateYAnimationResult = glm::pi<float>();
         }
         else if (aResourceManager.MainCamera.CameraTransform.translation.z <= -95.0f)
         {
             direction.z = 1.0f;
-            aResourceManager.MainCamera.CameraTransform.rotation.y = 0.0f;
+            rotationStarted = true;
+            rotateYAnimationResult = glm::two_pi<float>();
         }
         aResourceManager.MainCamera.UpdateViewMatrix();
         totalTime += frameTime;
