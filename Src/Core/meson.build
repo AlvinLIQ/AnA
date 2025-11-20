@@ -10,4 +10,5 @@ AnACore = static_library('AnACore', ['App.cpp', 'Buffer.cpp', 'Device.cpp', 'Ins
     include_directories : [vma_include, cdt_include],
     link_with: [meshoptimizer_lib],
     dependencies: [vulkan_dep, glfw_dep, glslang_dep],
+    cpp_args: cflags,
     sources: [shader_hpp])

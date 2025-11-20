@@ -3,6 +3,10 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 
+#ifdef RELEASE_BUILD
+#define NDEBUG
+#endif
+
 namespace AnA
 {
     const std::vector<const char*> validationLayers = 

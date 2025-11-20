@@ -4,6 +4,14 @@ project('AnA', ['c', 'cpp'],
 add_project_arguments(language: 'cpp')
 add_project_link_arguments('-fuse-ld=lld', language: 'cpp')
 vulkan_dep = dependency('vulkan', required: true)  # Vulkan SDK
+
+cflags = []
+if get_option('buildtype') == 'release'
+    cflags += ['-DRELEASE_BUILD']
+else
+    cflags += ['-DDEBUG_BUILD']
+endif
+
 if host_machine.system() == 'windows'
     glfw_dep = declare_dependency(
         include_directories: include_directories('C:/glfw3/include'),
