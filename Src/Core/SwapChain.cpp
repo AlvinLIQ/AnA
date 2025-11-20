@@ -231,7 +231,7 @@ VkPresentModeKHR SwapChain::chooseSwapPresentMode(const std::vector<VkPresentMod
         }
     }
 
-    return availablePresentModes.back();
+    return availablePresentModes.front();
 }
 
 VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)

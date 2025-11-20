@@ -66,7 +66,7 @@ layout (set = 5, binding = 0) uniform UBO {
 	Cascade[SHADOW_MAP_CASCADE_COUNT] cascades;
 } ubo;
 
-layout(std430, set = 6, binding = 0) buffer meshletSSBO
+layout(set = 6, binding = 0) buffer meshletSSBO
 {
     Meshlet meshlets[];
 };
@@ -81,7 +81,7 @@ layout(set = 6, binding = 2) buffer meshletIndexSSBO
     uint8_t primitives[];
 };
 
-layout(scalar, set = 6, binding = 4) buffer meshletIDSSBO
+layout(std430, set = 6, binding = 4) buffer meshletIDSSBO
 {
     uint meshletIDs[];
 };
