@@ -505,7 +505,7 @@ void SwapChain::createOffscreenFramebuffer()
 
 void SwapChain::createOffscreenSampler()
 {
-    aDevice->CreateSampler(&colorSampler, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 
+    aDevice->CreateSampler(&colorSampler, VK_SAMPLER_ADDRESS_MODE_REPEAT, 
         VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE);
 }
 

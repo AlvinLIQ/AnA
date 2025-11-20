@@ -5,7 +5,11 @@ class benchmark : public AnA::App
 public:
     benchmark() : AnA::App()
     {
-        for (uint32_t i = 4; i < 10; i++)
+        aResourceManager.TextureMap.try_emplace(4, 
+                "Textures/building1.jpg", &aDevice);
+        aResourceManager.TextureMap.try_emplace(5, 
+                "Textures/building2.jpg", &aDevice);
+        for (uint32_t i = 6; i < 10; i++)
         {
             aResourceManager.TextureMap.try_emplace(i, 
                 uint32_t((random() & 0x00FFFFFFu) ^ 0xFF000000u), &aDevice);

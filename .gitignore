@@ -6,6 +6,7 @@
 /AnA.exe
 /example
 /example_*
+/benchmarker*
 /xxdi
 /xxdi.exe
 /push.sh
