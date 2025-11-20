@@ -4,7 +4,7 @@
 class benchmark : public AnA::App
 {
 public:
-    benchmark() : AnA::App()
+    benchmark() : AnA::App("Benchmarker")
     {
         aResourceManager.TextureMap.try_emplace(4, 
                 "Textures/building1.jpg", &aDevice);

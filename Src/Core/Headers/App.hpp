@@ -16,7 +16,7 @@ namespace AnA
     class App
     {
     public:
-        App();
+        App(const char* name = "AnA");
         virtual ~App();
 
         App(const App&) = delete;

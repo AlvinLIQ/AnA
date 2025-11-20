@@ -21,7 +21,7 @@ bool _uiLoopShouldEnd = false;
 short _uiSignal;
 int _uiParam[2];
 
-App::App() : aWindow(),
+App::App(const char* name) : aWindow(name),
     aInstance(aWindow),
     aInputManager(aWindow),
     aDevice(aInstance.GetInstance(), aWindow.GetSurface()),

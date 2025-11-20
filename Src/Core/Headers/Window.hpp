@@ -15,7 +15,7 @@ namespace AnA
     class Window
     {
     public:
-        Window();
+        Window(const char* title);
         ~Window();
 
         void StartLoop();
@@ -46,7 +46,7 @@ namespace AnA
         GLFWwindow* window;
         VkSurfaceKHR surface{VK_NULL_HANDLE};
 
-        int init();
+        int init(const char* name);
         void mainLoop();
     };
 }

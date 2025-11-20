@@ -3,9 +3,9 @@
 
 using namespace AnA;
 
-Window::Window()
+Window::Window(const char* title)
 {
-    if (init())
+    if (init(title))
         throw std::runtime_error("Failed to init window!");
 }
 
@@ -16,19 +16,19 @@ Window::~Window()
     glfwTerminate();
 }
 
-int Window::init()
+int Window::init(const char* title)
 {
     if (!glfwInit())
         return -1;
     if (glfwGetPlatform() == GLFW_PLATFORM_WAYLAND)
-        glfwWindowHintString(GLFW_WAYLAND_APP_ID, "AnA");
+        glfwWindowHintString(GLFW_WAYLAND_APP_ID, title);
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
     glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
     //glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
     
-    window = glfwCreateWindow(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, "AnA", NULL, NULL);
+    window = glfwCreateWindow(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, title, NULL, NULL);
     if (!window)
         return -1;
 
