@@ -499,7 +499,7 @@ void Scene::applyVertexBufferUpdate(Model::Vertex* vertexBufferData, Model::Inde
 
 void Scene::createIndirectBuffers()
 {
-    drawIndexedIndirectBuffer = Buffer(aDevice, sizeof(VkDrawIndexedIndirectCommand) * 50,
+    drawIndexedIndirectBuffer = Buffer(aDevice, sizeof(VkDrawIndexedIndirectCommand) * MaxBatchSize,
     VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
     drawIndexedIndirectBuffer.Map();
     auto drawIndexedIndirectCommand =

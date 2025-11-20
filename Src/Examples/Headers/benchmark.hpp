@@ -1,4 +1,5 @@
 #include "../Core/Headers/App.hpp"
+#include <stdlib.h>
 
 class benchmark : public AnA::App
 {
@@ -12,7 +13,7 @@ public:
         for (uint32_t i = 6; i < 10; i++)
         {
             aResourceManager.TextureMap.try_emplace(i, 
-                uint32_t((random() & 0x00FFFFFFu) ^ 0xFF000000u), &aDevice);
+                uint32_t((rand() & 0x00FFFFFFu) ^ 0xFF000000u), &aDevice);
         }
         auto& scene = aResourceManager.MainScene;
         std::vector<AnA::MeshInfo> meshInfos{
@@ -29,7 +30,7 @@ public:
                 meshInfos.push_back({"Models/cube.obj", 
                     {{i * 200.0f - 100.0f, h, j * 200.0f - 100.0f},
                     {1.0f + random_double(), h + 0.3f, 1.0f + random_double()},
-                    {}}, uint32_t(random() % 10)});
+                    {}}, uint32_t(rand() % 10)});
             }
         }
         aResourceManager.MainCamera.CameraTransform.translation.x = 2.5f;
