@@ -203,9 +203,19 @@ namespace AnA
             VkPipelineStageFlags2 srcStageMask,
             VkPipelineStageFlags2 dstStageMask,
             VkImageAspectFlags aspectMask);
-        static void PipelineBarrier2(VkCommandBuffer commandBuffer, 
+        static void PipelineBarrier2(VkCommandBuffer commandBuffer, VkDependencyFlags dependencyFlags,
             VkImageMemoryBarrier2* imageBarriers, uint32_t imageBarrierCount, 
             VkBufferMemoryBarrier2* bufferBarriers, uint32_t bufferBarrierCount);
+        static void StageBarrier(VkCommandBuffer commandBuffer,
+            VkAccessFlags2 srcAccessMask,
+            VkAccessFlags2 dstAccessMask,
+            VkPipelineStageFlags2 srcStageMask,
+            VkPipelineStageFlags2 dstStageMask);
+        static void StageBarrier(VkCommandBuffer commandBuffer,
+            VkPipelineStageFlags2 srcStageMask,
+            VkPipelineStageFlags2 dstStageMask);
+        static void StageBarrier(VkCommandBuffer commandBuffer,
+            VkPipelineStageFlags2 StageMask);
         static void ImageMemoryBarrier(VkCommandBuffer commandBuffer, VkImage image, 
             VkImageLayout initLayout, VkImageLayout finalLayout,
             VkAccessFlags srcAccessMask, VkImageAspectFlags aspectMask,
@@ -233,6 +243,7 @@ namespace AnA
         bool isDeviceSuitable(VkPhysicalDevice device);
 
         bool meshShaderSupport = false;
+        bool unifiedLayoutsSupport = false;
 
         VkDevice logicalDevice;
         VkQueue graphicsQueue;

@@ -282,5 +282,7 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     swapChain.SetViewport(commandBuffer, aResourceManager.Shapes.Extent);
     aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.Shapes, 
         aResourceManager.Shaders[1], swapChain.CurrentFrame);
+    //Device.StageBarrier(commandBuffer,
+    //    VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT|VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
     aRenderer.EndRendering(commandBuffer);
 }

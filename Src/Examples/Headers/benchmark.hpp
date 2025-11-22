@@ -53,7 +53,7 @@ private:
 protected:
     virtual void onCommandBufferRecording(AnA::CommandBuffer& commandBuffer) override
     {
-        aResourceManager.MainCamera.CameraTransform.translation.y = sinf(totalTime) + 1.5f;
+        aResourceManager.MainCamera.CameraTransform.translation.y = sinf(totalTime) * 2.0f + 3.5f;
         aResourceManager.MainCamera.offset.z += 5.5f * direction.z;
         if (rotationStarted)
         {

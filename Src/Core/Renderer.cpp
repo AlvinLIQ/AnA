@@ -115,15 +115,16 @@ void Renderer::BeginRendering(CommandBuffer& commandBuffer)
         Device::ImageMemoryBarrier2(
             aSwapChain->swapChainImages[aSwapChain->CurrentImage],
             VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-            VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL_KHR,
+            VK_IMAGE_LAYOUT_GENERAL,
             VK_ACCESS_2_NONE,
-            VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
-            VK_PIPELINE_STAGE_2_NONE,
+            VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
             VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
             VK_IMAGE_ASPECT_COLOR_BIT
         )}
     };
-    Device::PipelineBarrier2(commandBuffer, imageBarriers, numsof(imageBarriers),
+    Device::PipelineBarrier2(commandBuffer, VK_DEPENDENCY_BY_REGION_BIT, 
+        imageBarriers, numsof(imageBarriers),
         nullptr, 0);
 
 
@@ -167,16 +168,16 @@ void Renderer::EndRendering(CommandBuffer& commandBuffer)
         {
             Device::ImageMemoryBarrier2(
             aSwapChain->swapChainImages[aSwapChain->CurrentImage],
-            VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL_KHR,
+            VK_IMAGE_LAYOUT_GENERAL,
             VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-            VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
-            VK_ACCESS_2_NONE,
+            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            0,
             VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
             VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT,
             VK_IMAGE_ASPECT_COLOR_BIT)
         }
     };
-    Device::PipelineBarrier2(commandBuffer,
+    Device::PipelineBarrier2(commandBuffer, VK_DEPENDENCY_BY_REGION_BIT,
         imageBarriers, numsof(imageBarriers),
         nullptr, 0);
 /*

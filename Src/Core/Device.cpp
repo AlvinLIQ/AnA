@@ -914,22 +914,28 @@ bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device)
     {
         requiredExtensions.erase(extension.extensionName);
     }
-
+    VkPhysicalDeviceUnifiedImageLayoutsFeaturesKHR unifiedLayoutsFeatures{};
+    unifiedLayoutsFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFIED_IMAGE_LAYOUTS_FEATURES_KHR;
 #ifdef ENABLE_MESH_SHADER
     VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures = {};
     meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
+    unifiedLayoutsFeatures.pNext = &meshShaderFeatures;
+#endif
 
     VkPhysicalDeviceFeatures2 deviceFeatures = {};
     deviceFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-    deviceFeatures.pNext = &meshShaderFeatures;
+    deviceFeatures.pNext = &unifiedLayoutsFeatures;
     vkGetPhysicalDeviceFeatures2(device, &deviceFeatures);
-    
+
+#ifdef ENABLE_MESH_SHADER
     if (meshShaderFeatures.meshShader == VK_TRUE)
     {
         meshShaderSupport = true;
         deviceExtensions.push_back(VK_EXT_MESH_SHADER_EXTENSION_NAME);
     }
 #endif
+    if (unifiedLayoutsFeatures.unifiedImageLayouts == VK_TRUE)
+        unifiedLayoutsSupport = true;
 
     return requiredExtensions.empty();
 }
@@ -969,12 +975,17 @@ void Device::createLogicalDevice()
         queueCreateInfo.pQueuePriorities = &queuePriority;
         queueCreateInfos.push_back(queueCreateInfo);
     }
+    VkPhysicalDeviceVulkan14Features vulkan14Features{};
+    vulkan14Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_4_FEATURES;
+    //vulkan14Features.dynamicRenderingLocalRead = VK_TRUE;
+
     VkPhysicalDeviceVulkan13Features vulkan13Features{};
     vulkan13Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
     vulkan13Features.maintenance4 = VK_TRUE;
     vulkan13Features.synchronization2 = VK_TRUE;
     vulkan13Features.dynamicRendering = VK_TRUE;
     vulkan13Features.shaderDemoteToHelperInvocation = VK_TRUE;
+    vulkan13Features.pNext = &vulkan14Features;
 
     VkPhysicalDevicePrimitiveTopologyListRestartFeaturesEXT primitiveRestartFeatures{};
     primitiveRestartFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRIMITIVE_TOPOLOGY_LIST_RESTART_FEATURES_EXT;
@@ -1126,18 +1137,57 @@ VkImageMemoryBarrier2 Device::ImageMemoryBarrier2(
     return imageBarrier;
 }
 
-void Device::PipelineBarrier2(VkCommandBuffer commandBuffer,
+void Device::PipelineBarrier2(VkCommandBuffer commandBuffer, VkDependencyFlags dependencyFlags,
     VkImageMemoryBarrier2* imageBarriers, uint32_t imageBarrierCount,
     VkBufferMemoryBarrier2* bufferBarriers, uint32_t bufferBarrierCount)
 {
     VkDependencyInfo depInfo{};
     depInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+    depInfo.dependencyFlags = dependencyFlags;
     depInfo.pImageMemoryBarriers = imageBarriers;
     depInfo.imageMemoryBarrierCount = imageBarrierCount;
     depInfo.pBufferMemoryBarriers = bufferBarriers;
     depInfo.bufferMemoryBarrierCount = bufferBarrierCount;
     vkCmdPipelineBarrier2(commandBuffer, &depInfo);
 }
+
+void Device::StageBarrier(VkCommandBuffer commandBuffer,
+    VkAccessFlags2 srcAccessMask,
+    VkAccessFlags2 dstAccessMask,
+    VkPipelineStageFlags2 srcStageMask,
+    VkPipelineStageFlags2 dstStageMask)
+{
+    VkMemoryBarrier2 memBarrier{};
+    memBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER_2;
+    memBarrier.srcAccessMask = srcAccessMask;
+    memBarrier.dstAccessMask = dstAccessMask;
+    memBarrier.srcStageMask = srcStageMask;
+    memBarrier.dstStageMask = dstStageMask;
+
+    VkDependencyInfo depInfo{};
+    depInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+    depInfo.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+    depInfo.memoryBarrierCount = 1;
+    depInfo.pMemoryBarriers = &memBarrier;
+    vkCmdPipelineBarrier2(commandBuffer, &depInfo);
+}
+
+void Device::StageBarrier(VkCommandBuffer commandBuffer,
+    VkPipelineStageFlags2 srcStageMask,
+    VkPipelineStageFlags2 dstStageMask)
+{
+    StageBarrier(commandBuffer, 
+        VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT, 
+        VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT, 
+        srcStageMask, dstStageMask);
+}
+
+void Device::StageBarrier(VkCommandBuffer commandBuffer,
+    VkPipelineStageFlags2 stageMask)
+{
+    StageBarrier(commandBuffer, stageMask, stageMask);
+}
+    
 
 void Device::ImageMemoryBarrier(VkCommandBuffer commandBuffer, VkImage image,
     VkImageLayout initLayout, VkImageLayout finalLayout,

@@ -463,8 +463,8 @@ void SwapChain::initImages()
             VK_IMAGE_ASPECT_DEPTH_BIT
         );
     }
-    auto commandbuffer =aDevice->BeginSingleTimeCommands();
-    Device::PipelineBarrier2(commandbuffer, 
+    auto commandbuffer = aDevice->BeginSingleTimeCommands();
+    Device::PipelineBarrier2(commandbuffer, VK_DEPENDENCY_BY_REGION_BIT,
         imageBarriers, 
         imageBarrierCount, 
         VK_NULL_HANDLE, 
