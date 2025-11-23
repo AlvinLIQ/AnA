@@ -53,6 +53,10 @@ namespace AnA
             {
                 return speedRatio;
             }
+            void SetRotateSpeed(float newSpeed)
+            {
+                rotateSpeed = newSpeed;
+            }
             float GetRotateSpeed() const
             {
                 return rotateSpeed;
