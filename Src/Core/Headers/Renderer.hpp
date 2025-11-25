@@ -4,6 +4,7 @@
 #include "Window.hpp"
 #include "SwapChain.hpp"
 #include "../Resources/Headers/CommandBuffer.hpp"
+#include "../Resources/Headers/Renderable.hpp"
 
 #include <cassert>
 #include <vulkan/vulkan.h>
@@ -62,6 +63,9 @@ namespace AnA
 
         void RecordOffscreenSecondaryCommandBuffer(RecordCallBack recordCallBack);
         void ExecuteOffscreenSecondaryCommandBuffer(CommandBuffer& commandBuffer);
+
+        void Render(CommandBuffer& commandBuffer, Renderable& renderable, Shader& shader, uint32_t bufferIndex = 0);
+        void RenderIndirect(CommandBuffer& commandBuffer, Renderable& renderable, Shader& shader, uint32_t bufferIndex = 0);
 
         void EndFrame();
         void BeginRendering(CommandBuffer& commandBuffer);

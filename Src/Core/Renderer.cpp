@@ -67,6 +67,17 @@ void Renderer::ExecuteOffscreenSecondaryCommandBuffer(CommandBuffer& commandBuff
     &cmd);
 }
 
+void Renderer::Render(CommandBuffer& commandBuffer, Renderable& renderable, Shader& shader, uint32_t bufferIndex)
+{
+    renderable.Bind(commandBuffer, shader, bufferIndex);
+    renderable.Draw(commandBuffer);
+}
+
+void Renderer::RenderIndirect(CommandBuffer& commandBuffer, Renderable& renderable, Shader& shader, uint32_t bufferIndex)
+{
+    renderable.Bind(commandBuffer, shader, bufferIndex);
+    renderable.DrawIndirect(commandBuffer);
+}
 void Renderer::EndFrame()
 {
     assert(isFrameStarted && "Can't call EndFrame while frame is not in progress!");
@@ -123,7 +134,7 @@ void Renderer::BeginRendering(CommandBuffer& commandBuffer)
             VK_IMAGE_ASPECT_COLOR_BIT
         )}
     };
-    Device::PipelineBarrier2(commandBuffer, VK_DEPENDENCY_BY_REGION_BIT, 
+    Device::PipelineBarrier2(commandBuffer, VK_DEPENDENCY_BY_REGION_BIT,
         imageBarriers, numsof(imageBarriers),
         nullptr, 0);
 

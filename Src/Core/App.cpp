@@ -26,8 +26,6 @@ App::App(const char* name) : aWindow(name),
     aInputManager(aWindow),
     aDevice(aInstance.GetInstance(), aWindow.GetSurface()),
     aRenderer(aWindow, &aDevice),
-    aRenderSystem(),
-    aShadowSystem(&aRenderer.GetSwapChain()),
     aResourceManager(&aDevice)
 
 {
@@ -143,7 +141,7 @@ void App::Run()
             aResourceManager.Resize();
             updateSceneOffset();
         }
-        if (aResourceManager.MainControl && 
+        if (aResourceManager.MainControl &&
             (aResourceManager.MainControl->NeedUpdate() || aRenderer.NeedUpdate()))
         {
             auto controlExtent = aRenderer.GetSwapChainExtent();
@@ -269,18 +267,18 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     */
     aRenderer.BeginRendering(commandBuffer);
     swapChain.SetViewport(commandBuffer, actualSceneOffset);
-    aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.MainScene,
+    aRenderer.RenderIndirect(commandBuffer, aResourceManager.MainScene,
         aDevice.MeshShaderSupport() ? aResourceManager.Shaders[5] : aResourceManager.Shaders[0],
         swapChain.CurrentFrame);
 
     if (aDevice.MeshShaderSupport())
     {
         swapChain.SetViewport(commandBuffer);
-        aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.TextContext, 
+        aRenderer.RenderIndirect(commandBuffer, aResourceManager.TextContext,
             aResourceManager.Shaders[6], swapChain.CurrentFrame);
     }
     swapChain.SetViewport(commandBuffer, aResourceManager.Shapes.Extent);
-    aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.Shapes, 
+    aRenderer.RenderIndirect(commandBuffer, aResourceManager.Shapes,
         aResourceManager.Shaders[1], swapChain.CurrentFrame);
     //Device.StageBarrier(commandBuffer,
     //    VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT|VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);

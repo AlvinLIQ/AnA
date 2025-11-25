@@ -5,8 +5,6 @@
 #include "Window.hpp"
 #include "Instance.hpp"
 #include "Device.hpp"
-#include "../Systems/Headers/RenderSystem.hpp"
-#include "../Systems/Headers/ShadowSystem.hpp"
 #include "../Input/Headers/InputManager.hpp"
 #include "../Resources/Headers/ResourceManager.hpp"
 #include <thread>
@@ -69,8 +67,6 @@ namespace AnA
         Input::InputManager aInputManager;
         Device aDevice;
         Renderer aRenderer;
-        Systems::RenderSystem aRenderSystem;
-        Systems::ShadowSystem aShadowSystem;
         Resource::ResourceManager aResourceManager;
         VkOffset2D sceneOffset{};
         Float frameTime, cpuTime, cpuTimeBeforeRecord, prevSecond;

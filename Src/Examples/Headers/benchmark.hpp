@@ -87,7 +87,7 @@ protected:
         auto& swapChain = aRenderer.GetSwapChain();
         aRenderer.BeginRendering(commandBuffer);
         swapChain.SetViewport(commandBuffer);
-        aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.MainScene,
+        aRenderer.RenderIndirect(commandBuffer, aResourceManager.MainScene,
             aDevice.MeshShaderSupport() ? aResourceManager.Shaders[5] : aResourceManager.Shaders[0],
             swapChain.CurrentFrame);
         aRenderer.EndRendering(commandBuffer);
