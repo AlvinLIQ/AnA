@@ -18,6 +18,7 @@ namespace AnA
         float size;
         glm::vec2 offset;
         glm::vec3 color;
+        glm::vec4 scissor;
         uint32_t chOffset;
         uint32_t count;
     };
@@ -26,6 +27,7 @@ namespace AnA
         float size;
         glm::vec2 offset;
         glm::vec3 color;
+        glm::vec4 scissor;
         std::string text;
     };
     struct TextMapData

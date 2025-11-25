@@ -1,8 +1,0 @@
-poll events
-
-check if any secondary command buffer needs update
-    update should be executed by using record call back
-
-begin main command buffer
-    execute all the secondary command buffers
-end main command buffer

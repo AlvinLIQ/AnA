@@ -1,7 +1,7 @@
 <PageView Name="pageView" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
     <StackPanel ControlSize="0.0f, 0.0f" Spacing="0.01f" Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
         Color="0.156f, 0.156f, 0.156f, 1.0f" Padding="0.05f, 0.01f">
-        <TextBlock Text="Benchmark" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
+        <TextBlock Text="Editor" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
         <Button HorizontalAlignment="Start" Click="loadModelButton_Click">
             <TextBlock Text="Load Model"/>
         </Button>

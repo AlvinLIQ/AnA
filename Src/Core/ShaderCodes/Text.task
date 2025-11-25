@@ -29,6 +29,7 @@ struct TextData
     float size;
     vec2 offset;
     vec3 color;
+    vec4 scissor;
     uint chOffset;
     uint count;
 };
@@ -70,5 +71,6 @@ void main()
     }
 
     taskData.textIndex = gl_WorkGroupID.x;
+    barrier();
     EmitMeshTasksEXT(textInfos[gl_WorkGroupID.x].count, 1, 1);
 }

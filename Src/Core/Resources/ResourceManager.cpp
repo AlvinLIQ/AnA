@@ -74,8 +74,8 @@ void ResourceManager::GetBufferInfos(std::vector<Buffer>& buffers, std::vector<V
     }
 }
 
-void ResourceManager::GetBufferInfos(Buffer* buffers, 
-    uint32_t bufferCount, 
+void ResourceManager::GetBufferInfos(Buffer* buffers,
+    uint32_t bufferCount,
     std::vector<VkDescriptorBufferInfo>& bufferInfos)
 {
     bufferInfos.resize(bufferCount);
@@ -88,8 +88,8 @@ void ResourceManager::GetBufferInfos(Buffer* buffers,
     }
 }
 
-void ResourceManager::GetBufferInfos(Buffer& buffer, 
-    uint32_t bufferCount, 
+void ResourceManager::GetBufferInfos(Buffer& buffer,
+    uint32_t bufferCount,
     std::vector<VkDescriptorBufferInfo>& bufferInfos)
 {
     bufferInfos.resize(bufferCount);
@@ -102,8 +102,8 @@ void ResourceManager::GetBufferInfos(Buffer& buffer,
     }
 }
 
-void ResourceManager::GetBufferInfos(Buffer& buffer, 
-    uint32_t bufferCount, 
+void ResourceManager::GetBufferInfos(Buffer& buffer,
+    uint32_t bufferCount,
     std::vector<VkDescriptorBufferInfo>& bufferInfos, uint32_t stride)
 {
     bufferInfos.resize(bufferCount);
@@ -149,7 +149,7 @@ void ResourceManager::UpdateCameraBuffer()
     auto& proj = MainCamera.GetProjectionMatrix();
     auto& view = MainCamera.GetView();
     uint32_t bufferIndex = SwapChain::GetCurrent()->CurrentImage;
-    Cameras::CameraBufferObject& cbo = 
+    Cameras::CameraBufferObject& cbo =
         static_cast<Cameras::CameraBufferObject*>(mainCameraBuffer.GetMappedData())[bufferIndex];
     cbo.proj = proj;
     cbo.view = view;
@@ -162,8 +162,8 @@ void ResourceManager::UpdateCameraBuffer()
     {
         cbo.position = MainCamera.GetInverseView()[3];
         FrustumPlanes::ExtractFrustumPlanes(proj * view, MainCameraFrustumPlanes);
-        memcpy(&static_cast<FrustumPlanes*>(frustumBuffer.GetMappedData())[bufferIndex * 2], 
-            &MainCameraFrustumPlanes, 
+        memcpy(&static_cast<FrustumPlanes*>(frustumBuffer.GetMappedData())[bufferIndex * 2],
+            &MainCameraFrustumPlanes,
             sizeof(FrustumPlanes));
     }
     uboDynamicOffsets[1] = bufferIndex * sizeof(FrustumPlanes) * 2;
@@ -221,7 +221,7 @@ void ResourceManager::Resize()
     for (uint32_t i = 0, j; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
         auto& framebuffer = framebuffers[i];
-        Image* images[4] = {&framebuffer.position, &framebuffer.normal, 
+        Image* images[4] = {&framebuffer.position, &framebuffer.normal,
             &framebuffer.albedo, &framebuffer.depth};
         writes[i].resize(4);
         for (j = 0; j < 4; j++)
@@ -489,14 +489,14 @@ void ResourceManager::AppendModel(std::shared_ptr<Model> model, uint32_t& id)
 void ResourceManager::createMainCameraBuffers()
 {
     uint32_t imageCount = SwapChain::GetCurrent()->GetImageCount();
-    mainCameraBuffer = Buffer(aDevice, 
-        imageCount * sizeof(Cameras::CameraBufferObject), 
+    mainCameraBuffer = Buffer(aDevice,
+        imageCount * sizeof(Cameras::CameraBufferObject),
         VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
         VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
     mainCameraBuffer.Map();
 
-    frustumBuffer = Buffer(aDevice, 
-        imageCount * 2 * sizeof(FrustumPlanes), 
+    frustumBuffer = Buffer(aDevice,
+        imageCount * 2 * sizeof(FrustumPlanes),
         VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
         VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
     frustumBuffer.Map();
@@ -535,7 +535,7 @@ std::vector<ShaderInfo> meshShaderStageInfos{{Mesh_task, 0, VK_SHADER_STAGE_TASK
                                   {Mesh_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT},
                                       {Mesh_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false}};
 std::vector<ShaderInfo> lightShaderStageInfos{{Light_vert, 0, VK_SHADER_STAGE_VERTEX_BIT},
-                                {Light_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};                                      
+                                {Light_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};
 std::vector<ShaderInfo> textShaderStageInfos{{Text_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
                                         {Text_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT},
                                             {Text_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};

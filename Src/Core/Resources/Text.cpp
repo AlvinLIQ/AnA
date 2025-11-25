@@ -216,6 +216,7 @@ void Text::updateAll()
         textBuffer[textIndex].size = textInfo.size;
         textBuffer[textIndex].offset = textInfo.offset * 2.0f;
         textBuffer[textIndex].color = textInfo.color;
+        textBuffer[textIndex].scissor = textInfo.scissor;
         textBuffer[textIndex].chOffset = index;
         textBuffer[textIndex].count = uint32_t(textInfo.text.length());
         for (auto& ch : textInfo.text)

@@ -10,7 +10,8 @@
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 layout(triangles, max_vertices = 128, max_primitives = 256) out;
 
-layout(location = 0) out vec3 outColor[];
+layout(location = 0) out vec3 outColors[];
+layout(location = 1) flat out vec4 scissors[];
 
 layout(scalar, set = 0, binding = 0) buffer VertexBufferObject {
     vec2 vertices[];
@@ -31,6 +32,7 @@ struct TextData
     float size;
     vec2 offset;
     vec3 color;
+    vec4 scissor;
     uint chOffset;
     uint count;
 };
@@ -73,14 +75,15 @@ void main()
         pos.x += scale.x * charSize.x * float(chInfo.index) - 1.;
         pos.y = -pos.y - charSize.y + scale.y;
         gl_MeshVerticesEXT[i].gl_Position = vec4(pos + textInfo.offset, 0.0, 1.0);
-        outColor[i] = textInfo.color;
+        outColors[i] = textInfo.color;
+        scissors[i] = textInfo.scissor;
     }
 
     for (uint i = 0, offset; i < primitiveCount; i++)
     {
         offset = meshlet.indexOffset + i * 3;
 	    gl_PrimitiveTriangleIndicesEXT[i] = uvec3(
-            primitives[offset + 0], 
+            primitives[offset + 0],
             primitives[offset + 1],
             primitives[offset + 2]
         );

@@ -69,7 +69,7 @@ void TextBlock::Text(const char* newText)
     }
     else
     {
-        id = textContext.Insert({0, {0.0f, 0.0f}, FontColor, newText});
+        id = textContext.Insert({0, {0.0f, 0.0f}, FontColor, {}, newText});
     }
     ControlSize = {FontSize * charSize.x() * float(strlen(newText) * 0.5f), FontSize * charSize.y()};
 }
