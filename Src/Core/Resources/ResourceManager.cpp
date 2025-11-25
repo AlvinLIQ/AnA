@@ -153,6 +153,7 @@ void ResourceManager::UpdateCameraBuffer()
         static_cast<Cameras::CameraBufferObject*>(mainCameraBuffer.GetMappedData())[bufferIndex];
     cbo.proj = proj;
     cbo.view = view;
+    mainCameraBuffer.Flush();
     //cbo.invView = MainCamera.GetInverseView();
     uboDynamicOffsets[0] = bufferIndex * sizeof(Cameras::CameraBufferObject);
 
@@ -494,6 +495,7 @@ void ResourceManager::createMainCameraBuffers()
         VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
         VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
     mainCameraBuffer.Map();
+    MainCamera.SetRotateSpeed(float(imageCount) * 1.5f);
 
     frustumBuffer = Buffer(aDevice,
         imageCount * 2 * sizeof(FrustumPlanes),
