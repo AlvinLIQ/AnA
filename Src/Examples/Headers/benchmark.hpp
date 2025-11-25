@@ -6,19 +6,23 @@ class benchmark : public AnA::App
 public:
     benchmark() : AnA::App("Benchmarker")
     {
-        aResourceManager.TextureMap.try_emplace(4, 
+        aResourceManager.TextureMap.try_emplace(4,
                 "Textures/building1.jpg", &aDevice);
-        aResourceManager.TextureMap.try_emplace(5, 
+        aResourceManager.TextureMap.try_emplace(5,
                 "Textures/building2.jpg", &aDevice);
         for (uint32_t i = 6; i < 10; i++)
         {
-            aResourceManager.TextureMap.try_emplace(i, 
+            aResourceManager.TextureMap.try_emplace(i,
                 uint32_t((rand() & 0x00FFFFFFu) ^ 0xFF000000u), &aDevice);
         }
         auto& scene = aResourceManager.MainScene;
         std::vector<AnA::MeshInfo> meshInfos{
-            {"Models/cube.obj", 
-                {{0.0f, -0.3f, 0.0f}, 
+            {"Models/mountains.obj",
+                {{0.0f, -110, 0.0f},
+                {1.0f, 1.0f, 1.0f},
+                {}}, 0},
+            {"Models/cube.obj",
+                {{0.0f, -0.3f, 0.0f},
                 {103.0f, 0.15f, 103.0f},
                 {}}, 0}
         };
@@ -27,7 +31,7 @@ public:
             for (j = 0.0f; j <= 1.0f; j += 0.033f)
             {
                 float h = (float(random_double()) * 7.0f) + 2.0f;
-                meshInfos.push_back({"Models/cube.obj", 
+                meshInfos.push_back({"Models/cube.obj",
                     {{i * 200.0f - 100.0f, h, j * 200.0f - 100.0f},
                     {1.0f + random_double(), h + 0.3f, 1.0f + random_double()},
                     {}}, uint32_t(rand() % 10)});
@@ -43,7 +47,7 @@ public:
         AnA::Input::InputProfile profile{};
         profile.flag = AnA::Input::InputProfileFlags::None;
         aInputManager.GetProfiles().push_back(profile);
-        aInputManager.SetActiveProfile(1);        
+        aInputManager.SetActiveProfile(1);
     }
 private:
     float totalTime = 0.0f;
