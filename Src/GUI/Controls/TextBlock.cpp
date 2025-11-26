@@ -38,7 +38,7 @@ void TextBlock::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInf
     Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
 }
 
-void TextBlock::ApplyRenderInfo(Shape* , std::vector<VkDescriptorImageInfo>& , uint32_t& )
+void TextBlock::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
     if (id != -1u)
     {
@@ -56,7 +56,7 @@ void TextBlock::ApplyRenderInfo(Shape* , std::vector<VkDescriptorImageInfo>& , u
         textContext.UpdateLayout(id);
     }
 
-    //Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
+    Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
 }
 
 void TextBlock::Text(const char* newText)

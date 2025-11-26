@@ -1,5 +1,5 @@
 #version 460
-#extension GL_EXT_nonuniform_qualifier : enable 
+#extension GL_EXT_nonuniform_qualifier : enable
 
 layout(location = 0) in vec4 baseColor;
 layout(location = 1) in vec2 texCoord;
@@ -56,7 +56,7 @@ float rounded_rect(vec2 uv, float l, float t, float r, float b, vec2 radius)
 {
     float c;
     c = rect(uv, l + radius.x, t, r - radius.x, b) + rect(uv, l, t + radius.y, r, b - radius.y);
-    
+
     c += ellipse(uv, vec2(l + radius.x, t + radius.y), radius) + ellipse(uv, vec2(r - radius.x, t + radius.y), radius)
         + ellipse(uv, vec2(l + radius.x, b - radius.y), radius) + ellipse(uv, vec2(r - radius.x, b - radius.y), radius);
     if (c >= 1.)
@@ -73,7 +73,7 @@ void main()
 {
     //outColor = vec4(baseColor, 1.0);
     vec4 texColor = texture(texSampler[nonuniformEXT(texIndex)], vec3(texCoord, texLayer));
-    if (texColor.a < 0.5)
+    if (texColor.a < 0.5 || baseColor.w == 0.)
         discard;
     outColor = vec4(baseColor.x * texColor.x, baseColor.y * texColor.y, baseColor.z * texColor.z, baseColor.w);
 }
