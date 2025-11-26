@@ -2,9 +2,9 @@
 #include "Headers/FileDialog.hpp"
 #include "../GUI/Controls/Headers/ToggleSwitch.hpp"
 #include "../GUI/Controls/Headers/Slider.hpp"
-#include "../GUI/Controls/Headers/StackPanel.hpp"
 #include "../GUI/Controls/Headers/TextBlock.hpp"
 #include "../GUI/Controls/Headers/PageView.hpp"
+#include "../GUI/Controls/Headers/ObjectView.hpp"
 
 
 using namespace AnA;
@@ -80,14 +80,15 @@ void EditorApp::loadModelButton_Click(void* , PointerEventArgs& )
         mesh.tetureId = 0;
         resourceManager->MainScene.Append(std::vector<MeshInfo>(1, mesh));
         auto panel =
-                static_cast<Controls::StackPanel*>(static_cast<EditorApp*>(App::GetCurrent())->controlMap["modelList"]);
-        panel->Child(static_cast<Controls::Control*>(new Controls::TextBlock(path.substr(path.find_last_of('/') + 1).c_str(),
-                                    {0.8f, 0.8f, 0.8f, 1.0f})));
+                static_cast<Controls::ObjectView*>(static_cast<EditorApp*>(App::GetCurrent())->controlMap["modelList"]);
+        ObjectViewItemData itemData;
+        itemData.name = path.substr(path.find_last_of('/') + 1).c_str();
+        panel->AddItem(itemData);
         resourceManager->AppendCallback([]()
         {
             Control::RequestUpdate();
         });
-        
+
     });
 }
 
@@ -137,7 +138,7 @@ int main()
     editor.Init();
     auto resourceManager = Resource::ResourceManager::GetCurrent();
     auto& scene = resourceManager->MainScene;
-    
+
     auto sceneFile = ReadFile("Scenes/test.ana");
     scene.Append(reinterpret_cast<MeshInfo*>(sceneFile.data()), sceneFile.size() / sizeof(MeshInfo));
     /*
