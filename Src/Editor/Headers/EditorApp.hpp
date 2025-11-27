@@ -20,6 +20,7 @@ namespace AnA
             static void saveSceneButton_Click(void* control, PointerEventArgs& args);
             static void exitButton_Click(void* control, PointerEventArgs& args);
             static void pageButton_Click(void* , PointerEventArgs& );
+            static void mainScene_MeshAppend(std::string name, uint32_t id);
             std::unordered_map<std::string, Controls::Control*> controlMap;
         protected:
             static void onLoop();

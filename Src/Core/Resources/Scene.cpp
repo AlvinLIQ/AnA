@@ -194,14 +194,16 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
             }
         }
         meshes.push_back(mesh);
-        
+        if (this->MeshAppend)
+            this->MeshAppend(meshInfo.filePath, meshes.size() - 1);
+
         VkDrawIndexedIndirectCommand drawIndexedCommand;
         drawIndexedCommand.firstInstance = 0;
         drawIndexedCommand.instanceCount = 1;
         drawIndexedCommand.indexCount = mesh.indexCount;
         drawIndexedCommand.firstIndex = uniqueModels[mesh.modelID].indexOffset;
         drawIndexedCommand.vertexOffset = 0;
-        static_cast<VkDrawIndexedIndirectCommand*>(drawIndexedIndirectBuffer.GetMappedData())[drawIndexedCommands.size()] = 
+        static_cast<VkDrawIndexedIndirectCommand*>(drawIndexedIndirectBuffer.GetMappedData())[drawIndexedCommands.size()] =
             drawIndexedCommand;
         drawIndexedCommands.push_back(drawIndexedCommand);
     }
@@ -227,7 +229,7 @@ void Scene::Append(std::vector<Model::Vertex>& meshVertices, std::vector<uint32_
     auto model = std::make_shared<Model>(info);
     uint32_t meshId;
     Resource::ResourceManager::GetCurrent()->AppendModel(model, meshId);
-    
+
     modelMap.emplace(meshId, uint32_t(uniqueModels.size()));
     mesh.modelID = uint32_t(uniqueModels.size());
     uniqueModels.push_back({uint32_t(vertexCount), uint32_t(indexCount), meshletCount, model});
@@ -290,12 +292,12 @@ void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIn
     {
         sets[DEFAULT_MESHLET_LAYOUT] = meshDescriptor->GetSets()[currentBufferIndex];
     }
-    const auto& offsets = 
+    const auto& offsets =
         Resource::ResourceManager::GetCurrent()->GetDefaultUBODynamicOffsets();
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
         shader.GetPipelineLayout(), 0, static_cast<uint32_t>(sets.size()),
-        sets.data(), 
-        static_cast<uint32_t>(offsets.size()), 
+        sets.data(),
+        static_cast<uint32_t>(offsets.size()),
         offsets.data());
 }
 
@@ -493,7 +495,7 @@ void Scene::applyVertexBufferUpdate(Model::Vertex* vertexBufferData, Model::Inde
         }
     }
     *static_cast<uint32_t*>(drawIndexedCountBuffer.GetMappedData()) = meshes.size();
-    
+
     vertexBuffers[nextIndex].Flush();
 }
 
@@ -605,7 +607,7 @@ void Scene::updateSSBODescriptor()
         bufferInfo.offset = 0;
         bufferInfo.range = meshletIDBuffers[nextIndex].GetSize();
         aDevice->UpdateDescriptorSet(bufferInfo, 4, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                meshDescriptor->GetSets()[nextIndex]);  
+                meshDescriptor->GetSets()[nextIndex]);
     }
     currentBufferIndex = nextIndex;
     nextIndex = NextFrameIndex(currentBufferIndex);

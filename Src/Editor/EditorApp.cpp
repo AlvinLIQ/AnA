@@ -23,6 +23,7 @@ EditorApp::~EditorApp()
 void EditorApp::Init()
 {
     aResourceManager.MainControl = InitControl();
+    aResourceManager.MainScene.MeshAppend = EditorApp::mainScene_MeshAppend;
     sceneOffset.x = EDITOR_LEFT_PANEL_WIDTH;
     aInputManager.GlobalProfile.flag = Input::InputProfileFlags::None;
     Input::KeyMapConfig keyMapConfig;
@@ -79,11 +80,6 @@ void EditorApp::loadModelButton_Click(void* , PointerEventArgs& )
         memcpy(mesh.filePath, path.c_str(), path.length() + 1);
         mesh.tetureId = 0;
         resourceManager->MainScene.Append(std::vector<MeshInfo>(1, mesh));
-        auto panel =
-                static_cast<Controls::ObjectView*>(static_cast<EditorApp*>(App::GetCurrent())->controlMap["modelList"]);
-        ObjectViewItemData itemData;
-        itemData.name = path.substr(path.find_last_of('/') + 1).c_str();
-        panel->AddItem(itemData);
         resourceManager->AppendCallback([]()
         {
             Control::RequestUpdate();
@@ -130,6 +126,15 @@ void EditorApp::pageButton_Click(void* , PointerEventArgs& )
     pageView->PageIndex(1 - pageView->PageIndex());
 }
 
+void EditorApp::mainScene_MeshAppend(std::string name, uint32_t id)
+{
+    auto panel =
+            static_cast<Controls::ObjectView*>(static_cast<EditorApp*>(App::GetCurrent())->controlMap["modelList"]);
+    ObjectViewItemData itemData;
+    itemData.id = id;
+    itemData.name = name.substr(name.find_last_of('/') + 1).c_str();
+    panel->AddItem(itemData);
+}
 //const VkDeviceSize offset = 0;
 
 int main()

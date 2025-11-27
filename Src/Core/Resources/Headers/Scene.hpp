@@ -144,6 +144,7 @@ namespace AnA
         {
             return samplersDescriptors[0]->GetSets()[0];
         }
+        void (*MeshAppend)(std::string, uint32_t) = nullptr;
     private:
         Device* aDevice;
         std::vector<Buffer> vertexBuffers{};
