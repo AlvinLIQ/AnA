@@ -15,22 +15,15 @@ StackPanel::~StackPanel()
 void StackPanel::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
     GetSizeForRender();
-    GetActualControlOffset();
     StackPanel::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
 }
 
-void StackPanel::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
+Vec2 StackPanel::GetSizeForRender()
 {
+    Control::GetSizeForRender();
+    GetActualControlOffset();
     Vec2 maxSize = RenderSize();
-    auto renderOffset = RenderOffset() + Padding;
     int o = Orientation, invO = 1 - Orientation;
-    /*
-    for (int i = 0; i < items.size(); i++)
-    {
-        auto size = items[i]->GetSizeForRender();
-        if (size2F[o] > maxSize)
-            maxSize = size2F[o];
-    }*/
     Vec2 size{};
     Vec2 offset{};
     float* size2F = reinterpret_cast<float*>(&size);
@@ -73,9 +66,18 @@ void StackPanel::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorIma
         }
         items[i]->RenderOffset(offset);
         items[i]->RenderSize(size);
-        items[i]->ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
         maxSize2F[invO] = std::max(maxSize2F[invO] ,(offset2F[invO] - renderOffset2F[invO] + size2F[invO]));
     }
     RenderSize(maxSize);
+    return maxSize;
+}
+
+void StackPanel::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
+{
+    for (auto& item : items)
+    {
+        item->RenderOffset() += renderOffset + Padding;
+        item->ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
+    }
     Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
 }

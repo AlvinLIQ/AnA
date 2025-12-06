@@ -25,7 +25,6 @@ namespace AnA
                 return items;
             }
 
-            void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
             void PointerEventTrigger(PointerEventArgs& args) override;
             float Spacing = 0.0f;
             Vec2 Padding = {};

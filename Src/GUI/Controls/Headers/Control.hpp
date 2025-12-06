@@ -16,7 +16,7 @@ namespace AnA
         public:
             Control();
             virtual ~Control();
-            
+
             AlignmentType HorizontalAlignment {ControlHorizontalAlignment};
             AlignmentType VerticalAlignment {ControlVerticalAlignment};
 
@@ -24,10 +24,10 @@ namespace AnA
             Vec2 GetActualControlOffset();
 
             Vec2 ControlSize {AnA::ControlSize};
-            Vec2 GetSizeForRender();
+            virtual Vec2 GetSizeForRender();
             void SizeRequest(Vec2 newSize)
             {
-                if (newSize.x() < minSize.x() || newSize.y() < minSize.y() || 
+                if (newSize.x() < minSize.x() || newSize.y() < minSize.y() ||
                     newSize.x() > maxSize.x() || newSize.y() > maxSize.y())
                     return;
 
@@ -86,11 +86,12 @@ namespace AnA
             }
             static void ClearFocus();
             static Control* GetFocused();
-            
+
             bool IsInside(CursorPosition pos);
             static bool IsInside(CursorPosition& pos, Vec2& offset, Vec2& size);
 
             static bool NeedUpdate();
+            static bool BeginUpdate();
             static void RequestUpdate();
             static void EndUpdate();
 

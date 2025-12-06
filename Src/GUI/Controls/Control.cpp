@@ -18,7 +18,7 @@ Control::Control()
 
 Control::~Control()
 {
-    
+
 }
 
 Vec2 Control::GetActualControlOffset()
@@ -39,7 +39,7 @@ Vec2 Control::GetActualControlOffset()
                 pSize[i] = 1.f;
         }
     }
-                
+
     renderOffset.x() += ControlOffset.x();
     renderOffset.y() += ControlOffset.y();
     renderOffset.x() *= aSwapChain->ScaleX;
@@ -137,7 +137,7 @@ bool Control::IsInside(CursorPosition pos)
 
 bool Control::IsInside(CursorPosition& pos, Vec2& offset, Vec2& size)
 {
-    return pos.x.As<float>() >= offset.x() && pos.y.As<float>() >= offset.y() && 
+    return pos.x.As<float>() >= offset.x() && pos.y.As<float>() >= offset.y() &&
     pos.x.As<float>() <= offset.x() + size.x() && pos.y.As<float>() <= offset.y() + size.y();
 }
 
@@ -283,12 +283,12 @@ void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input:
     {
         auto control = static_cast<Control*>(param);
         PointerEventArgs args;
-        
+
         args.EventType = GetPointerEventType(leftButtonAction);
         args.TriggerType = PointerTriggerType::Mouse;
         auto extent = Control::GetSwapChainExtent();
         auto scale = Control::GetScale();
-        args.Position = {pos.x * scale[0].As<double>() / (control->Extent.width / static_cast<double>(extent.width)), 
+        args.Position = {pos.x * scale[0].As<double>() / (control->Extent.width / static_cast<double>(extent.width)),
                         pos.y * static_cast<double>(scale[1]) / (control->Extent.height / static_cast<double>(extent.height))};
         if (focusedControl && focusedControl != control)
             focusedControl->PointerEventTrigger(args);

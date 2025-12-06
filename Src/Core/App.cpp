@@ -141,8 +141,8 @@ void App::Run()
             aResourceManager.Resize();
             updateSceneOffset();
         }
-        if (aResourceManager.MainControl &&
-            (aResourceManager.MainControl->NeedUpdate() || aRenderer.NeedUpdate()))
+        if ((aResourceManager.MainControl &&
+            aResourceManager.MainControl->NeedUpdate()) || aRenderer.NeedUpdate())
         {
             auto controlExtent = aRenderer.GetSwapChainExtent();
             controlExtent.width = static_cast<uint32_t>(actualSceneOffset.x);

@@ -25,6 +25,7 @@ void ItemPresenter::Child(Control* newItem)
         delete item;
 
     item = newItem;
+    RequestUpdate();
 }
 
 Control* ItemPresenter::Child()
