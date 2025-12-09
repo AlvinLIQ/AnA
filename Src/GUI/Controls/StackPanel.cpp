@@ -20,6 +20,7 @@ void StackPanel::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageIn
 
 Vec2 StackPanel::GetSizeForRender()
 {
+    RenderSize({});
     Control::GetSizeForRender();
     GetActualControlOffset();
     Vec2 maxSize = RenderSize();
@@ -74,9 +75,10 @@ Vec2 StackPanel::GetSizeForRender()
 
 void StackPanel::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
+    auto offset = Vec2{renderOffset.x() - renderSize.x() + 1.0f, renderOffset.y() - renderSize.y() + 1.0f};
     for (auto& item : items)
     {
-        item->RenderOffset() += renderOffset + Padding;
+        item->RenderOffset() += offset + Padding;
         item->ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
     }
     Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
