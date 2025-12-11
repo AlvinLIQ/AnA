@@ -18,6 +18,8 @@ namespace AnA
             void Text(const char* newText);
             const char* Text();
 
+            void Insert(size_t index, uint32_t ch);
+
             bool IsWrapping;
             Float FontSize = 25.0f;
             glm::vec4 FontColor{0.0f, 0.0f, 0.0f, 1.0f};

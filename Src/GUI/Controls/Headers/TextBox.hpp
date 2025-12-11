@@ -1,30 +1,18 @@
 #pragma once
 
-#include "Control.hpp"
+#include "TextBlock.hpp"
 
 namespace AnA
 {
     namespace Controls
     {
-        class TextBox : Control
+        class TextBox : public TextBlock
         {
         public:
             TextBox();
-            std::string Text()
-            {
-                return text;
-            }
-            void Text(const std::string& newText)
-            {
-                text = newText;
-                RequestUpdate();
-            }
-            void Insert(size_t index, uint32_t ch);
+            void CharacterRecevied(uint32_t ch) override;
         protected:
-            std::string text = "";
-            std::vector<AnA::String> stringBuffers;
             size_t cursor = 0;
-            void CharacterRecevied(uint32_t ch);
         };
     }
 }

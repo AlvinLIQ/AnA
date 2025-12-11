@@ -22,6 +22,12 @@ namespace AnA
             CursorCallBack callBack;
             int action;
         };
+        typedef void(*CharacterCallBack)(uint32_t ch);
+        struct CharacterConfig
+        { 
+            CharacterCallBack callBack;
+            uint32_t ch;
+        };
         enum InputProfileFlags
         {
             None = 0, HideCursor = 1, RawMotion = 2, Disabled = 4
@@ -31,6 +37,7 @@ namespace AnA
             uint32_t flag;
             std::vector<KeyMapConfig> keyMapConfigs;
             std::vector<CursorConfig> cursorConfigs;
+            std::vector<CharacterConfig> characterConfigs;
             void* param;
             //only call when there's a config
             void(*callback)(void* param) = nullptr;
@@ -63,6 +70,7 @@ namespace AnA
         private:
             Window& aWindow;
             static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+            static void characterCallback(GLFWwindow* window, uint32_t ch);
             int activeProfileIndex = 0;
             std::vector<InputProfile> inputProfiles{1};
             CursorPosition cursorPos;

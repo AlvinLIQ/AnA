@@ -12,6 +12,7 @@ InputManager::InputManager(Window& mWindow) : aWindow {mWindow}
 
     auto window = aWindow.GetGLFWwindow();
     glfwSetKeyCallback(window, InputManager::keyCallback);
+    glfwSetCharCallback(window, InputManager::characterCallback);
     glfwGetCursorPos(aWindow.GetGLFWwindow(), &prevPos.x, &prevPos.y);
 }
 
@@ -57,6 +58,15 @@ void InputManager::keyCallback(GLFWwindow* , int key, int , int action, int )
     {
         if (keyMapConfig.keyCode == key && keyMapConfig.callBack != nullptr && keyMapConfig.action == action)
             keyMapConfig.callBack(keyMapConfig.param);
+    }
+}
+
+void InputManager::characterCallback(GLFWwindow* , uint32_t ch)
+{
+    auto &characterConfigs = _aInputManager->GetActiveProfile().characterConfigs;
+    for (auto& characterConfig : characterConfigs)
+    {
+        characterConfig.callBack(ch);
     }
 }
 

@@ -248,6 +248,11 @@ void Control::PointerEventTrigger(PointerEventArgs& args)
         RunPointerEvents(PointerEvents[actualEventType], this, args);
 }
 
+void Control::CharacterRecevied(uint32_t ch)
+{
+    printf("%c", ch);
+}
+
 PointerEventType GetPointerEventType(int buttonAction)
 {
     PointerEventType eventType = PointerEventType::Moving;
@@ -258,6 +263,8 @@ PointerEventType GetPointerEventType(int buttonAction)
         {
             leftButtonPressed = true;
             eventType = PointerEventType::Pressed;
+            if (focusedControl != nullptr && focusedControl->FocusType)
+                Control::ClearFocus();
         }
         break;
     case GLFW_RELEASE:
@@ -265,12 +272,19 @@ PointerEventType GetPointerEventType(int buttonAction)
         {
             leftButtonPressed = false;
             eventType = PointerEventType::Released;
-            focusedControl = nullptr;
+            if (focusedControl != nullptr && !focusedControl->FocusType)
+                Control::ClearFocus();
         }
     default:
         break;
     }
     return eventType;
+}
+
+void _characterReceived(uint32_t ch)
+{
+    if (focusedControl != nullptr)
+        focusedControl->CharacterRecevied(ch);
 }
 
 void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input::InputProfile>& profiles)
@@ -296,5 +310,6 @@ void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input:
             control->PointerEventTrigger(args);
     };
     profile.cursorConfigs.push_back(cursorConfig);
+    profile.characterConfigs.push_back({_characterReceived});
     profiles.push_back(profile);
 }

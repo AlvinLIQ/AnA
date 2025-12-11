@@ -79,3 +79,14 @@ const char* TextBlock::Text()
     auto info = Resource::ResourceManager::GetCurrent()->TextContext.GetInfoById(id);
     return info ? info->text.c_str() : "";
 }
+
+void TextBlock::Insert(size_t index, uint32_t ch)
+{
+    auto& textContext = Resource::ResourceManager::GetCurrent()->TextContext;
+    auto info = textContext.GetInfoById(id);
+    if (info)
+    {
+        info->text.insert(info->text.begin() + index, ch);
+        textContext.UpdateText(id, info->text);
+    }
+}

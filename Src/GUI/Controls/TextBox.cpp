@@ -3,14 +3,17 @@
 using namespace AnA;
 using namespace AnA::Controls;
 
-TextBox::TextBox()
+
+void TextBox_PointerPressed(TextBox* control, PointerEventArgs& args)
 {
-    
+    control->Focus();
+    Control::RequestUpdate();
 }
 
-void TextBox::Insert(size_t index, uint32_t ch)
+TextBox::TextBox()
 {
-    text.insert(text.begin() + index, ch);
+    FocusType = 1;
+    PointerEvents[PointerEventType::Pressed].push_back(reinterpret_cast<PointerEventHandler>(TextBox_PointerPressed));
 }
 
 void TextBox::CharacterRecevied(uint32_t ch)
