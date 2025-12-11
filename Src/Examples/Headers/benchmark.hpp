@@ -17,10 +17,6 @@ public:
         }
         auto& scene = aResourceManager.MainScene;
         std::vector<AnA::MeshInfo> meshInfos{
-            {"Models/mountains.obj",
-                {{0.0f, -110, 0.0f},
-                {1.0f, 1.0f, 1.0f},
-                {}}, 0},
             {"Models/cube.obj",
                 {{0.0f, -0.3f, 0.0f},
                 {103.0f, 0.15f, 103.0f},
@@ -54,6 +50,12 @@ private:
     glm::vec3 direction = glm::vec3{1.0f};
     float rotateYAnimationResult = 0.0f;
     bool rotationStarted = false;
+    uint64_t frameCount = 0;
+    float totalCPUTime = 0.f;
+    float avgCPUTime = 0.0f;
+    float totalGPUTime = 0.f;
+    float avgGPUTime = 0.0f;
+    short rotateTime = 0;
 protected:
     virtual void onCommandBufferRecording(AnA::CommandBuffer& commandBuffer) override
     {
@@ -68,7 +70,18 @@ protected:
                 while (aResourceManager.MainCamera.CameraTransform.rotation.y >= glm::two_pi<float>())
                     aResourceManager.MainCamera.CameraTransform.rotation.y -= glm::two_pi<float>();
                 rotationStarted = false;
+                rotateTime++;
             }
+        }
+        if (rotateTime > 2)
+        {
+            uint64_t score, cpuScore, gpuScore;
+            cpuScore = uint64_t(3000.0f / totalCPUTime / avgCPUTime);
+            gpuScore = uint64_t(700000000.0f / totalGPUTime / avgGPUTime);
+            score = frameCount + cpuScore + gpuScore;
+            printf("%llu,%llu,%llu\n", score, cpuScore, gpuScore);
+            Exit();
+            return;
         }
         if (aResourceManager.MainCamera.CameraTransform.translation.z >= 95.0f)
         {
@@ -91,5 +104,10 @@ protected:
             aDevice.MeshShaderSupport() ? aResourceManager.Shaders[5] : aResourceManager.Shaders[0],
             swapChain.CurrentFrame);
         aRenderer.EndRendering(commandBuffer);
+        frameCount++;
+        totalCPUTime += cpuTime;
+        totalGPUTime += aRenderer.GetGPUTime();
+        avgCPUTime = (avgCPUTime + cpuTime) * 0.5f;
+        avgGPUTime = (avgGPUTime + aRenderer.GetGPUTime()) * 0.5f;
     }
 };
