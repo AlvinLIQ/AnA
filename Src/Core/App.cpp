@@ -177,6 +177,11 @@ void App::Run()
     vkDeviceWaitIdle(aDevice.GetLogicalDevice());
 }
 
+void App::Exit()
+{
+    glfwSetWindowShouldClose(aWindow.GetGLFWwindow(), 1);
+}
+
 void App::Cleanup()
 {
     _2DModel.reset();
