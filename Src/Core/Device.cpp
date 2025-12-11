@@ -190,7 +190,7 @@ void Device::CreateTextureImage(const char* imagePath, VkImage* pTexImage, VmaAl
     VkDeviceSize imageSize = static_cast<VkDeviceSize>(texWidth * texHeight * 4);
 
     if (!pixels)
-        throw std::runtime_error("Failed to load texture image!");
+        throw std::runtime_error(std::string("Failed to load texture image! ") + imagePath);
 
     Buffer aBuffer(this, imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_HOST);
     aBuffer.Map();
@@ -927,12 +927,14 @@ bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device)
     deviceFeatures.pNext = &unifiedLayoutsFeatures;
     vkGetPhysicalDeviceFeatures2(device, &deviceFeatures);
 
+#ifndef RELEASE_BUILD
 #ifdef ENABLE_MESH_SHADER
     if (meshShaderFeatures.meshShader == VK_TRUE)
     {
         meshShaderSupport = true;
         deviceExtensions.push_back(VK_EXT_MESH_SHADER_EXTENSION_NAME);
     }
+#endif
 #endif
     if (unifiedLayoutsFeatures.unifiedImageLayouts == VK_TRUE)
         unifiedLayoutsSupport = true;
