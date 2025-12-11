@@ -26,7 +26,8 @@ namespace AnA
                 RenderMode(Absolute);
                 Color = {};
                 ControlSize = {10.0f, 25.0f};
-                item = new TextBlock(Data.name.c_str(), {0.8f, 0.8f, 0.8f, 1.0f});
+                item = new TextBlock((std::to_string(Data.id) + " " + Data.name).c_str(), 
+                    {0.8f, 0.8f, 0.8f, 1.0f});
             }
             ObjectViewItemData Data;
         };
