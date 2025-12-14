@@ -11,9 +11,9 @@ void ListView::ListView_PointerMoving(ListView* control, PointerEventArgs& args)
     {
         if (item->IsInside(args.Position))
         {
-            if (item != control->hoverItem)
+            if (item != control->hoverItem && item != control->selectedItem)
             {
-                if (control->hoverItem != nullptr)
+                if (control->hoverItem != nullptr && control->hoverItem != control->selectedItem)
                 {
                     control->hoverItem->Color = {};
                 }
@@ -24,7 +24,7 @@ void ListView::ListView_PointerMoving(ListView* control, PointerEventArgs& args)
             return;
         }
     }
-    if (control->hoverItem != nullptr)
+    if (control->hoverItem != nullptr && control->hoverItem != control->selectedItem)
     {
         control->hoverItem->Color = {};
         control->hoverItem->RequestUpdate();
@@ -32,11 +32,30 @@ void ListView::ListView_PointerMoving(ListView* control, PointerEventArgs& args)
     }
 }
 
+
+void ListView::ListView_PointerPressed(ListView* control, PointerEventArgs& )
+{
+    if (control->hoverItem == control->selectedItem)
+        return;
+    if (control->selectedItem != nullptr)
+    {
+        control->selectedItem->Color = {};
+    }
+    if (control->hoverItem != nullptr)
+    {
+        control->selectedItem = control->hoverItem;
+        control->hoverItem->Color = {0.5f, 0.5f, 0.5f, 1.0f};
+        control->hoverItem->RequestUpdate();
+        control->selectedItem = control->hoverItem;
+    }
+}
+
 void ListView::ListView_PointerExited(ListView* control, PointerEventArgs& )
 {
     if (control->hoverItem != nullptr)
     {
-        control->hoverItem->Color = {};
+        if (control->hoverItem != control->selectedItem)
+            control->hoverItem->Color = {};
         control->hoverItem->RequestUpdate();
         control->hoverItem = nullptr;
     }
@@ -45,6 +64,7 @@ void ListView::ListView_PointerExited(ListView* control, PointerEventArgs& )
 ListView::ListView()
 {
     PointerEvents[PointerEventType::Moving].push_back(reinterpret_cast<PointerEventHandler>(ListView::ListView_PointerMoving));
+    PointerEvents[PointerEventType::Pressed].push_back(reinterpret_cast<PointerEventHandler>(ListView::ListView_PointerPressed));
     PointerEvents[PointerEventType::Exited].push_back(reinterpret_cast<PointerEventHandler>(ListView::ListView_PointerExited));
 }
 

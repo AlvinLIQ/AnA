@@ -24,6 +24,7 @@ namespace AnA
             Control* selectedItem = nullptr;
             Control* hoverItem = nullptr;
             static void ListView_PointerMoving(ListView* control, PointerEventArgs& args);
+            static void ListView_PointerPressed(ListView* control, PointerEventArgs& args);
             static void ListView_PointerExited(ListView* control, PointerEventArgs& args);
         };
     }
