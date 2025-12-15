@@ -29,6 +29,7 @@ namespace AnA
         glm::vec3 color;
         glm::vec4 scissor;
         std::string text;
+        bool visible;
     };
     struct TextMapData
     {

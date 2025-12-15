@@ -26,7 +26,6 @@ namespace AnA
         struct CharacterConfig
         { 
             CharacterCallBack callBack;
-            uint32_t ch;
         };
         enum InputProfileFlags
         {

@@ -53,6 +53,7 @@ void TextBlock::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImag
 
         info->offset = {offset.x() * 0.5f, offset.y() * 0.5f + 0.5f};
         info->size = FontSize;
+        info->visible = true;
         textContext.UpdateLayout(id);
     }
 
@@ -69,7 +70,7 @@ void TextBlock::Text(const char* newText)
     }
     else
     {
-        id = textContext.Insert({0, {0.0f, 0.0f}, FontColor, {}, newText});
+        id = textContext.Insert({0, {0.0f, 0.0f}, FontColor, {}, newText, true});
     }
     ControlSize = {FontSize * charSize.x() * float(strlen(newText) * 0.5f), FontSize * charSize.y()};
 }

@@ -185,9 +185,11 @@ void Text::ResetLayout()
 {
     _mutex.lock();
     TextData* textBuffer = reinterpret_cast<TextData*>(textBuffers[currentBufferIndex].GetMappedData());
-    for (size_t i = 0; i < textMap.size(); i++)
+    size_t i = 0;
+    for (auto& text : textMap)
     {
-        textBuffer[i].size = 0.0f;
+        textBuffer[i++].size = 0.0f;
+        text.second.textInfo.visible = false;
     }
     _mutex.unlock();
 }
@@ -213,7 +215,7 @@ void Text::updateAll()
         iter.second.index = textIndex;
         auto& textInfo = iter.second.textInfo;
         chIndex = 0;
-        textBuffer[textIndex].size = textInfo.size;
+        textBuffer[textIndex].size = textInfo.visible ? textInfo.size : 0.0f;
         textBuffer[textIndex].offset = textInfo.offset * 2.0f;
         textBuffer[textIndex].color = textInfo.color;
         textBuffer[textIndex].scissor = textInfo.scissor;
