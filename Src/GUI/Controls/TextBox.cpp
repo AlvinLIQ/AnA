@@ -4,7 +4,7 @@ using namespace AnA;
 using namespace AnA::Controls;
 
 
-void TextBox_PointerPressed(TextBox* control, PointerEventArgs& args)
+void TextBox_PointerPressed(TextBox* control, PointerEventArgs& )
 {
     control->Focus();
     Control::RequestUpdate();

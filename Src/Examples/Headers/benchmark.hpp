@@ -1,5 +1,6 @@
 #include "../Core/Headers/App.hpp"
 #include <stdlib.h>
+#include <iostream>
 
 class benchmark : public AnA::App
 {
@@ -79,7 +80,7 @@ protected:
             cpuScore = uint64_t(3000.0f / totalCPUTime / avgCPUTime);
             gpuScore = uint64_t(700000000.0f / totalGPUTime / avgGPUTime);
             score = frameCount + cpuScore + gpuScore;
-            printf("%llu,%llu,%llu\n", score, cpuScore, gpuScore);
+            std::cout << score << "," << gpuScore << "," << cpuScore << "\n";
             Exit();
             return;
         }
