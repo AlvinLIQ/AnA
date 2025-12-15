@@ -213,7 +213,8 @@ void ResourceManager::Resize()
     auto extent = SwapChain::GetCurrent()->GetExtent();
     UpdateCamera(static_cast<float>(extent.width) / static_cast<float>(extent.height));
     RecreateResources();
-/*
+
+#ifdef DEFERRED
     auto& framebuffers = SwapChain::GetCurrent()->GetOffscreenFramebuffers();
     VkSampler colorSampler = SwapChain::GetCurrent()->GetColorSampler();
     std::vector<std::vector<VkWriteDescriptorSet>> writes(2);
@@ -238,7 +239,8 @@ void ResourceManager::Resize()
             write.dstBinding = j;
         }
     }
-    lightDescriptors[0].UpdateDescriptorSets(writes);*/
+    lightDescriptors[0].UpdateDescriptorSets(writes);
+#endif
 }
 
 void ResourceManager::RecreateResources()

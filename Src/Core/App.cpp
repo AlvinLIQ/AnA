@@ -260,21 +260,34 @@ void App::uiLoop()
 void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
 {
     auto& swapChain = aRenderer.GetSwapChain();
-/*
+
+#ifdef DEFERRED
     aRenderer.BeginOffscreenRendering(commandBuffer);
 
     swapChain.SetViewport(commandBuffer);
-    aRenderSystem.RenderIndirect(commandBuffer, aResourceManager.MainScene,
+    aRenderer.RenderIndirect(commandBuffer, aResourceManager.MainScene,
         aResourceManager.Shaders[5],
         swapChain.CurrentFrame);
 
     aRenderer.EndOffscreenRendering(commandBuffer);
-    */
+#endif
+
     aRenderer.BeginRendering(commandBuffer);
     swapChain.SetViewport(commandBuffer, actualSceneOffset);
+
+#ifdef DEFERRED
+    auto& lightShader = aResourceManager.Shaders.back();
+    lightShader.GetPipeline().Bind(commandBuffer);
+    vkCmdSetPrimitiveTopology(commandBuffer, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+    auto& sets = lightShader.GetDescriptorSets()[0];
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, lightShader.GetPipelineLayout(),
+        0, uint32_t(sets.size()), sets.data(), 0, VK_NULL_HANDLE);
+    vkCmdDraw(commandBuffer, 6, 1, 0, 0);
+#else
     aRenderer.RenderIndirect(commandBuffer, aResourceManager.MainScene,
         aDevice.MeshShaderSupport() ? aResourceManager.Shaders[5] : aResourceManager.Shaders[0],
         swapChain.CurrentFrame);
+#endif
 
     if (aDevice.MeshShaderSupport())
     {

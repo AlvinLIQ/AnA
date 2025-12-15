@@ -8,7 +8,7 @@ layout(set = 0, binding = 1) uniform sampler2D normalSampler;
 layout(set = 0, binding = 2) uniform sampler2D albedoSampler;
 layout(set = 0, binding = 3) uniform sampler2D depthSampler;
 
-const vec3 LIGHT_POS = vec3(4., -2., 1.);
+const vec3 LIGHT_POS = vec3(4., 2., 1.);
 const vec3 LIGHT_COLOR = vec3(0.6, 0.7, 0.5);
 
 void main()
