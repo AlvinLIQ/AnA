@@ -1,5 +1,6 @@
 #version 460
 
+layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 struct Projection
 {
     vec2 pos1;
@@ -8,11 +9,15 @@ struct Projection
 
 struct Object{
     mat4 model;
+    vec3 center;
+    float radius;
 };
 
 layout(std140, set = 0, binding = 0) buffer ObjectBuffer {
     Object objects[];
-} objectBuffer;
+};
+
+layout(st)
 
 layout(std140, binding = 1) readonly buffer SSBOIn
 {
@@ -21,10 +26,25 @@ layout(std140, binding = 1) readonly buffer SSBOIn
 
 layout(std140, binding = 2) buffer SSBOOut
 {
-    Projection projectionsOut[];
+    uvec2 collidedPairs[];
 };
+
+shared uint collidedCount;
 
 void main()
 {
-    
+    uint pos = gl_GlobalInvocationID.x;
+    collidedCount = 0;
+    barrier();
+
+    for (uint i = 0; i < pos; i++)
+    {
+        vec3 relativePos = objects[i].center - objects[pos].center;
+        float r = objects[i].radius + objects[pos].radius;
+        if (dot(relativePos, relativePos) <= r * r)
+        {
+            uint index = atomicAdd(collidedCount, 1);
+            collidedPairs[index] = uvec2(i, pos);
+        }
+    }
 }
