@@ -15,6 +15,13 @@ struct Vertex
     vec2 uv;
 };
 
+struct Object
+{
+    vec3 center;
+    float radius;
+    mat4 transform;
+};
+
 struct Meshlet
 {
     uint vertexOffset;
@@ -38,7 +45,7 @@ struct MeshPayload
 struct BoundingSphere
 {
     vec3 center;
-    uint farVertexID;
+    float radius;
     vec3 normal;
     float cutoff;
     vec3 coneApex;

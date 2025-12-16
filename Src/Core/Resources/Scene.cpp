@@ -426,7 +426,7 @@ void Scene::UpdateMeshlets()
             indexOffset += meshlet.indexCount;
 
             cullingBuffer[i].center = meshlet.center;
-            cullingBuffer[i].farVertexID = meshlet.farVertexID;
+            cullingBuffer[i].radius = meshlet.radius;
             cullingBuffer[i].normal = meshlet.normal;
             cullingBuffer[i].coneApex = meshlet.coneApex;
             cullingBuffer[i].cutoff = meshlet.cutoff;

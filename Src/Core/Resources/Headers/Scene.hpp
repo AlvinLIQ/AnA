@@ -36,6 +36,8 @@ namespace AnA
 
     struct Object
     {
+        glm::vec3 center;
+        float radius;
         glm::mat4 transform;
     };
 
@@ -61,7 +63,7 @@ namespace AnA
     struct BoundingSphere
     {
         glm::vec3 center;
-        uint32_t farVertexID;
+        float radius;
         glm::vec3 normal;
         float cutoff;
         glm::vec3 coneApex;

@@ -32,11 +32,6 @@ layout(scalar, set = 1, binding = 0) buffer VertexSSBO
     Vertex vertices[];
 };
 
-struct Object
-{
-    mat4 transform;
-};
-
 layout(std430, set = 1, binding = 1) buffer ObjectSSBO
 {
     Object objects[];

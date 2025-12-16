@@ -7,17 +7,9 @@ struct Projection
     vec2 pos2;
 };
 
-struct Object{
-    mat4 model;
-    vec3 center;
-    float radius;
-};
-
-layout(std140, set = 0, binding = 0) buffer ObjectBuffer {
+layout(std430, set = 0, binding = 0) buffer ObjectBuffer {
     Object objects[];
 };
-
-layout(st)
 
 layout(std140, binding = 1) readonly buffer SSBOIn
 {

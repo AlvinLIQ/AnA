@@ -13,11 +13,6 @@ layout(scalar, set = 1, binding = 0) buffer VertexSSBO
     Vertex vertices[];
 };
 
-struct Object
-{
-    mat4 transform;
-};
-
 layout(scalar, set = 1, binding = 1) buffer ObjectSSBO
 {
     Object objects[];
@@ -77,8 +72,8 @@ bool isMeshletVisible(MeshletID mid)
     mat4 transform = objects[mid.objectID].transform;
     transform[3].w = 1.0;
     vec3 center = (transform * vec4(boundingSphere.center, 1.0)).xyz;
-    float radius = distance(center,
-        vec3(transform * vec4(vertices[mvsbo.vertices[meshlets[mid.meshletID].vertexOffset + mcsbo.boundings[mid.meshletID].farVertexID]].position, 1.0)));
+    float scale = max(length(transform[0].xyz), max(length(transform[1].xyz), length(transform[2].xyz)));
+    float radius = boundingSphere.radius * scale;
 
     return  isSphereInsideFrustum(center, radius, frustum.lightPlanes);
 }

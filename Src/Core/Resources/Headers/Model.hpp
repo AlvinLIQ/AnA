@@ -50,7 +50,7 @@ namespace AnA
             uint8_t indices[128 * 3];
             uint32_t indexCount;
             uint32_t vertexCount;
-            uint32_t farVertexID;
+            float radius;
             glm::vec3 center;
             glm::vec3 normal;
             glm::vec3 coneApex;

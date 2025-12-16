@@ -320,7 +320,7 @@ void Model::buildMeshletsWithOptimizer()
         sizeof(Model::Vertex),
         maxVerticesPerMeshlet,
         maxIndicesPerMeshlet / 3,
-        0.5f
+        0.7f
     );
     meshopt_meshlets.resize(actualMeshletCount);
     auto& last = meshopt_meshlets.back();
@@ -363,6 +363,8 @@ void Model::buildMeshletsWithOptimizer()
         meshlet.center = (minBounding + maxBounding) * 0.5f;
         meshlet.center = meshlet.center;
         meshlet.cutoff = bounds.cone_cutoff;
+        meshlet.radius = bounds.radius;
+        /*
         float maxDistance = 0.0f;
         for (uint32_t i = 0; i < meshlet.vertexCount; i++)
         {
@@ -372,7 +374,7 @@ void Model::buildMeshletsWithOptimizer()
                 maxDistance = distance;
                 meshlet.farVertexID = i;
             }
-        }
+        }*/
         meshlets.push_back(meshlet);
     }
 }

@@ -13,11 +13,6 @@ layout(scalar, set = 1, binding = 0) buffer VertexSSBO
     Vertex vertices[];
 };
 
-struct Object
-{
-    mat4 transform;
-};
-
 layout(scalar, set = 1, binding = 1) buffer ObjectSSBO
 {
     Object objects[];
@@ -75,8 +70,10 @@ bool isMeshletVisible(uint meshletID, uint objectID)
     mat4 transform = objects[objectID].transform;
     transform[3].w = 1.0;
     vec3 center = (transform * vec4(boundingSphere.center, 1.0)).xyz;
-    float radius = distance(center,
-        vec3(transform * vec4(vertices[mvsbo.vertices[meshlet.vertexOffset + boundingSphere.farVertexID]].position, 1.0)));
+
+    float scale = max(length(transform[0].xyz), max(length(transform[1].xyz), length(transform[2].xyz)));
+    float radius = boundingSphere.radius * scale;
+
     vec3 normal = mat3(transform) * boundingSphere.normal;
     float len = length(normal);
     if (len != 0.)
