@@ -126,6 +126,10 @@ namespace AnA
 
             return batchCount;
         }
+        uint32_t GetBufferIndex() const
+        {
+            return currentBufferIndex;
+        }
         const Descriptor* GetVertexDescriptor() const
         {
             return vertexDescriptor;
@@ -151,6 +155,7 @@ namespace AnA
         Device* aDevice;
         std::vector<Buffer> vertexBuffers{};
         std::vector<Buffer> objectBuffers{};
+        std::vector<Buffer> objectDataBuffers{};
         size_t vertexCount = 0;
         std::vector<Buffer> indexBuffers{};
         size_t indexCount = 0;

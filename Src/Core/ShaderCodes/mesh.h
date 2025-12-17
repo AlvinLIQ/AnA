@@ -22,6 +22,14 @@ struct Object
     mat4 transform;
 };
 
+struct MeshDrawCommand
+{
+    uint x;
+    uint y;
+    uint z;
+    uint objectCount;
+};
+
 struct Meshlet
 {
     uint vertexOffset;

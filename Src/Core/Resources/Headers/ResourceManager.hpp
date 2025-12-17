@@ -83,6 +83,7 @@ namespace AnA
             void GetDefaultDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);
             void GetDefaultShapesDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);
             void GetDefaultTextDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);
+            void GetDefaultComputeDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);
             void GetDefaultLightDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);
             const std::array<uint32_t, 2>& GetDefaultUBODynamicOffsets() const
             {
@@ -135,6 +136,7 @@ namespace AnA
             std::vector<Descriptor> defaultDescriptors;
             std::vector<Descriptor> shapeDescriptors;
             std::vector<Descriptor> textDescriptors;
+            std::vector<Descriptor> computeDescriptors;
             std::vector<Descriptor> lightDescriptors;
             std::array<uint32_t, 2> uboDynamicOffsets{0, 0};
         };

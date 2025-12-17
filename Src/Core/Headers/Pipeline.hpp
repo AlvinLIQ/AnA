@@ -503,6 +503,7 @@ namespace AnA
                 PipelineConfig dConfig;
                 assert(shaderInfos.size() <= 3);
                 bool isMeshShader = false, hasFragmentShader = false, hasGBuffer = false;
+                dConfig.pipelineInfo.layout = pipelineLayout;
                 for (size_t i = 0; i < shaderInfos.size(); i++)
                 {
                     dConfig.shaderStages[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -607,8 +608,6 @@ namespace AnA
                 dConfig.pipelineInfo.pDepthStencilState = &dConfig.depthStencilInfo;
                 dConfig.pipelineInfo.pColorBlendState = &dConfig.colorBlending;
                 dConfig.pipelineInfo.pDynamicState = &dConfig.dynamicStateInfo;
-
-                dConfig.pipelineInfo.layout = pipelineLayout;
 
                 dConfig.pipelineInfo.pNext = &dConfig.pipelineRenderingInfo;
 

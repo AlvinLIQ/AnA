@@ -3,7 +3,7 @@ shader_sources = files(
     'Basic.vert', 'Basic.frag', 'CascadedShadowMapping.task', 'CascadedShadowMapping.mesh', 'Point.vert', 'Point.frag',
     'Line.vert', 'Line.frag', 'ShadowMapping.vert', 'Shape.vert', 'Shape.frag', 'Light.comp', 'Light.vert', 'Light.frag', 
     'Mesh.mesh', 'Mesh.task', 'Mesh.frag', 'Terrain.mesh', 'Terrain.task',
-    'Text.task', 'Text.mesh', 'Text.frag')
+    'Text.task', 'Text.mesh', 'Text.frag', 'CollisionDetect.comp')
 shader_outputs = []
 shader_args = ['--target-env', 'vulkan1.3']
 foreach shader_source : shader_sources

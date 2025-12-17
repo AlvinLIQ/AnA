@@ -1,4 +1,7 @@
 #version 460
+#extension GL_GOOGLE_include_directive : require
+
+#include "mesh.h"
 
 layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 struct Projection
@@ -7,20 +10,21 @@ struct Projection
     vec2 pos2;
 };
 
-layout(std430, set = 0, binding = 0) buffer ObjectBuffer {
+layout(std430, set = 0, binding = 1) buffer ObjectBuffer
+{
     Object objects[];
 };
 
-layout(std140, binding = 1) readonly buffer SSBOIn
+layout(std430, set = 0, binding = 2) buffer countBuffer
 {
-    Projection projectionsIn[];
+    uint objectCount;
 };
-
+/*
 layout(std140, binding = 2) buffer SSBOOut
 {
     uvec2 collidedPairs[];
 };
-
+*/
 shared uint collidedCount;
 
 void main()
@@ -28,15 +32,19 @@ void main()
     uint pos = gl_GlobalInvocationID.x;
     collidedCount = 0;
     barrier();
+    if (pos > objectCount)
+        return;
 
     for (uint i = 0; i < pos; i++)
-    {
-        vec3 relativePos = objects[i].center - objects[pos].center;
+    { 
         float r = objects[i].radius + objects[pos].radius;
-        if (dot(relativePos, relativePos) <= r * r)
+        if (distance(objects[i].center, objects[pos].center) <= r)
         {
             uint index = atomicAdd(collidedCount, 1);
-            collidedPairs[index] = uvec2(i, pos);
+            //collidedPairs[index] = uvec2(i, pos);
+            objects[i].transform[3].w = 2.0;
         }
+        else
+            objects[i].transform[3].w = 1.0;
     }
 }

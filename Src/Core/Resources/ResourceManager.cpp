@@ -254,7 +254,7 @@ void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Desc
     descriptorSetConfigs.resize(DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT);
     for (auto& configs : descriptorSetConfigs)
         configs.resize(1);
-    descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT].resize(2);
+    descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT].resize(3);
     auto pConfig = &descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT][0];
     pConfig->binding = 0;
     pConfig->descriptorCount = 1;
@@ -268,7 +268,16 @@ void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Desc
     pConfig->binding = 1;
     pConfig->descriptorCount = 1;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
+    pConfig->bindless = true;
+    if (aDevice->MeshShaderSupport())
+        pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+
+    pConfig = &descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT][2];
+    pConfig->binding = 2;
+    pConfig->descriptorCount = 1;
+    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
     pConfig->bindless = true;
     if (aDevice->MeshShaderSupport())
         pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
@@ -422,6 +431,40 @@ void ResourceManager::GetDefaultTextDescriptorSetConfig(std::vector<std::vector<
     }
 }
 
+void ResourceManager::GetDefaultComputeDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs)
+{
+    descriptorSetConfigs.resize(1);
+    for (auto& configs : descriptorSetConfigs)
+        configs.resize(1);
+    descriptorSetConfigs[0].resize(3);
+    auto pConfig = &descriptorSetConfigs[0][0];
+    pConfig->binding = 0;
+    pConfig->descriptorCount = 1;
+    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    pConfig->bindless = true;
+    if (aDevice->MeshShaderSupport())
+        pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+
+    pConfig = &descriptorSetConfigs[0][1];
+    pConfig->binding = 1;
+    pConfig->descriptorCount = 1;
+    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
+    pConfig->bindless = true;
+    if (aDevice->MeshShaderSupport())
+        pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+
+    pConfig = &descriptorSetConfigs[0][2];
+    pConfig->binding = 2;
+    pConfig->descriptorCount = 1;
+    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
+    pConfig->bindless = true;
+    if (aDevice->MeshShaderSupport())
+        pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+}
+
 void ResourceManager::GetDefaultLightDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs)
 {
     descriptorSetConfigs.resize(1);
@@ -520,6 +563,10 @@ void ResourceManager::createDefaultDescriptors()
     GetDefaultTextDescriptorSetConfig(textDescriptorConfig);
     Descriptor::CreateDescriptors(aDevice, textDescriptorConfig, textDescriptors);
 
+    std::vector<std::vector<Descriptor::DescriptorConfig>> computeDescriptorConfig;
+    GetDefaultComputeDescriptorSetConfig(computeDescriptorConfig);
+    Descriptor::CreateDescriptors(aDevice, computeDescriptorConfig, computeDescriptors);
+
     std::vector<std::vector<Descriptor::DescriptorConfig>> lightDescriptorConfig;
     GetDefaultLightDescriptorSetConfig(lightDescriptorConfig);
     Descriptor::CreateDescriptors(aDevice, lightDescriptorConfig, lightDescriptors);
@@ -543,9 +590,10 @@ std::vector<ShaderInfo> lightShaderStageInfos{{Light_vert, 0, VK_SHADER_STAGE_VE
 std::vector<ShaderInfo> textShaderStageInfos{{Text_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
                                         {Text_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT},
                                             {Text_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};
+std::vector<ShaderInfo> collisionShaderStageInfos{{CollisionDetect_comp, 0, VK_SHADER_STAGE_COMPUTE_BIT}};
 void ResourceManager::createDefaultShaders()
 {
-    Shaders.reserve(8);
+    Shaders.reserve(9);
     Shaders.emplace_back(aDevice, basicShaderStageInfos, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
 
     Shaders.emplace_back(aDevice, shapeShaderStageInfos, shapeDescriptors, SHAPE_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
@@ -562,6 +610,7 @@ void ResourceManager::createDefaultShaders()
         Shaders.emplace_back(aDevice, meshShaderStageInfos, defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(uint32_t));
         Shaders.emplace_back(aDevice, textShaderStageInfos, textDescriptors, 3, 0, sizeof(glm::vec2));
     }
+    Shaders.emplace_back(aDevice, collisionShaderStageInfos, computeDescriptors, 1, 0, 0);
     Shaders.emplace_back(aDevice, lightShaderStageInfos, lightDescriptors, 1, 0, 0);
 }
 

@@ -271,7 +271,16 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
 
     aRenderer.EndOffscreenRendering(commandBuffer);
 #endif
-
+/*
+    auto& computeShader = aResourceManager.Shaders[7];
+    computeShader.GetPipeline().Bind(commandBuffer);
+    auto& computeSets = computeShader.GetDescriptorSets()[aResourceManager.MainScene.GetBufferIndex()];
+    computeSets[0] = aResourceManager.MainScene.GetVertexDescriptorSet();
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE,
+        computeShader.GetPipelineLayout(), 0, 1, 
+        computeSets.data(), 0, VK_NULL_HANDLE);
+    vkCmdDispatch(commandBuffer, 1, 1, 1);
+*/
     aRenderer.BeginRendering(commandBuffer);
     swapChain.SetViewport(commandBuffer, actualSceneOffset);
 
