@@ -17,7 +17,7 @@ layout(scalar, set = 1, binding = 0) buffer VertexSSBO
 
 layout(std430, set = 1, binding = 1) buffer ObjectSSBO
 {
-    mat4 objects[];
+    Object objects[];
 };
 
 layout(set = 0, binding = 0) uniform CameraBufferObject {
@@ -84,7 +84,7 @@ mat4 transform(vec3 scale, vec3 rotation, vec3 transition)
 }
 
 void main() {
-    mat4 transform = objects[gl_DrawID];
+    mat4 transform = objects[gl_DrawID].transform;
     uint texID = uint(transform[3].w);
     transform[3].w = 1.0;
     Vertex vertex = vertices[gl_VertexIndex];
