@@ -38,13 +38,17 @@ void main()
     for (uint i = 0; i < pos; i++)
     { 
         float r = objects[i].radius + objects[pos].radius;
-        if (distance(objects[i].center, objects[pos].center) <= r)
+        if (distance(objects[i].center, objects[pos].center) < r)
         {
             uint index = atomicAdd(collidedCount, 1);
             //collidedPairs[index] = uvec2(i, pos);
             objects[i].transform[3].w = 2.0;
+            objects[pos].transform[3].w = 2.0;
         }
         else
-            objects[i].transform[3].w = 1.0;
+        {
+            objects[i].transform[3].w = 3.0;
+            objects[pos].transform[3].w = 3.0;
+        }
     }
 }

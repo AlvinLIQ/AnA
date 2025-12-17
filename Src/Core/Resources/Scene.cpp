@@ -347,7 +347,7 @@ void Scene::CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer, Bu
     {
         transform = meshes[i].transform.mat4();
         auto& model = uniqueModels[meshes[i].modelID].model;
-        bufferObjects[i].center = glm::vec4(model->center, 1.0f);
+        bufferObjects[i].center = transform * glm::vec4(model->center, 1.0f);
         auto& scale = meshes[i].transform.scale;
         bufferObjects[i].radius = model->radius * std::max(scale.x, std::max(scale.y, scale.z));
         transform[3].w = float(textureIdMap[meshes[i].textureId]);
