@@ -23,6 +23,17 @@ using namespace AnA;
 Model::Model(const ModelInfo& modelInfo)
 {
     info = std::move(modelInfo);
+    center = {};
+    for(auto& vertex : info.vertices)
+    {
+        center += vertex.position;
+    }
+    center /= float(info.vertices.size());
+    radius = 0.0f;
+    for(auto& vertex : info.vertices)
+    {
+        radius = std::max(radius, glm::distance(vertex.position, center));
+    }
     buildMeshletsWithOptimizer();
 }
 

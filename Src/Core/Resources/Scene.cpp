@@ -340,6 +340,10 @@ void Scene::CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer, Bu
     for (size_t i = meshOffset; i < meshes.size(); i++)
     {
         transform = meshes[i].transform.mat4();
+        auto& model = uniqueModels[meshes[i].modelID].model;
+        bufferObjects[i].center = glm::vec4(model->center, 1.0f);
+        auto& scale = meshes[i].transform.scale;
+        bufferObjects[i].radius = model->radius * std::max(scale.x, std::max(scale.y, scale.z));
         transform[3].w = float(textureIdMap[meshes[i].textureId]);
         bufferObjects[i].transform = transform;
     }
@@ -476,6 +480,10 @@ void Scene::UpdateMeshTransform(uint32_t meshIndex)
 {
     auto objectBufferData = static_cast<Object*>(objectBuffers[currentBufferIndex].GetMappedData());
     glm::mat4 transform = meshes[meshIndex].transform.mat4();
+    auto& model = uniqueModels[meshes[meshIndex].modelID].model;
+    objectBufferData[meshIndex].center = glm::vec4(model->center, 1.0f);
+    auto& scale = meshes[meshIndex].transform.scale;
+    objectBufferData[meshIndex].radius = model->radius * std::max(scale.x, std::max(scale.y, scale.z));
     transform[3].w = float(meshes[meshIndex].textureId);
     objectBufferData[meshIndex].transform = transform;
 }

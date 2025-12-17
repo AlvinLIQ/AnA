@@ -90,6 +90,8 @@ namespace AnA
         ~Model();
 
         ModelInfo info{};
+        glm::vec3 center{};
+        float radius{};
         std::vector<Animation> Animations;
         std::string Path = "";
 
