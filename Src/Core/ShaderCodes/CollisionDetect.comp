@@ -49,15 +49,12 @@ void main()
     { 
         float r = objects[i].radius + objects[pos].radius;
         vec3 relativePos = objects[i].center - objects[pos].center;
-        if (dot(relativePos, relativePos) <= r * r)
+        if (dot(relativePos, relativePos) <= r * r && AABBTest(relativePos, objects[i].halfVolume.xyz, objects[pos].halfVolume.xyz))
         {
-            if (AABBTest(relativePos, objects[i].halfVolume.xyz, objects[pos].halfVolume.xyz))
-            {
-                uint index = atomicAdd(collidedCount, 1);
-                //collidedPairs[index] = uvec2(i, pos);
-                objects[i].transform[3].w = 2.0;
-                objects[pos].transform[3].w = 2.0;
-            }
+            uint index = atomicAdd(collidedCount, 1);
+            //collidedPairs[index] = uvec2(i, pos);
+            objects[i].transform[3].w = 2.0;
+            objects[pos].transform[3].w = 2.0;
         }
     }
 }
