@@ -20,12 +20,17 @@ layout(std430, set = 0, binding = 2) buffer countBuffer
     uint objectCount;
 };
 /*
-layout(std140, binding = 2) buffer SSBOOut
+layout(std430, set = 1, binding = 0) buffer SSBOOut
 {
     uvec2 collidedPairs[];
 };
 */
 shared uint collidedCount;
+
+bool SATTest(vec3 axis, uint a, uint b)
+{
+    return true;
+}
 
 void main()
 {
@@ -38,7 +43,8 @@ void main()
     for (uint i = 0; i < pos; i++)
     { 
         float r = objects[i].radius + objects[pos].radius;
-        if (distance(objects[i].center, objects[pos].center) < r)
+        vec3 relativePos = objects[i].center - objects[pos].center;
+        if (dot(relativePos, relativePos) <= r * r)
         {
             uint index = atomicAdd(collidedCount, 1);
             //collidedPairs[index] = uvec2(i, pos);
@@ -47,8 +53,7 @@ void main()
         }
         else
         {
-            objects[i].transform[3].w = 3.0;
-            objects[pos].transform[3].w = 3.0;
+            //objects[i].transform[3].w = 3.0;
         }
     }
 }

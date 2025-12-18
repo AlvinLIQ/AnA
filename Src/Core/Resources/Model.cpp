@@ -17,7 +17,6 @@
 #include <cassert>
 #include <unordered_map>
 
-
 using namespace AnA;
 
 Model::Model(const ModelInfo& modelInfo)
@@ -45,7 +44,7 @@ Model::~Model()
 void Model::CreateModelFromFile(const char *filePath, std::shared_ptr<Model>& model)
 {
     ModelInfo modelInfo{};
-    CreateMeshFromFile(filePath, modelInfo.vertices, modelInfo.indices, modelInfo.nodes);
+    CreateMeshFromFile(filePath, modelInfo);
 /*
     const glm::vec<2, int> sets[] = {{0, 1}, {0, 2}, {1, 2}};
     for (size_t i = 0, j, k = 0; i < modelInfo.indices.size(); i += k)
@@ -79,8 +78,7 @@ void Model::CreateModelFromFile(const char *filePath, std::shared_ptr<Model>& mo
     model->Path = filePath;
 }
 
-void Model::CreateMeshFromFile(const char *filePath, std::vector<Vertex>& vertices, std::vector<Index>& indices, 
-    std::vector<Node>& nodes, size_t vertexOffset)
+void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo)
 {
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
@@ -91,9 +89,11 @@ void Model::CreateMeshFromFile(const char *filePath, std::vector<Vertex>& vertic
         throw std::runtime_error(warn + err);
 
     std::unordered_map<Vertex, Index, VertexHash> vertexMap;
+    //std::set<glm::vec3, Vec3Less> facesSet, edgesSet;
+    glm::vec3 maxBounding{-FLT_MAX}, minBounding{FLT_MAX};
     for (const auto& shape : shapes)
     {
-        nodes.push_back({});
+        modelInfo.nodes.push_back({});
         for (size_t i = 0; i < shape.mesh.indices.size(); i++)
         {
             const auto& index = shape.mesh.indices[i];
@@ -107,6 +107,8 @@ void Model::CreateMeshFromFile(const char *filePath, std::vector<Vertex>& vertic
                     attrib.vertices[3 * static_cast<size_t>(index.vertex_index) + 1],
                     attrib.vertices[3 * static_cast<size_t>(index.vertex_index) + 2]
                 };
+                maxBounding = glm::max(maxBounding, vertex.position);
+                minBounding = glm::min(minBounding, vertex.position);
                 /*
                 auto colorIndex = 3 * index.vertex_index + 2;
                 if (colorIndex < attrib.colors.size())
@@ -148,17 +150,44 @@ void Model::CreateMeshFromFile(const char *filePath, std::vector<Vertex>& vertic
             auto result = vertexMap.find(vertex);
             if (result != vertexMap.end())
             {
-                indices.push_back(result->second + static_cast<uint32_t>(vertexOffset));
-                nodes.back().indices.push_back(result->second + static_cast<uint32_t>(vertexOffset));
+                modelInfo.indices.push_back(result->second);
+                modelInfo.nodes.back().indices.push_back(result->second);
             }
             else
             {
-                indices.push_back(static_cast<Index>(vertexMap.size() + vertexOffset));
-                nodes.back().indices.push_back(vertexMap.size() + vertexOffset);
+                modelInfo.indices.push_back(static_cast<Index>(vertexMap.size()));
+                modelInfo.nodes.back().indices.push_back(vertexMap.size());
 
                 vertexMap.insert(std::pair<Vertex, Index>(vertex, vertexMap.size()));
-                vertices.push_back(vertex);
+                modelInfo.vertices.push_back(vertex);
             }
+/*
+            if (i > 0 && (i + 1) % 3 == 0)
+            {
+                Index v0 = modelInfo.indices[i - 2], v1 = modelInfo.indices[i - 1], v2 = modelInfo.indices[i];
+                glm::vec3 edges[3] = {
+                glm::normalize(modelInfo.vertices[v2].position - modelInfo.vertices[v1].position),
+                glm::normalize(modelInfo.vertices[v2].position - modelInfo.vertices[v0].position),
+                glm::normalize(modelInfo.vertices[v1].position - modelInfo.vertices[v0].position)
+                };
+                for (auto& edge : edges)
+                {
+                    if (edge.x < 0 ||
+                        (edge.x == 0 && edge.y < 0) ||
+                        (edge.x == 0 && edge.y == 0 && edge.z < 0))
+                        edge = -edge;
+                    if (edgesSet.emplace(edge).second) 
+                        modelInfo.edges.push_back(edge);
+                }
+
+                glm::vec3 normal = 
+                    glm::normalize(
+                        glm::cross(modelInfo.vertices[v1].position - 
+                            modelInfo.vertices[v0].position,
+                            modelInfo.vertices[v2].position - modelInfo.vertices[v0].position)); 
+                if (facesSet.emplace(normal).second)
+                    modelInfo.faces.push_back(normal);
+            }*/
         }
     }
 }
@@ -331,7 +360,7 @@ void Model::buildMeshletsWithOptimizer()
         sizeof(Model::Vertex),
         maxVerticesPerMeshlet,
         maxIndicesPerMeshlet / 3,
-        0.7f
+        0.6f
     );
     meshopt_meshlets.resize(actualMeshletCount);
     auto& last = meshopt_meshlets.back();

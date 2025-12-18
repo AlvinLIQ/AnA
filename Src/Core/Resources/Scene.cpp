@@ -231,7 +231,7 @@ void Scene::Append(std::vector<Model::Vertex>& meshVertices, std::vector<uint32_
     mesh.indexCount = static_cast<uint32_t>(meshIndices.size());
     mesh.textureId = textureId;
     //temporary solution for now
-    Model::ModelInfo info{{}, meshVertices, {}, uint32_t(meshIndices.size()), meshIndices};
+    Model::ModelInfo info{{}, meshVertices, {}, {}, uint32_t(meshIndices.size()), meshIndices};
     auto model = std::make_shared<Model>(info);
     uint32_t meshId;
     Resource::ResourceManager::GetCurrent()->AppendModel(model, meshId);
@@ -487,7 +487,7 @@ void Scene::UpdateMeshTransform(uint32_t meshIndex)
     auto objectBufferData = static_cast<Object*>(objectBuffers[currentBufferIndex].GetMappedData());
     glm::mat4 transform = meshes[meshIndex].transform.mat4();
     auto& model = uniqueModels[meshes[meshIndex].modelID].model;
-    objectBufferData[meshIndex].center = glm::vec4(model->center, 1.0f);
+    objectBufferData[meshIndex].center = transform * glm::vec4(model->center, 1.0f);
     auto& scale = meshes[meshIndex].transform.scale;
     objectBufferData[meshIndex].radius = model->radius * std::max(scale.x, std::max(scale.y, scale.z));
     transform[3].w = float(meshes[meshIndex].textureId);

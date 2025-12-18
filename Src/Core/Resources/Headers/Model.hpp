@@ -4,6 +4,7 @@
 
 #include <functional>
 #include <glm/fwd.hpp>
+#include <glm/gtc/epsilon.hpp>
 #include <vulkan/vulkan_core.h>
 
 #include <memory>
@@ -43,7 +44,31 @@ namespace AnA
                     ^ std::hash<float>()(vertex.uv.y);
             }
         };
-
+        struct VectorHash
+        {
+            std::size_t operator() (const glm::vec3& vector) const
+            {
+                return std::hash<float>()(vector.x) ^ 
+                    std::hash<float>()(vector.y) << 1 ^ 
+                    std::hash<float>()(vector.z) << 2;
+            }
+        };
+        struct VectorEqual
+        {
+            bool operator()(const glm::vec3& a, const glm::vec3& b) const noexcept
+            {
+                return glm::all(glm::epsilonEqual(a, b, 1e-5f));
+            }
+        };
+        struct Vec3Less
+        {
+            bool operator()(const glm::vec3& a, const glm::vec3& b) const
+            {
+                if (a.x != b.x) return a.x < b.x;
+                if (a.y != b.y) return a.y < b.y;
+                return a.z < b.z;
+            }
+        };
         struct Meshlet
         {
             uint32_t vertices[64];
@@ -75,7 +100,8 @@ namespace AnA
         {
             std::vector<Node> nodes;
             std::vector<Vertex> vertices;
-            std::vector<glm::vec2> vertexProjections;
+            std::vector<glm::vec3> faces;
+            std::vector<glm::vec3> edges;
             Index indexStep;
             std::vector<Index> indices;
         };
@@ -100,8 +126,7 @@ namespace AnA
         uint32_t meshletIndexCount = 0;
 
         static void CreateModelFromFile(const char* filePath, std::shared_ptr<Model>& model);
-        static void CreateMeshFromFile(const char *filePath, std::vector<Vertex>& vertices, std::vector<Index>& indices,
-            std::vector<Node>& nodes, size_t vertexOffset = 0);
+        static void CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo);
         static void CreateVerticesFromFile(const char* filePath, std::vector<Vertex>& vertices);
         static bool CreateQuad(std::vector<Vertex> &vertices, std::vector<Index> &indices, Index a, Index b, Index c, Index d);
         static void CreateTerrainFromVertices(std::vector<Vertex>& vertices, std::vector<Index> &terrainVertices, size_t period);
