@@ -38,6 +38,7 @@ namespace AnA
     {
         glm::vec3 center;
         float radius;
+        glm::vec4 halfVolume;
         glm::mat4 transform;
     };
 

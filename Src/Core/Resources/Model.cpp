@@ -90,7 +90,8 @@ void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo)
 
     std::unordered_map<Vertex, Index, VertexHash> vertexMap;
     //std::set<glm::vec3, Vec3Less> facesSet, edgesSet;
-    glm::vec3 maxBounding{-FLT_MAX}, minBounding{FLT_MAX};
+    modelInfo.minBounding = glm::vec3(FLT_MAX);
+    modelInfo.maxBounding = glm::vec3(-FLT_MAX);
     for (const auto& shape : shapes)
     {
         modelInfo.nodes.push_back({});
@@ -107,8 +108,8 @@ void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo)
                     attrib.vertices[3 * static_cast<size_t>(index.vertex_index) + 1],
                     attrib.vertices[3 * static_cast<size_t>(index.vertex_index) + 2]
                 };
-                maxBounding = glm::max(maxBounding, vertex.position);
-                minBounding = glm::min(minBounding, vertex.position);
+                modelInfo.minBounding = glm::min(modelInfo.minBounding, vertex.position);
+                modelInfo.maxBounding = glm::max(modelInfo.maxBounding, vertex.position);
                 /*
                 auto colorIndex = 3 * index.vertex_index + 2;
                 if (colorIndex < attrib.colors.size())
@@ -189,7 +190,7 @@ void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo)
                     modelInfo.faces.push_back(normal);
             }*/
         }
-    }
+    } 
 }
 
 void Model::CreateVerticesFromFile(const char *filePath, std::vector<Vertex> &vertices)

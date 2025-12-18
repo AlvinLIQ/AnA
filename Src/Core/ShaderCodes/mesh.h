@@ -19,6 +19,7 @@ struct Object
 {
     vec3 center;
     float radius;
+    vec4 halfVolume;
     mat4 transform;
 };
 

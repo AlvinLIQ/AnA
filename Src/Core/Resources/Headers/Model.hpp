@@ -100,8 +100,8 @@ namespace AnA
         {
             std::vector<Node> nodes;
             std::vector<Vertex> vertices;
-            std::vector<glm::vec3> faces;
-            std::vector<glm::vec3> edges;
+            glm::vec3 minBounding;
+            glm::vec3 maxBounding;
             Index indexStep;
             std::vector<Index> indices;
         };
