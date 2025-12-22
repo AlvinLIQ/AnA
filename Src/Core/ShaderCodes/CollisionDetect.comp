@@ -25,7 +25,7 @@ struct CollisionData
     uvec2 pair;
     vec3 normal;
     float penetration;
-}
+};
 /*
 layout(std430, set = 1, binding = 0) buffer SSBOOut
 {
