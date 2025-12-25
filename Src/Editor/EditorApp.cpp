@@ -38,15 +38,50 @@ void EditorApp::Init()
             activeProfile.flag);*/
         if (&aInputManager->GetActiveProfile() == aInputManager->GetProfiles().data())
         {
+            aInputManager->GlobalProfile.flag = Input::InputProfileFlags::None;
             aInputManager->SetActiveProfile(1);
         }
         else
         {
+            aInputManager->GlobalProfile.flag = Input::InputProfileFlags::CursorDisabled;
             aInputManager->SetActiveProfile(0);
         }
     };
     aInputManager.GlobalProfile.keyMapConfigs.push_back(keyMapConfig);
+    aInputManager.GlobalProfile.keyMapConfigs.push_back({this, 
+    [](void* param)
+    {
+        auto editorApp = reinterpret_cast<EditorApp*>(param);
+        editorApp->ActionMode = editorApp->ActionMode == 1 ? 0 : 1;
+    }, GLFW_KEY_G, GLFW_PRESS});
+    aInputManager.GlobalProfile.cursorConfigs.push_back({this,
+    [](void* param, CursorPosition& , int leftButtonAction)
+    { 
+        auto editorApp = reinterpret_cast<EditorApp*>(param);
+        if (editorApp->ActionMode != 1 || editorApp->SelectedObjectData == nullptr)
+            return;
+
+        if (leftButtonAction)
+        {
+            editorApp->ActionMode = 0;
+            return;
+        }
+        auto& object = editorApp->aResourceManager.MainScene.At(editorApp->SelectedObjectData->id);
+        auto duration = editorApp->aInputManager.GetDuration();
+        float speedRatio = editorApp->aResourceManager.MainCamera.GetSpeedRatio();
+        object.transform.translation.x -= duration.x.As<float>() * speedRatio * 10000.0f;
+        object.transform.translation.y -= duration.y.As<float>() * speedRatio * 10000.0f;
+        editorApp->aResourceManager.MainScene.UpdateMeshTransform(editorApp->SelectedObjectData->id);
+    }, 0});
     Controls::Control::GetInputProfile(aResourceManager.MainControl, aInputManager.GetProfiles());
+
+    auto panel = static_cast<Controls::ObjectView*>(static_cast<EditorApp*>(App::GetCurrent())->controlMap["modelList"]);
+    panel->SelectionChanged = [](void* param)
+    {
+        auto selectedItem = reinterpret_cast<ObjectViewItem*>(param);
+        auto editorApp = reinterpret_cast<EditorApp*>(EditorApp::GetCurrent());
+        editorApp->SelectedObjectData = &selectedItem->Data;
+    };
     loopCallback = EditorApp::onLoop;
 
     App::Init();

@@ -14,11 +14,15 @@ namespace AnA
             {
                 return selectionIndex;
             }
+            Control* SelectedItem() const
+            {
+                return selectedItem;
+            }
             void Select(int index);
             void Select(Control* item);
 
             void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
-
+            Input::RegularCallBack SelectionChanged{nullptr};
         private:
             int selectionIndex = -1;
             Control* selectedItem = nullptr;
