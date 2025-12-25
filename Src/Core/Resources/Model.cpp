@@ -108,8 +108,6 @@ void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo)
                     attrib.vertices[3 * static_cast<size_t>(index.vertex_index) + 1],
                     attrib.vertices[3 * static_cast<size_t>(index.vertex_index) + 2]
                 };
-                modelInfo.minBounding = glm::min(modelInfo.minBounding, vertex.position);
-                modelInfo.maxBounding = glm::max(modelInfo.maxBounding, vertex.position);
                 /*
                 auto colorIndex = 3 * index.vertex_index + 2;
                 if (colorIndex < attrib.colors.size())
@@ -161,6 +159,8 @@ void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo)
 
                 vertexMap.insert(std::pair<Vertex, Index>(vertex, vertexMap.size()));
                 modelInfo.vertices.push_back(vertex);
+                modelInfo.minBounding = glm::min(modelInfo.minBounding, vertex.position);
+                modelInfo.maxBounding = glm::max(modelInfo.maxBounding, vertex.position);
             }
 /*
             if (i > 0 && (i + 1) % 3 == 0)

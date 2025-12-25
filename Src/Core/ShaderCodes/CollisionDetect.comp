@@ -37,7 +37,7 @@ shared uint collidedObjects[64];
 
 bool AABBTest(vec3 overlap)
 {
-    return overlap.x > 0. && overlap.y > 0. && overlap.z > 0.;
+    return overlap.x >= 0. && overlap.y >= 0. && overlap.z >= 0.;
 }
 
 void main()
@@ -58,8 +58,8 @@ void main()
         vec3 relativePos = objects[i].center - objects[pos].center;
         if (dot(relativePos, relativePos) <= r * r)
         {
-            //vec3 overlap = (objects[i].halfVolume.xyz + objects[pos].halfVolume.xyz) - abs(relativePos);
-            //if (AABBTest(overlap))
+            vec3 overlap = (objects[i].halfVolume.xyz + objects[pos].halfVolume.xyz) - abs(relativePos);
+            if (AABBTest(overlap))
             {
                 uint index = atomicAdd(collidedCount, 1);
                 collidedObjects[pos] = 1;

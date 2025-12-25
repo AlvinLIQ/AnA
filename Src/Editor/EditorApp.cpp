@@ -70,8 +70,12 @@ void EditorApp::Init()
         }
         auto& object = editorApp->aResourceManager.MainScene.At(editorApp->SelectedObjectData->id);
         auto duration = editorApp->aInputManager.GetDuration();
-        float speedRatio = editorApp->aResourceManager.MainCamera.GetSpeedRatio();
-        object.transform.translation.x -= duration.x.As<float>() * speedRatio * 10000.0f;
+        auto& mainCamera = editorApp->aResourceManager.MainCamera;
+        float speedRatio = mainCamera.GetSpeedRatio();
+        object.transform.translation -= 
+            glm::vec3(cosf(mainCamera.CameraTransform.rotation.y), 
+            0.0f, 
+            -sinf(mainCamera.CameraTransform.rotation.y)) * duration.x.As<float>() * speedRatio * 10000.0f;
         object.transform.translation.y -= duration.y.As<float>() * speedRatio * 10000.0f;
         editorApp->aResourceManager.MainScene.UpdateMeshTransform(editorApp->SelectedObjectData->id);
     }, 0});
