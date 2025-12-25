@@ -1,6 +1,5 @@
 #include "Headers/App.hpp"
 #include "Camera/Headers/CameraController.hpp"
-#include "Input/Headers/InputManager.hpp"
 #include <glm/detail/qualifier.hpp>
 #include <glm/fwd.hpp>
 #include <glm/gtc/constants.hpp>
@@ -272,16 +271,17 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
 
     aRenderer.EndOffscreenRendering(commandBuffer);
 #endif
-
+    Device::StageBarrier(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
     auto& computeShader = aResourceManager.Shaders[7];
     computeShader.GetPipeline().Bind(commandBuffer);
     auto& computeSets = computeShader.GetDescriptorSets()[aResourceManager.MainScene.GetBufferIndex()];
     computeSets[0] = aResourceManager.MainScene.GetVertexDescriptorSet();
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE,
-        computeShader.GetPipelineLayout(), 0, 1, 
+        computeShader.GetPipelineLayout(), 0, 1,
         computeSets.data(), 0, VK_NULL_HANDLE);
     vkCmdDispatch(commandBuffer, 1, 1, 1);
 
+    Device::StageBarrier(commandBuffer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT);
     aRenderer.BeginRendering(commandBuffer);
     swapChain.SetViewport(commandBuffer, actualSceneOffset);
 

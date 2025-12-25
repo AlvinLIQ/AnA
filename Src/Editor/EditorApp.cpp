@@ -36,17 +36,91 @@ void EditorApp::Init()
         aInputManager->ProcessProfileFlag((activeProfile.flag ^= Input::Disabled) & Input::Disabled ?
             aInputManager->GlobalProfile.flag :
             activeProfile.flag);*/
+        auto editorApp = reinterpret_cast<EditorApp*>(EditorApp::GetCurrent());
+        editorApp->ActionMode = 0;
         if (&aInputManager->GetActiveProfile() == aInputManager->GetProfiles().data())
         {
+            aInputManager->GlobalProfile.flag = Input::InputProfileFlags::None;
             aInputManager->SetActiveProfile(1);
         }
         else
         {
+            aInputManager->GlobalProfile.flag = Input::InputProfileFlags::CursorDisabled;
             aInputManager->SetActiveProfile(0);
         }
     };
     aInputManager.GlobalProfile.keyMapConfigs.push_back(keyMapConfig);
+//Transform Action Mode
+    aInputManager.GlobalProfile.keyMapConfigs.push_back({this, 
+    [](void* param)
+    {
+        auto editorApp = reinterpret_cast<EditorApp*>(param);
+        editorApp->ActionMode = editorApp->ActionMode == 1 ? 0 : 1;
+    }, GLFW_KEY_G, GLFW_PRESS});// Grab Mode
+    aInputManager.GlobalProfile.keyMapConfigs.push_back({this, 
+    [](void* param)
+    {
+        auto editorApp = reinterpret_cast<EditorApp*>(param);
+        editorApp->ActionMode = editorApp->ActionMode == 2 ? 0 : 2;
+    }, GLFW_KEY_S, GLFW_PRESS});// Scale Mode
+    aInputManager.GlobalProfile.keyMapConfigs.push_back({this, 
+    [](void* param)
+    {
+        auto editorApp = reinterpret_cast<EditorApp*>(param);
+        editorApp->ActionMode = editorApp->ActionMode == 3 ? 0 : 3;
+    }, GLFW_KEY_R, GLFW_PRESS});// Rotate Mode
+
+    aInputManager.GlobalProfile.cursorConfigs.push_back({this,
+    [](void* param, CursorPosition& , int leftButtonAction)
+    { 
+        auto editorApp = reinterpret_cast<EditorApp*>(param);
+        if (editorApp->ActionMode == 0 || editorApp->SelectedObjectData == nullptr)
+            return;
+
+        if (leftButtonAction)
+        {
+            editorApp->ActionMode = 0;
+            return;
+        }
+        auto& object = editorApp->aResourceManager.MainScene.At(editorApp->SelectedObjectData->id);
+        auto duration = editorApp->aInputManager.GetDuration();
+        auto& mainCamera = editorApp->aResourceManager.MainCamera;
+        float speedRatio = mainCamera.GetSpeedRatio();
+        switch(editorApp->ActionMode)
+        {
+        case 1:
+            object.transform.translation -= 
+                glm::vec3(cosf(mainCamera.CameraTransform.rotation.y), 
+                0.0f, 
+                -sinf(mainCamera.CameraTransform.rotation.y)) * duration.x.As<float>() * speedRatio * 10000.0f;
+            object.transform.translation.y -= duration.y.As<float>() * speedRatio * 10000.0f;
+            break;
+        case 2:
+            object.transform.scale += (duration.x - duration.y).As<float>() * speedRatio * 10000.0f;
+            break;
+        case 3:
+        {
+            const float rotateSpeed = speedRatio * mainCamera.GetRotateSpeed() * 6.283f * 80.f;
+            object.transform.rotation.y = 
+                glm::mod(object.transform.rotation.y - static_cast<float>(duration.x) * rotateSpeed, 
+                glm::two_pi<float>());
+            object.transform.rotation.x += static_cast<float>(duration.y) * rotateSpeed;
+        }
+            break;
+        default:
+            break;
+        }
+        editorApp->aResourceManager.MainScene.UpdateMeshTransform(editorApp->SelectedObjectData->id);
+    }, 0});
     Controls::Control::GetInputProfile(aResourceManager.MainControl, aInputManager.GetProfiles());
+
+    auto panel = static_cast<Controls::ObjectView*>(static_cast<EditorApp*>(App::GetCurrent())->controlMap["modelList"]);
+    panel->SelectionChanged = [](void* param)
+    {
+        auto selectedItem = reinterpret_cast<ObjectViewItem*>(param);
+        auto editorApp = reinterpret_cast<EditorApp*>(EditorApp::GetCurrent());
+        editorApp->SelectedObjectData = &selectedItem->Data;
+    };
     loopCallback = EditorApp::onLoop;
 
     App::Init();

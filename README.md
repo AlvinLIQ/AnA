@@ -13,7 +13,7 @@
 * [ ] occlusion culling
 * [x] clean deprecated stuff(renderpass, framebuffer, shadow map, ...)
 * [ ] use specialization constants for task count
-* [ ] Editor Action Mode(Normal Mode, Transformation Mode)
+* [X] Editor Action Mode(Normal Mode, Transformation Mode)
 * [ ] try pipeline cache
 
 ## Build&Run

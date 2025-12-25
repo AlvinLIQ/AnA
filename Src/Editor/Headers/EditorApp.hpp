@@ -6,6 +6,7 @@
 
 namespace AnA
 {
+    struct ObjectViewItemData;
     namespace Editor
     {
         class EditorApp : public App
@@ -15,6 +16,9 @@ namespace AnA
             virtual ~EditorApp();
             void Init();
             Controls::Control* InitControl();
+            // 0 normal 1 grab 2 rotate 3 scale
+            char ActionMode = 0;
+            ObjectViewItemData* SelectedObjectData = nullptr;
         private:
             static void loadModelButton_Click(void* control, PointerEventArgs& args);
             static void saveSceneButton_Click(void* control, PointerEventArgs& args);

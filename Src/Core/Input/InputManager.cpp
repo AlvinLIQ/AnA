@@ -48,7 +48,9 @@ void InputManager::ProcessProfileFlag(uint32_t profileFlag)
 void InputManager::Check()
 {
     checkProfile(inputProfiles[activeProfileIndex]);
+    checkCursorConfigs(GlobalProfile);
     //checkProfile(GlobalProfile);
+    prevPos = curPos;
 }
 
 void InputManager::keyCallback(GLFWwindow* , int key, int , int action, int )
@@ -70,13 +72,14 @@ void InputManager::characterCallback(GLFWwindow* , uint32_t ch)
     }
 }
 
-void InputManager::checkProfile(Input::InputProfile& inputProfile)
+void InputManager::checkCursorConfigs(Input::InputProfile& inputProfile)
 {
-    if (inputProfile.flag & InputProfileFlags::Disabled)
+    if (inputProfile.flag & InputProfileFlags::CursorDisabled)
         return;
+
     auto window = aWindow.GetGLFWwindow();
     glfwGetCursorPos(window, &curPos.x, &curPos.y);
-    CursorPosition duration = {(curPos.x - prevPos.x) / aWindow.Width.As<double>(), (curPos.y - prevPos.y) / aWindow.Height.As<double>()};
+    duration = {(curPos.x - prevPos.x) / aWindow.Width.As<double>(), (curPos.y - prevPos.y) / aWindow.Height.As<double>()};
     cursorPos = {curPos.x / (double)aWindow.Width, curPos.y / (double)aWindow.Height};
     auto &cursorConfigs = inputProfile.cursorConfigs;
     int leftButton = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
@@ -85,8 +88,15 @@ void InputManager::checkProfile(Input::InputProfile& inputProfile)
         if (cursorConfig.callBack != nullptr)
             cursorConfig.callBack(cursorConfig.param, inputProfile.flag & InputProfileFlags::RawMotion ? duration : cursorPos, leftButton);
     }
-    prevPos = curPos;
+}
 
+void InputManager::checkProfile(Input::InputProfile& inputProfile)
+{
+    if (inputProfile.flag & InputProfileFlags::Disabled)
+        return;
+
+    checkCursorConfigs(inputProfile);
+    auto window = aWindow.GetGLFWwindow();
     auto &keyMapConfigs = inputProfile.keyMapConfigs;
     for (auto &keyMapConfig : keyMapConfigs)
     {
@@ -94,7 +104,7 @@ void InputManager::checkProfile(Input::InputProfile& inputProfile)
             keyMapConfig.callBack(keyMapConfig.param);
     }
     //glfwSetCursorPos(window, centerX, centerY);
-    if (inputProfile.callback != nullptr && keyMapConfigs.size() + cursorConfigs.size() > 0)
+    if (inputProfile.callback != nullptr && keyMapConfigs.size() + inputProfile.cursorConfigs.size() > 0)
     {
         inputProfile.callback(inputProfile.param);
     }

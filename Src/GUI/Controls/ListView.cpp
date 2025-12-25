@@ -46,6 +46,8 @@ void ListView::ListView_PointerPressed(ListView* control, PointerEventArgs& )
         control->hoverItem->Color = {0.5f, 0.5f, 0.5f, 1.0f};
         control->hoverItem->RequestUpdate();
         control->selectedItem = control->hoverItem;
+        if (control->SelectionChanged != nullptr)
+            control->SelectionChanged(control->SelectedItem());
     }
 }
 

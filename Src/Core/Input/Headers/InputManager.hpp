@@ -29,7 +29,7 @@ namespace AnA
         };
         enum InputProfileFlags
         {
-            None = 0, HideCursor = 1, RawMotion = 2, Disabled = 4
+            None = 0, HideCursor = 1, RawMotion = 2, Disabled = 4, CursorDisabled = 8
         };
         struct InputProfile
         {
@@ -66,6 +66,10 @@ namespace AnA
             void ProcessProfileFlag(uint32_t profileFlag);
 
             void Check();
+            CursorPosition GetDuration()
+            {
+                return duration;
+            }
         private:
             Window& aWindow;
             static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -73,7 +77,8 @@ namespace AnA
             int activeProfileIndex = 0;
             std::vector<InputProfile> inputProfiles{1};
             CursorPosition cursorPos;
-            CursorPosition curPos, prevPos;
+            CursorPosition curPos, prevPos, duration;
+            void checkCursorConfigs(Input::InputProfile& inputProfile);
             void checkProfile(Input::InputProfile& inputProfile);
         };
     }
