@@ -36,6 +36,8 @@ void EditorApp::Init()
         aInputManager->ProcessProfileFlag((activeProfile.flag ^= Input::Disabled) & Input::Disabled ?
             aInputManager->GlobalProfile.flag :
             activeProfile.flag);*/
+        auto editorApp = reinterpret_cast<EditorApp*>(EditorApp::GetCurrent());
+        editorApp->ActionMode = 0;
         if (&aInputManager->GetActiveProfile() == aInputManager->GetProfiles().data())
         {
             aInputManager->GlobalProfile.flag = Input::InputProfileFlags::None;
@@ -43,8 +45,6 @@ void EditorApp::Init()
         }
         else
         {
-            auto editorApp = reinterpret_cast<EditorApp*>(EditorApp::GetCurrent());
-            editorApp->ActionMode = 0;
             aInputManager->GlobalProfile.flag = Input::InputProfileFlags::CursorDisabled;
             aInputManager->SetActiveProfile(0);
         }
