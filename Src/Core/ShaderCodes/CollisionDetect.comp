@@ -49,8 +49,8 @@ void main()
     {
         collidedCount = 0;
     }
-    barrier();
     collidedObjects[pos] = 0;
+    barrier();
 
     for (uint i = 0; i < pos; i++)
     { 
