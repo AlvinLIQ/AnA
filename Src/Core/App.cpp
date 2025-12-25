@@ -117,6 +117,7 @@ void App::Run()
 
         if (prevSecond >= 1.0f)
         {
+            fps = frameCount;
             std::string terrainSize = std::to_string(int(terrainPushConstants.density * 320.0f * 32.0f));
             auto info = std::to_string(static_cast<int>(frameCount.As<float>() / prevSecond)) +
                 " CPU Time: " + std::to_string(cpuTimeBeforeRecord * 1000.0f) + "ms GPU Time:" +
