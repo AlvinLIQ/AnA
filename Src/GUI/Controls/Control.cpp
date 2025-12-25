@@ -42,8 +42,8 @@ Vec2 Control::GetActualControlOffset()
 
     renderOffset.x() += ControlOffset.x();
     renderOffset.y() += ControlOffset.y();
-    renderOffset.x() *= aSwapChain->ScaleX;
-    renderOffset.y() *= aSwapChain->ScaleY;
+    //renderOffset.x() *= aSwapChain->ScaleX;
+    //renderOffset.y() *= aSwapChain->ScaleY;
     return renderOffset;
 }
 

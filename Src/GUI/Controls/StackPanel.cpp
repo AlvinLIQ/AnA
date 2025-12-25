@@ -75,11 +75,17 @@ Vec2 StackPanel::GetSizeForRender()
 
 void StackPanel::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
-    auto offset = Vec2{renderOffset.x() - renderSize.x() + 1.0f, renderOffset.y() - renderSize.y() + 1.0f};
+    auto offset = (renderOffset - renderSize) + 1.0f;
+    printf("%f %f-------------------\n",
+        renderOffset[1].value, renderSize[1].value);
+    int i = 0;
     for (auto& item : items)
     {
+        printf("%d: %f %f\n", i++, 
+        item->RenderOffset()[1].value, item->RenderSize()[1].value);
         item->RenderOffset() += offset + Padding;
         item->ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
     }
+    printf("----------\n");
     Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
 }

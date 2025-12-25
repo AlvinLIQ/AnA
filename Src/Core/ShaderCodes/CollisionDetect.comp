@@ -27,12 +27,13 @@ struct CollisionData
     float penetration;
 };
 /*
-layout(std430, set = 1, binding = 0) buffer SSBOOut
+layout(std430, set = 0, binding = 3) buffer SSBOOut
 {
-    uvec2 collidedPairs[];
+    CollisionData CollisionDatas[];
 };
 */
 shared uint collidedCount;
+shared uint collidedObjects[64];
 
 bool AABBTest(vec3 overlap)
 {
@@ -42,13 +43,14 @@ bool AABBTest(vec3 overlap)
 void main()
 {
     uint pos = gl_GlobalInvocationID.x;
+    if (pos > objectCount)
+        return;
     if (pos == 0.)
     {
         collidedCount = 0;
-        barrier();
     }
-    if (pos > objectCount)
-        return;
+    barrier();
+    collidedObjects[pos] = 0;
 
     for (uint i = 0; i < pos; i++)
     { 
@@ -56,14 +58,15 @@ void main()
         vec3 relativePos = objects[i].center - objects[pos].center;
         if (dot(relativePos, relativePos) <= r * r)
         {
-            vec3 overlap = (objects[i].halfVolume.xyz + objects[pos].halfVolume.xyz) - abs(relativePos);
-            if (AABBTest(overlap))
+            //vec3 overlap = (objects[i].halfVolume.xyz + objects[pos].halfVolume.xyz) - abs(relativePos);
+            //if (AABBTest(overlap))
             {
                 uint index = atomicAdd(collidedCount, 1);
-                //collidedPairs[index] = uvec2(i, pos);
-                objects[i].transform[3].w = 2.0;
-                objects[pos].transform[3].w = 2.0;
+                collidedObjects[pos] = 1;
+                collidedObjects[i] = 1;
             }
         }
     }
+    barrier();
+    objects[pos].transform[3].w = collidedObjects[pos] == 1 ? 2.0 : 0.0;
 }

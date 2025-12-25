@@ -43,6 +43,8 @@ void EditorApp::Init()
         }
         else
         {
+            auto editorApp = reinterpret_cast<EditorApp*>(EditorApp::GetCurrent());
+            editorApp->ActionMode = 0;
             aInputManager->GlobalProfile.flag = Input::InputProfileFlags::CursorDisabled;
             aInputManager->SetActiveProfile(0);
         }
