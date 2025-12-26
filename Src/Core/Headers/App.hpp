@@ -70,7 +70,7 @@ namespace AnA
         Resource::ResourceManager aResourceManager;
         VkOffset2D sceneOffset{};
         Float frameTime, cpuTime, cpuTimeBeforeRecord, prevSecond;
-        Int32 frameCount = 0;
+        Int32 frameCount = 0, fps = 0;
         bool commandBufferNeedUpdate = false;
         TerrainPushConstants terrainPushConstants = {0.5f, 5.0f, 0, 0};
         void(*loopCallback)() = nullptr;

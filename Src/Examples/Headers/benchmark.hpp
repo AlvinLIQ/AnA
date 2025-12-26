@@ -74,13 +74,14 @@ protected:
                 rotateTime++;
             }
         }
-        if (rotateTime > 2)
+        if (rotateTime > 0)
         {
             uint64_t score, cpuScore, gpuScore;
             cpuScore = uint64_t(3000.0f / totalCPUTime / avgCPUTime);
-            gpuScore = uint64_t(700000000.0f / totalGPUTime / avgGPUTime);
+            gpuScore = uint64_t(totalGPUTime / avgGPUTime) / 1000000000000;
             score = frameCount + cpuScore + gpuScore;
-            std::cout << score << "," << gpuScore << "," << cpuScore << "\n";
+            std::cout << "{\"result\":{\"score\":" << score << ",\"gpuScore\":" << gpuScore << ",\"cpuScore\":" << cpuScore << "}}" << std::endl;
+            fflush(stdout);
             Exit();
             return;
         }
@@ -110,5 +111,6 @@ protected:
         totalGPUTime += aRenderer.GetGPUTime();
         avgCPUTime = (avgCPUTime + cpuTime) * 0.5f;
         avgGPUTime = (avgGPUTime + aRenderer.GetGPUTime()) * 0.5f;
+        std::cout << "{\"fps\":" << fps << "}\n";
     }
 };
