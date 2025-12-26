@@ -78,6 +78,7 @@ void Scene::Init()
     indexBuffers.resize(vertexBuffers.size());
     objectBuffers.resize(vertexBuffers.size());
     objectDataBuffers.resize(vertexBuffers.size());
+    collisionBuffer.resize(vertexBuffers.size());
 
     meshletBuffers.resize(vertexBuffers.size());
     meshletVertexBuffers.resize(meshletBuffers.size());
@@ -97,7 +98,7 @@ void Scene::Init()
         VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         indexBuffers[i].Map();
 
-        objectBuffers[i] = Buffer(aDevice, (1000) * sizeof(Object),
+        objectBuffers[i] = Buffer(aDevice, 1000 * sizeof(Object),
         VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
         VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         objectBuffers[i].Map();
@@ -106,6 +107,11 @@ void Scene::Init()
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         objectDataBuffers[i].Map();
+
+        collisionBuffer[i] = Buffer(aDevice, 1000 * sizeof(CollisionData),
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        collisionBuffer[i].Map();
 
         meshletBuffers[i] = Buffer(aDevice, 100 * sizeof(MeshletInfo),
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
@@ -598,6 +604,12 @@ void Scene::updateSSBODescriptor()
     bufferInfo.offset = 0;
     bufferInfo.range = objectDataBuffers[nextIndex].GetSize();
     aDevice->UpdateDescriptorSet(bufferInfo, 2, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+        vertexDescriptor->GetSets()[nextIndex]);
+    //Collision Buffer
+    bufferInfo.buffer = collisionBuffer[nextIndex].GetBuffer();
+    bufferInfo.offset = 0;
+    bufferInfo.range = collisionBuffer[nextIndex].GetSize();
+    aDevice->UpdateDescriptorSet(bufferInfo, 3, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
         vertexDescriptor->GetSets()[nextIndex]);
 
     if (aDevice->MeshShaderSupport())

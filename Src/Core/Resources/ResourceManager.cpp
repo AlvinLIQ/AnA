@@ -254,7 +254,7 @@ void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Desc
     descriptorSetConfigs.resize(DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT);
     for (auto& configs : descriptorSetConfigs)
         configs.resize(1);
-    descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT].resize(3);
+    descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT].resize(4);
     auto pConfig = &descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT][0];
     pConfig->binding = 0;
     pConfig->descriptorCount = 1;
@@ -275,6 +275,15 @@ void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Desc
 
     pConfig = &descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT][2];
     pConfig->binding = 2;
+    pConfig->descriptorCount = 1;
+    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
+    pConfig->bindless = true;
+    if (aDevice->MeshShaderSupport())
+        pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+
+    pConfig = &descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT][3];
+    pConfig->binding = 3;
     pConfig->descriptorCount = 1;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
@@ -436,7 +445,7 @@ void ResourceManager::GetDefaultComputeDescriptorSetConfig(std::vector<std::vect
     descriptorSetConfigs.resize(1);
     for (auto& configs : descriptorSetConfigs)
         configs.resize(1);
-    descriptorSetConfigs[0].resize(3);
+    descriptorSetConfigs[0].resize(4);
     auto pConfig = &descriptorSetConfigs[0][0];
     pConfig->binding = 0;
     pConfig->descriptorCount = 1;
@@ -457,6 +466,15 @@ void ResourceManager::GetDefaultComputeDescriptorSetConfig(std::vector<std::vect
 
     pConfig = &descriptorSetConfigs[0][2];
     pConfig->binding = 2;
+    pConfig->descriptorCount = 1;
+    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
+    pConfig->bindless = true;
+    if (aDevice->MeshShaderSupport())
+        pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+    
+    pConfig = &descriptorSetConfigs[0][3];
+    pConfig->binding = 3;
     pConfig->descriptorCount = 1;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;

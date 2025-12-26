@@ -71,6 +71,13 @@ namespace AnA
         float padding;
     };
 
+    struct CollisionData
+    {
+        glm::uvec2 pair;
+        glm::vec3 normal;
+        float penetration;
+    };
+
     class Scene : public Renderable
     {
     public:
@@ -157,6 +164,7 @@ namespace AnA
         std::vector<Buffer> vertexBuffers{};
         std::vector<Buffer> objectBuffers{};
         std::vector<Buffer> objectDataBuffers{};
+        std::vector<Buffer> collisionBuffer{};
         size_t vertexCount = 0;
         std::vector<Buffer> indexBuffers{};
         size_t indexCount = 0;

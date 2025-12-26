@@ -3,7 +3,7 @@
 
 #include "mesh.h"
 
-layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = TASK_WORKGROUP, local_size_y = 1, local_size_z = 1) in;
 struct Projection
 {
     vec2 pos1;
@@ -26,14 +26,13 @@ struct CollisionData
     vec3 normal;
     float penetration;
 };
-/*
-layout(std430, set = 0, binding = 3) buffer SSBOOut
+
+layout(std430, set = 0, binding = 3) buffer collisionBuffer
 {
-    CollisionData CollisionDatas[];
+    uint collidedCount;
+    CollisionData collisions[];
 };
-*/
-shared uint collidedCount;
-shared uint collidedObjects[64];
+
 
 bool AABBTest(vec3 overlap)
 {
@@ -49,7 +48,6 @@ void main()
     {
         collidedCount = 0;
     }
-    collidedObjects[pos] = 0;
     barrier();
 
     for (uint i = 0; i < pos; i++)
@@ -62,11 +60,10 @@ void main()
             if (AABBTest(overlap))
             {
                 uint index = atomicAdd(collidedCount, 1);
-                collidedObjects[pos] = 1;
-                collidedObjects[i] = 1;
+                collisions[index].pair = uvec2(pos, i);
+                collisions[index].normal = normalize(relativePos);
+                collisions[index].penetration = length(overlap);
             }
         }
     }
-    barrier();
-    objects[pos].transform[3].w = collidedObjects[pos] == 1 ? 2.0 : 0.0;
 }
