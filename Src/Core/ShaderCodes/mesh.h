@@ -61,6 +61,13 @@ struct BoundingSphere
     float padding;
 };
 
+struct CollisionData
+{
+    uvec2 pair;
+    vec3 normal;
+    float penetration;
+};
+
 bool isSphereInsideFrustum(in vec3 center, in float radius, in vec4 frustumPlanes[6])
 {
     for (int i = 0; i < 6; ++i)
