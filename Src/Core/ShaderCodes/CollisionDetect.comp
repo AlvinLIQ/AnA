@@ -1,5 +1,6 @@
 #version 460
 #extension GL_GOOGLE_include_directive : require
+#extension GL_EXT_scalar_block_layout: require
 
 #include "mesh.h"
 
@@ -18,11 +19,11 @@ layout(std430, set = 0, binding = 1) buffer ObjectBuffer
 layout(std430, set = 0, binding = 2) buffer countBuffer
 {
     uint objectCount;
+    uint collidedCount;
 };
 
-layout(std430, set = 0, binding = 3) buffer collisionBuffer
+layout(scalar, set = 0, binding = 3) buffer collisionBuffer
 {
-    uint collidedCount;
     CollisionData collisions[];
 };
 
@@ -58,4 +59,5 @@ void main()
             }
         }
     }
+    barrier();
 }

@@ -18,6 +18,17 @@ layout(scalar, set = 1, binding = 1) buffer ObjectSSBO
     Object objects[];
 };
 
+layout(std430, set = 1, binding = 2) buffer countBuffer
+{
+    uint objectCount;
+    uint collidedCount;
+};
+
+layout(scalar, set = 1, binding = 3) buffer collisionBuffer
+{
+    CollisionData collisions[];
+};
+
 layout(set = 0, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
