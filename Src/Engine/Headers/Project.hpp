@@ -1,7 +1,6 @@
 #pragma once
 #include <cstdint>
-#include "../../Core/Resources/Headers/Mesh.hpp"
-
+#include "../../Core/Resources/Headers/Scene.hpp"
 
 namespace AnA
 {
@@ -12,14 +11,6 @@ namespace AnA
             uint32_t type;
             char name[32];
             uint32_t startupSceneId;
-        };
-
-        struct TextInfo
-        {
-            int width;
-            int height;
-            float lineHeight;
-            String text;
         };
 
         struct Scene
