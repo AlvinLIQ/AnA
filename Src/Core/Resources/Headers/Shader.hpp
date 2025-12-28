@@ -19,8 +19,6 @@ namespace AnA
         Shader& operator=(const Shader&) = delete;
         Shader(Shader& shader) noexcept : aDevice{shader.aDevice}, pipeline{shader.pipeline}, pipelineLayout{shader.pipelineLayout}, descriptorSets{shader.descriptorSets}, descriptors{shader.descriptors}, descriptorCount{shader.descriptorCount}, descriptorOffset{shader.descriptorOffset}
         {
-            shader.pipelineLayout = VK_NULL_HANDLE;
-            shader.descriptorSets.clear();
         }
         Shader& operator=(Shader& shader) noexcept
         {
@@ -34,9 +32,6 @@ namespace AnA
                 descriptors = shader.descriptors;
                 descriptorCount = shader.descriptorCount;
                 descriptorOffset = shader.descriptorOffset;
-
-                shader.pipelineLayout = VK_NULL_HANDLE;
-                shader.descriptorSets.clear();
             }
             return *this;
         }
