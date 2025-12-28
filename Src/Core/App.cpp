@@ -271,6 +271,7 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
 
     aRenderer.EndOffscreenRendering(commandBuffer);
 #endif
+#ifndef RELEASE_BUILD
     Device::StageBarrier(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
     auto& computeShader = aResourceManager.Shaders[7];
     computeShader.GetPipeline().Bind(commandBuffer);
@@ -279,9 +280,9 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE,
         computeShader.GetPipelineLayout(), 0, 1,
         computeSets.data(), 0, VK_NULL_HANDLE);
-    vkCmdDispatch(commandBuffer, (aResourceManager.MainScene.GetMeshCount() + 63) / 64, 1, 1);
-
+    vkCmdDispatch(commandBuffer, (aResourceManager.MainScene.GetMeshCount() + 63) / 64, 1, 1); 
     Device::StageBarrier(commandBuffer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT);
+#endif
     aRenderer.BeginRendering(commandBuffer);
     swapChain.SetViewport(commandBuffer, actualSceneOffset);
 

@@ -11,7 +11,9 @@
 
 #define INCLUDE_STB_IMAGE
 
+#ifndef RELEASE_BUILD
 #define ENABLE_MESH_SHADER
+#endif
 
 #define MAX_FRAMES_IN_FLIGHT 2
 

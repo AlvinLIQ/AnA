@@ -3,6 +3,8 @@ project('AnA', ['c', 'cpp'],
 
 add_project_arguments(language: 'cpp')
 add_project_link_arguments('-fuse-ld=lld', language: 'cpp')
+cc = meson.get_compiler('cpp')
+
 vulkan_dep = dependency('vulkan', required: true)  # Vulkan SDK
 
 cflags = []
