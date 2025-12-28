@@ -927,14 +927,12 @@ bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device)
     deviceFeatures.pNext = &unifiedLayoutsFeatures;
     vkGetPhysicalDeviceFeatures2(device, &deviceFeatures);
 
-#ifndef RELEASE_BUILD
 #ifdef ENABLE_MESH_SHADER
     if (meshShaderFeatures.meshShader == VK_TRUE)
     {
         meshShaderSupport = true;
         deviceExtensions.push_back(VK_EXT_MESH_SHADER_EXTENSION_NAME);
     }
-#endif
 #endif
 
     if (unifiedLayoutsFeatures.unifiedImageLayouts == VK_TRUE)

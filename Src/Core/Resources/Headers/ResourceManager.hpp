@@ -112,9 +112,7 @@ namespace AnA
                 callbacks.push_back(callback);
             }
             
-#ifdef ENABLE_MESH_SHADER
             MeshShaderOutput MeshShaderOutputData;
-#endif
         private:
             Device* aDevice;
             Buffer mainCameraBuffer;
