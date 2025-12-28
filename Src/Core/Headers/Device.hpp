@@ -11,9 +11,7 @@
 
 #define INCLUDE_STB_IMAGE
 
-#ifndef RELEASE_BUILD
 #define ENABLE_MESH_SHADER
-#endif
 
 #define MAX_FRAMES_IN_FLIGHT 2
 
@@ -206,7 +204,7 @@ namespace AnA
             VkPipelineStageFlags2 dstStageMask,
             VkImageAspectFlags aspectMask);
         static void PipelineBarrier2(VkCommandBuffer commandBuffer, VkDependencyFlags dependencyFlags,
-            VkImageMemoryBarrier2* imageBarriers, uint32_t imageBarrierCount, 
+            VkImageMemoryBarrier2* imageBarriers, uint32_t imageBarrierCount,
             VkBufferMemoryBarrier2* bufferBarriers, uint32_t bufferBarrierCount);
         static void StageBarrier(VkCommandBuffer commandBuffer,
             VkAccessFlags2 srcAccessMask,
@@ -218,7 +216,7 @@ namespace AnA
             VkPipelineStageFlags2 dstStageMask);
         static void StageBarrier(VkCommandBuffer commandBuffer,
             VkPipelineStageFlags2 StageMask);
-        static void ImageMemoryBarrier(VkCommandBuffer commandBuffer, VkImage image, 
+        static void ImageMemoryBarrier(VkCommandBuffer commandBuffer, VkImage image,
             VkImageLayout initLayout, VkImageLayout finalLayout,
             VkAccessFlags srcAccessMask, VkImageAspectFlags aspectMask,
             VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask);
@@ -272,7 +270,7 @@ namespace AnA
             VkImageType imageType;
             VkFormat format;
             VkExtent3D extent;
-            void create(Device* device, VkImageUsageFlags usage, uint32_t arrayLayers = 1, 
+            void create(Device* device, VkImageUsageFlags usage, uint32_t arrayLayers = 1,
                 VkImageSubresourceRange subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0,
                 1, 0,
                 1})
@@ -290,7 +288,7 @@ namespace AnA
                 imageInfo.usage = usage;
 
                 device->CreateImage(&imageInfo, &image, allocation);
-                imageView = device->CreateImageView(image, format, VK_IMAGE_VIEW_TYPE_2D, subresourceRange); 
+                imageView = device->CreateImageView(image, format, VK_IMAGE_VIEW_TYPE_2D, subresourceRange);
             }
             void cleanup(Device* device)
             {

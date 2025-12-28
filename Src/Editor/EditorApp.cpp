@@ -51,19 +51,19 @@ void EditorApp::Init()
     };
     aInputManager.GlobalProfile.keyMapConfigs.push_back(keyMapConfig);
 //Transform Action Mode
-    aInputManager.GlobalProfile.keyMapConfigs.push_back({this, 
+    aInputManager.GlobalProfile.keyMapConfigs.push_back({this,
     [](void* param)
     {
         auto editorApp = reinterpret_cast<EditorApp*>(param);
         editorApp->ActionMode = editorApp->ActionMode == 1 ? 0 : 1;
     }, GLFW_KEY_G, GLFW_PRESS});// Grab Mode
-    aInputManager.GlobalProfile.keyMapConfigs.push_back({this, 
+    aInputManager.GlobalProfile.keyMapConfigs.push_back({this,
     [](void* param)
     {
         auto editorApp = reinterpret_cast<EditorApp*>(param);
         editorApp->ActionMode = editorApp->ActionMode == 2 ? 0 : 2;
     }, GLFW_KEY_S, GLFW_PRESS});// Scale Mode
-    aInputManager.GlobalProfile.keyMapConfigs.push_back({this, 
+    aInputManager.GlobalProfile.keyMapConfigs.push_back({this,
     [](void* param)
     {
         auto editorApp = reinterpret_cast<EditorApp*>(param);
@@ -72,7 +72,7 @@ void EditorApp::Init()
 
     aInputManager.GlobalProfile.cursorConfigs.push_back({this,
     [](void* param, CursorPosition& , int leftButtonAction)
-    { 
+    {
         auto editorApp = reinterpret_cast<EditorApp*>(param);
         if (editorApp->ActionMode == 0 || editorApp->SelectedObjectData == nullptr)
             return;
@@ -89,9 +89,9 @@ void EditorApp::Init()
         switch(editorApp->ActionMode)
         {
         case 1:
-            object.transform.translation -= 
-                glm::vec3(cosf(mainCamera.CameraTransform.rotation.y), 
-                0.0f, 
+            object.transform.translation -=
+                glm::vec3(cosf(mainCamera.CameraTransform.rotation.y),
+                0.0f,
                 -sinf(mainCamera.CameraTransform.rotation.y)) * duration.x.As<float>() * speedRatio * 10000.0f;
             object.transform.translation.y -= duration.y.As<float>() * speedRatio * 10000.0f;
             break;
@@ -101,8 +101,8 @@ void EditorApp::Init()
         case 3:
         {
             const float rotateSpeed = speedRatio * mainCamera.GetRotateSpeed() * 6.283f * 80.f;
-            object.transform.rotation.y = 
-                glm::mod(object.transform.rotation.y - static_cast<float>(duration.x) * rotateSpeed, 
+            object.transform.rotation.y =
+                glm::mod(object.transform.rotation.y - static_cast<float>(duration.x) * rotateSpeed,
                 glm::two_pi<float>());
             object.transform.rotation.x += static_cast<float>(duration.y) * rotateSpeed;
         }

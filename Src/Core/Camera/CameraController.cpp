@@ -63,7 +63,7 @@ void CameraController::Move(CameraController::CameraCallbackParam* param)
 {
     int posIndex = param->id >> 1;
     auto &roY = param->aCamera.CameraTransform.rotation.y;
-    glm::vec3 moveDirection;
+    glm::vec3 moveDirection{};
     if (posIndex == ANA_MOVE_LEFTRIGHT)
     {
         moveDirection = {cosf(roY), 0.f, -sinf(roY)};
