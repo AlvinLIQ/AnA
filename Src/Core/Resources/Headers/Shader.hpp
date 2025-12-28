@@ -17,7 +17,30 @@ namespace AnA
 
         Shader(const Shader&) = delete;
         Shader& operator=(const Shader&) = delete;
-        Shader(Shader&& shader) noexcept : aDevice{shader.aDevice}, pipeline{shader.pipeline}, pipelineLayout{shader.pipelineLayout}, descriptorSets{shader.descriptorSets}
+        Shader(Shader& shader) noexcept : aDevice{shader.aDevice}, pipeline{shader.pipeline}, pipelineLayout{shader.pipelineLayout}, descriptorSets{shader.descriptorSets}, descriptors{shader.descriptors}, descriptorCount{shader.descriptorCount}, descriptorOffset{shader.descriptorOffset}
+        {
+            shader.pipelineLayout = VK_NULL_HANDLE;
+            shader.descriptorSets.clear();
+        }
+        Shader& operator=(Shader& shader) noexcept
+        {
+            if (&shader != this)
+            {
+                Shader::~Shader();
+                aDevice = shader.aDevice;
+                pipeline = shader.pipeline;
+                pipelineLayout = shader.pipelineLayout;
+                descriptorSets = shader.descriptorSets;
+                descriptors = shader.descriptors;
+                descriptorCount = shader.descriptorCount;
+                descriptorOffset = shader.descriptorOffset;
+
+                shader.pipelineLayout = VK_NULL_HANDLE;
+                shader.descriptorSets.clear();
+            }
+            return *this;
+        }
+        Shader(Shader&& shader) noexcept : aDevice{shader.aDevice}, pipeline{shader.pipeline}, pipelineLayout{shader.pipelineLayout}, descriptorSets{shader.descriptorSets}, descriptors{shader.descriptors}, descriptorCount{shader.descriptorCount}, descriptorOffset{shader.descriptorOffset}
         {
             shader.pipelineLayout = VK_NULL_HANDLE;
             shader.descriptorSets.clear();
@@ -31,6 +54,9 @@ namespace AnA
                 pipeline = shader.pipeline;
                 pipelineLayout = shader.pipelineLayout;
                 descriptorSets = shader.descriptorSets;
+                descriptors = shader.descriptors;
+                descriptorCount = shader.descriptorCount;
+                descriptorOffset = shader.descriptorOffset;
 
                 shader.pipelineLayout = VK_NULL_HANDLE;
                 shader.descriptorSets.clear();
