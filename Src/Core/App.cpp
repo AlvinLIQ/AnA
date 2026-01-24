@@ -280,7 +280,7 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE,
         computeShader.GetPipelineLayout(), 0, 1,
         computeSets.data(), 0, VK_NULL_HANDLE);
-    vkCmdDispatch(commandBuffer, (aResourceManager.MainScene.GetMeshCount() + 63) / 64, 1, 1);
+    vkCmdDispatch(commandBuffer, (uint32_t(aResourceManager.MainScene.GetMeshCount()) + 63) / 64, 1, 1);
     Device::StageBarrier(commandBuffer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT);
 #endif
     aRenderer.BeginRendering(commandBuffer);

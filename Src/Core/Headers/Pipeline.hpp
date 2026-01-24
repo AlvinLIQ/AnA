@@ -1,6 +1,8 @@
 #pragma once
 #include "Device.hpp"
+#include "vulkan/vulkan_core.h"
 
+#include <initializer_list>
 #include <vulkan/vulkan.h>
 #include <vector>
 #include <string>
@@ -21,7 +23,7 @@ namespace AnA
         VkPipelineCreateFlags flag;
         VkShaderStageFlagBits stage;
         bool hasGBuffer{false};
-        std::vector<uint32_t> spirv{};
+        std::initializer_list<int> constants;
     };
     class Pipeline
     {
@@ -39,7 +41,7 @@ namespace AnA
             VkPipelineMultisampleStateCreateInfo multiSampling{};
             VkPipelineColorBlendAttachmentState colorBlendAttachment{};
             const VkPipelineColorBlendAttachmentState noBlendAttachment
-                                {.blendEnable = VK_FALSE, 
+                                {.blendEnable = VK_FALSE,
                                     .srcColorBlendFactor = VK_BLEND_FACTOR_ZERO,
                                     .dstColorBlendFactor = VK_BLEND_FACTOR_ZERO,
                                     .colorBlendOp = VK_BLEND_OP_ADD,
@@ -59,6 +61,7 @@ namespace AnA
             VkPipelineRenderingCreateInfoKHR pipelineRenderingInfo{};
             bool hasComputeShader = false;
             std::vector<VkDynamicState> dynamicStates = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR, VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY };
+            std::vector<VkSpecializationInfo> specializationInfos{};
             static PipelineConfig GetDefault(VkShaderModule vertexShaderModule, VkShaderModule fragShaderModule,
                 VkPipelineLayout &pipelineLayout, VkRenderPass &renderPass, VkSampleCountFlagBits msaaSamplers, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
             {
@@ -255,7 +258,7 @@ namespace AnA
                 dConfig.depthStencilInfo.stencilTestEnable = VK_FALSE;
                 dConfig.depthStencilInfo.front = {};            // Optional
                 dConfig.depthStencilInfo.back = {};             // Optional
-            
+
                 dConfig.pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
                 dConfig.pipelineInfo.stageCount = stageCount;
                 dConfig.pipelineInfo.pStages = dConfig.shaderStages;
@@ -476,7 +479,7 @@ namespace AnA
                 dConfig.depthStencilInfo.stencilTestEnable = VK_FALSE;
                 dConfig.depthStencilInfo.front = {};            // Optional
                 dConfig.depthStencilInfo.back = {};             // Optional
-            
+
                 dConfig.pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
                 dConfig.pipelineInfo.stageCount = stageCount;
                 dConfig.pipelineInfo.pStages = dConfig.shaderStages;
@@ -497,13 +500,14 @@ namespace AnA
                 return dConfig;
             }
             static PipelineConfig GetForDynamicRendering(Device* aDevice, std::vector<ShaderInfo> shaderInfos,
-                VkPipelineLayout &pipelineLayout, VkFormat colorFormat, VkFormat depthFormat, VkSampleCountFlagBits msaaSamplers, 
+                VkPipelineLayout &pipelineLayout, VkFormat colorFormat, VkFormat depthFormat, VkSampleCountFlagBits msaaSamplers,
                 const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
             {
                 PipelineConfig dConfig;
                 assert(shaderInfos.size() <= 3);
                 bool isMeshShader = false, hasFragmentShader = false, hasGBuffer = false;
                 dConfig.pipelineInfo.layout = pipelineLayout;
+                dConfig.specializationInfos.resize(shaderInfos.size());
                 for (size_t i = 0; i < shaderInfos.size(); i++)
                 {
                     dConfig.shaderStages[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -511,12 +515,21 @@ namespace AnA
                     dConfig.shaderStages[i].stage = shaderInfos[i].stage;
                     dConfig.shaderStages[i].module = aDevice->CreateShaderModule(shaderInfos[i].codes);
                     dConfig.shaderStages[i].pName = "main";
-                    isMeshShader = isMeshShader | (shaderInfos[i].stage & 
-                        (VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_TASK_BIT_EXT | 
+
+                    if (shaderInfos[i].constants.size())
+                    {
+                        dConfig.specializationInfos[i].dataSize =  shaderInfos[i].constants.size();
+                        dConfig.specializationInfos[i].pData = shaderInfos[i].constants.begin();
+                        dConfig.specializationInfos[i].mapEntryCount = 0;
+                        dConfig.specializationInfos[i].pMapEntries = VK_NULL_HANDLE;
+                        dConfig.shaderStages[i].pSpecializationInfo = &dConfig.specializationInfos[i];
+                    }
+                    isMeshShader = isMeshShader || (shaderInfos[i].stage &
+                        (VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_TASK_BIT_EXT |
                         VK_SHADER_STAGE_MESH_BIT_NV | VK_SHADER_STAGE_TASK_BIT_NV));
-                    hasFragmentShader = hasFragmentShader | (shaderInfos[i].stage | VK_SHADER_STAGE_FRAGMENT_BIT);
-                    hasGBuffer = hasGBuffer | shaderInfos[i].hasGBuffer;
-                    dConfig.hasComputeShader = dConfig.hasComputeShader | (shaderInfos[i].stage & VK_SHADER_STAGE_COMPUTE_BIT);
+                    hasFragmentShader = hasFragmentShader || (shaderInfos[i].stage & VK_SHADER_STAGE_FRAGMENT_BIT);
+                    hasGBuffer = hasGBuffer || shaderInfos[i].hasGBuffer;
+                    dConfig.hasComputeShader = dConfig.hasComputeShader || (shaderInfos[i].stage & VK_SHADER_STAGE_COMPUTE_BIT);
                 }
                 if (dConfig.hasComputeShader)
                     return dConfig;
@@ -612,7 +625,7 @@ namespace AnA
                 dConfig.pipelineInfo.pNext = &dConfig.pipelineRenderingInfo;
 
                 dConfig.pipelineRenderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR;
-                
+
                 dConfig.depthAttachmentFormat = depthFormat;
                 if (hasGBuffer)
                 {

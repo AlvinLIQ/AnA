@@ -207,7 +207,7 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
         }
         meshes.push_back(mesh);
         if (this->MeshAppend)
-            this->MeshAppend(meshInfo.filePath, meshes.size() - 1);
+            this->MeshAppend(meshInfo.filePath, uint32_t(meshes.size()) - 1);
 
         VkDrawIndexedIndirectCommand drawIndexedCommand;
         drawIndexedCommand.firstInstance = 0;
@@ -319,7 +319,7 @@ void Scene::Draw(CommandBuffer& commandBuffer)
     vkCmdBindIndexBuffer(commandBuffer, indexBuffers[currentBufferIndex].GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
     vkCmdDrawIndexedIndirectCount(commandBuffer, drawIndexedIndirectBuffer.GetBuffer(),
     0, drawIndexedCountBuffer.GetBuffer(),
-    0, meshes.size(), sizeof(VkDrawIndexedIndirectCommand));
+    0, uint32_t(meshes.size()), sizeof(VkDrawIndexedIndirectCommand));
 }
 
 void Scene::DrawIndirect(CommandBuffer& commandBuffer)
@@ -336,7 +336,7 @@ void Scene::DrawIndirect(CommandBuffer& commandBuffer)
         vkCmdBindIndexBuffer(commandBuffer, indexBuffers[currentBufferIndex].GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
         vkCmdDrawIndexedIndirectCount(commandBuffer, drawIndexedIndirectBuffer.GetBuffer(),
             0, drawIndexedCountBuffer.GetBuffer(),
-            0, meshes.size(), sizeof(VkDrawIndexedIndirectCommand));
+            0, uint32_t(meshes.size()), sizeof(VkDrawIndexedIndirectCommand));
     }
 }
 
@@ -516,7 +516,7 @@ void Scene::applyVertexBufferUpdate(Model::Vertex* vertexBufferData, Model::Inde
             indexBufferData[model.indexOffset + j] = model.model->info.indices[j] + model.vertexOffset;
         }
     }
-    *static_cast<uint32_t*>(drawIndexedCountBuffer.GetMappedData()) = meshes.size();
+    *static_cast<uint32_t*>(drawIndexedCountBuffer.GetMappedData()) = uint32_t(meshes.size());
 
     vertexBuffers[nextIndex].Flush();
 }
