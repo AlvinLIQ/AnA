@@ -103,7 +103,7 @@ protected:
         aRenderer.BeginRendering(commandBuffer);
         swapChain.SetViewport(commandBuffer);
         aRenderer.RenderIndirect(commandBuffer, aResourceManager.MainScene,
-            aDevice.MeshShaderSupport() ? aResourceManager.Shaders[5] : aResourceManager.Shaders[0],
+            aDevice.MeshShaderSupport() ? aResourceManager.Shaders[4] : aResourceManager.Shaders[0],
             swapChain.CurrentFrame);
         aRenderer.EndRendering(commandBuffer);
         frameCount++;

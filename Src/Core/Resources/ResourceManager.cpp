@@ -472,7 +472,7 @@ void ResourceManager::GetDefaultComputeDescriptorSetConfig(std::vector<std::vect
     pConfig->bindless = true;
     if (aDevice->MeshShaderSupport())
         pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-    
+
     pConfig = &descriptorSetConfigs[0][3];
     pConfig->binding = 3;
     pConfig->descriptorCount = 1;
@@ -598,8 +598,6 @@ std::vector<ShaderInfo> pointShaderStageInfos{{Point_vert, 0, VK_SHADER_STAGE_VE
                                   {Point_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};
 std::vector<ShaderInfo> csmShaderStageInfos{{CascadedShadowMapping_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
                                   {CascadedShadowMapping_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT}};
-std::vector<ShaderInfo> terrainShaderStageInfos{{Terrain_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
-                                  {Terrain_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT}};
 std::vector<ShaderInfo> meshShaderStageInfos{{Mesh_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
                                   {Mesh_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT},
                                       {Mesh_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false}};
@@ -624,7 +622,6 @@ void ResourceManager::createDefaultShaders()
 
     if (aDevice->MeshShaderSupport())
     {
-        Shaders.emplace_back(aDevice, terrainShaderStageInfos, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(TerrainPushConstants));
         Shaders.emplace_back(aDevice, meshShaderStageInfos, defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(uint32_t));
         Shaders.emplace_back(aDevice, textShaderStageInfos, textDescriptors, 3, 0, sizeof(glm::vec2));
     }

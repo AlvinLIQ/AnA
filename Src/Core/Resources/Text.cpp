@@ -275,7 +275,7 @@ void Text::updateMeshlets(size_t meshletOffset)
 void Text::createSSBODescriptor()
 {
     auto& shaders = Resource::ResourceManager::GetCurrent()->Shaders;
-    auto& descriptors = shaders[6].GetDescriptors();
+    auto& descriptors = shaders[5].GetDescriptors();
     auto& vertexDescriptorSetLayout =
         descriptors[0].GetLayout();
     vertexDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,

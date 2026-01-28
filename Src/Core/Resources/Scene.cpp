@@ -565,7 +565,7 @@ void Scene::createSSBODescriptor()
         VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
     if (aDevice->MeshShaderSupport())
     {
-        auto& meshDescriptorSetLayout = shaders[5].GetDescriptors()[DEFAULT_MESHLET_LAYOUT].GetLayout();
+        auto& meshDescriptorSetLayout = shaders[4].GetDescriptors()[DEFAULT_MESHLET_LAYOUT].GetLayout();
         meshDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,
             MAX_FRAMES_IN_FLIGHT * 4,
             4,

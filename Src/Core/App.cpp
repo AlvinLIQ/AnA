@@ -266,14 +266,14 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
 
     swapChain.SetViewport(commandBuffer);
     aRenderer.RenderIndirect(commandBuffer, aResourceManager.MainScene,
-        aResourceManager.Shaders[5],
+        aResourceManager.Shaders[4],
         swapChain.CurrentFrame);
 
     aRenderer.EndOffscreenRendering(commandBuffer);
 #endif
 #ifndef RELEASE_BUILD
     Device::StageBarrier(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-    auto& computeShader = aResourceManager.Shaders[7];
+    auto& computeShader = aResourceManager.Shaders[6];
     computeShader.GetPipeline().Bind(commandBuffer);
     auto& computeSets = computeShader.GetDescriptorSets()[aResourceManager.MainScene.GetBufferIndex()];
     computeSets[0] = aResourceManager.MainScene.GetVertexDescriptorSet();
@@ -296,7 +296,7 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     vkCmdDraw(commandBuffer, 6, 1, 0, 0);
 #else
     aRenderer.RenderIndirect(commandBuffer, aResourceManager.MainScene,
-        aDevice.MeshShaderSupport() ? aResourceManager.Shaders[5] : aResourceManager.Shaders[0],
+        aDevice.MeshShaderSupport() ? aResourceManager.Shaders[4] : aResourceManager.Shaders[0],
         swapChain.CurrentFrame);
 #endif
 
@@ -304,7 +304,7 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     {
         swapChain.SetViewport(commandBuffer);
         aRenderer.RenderIndirect(commandBuffer, aResourceManager.TextContext,
-            aResourceManager.Shaders[6], swapChain.CurrentFrame);
+            aResourceManager.Shaders[5], swapChain.CurrentFrame);
     }
     swapChain.SetViewport(commandBuffer, aResourceManager.Shapes.Extent);
     aRenderer.RenderIndirect(commandBuffer, aResourceManager.Shapes,
