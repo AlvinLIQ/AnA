@@ -1,5 +1,6 @@
 #include "Headers/App.hpp"
 #include "Camera/Headers/CameraController.hpp"
+#include "Resources/Headers/ResourceManager.hpp"
 #include <glm/detail/qualifier.hpp>
 #include <glm/fwd.hpp>
 #include <glm/gtc/constants.hpp>
@@ -266,14 +267,14 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
 
     swapChain.SetViewport(commandBuffer);
     aRenderer.RenderIndirect(commandBuffer, aResourceManager.MainScene,
-        aResourceManager.Shaders[4],
+        aResourceManager.Shaders[MESH_PIPELINE_ID],
         swapChain.CurrentFrame);
 
     aRenderer.EndOffscreenRendering(commandBuffer);
 #endif
 #ifndef RELEASE_BUILD
     Device::StageBarrier(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-    auto& computeShader = aResourceManager.Shaders[6];
+    auto& computeShader = aResourceManager.Shaders[COLLISION_PIPELINE_ID];
     computeShader.GetPipeline().Bind(commandBuffer);
     auto& computeSets = computeShader.GetDescriptorSets()[aResourceManager.MainScene.GetBufferIndex()];
     computeSets[0] = aResourceManager.MainScene.GetVertexDescriptorSet();
@@ -296,7 +297,7 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     vkCmdDraw(commandBuffer, 6, 1, 0, 0);
 #else
     aRenderer.RenderIndirect(commandBuffer, aResourceManager.MainScene,
-        aDevice.MeshShaderSupport() ? aResourceManager.Shaders[4] : aResourceManager.Shaders[0],
+        aDevice.MeshShaderSupport() ? aResourceManager.Shaders[MESH_PIPELINE_ID] : aResourceManager.Shaders[VERTEX_PIPELINE_ID],
         swapChain.CurrentFrame);
 #endif
 
@@ -304,11 +305,11 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     {
         swapChain.SetViewport(commandBuffer);
         aRenderer.RenderIndirect(commandBuffer, aResourceManager.TextContext,
-            aResourceManager.Shaders[5], swapChain.CurrentFrame);
+            aResourceManager.Shaders[TEXT_PIPELINE_ID], swapChain.CurrentFrame);
     }
     swapChain.SetViewport(commandBuffer, aResourceManager.Shapes.Extent);
     aRenderer.RenderIndirect(commandBuffer, aResourceManager.Shapes,
-        aResourceManager.Shaders[1], swapChain.CurrentFrame);
+        aResourceManager.Shaders[SHAPE_PIPELINE_ID], swapChain.CurrentFrame);
     //Device.StageBarrier(commandBuffer,
     //    VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT|VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
     aRenderer.EndRendering(commandBuffer);

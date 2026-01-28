@@ -565,7 +565,7 @@ void Scene::createSSBODescriptor()
         VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
     if (aDevice->MeshShaderSupport())
     {
-        auto& meshDescriptorSetLayout = shaders[4].GetDescriptors()[DEFAULT_MESHLET_LAYOUT].GetLayout();
+        auto& meshDescriptorSetLayout = shaders[MESH_PIPELINE_ID].GetDescriptors()[DEFAULT_MESHLET_LAYOUT].GetLayout();
         meshDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,
             MAX_FRAMES_IN_FLIGHT * 4,
             4,
@@ -672,7 +672,7 @@ void Scene::appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageIn
 void Scene::createSamplerDescriptor()
 {
     auto& descriptorSetLayout =
-        Resource::ResourceManager::GetCurrent()->Shaders[0].GetDescriptors()[DEFAULT_SAMPLER_LAYOUT].GetLayout();
+        Resource::ResourceManager::GetCurrent()->Shaders[VERTEX_PIPELINE_ID].GetDescriptors()[DEFAULT_SAMPLER_LAYOUT].GetLayout();
     auto descriptor = new Descriptor(aDevice, 1,
         batchSize,
         1,
