@@ -68,7 +68,7 @@ void Pipeline::createComputePipeline(const std::vector<unsigned char>& computeSh
     computePipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
     computePipelineInfo.layout = pipelineLayout;
     computePipelineInfo.stage = computeShaderStageInfo;
-    
+
     if (vkCreateComputePipelines(aDevice->GetLogicalDevice(), NULL, 1, &computePipelineInfo, nullptr, &pipeline) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create compute pipeline!");

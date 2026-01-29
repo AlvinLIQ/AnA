@@ -12,7 +12,7 @@
 * [ ] SSAO
 * [ ] occlusion culling
 * [x] clean deprecated stuff(renderpass, framebuffer, shadow map, ...)
-* [ ] use specialization constants for task count
+* [X] specialization constants
 * [X] Editor Action Mode(Normal Mode, Transformation Mode)
 * [ ] try pipeline cache
 

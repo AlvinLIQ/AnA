@@ -9,11 +9,8 @@ namespace AnA
     {
     public:
         Shader(Device* mDevice);
-        Shader(Device* mDevice, std::vector<ShaderInfo>& shaderInfos, 
+        Shader(Device* mDevice, std::vector<ShaderInfo>& shaderInfos,
             std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, size_t _descriptorOffset, VkDeviceSize pushConstantSize = 0);
-
-        Shader(Device* mDevice, Pipeline::PipelineConfig pipelineConfig);
-        Shader(Device* mDevice, Pipeline::PipelineConfig pipelineConfig, std::vector<Descriptor>& descriptors, size_t actualDescriptorCount, size_t _descriptorOffset);
 
         Shader(const Shader&) = delete;
         Shader& operator=(const Shader&) = delete;

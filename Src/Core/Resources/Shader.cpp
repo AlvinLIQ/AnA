@@ -1,5 +1,6 @@
 #include "Headers/Shader.hpp"
 #include "Headers/SwapChain.hpp"
+#include "vulkan/vulkan_core.h"
 //#include <glslang/Public/ShaderLang.h>
 //#include <glslang/SPIRV/GlslangToSpv.h>
 
@@ -7,32 +8,26 @@ using namespace AnA;
 
 Shader::Shader(Device* mDevice) : aDevice{mDevice}
 {
-    
+
 }
 
-Shader::Shader(Device* mDevice, std::vector<ShaderInfo>& shaderInfos, 
-            std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, 
-            size_t _descriptorOffset, VkDeviceSize pushConstantSize) : aDevice{mDevice}, 
+Shader::Shader(Device* mDevice, std::vector<ShaderInfo>& shaderInfos,
+            std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount,
+            size_t _descriptorOffset, VkDeviceSize pushConstantSize) : aDevice{mDevice},
     descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}, descriptorOffset{_descriptorOffset}
 {
     createPipelineLayout(pushConstantSize);
     auto swapChain = SwapChain::GetCurrent();
-    Pipeline::PipelineConfig pipelineConfig = 
-        Pipeline::PipelineConfig::GetForDynamicRendering(mDevice, shaderInfos, pipelineLayout, 
+    Pipeline::PipelineConfig pipelineConfig =
+        Pipeline::PipelineConfig::GetForDynamicRendering(mDevice, shaderInfos, pipelineLayout,
         swapChain->GetFormat(), swapChain->GetDepthFormat(), aDevice->GetMaxUsableSampleCount());
     pipeline = Pipeline(mDevice, pipelineConfig);
     Pipeline::PipelineConfig::CleanupPipelineConfig(mDevice, pipelineConfig);
 }
 
-Shader::Shader(Device* mDevice, Pipeline::PipelineConfig pipelineConfig, 
-    std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, size_t _descriptorOffset) : aDevice{mDevice}, descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}, descriptorOffset{_descriptorOffset}
-{
-    pipeline = Pipeline(mDevice, pipelineConfig);
-}
-
 Shader::~Shader()
 {
-    
+
 }
 
 EShLanguage ShaderStageToEshLanguage(VkShaderStageFlagBits stage)
@@ -44,7 +39,7 @@ EShLanguage ShaderStageToEshLanguage(VkShaderStageFlagBits stage)
         case VK_SHADER_STAGE_MESH_BIT_EXT: return EShLangMesh;
         case VK_SHADER_STAGE_TASK_BIT_EXT: return EShLangTask;
         case VK_SHADER_STAGE_COMPUTE_BIT: return EShLangCompute;
-        default: return EShLangAnyHit;   
+        default: return EShLangAnyHit;
     }
 }
 
@@ -67,7 +62,7 @@ bool Shader::Compile(std::vector<ShaderInfo>& shaderInfos)
         EShMessages messages = EShMsgDefault;
         glslang::TProgram program;
         program.addShader(&shader);
-    
+
         if (!program.link(messages))
         {
             perror(program.getInfoLog());
@@ -114,9 +109,9 @@ void Shader::createPipelineLayout(VkDeviceSize pushConstantSize)
     }
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = descriptorCount;
+    pipelineLayoutInfo.setLayoutCount = uint32_t(descriptorCount);
     pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
-    
+
     VkPushConstantRange range;
     if (pushConstantSize)
     {
@@ -124,7 +119,7 @@ void Shader::createPipelineLayout(VkDeviceSize pushConstantSize)
         if (aDevice->MeshShaderSupport())
             range.stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
         range.offset = 0;
-        range.size = pushConstantSize;
+        range.size = uint32_t(pushConstantSize);
         pipelineLayoutInfo.pushConstantRangeCount = 1;
         pipelineLayoutInfo.pPushConstantRanges = &range;
     }

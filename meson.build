@@ -19,6 +19,7 @@ if host_machine.system() == 'windows'
         include_directories: include_directories('C:/glfw3/include'),
         link_args: ['C:/glfw3/lib/glfw3.lib']
     )
+    cflags += ['-D_CRT_SECURE_NO_WARNINGS']
 else
     glfw_dep = dependency('glfw3', required: true)      # GLFW
 endif

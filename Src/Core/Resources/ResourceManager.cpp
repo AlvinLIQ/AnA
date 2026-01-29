@@ -472,7 +472,7 @@ void ResourceManager::GetDefaultComputeDescriptorSetConfig(std::vector<std::vect
     pConfig->bindless = true;
     if (aDevice->MeshShaderSupport())
         pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-    
+
     pConfig = &descriptorSetConfigs[0][3];
     pConfig->binding = 3;
     pConfig->descriptorCount = 1;
@@ -590,46 +590,39 @@ void ResourceManager::createDefaultDescriptors()
     Descriptor::CreateDescriptors(aDevice, lightDescriptorConfig, lightDescriptors);
 }
 
-std::vector<ShaderInfo> basicShaderStageInfos{{Basic_vert, 0, VK_SHADER_STAGE_VERTEX_BIT},
-                                  {Basic_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};
-std::vector<ShaderInfo> shapeShaderStageInfos{{Shape_vert, 0, VK_SHADER_STAGE_VERTEX_BIT},
-                                  {Shape_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};
-std::vector<ShaderInfo> pointShaderStageInfos{{Point_vert, 0, VK_SHADER_STAGE_VERTEX_BIT},
-                                  {Point_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};
-std::vector<ShaderInfo> csmShaderStageInfos{{CascadedShadowMapping_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
-                                  {CascadedShadowMapping_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT}};
-std::vector<ShaderInfo> terrainShaderStageInfos{{Terrain_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
-                                  {Terrain_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT}};
-std::vector<ShaderInfo> meshShaderStageInfos{{Mesh_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
-                                  {Mesh_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT},
-                                      {Mesh_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false}};
-std::vector<ShaderInfo> lightShaderStageInfos{{Light_vert, 0, VK_SHADER_STAGE_VERTEX_BIT},
-                                {Light_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};
-std::vector<ShaderInfo> textShaderStageInfos{{Text_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT},
-                                        {Text_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT},
-                                            {Text_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT}};
-std::vector<ShaderInfo> collisionShaderStageInfos{{CollisionDetect_comp, 0, VK_SHADER_STAGE_COMPUTE_BIT}};
+std::vector<ShaderInfo> basicShaderStageInfos{{Basic_vert, 0, VK_SHADER_STAGE_VERTEX_BIT, false, {}},
+                                  {Basic_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
+std::vector<ShaderInfo> shapeShaderStageInfos{{Shape_vert, 0, VK_SHADER_STAGE_VERTEX_BIT, false, {}},
+                                  {Shape_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
+std::vector<ShaderInfo> pointShaderStageInfos{{Point_vert, 0, VK_SHADER_STAGE_VERTEX_BIT, false, {}},
+                                  {Point_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
+std::vector<ShaderInfo> csmShaderStageInfos{{CascadedShadowMapping_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT, false, {}},
+                                  {CascadedShadowMapping_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT, false, {}}};
+std::vector<ShaderInfo> meshShaderStageInfos{{Mesh_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT, false, {}},
+                                  {Mesh_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT, false, {}},
+                                      {Mesh_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
+std::vector<ShaderInfo> lightShaderStageInfos{{Light_vert, 0, VK_SHADER_STAGE_VERTEX_BIT, false, {}},
+                                {Light_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
+std::vector<ShaderInfo> textShaderStageInfos{{Text_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT, false, {}},
+                                        {Text_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT, false, {}},
+                                            {Text_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
+std::vector<ShaderInfo> collisionShaderStageInfos{{CollisionDetect_comp, 0, VK_SHADER_STAGE_COMPUTE_BIT, false, {}}};
 void ResourceManager::createDefaultShaders()
 {
     Shaders.reserve(9);
     Shaders.emplace_back(aDevice, basicShaderStageInfos, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
 
     Shaders.emplace_back(aDevice, shapeShaderStageInfos, shapeDescriptors, SHAPE_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
+    Shaders.emplace_back(aDevice, pointShaderStageInfos, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
 
+    Shaders.emplace_back(aDevice, collisionShaderStageInfos, computeDescriptors, 1, 0, 0);
+    Shaders.emplace_back(aDevice, lightShaderStageInfos, lightDescriptors, 1, 0, 0);
     if (aDevice->MeshShaderSupport())
     {
         Shaders.emplace_back(aDevice, csmShaderStageInfos, defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
-    }
-    Shaders.emplace_back(aDevice, pointShaderStageInfos, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
-
-    if (aDevice->MeshShaderSupport())
-    {
-        Shaders.emplace_back(aDevice, terrainShaderStageInfos, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(TerrainPushConstants));
         Shaders.emplace_back(aDevice, meshShaderStageInfos, defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(uint32_t));
         Shaders.emplace_back(aDevice, textShaderStageInfos, textDescriptors, 3, 0, sizeof(glm::vec2));
     }
-    Shaders.emplace_back(aDevice, collisionShaderStageInfos, computeDescriptors, 1, 0, 0);
-    Shaders.emplace_back(aDevice, lightShaderStageInfos, lightDescriptors, 1, 0, 0);
 }
 
 void ResourceManager::initTextures()

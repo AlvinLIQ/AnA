@@ -19,6 +19,12 @@
 
 #define DEFAULT_TEXTURE_ID 0
 
+#define VERTEX_PIPELINE_ID 0
+#define SHAPE_PIPELINE_ID 1
+#define MESH_PIPELINE_ID 6
+#define TEXT_PIPELINE_ID 7
+#define COLLISION_PIPELINE_ID 3
+
 namespace AnA
 {
     struct RecordCallBackInfo
@@ -52,14 +58,14 @@ namespace AnA
             static ResourceManager* GetCurrent();
 
             static void GetBufferInfos(std::vector<Buffer>& buffers, std::vector<VkDescriptorBufferInfo>& bufferInfos);
-            static void GetBufferInfos(Buffer* buffers, 
-                uint32_t bufferCount, 
+            static void GetBufferInfos(Buffer* buffers,
+                uint32_t bufferCount,
                 std::vector<VkDescriptorBufferInfo>& bufferInfos);
-            static void GetBufferInfos(Buffer& buffer, 
-                uint32_t bufferCount, 
+            static void GetBufferInfos(Buffer& buffer,
+                uint32_t bufferCount,
                 std::vector<VkDescriptorBufferInfo>& bufferInfos);
-            static void GetBufferInfos(Buffer& buffer, 
-                uint32_t bufferCount, 
+            static void GetBufferInfos(Buffer& buffer,
+                uint32_t bufferCount,
                 std::vector<VkDescriptorBufferInfo>& bufferInfos, uint32_t stride);
             static void GetImageInfos(const std::vector<Image>& images, const std::vector<VkSampler>& samplers, std::vector<VkDescriptorImageInfo>& imageInfos);
 
@@ -111,7 +117,7 @@ namespace AnA
                 std::unique_lock<std::mutex> lock(callbacksMutex);
                 callbacks.push_back(callback);
             }
-            
+
             MeshShaderOutput MeshShaderOutputData;
         private:
             Device* aDevice;

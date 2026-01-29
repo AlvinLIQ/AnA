@@ -207,7 +207,7 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
         }
         meshes.push_back(mesh);
         if (this->MeshAppend)
-            this->MeshAppend(meshInfo.filePath, meshes.size() - 1);
+            this->MeshAppend(meshInfo.filePath, uint32_t(meshes.size()) - 1);
 
         VkDrawIndexedIndirectCommand drawIndexedCommand;
         drawIndexedCommand.firstInstance = 0;
@@ -319,7 +319,7 @@ void Scene::Draw(CommandBuffer& commandBuffer)
     vkCmdBindIndexBuffer(commandBuffer, indexBuffers[currentBufferIndex].GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
     vkCmdDrawIndexedIndirectCount(commandBuffer, drawIndexedIndirectBuffer.GetBuffer(),
     0, drawIndexedCountBuffer.GetBuffer(),
-    0, meshes.size(), sizeof(VkDrawIndexedIndirectCommand));
+    0, uint32_t(meshes.size()), sizeof(VkDrawIndexedIndirectCommand));
 }
 
 void Scene::DrawIndirect(CommandBuffer& commandBuffer)
@@ -336,7 +336,7 @@ void Scene::DrawIndirect(CommandBuffer& commandBuffer)
         vkCmdBindIndexBuffer(commandBuffer, indexBuffers[currentBufferIndex].GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
         vkCmdDrawIndexedIndirectCount(commandBuffer, drawIndexedIndirectBuffer.GetBuffer(),
             0, drawIndexedCountBuffer.GetBuffer(),
-            0, meshes.size(), sizeof(VkDrawIndexedIndirectCommand));
+            0, uint32_t(meshes.size()), sizeof(VkDrawIndexedIndirectCommand));
     }
 }
 
@@ -516,7 +516,7 @@ void Scene::applyVertexBufferUpdate(Model::Vertex* vertexBufferData, Model::Inde
             indexBufferData[model.indexOffset + j] = model.model->info.indices[j] + model.vertexOffset;
         }
     }
-    *static_cast<uint32_t*>(drawIndexedCountBuffer.GetMappedData()) = meshes.size();
+    *static_cast<uint32_t*>(drawIndexedCountBuffer.GetMappedData()) = uint32_t(meshes.size());
 
     vertexBuffers[nextIndex].Flush();
 }
@@ -565,7 +565,7 @@ void Scene::createSSBODescriptor()
         VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
     if (aDevice->MeshShaderSupport())
     {
-        auto& meshDescriptorSetLayout = shaders[5].GetDescriptors()[DEFAULT_MESHLET_LAYOUT].GetLayout();
+        auto& meshDescriptorSetLayout = shaders[MESH_PIPELINE_ID].GetDescriptors()[DEFAULT_MESHLET_LAYOUT].GetLayout();
         meshDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,
             MAX_FRAMES_IN_FLIGHT * 4,
             4,
@@ -672,7 +672,7 @@ void Scene::appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageIn
 void Scene::createSamplerDescriptor()
 {
     auto& descriptorSetLayout =
-        Resource::ResourceManager::GetCurrent()->Shaders[0].GetDescriptors()[DEFAULT_SAMPLER_LAYOUT].GetLayout();
+        Resource::ResourceManager::GetCurrent()->Shaders[VERTEX_PIPELINE_ID].GetDescriptors()[DEFAULT_SAMPLER_LAYOUT].GetLayout();
     auto descriptor = new Descriptor(aDevice, 1,
         batchSize,
         1,

@@ -40,7 +40,7 @@ void TextBlock::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInf
 
 void TextBlock::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
-    if (id != -1u)
+    if (id != uint32_t(-1))
     {
         auto swapChain = SwapChain::GetCurrent();
         auto swapChainExtent = swapChain->GetExtent();

@@ -112,7 +112,7 @@ void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo)
                 auto colorIndex = 3 * index.vertex_index + 2;
                 if (colorIndex < attrib.colors.size())
                 {
-                    vertex.color = 
+                    vertex.color =
                     {
                         attrib.colors[colorIndex - 2],
                         attrib.colors[colorIndex - 1],
@@ -121,7 +121,7 @@ void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo)
                 }
                 if (materials.size())
                 {
-                    vertex.color = 
+                    vertex.color =
                     {
                         materials[0].diffuse[0],
                         materials[0].diffuse[1],
@@ -155,9 +155,9 @@ void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo)
             else
             {
                 modelInfo.indices.push_back(static_cast<Index>(vertexMap.size()));
-                modelInfo.nodes.back().indices.push_back(vertexMap.size());
+                modelInfo.nodes.back().indices.push_back(static_cast<Index>(vertexMap.size()));
 
-                vertexMap.insert(std::pair<Vertex, Index>(vertex, vertexMap.size()));
+                vertexMap.insert(std::pair<Vertex, Index>(vertex, static_cast<Index>(vertexMap.size())));
                 modelInfo.vertices.push_back(vertex);
                 modelInfo.minBounding = glm::min(modelInfo.minBounding, vertex.position);
                 modelInfo.maxBounding = glm::max(modelInfo.maxBounding, vertex.position);
@@ -177,20 +177,20 @@ void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo)
                         (edge.x == 0 && edge.y < 0) ||
                         (edge.x == 0 && edge.y == 0 && edge.z < 0))
                         edge = -edge;
-                    if (edgesSet.emplace(edge).second) 
+                    if (edgesSet.emplace(edge).second)
                         modelInfo.edges.push_back(edge);
                 }
 
-                glm::vec3 normal = 
+                glm::vec3 normal =
                     glm::normalize(
-                        glm::cross(modelInfo.vertices[v1].position - 
+                        glm::cross(modelInfo.vertices[v1].position -
                             modelInfo.vertices[v0].position,
-                            modelInfo.vertices[v2].position - modelInfo.vertices[v0].position)); 
+                            modelInfo.vertices[v2].position - modelInfo.vertices[v0].position));
                 if (facesSet.emplace(normal).second)
                     modelInfo.faces.push_back(normal);
             }*/
         }
-    } 
+    }
 }
 
 void Model::CreateVerticesFromFile(const char *filePath, std::vector<Vertex> &vertices)
@@ -200,7 +200,7 @@ void Model::CreateVerticesFromFile(const char *filePath, std::vector<Vertex> &ve
     for (size_t j = 0; j < data.size();)
     {
         Model::Vertex vertex{};
-        sscanf(str + j, "%f,%f,%f\n", 
+        sscanf(str + j, "%f,%f,%f\n",
             &vertex.position.x, &vertex.position.y, &vertex.position.z);
 
         vertices.push_back(vertex);
@@ -249,11 +249,11 @@ bool Model::CreateQuad(std::vector<Vertex> &vertices, std::vector<Index> &indice
     {
         return false;
     }
-    
+
     indices.push_back(a);
     indices.push_back(b);
     indices.push_back(c);
-    
+
     indices.push_back(b);
     indices.push_back(d);
     indices.push_back(c);
@@ -270,12 +270,12 @@ void Model::CreateTerrainFromVertices(std::vector<Vertex> &vertices, std::vector
     Index a, b, c, d;
     for (size_t i = period, vi; i < vertices.size(); i += period)
     {
-        a = i;
-        b = i - period;
+        a = Index(i);
+        b = Index(i - period);
         for (vi = 0; vi < period - 1; vi++)
         {
-            c = vi + i + 1;
-            d = vi + i - period + 1;
+            c = Index(vi + i + 1);
+            d = Index(vi + i - period + 1);
 
             Index t = c, u = d;
 
