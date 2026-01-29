@@ -302,9 +302,13 @@ void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input:
         args.TriggerType = PointerTriggerType::Mouse;
         auto extent = Control::GetSwapChainExtent();
         auto scale = Control::GetScale();
+#ifdef WIN32
+        args.Position = {curArgs.pos.x / (control->Extent.width / static_cast<double>(extent.width)),
+                        curArgs.pos.y / (control->Extent.height / static_cast<double>(extent.height))};
+#else
         args.Position = {curArgs.pos.x * scale[0].As<double>() / (control->Extent.width / static_cast<double>(extent.width)),
                         curArgs.pos.y * scale[1].As<double>() / (control->Extent.height / static_cast<double>(extent.height))};
-        printf("=====\n%f %f\n", args.Position.x.value, args.Position.y.value);
+#endif
         if (focusedControl && focusedControl != control)
             focusedControl->PointerEventTrigger(args);
         else
