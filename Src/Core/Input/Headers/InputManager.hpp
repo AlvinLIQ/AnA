@@ -15,16 +15,21 @@ namespace AnA
             int keyCode;
             int action = GLFW_PRESS;
         };
-        typedef void(*CursorCallBack)(void* pParam, CursorPosition &curPos, int leftButtonAction);
+        struct CursorArgs
+        {
+            CursorPosition pos;
+            CursorPosition duration;
+        };
+        typedef void(*CursorCallBack)(void* pParam, CursorArgs &curArgs, int leftButtonAction);
         struct CursorConfig
-        { 
+        {
             void* param;
             CursorCallBack callBack;
             int action;
         };
         typedef void(*CharacterCallBack)(uint32_t ch);
         struct CharacterConfig
-        { 
+        {
             CharacterCallBack callBack;
         };
         enum InputProfileFlags
@@ -59,7 +64,7 @@ namespace AnA
 
             CursorPosition& GetCursorPosition()
             {
-                return cursorPos;
+                return curArgs.pos;
             }
             InputProfile GlobalProfile{};
             void SetActiveProfile(uint32_t profileIndex);
@@ -68,7 +73,7 @@ namespace AnA
             void Check();
             CursorPosition GetDuration()
             {
-                return duration;
+                return curArgs.duration;
             }
         private:
             Window& aWindow;
@@ -76,8 +81,8 @@ namespace AnA
             static void characterCallback(GLFWwindow* window, uint32_t ch);
             int activeProfileIndex = 0;
             std::vector<InputProfile> inputProfiles{1};
-            CursorPosition cursorPos;
-            CursorPosition curPos, prevPos, duration;
+            CursorArgs curArgs;
+            CursorPosition curPos, prevPos;
             void checkCursorConfigs(Input::InputProfile& inputProfile);
             void checkProfile(Input::InputProfile& inputProfile);
         };

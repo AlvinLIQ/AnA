@@ -27,7 +27,7 @@ int Window::init(const char* title)
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
     glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
     //glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
-    
+
     window = glfwCreateWindow(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, title, NULL, NULL);
     if (!window)
         return -1;
@@ -35,10 +35,10 @@ int Window::init(const char* title)
     glfwSetWindowUserPointer(window, this);
     glfwSetFramebufferSizeCallback(window, Window::FramebufferResizeCallback);
     //In case window was created with a different size
-    glfwGetWindowSize(window, &Width, &Height);
+    glfwGetFramebufferSize(window, &Width, &Height);
     glfwSetWindowPos(window, 100, 100);
     glfwMakeContextCurrent(window);
-    
+
     return 0;
 }
 
@@ -73,10 +73,9 @@ void Window::mainLoop()
     }
 }
 
-void Window::FramebufferResizeCallback(GLFWwindow* window, int width, int height)
+void Window::FramebufferResizeCallback(GLFWwindow* window, int , int )
 {
     auto aWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
     aWindow->FramebufferResized = true;
-    aWindow->Width = width;
-    aWindow->Height = height;
+    glfwGetFramebufferSize(window, &aWindow->Width, &aWindow->Height);
 }

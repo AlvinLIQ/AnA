@@ -1,5 +1,6 @@
 #include "Headers/CameraController.hpp"
 #include "Headers/Camera.hpp"
+#include "Input/Headers/InputManager.hpp"
 
 #include <glm/detail/qualifier.hpp>
 #include <glm/fwd.hpp>
@@ -85,11 +86,11 @@ void CameraController::Rotate(CameraController::CameraCallbackParam* param)
     param->aCamera.CameraTransform.rotation[posIndex] -= (param->id & 1 ? -rotateStep : rotateStep) * param->aCamera.GetRotateSpeed() * 6.283f;
 }
 
-void CameraController::CursorMoved(Camera* camera, CursorPosition &duration, int )
+void CameraController::CursorMoved(Camera* camera, Input::CursorArgs &curArgs, int )
 {
     const float rotateSpeed = camera->GetSpeedRatio() * camera->GetRotateSpeed() * 6.283f * 80.f;
-    camera->CameraTransform.rotation.y = glm::mod(camera->CameraTransform.rotation.y - static_cast<float>(duration.x) * rotateSpeed, glm::two_pi<float>());
-    camera->CameraTransform.rotation.x += static_cast<float>(duration.y) * rotateSpeed;
+    camera->CameraTransform.rotation.y = glm::mod(camera->CameraTransform.rotation.y - static_cast<float>(curArgs.duration.x) * rotateSpeed, glm::two_pi<float>());
+    camera->CameraTransform.rotation.x += static_cast<float>(curArgs.duration.y) * rotateSpeed;
 
     const float yLock = .2f * glm::two_pi<float>();
     camera->CameraTransform.rotation.x = glm::clamp(camera->CameraTransform.rotation.x, -yLock, yLock);

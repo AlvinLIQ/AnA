@@ -71,7 +71,7 @@ void EditorApp::Init()
     }, GLFW_KEY_R, GLFW_PRESS});// Rotate Mode
 
     aInputManager.GlobalProfile.cursorConfigs.push_back({this,
-    [](void* param, CursorPosition& , int leftButtonAction)
+    [](void* param, Input::CursorArgs& curArgs, int leftButtonAction)
     {
         auto editorApp = reinterpret_cast<EditorApp*>(param);
         if (editorApp->ActionMode == 0 || editorApp->SelectedObjectData == nullptr)
@@ -83,7 +83,7 @@ void EditorApp::Init()
             return;
         }
         auto& object = editorApp->aResourceManager.MainScene.At(editorApp->SelectedObjectData->id);
-        auto duration = editorApp->aInputManager.GetDuration();
+        auto duration = curArgs.duration;
         auto& mainCamera = editorApp->aResourceManager.MainCamera;
         float speedRatio = mainCamera.GetSpeedRatio();
         switch(editorApp->ActionMode)

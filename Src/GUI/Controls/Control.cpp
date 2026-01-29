@@ -290,10 +290,10 @@ void _characterReceived(uint32_t ch)
 void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input::InputProfile>& profiles)
 {
     Input::InputProfile profile{};
-    profile.flag = Input::InputProfileFlags::None;
+    profile.flag = Input::InputProfileFlags::RawMotion;
     Input::CursorConfig cursorConfig{};
     cursorConfig.param = mainControl;
-    cursorConfig.callBack = [](void* param, CursorPosition& pos, int leftButtonAction)
+    cursorConfig.callBack = [](void* param, Input::CursorArgs& curArgs, int leftButtonAction)
     {
         auto control = static_cast<Control*>(param);
         PointerEventArgs args;
@@ -302,8 +302,9 @@ void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input:
         args.TriggerType = PointerTriggerType::Mouse;
         auto extent = Control::GetSwapChainExtent();
         auto scale = Control::GetScale();
-        args.Position = {pos.x * scale[0].As<double>() / (control->Extent.width / static_cast<double>(extent.width)),
-                        pos.y * scale[1].As<double>() / (control->Extent.height / static_cast<double>(extent.height))};
+        args.Position = {curArgs.pos.x * scale[0].As<double>() / (control->Extent.width / static_cast<double>(extent.width)),
+                        curArgs.pos.y * scale[1].As<double>() / (control->Extent.height / static_cast<double>(extent.height))};
+        printf("=====\n%f %f\n", args.Position.x.value, args.Position.y.value);
         if (focusedControl && focusedControl != control)
             focusedControl->PointerEventTrigger(args);
         else
