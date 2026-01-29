@@ -303,7 +303,7 @@ void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input:
         auto extent = Control::GetSwapChainExtent();
         auto scale = Control::GetScale();
         args.Position = {pos.x * scale[0].As<double>() / (control->Extent.width / static_cast<double>(extent.width)),
-                        pos.y * static_cast<double>(scale[1]) / (control->Extent.height / static_cast<double>(extent.height))};
+                        pos.y * scale[1].As<double>() / (control->Extent.height / static_cast<double>(extent.height))};
         if (focusedControl && focusedControl != control)
             focusedControl->PointerEventTrigger(args);
         else
