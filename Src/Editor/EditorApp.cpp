@@ -180,8 +180,6 @@ void EditorApp::saveSceneButton_Click(void* , PointerEventArgs& )
         memcpy(info.filePath, model->Path.data(), model->Path.size());
         info.tetureId = mesh.textureId;
         info.transform = mesh.transform;
-        info.transform.translation.y = -info.transform.translation.y;
-        info.transform.rotation.y = 0.0f;
         fwrite((const void*)&info, sizeof(MeshInfo), 1, f);
     }
 
