@@ -302,7 +302,7 @@ void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input:
         args.TriggerType = PointerTriggerType::Mouse;
         auto extent = Control::GetSwapChainExtent();
         auto scale = Control::GetScale();
-#ifdef WIN32
+#ifdef _WIN32
         args.Position = {curArgs.pos.x / (control->Extent.width / static_cast<double>(extent.width)),
                         curArgs.pos.y / (control->Extent.height / static_cast<double>(extent.height))};
 #else
