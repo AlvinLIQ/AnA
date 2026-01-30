@@ -10,6 +10,8 @@ using namespace AnA;
 using namespace Editor;
 using namespace Controls;
 
+Transform _originalTransform;
+
 EditorApp::EditorApp() : App()
 {
 
@@ -52,23 +54,27 @@ void EditorApp::Init()
     aInputManager.GlobalProfile.keyMapConfigs.push_back(keyMapConfig);
 //Transform Action Mode
     aInputManager.GlobalProfile.keyMapConfigs.push_back({this,
-    [](void* param)
-    {
-        auto editorApp = reinterpret_cast<EditorApp*>(param);
-        editorApp->ActionMode = editorApp->ActionMode == 1 ? 0 : 1;
-    }, GLFW_KEY_G, GLFW_PRESS});// Grab Mode
+        createActionModeCallback<1>()
+        , GLFW_KEY_G, GLFW_PRESS});// Grab Mode
     aInputManager.GlobalProfile.keyMapConfigs.push_back({this,
-    [](void* param)
-    {
-        auto editorApp = reinterpret_cast<EditorApp*>(param);
-        editorApp->ActionMode = editorApp->ActionMode == 2 ? 0 : 2;
-    }, GLFW_KEY_S, GLFW_PRESS});// Scale Mode
+        createActionModeCallback<2>()
+        , GLFW_KEY_S, GLFW_PRESS});// Scale Mode
     aInputManager.GlobalProfile.keyMapConfigs.push_back({this,
-    [](void* param)
-    {
-        auto editorApp = reinterpret_cast<EditorApp*>(param);
-        editorApp->ActionMode = editorApp->ActionMode == 3 ? 0 : 3;
-    }, GLFW_KEY_R, GLFW_PRESS});// Rotate Mode
+        createActionModeCallback<3>()
+        , GLFW_KEY_R, GLFW_PRESS});// Rotate Mode
+    aInputManager.GlobalProfile.keyMapConfigs.push_back({this,
+        [](void* param)
+        {
+            auto editorApp = reinterpret_cast<EditorApp*>(param);
+            if (editorApp->ActionMode == 0 || editorApp->SelectedObjectData == nullptr)
+                return;
+
+            editorApp->ActionMode = 0;
+            auto& object = editorApp->aResourceManager.MainScene.At(editorApp->SelectedObjectData->id);
+            object.transform = _originalTransform;
+            editorApp->aResourceManager.MainScene.UpdateMeshTransform(editorApp->SelectedObjectData->id);
+        }
+        , GLFW_KEY_ESCAPE, GLFW_PRESS});// Rotate Mode
 
     aInputManager.GlobalProfile.cursorConfigs.push_back({this,
     [](void* param, Input::CursorArgs& curArgs, int leftButtonAction)
@@ -207,6 +213,21 @@ void EditorApp::mainScene_MeshAppend(std::string name, uint32_t id)
     panel->AddItem(itemData);
 }
 //const VkDeviceSize offset = 0;
+
+template<char actionMode>
+Input::RegularCallBack EditorApp::createActionModeCallback()
+{
+    return [](void* param)
+    {
+        auto editorApp = reinterpret_cast<EditorApp*>(param);
+        if (editorApp->SelectedObjectData == nullptr)
+            return;
+
+        auto& object = editorApp->aResourceManager.MainScene.At(editorApp->SelectedObjectData->id);
+        _originalTransform = object.transform;
+        editorApp->ActionMode = editorApp->ActionMode == actionMode ? 0 : actionMode;
+    };
+}
 
 int main()
 {
