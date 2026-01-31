@@ -51,13 +51,13 @@ Vec2 StackPanel::GetSizeForRender()
         switch (align)
         {
         case Start:
-            offset2F[o] = size2F[o] - maxSize2F[o] + renderOffset2F[o];
+            offset2F[o] = size2F[o] - maxSize2F[o] + renderOffset2F[o] + Padding[o];
             break;
         case End:
-            offset2F[o] = maxSize2F[o] - size2F[o];
+            offset2F[o] = maxSize2F[o] - size2F[o] - Padding[2 + o];
             break;
         case Stretch:
-            size2F[o] = maxSize2F[o];
+            size2F[o] = maxSize2F[o] - Padding[o] * 0.5f - Padding[2 + o] * 0.5f;
             [[fallthrough]];
         case Center:
             [[fallthrough]];
@@ -67,7 +67,7 @@ Vec2 StackPanel::GetSizeForRender()
         }
         items[i]->RenderOffset(offset);
         items[i]->RenderSize(size);
-        maxSize2F[invO] = std::max(maxSize2F[invO] ,(offset2F[invO] - renderOffset2F[invO] + size2F[invO]));
+        maxSize2F[invO] = std::max(maxSize2F[invO] ,(offset2F[invO] - renderOffset2F[invO] + size2F[invO]) + Padding[2 + invO]);
     }
     RenderSize(maxSize);
     return maxSize;
@@ -78,7 +78,7 @@ void StackPanel::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorIma
     auto offset = (renderOffset - renderSize) + 1.0f;
     for (auto& item : items)
     {
-        item->RenderOffset() += offset + Padding;
+        item->RenderOffset() += offset;
         item->ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
     }
     Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);

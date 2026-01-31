@@ -75,6 +75,10 @@ namespace AnA
             {
                 return renderSize;
             }
+            Vec2 ActualRenderOffset()
+            {
+                return {renderOffset.x() * 0.5f + 0.5f - renderSize.x() * 0.5f, renderOffset.y() * 0.5f + 0.5f - renderSize.y() * 0.5f};
+            }
 
             std::vector<PointerEventHandler> PointerEvents[PointerEventType::Moving + 1] = {};
 
@@ -88,6 +92,8 @@ namespace AnA
             }
             static void ClearFocus();
             static Control* GetFocused();
+
+            Control* Parent{nullptr};
 
             bool IsInside(CursorPosition pos);
             static bool IsInside(CursorPosition& pos, Vec2& offset, Vec2& size);

@@ -78,7 +78,7 @@ namespace AnA
         T value;
         Var() : value(0)
         {
-            
+
         }
         Var(T v) : value(v)
         {
@@ -225,7 +225,7 @@ namespace AnA
             return data;
         }
 
-        Vec& operator-=(const Vec& other) 
+        Vec& operator-=(const Vec& other)
         {
             for (size_t i = 0; i < N; ++i)
                 data[i] = data[i] - other[i];
@@ -273,7 +273,15 @@ namespace AnA
     struct Vec<T, 2>
     {
         T data[2];
-        
+        Vec<T, 2>()
+        {
+
+        }
+        Vec<T, 2>(T _x, T _y) : data{_x, _y}
+        {
+
+        }
+
         T& x() { return data[0]; }
         T& y() { return data[1]; }
 
@@ -346,7 +354,7 @@ namespace AnA
     struct Vec<T, 3>
     {
         T data[3];
-        
+
         T& x() { return data[0]; }
         T& y() { return data[1]; }
         T& z() { return data[2]; }
@@ -363,7 +371,7 @@ namespace AnA
     struct Vec<T, 4>
     {
         T data[4];
-        
+
         T& x() { return data[0]; }
         T& y() { return data[1]; }
         T& z() { return data[2]; }

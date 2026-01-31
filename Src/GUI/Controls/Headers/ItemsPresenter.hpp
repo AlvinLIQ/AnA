@@ -27,7 +27,7 @@ namespace AnA
 
             void PointerEventTrigger(PointerEventArgs& args) override;
             float Spacing = 0.0f;
-            Vec2 Padding = {};
+            Vec4 Padding = {};
         protected:
             std::vector<Control*> items;
         };

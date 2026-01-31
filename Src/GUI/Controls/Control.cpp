@@ -123,15 +123,7 @@ Control* Control::GetFocused()
 
 bool Control::IsInside(CursorPosition pos)
 {
-    Vec2 offset = {renderOffset.x() * 0.5f + 0.5f - renderSize.x() * 0.5f, renderOffset.y() * 0.5f + 0.5f - renderSize.y() * 0.5f};
-    if (HorizontalAlignment == Stretch)
-    {
-        offset.x() = 0.0f;
-    }
-    if (VerticalAlignment == Stretch)
-    {
-        offset.y() = 0.0f;
-    }
+    Vec2 offset = ActualRenderOffset();
     return IsInside(pos, offset, renderSize);
 }
 
@@ -301,11 +293,11 @@ void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input:
         args.EventType = GetPointerEventType(leftButtonAction);
         args.TriggerType = PointerTriggerType::Mouse;
         auto extent = Control::GetSwapChainExtent();
-        auto scale = Control::GetScale();
 #ifdef _WIN32
         args.Position = {curArgs.pos.x / (control->Extent.width / static_cast<double>(extent.width)),
                         curArgs.pos.y / (control->Extent.height / static_cast<double>(extent.height))};
 #else
+        auto scale = Control::GetScale();
         args.Position = {curArgs.pos.x * scale[0].As<double>() / (control->Extent.width / static_cast<double>(extent.width)),
                         curArgs.pos.y * scale[1].As<double>() / (control->Extent.height / static_cast<double>(extent.height))};
 #endif
