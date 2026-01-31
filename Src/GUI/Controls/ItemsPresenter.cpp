@@ -20,6 +20,7 @@ ItemsPresenter::~ItemsPresenter()
 void ItemsPresenter::Child(Control* newItem)
 {
     items.push_back(newItem);
+    newItem->Parent = this;
     RequestUpdate();
 }
 

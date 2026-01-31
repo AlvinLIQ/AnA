@@ -73,12 +73,18 @@ Vec2 StackPanel::GetSizeForRender()
     return maxSize;
 }
 
+Vec2 StackPanel::ContentRenderSize()
+{
+    return RenderSize() - Vec2(Padding.x(), Padding.y()) * 0.5f - Vec2(Padding.z(), Padding.w()) * 0.5f;
+}
+
 void StackPanel::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
     auto offset = (renderOffset - renderSize) + 1.0f;
+    int invO = 1 - Orientation;
     for (auto& item : items)
     {
-        item->RenderOffset() += offset;
+        item->RenderOffset()[invO] += offset[invO];
         item->ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
     }
     Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);

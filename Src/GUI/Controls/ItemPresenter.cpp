@@ -25,6 +25,7 @@ void ItemPresenter::Child(Control* newItem)
         delete item;
 
     item = newItem;
+    item->Parent = this;
     RequestUpdate();
 }
 

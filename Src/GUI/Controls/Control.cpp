@@ -26,6 +26,7 @@ Vec2 Control::GetActualControlOffset()
     float* pOffset = reinterpret_cast<float*>(&renderOffset);
     float* pSize = reinterpret_cast<float*>(&this->renderSize);
     AlignmentType Alignments[]{HorizontalAlignment, VerticalAlignment};
+    Vec2 maxSize = Parent ? Parent->ContentRenderSize() : Vec2(1.0f, 1.0f);
     for (int i = 0; i < 2; i++)
     {
         if (Alignments[i] == AlignmentType::Start)
@@ -36,7 +37,7 @@ Vec2 Control::GetActualControlOffset()
         {
             pOffset[i] = 0.f;
             if (Alignments[i] == AlignmentType::Stretch)
-                pSize[i] = 1.f;
+                pSize[i] = maxSize[i];
         }
     }
 
