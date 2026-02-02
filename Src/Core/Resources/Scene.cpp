@@ -185,8 +185,7 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
             meshletCount += uint32_t(model->meshlets.size());
         }
 
-        for (uint32_t i = 0; i < uint32_t(model->meshlets.size()); i++)
-            meshletIDs.push_back({model->meshletOffset + i, uint32_t(meshes.size())});
+        meshletIDCount += uint32_t(model->meshlets.size());
 
         auto& textureMap = Resource::ResourceManager::GetCurrent()->TextureMap;
         mesh.textureId = textureMap.find(meshInfo.tetureId) == textureMap.end() ? DEFAULT_TEXTURE_ID : meshInfo.tetureId;
@@ -244,9 +243,7 @@ void Scene::Append(std::vector<Model::Vertex>& meshVertices, std::vector<uint32_
     meshletIndexCount += model->meshletIndexCount;
     meshletVertexCount += model->meshletVertexCount;
     meshletCount += uint32_t(model->meshlets.size());
-
-    for (uint32_t i = 0; i < uint32_t(model->meshlets.size()); i++)
-        meshletIDs.push_back({model->meshletOffset + i, uint32_t(meshes.size())});
+    meshletIDCount += uint32_t(model->meshlets.size());
 
     auto& textureMap = Resource::ResourceManager::GetCurrent()->TextureMap;
     auto& texture = textureMap.at(mesh.textureId);
@@ -401,9 +398,9 @@ void Scene::UpdateMeshlets()
 
         meshletIndexBuffers[nextIndex].Map();
     }
-    if (meshletIDs.size() * sizeof(MeshletID) > meshletIDBuffers[nextIndex].GetSize())
+    if (meshletIDCount * sizeof(MeshletID) > meshletIDBuffers[nextIndex].GetSize())
     {
-        meshletIDBuffers[nextIndex].Resize((meshletIDs.size() + 100) * sizeof(MeshletID));
+        meshletIDBuffers[nextIndex].Resize((meshletIDCount + 100) * sizeof(MeshletID));
         meshletIDBuffers[nextIndex].Map();
     }
 
@@ -411,12 +408,16 @@ void Scene::UpdateMeshlets()
     uint32_t* meshletVertexBuffer = static_cast<uint32_t*>(meshletVertexBuffers[nextIndex].GetMappedData());
     uint8_t* meshletIndexBuffer = static_cast<uint8_t*>(meshletIndexBuffers[nextIndex].GetMappedData());
     BoundingSphere* cullingBuffer = static_cast<BoundingSphere*>(meshletCullingBuffers[nextIndex].GetMappedData());
+    MeshletID* meshletIDBuffer = static_cast<MeshletID*>(meshletIDBuffers[nextIndex].GetMappedData());
     uint32_t vertexOffset = 0, indexOffset = 0;
     uint32_t i = 0;
-    for (auto& modelPair : Resource::ResourceManager::GetCurrent()->ModelMap)
+    auto& modelMap = Resource::ResourceManager::GetCurrent()->ModelMap;
+    uint32_t meshletOffset = 0;
+    for (auto& modelPair : modelMap)
     {
         auto& model = modelPair.second;
         auto& meshlets = model->meshlets;
+        model->meshletOffset = meshletOffset;
         for (auto& meshlet : meshlets)
         {
             meshletBuffer[i] = {vertexOffset, indexOffset, meshlet.vertexCount, meshlet.indexCount};
@@ -435,11 +436,20 @@ void Scene::UpdateMeshlets()
             cullingBuffer[i].cutoff = meshlet.cutoff;
             ++i;
         }
+        meshletOffset += uint32_t(meshlets.size());
     }
-    memcpy(meshletIDBuffers[nextIndex].GetMappedData(), meshletIDs.data(), meshletIDs.size() * sizeof(MeshletID));
-    *static_cast<uint32_t*>(meshletIDCountBuffers[nextIndex].GetMappedData()) = uint32_t(meshletIDs.size());
+
+    //Update meshlet id buffer
+    i = 0;
+    for (uint32_t meshID = 0, meshletID; meshID < uint32_t(meshes.size()); meshID++)
+    {
+        auto& model = modelMap[meshes[meshID].modelID];
+        for (meshletID = 0; meshletID < uint32_t(model->meshlets.size()); meshletID++)
+            meshletIDBuffer[i++] = {meshletID + model->meshletOffset, meshID};
+    }
+    *static_cast<uint32_t*>(meshletIDCountBuffers[nextIndex].GetMappedData()) = meshletIDCount;
     auto drawMeshTaskCommand = static_cast<glm::uvec3*>(drawMeshIndirectBuffer.GetMappedData());
-    uint32_t numofGroup = (static_cast<uint32_t>(meshletIDs.size()) + numOfGroup - 1) / numOfGroup;
+    uint32_t numofGroup = (meshletIDCount + numOfGroup - 1) / numOfGroup;
     glm::uvec3 groupSize;
     groupSize.x = numofGroup;
     groupSize.y = 1;

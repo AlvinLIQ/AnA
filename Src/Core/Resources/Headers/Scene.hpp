@@ -191,7 +191,7 @@ namespace AnA
         uint32_t meshletVertexCount = 0;
         uint32_t meshletIndexCount = 0;
         uint32_t meshletCount = 0;
-        std::vector<MeshletID> meshletIDs{};
+        uint32_t meshletIDCount = 0;
         std::vector<Buffer> meshletIDCountBuffers{};
         std::vector<Buffer> meshletIDBuffers{};
         std::vector<Buffer> meshletBuffers{};
