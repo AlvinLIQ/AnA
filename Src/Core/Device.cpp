@@ -1177,9 +1177,9 @@ void Device::StageBarrier(VkCommandBuffer commandBuffer,
     VkPipelineStageFlags2 srcStageMask,
     VkPipelineStageFlags2 dstStageMask)
 {
-    StageBarrier(commandBuffer, 
-        VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT, 
-        VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT, 
+    StageBarrier(commandBuffer,
+        VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT,
+        VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT,
         srcStageMask, dstStageMask);
 }
 
@@ -1188,7 +1188,7 @@ void Device::StageBarrier(VkCommandBuffer commandBuffer,
 {
     StageBarrier(commandBuffer, stageMask, stageMask);
 }
-    
+
 
 void Device::ImageMemoryBarrier(VkCommandBuffer commandBuffer, VkImage image,
     VkImageLayout initLayout, VkImageLayout finalLayout,

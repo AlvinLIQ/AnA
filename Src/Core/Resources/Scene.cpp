@@ -1,6 +1,7 @@
 #include "Headers/Scene.hpp"
 #include "Headers/ResourceManager.hpp"
 #include "Headers/Texture.hpp"
+#include "vulkan/vulkan_core.h"
 #include <memory>
 
 using namespace AnA;
@@ -267,6 +268,9 @@ void Scene::Append(std::vector<Model::Vertex>& meshVertices, std::vector<uint32_
 
 void Scene::RemoveAt(uint32_t meshIndex)
 {
+    auto& modelMap = Resource::ResourceManager::GetCurrent()->ModelMap;
+    meshletIDCount -= uint32_t(modelMap[meshes[meshIndex].modelID]->meshlets.size());
+
     meshes.erase(meshes.begin() + meshIndex);
     needUpdate = true;
 }
@@ -447,13 +451,15 @@ void Scene::UpdateMeshlets()
         for (meshletID = 0; meshletID < uint32_t(model->meshlets.size()); meshletID++)
             meshletIDBuffer[i++] = {meshletID + model->meshletOffset, meshID};
     }
+    meshletIDCount = i;
+
     *static_cast<uint32_t*>(meshletIDCountBuffers[nextIndex].GetMappedData()) = meshletIDCount;
-    auto drawMeshTaskCommand = static_cast<glm::uvec3*>(drawMeshIndirectBuffer.GetMappedData());
+    auto drawMeshTaskCommand = static_cast<VkDrawMeshTasksIndirectCommandEXT*>(drawMeshIndirectBuffer.GetMappedData());
     uint32_t numofGroup = (meshletIDCount + numOfGroup - 1) / numOfGroup;
-    glm::uvec3 groupSize;
-    groupSize.x = numofGroup;
-    groupSize.y = 1;
-    groupSize.z = 1;
+    VkDrawMeshTasksIndirectCommandEXT groupSize;
+    groupSize.groupCountX = numofGroup;
+    groupSize.groupCountY = 1;
+    groupSize.groupCountZ = 1;
     *drawMeshTaskCommand = groupSize;
 
     //meshletBuffers[nextIndex].Flush();

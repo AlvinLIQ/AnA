@@ -73,7 +73,10 @@ void EditorApp::Init()
 
             auto modelList = reinterpret_cast<Controls::ObjectView*>(editorApp->controlMap["modelList"]);
             Resource::ResourceManager::GetCurrent()->MainScene.RemoveAt(editorApp->SelectedObjectData->id);
-            modelList->RemoveChildAt(modelList->SelectionIndex());
+            int selectionIndex = modelList->SelectionIndex();
+            modelList->RemoveChildAt(selectionIndex);
+            for (int i = selectionIndex; i < modelList->Children().size(); i++)
+                reinterpret_cast<ObjectViewItem*>(modelList->Children()[i])->Data.id--;
         }
         , GLFW_KEY_D, GLFW_PRESS});// Rotate Mode
     editorInputProfile.opKeyMapConfigs.push_back({this,
