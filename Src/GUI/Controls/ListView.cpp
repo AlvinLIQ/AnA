@@ -69,15 +69,17 @@ void ListView::Select(int index)
     {
         selectionIndex = -1;
         selectedItem = nullptr;
-        return;
     }
-    auto item = items[index];
-    item->Color = {0.5f, 0.5f, 0.5f, 1.0f};
-    item->RequestUpdate();
-    selectedItem = item;
-    selectionIndex = index;
+    else
+    {
+        auto item = items[index];
+        item->Color = {0.5f, 0.5f, 0.5f, 1.0f};
+        item->RequestUpdate();
+        selectedItem = item;
+        selectionIndex = index;
+    }
     if (SelectionChanged != nullptr)
-        SelectionChanged(item);
+        SelectionChanged(selectedItem);
 }
 void ListView::Select(Control* item)
 {

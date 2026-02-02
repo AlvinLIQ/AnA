@@ -139,9 +139,14 @@ void EditorApp::Init()
     auto panel = static_cast<Controls::ObjectView*>(static_cast<EditorApp*>(App::GetCurrent())->controlMap["modelList"]);
     panel->SelectionChanged = [](void* param)
     {
-        auto selectedItem = reinterpret_cast<ObjectViewItem*>(param);
         auto editorApp = reinterpret_cast<EditorApp*>(EditorApp::GetCurrent());
-        editorApp->SelectedObjectData = &selectedItem->Data;
+        if (param == nullptr)
+            editorApp->SelectedObjectData = nullptr;
+        else
+        {
+            auto selectedItem = reinterpret_cast<ObjectViewItem*>(param);
+            editorApp->SelectedObjectData = &selectedItem->Data;
+        }
     };
     loopCallback = EditorApp::onLoop;
 
