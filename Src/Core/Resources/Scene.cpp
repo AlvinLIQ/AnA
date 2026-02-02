@@ -340,6 +340,7 @@ void Scene::CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer, Bu
     auto bufferVertices = static_cast<Model::Vertex*>(newVertBuffer->GetMappedData());
     auto bufferIndices = static_cast<Model::Index*>(newIndexBuffer->GetMappedData());
     auto bufferObjects = static_cast<Object*>(newObjectBuffer->GetMappedData());
+    auto bufferDrawIndexedIndirect = static_cast<VkDrawIndexedIndirectCommand*>(drawIndexedIndirectBuffer.GetMappedData());
 
     auto& modelMap = Resource::ResourceManager::GetCurrent()->ModelMap;
     applyVertexBufferUpdate(bufferVertices, bufferIndices);
@@ -354,6 +355,12 @@ void Scene::CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer, Bu
         bufferObjects[i].radius = model->radius * std::max(scale.x, std::max(scale.y, scale.z));
         transform[3].w = float(textureIdMap[meshes[i].textureId]);
         bufferObjects[i].transform = transform;
+
+        bufferDrawIndexedIndirect[i].indexCount = meshes[i].indexCount;
+        bufferDrawIndexedIndirect[i].instanceCount = 1;
+        bufferDrawIndexedIndirect[i].firstIndex = model->indexOffset;
+        bufferDrawIndexedIndirect[i].vertexOffset = 0;
+        bufferDrawIndexedIndirect[i].firstInstance = 0;
     }
 }
 
