@@ -21,6 +21,8 @@ namespace AnA
             void Select(int index);
             void Select(Control* item);
 
+            void RemoveChildAt(size_t index) override;
+
             void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
             Input::RegularCallBack SelectionChanged{nullptr};
         private:

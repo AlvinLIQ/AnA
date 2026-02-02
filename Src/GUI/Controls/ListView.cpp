@@ -1,4 +1,5 @@
 #include "Headers/ListView.hpp"
+#include "Headers/ItemsPresenter.hpp"
 #include "Headers/Types.hpp"
 
 using namespace AnA;
@@ -36,18 +37,9 @@ void ListView::ListView_PointerPressed(ListView* control, PointerEventArgs& )
 {
     if (control->hoverItem == control->selectedItem)
         return;
-    if (control->selectedItem != nullptr)
-    {
-        control->selectedItem->Color = {};
-    }
     if (control->hoverItem != nullptr)
     {
-        control->selectedItem = control->hoverItem;
-        control->hoverItem->Color = {0.5f, 0.5f, 0.5f, 1.0f};
-        control->hoverItem->RequestUpdate();
-        control->selectedItem = control->hoverItem;
-        if (control->SelectionChanged != nullptr)
-            control->SelectionChanged(control->SelectedItem());
+        control->Select(control->hoverItem);
     }
 }
 
@@ -67,6 +59,44 @@ ListView::ListView()
     PointerEvents[PointerEventType::Moving].push_back(reinterpret_cast<PointerEventHandler>(ListView::ListView_PointerMoving));
     PointerEvents[PointerEventType::Pressed].push_back(reinterpret_cast<PointerEventHandler>(ListView::ListView_PointerPressed));
     PointerEvents[PointerEventType::Exited].push_back(reinterpret_cast<PointerEventHandler>(ListView::ListView_PointerExited));
+}
+
+void ListView::Select(int index)
+{
+    if (selectedItem != nullptr)
+        selectedItem->Color = {};
+    if (index < 0)
+    {
+        selectionIndex = -1;
+        selectedItem = nullptr;
+        return;
+    }
+    auto item = items[index];
+    item->Color = {0.5f, 0.5f, 0.5f, 1.0f};
+    item->RequestUpdate();
+    selectedItem = item;
+    selectionIndex = index;
+    if (SelectionChanged != nullptr)
+        SelectionChanged(item);
+}
+void ListView::Select(Control* item)
+{
+    for (size_t i = 0; i < items.size(); i++)
+        if (items[i] == item)
+        {
+            Select(int(i));
+            break;
+        }
+}
+
+void ListView::RemoveChildAt(size_t index)
+{
+    if (selectedItem != nullptr)
+    {
+        if (selectionIndex >= int(index))
+            Select(selectionIndex - 1);
+    }
+    ItemsPresenter::RemoveChildAt(index);
 }
 
 void ListView::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)

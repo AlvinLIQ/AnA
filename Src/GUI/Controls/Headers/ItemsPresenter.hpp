@@ -18,7 +18,7 @@ namespace AnA
             }
 
             void RemoveChild(Control* targetItem);
-            void RemoveChildAt(size_t index);
+            virtual void RemoveChildAt(size_t index);
 
             std::vector<Control*> Children()
             {

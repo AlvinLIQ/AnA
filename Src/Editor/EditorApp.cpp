@@ -66,6 +66,18 @@ void EditorApp::Init()
         [](void* param)
         {
             auto editorApp = reinterpret_cast<EditorApp*>(param);
+            if (editorApp->SelectedObjectData == nullptr)
+                return;
+
+            auto modelList = reinterpret_cast<Controls::ObjectView*>(editorApp->controlMap["modelList"]);
+            //Resource::ResourceManager::GetCurrent()->MainScene.RemoveAt(editorApp->SelectedObjectData->id);
+            modelList->RemoveChildAt(modelList->SelectionIndex());
+        }
+        , GLFW_KEY_D, GLFW_PRESS});// Rotate Mode
+    aInputManager.GlobalProfile.keyMapConfigs.push_back({this,
+        [](void* param)
+        {
+            auto editorApp = reinterpret_cast<EditorApp*>(param);
             if (editorApp->ActionMode == 0 || editorApp->SelectedObjectData == nullptr)
                 return;
 
