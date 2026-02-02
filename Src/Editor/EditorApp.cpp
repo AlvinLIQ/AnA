@@ -75,7 +75,7 @@ void EditorApp::Init()
             Resource::ResourceManager::GetCurrent()->MainScene.RemoveAt(editorApp->SelectedObjectData->id);
             int selectionIndex = modelList->SelectionIndex();
             modelList->RemoveChildAt(selectionIndex);
-            for (int i = selectionIndex; i < modelList->Children().size(); i++)
+            for (int i = selectionIndex; i < int(modelList->Children().size()); i++)
                 reinterpret_cast<ObjectViewItem*>(modelList->Children()[i])->Data.id--;
         }
         , GLFW_KEY_D, GLFW_PRESS});// Rotate Mode

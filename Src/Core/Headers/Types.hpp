@@ -273,11 +273,11 @@ namespace AnA
     struct Vec<T, 2>
     {
         T data[2];
-        Vec<T, 2>()
+        Vec()
         {
 
         }
-        Vec<T, 2>(T _x, T _y) : data{_x, _y}
+        Vec(T _x, T _y) : data{_x, _y}
         {
 
         }

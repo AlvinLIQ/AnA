@@ -91,12 +91,14 @@ void ListView::Select(Control* item)
 
 void ListView::RemoveChildAt(size_t index)
 {
+    ItemsPresenter::RemoveChildAt(index);
     if (selectedItem != nullptr)
     {
-        if (selectionIndex >= int(index))
+        if (selectionIndex == 0 && selectionIndex < int(items.size()))
+            Select(0);
+        else if (selectionIndex >= int(index))
             Select(selectionIndex - 1);
     }
-    ItemsPresenter::RemoveChildAt(index);
 }
 
 void ListView::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
