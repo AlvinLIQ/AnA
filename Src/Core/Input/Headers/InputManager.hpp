@@ -40,6 +40,7 @@ namespace AnA
         {
             uint32_t flag;
             std::vector<KeyMapConfig> keyMapConfigs;
+            std::vector<KeyMapConfig> opKeyMapConfigs;
             std::vector<CursorConfig> cursorConfigs;
             std::vector<CharacterConfig> characterConfigs;
             void* param;

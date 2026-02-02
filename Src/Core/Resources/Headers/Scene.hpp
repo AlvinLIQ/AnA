@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <memory>
 #include <mutex>
 #include "Renderable.hpp"
 #include "Model.hpp"
@@ -105,13 +106,11 @@ namespace AnA
         {
             commandBufferNeedUpdate = false;
         }
-        void CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer, Buffer* newObjectBuffer, uint32_t offset = 0, size_t meshOffset = 0);
-        void CommitBufferUpdate();
+        void CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer, Buffer* newObjectBuffer, size_t meshOffset = 0);
         void Update() override;
         void UpdateBuffers(Range updateRange);
         void UpdateMeshlets();
-        void UpdateVertexPositions(UniqueModel& model);
-        void UpdateVertexPositions(Range updateRange);
+        void UpdateVertexPositions(std::shared_ptr<Model> model);
         void UpdateMeshTransform(uint32_t meshIndex);
 
         Mesh& At(size_t index)
@@ -177,7 +176,7 @@ namespace AnA
         std::vector<VkDrawIndexedIndirectCommand> drawIndexedCommands{};
         uint32_t batchSize;
         std::vector<Range> updateQueue{};
-        void applyVertexBufferUpdate(Model::Vertex* vertices, Model::Index* indices, Range& updateRange);
+        void applyVertexBufferUpdate(Model::Vertex* vertices, Model::Index* indices);
         bool needUpdate;
         bool commandBufferNeedUpdate = false;
         std::mutex _mutex;
@@ -192,8 +191,6 @@ namespace AnA
         uint32_t meshletVertexCount = 0;
         uint32_t meshletIndexCount = 0;
         uint32_t meshletCount = 0;
-        std::unordered_map<uint32_t, uint32_t> modelMap{};
-        std::vector<UniqueModel> uniqueModels{};
         std::vector<MeshletID> meshletIDs{};
         std::vector<Buffer> meshletIDCountBuffers{};
         std::vector<Buffer> meshletIDBuffers{};

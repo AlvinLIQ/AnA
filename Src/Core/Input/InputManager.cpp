@@ -61,6 +61,12 @@ void InputManager::keyCallback(GLFWwindow* , int key, int , int action, int )
         if (keyMapConfig.keyCode == key && keyMapConfig.callBack != nullptr && keyMapConfig.action == action)
             keyMapConfig.callBack(keyMapConfig.param);
     }
+    auto& activeProfile = _aInputManager->GetActiveProfile();
+    for (auto &keyMapConfig : activeProfile.opKeyMapConfigs)
+    {
+        if (keyMapConfig.keyCode == key && keyMapConfig.callBack != nullptr && keyMapConfig.action == action)
+            keyMapConfig.callBack(keyMapConfig.param);
+    }
 }
 
 void InputManager::characterCallback(GLFWwindow* , uint32_t ch)

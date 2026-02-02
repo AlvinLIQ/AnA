@@ -1,6 +1,7 @@
 #include "Headers/Scene.hpp"
 #include "Headers/ResourceManager.hpp"
 #include "Headers/Texture.hpp"
+#include <memory>
 
 using namespace AnA;
 
@@ -165,32 +166,27 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
     for (size_t i = 0; i < count; i++)
     {
         auto& meshInfo = meshInfos[i];
-        uint32_t meshId;
         Mesh mesh;
         mesh.transform = meshInfo.transform;
-        bool newModel = resourceManager->CreateModel(meshInfo.filePath, meshId);
-        auto model = resourceManager->ModelMap[meshId];
+        bool newModel = resourceManager->CreateModel(meshInfo.filePath, mesh.modelID);
+        auto model = resourceManager->ModelMap[mesh.modelID];
         mesh.vertexCount = uint32_t(model->info.vertices.size());
         mesh.indexCount = uint32_t(model->info.indices.size());
 
         if (newModel)
         {
-            modelMap.emplace(meshId, uint32_t(uniqueModels.size()));
-            mesh.modelID = uint32_t(uniqueModels.size());
-            uniqueModels.push_back({uint32_t(vertexCount), uint32_t(indexCount), meshletCount, model});
+            model->vertexOffset = uint32_t(vertexCount);
+            model->indexOffset = uint32_t(indexCount);
+            model->meshletOffset = meshletCount;
             vertexCount += mesh.vertexCount;
             indexCount += mesh.indexCount;
             meshletIndexCount += model->meshletIndexCount;
             meshletVertexCount += model->meshletVertexCount;
             meshletCount += uint32_t(model->meshlets.size());
         }
-        else
-        {
-            mesh.modelID = modelMap[meshId];
-        }
 
-        for (uint32_t i = 0, meshletOffset = uniqueModels[mesh.modelID].meshletOffset; i < uint32_t(model->meshlets.size()); i++)
-            meshletIDs.push_back({meshletOffset + i, uint32_t(meshes.size())});
+        for (uint32_t i = 0; i < uint32_t(model->meshlets.size()); i++)
+            meshletIDs.push_back({model->meshletOffset + i, uint32_t(meshes.size())});
 
         auto& textureMap = Resource::ResourceManager::GetCurrent()->TextureMap;
         mesh.textureId = textureMap.find(meshInfo.tetureId) == textureMap.end() ? DEFAULT_TEXTURE_ID : meshInfo.tetureId;
@@ -213,7 +209,7 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
         drawIndexedCommand.firstInstance = 0;
         drawIndexedCommand.instanceCount = 1;
         drawIndexedCommand.indexCount = mesh.indexCount;
-        drawIndexedCommand.firstIndex = uniqueModels[mesh.modelID].indexOffset;
+        drawIndexedCommand.firstIndex = model->indexOffset;
         drawIndexedCommand.vertexOffset = 0;
         static_cast<VkDrawIndexedIndirectCommand*>(drawIndexedIndirectBuffer.GetMappedData())[drawIndexedCommands.size()] =
             drawIndexedCommand;
@@ -239,20 +235,18 @@ void Scene::Append(std::vector<Model::Vertex>& meshVertices, std::vector<uint32_
     //temporary solution for now
     Model::ModelInfo info{{}, meshVertices, {}, {}, uint32_t(meshIndices.size()), meshIndices};
     auto model = std::make_shared<Model>(info);
-    uint32_t meshId;
-    Resource::ResourceManager::GetCurrent()->AppendModel(model, meshId);
+    Resource::ResourceManager::GetCurrent()->AppendModel(model, mesh.modelID);
 
-    modelMap.emplace(meshId, uint32_t(uniqueModels.size()));
-    mesh.modelID = uint32_t(uniqueModels.size());
-    uniqueModels.push_back({uint32_t(vertexCount), uint32_t(indexCount), meshletCount, model});
-    vertexCount += mesh.vertexCount;
+    model->vertexOffset = uint32_t(vertexCount);
+    model->indexOffset = uint32_t(indexCount);
+    model->meshletOffset = meshletCount;vertexCount += mesh.vertexCount;
     indexCount += mesh.indexCount;
     meshletIndexCount += model->meshletIndexCount;
     meshletVertexCount += model->meshletVertexCount;
     meshletCount += uint32_t(model->meshlets.size());
 
-    for (uint32_t i = 0, meshletOffset = uniqueModels[mesh.modelID].meshletOffset; i < uint32_t(model->meshlets.size()); i++)
-        meshletIDs.push_back({meshletOffset + i, uint32_t(meshes.size())});
+    for (uint32_t i = 0; i < uint32_t(model->meshlets.size()); i++)
+        meshletIDs.push_back({model->meshletOffset + i, uint32_t(meshes.size())});
 
     auto& textureMap = Resource::ResourceManager::GetCurrent()->TextureMap;
     auto& texture = textureMap.at(mesh.textureId);
@@ -340,19 +334,19 @@ void Scene::DrawIndirect(CommandBuffer& commandBuffer)
     }
 }
 
-void Scene::CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer, Buffer* newObjectBuffer, uint32_t offset, size_t meshOffset)
+void Scene::CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer, Buffer* newObjectBuffer, size_t meshOffset)
 {
     auto bufferVertices = static_cast<Model::Vertex*>(newVertBuffer->GetMappedData());
     auto bufferIndices = static_cast<Model::Index*>(newIndexBuffer->GetMappedData());
     auto bufferObjects = static_cast<Object*>(newObjectBuffer->GetMappedData());
 
-    Range updateRange = {offset, static_cast<uint32_t>(uniqueModels.size()) - offset};
-    applyVertexBufferUpdate(bufferVertices, bufferIndices, updateRange);
+    auto& modelMap = Resource::ResourceManager::GetCurrent()->ModelMap;
+    applyVertexBufferUpdate(bufferVertices, bufferIndices);
     glm::mat4 transform;
     for (size_t i = meshOffset; i < meshes.size(); i++)
     {
         transform = meshes[i].transform.mat4();
-        auto& model = uniqueModels[meshes[i].modelID].model;
+        auto& model = modelMap[meshes[i].modelID];
         bufferObjects[i].halfVolume = glm::vec4(glm::mat3(transform) * ((model->info.maxBounding - model->info.minBounding) * 0.5f), 1.0f);
         bufferObjects[i].center = transform * glm::vec4(model->center, 1.0f);
         auto& scale = meshes[i].transform.scale;
@@ -362,16 +356,7 @@ void Scene::CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer, Bu
     }
 }
 
-void Scene::CommitBufferUpdate()
-{
-    auto bufferVertices = static_cast<Model::Vertex*>(vertexBuffers[currentBufferIndex].GetMappedData());
-    auto bufferIndices = static_cast<Model::Index*>(indexBuffers[currentBufferIndex].GetMappedData());
-    for (auto& updateRange : updateQueue)
-    {
-        applyVertexBufferUpdate(bufferVertices, bufferIndices, updateRange);
-    }
-    updateQueue.clear();
-}
+
 
 void Scene::Update()
 {
@@ -427,17 +412,18 @@ void Scene::UpdateMeshlets()
     uint8_t* meshletIndexBuffer = static_cast<uint8_t*>(meshletIndexBuffers[nextIndex].GetMappedData());
     BoundingSphere* cullingBuffer = static_cast<BoundingSphere*>(meshletCullingBuffers[nextIndex].GetMappedData());
     uint32_t vertexOffset = 0, indexOffset = 0;
-    for (size_t j = 0, i = 0; j < uniqueModels.size(); j++)
+    uint32_t i = 0;
+    for (auto& modelPair : Resource::ResourceManager::GetCurrent()->ModelMap)
     {
-        auto& model = uniqueModels[j];
-        auto& meshlets = model.model->meshlets;
+        auto& model = modelPair.second;
+        auto& meshlets = model->meshlets;
         for (auto& meshlet : meshlets)
         {
             meshletBuffer[i] = {vertexOffset, indexOffset, meshlet.vertexCount, meshlet.indexCount};
-            for (uint32_t i = 0; i < meshlet.vertexCount; i++)
-                meshletVertexBuffer[i + vertexOffset] = meshlet.vertices[i] + model.vertexOffset;
-            for (uint32_t i = 0; i < meshlet.indexCount; i++)
-                meshletIndexBuffer[i + indexOffset] = meshlet.indices[i];
+            for (uint32_t j = 0; j < meshlet.vertexCount; j++)
+                meshletVertexBuffer[j + vertexOffset] = meshlet.vertices[j] + model->vertexOffset;
+            for (uint32_t j = 0; j < meshlet.indexCount; j++)
+                meshletIndexBuffer[j + indexOffset] = meshlet.indices[j];
 
             vertexOffset += meshlet.vertexCount;
             indexOffset += meshlet.indexCount;
@@ -463,29 +449,14 @@ void Scene::UpdateMeshlets()
     //meshletBuffers[nextIndex].Flush();
 }
 
-void Scene::UpdateVertexPositions(UniqueModel& model)
+void Scene::UpdateVertexPositions(std::shared_ptr<Model> model)
 {
     auto vertexBufferData = static_cast<Model::Vertex*>(vertexBuffers[currentBufferIndex].GetMappedData());
-    for (size_t i = 0; i < model.model->info.vertices.size(); i++)
+    for (size_t i = 0; i < model->info.vertices.size(); i++)
     {
-        auto& vertex = vertexBufferData[model.vertexOffset + i];
-        auto& meshVertex = model.model->info.vertices[i];
+        auto& vertex = vertexBufferData[model->vertexOffset + i];
+        auto& meshVertex = model->info.vertices[i];
         vertex.position = meshVertex.position;
-    }
-}
-
-void Scene::UpdateVertexPositions(Range updateRange)
-{
-    auto vertexBufferData = static_cast<Model::Vertex*>(vertexBuffers[currentBufferIndex].GetMappedData());
-    for (uint32_t i = 0; i < updateRange.y; i++)
-    {
-        auto& model = uniqueModels[updateRange.x + i];
-        for (size_t j = 0; i < model.model->info.vertices.size(); j++)
-        {
-            auto& vertex = vertexBufferData[model.vertexOffset + j];
-            auto& meshVertex = model.model->info.vertices[j];
-            vertex.position = meshVertex.position;
-        }
     }
 }
 
@@ -493,7 +464,7 @@ void Scene::UpdateMeshTransform(uint32_t meshIndex)
 {
     auto objectBufferData = static_cast<Object*>(objectBuffers[currentBufferIndex].GetMappedData());
     glm::mat4 transform = meshes[meshIndex].transform.mat4();
-    auto& model = uniqueModels[meshes[meshIndex].modelID].model;
+    auto& model = Resource::ResourceManager::GetCurrent()->ModelMap[meshes[meshIndex].modelID];
     objectBufferData[meshIndex].halfVolume = glm::vec4(glm::mat3(transform) * ((model->info.maxBounding - model->info.minBounding) * 0.5f), 1.0f);
     objectBufferData[meshIndex].center = transform * glm::vec4(model->center, 1.0f);
     auto& scale = meshes[meshIndex].transform.scale;
@@ -502,20 +473,27 @@ void Scene::UpdateMeshTransform(uint32_t meshIndex)
     objectBufferData[meshIndex].transform = transform;
 }
 
-void Scene::applyVertexBufferUpdate(Model::Vertex* vertexBufferData, Model::Index* indexBufferData, Range& updateRange)
+void Scene::applyVertexBufferUpdate(Model::Vertex* vertexBufferData, Model::Index* indexBufferData)
 {
-    for (uint32_t i = 0; i < updateRange.y; i++)
+    uint32_t vertexOffset = 0, indexOffset = 0;
+    for (auto& modelPair : Resource::ResourceManager::GetCurrent()->ModelMap)
     {
-        auto& model = uniqueModels[i + updateRange.x];
-        for (uint32_t j = 0; j < uint32_t(model.model->info.vertices.size()); j++)
+        auto& model = modelPair.second;
+        model->vertexOffset = vertexOffset;
+        model->indexOffset = indexOffset;
+        for (uint32_t j = 0; j < uint32_t(model->info.vertices.size()); j++)
         {
-            vertexBufferData[model.vertexOffset + j] = model.model->info.vertices[j];
+            vertexBufferData[model->vertexOffset + j] = model->info.vertices[j];
         }
-        for (uint32_t j = 0; j < uint32_t(model.model->info.indices.size()); j++)
+        for (uint32_t j = 0; j < uint32_t(model->info.indices.size()); j++)
         {
-            indexBufferData[model.indexOffset + j] = model.model->info.indices[j] + model.vertexOffset;
+            indexBufferData[model->indexOffset + j] = model->info.indices[j] + model->vertexOffset;
         }
+        vertexOffset += uint32_t(model->info.vertices.size());
+        indexOffset += uint32_t(model->info.indices.size());
     }
+    vertexCount = vertexOffset;
+    indexCount = indexOffset;
     *static_cast<uint32_t*>(drawIndexedCountBuffer.GetMappedData()) = uint32_t(meshes.size());
 
     vertexBuffers[nextIndex].Flush();

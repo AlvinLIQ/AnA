@@ -48,8 +48,8 @@ namespace AnA
         {
             std::size_t operator() (const glm::vec3& vector) const
             {
-                return std::hash<float>()(vector.x) ^ 
-                    std::hash<float>()(vector.y) << 1 ^ 
+                return std::hash<float>()(vector.x) ^
+                    std::hash<float>()(vector.y) << 1 ^
                     std::hash<float>()(vector.z) << 2;
             }
         };
@@ -124,6 +124,9 @@ namespace AnA
         std::vector<Meshlet> meshlets;
         uint32_t meshletVertexCount = 0;
         uint32_t meshletIndexCount = 0;
+        uint32_t vertexOffset = 0;
+        uint32_t indexOffset = 0;
+        uint32_t meshletOffset = 0;
 
         static void CreateModelFromFile(const char* filePath, std::shared_ptr<Model>& model);
         static void CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo);

@@ -52,17 +52,19 @@ void EditorApp::Init()
         }
     };
     aInputManager.GlobalProfile.keyMapConfigs.push_back(keyMapConfig);
+    Controls::Control::GetInputProfile(aResourceManager.MainControl, aInputManager.GetProfiles());
+    auto& editorInputProfile = aInputManager.GetProfiles().back();
 //Transform Action Mode
-    aInputManager.GlobalProfile.keyMapConfigs.push_back({this,
+    editorInputProfile.opKeyMapConfigs.push_back({this,
         createActionModeCallback<1>()
         , GLFW_KEY_G, GLFW_PRESS});// Grab Mode
-    aInputManager.GlobalProfile.keyMapConfigs.push_back({this,
+    editorInputProfile.opKeyMapConfigs.push_back({this,
         createActionModeCallback<2>()
         , GLFW_KEY_S, GLFW_PRESS});// Scale Mode
-    aInputManager.GlobalProfile.keyMapConfigs.push_back({this,
+    editorInputProfile.opKeyMapConfigs.push_back({this,
         createActionModeCallback<3>()
         , GLFW_KEY_R, GLFW_PRESS});// Rotate Mode
-    aInputManager.GlobalProfile.keyMapConfigs.push_back({this,
+    editorInputProfile.opKeyMapConfigs.push_back({this,
         [](void* param)
         {
             auto editorApp = reinterpret_cast<EditorApp*>(param);
@@ -70,11 +72,11 @@ void EditorApp::Init()
                 return;
 
             auto modelList = reinterpret_cast<Controls::ObjectView*>(editorApp->controlMap["modelList"]);
-            //Resource::ResourceManager::GetCurrent()->MainScene.RemoveAt(editorApp->SelectedObjectData->id);
+            Resource::ResourceManager::GetCurrent()->MainScene.RemoveAt(editorApp->SelectedObjectData->id);
             modelList->RemoveChildAt(modelList->SelectionIndex());
         }
         , GLFW_KEY_D, GLFW_PRESS});// Rotate Mode
-    aInputManager.GlobalProfile.keyMapConfigs.push_back({this,
+    editorInputProfile.opKeyMapConfigs.push_back({this,
         [](void* param)
         {
             auto editorApp = reinterpret_cast<EditorApp*>(param);
@@ -88,7 +90,7 @@ void EditorApp::Init()
         }
         , GLFW_KEY_ESCAPE, GLFW_PRESS});// Rotate Mode
 
-    aInputManager.GlobalProfile.cursorConfigs.push_back({this,
+    editorInputProfile.cursorConfigs.push_back({this,
     [](void* param, Input::CursorArgs& curArgs, int leftButtonAction)
     {
         auto editorApp = reinterpret_cast<EditorApp*>(param);
@@ -130,7 +132,6 @@ void EditorApp::Init()
         }
         editorApp->aResourceManager.MainScene.UpdateMeshTransform(editorApp->SelectedObjectData->id);
     }, 0});
-    Controls::Control::GetInputProfile(aResourceManager.MainControl, aInputManager.GetProfiles());
 
     auto panel = static_cast<Controls::ObjectView*>(static_cast<EditorApp*>(App::GetCurrent())->controlMap["modelList"]);
     panel->SelectionChanged = [](void* param)
