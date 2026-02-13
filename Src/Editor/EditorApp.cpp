@@ -70,6 +70,7 @@ void EditorApp::Init()
             auto editorApp = reinterpret_cast<EditorApp*>(param);
             if (editorApp->SelectedObjectData == nullptr)
                 return;
+            editorApp->ActionMode = 0;
 
             auto modelList = reinterpret_cast<Controls::ObjectView*>(editorApp->controlMap["modelList"]);
             Resource::ResourceManager::GetCurrent()->MainScene.RemoveAt(editorApp->SelectedObjectData->id);
