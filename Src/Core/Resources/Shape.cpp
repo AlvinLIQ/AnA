@@ -6,15 +6,15 @@ using namespace AnA;
 Shapes::Shapes(Device* mDeivce) : aDevice{mDeivce}
 {
     imageInfos.resize(MaxBatchSize);
-    auto& samplerLayout = Resource::ResourceManager::GetCurrent()->Shaders[1].GetDescriptors()[1].GetLayout();
-    samplersDescriptor = new Descriptor(aDevice, 1, 
+    auto& samplerLayout = Resources::ResourceManager::GetCurrent()->Shaders[1].GetDescriptors()[1].GetLayout();
+    samplersDescriptor = new Descriptor(aDevice, 1,
         MaxBatchSize,
         1,
         samplerLayout,
         VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
         );
-    auto& ssboLayout = Resource::ResourceManager::GetCurrent()->Shaders[1].GetDescriptors()[0].GetLayout();
-    ssboDescriptor = new Descriptor(aDevice, 1, 
+    auto& ssboLayout = Resources::ResourceManager::GetCurrent()->Shaders[1].GetDescriptors()[0].GetLayout();
+    ssboDescriptor = new Descriptor(aDevice, 1,
         1,
         1,
         ssboLayout,
@@ -33,7 +33,7 @@ Shapes::Shapes(Device* mDeivce) : aDevice{mDeivce}
     indirectCommand->firstInstance = 0;
     indirectCommand->firstVertex = 0;
     indirectCommand->instanceCount = 1;
-    
+
     countBuffer = Buffer(aDevice, 4, VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
     countBuffer.Map();
     *((uint32_t*)countBuffer.GetMappedData()) = 1;
@@ -64,8 +64,8 @@ bool Shapes::NeedUpdate()
 void Shapes::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t)
 {
     shader.GetPipeline().Bind(commandBuffer);
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, 
-        shader.GetPipelineLayout(), 0, numsof(sets), 
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+        shader.GetPipelineLayout(), 0, numsof(sets),
         sets, 0, nullptr);
     vkCmdSetPrimitiveTopology(commandBuffer, Topology);
 }

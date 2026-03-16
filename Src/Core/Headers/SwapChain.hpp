@@ -23,8 +23,8 @@ namespace AnA
         uint32_t width, height;
         VkFramebuffer frameBuffer;
         // One attachment for every component required for a deferred rendering setup
-        Resource::Image position, normal, albedo;
-        Resource::Image depth;
+        Resources::Image position, normal, albedo;
+        Resources::Image depth;
         VkRenderPass renderPass{VK_NULL_HANDLE};
         void cleanupImages(Device* device)
         {

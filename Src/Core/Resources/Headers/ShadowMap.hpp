@@ -9,7 +9,7 @@
 
 namespace AnA
 {
-    namespace Resource
+    namespace Resources
     {
         struct alignas(16) CascadeBufferObject
         {

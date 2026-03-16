@@ -67,7 +67,7 @@ namespace AnA
         Input::InputManager aInputManager;
         Device aDevice;
         Renderer aRenderer;
-        Resource::ResourceManager aResourceManager;
+        Resources::ResourceManager aResourceManager;
         VkOffset2D sceneOffset{};
         Float frameTime, cpuTime, cpuTimeBeforeRecord, prevSecond;
         Int32 frameCount = 0, fps = 0;

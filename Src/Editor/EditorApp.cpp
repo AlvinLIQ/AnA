@@ -73,7 +73,7 @@ void EditorApp::Init()
             editorApp->ActionMode = 0;
 
             auto modelList = reinterpret_cast<Controls::ObjectView*>(editorApp->controlMap["modelList"]);
-            Resource::ResourceManager::GetCurrent()->MainScene.RemoveAt(editorApp->SelectedObjectData->id);
+            Resources::ResourceManager::GetCurrent()->MainScene.RemoveAt(editorApp->SelectedObjectData->id);
             int selectionIndex = modelList->SelectionIndex();
             modelList->RemoveChildAt(selectionIndex);
             for (int i = selectionIndex; i < int(modelList->Children().size()); i++)
@@ -156,7 +156,7 @@ void EditorApp::Init()
 
 void EditorApp::onLoop()
 {
-    auto& aResourceManager = *Resource::ResourceManager::GetCurrent();
+    auto& aResourceManager = *Resources::ResourceManager::GetCurrent();
     auto editorApp = static_cast<EditorApp*>(App::GetCurrent());
     aResourceManager.LockCamera = static_cast<Controls::ToggleSwitch*>(editorApp->controlMap["camLockToggle"])->Toggle();
     aResourceManager.MainCameraInfo.near = 0.05f + static_cast<Controls::Slider*>(editorApp->controlMap["nearSlider"])->Value() * (32.0f - 0.05f);
@@ -170,7 +170,7 @@ void EditorApp::onLoop()
 
 void EditorApp::loadModelButton_Click(void* , PointerEventArgs& )
 {
-    auto resourceManager = Resource::ResourceManager::GetCurrent();
+    auto resourceManager = Resources::ResourceManager::GetCurrent();
     resourceManager->TaskPool.Enqueue([resourceManager]()
     {
         FileDialog fileDialog{};
@@ -195,7 +195,7 @@ void EditorApp::saveSceneButton_Click(void* , PointerEventArgs& )
     auto path = fileDialog.Run();
     if(path.empty())
         return;
-    auto resourceManager = Resource::ResourceManager::GetCurrent();
+    auto resourceManager = Resources::ResourceManager::GetCurrent();
     FILE* f = fopen(path.c_str(), "wb");
     auto& scene = resourceManager->MainScene;
     auto meshCount = scene.GetMeshCount();
@@ -255,7 +255,7 @@ int main()
 {
     EditorApp editor{};
     editor.Init();
-    auto resourceManager = Resource::ResourceManager::GetCurrent();
+    auto resourceManager = Resources::ResourceManager::GetCurrent();
     auto& scene = resourceManager->MainScene;
 
     auto sceneFile = ReadFile("Scenes/test.ana");

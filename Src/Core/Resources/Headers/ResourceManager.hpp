@@ -47,7 +47,7 @@ namespace AnA
         uint32_t texture;
         uint32_t calNormal;
     };
-    namespace Resource
+    namespace Resources
     {
         class ResourceManager
         {
@@ -107,7 +107,7 @@ namespace AnA
             bool CreateModel(const char* filePath, uint32_t& id);
             void AppendModel(std::shared_ptr<Model> model, uint32_t& id);
             std::vector<Character> Characters{};
-            AnA::Resource::ShadowMap ShadowMap;
+            AnA::Resources::ShadowMap ShadowMap;
             ThreadPool<void()> TaskPool{MAX_FRAMES_IN_FLIGHT};
             //CommandBufferPool SecondaryCommandBufferPool;
             //ThreadPool<void(CommandBuffer*)> SecondaryCommandBufferPool{};

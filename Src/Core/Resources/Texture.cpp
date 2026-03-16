@@ -7,7 +7,7 @@ using namespace AnA;
 
 Texture::Texture()
 {
-    
+
 }
 
 Texture::Texture(const char* filename, Device* mDevice) : aDevice{ mDevice }
@@ -57,11 +57,11 @@ void Texture::init()
     imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     imageInfo.imageView = aDevice->CreateImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
     imageInfo.sampler = SwapChain::GetCurrent()->GetColorSampler();
-    //auto descriptors = Resource::ResourceManager::GetCurrent()->Shaders[0]->GetDescriptors();
+    //auto descriptors = Resources::ResourceManager::GetCurrent()->Shaders[0]->GetDescriptors();
     //descriptor = new Descriptor(aDevice, textureSampler, textureImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-    //     0, 1, Resource::ResourceManager::GetCurrent()->Shaders[0]->GetDescriptors()[DEFAULT_SAMPLER_LAYOUT]->GetLayout(),
+    //     0, 1, Resources::ResourceManager::GetCurrent()->Shaders[0]->GetDescriptors()[DEFAULT_SAMPLER_LAYOUT]->GetLayout(),
     //     VK_SHADER_STAGE_FRAGMENT_BIT, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
-    
+
 }
 
 void Texture::cleanup()

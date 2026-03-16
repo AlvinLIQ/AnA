@@ -166,7 +166,7 @@ void Control::EndTextLayoutReset()
 
 VkDescriptorImageInfo Control::GetDescriptorImageInfo()
 {
-    return Resource::ResourceManager::GetCurrent()->TextureMap.at(TextureId).GetImageInfo();
+    return Resources::ResourceManager::GetCurrent()->TextureMap.at(TextureId).GetImageInfo();
 }
 
 void Control::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)

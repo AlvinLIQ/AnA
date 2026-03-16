@@ -163,7 +163,7 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
 {
     std::unique_lock<std::mutex> unique_lock(_mutex);
     std::vector<VkDescriptorImageInfo> imageInfos{};
-    auto resourceManager = Resource::ResourceManager::GetCurrent();
+    auto resourceManager = Resources::ResourceManager::GetCurrent();
     for (size_t i = 0; i < count; i++)
     {
         auto& meshInfo = meshInfos[i];
@@ -188,7 +188,7 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
 
         meshletIDCount += uint32_t(model->meshlets.size());
 
-        auto& textureMap = Resource::ResourceManager::GetCurrent()->TextureMap;
+        auto& textureMap = Resources::ResourceManager::GetCurrent()->TextureMap;
         mesh.textureId = textureMap.find(meshInfo.tetureId) == textureMap.end() ? DEFAULT_TEXTURE_ID : meshInfo.tetureId;
         auto& texture = textureMap.at(mesh.textureId);
         if (textureIdMap.find(mesh.textureId) == textureIdMap.end())
@@ -235,7 +235,7 @@ void Scene::Append(std::vector<Model::Vertex>& meshVertices, std::vector<uint32_
     //temporary solution for now
     Model::ModelInfo info{{}, meshVertices, {}, {}, uint32_t(meshIndices.size()), meshIndices};
     auto model = std::make_shared<Model>(info);
-    Resource::ResourceManager::GetCurrent()->AppendModel(model, mesh.modelID);
+    Resources::ResourceManager::GetCurrent()->AppendModel(model, mesh.modelID);
 
     model->vertexOffset = uint32_t(vertexCount);
     model->indexOffset = uint32_t(indexCount);
@@ -246,7 +246,7 @@ void Scene::Append(std::vector<Model::Vertex>& meshVertices, std::vector<uint32_
     meshletCount += uint32_t(model->meshlets.size());
     meshletIDCount += uint32_t(model->meshlets.size());
 
-    auto& textureMap = Resource::ResourceManager::GetCurrent()->TextureMap;
+    auto& textureMap = Resources::ResourceManager::GetCurrent()->TextureMap;
     auto& texture = textureMap.at(mesh.textureId);
     if (textureIdMap.find(mesh.textureId) == textureIdMap.end())
     {
@@ -268,7 +268,7 @@ void Scene::Append(std::vector<Model::Vertex>& meshVertices, std::vector<uint32_
 
 void Scene::RemoveAt(uint32_t meshIndex)
 {
-    auto& modelMap = Resource::ResourceManager::GetCurrent()->ModelMap;
+    auto& modelMap = Resources::ResourceManager::GetCurrent()->ModelMap;
     meshletIDCount -= uint32_t(modelMap[meshes[meshIndex].modelID]->meshlets.size());
 
     meshes.erase(meshes.begin() + meshIndex);
@@ -300,7 +300,7 @@ void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIn
         sets[DEFAULT_MESHLET_LAYOUT] = meshDescriptor->GetSets()[currentBufferIndex];
     }
     const auto& offsets =
-        Resource::ResourceManager::GetCurrent()->GetDefaultUBODynamicOffsets();
+        Resources::ResourceManager::GetCurrent()->GetDefaultUBODynamicOffsets();
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
         shader.GetPipelineLayout(), 0, static_cast<uint32_t>(sets.size()),
         sets.data(),
@@ -342,7 +342,7 @@ void Scene::CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer, Bu
     auto bufferObjects = static_cast<Object*>(newObjectBuffer->GetMappedData());
     auto bufferDrawIndexedIndirect = static_cast<VkDrawIndexedIndirectCommand*>(drawIndexedIndirectBuffer.GetMappedData());
 
-    auto& modelMap = Resource::ResourceManager::GetCurrent()->ModelMap;
+    auto& modelMap = Resources::ResourceManager::GetCurrent()->ModelMap;
     applyVertexBufferUpdate(bufferVertices, bufferIndices);
     glm::mat4 transform;
     for (size_t i = meshOffset; i < meshes.size(); i++)
@@ -369,9 +369,9 @@ void Scene::CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer, Bu
 void Scene::Update()
 {
     needUpdate = false;
-    Resource::ResourceManager::GetCurrent()->TaskPool.Enqueue([this]()
+    Resources::ResourceManager::GetCurrent()->TaskPool.Enqueue([this]()
     {
-        Resource::ResourceManager::GetCurrent()->TaskPool.Join();
+        Resources::ResourceManager::GetCurrent()->TaskPool.Join();
         this->updateAll();
     });
 }
@@ -422,7 +422,7 @@ void Scene::UpdateMeshlets()
     MeshletID* meshletIDBuffer = static_cast<MeshletID*>(meshletIDBuffers[nextIndex].GetMappedData());
     uint32_t vertexOffset = 0, indexOffset = 0;
     uint32_t i = 0;
-    auto& modelMap = Resource::ResourceManager::GetCurrent()->ModelMap;
+    auto& modelMap = Resources::ResourceManager::GetCurrent()->ModelMap;
     uint32_t meshletOffset = 0;
     for (auto& modelPair : modelMap)
     {
@@ -487,7 +487,7 @@ void Scene::UpdateMeshTransform(uint32_t meshIndex)
 {
     auto objectBufferData = static_cast<Object*>(objectBuffers[currentBufferIndex].GetMappedData());
     glm::mat4 transform = meshes[meshIndex].transform.mat4();
-    auto& model = Resource::ResourceManager::GetCurrent()->ModelMap[meshes[meshIndex].modelID];
+    auto& model = Resources::ResourceManager::GetCurrent()->ModelMap[meshes[meshIndex].modelID];
     objectBufferData[meshIndex].halfVolume = glm::vec4(glm::mat3(transform) * ((model->info.maxBounding - model->info.minBounding) * 0.5f), 1.0f);
     objectBufferData[meshIndex].center = transform * glm::vec4(model->center, 1.0f);
     auto& scale = meshes[meshIndex].transform.scale;
@@ -499,7 +499,7 @@ void Scene::UpdateMeshTransform(uint32_t meshIndex)
 void Scene::applyVertexBufferUpdate(Model::Vertex* vertexBufferData, Model::Index* indexBufferData)
 {
     uint32_t vertexOffset = 0, indexOffset = 0;
-    for (auto& modelPair : Resource::ResourceManager::GetCurrent()->ModelMap)
+    for (auto& modelPair : Resources::ResourceManager::GetCurrent()->ModelMap)
     {
         auto& model = modelPair.second;
         model->vertexOffset = vertexOffset;
@@ -556,7 +556,7 @@ void Scene::createIndirectBuffers()
 
 void Scene::createSSBODescriptor()
 {
-    auto& shaders = Resource::ResourceManager::GetCurrent()->Shaders;
+    auto& shaders = Resources::ResourceManager::GetCurrent()->Shaders;
     auto& vertexDescriptorSetLayout =
         shaders.front().GetDescriptors()[DEFAULT_VERTEX_LAYOUT].GetLayout();
     vertexDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,
@@ -673,7 +673,7 @@ void Scene::appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageIn
 void Scene::createSamplerDescriptor()
 {
     auto& descriptorSetLayout =
-        Resource::ResourceManager::GetCurrent()->Shaders[VERTEX_PIPELINE_ID].GetDescriptors()[DEFAULT_SAMPLER_LAYOUT].GetLayout();
+        Resources::ResourceManager::GetCurrent()->Shaders[VERTEX_PIPELINE_ID].GetDescriptors()[DEFAULT_SAMPLER_LAYOUT].GetLayout();
     auto descriptor = new Descriptor(aDevice, 1,
         batchSize,
         1,

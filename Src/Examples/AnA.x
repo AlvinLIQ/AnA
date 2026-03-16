@@ -26,7 +26,7 @@ int main()
     App* aApp = new App();
     aApp->Init();
 
-    auto& MainScene = *Resource::ResourceManager::GetCurrent()->MainScene;
+    auto& MainScene = *Resources::ResourceManager::GetCurrent()->MainScene;
 
     Object* object = new Object;
     object->Color = {0.1f, 0.2f, 0.3f};
@@ -47,7 +47,7 @@ int main()
     nObj->Properties = objectProperties;
     //nObj->Properties.transform.scale = {.0001, .0001, .0001};
     nObj->Properties.transform.rotation = {glm::two_pi<float>() / 4, 0.f, 0.f};
-    
+
     nObj->Properties.transform.translation = {-1.5, -.5, 1.5};
     App::CreateCubeModel(nObj->Model);
     //nObj->Texture = std::make_unique<Texture>("Textures/test.jpg", aApp->GetDevice());
@@ -74,9 +74,9 @@ int main()
     nObj->Properties.transform.translation = {1.5, -2.0, 0.0};
     MainScene.Append(nObj);
 
-/*  
+/*
     Control::InitControl(&aApp->GetSwapChain());
-    
+
     Button* button = new Button;
     button->Model = App::Get2DModel();
     button->HorizontalAlignment = AlignmentType::Start;

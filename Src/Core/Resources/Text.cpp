@@ -90,7 +90,7 @@ void Text::Update()
     {
         return;
     }
-    Resource::ResourceManager::GetCurrent()->TaskPool.Enqueue([this]()
+    Resources::ResourceManager::GetCurrent()->TaskPool.Enqueue([this]()
     {
         this->updateAll();
     });
@@ -248,7 +248,7 @@ void Text::updateAll()
 
 void Text::updateMeshlets(size_t meshletOffset)
 {
-    auto characters = Resource::ResourceManager::GetCurrent()->Characters;
+    auto characters = Resources::ResourceManager::GetCurrent()->Characters;
     auto meshletInfos = reinterpret_cast<MeshletInfo*>(meshletBuffer.GetMappedData());
     auto vertices = reinterpret_cast<glm::vec2*>(vertexBuffer.GetMappedData());
     auto meshletIndices = reinterpret_cast<uint8_t*>(meshletIndexBuffer.GetMappedData());
@@ -274,7 +274,7 @@ void Text::updateMeshlets(size_t meshletOffset)
 
 void Text::createSSBODescriptor()
 {
-    auto& shaders = Resource::ResourceManager::GetCurrent()->Shaders;
+    auto& shaders = Resources::ResourceManager::GetCurrent()->Shaders;
     auto& descriptors = shaders[TEXT_PIPELINE_ID].GetDescriptors();
     auto& vertexDescriptorSetLayout =
         descriptors[0].GetLayout();

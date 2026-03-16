@@ -4,7 +4,7 @@
 #include "../Headers/SwapChain.hpp"
 
 using namespace AnA;
-using namespace Resource;
+using namespace Resources;
 
 ShadowMap::ShadowMap(Device* mDevice) : aDevice{mDevice}
 {
@@ -45,7 +45,7 @@ std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& inv, glm::ve
 
 void ShadowMap::UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, uint32_t bufferIndex)
 {
-	glm::vec3 lightDir = glm::normalize(-Resource::ResourceManager::GetCurrent()->GlobalLight.Direction);
+	glm::vec3 lightDir = glm::normalize(-Resources::ResourceManager::GetCurrent()->GlobalLight.Direction);
     //glm::vec3 lightPos = lightDir * 2.0f;
     //float cascadeSplits[SHADOW_MAP_CASCADE_COUNT];
 
@@ -70,7 +70,7 @@ void ShadowMap::UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, u
 	}
 */
     glm::mat4 invCam = glm::inverse(camera.GetProjectionMatrix() * camera.GetView());
-    //float aspect = Resource::ResourceManager::GetCurrent()->MainCameraInfo.aspect;
+    //float aspect = Resources::ResourceManager::GetCurrent()->MainCameraInfo.aspect;
 
 	// Calculate orthographic projection matrix for each cascade
 	float lastSplitDist = 0.0;
@@ -132,7 +132,7 @@ void ShadowMap::GetUBODescriptorConfig(Descriptor::DescriptorConfig* pConfig)
     pConfig->descriptorCount = 1;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_MESH_BIT_EXT;
-    Resource::ResourceManager::GetBufferInfos(cascadeBuffers, pConfig->bufferInfos);
+    Resources::ResourceManager::GetBufferInfos(cascadeBuffers, pConfig->bufferInfos);
 }
 
 void ShadowMap::createShadowResources()

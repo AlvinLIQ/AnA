@@ -259,7 +259,7 @@ namespace AnA
         void createVmaAllocator();
     };
 
-    namespace Resource
+    namespace Resources
     {
         struct Image
         {

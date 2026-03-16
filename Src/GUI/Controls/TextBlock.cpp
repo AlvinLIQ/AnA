@@ -24,7 +24,7 @@ TextBlock::TextBlock(const char* text, glm::vec4 color)
 
 TextBlock::~TextBlock()
 {
-    auto& textContext = Resource::ResourceManager::GetCurrent()->TextContext;
+    auto& textContext = Resources::ResourceManager::GetCurrent()->TextContext;
     textContext.Remove(id);
 }
 
@@ -47,7 +47,7 @@ void TextBlock::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImag
         auto offset = Vec2{renderOffset.x() - renderSize.x() + 1.0f, renderOffset.y() - renderSize.y() * 0.5f};
         offset.x() *= float(Extent.width) / float(swapChainExtent.width);
         offset.y() *= float(Extent.height) / float(swapChainExtent.height);
-        auto& textContext = Resource::ResourceManager::GetCurrent()->TextContext;
+        auto& textContext = Resources::ResourceManager::GetCurrent()->TextContext;
         auto info = textContext.GetInfoById(id);
         info->color = FontColor;
 
@@ -62,7 +62,7 @@ void TextBlock::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImag
 
 void TextBlock::Text(const char* newText)
 {
-    auto& textContext = Resource::ResourceManager::GetCurrent()->TextContext;
+    auto& textContext = Resources::ResourceManager::GetCurrent()->TextContext;
     auto info = textContext.GetInfoById(id);
     if (info)
     {
@@ -77,13 +77,13 @@ void TextBlock::Text(const char* newText)
 
 const char* TextBlock::Text()
 {
-    auto info = Resource::ResourceManager::GetCurrent()->TextContext.GetInfoById(id);
+    auto info = Resources::ResourceManager::GetCurrent()->TextContext.GetInfoById(id);
     return info ? info->text.c_str() : "";
 }
 
 void TextBlock::Insert(size_t index, uint32_t ch)
 {
-    auto& textContext = Resource::ResourceManager::GetCurrent()->TextContext;
+    auto& textContext = Resources::ResourceManager::GetCurrent()->TextContext;
     auto info = textContext.GetInfoById(id);
     if (info)
     {

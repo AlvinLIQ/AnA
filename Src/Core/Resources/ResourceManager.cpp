@@ -3,7 +3,7 @@
 #include "../Headers/ShaderCodes.hpp"
 
 using namespace AnA;
-using namespace Resource;
+using namespace Resources;
 
 ResourceManager* _resourceManager = nullptr;
 uint32_t modelId = 0;
