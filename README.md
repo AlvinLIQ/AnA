@@ -8,12 +8,18 @@
 * GUI
 
 ## To do
+* [ ] separate shared mesh buffers from Scene
+* [ ] optimize resource management before scaling
+  * [ ] rewrite scene buffers with lazy buffer rebuild
+  * [ ] make resource manager a facade, real logic in specialized classes.
+    * [ ] meshes
+    * [ ] text
+    * [ ] textures
+    * [ ] cameras
+    * [ ] lights
 * [ ] use ray tracing instead of traditional shadow map when having multiple light sources (enable by default when mesh shader is supported)
 * [ ] SSAO
 * [ ] occlusion culling
-* [x] clean deprecated stuff(renderpass, framebuffer, shadow map, ...)
-* [X] specialization constants
-* [X] Editor Action Mode(Normal Mode, Transformation Mode)
 * [ ] try pipeline cache
 
 ## Build&Run

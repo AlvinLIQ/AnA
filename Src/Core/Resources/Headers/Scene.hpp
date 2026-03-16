@@ -27,13 +27,6 @@ namespace AnA
         uint32_t vertexCount;
         uint32_t indexCount;
     };
-    struct UniqueModel
-    {
-        uint32_t vertexOffset;
-        uint32_t indexOffset;
-        uint32_t meshletOffset;
-        std::shared_ptr<Model> model;
-    };
 
     struct Object
     {
@@ -82,6 +75,11 @@ namespace AnA
     class Scene : public Renderable
     {
     public:
+        struct SceneFrameResources
+        {
+            Buffer objectBuffer;
+            Buffer meshletIDBuffer;
+        };
         Scene(Device* mDevice);
         virtual ~Scene();
         void Init();
