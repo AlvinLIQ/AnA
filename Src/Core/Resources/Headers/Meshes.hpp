@@ -16,6 +16,23 @@ namespace AnA
         class Meshes
         {
         public:
+            struct MeshletInfo
+            {
+                uint32_t vertexOffset;
+                uint32_t indexOffset;
+                uint32_t vertexCount;
+                uint32_t indexCount;
+            };
+            struct BoundingSphere
+            {
+                glm::vec3 center;
+                float radius;
+                glm::vec3 normal;
+                float cutoff;
+                glm::vec3 coneApex;
+                float padding;
+            };
+
             struct MeshFrameResource
             {
                 Buffer vertexBuffer;
@@ -29,7 +46,7 @@ namespace AnA
                 Buffer meshletIDCountBuffer;
             };
 
-            Meshes();
+            Meshes(Device* mDevice);
             ~Meshes();
 
             bool Create(const char* filePath, uint32_t& id);
@@ -45,6 +62,7 @@ namespace AnA
             uint32_t currentBufferIndex = 0;
 
             std::array<MeshFrameResource, MAX_FRAMES_IN_FLIGHT> frameResources;
+            void initFrameResource(MeshFrameResource& frameResource);
             void prepareFrameResources();
 
             size_t vertexCount = 0;
