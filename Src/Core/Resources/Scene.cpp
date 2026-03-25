@@ -283,6 +283,7 @@ void Scene::CommitBufferUpdate(Buffer* newObjectBuffer, size_t meshOffset)
     auto bufferObjects = static_cast<Object*>(newObjectBuffer->GetMappedData());
     auto bufferDrawIndexedIndirect = static_cast<VkDrawIndexedIndirectCommand*>(drawIndexedIndirectBuffer.GetMappedData());
 
+    *static_cast<uint32_t*>(drawIndexedCountBuffer.GetMappedData()) = uint32_t(meshes.size());
     auto& modelMap = Resources::ResourceManager::GetCurrent()->Meshes.MeshMap;
     glm::mat4 transform;
     for (size_t i = meshOffset; i < meshes.size(); i++)
@@ -363,28 +364,6 @@ void Scene::UpdateMeshTransform(uint32_t meshIndex)
     objectBufferData[meshIndex].radius = model->radius * std::max(scale.x, std::max(scale.y, scale.z));
     transform[3].w = float(meshes[meshIndex].textureId);
     objectBufferData[meshIndex].transform = transform;
-}
-
-void Scene::applyVertexBufferUpdate(Model::Vertex* vertexBufferData, Model::Index* indexBufferData)
-{
-    uint32_t vertexOffset = 0, indexOffset = 0;
-    for (auto& modelPair : Resources::ResourceManager::GetCurrent()->Meshes.MeshMap)
-    {
-        auto& model = modelPair.second;
-        model->vertexOffset = vertexOffset;
-        model->indexOffset = indexOffset;
-        for (uint32_t j = 0; j < uint32_t(model->info.vertices.size()); j++)
-        {
-            vertexBufferData[model->vertexOffset + j] = model->info.vertices[j];
-        }
-        for (uint32_t j = 0; j < uint32_t(model->info.indices.size()); j++)
-        {
-            indexBufferData[model->indexOffset + j] = model->info.indices[j] + model->vertexOffset;
-        }
-        vertexOffset += uint32_t(model->info.vertices.size());
-        indexOffset += uint32_t(model->info.indices.size());
-    }
-    *static_cast<uint32_t*>(drawIndexedCountBuffer.GetMappedData()) = uint32_t(meshes.size());
 }
 
 void Scene::createIndirectBuffers()
@@ -558,8 +537,8 @@ void Scene::updateAll()
         objectBuffers[nextIndex].Resize((meshes.size() + 1000) * sizeof(Object));
         objectBuffers[nextIndex].Map();
     }
-    CommitBufferUpdate(&objectBuffers[nextIndex]);
     Resources::ResourceManager::GetCurrent()->Meshes.Update();
+    CommitBufferUpdate(&objectBuffers[nextIndex]);
     *reinterpret_cast<uint32_t*>(objectDataBuffers[nextIndex].GetMappedData()) = uint32_t(meshes.size());
     UpdateMeshlets();
 

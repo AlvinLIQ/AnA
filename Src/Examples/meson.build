@@ -4,5 +4,5 @@ benchmarker = executable('benchmarker', ['benchmark.cpp'],
     link_args: host_machine.system() == 'windows' and cc.get_id() == 'msvc'
         ? ['/ENTRY:mainCRTStartup']
         : [],
-    dependencies: [vulkan_dep, glfw_dep, glslang_dep],
+    dependencies: [vulkan_dep, glfw_dep],
     install: true, install_dir: meson.project_source_root())

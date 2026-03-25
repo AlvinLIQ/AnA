@@ -78,10 +78,6 @@ namespace AnA
             void rebuildFrameResource(MeshFrameResource& frameResource);
             uint32_t prepareFrameResources();
 
-            void insertMesh(std::shared_ptr<Model> mesh, MeshFrameResource& frameResource,
-                size_t vertexOffset, size_t indexOffset, size_t meshletOffset,
-                size_t meshletVertexOffset, size_t meshletIndexOffset);
-
             size_t vertexCount = 0;
             size_t indexCount = 0;
             uint32_t meshletVertexCount = 0;

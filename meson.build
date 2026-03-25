@@ -24,13 +24,8 @@ else
     glfw_dep = dependency('glfw3', required: true)      # GLFW
 endif
 
-glslang_dep = dependency('glslang', required: false)
 conf_data = configuration_data()
-if glslang_dep.found()
-  conf_data.set('HAVE_GLSLANG', 1)
-else
-  conf_data.set('HAVE_GLSLANG', 0)
-endif
+conf_data.set('HAVE_GLSLANG', 0)
 
 subdir('Src/3rdParty/')
 subdir('Src/Core/')

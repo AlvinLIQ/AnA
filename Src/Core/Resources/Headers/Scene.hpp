@@ -170,7 +170,6 @@ namespace AnA
         std::vector<VkDrawIndexedIndirectCommand> drawIndexedCommands{};
         uint32_t batchSize;
         std::vector<Range> updateQueue{};
-        void applyVertexBufferUpdate(Model::Vertex* vertices, Model::Index* indices);
         bool needUpdate;
         bool commandBufferNeedUpdate = false;
         std::mutex _mutex;

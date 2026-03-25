@@ -3,7 +3,6 @@
 #include "Headers/SwapChain.hpp"
 #include "Resources/Headers/Model.hpp"
 #include <memory>
-#include <strings.h>
 
 using namespace AnA;
 using namespace Resources;
@@ -58,6 +57,15 @@ void Meshes::Load(const uint32_t id)
         return;
     }
     loadedSet.emplace(id);
+    auto mesh = MeshMap[id];
+    mesh->vertexOffset = uint32_t(vertexCount);
+    mesh->indexOffset = uint32_t(indexCount);
+    mesh->meshletOffset = meshletCount;
+    vertexCount += (mesh->info.vertices.size());
+    indexCount += (mesh->info.indices.size());
+    meshletCount += uint32_t(mesh->meshlets.size());
+    meshletVertexCount += uint32_t(mesh->meshletVertexCount);
+    meshletIndexCount += uint32_t(mesh->meshletIndexCount);
     needUpdate = true;
 }
 
@@ -123,7 +131,8 @@ void Meshes::initFrameResource(MeshFrameResource& frameResource)
 
 void Meshes::rebuildFrameResource(MeshFrameResource& frameResource)
 {
-    size_t vertexOffset = 0, indexOffset = 0, meshletOffset = 0, meshletVertexOffset = 0, meshletIndexOffset = 0;
+    size_t vertexOffset = 0, indexOffset = 0, meshletOffset = 0;
+    uint32_t meshletVertexOffset = 0, meshletIndexOffset = 0;
     auto vertexBufferData = reinterpret_cast<Model::Vertex*>(frameResource.vertexBuffer.GetMappedData());
     auto indexBufferData = reinterpret_cast<Model::Index*>(frameResource.indexBuffer.GetMappedData());
     auto meshletBufferData = reinterpret_cast<MeshletInfo*>(frameResource.meshletBuffer.GetMappedData());
@@ -140,20 +149,26 @@ void Meshes::rebuildFrameResource(MeshFrameResource& frameResource)
         for (size_t i = 0; i < mesh->info.indices.size(); i++)
             indexBufferData[indexOffset + i] = mesh->info.indices[i] + Model::Index(vertexOffset);
 
+        mesh->meshletOffset = uint32_t(meshletOffset);
         for (auto& meshlet : mesh->meshlets)
         {
             meshletBufferData[meshletOffset] =
-                {uint32_t(vertexOffset), uint32_t(indexOffset),
+                {uint32_t(meshletVertexOffset), uint32_t(meshletIndexOffset),
                     meshlet.vertexCount, meshlet.indexCount};
-            for (auto& meshletVertex : meshlet.vertices)
-                meshletVertexBufferData[meshletVertexOffset++] = meshletVertex + uint32_t(vertexOffset);
-            for (auto& meshletIndex : meshlet.indices)
-                meshletIndexBufferData[meshletIndexOffset++] = meshletIndex;
+            for (uint32_t j = 0; j < meshlet.vertexCount; j++)
+                meshletVertexBufferData[meshletVertexOffset + j] = meshlet.vertices[j] + uint32_t(vertexOffset);
+            for (uint32_t j = 0; j < meshlet.indexCount; j++)
+                meshletIndexBufferData[meshletIndexOffset + j] = meshlet.indices[j];
+
+            meshletVertexOffset += meshlet.vertexCount;
+            meshletIndexOffset += meshlet.indexCount;
 
             meshletCullingBufferData[meshletOffset++] = {meshlet.center, meshlet.radius,
                 meshlet.normal, meshlet.cutoff,
                 meshlet.coneApex, 0.0f};
         }
+        mesh->vertexOffset = uint32_t(vertexOffset);
+        mesh->indexOffset = uint32_t(indexOffset);
         vertexOffset += mesh->info.vertices.size();
         indexOffset += mesh->info.indices.size();
     }
@@ -187,30 +202,4 @@ uint32_t Meshes::prepareFrameResources()
     rebuildFrameResource(frameResources[bufferIndex]);
 
     return bufferIndex;
-}
-
-void Meshes::insertMesh(std::shared_ptr<Model> mesh, MeshFrameResource& frameResource,
-    size_t vertexOffset, size_t indexOffset, size_t meshletOffset,
-    size_t meshletVertexOffset, size_t meshletIndexOffset)
-{
-    auto vertexBufferData = reinterpret_cast<Model::Vertex*>(frameResource.vertexBuffer.GetMappedData());
-    auto indexBufferData = reinterpret_cast<Model::Index*>(frameResource.indexBuffer.GetMappedData());
-    auto meshletBufferData = reinterpret_cast<MeshletInfo*>(frameResource.meshletBuffer.GetMappedData());
-    auto meshletVertexBufferData = reinterpret_cast<uint32_t*>(frameResource.meshletVertexBuffer.GetMappedData());
-    auto meshletIndexBufferData = reinterpret_cast<uint8_t*>(frameResource.meshletIndexBuffer.GetMappedData());
-
-    memcpy(&vertexBufferData[vertexOffset], mesh->info.vertices.data(), mesh->info.vertices.size());
-    memcpy(&indexBufferData[indexOffset], mesh->info.indices.data(), mesh->info.indices.size());
-    for (auto& meshlet : mesh->meshlets)
-    {
-        meshletBufferData[meshletOffset++] =
-            {uint32_t(vertexOffset), uint32_t(indexOffset),
-                meshlet.vertexCount, meshlet.indexCount};
-        for (auto& meshletVertex : meshlet.vertices)
-            meshletVertexBufferData[meshletVertexOffset++] = meshletVertex;
-        for (auto& meshletIndex : meshlet.indices)
-            meshletIndexBufferData[meshletIndexOffset++] = meshletIndex;
-    }
-    vertexOffset += mesh->info.vertices.size();
-    indexOffset += mesh->info.indices.size();
 }
