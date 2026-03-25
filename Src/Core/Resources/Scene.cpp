@@ -323,7 +323,6 @@ void Scene::UpdateBuffers(Range updateRange)
 
 void Scene::UpdateMeshlets()
 {
-    MeshletID* meshletIDBuffer = static_cast<MeshletID*>(meshletIDBuffers[nextIndex].GetMappedData());
     uint32_t i = 0;
     auto& modelMap = Resources::ResourceManager::GetCurrent()->Meshes.MeshMap;
     if (meshletIDCount * sizeof(MeshletID) > meshletIDBuffers[nextIndex].GetSize())
@@ -331,6 +330,7 @@ void Scene::UpdateMeshlets()
         meshletIDBuffers[nextIndex].Resize((meshletIDCount + 100) * sizeof(MeshletID));
         meshletIDBuffers[nextIndex].Map();
     }
+    MeshletID* meshletIDBuffer = static_cast<MeshletID*>(meshletIDBuffers[nextIndex].GetMappedData());
     //Update meshlet id buffer
     i = 0;
     for (uint32_t meshID = 0, meshletID; meshID < uint32_t(meshes.size()); meshID++)

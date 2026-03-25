@@ -177,22 +177,22 @@ void Meshes::rebuildFrameResource(MeshFrameResource& frameResource)
 uint32_t Meshes::prepareFrameResources()
 {
     uint32_t bufferIndex = currentBufferIndex;
-    if (vertexCount * sizeof(Model::Vertex) <
+    if (vertexCount * sizeof(Model::Vertex) >
         frameResources[currentBufferIndex].vertexBuffer.GetSize() ||
 
-        indexCount * sizeof(Model::Index) <
+        indexCount * sizeof(Model::Index) >
         frameResources[currentBufferIndex].indexBuffer.GetSize() ||
 
-        meshletVertexCount * sizeof(uint32_t) <
+        meshletVertexCount * sizeof(uint32_t) >
         frameResources[currentBufferIndex].meshletVertexBuffer.GetSize() ||
 
-        indexCount <
+        indexCount >
         frameResources[currentBufferIndex].meshletIndexBuffer.GetSize() ||
 
-        meshletCount * sizeof(MeshFrameResource) <
+        meshletCount * sizeof(MeshFrameResource) >
         frameResources[currentBufferIndex].meshletBuffer.GetSize() ||
 
-        meshletCount * sizeof(BoundingSphere) <
+        meshletCount * sizeof(BoundingSphere) >
         frameResources[currentBufferIndex].meshletCullingBuffer.GetSize()
     )
     {
