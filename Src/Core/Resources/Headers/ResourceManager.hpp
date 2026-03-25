@@ -1,6 +1,7 @@
 #pragma once
 #include "../../Camera/Headers/Camera.hpp"
 #include "../../Headers/Threadpool.hpp"
+#include "Meshes.hpp"
 #include "Scene.hpp"
 #include "Descriptor.hpp"
 #include "Shader.hpp"
@@ -82,6 +83,7 @@ namespace AnA
 
             void Resize();
 
+            Resources::Meshes Meshes;
             Scene MainScene;
             //Test scene
             //Scene Points;
@@ -102,10 +104,6 @@ namespace AnA
             AnA::Controls::Control* MainControl = NULL;
 #endif
             std::unordered_map<uint32_t, Texture> TextureMap{};
-            std::unordered_map<uint32_t, std::shared_ptr<Model>> ModelMap{};
-            std::unordered_map<std::string, uint32_t> ModelPathIndexMap{};
-            bool CreateModel(const char* filePath, uint32_t& id);
-            void AppendModel(std::shared_ptr<Model> model, uint32_t& id);
             std::vector<Character> Characters{};
             AnA::Resources::ShadowMap ShadowMap;
             ThreadPool<void()> TaskPool{MAX_FRAMES_IN_FLIGHT};

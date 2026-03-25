@@ -9,6 +9,7 @@ ResourceManager* _resourceManager = nullptr;
 uint32_t modelId = 0;
 
 ResourceManager::ResourceManager(Device* mDevice) :
+        Meshes(mDevice),
         MainScene(mDevice),
         //Points(mDevice),
         TextContext(mDevice),
@@ -525,29 +526,6 @@ void ResourceManager::GetDefaultLightDescriptorSetConfig(std::vector<std::vector
         dConfig.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
         dConfig.bindless = false;
     }
-}
-
-bool ResourceManager::CreateModel(const char* filePath, uint32_t& id)
-{
-    auto iter = ModelPathIndexMap.find(filePath);
-    if (iter != ModelPathIndexMap.end())
-    {
-        id = iter->second;
-        return false;
-    }
-    std::shared_ptr<Model> model;
-    Model::CreateModelFromFile(filePath, model);
-    ModelPathIndexMap.emplace(filePath, modelId);
-    id = modelId;
-    ModelMap.emplace(modelId++, model);
-
-    return true;
-}
-
-void ResourceManager::AppendModel(std::shared_ptr<Model> model, uint32_t& id)
-{
-    id = modelId;
-    ModelMap.emplace(modelId++, model);
 }
 
 void ResourceManager::createMainCameraBuffers()

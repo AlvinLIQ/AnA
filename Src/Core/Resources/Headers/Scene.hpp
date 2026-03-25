@@ -104,7 +104,7 @@ namespace AnA
         {
             commandBufferNeedUpdate = false;
         }
-        void CommitBufferUpdate(Buffer* newVertBuffer, Buffer* newIndexBuffer, Buffer* newObjectBuffer, size_t meshOffset = 0);
+        void CommitBufferUpdate(Buffer* newObjectBuffer, size_t meshOffset = 0);
         void Update() override;
         void UpdateBuffers(Range updateRange);
         void UpdateMeshlets();
@@ -158,13 +158,9 @@ namespace AnA
         void (*MeshAppend)(std::string, uint32_t) = nullptr;
     private:
         Device* aDevice;
-        std::vector<Buffer> vertexBuffers{};
         std::vector<Buffer> objectBuffers{};
         std::vector<Buffer> objectDataBuffers{};
         std::vector<Buffer> collisionBuffer{};
-        size_t vertexCount = 0;
-        std::vector<Buffer> indexBuffers{};
-        size_t indexCount = 0;
         Buffer drawIndexedIndirectBuffer{};
         Buffer drawIndexedCountBuffer{};
         Buffer drawMeshIndirectBuffer{};
@@ -186,16 +182,10 @@ namespace AnA
         void createSSBODescriptor();
         void updateSSBODescriptor();
         void appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageInfos);
-        uint32_t meshletVertexCount = 0;
-        uint32_t meshletIndexCount = 0;
-        uint32_t meshletCount = 0;
         uint32_t meshletIDCount = 0;
-        std::vector<Buffer> meshletIDCountBuffers{};
         std::vector<Buffer> meshletIDBuffers{};
-        std::vector<Buffer> meshletBuffers{};
-        std::vector<Buffer> meshletVertexBuffers{};
-        std::vector<Buffer> meshletIndexBuffers{};
-        std::vector<Buffer> meshletCullingBuffers{};
+        std::vector<Buffer> meshletIDCountBuffers{};
+
         uint32_t numOfGroup = 64;
         uint8_t currentBufferIndex = 0;
         uint8_t nextIndex = 1 % MAX_FRAMES_IN_FLIGHT;

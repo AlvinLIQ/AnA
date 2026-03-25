@@ -204,7 +204,7 @@ void EditorApp::saveSceneButton_Click(void* , PointerEventArgs& )
     {
         auto& mesh = meshes[i];
         MeshInfo info{};
-        auto& model = resourceManager->ModelMap[mesh.modelID];
+        auto& model = resourceManager->Meshes.MeshMap[mesh.modelID];
         memcpy(info.filePath, model->Path.data(), model->Path.size());
         info.tetureId = mesh.textureId;
         info.transform = mesh.transform;

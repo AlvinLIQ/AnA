@@ -43,15 +43,26 @@ namespace AnA
                 Buffer meshletIndexBuffer;
                 Buffer meshletCullingBuffer;
                 //Buffer meshletIDBuffer;
-                Buffer meshletIDCountBuffer;
             };
 
             Meshes(Device* mDevice);
             ~Meshes();
 
             bool Create(const char* filePath, uint32_t& id);
-            void Load(const char* filePath);
+            void Load(const char* filePath, uint32_t& id);
+            void Load(std::shared_ptr<Model> model, uint32_t& id);
             void Load(const uint32_t id);
+
+            bool NeedUpdate()
+            {
+                return needUpdate;
+            }
+            void Update();
+
+            MeshFrameResource& GetCurrentFrameResource()
+            {
+                return frameResources[currentBufferIndex];
+            }
 
             std::unordered_map<uint32_t, std::shared_ptr<Model>> MeshMap{};
             std::unordered_map<std::string, uint32_t> MeshPathIndexMap{};
@@ -60,17 +71,22 @@ namespace AnA
             std::set<uint32_t> loadedSet{};
 
             uint32_t currentBufferIndex = 0;
+            bool needUpdate = false;
 
             std::array<MeshFrameResource, MAX_FRAMES_IN_FLIGHT> frameResources;
             void initFrameResource(MeshFrameResource& frameResource);
-            void prepareFrameResources();
+            void rebuildFrameResource(MeshFrameResource& frameResource);
+            uint32_t prepareFrameResources();
+
+            void insertMesh(std::shared_ptr<Model> mesh, MeshFrameResource& frameResource,
+                size_t vertexOffset, size_t indexOffset, size_t meshletOffset,
+                size_t meshletVertexOffset, size_t meshletIndexOffset);
 
             size_t vertexCount = 0;
             size_t indexCount = 0;
             uint32_t meshletVertexCount = 0;
             uint32_t meshletIndexCount = 0;
             uint32_t meshletCount = 0;
-            uint32_t meshletIDCount = 0;
         };
     }
 }
