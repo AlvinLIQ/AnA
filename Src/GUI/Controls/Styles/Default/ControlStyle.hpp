@@ -14,12 +14,12 @@ namespace AnA
 
     const AlignType ControlRenderMode = Auto;
     /*Button*/
-    
+
     /*
     const Vec2 ButtonMinSize = {0.1f, 0.06f};
     const AlignType ButtonRenderMode = Auto;*/
     const Vec2 ButtonMinAbsoluteSize = {80.f, 36.0f};
-    const glm::vec4 ButtonBackgroundColor = {0.85f, 0.85f, 0.85f, 1.0f};
-    const glm::vec4 ButtonPointerMovedBackgroundColor = {0.78f, 0.78, 0.78f, 1.0f};
-    const glm::vec4 ButtonPointerPressedBackgroundColor = {0.68f, 0.68f, 0.68f, 1.0f};
+    const glm::vec4 ButtonBackgroundColor = {0.2f, 0.2f, 0.2f, 1.0f};
+    const glm::vec4 ButtonPointerMovedBackgroundColor = {0.22f, 0.22, 0.22f, 1.0f};
+    const glm::vec4 ButtonPointerPressedBackgroundColor = {0.18f, 0.18f, 0.18f, 1.0f};
 }

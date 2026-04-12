@@ -32,8 +32,8 @@ void slider_Click(void* control, PointerEventArgs& args)
 
 Slider::Slider()
 {
-    Color = {0.7, 0.7, 0.7, 1.0};
-    button.Color = {0.6, 0.6, 0.6, 1.0};
+    Color = {0.18, 0.18, 0.18, 1.0};
+    button.Color = {0.28, 0.28, 0.28, 1.0};
     PointerEvents[PointerEventType::Moving].emplace_back(slider_Click);
 }
 

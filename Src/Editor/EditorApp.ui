@@ -3,11 +3,12 @@
         Color="0.156f, 0.156f, 0.156f, 1.0f" Padding="0.05f, 0.01f, 0.05f, 0.01f">
         <TextBlock Text="Editor" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
         <Button HorizontalAlignment="Start" Click="loadModelButton_Click">
-            <TextBlock Text="Load Model"/>
+            <TextBlock Text="Load Model" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
         </Button>
         <Button HorizontalAlignment="Start" Click="saveSceneButton_Click">
-            <TextBlock Text="Save Scene"/>
+            <TextBlock Text="Save Scene" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
         </Button>
+        <TextBlock Text="Meshes" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
         <ObjectView Name="modelList" Orientation="Vertical" HorizontalAlignment="Stretch" RenderMode="Passive" Color="0.2f, 0.2f, 0.2, 1.0f"/>
         <TextBlock Text="Near" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
         <Slider Name="nearSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.0f"/>
@@ -20,17 +21,17 @@
         <TextBlock Text="Lock Camera" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
         <ToggleSwitch Name="camLockToggle" ControlSize="0.04f, 0.02f"/>
         <Button HorizontalAlignment="Start" Click="exitButton_Click">
-            <TextBlock Text="Exit"/>
+            <TextBlock Text="Exit" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
         </Button>
         <Button Click="pageButton_Click">
-            <TextBlock Text="Test"/>
+            <TextBlock Text="Test" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
         </Button>
     </StackPanel>
     <StackPanel ControlSize="0.0f, 0.0f" Spacing="0.01f" Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
         Color="0.156f, 0.156f, 0.156f, 1.0f" Padding="0.05f, 0.01f, 0.05f, 0.01f">
         <TextBox Text="123"/>
         <Button Click="pageButton_Click">
-            <TextBlock Text="Back"/>
+            <TextBlock Text="Back" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
         </Button>
     </StackPanel>
 </PageView>
