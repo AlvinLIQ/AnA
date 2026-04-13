@@ -21,7 +21,7 @@ namespace AnA
             void Insert(size_t index, uint32_t ch);
 
             bool IsWrapping;
-            Float FontSize = 25.0f;
+            Float FontSize = 16.0f;
             glm::vec4 FontColor{0.0f, 0.0f, 0.0f, 1.0f};
             void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
         private:

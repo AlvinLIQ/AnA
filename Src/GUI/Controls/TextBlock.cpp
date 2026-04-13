@@ -52,7 +52,7 @@ void TextBlock::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImag
         info->color = FontColor;
 
         info->offset = {offset.x() * 0.5f, offset.y() * 0.5f + 0.5f};
-        info->size = FontSize;// * sqrtf(glm::length(glm::vec2(swapChain->ScaleX, swapChain->ScaleY)));
+        info->size = FontSize * sqrtf(glm::length(glm::vec2(swapChain->ScaleX * 0.7071f, swapChain->ScaleY * 0.7071f)));
         info->visible = true;
         textContext.UpdateLayout(id);
     }
