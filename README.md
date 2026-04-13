@@ -8,14 +8,14 @@
 * GUI
 
 ## To do
-* [ ] separate shared mesh buffers from Scene
+* [x] separate shared mesh buffers from Scene
 * [ ] optimize resource management before scaling
-  * [ ] rewrite scene buffers with lazy buffer rebuild
+  * [x] rewrite scene buffers with lazy buffer rebuild
   * [ ] make resource manager a facade, real logic in specialized classes.
-    * [ ] meshes
+    * [x] meshes
     * [ ] text
     * [ ] textures
-    * [ ] cameras
+    * [x] cameras
     * [ ] lights
 * [ ] use ray tracing instead of traditional shadow map when having multiple light sources (enable by default when mesh shader is supported)
 * [ ] SSAO
