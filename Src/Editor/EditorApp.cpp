@@ -149,6 +149,8 @@ void EditorApp::Init()
             editorApp->SelectedObjectData = &selectedItem->Data;
         }
     };
+    static_cast<Controls::ListView*>((static_cast<EditorApp*>(App::GetCurrent())->controlMap["camLockToggle"]))->Select(0);
+
     loopCallback = EditorApp::onLoop;
 
     App::Init();
@@ -158,7 +160,7 @@ void EditorApp::onLoop()
 {
     auto& aResourceManager = *Resources::ResourceManager::GetCurrent();
     auto editorApp = static_cast<EditorApp*>(App::GetCurrent());
-    aResourceManager.LockCamera = static_cast<Controls::ToggleSwitch*>(editorApp->controlMap["camLockToggle"])->Toggle();
+    aResourceManager.LockCamera = static_cast<Controls::ListView*>(editorApp->controlMap["camLockToggle"])->SelectionIndex() == 1;
     aResourceManager.MainCameraInfo.near = 0.05f + static_cast<Controls::Slider*>(editorApp->controlMap["nearSlider"])->Value() * (32.0f - 0.05f);
     aResourceManager.MainCameraInfo.far = static_cast<Controls::Slider*>(editorApp->controlMap["farSlider"])->Value() * 32.0f;
     aResourceManager.MainCameraInfo.UpdateCameraPerspective(aResourceManager.MainCamera);

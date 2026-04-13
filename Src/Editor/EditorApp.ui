@@ -19,11 +19,10 @@
         <Slider Name="lightY" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.9f"/>
         <Slider Name="lightZ" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.3f"/>
         <TextBlock Text="Lock Camera" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
-        <ToggleSwitch Name="camLockToggle" ControlSize="0.04f, 0.02f"/>
-        <ListView Orientation="Horizontal" HorizontalAlignment="Start" RenderMode="Passive" ControlSize="0.f, 40.0f" Color="0.2f, 0.2f, 0.2f, 1.0f" Spacing="0.01f">
-            <TextBlock Text="t1" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
-            <TextBlock Text="t2" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
-            <TextBlock Text="t3" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
+        <ListView Name="camLockToggle" Orientation="Horizontal" HorizontalAlignment="Start" RenderMode="Passive"
+            ControlSize="0.f, 40.0f" Color="0.2f, 0.2f, 0.2f, 1.0f" Spacing="0.01f">
+            <TextBlock Text=" Off " FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
+            <TextBlock Text=" On " FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
         </ListView>
         <Button HorizontalAlignment="Start" Click="exitButton_Click">
             <TextBlock Text="Exit" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
