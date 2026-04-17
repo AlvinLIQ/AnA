@@ -1,6 +1,5 @@
 #include "Headers/EditorApp.hpp"
 #include "Headers/FileDialog.hpp"
-#include "../GUI/Controls/Headers/ToggleSwitch.hpp"
 #include "../GUI/Controls/Headers/Slider.hpp"
 #include "../GUI/Controls/Headers/PageView.hpp"
 #include "../GUI/Controls/Headers/ObjectView.hpp"

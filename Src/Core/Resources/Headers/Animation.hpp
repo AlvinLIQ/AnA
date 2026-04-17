@@ -8,6 +8,7 @@ namespace AnA
 {
     struct KeyFrame
     {
+        float time;
         Transform transform;
     };
 
@@ -16,5 +17,11 @@ namespace AnA
         uint32_t position;
         std::vector<KeyFrame> keyFrames{};
         std::string name;
+    };
+
+    class Animations
+    {
+    public:
+        Animations();
     };
 }
