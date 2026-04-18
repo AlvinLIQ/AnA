@@ -19,6 +19,10 @@ namespace AnA
         uint32_t indexCount;
         uint32_t textureId{};
         uint32_t modelID;
+        uint32_t animationID{0xFFFFFFFF};
+        uint32_t animationPos{0};
+        float animationTime{};
+        uint8_t loop{};
     };
     struct MeshletInfo
     {
@@ -189,5 +193,7 @@ namespace AnA
         uint8_t currentBufferIndex = 0;
         uint8_t nextIndex = 1 % MAX_FRAMES_IN_FLIGHT;
         void updateAll();
+
+        friend class Animations;
     };
 }

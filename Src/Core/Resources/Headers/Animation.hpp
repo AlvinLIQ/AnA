@@ -14,14 +14,27 @@ namespace AnA
 
     struct Animation
     {
-        uint32_t position;
         std::vector<KeyFrame> keyFrames{};
         std::string name;
     };
+
+    struct AnimationInfo
+    {
+        uint32_t id;
+        float time = 0.0f;
+        bool loop = false;
+    };
+
+    class Scene;
 
     class Animations
     {
     public:
         Animations();
+
+        void Update(Scene& scene, float dt);
+
+    private:
+        std::vector<Animation> animations;
     };
 }
