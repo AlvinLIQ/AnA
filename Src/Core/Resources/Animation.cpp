@@ -56,11 +56,8 @@ void Animations::Update(Scene& scene, float dt)
                 meshes[i].transform.scale = keyFrame0.transform.scale +
                     factor * (keyFrame1.transform.scale - keyFrame0.transform.scale);
             if (animation.type & ANA_ROATE)
-            {
                 meshes[i].transform.rotation = keyFrame0.transform.rotation +
                     factor * (keyFrame1.transform.rotation - keyFrame0.transform.rotation);
-                printf("%f\r", meshes[i].transform.rotation.x);
-            }
             if (animation.type & ANA_TRANSLATION)
                 meshes[i].transform.translation = keyFrame0.transform.translation +
                     factor * (keyFrame1.transform.translation - keyFrame0.transform.translation);
