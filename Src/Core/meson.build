@@ -5,7 +5,7 @@ AnACore = static_library('AnACore', ['App.cpp', 'Buffer.cpp', 'Device.cpp', 'Ins
     'Physics/Gravity.cpp', 'Resources/Scene.cpp', 'Resources/ShadowMap.cpp',
     'Camera/Camera.cpp', 'Resources/CommandBuffer.cpp', 'Resources/Model.cpp', 'Resources/Shape.cpp',
     'Input/InputManager.cpp', 'Resources/Descriptor.cpp', 'Resources/ResourceManager.cpp', 'Resources/Texture.cpp',
-    'Resources/Text.cpp', 'Resources/Meshes.cpp',
+    'Resources/Text.cpp', 'Resources/Meshes.cpp', 'Resources/Animation.cpp',
     'Physics/CollisionDetect.cpp', 'Resources/Lights.cpp', 'Resources/Shader.cpp'],
     include_directories : [vma_include, cdt_include],
     link_with: [meshoptimizer_lib],

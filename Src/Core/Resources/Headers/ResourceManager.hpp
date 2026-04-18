@@ -1,6 +1,7 @@
 #pragma once
 #include "../../Camera/Headers/Camera.hpp"
 #include "../../Headers/Threadpool.hpp"
+#include "Animation.hpp"
 #include "Meshes.hpp"
 #include "Scene.hpp"
 #include "Descriptor.hpp"
@@ -85,6 +86,7 @@ namespace AnA
 
             Resources::Meshes Meshes;
             Scene MainScene;
+            AnA::Animations Animations;
             //Test scene
             //Scene Points;
             std::vector<Shader> Shaders;

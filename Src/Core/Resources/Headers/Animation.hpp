@@ -12,9 +12,11 @@ namespace AnA
         Transform transform;
     };
 
+    enum AnimaionType{ANA_TRANSLATION = 1, ANA_ROATE = 2, ANA_SCALE = 4};
     struct Animation
     {
         std::vector<KeyFrame> keyFrames{};
+        AnimaionType type{};
         std::string name;
     };
 

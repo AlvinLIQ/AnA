@@ -1,6 +1,7 @@
 #include "Headers/ResourceManager.hpp"
 #include "../Headers/SwapChain.hpp"
 #include "../Headers/ShaderCodes.hpp"
+#include "Resources/Headers/Animation.hpp"
 
 using namespace AnA;
 using namespace Resources;
@@ -11,6 +12,7 @@ uint32_t modelId = 0;
 ResourceManager::ResourceManager(Device* mDevice) :
         Meshes(mDevice),
         MainScene(mDevice),
+        Animations(),
         //Points(mDevice),
         TextContext(mDevice),
         GlobalLight(mDevice),
@@ -182,6 +184,9 @@ void ResourceManager::Update()
         TextContext.Update();
     }
     UpdateCameraBuffer();
+
+    Animations.Update(MainScene, MainCamera.GetSpeedRatio() * 0.5f);
+
     uint32_t frameIndex = SwapChain::GetCurrent()->CurrentFrame;
     GlobalLight.UpdateBuffers(LightCamera, frameIndex);
     ShadowMap.UpdateBuffers(MainCamera, LightCamera, frameIndex);
