@@ -16,7 +16,7 @@ namespace AnA
     struct Animation
     {
         std::vector<KeyFrame> keyFrames{};
-        AnimaionType type{};
+        int type{};
         std::string name;
     };
 

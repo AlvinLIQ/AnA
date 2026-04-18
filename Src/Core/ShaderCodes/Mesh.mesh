@@ -103,7 +103,7 @@ void main()
     mat4 transform = objects[objectID].transform;
     uint texID = uint(transform[3].w);
     transform[3].w = 1.0;
-    
+
     uint i = gl_LocalInvocationID.x;
     if (i < meshlet.vertexCount)
     {
@@ -126,7 +126,7 @@ void main()
     {
         uint indexOffset = meshlet.indexOffset + i * 3;
 	    gl_PrimitiveTriangleIndicesEXT[i] = uvec3(
-            primitives[indexOffset + 0], 
+            primitives[indexOffset + 0],
             primitives[indexOffset + 1],
             primitives[indexOffset + 2]
         );

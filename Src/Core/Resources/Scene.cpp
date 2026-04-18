@@ -136,6 +136,14 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
         mesh.vertexCount = uint32_t(model->info.vertices.size());
         mesh.indexCount = uint32_t(model->info.indices.size());
 
+        if (i == 1)
+        {
+            mesh.animationID = 0;
+            mesh.animationPos = 0;
+            mesh.animationTime = 0.0f;
+            mesh.loop = true;
+        }
+
         meshletIDCount += uint32_t(model->meshlets.size());
 
         auto& textureMap = Resources::ResourceManager::GetCurrent()->TextureMap;
