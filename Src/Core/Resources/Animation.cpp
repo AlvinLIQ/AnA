@@ -55,7 +55,7 @@ void Animations::Update(Scene& scene, float dt)
             if (animation.type & ANA_SCALE)
                 meshes[i].transform.scale = keyFrame0.transform.scale +
                     factor * (keyFrame1.transform.scale - keyFrame0.transform.scale);
-            if (animation.type & ANA_ROATE)
+            if (animation.type & ANA_ROTATION)
                 meshes[i].transform.rotation = keyFrame0.transform.rotation +
                     factor * (keyFrame1.transform.rotation - keyFrame0.transform.rotation);
             if (animation.type & ANA_TRANSLATION)
