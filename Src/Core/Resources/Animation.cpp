@@ -8,7 +8,7 @@ Animations::Animations()
 {
     Animation animation;
     animation.name = "testScaleAnimation";
-    animation.type = ANA_ROATE | ANA_TRANSLATION | ANA_SCALE;
+    animation.type = ANA_ROTATION | ANA_TRANSLATION | ANA_SCALE;
 
     KeyFrame keyframe, keyframe1{};
     keyframe.time = 0.0f;
