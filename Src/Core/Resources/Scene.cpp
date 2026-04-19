@@ -138,10 +138,11 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
 
         if (i == 1)
         {
-            mesh.animationID = 0;
-            mesh.animationPos = 0;
-            mesh.animationTime = 0.0f;
-            mesh.loop = true;
+            mesh.animationInfo.id = 0;
+            mesh.animationInfo.pos = 0;
+            mesh.animationInfo.time = 0.0f;
+            mesh.animationInfo.loop = true;
+            mesh.animationInfo.playing = true;
         }
 
         meshletIDCount += uint32_t(model->meshlets.size());

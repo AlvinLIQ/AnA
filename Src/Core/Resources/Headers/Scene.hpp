@@ -19,10 +19,7 @@ namespace AnA
         uint32_t indexCount;
         uint32_t textureId{};
         uint32_t modelID;
-        uint32_t animationID{0xFFFFFFFF};
-        uint32_t animationPos{0};
-        float animationTime{};
-        uint8_t loop{};
+        AnimationInfo animationInfo{};
     };
     struct MeshletInfo
     {

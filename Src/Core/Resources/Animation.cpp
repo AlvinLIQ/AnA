@@ -37,20 +37,20 @@ void Animations::Update(Scene& scene, float dt)
 
     for (size_t i = 0, j; i < meshes.size(); i++)
     {
-        if (meshes[i].animationID >= animations.size())
+        if (meshes[i].animationInfo.id >= animations.size() || !meshes[i].animationInfo.playing)
             continue;
 
-        auto& animation = animations[meshes[i].animationID];
-        meshes[i].animationTime += dt;
-        for (j = meshes[i].animationPos + 1; j < animation.keyFrames.size(); j++)
+        auto& animation = animations[meshes[i].animationInfo.id];
+        meshes[i].animationInfo.time += dt;
+        for (j = meshes[i].animationInfo.pos + 1; j < animation.keyFrames.size(); j++)
         {
             auto& keyFrame0 = animation.keyFrames[j - 1];
             auto& keyFrame1 = animation.keyFrames[j];
-            float factor = (meshes[i].animationTime - keyFrame0.time)
+            float factor = (meshes[i].animationInfo.time - keyFrame0.time)
                         / (keyFrame1.time - keyFrame0.time);
 
-            if (meshes[i].animationTime >= keyFrame1.time)
-                meshes[i].animationPos++;
+            if (meshes[i].animationInfo.time >= keyFrame1.time)
+                meshes[i].animationInfo.pos++;
 
             if (animation.type & ANA_SCALE)
                 meshes[i].transform.scale = keyFrame0.transform.scale +
@@ -65,12 +65,12 @@ void Animations::Update(Scene& scene, float dt)
             break;
         }
 
-        if (meshes[i].animationPos + 1 >= animation.keyFrames.size())
+        if (meshes[i].animationInfo.pos + 1 >= animation.keyFrames.size())
         {
-            meshes[i].animationPos = 0;
-            meshes[i].animationTime = 0;
-            if (!meshes[i].loop)
-                meshes[i].animationID = 0xFFFFFFFF;
+            meshes[i].animationInfo.pos = 0;
+            meshes[i].animationInfo.time = 0;
+            if (!meshes[i].animationInfo.loop)
+                meshes[i].animationInfo.playing = false;
         }
     }
 }
