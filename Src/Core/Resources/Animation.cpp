@@ -61,7 +61,7 @@ void Animations::Update(Scene& scene, float dt)
             if (animation.type & ANA_TRANSLATION)
                 meshes[i].transform.translation = keyFrame0.transform.translation +
                     factor * (keyFrame1.transform.translation - keyFrame0.transform.translation);
-            scene.UpdateMeshTransform(i);
+            scene.UpdateMeshTransform(uint32_t(i));
             break;
         }
 
