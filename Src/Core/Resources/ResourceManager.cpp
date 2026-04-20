@@ -614,6 +614,7 @@ void ResourceManager::initTextures()
     TextureMap.try_emplace(1, 0xFFCC9999u, aDevice);
     TextureMap.try_emplace(2, 0xFF99CC99u, aDevice);
     TextureMap.try_emplace(3, 0xFF9999CCu, aDevice);
+    TextureMap.try_emplace(4, 0x00CC9999u, aDevice);
     //TextureMap.try_emplace(4, "Textures/rock3.jpg", aDevice);
 
     aDevice->BuildFontVertices(Characters);
