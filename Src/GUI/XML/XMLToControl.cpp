@@ -20,8 +20,8 @@ void traverse_node(rapidxml::xml_node<> *node, std::set<std::string>& usedNodes,
         ss << '\t';
         if (attr.name() == "Name")
         {
-            ss << "controlMap.insert(std::pair<std::string, Controls::Control*>(\"" 
-                << attr.value() << "\", (Controls::Control*)node" << id << "));\n"; 
+            ss << "controlMap.insert(std::pair<std::string, Controls::Control*>(\""
+                << attr.value() << "\", (Controls::Control*)node" << id << "));\n";
         }
         else if (attr.name() == "Click")
         {
@@ -73,14 +73,18 @@ std::string XML::XMLToCode(std::filesystem::path& path)
     std::stringstream ss{};
     std::set<std::string> usedNodes{};
     traverse_node(root.get(), usedNodes, ss, count);
+    ss << "\nnode0->RequestUpdate();\n";
     ss.flush();
+
     for (auto& node : usedNodes)
     {
-        code += "#include \"../GUI/Controls/Headers/" + node + ".hpp\"\n";
+        code += "#include \"GUI/Controls/Headers/" + node + ".hpp\"\n";
     }
     auto _path = std::filesystem::absolute(path);
     std::string className = _path.filename().replace_extension().string();
-    code += "#include \"Headers/" + className + ".hpp\"\n\nusing namespace AnA;\nusing namespace Controls;\nusing namespace " + _path.parent_path().filename().string() + ";\n";
+    code += "#include \"Headers/" + className + ".hpp\"\n\nusing namespace AnA;\nusing namespace Controls;\n";
+    if (_path.parent_path().filename().string() != "Src")
+        code += "using namespace " + _path.parent_path().filename().string() + ";\n";
 
     code += "\nControls::Control* " + className + "::InitControl()\n{\n" + ss.str() + "\n\treturn node0;\n}\n";
 
