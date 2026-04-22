@@ -30,7 +30,7 @@ Vec2 Control::GetActualControlOffset()
     for (int i = 0; i < 2; i++)
     {
         if (Alignments[i] == AlignmentType::Start)
-            pOffset[i] = pSize[i] / 2.f - 1.0f;
+            pOffset[i] = pSize[i] - 1.0f;
         else if (Alignments[i] == AlignmentType::End)
             pOffset[i] = 1.0f - pSize[i] / 2.f;
         else

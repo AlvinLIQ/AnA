@@ -146,7 +146,8 @@ void App::Run()
             aResourceManager.MainControl->NeedUpdate()) || aRenderer.NeedUpdate())
         {
             auto controlExtent = aRenderer.GetSwapChainExtent();
-            controlExtent.width = static_cast<uint32_t>(actualSceneOffset.x);
+            if (actualSceneOffset.x)
+                controlExtent.width = static_cast<uint32_t>(actualSceneOffset.x);
             aResourceManager.MainControl->Aspect = static_cast<float>(controlExtent.width) / static_cast<float>(controlExtent.height);
             aResourceManager.MainControl->Extent = controlExtent;
             aResourceManager.Shapes.Extent = controlExtent;
