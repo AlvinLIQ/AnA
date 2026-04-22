@@ -142,6 +142,7 @@ void SwapChain::SetViewport(CommandBuffer& commandBuffer)
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
     commandBuffer.Offset = scissor.offset;
     commandBuffer.Extent = scissor.extent;
+
 }
 
 void SwapChain::SetViewport(CommandBuffer& commandBuffer, VkOffset2D& offset)

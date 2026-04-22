@@ -32,3 +32,11 @@ subdir('Src/Core/')
 subdir('Src/GUI')
 subdir('Src/Editor/')
 subdir('Src/Examples/')
+
+AnA_dep = declare_dependency(
+  link_with: [AnACore, AnAControls],
+  dependencies: [glfw_dep, vulkan_dep],
+  include_directories: include_directories('Src')
+)
+
+meson.override_dependency('AnA', AnA_dep)
