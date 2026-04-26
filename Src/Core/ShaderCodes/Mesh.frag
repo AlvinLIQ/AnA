@@ -9,7 +9,7 @@ layout(location = 0) in vec2 texCoord;
 layout(location = 1) flat in uint texIndex;
 #ifdef PER_PRIMITIVE_NORMAL
 layout(location = 2) in vec3 vertex;
-layout(location = 4) perprimitiveEXT flat in vec3 normalSpace;
+layout(location = 4) perprimitiveEXT in vec3 normalSpace;
 #else
 layout(location = 2) in vec3 normalSpace;
 layout(location = 3) in vec3 vertex;

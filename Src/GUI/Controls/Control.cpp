@@ -29,16 +29,17 @@ Vec2 Control::GetActualControlOffset()
     Vec2 maxSize = Parent ? Parent->ContentRenderSize() : Vec2(1.0f, 1.0f);
     for (int i = 0; i < 2; i++)
     {
-        if (Alignments[i] == AlignmentType::Start)
-            pOffset[i] = pSize[i] - 1.0f;
+        if (Alignments[i] == AlignmentType::Center)
+            pOffset[i] = 0.5f - pSize[i] * 0.5f;
         else if (Alignments[i] == AlignmentType::End)
-            pOffset[i] = 1.0f - pSize[i] / 2.f;
+            pOffset[i] = 1.0f - pSize[i];
         else
         {
-            pOffset[i] = 0.f;
+            pOffset[i] = 0.0f;
             if (Alignments[i] == AlignmentType::Stretch)
                 pSize[i] = maxSize[i];
         }
+
     }
 
     renderOffset.x() += ControlOffset.x();
@@ -172,7 +173,7 @@ VkDescriptorImageInfo Control::GetDescriptorImageInfo()
 void Control::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
     this->Transform.scale = {renderSize.x(), renderSize.y(), 1.f};
-    this->Transform.translation = {renderOffset.x(), renderOffset.y(), 0.f};
+    this->Transform.translation = {renderOffset.x() * 2.0f - 1.0f + renderSize.x(), renderOffset.y() * 2.0f - 1.0f + renderSize.y(), 0.f};
     shapeBuffer[shapeCount].transform = Transform.mat4();
     shapeBuffer[shapeCount].color = Color;
     shapeBuffer[shapeCount].texLayer = TextureLayer;

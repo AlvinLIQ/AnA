@@ -3,13 +3,13 @@
         Color="0.156f, 0.156f, 0.156f, 1.0f" Padding="0.05f, 0.01f, 0.05f, 0.01f">
         <TextBlock Text="Editor" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
         <Button HorizontalAlignment="Start" Click="loadModelButton_Click">
-            <TextBlock Text="Load Model" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
+            <TextBlock Text="Load Model" FontColor="0.8f, 0.8f, 0.8f, 1.0f" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </Button>
         <Button HorizontalAlignment="Start" Click="saveSceneButton_Click">
             <TextBlock Text="Save Scene" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
         </Button>
         <TextBlock Text="Meshes" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
-        <ObjectView Name="modelList" Orientation="Vertical" HorizontalAlignment="Stretch" RenderMode="Passive" Color="0.2f, 0.2f, 0.2, 1.0f"/>
+        <ObjectView Name="modelList" Orientation="Vertical" HorizontalAlignment="Stretch" Color="0.2f, 0.2f, 0.2, 1.0f"/>
         <TextBlock Text="Near" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
         <Slider Name="nearSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.0f"/>
         <TextBlock Text="Far" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>

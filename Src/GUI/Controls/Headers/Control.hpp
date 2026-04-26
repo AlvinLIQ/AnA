@@ -77,7 +77,7 @@ namespace AnA
             }
             Vec2 ActualRenderOffset()
             {
-                return {renderOffset.x() * 0.5f + 0.5f - renderSize.x() * 0.5f, renderOffset.y() * 0.5f + 0.5f - renderSize.y() * 0.5f};
+                return renderOffset;//{renderOffset.x() * 0.5f + 0.5f - renderSize.x() * 0.5f, renderOffset.y() * 0.5f + 0.5f - renderSize.y() * 0.5f};
             }
             virtual Vec2 ContentRenderSize()
             {

@@ -1,4 +1,5 @@
 #include "Headers/StackView.hpp"
+#include "Headers/Control.hpp"
 #include "Headers/ItemsPresenter.hpp"
 
 using namespace AnA;
@@ -21,6 +22,7 @@ void StackView::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInf
 
 void StackView::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
+    GetActualControlOffset();
     for (auto& item : items)
     {
         item->Aspect = Aspect;
@@ -29,5 +31,5 @@ void StackView::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImag
         item->GetActualControlOffset();
         item->ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
     }
-    ItemsPresenter::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
+    Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
 }

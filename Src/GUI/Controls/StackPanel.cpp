@@ -30,30 +30,23 @@ Vec2 StackPanel::GetSizeForRender()
     float* size2F = reinterpret_cast<float*>(&size);
     float* offset2F = reinterpret_cast<float*>(&offset);
     float* maxSize2F = reinterpret_cast<float*>(&maxSize);
-    float* renderOffset2F = reinterpret_cast<float*>(&renderOffset);
-    if (items.size() && renderOffset2F[invO] >= 0.0f && invO)
-    {
-        offset2F[invO] = -1.0f;
-    }
-    offset2F[invO] += renderOffset2F[invO];
-    if (maxSize2F[invO] < 1.0f)
-    {
-        offset2F[invO] -= maxSize2F[invO];
-    }
+
+    offset = {Padding.x() * 0.5f, Padding.y() * 0.5f};
+
     for (size_t i = 0; i < items.size(); i++)
     {
         items[i]->Aspect = Aspect;
         items[i]->Extent = Extent;
         auto _size = items[i]->GetSizeForRender();
-        offset2F[invO] += size2F[invO] + reinterpret_cast<float*>(&_size)[invO] + Spacing;
+        offset2F[invO] += size[invO];
         size = _size;
-        maxSize2F[o] = std::max(maxSize2F[o], size2F[o]);
 
         items[i]->RenderOffset(offset);
         items[i]->RenderSize(size);
 
-        maxSize2F[invO] = std::max(maxSize2F[invO], (offset2F[invO] - renderOffset2F[invO] + size2F[invO]) * 0.5f + Padding[2 + invO]);
+        maxSize2F[invO] = std::max(maxSize2F[invO], (offset2F[invO] + size2F[invO]) + Spacing + (Padding[invO] + Padding[2 + invO]) * 0.5f);
         maxSize2F[o] = std::max(maxSize2F[o], size2F[o]);
+        offset2F[invO] += Spacing * 0.5f;
     }
     RenderSize(maxSize);
     return maxSize;
@@ -67,26 +60,26 @@ Vec2 StackPanel::ContentRenderSize()
 void StackPanel::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
     int o = Orientation, invO = 1 - Orientation;
-    float offset = renderOffset[invO] - renderSize[invO] + 1.0f;
+    float offset = renderOffset[invO];
     for (auto& item : items)
     {
         item->RenderOffset()[invO] += offset;
         auto align = invO ? item->HorizontalAlignment : item->VerticalAlignment;//(items[i] + offsets[o]);
         switch (align)
         {
-        case Start:
-            item->RenderOffset()[o] = item->RenderSize()[o] - renderSize[o] + renderOffset[o] + Padding[o];
+        case Center:
+            item->RenderOffset()[o] = renderOffset[o] + (renderSize[o] - item->RenderSize()[o]) * 0.5f - Padding[o] * 0.5f;
             break;
         case End:
-            item->RenderOffset()[o] = renderSize[o] - item->RenderSize()[o] - Padding[2 + o];
+            item->RenderOffset()[o] = renderSize[o] - item->RenderSize()[o] + renderOffset[o] - Padding[2 + 0] * 0.5f;
             break;
         case Stretch:
             item->RenderSize()[o] = renderSize[o] - Padding[o] * 0.5f - Padding[2 + o] * 0.5f;
             [[fallthrough]];
-        case Center:
+        case Start:
             [[fallthrough]];
         default:
-            item->RenderOffset()[o] = renderOffset[o] * 0.5f;
+            item->RenderOffset()[o] = renderOffset[o] + Padding[o] * 0.5f;
             break;
         }
         item->ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);

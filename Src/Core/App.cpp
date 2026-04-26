@@ -289,7 +289,7 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     swapChain.SetViewport(commandBuffer, actualSceneOffset);
 
 #ifdef DEFERRED
-    auto& lightShader = aResourceManager.Shaders.back();
+    auto& lightShader = aResourceManager.Shaders[LIGHT_PIPELINE_ID];
     lightShader.GetPipeline().Bind(commandBuffer);
     vkCmdSetPrimitiveTopology(commandBuffer, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
     auto& sets = lightShader.GetDescriptorSets()[0];

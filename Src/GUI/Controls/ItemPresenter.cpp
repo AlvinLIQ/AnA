@@ -49,22 +49,33 @@ void ItemPresenter::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptor
         item->Aspect = Aspect;
         auto itemRenderSize = item->GetSizeForRender();
         Vec2 itemRenderOffset = renderOffset;
-        if (renderSize.x() < itemRenderSize.x())
+        AlignmentType alignments[] = {HorizontalContentAlignment, VerticalContentAlignment};
+        for (int i = 0; i < 2; i++)
         {
-            renderOffset.x() = renderOffset.x() - renderSize.x() + itemRenderSize.x();
-            itemRenderOffset.x() = renderOffset.x();
-            renderSize.x() = itemRenderSize.x();
+            if (renderSize[i] < itemRenderSize[i])
+            {
+                renderOffset[i] = renderOffset[i] - renderSize[i] + itemRenderSize[i];
+                itemRenderOffset[i] = renderOffset[i];
+                renderSize[i] = itemRenderSize[i];
+            }
+            else if (alignments[i] == AlignmentType::Center)
+            {
+                itemRenderOffset[i] = renderOffset[i] + (renderSize[i] - itemRenderSize[i]) * 0.5f;
+            }
+            else if (alignments[i] == AlignmentType::End)
+            {
+                itemRenderOffset[i] = renderOffset[i] + renderSize[i] - itemRenderSize[i];
+            }
+            else
+            {
+                itemRenderOffset[i] = renderOffset[i];
+                if(HorizontalContentAlignment == AlignmentType::Stretch)
+                {
+                    itemRenderSize[i] = renderSize[i];
+                }
+            }
         }
-        else if (HorizontalContentAlignment == AlignmentType::Start)
-        {
-            itemRenderOffset.x() = renderOffset.x() - renderSize.x() + itemRenderSize.x();
-        }
-        if (renderSize.y() < itemRenderSize.y())
-        {
-            renderOffset.y() = renderOffset.y() - renderSize.y() + itemRenderSize.y();
-            itemRenderOffset.y() = renderOffset.y();
-            renderSize.y() = itemRenderSize.y();
-        }
+
         item->RenderOffset(itemRenderOffset);
         if (itemRenderSize.x() == 0.f || itemRenderSize.y() == 0.f)
             item->RenderSize(renderSize);

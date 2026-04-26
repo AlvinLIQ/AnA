@@ -1,6 +1,7 @@
 #include "Headers/ResourceManager.hpp"
 #include "../Headers/SwapChain.hpp"
 #include "../Headers/ShaderCodes.hpp"
+#include "Headers/Device.hpp"
 #include "Resources/Headers/Animation.hpp"
 
 using namespace AnA;
@@ -589,6 +590,9 @@ std::vector<ShaderInfo> lightShaderStageInfos{{Light_vert, 0, VK_SHADER_STAGE_VE
 std::vector<ShaderInfo> textShaderStageInfos{{Text_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT, false, {}},
                                         {Text_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT, false, {}},
                                             {Text_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
+std::vector<ShaderInfo> terrainShaderStageInfos{{Terrain_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT, false, {}},
+                                        {Terrain_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT, false, {}},
+                                            {Mesh_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
 std::vector<ShaderInfo> collisionShaderStageInfos{{CollisionDetect_comp, 0, VK_SHADER_STAGE_COMPUTE_BIT, false, {}}};
 void ResourceManager::createDefaultShaders()
 {
@@ -605,6 +609,7 @@ void ResourceManager::createDefaultShaders()
         Shaders.emplace_back(aDevice, csmShaderStageInfos, defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
         Shaders.emplace_back(aDevice, meshShaderStageInfos, defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(uint32_t));
         Shaders.emplace_back(aDevice, textShaderStageInfos, textDescriptors, 3, 0, sizeof(glm::vec2));
+        Shaders.emplace_back(aDevice, terrainShaderStageInfos, defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(TerrainPushConstants));
     }
 }
 

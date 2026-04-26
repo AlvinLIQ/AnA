@@ -44,15 +44,16 @@ void TextBlock::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImag
     {
         auto swapChain = SwapChain::GetCurrent();
         auto swapChainExtent = swapChain->GetExtent();
-        auto offset = Vec2{renderOffset.x() - renderSize.x() + 1.0f, renderOffset.y() - renderSize.y() * 0.5f};
+        auto offset = Vec2{renderOffset.x(), renderOffset.y()};
         offset.x() *= float(Extent.width) / float(swapChainExtent.width);
         offset.y() *= float(Extent.height) / float(swapChainExtent.height);
         auto& textContext = Resources::ResourceManager::GetCurrent()->TextContext;
         auto info = textContext.GetInfoById(id);
         info->color = FontColor;
 
-        info->offset = {offset.x() * 0.5f, offset.y() * 0.5f + 0.5f};
+        info->offset = {offset.x(), offset.y()};
         info->size = FontSize * sqrtf(glm::length(glm::vec2(swapChain->ScaleX * 0.7071f, swapChain->ScaleY * 0.7071f)));
+        info->offset.y += renderSize.y() - info->size * charSize.y().value / float(Extent.height);
         info->visible = true;
         textContext.UpdateLayout(id);
     }

@@ -25,7 +25,7 @@ float Noise( in vec2 x )
     vec2 p = floor(x);
     vec2 f = fract(x);
     f = f*f*(3.0-2.0*f);
-    
+
     float res = mix(mix( Hash12(p),          Hash12(p + add.xy),f.x),
                     mix( Hash12(p + add.yx), Hash12(p + add.xx),f.x),f.y);
     return res;
@@ -58,7 +58,7 @@ float Terrain( in vec2 p)
 		w = -w * 0.4;	//...Flip negative and positive for variation
 	}
 	float ff = Noise(pos*.002);
-	
+
 	f += pow(abs(ff), 5.0)*275.-5.0;
 	return f;
 }
