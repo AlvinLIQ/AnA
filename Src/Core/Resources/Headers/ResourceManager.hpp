@@ -11,6 +11,8 @@
 #include "Texture.hpp"
 #include "ShadowMap.hpp"
 #include <mutex>
+#include <string>
+#include <unordered_map>
 //#include <map>
 
 #define ANA_INCLUDE_CONTROL
@@ -119,6 +121,7 @@ namespace AnA
                 std::unique_lock<std::mutex> lock(callbacksMutex);
                 callbacks.push_back(callback);
             }
+            uint32_t AppendTexture(const std::string path);
 
             MeshShaderOutput MeshShaderOutputData;
         private:
@@ -129,6 +132,7 @@ namespace AnA
 
             std::vector<NormalCallBack> callbacks{};
             std::mutex callbacksMutex{};
+            std::unordered_map<std::string, uint32_t> textureIDMap{};
             //uint32_t recordedCallbacks = 0;
 /*
             std::vector<VkSampler> shadowSamplers;

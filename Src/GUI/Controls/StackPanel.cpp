@@ -44,7 +44,7 @@ Vec2 StackPanel::GetSizeForRender()
         items[i]->RenderOffset(offset);
         items[i]->RenderSize(size);
 
-        maxSize2F[invO] = std::max(maxSize2F[invO], (offset2F[invO] + size2F[invO]) + Spacing + (Padding[invO] + Padding[2 + invO]) * 0.5f);
+        maxSize2F[invO] = std::max(maxSize2F[invO], (offset2F[invO] + size2F[invO]) + (Padding[invO] + Padding[2 + invO]) * 0.5f);
         maxSize2F[o] = std::max(maxSize2F[o], size2F[o]);
         offset2F[invO] += Spacing * 0.5f;
     }

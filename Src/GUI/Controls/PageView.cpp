@@ -5,20 +5,20 @@ using namespace Controls;
 
 PageView::PageView()
 {
-
 }
 
 PageView::~PageView()
 {
+    item = nullptr;
     for (auto& page : pages)
         delete page;
-    item = nullptr;
 }
 
 void PageView::Child(Control* newItem)
 {
     pages.push_back(newItem);
-    PageIndex(pageIndex);
+    if (!item)
+        PageIndex(pageIndex);
 }
 
 void PageView::PageIndex(uint32_t _pageIndex)

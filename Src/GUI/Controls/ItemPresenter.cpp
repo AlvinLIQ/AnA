@@ -54,7 +54,7 @@ void ItemPresenter::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptor
         {
             if (renderSize[i] < itemRenderSize[i])
             {
-                renderOffset[i] = renderOffset[i] - renderSize[i] + itemRenderSize[i];
+                //renderOffset[i] = renderOffset[i] - renderSize[i] + itemRenderSize[i];
                 itemRenderOffset[i] = renderOffset[i];
                 renderSize[i] = itemRenderSize[i];
             }
@@ -69,7 +69,7 @@ void ItemPresenter::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptor
             else
             {
                 itemRenderOffset[i] = renderOffset[i];
-                if(HorizontalContentAlignment == AlignmentType::Stretch)
+                if(alignments[i] == AlignmentType::Stretch)
                 {
                     itemRenderSize[i] = renderSize[i];
                 }
@@ -77,8 +77,7 @@ void ItemPresenter::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptor
         }
 
         item->RenderOffset(itemRenderOffset);
-        if (itemRenderSize.x() == 0.f || itemRenderSize.y() == 0.f)
-            item->RenderSize(renderSize);
+        item->RenderSize(itemRenderSize);
         item->ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
     }
     Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);

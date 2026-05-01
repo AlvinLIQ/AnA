@@ -111,6 +111,8 @@ namespace AnA
             static void RequestTextLayoutReset();
             static void EndTextLayoutReset();
 
+            void Texture(const std::string path);
+
             virtual VkDescriptorImageInfo GetDescriptorImageInfo();
             virtual void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount);
         private:

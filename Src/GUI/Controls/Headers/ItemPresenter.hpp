@@ -12,7 +12,7 @@ namespace AnA
         public:
             ItemPresenter();
             ~ItemPresenter();
-            
+
             virtual void Child(Control* newItem);
             Control* Child();
 

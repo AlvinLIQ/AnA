@@ -9,6 +9,7 @@ using namespace Resources;
 
 ResourceManager* _resourceManager = nullptr;
 uint32_t modelId = 0;
+uint32_t texId = 0;
 
 ResourceManager::ResourceManager(Device* mDevice) :
         Meshes(mDevice),
@@ -254,6 +255,16 @@ void ResourceManager::RecreateResources()
 {
     //cleanupShadowResources();
     //createShadowFramebuffers();
+}
+
+uint32_t ResourceManager::AppendTexture(const std::string path)
+{
+    auto iter = textureIDMap.find(path);
+    if (iter != textureIDMap.end())
+        return iter->second;
+
+    auto result = TextureMap.try_emplace(texId++, path.c_str(), aDevice);
+    return result.first->first;
 }
 
 void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs)
@@ -620,6 +631,7 @@ void ResourceManager::initTextures()
     TextureMap.try_emplace(2, 0xFF99CC99u, aDevice);
     TextureMap.try_emplace(3, 0xFF9999CCu, aDevice);
     TextureMap.try_emplace(4, 0x00CC9999u, aDevice);
+    texId = 5;
     //TextureMap.try_emplace(4, "Textures/rock3.jpg", aDevice);
 
     aDevice->BuildFontVertices(Characters);

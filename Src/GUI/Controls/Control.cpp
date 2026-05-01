@@ -8,7 +8,7 @@ SwapChain* aSwapChain = nullptr;
 Control* pressedControl = nullptr;
 Control* focusedControl = nullptr;
 bool leftButtonPressed = false;
-bool needUpdate = false;
+short needUpdate = 0;
 bool textLayoutNeedReset = false;
 Vec2 lastPressedPos{};
 
@@ -142,12 +142,12 @@ bool Control::NeedUpdate()
 
 void Control::RequestUpdate()
 {
-    needUpdate = true;
+    needUpdate = 2;
 }
 
 void Control::EndUpdate()
 {
-    needUpdate = false;
+    needUpdate--;
 }
 
 bool Control::TextLayoutNeedReset()
@@ -163,6 +163,11 @@ void Control::RequestTextLayoutReset()
 void Control::EndTextLayoutReset()
 {
     textLayoutNeedReset = false;
+}
+
+void Control::Texture(const std::string path)
+{
+    TextureId = Resources::ResourceManager::GetCurrent()->AppendTexture(path);
 }
 
 VkDescriptorImageInfo Control::GetDescriptorImageInfo()
