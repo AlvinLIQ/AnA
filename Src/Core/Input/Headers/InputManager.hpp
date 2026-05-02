@@ -32,6 +32,11 @@ namespace AnA
         {
             CharacterCallBack callBack;
         };
+        typedef void(*ScrollConfigCallBack)(float dx, float dy);
+        struct ScrollConfig
+        {
+            ScrollConfigCallBack callBack;
+        };
         enum InputProfileFlags
         {
             None = 0, HideCursor = 1, RawMotion = 2, Disabled = 4, CursorDisabled = 8
@@ -42,6 +47,7 @@ namespace AnA
             std::vector<KeyMapConfig> keyMapConfigs;
             std::vector<KeyMapConfig> opKeyMapConfigs;
             std::vector<CursorConfig> cursorConfigs;
+            std::vector<ScrollConfig> scrollConfigs;
             std::vector<CharacterConfig> characterConfigs;
             void* param;
             //only call when there's a config
@@ -80,6 +86,7 @@ namespace AnA
             Window& aWindow;
             static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
             static void characterCallback(GLFWwindow* window, uint32_t ch);
+            static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
             int activeProfileIndex = 0;
             std::vector<InputProfile> inputProfiles{1};
             CursorArgs curArgs;
