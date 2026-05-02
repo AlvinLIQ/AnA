@@ -6,6 +6,7 @@
 #include <fstream>
 #include <vulkan/vulkan.h>
 #include <glm/glm.hpp>
+#include <vulkan/vulkan_core.h>
 #include "Utils.hpp"
 #include "../../3rdParty/VulkanMemoryAllocator/include/vk_mem_alloc.h"
 
@@ -189,6 +190,7 @@ namespace AnA
         PFN_vkCmdDrawMeshTasksIndirectCountEXT vkCmdDrawMeshTasksIndirectCountEXT{ VK_NULL_HANDLE };
         PFN_vkCmdBeginRenderingKHR vkCmdBeginRenderingKHR{ VK_NULL_HANDLE };
         PFN_vkCmdEndRenderingKHR vkCmdEndRenderingKHR{ VK_NULL_HANDLE };
+        PFN_vkCmdSetPolygonModeEXT vkCmdSetPolygonModeEXT{ VK_NULL_HANDLE };
 
         VmaAllocator GetAllocator();
 
@@ -232,6 +234,7 @@ namespace AnA
         {
             VK_KHR_SWAPCHAIN_EXTENSION_NAME,
             VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME,
+            VK_EXT_SHADER_OBJECT_EXTENSION_NAME,
             VK_EXT_PRIMITIVE_TOPOLOGY_LIST_RESTART_EXTENSION_NAME,
             VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME
         };

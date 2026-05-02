@@ -65,10 +65,10 @@ float Terrain( in vec2 p)
 
 vec3 CalculateNormal(vec2 pos)
 {
-    float heightLeft = Terrain(vec2(pos.x - 1, pos.y));
-    float heightRight = Terrain(vec2(pos.x + 1., pos.y));
-    float heightUp = Terrain(vec2(pos.x, pos.y + 1.));
-    float heightDown = Terrain(vec2(pos.x, pos.y - 1.));
+    float heightLeft = Terrain(vec2(pos.x - 0.3, pos.y));
+    float heightRight = Terrain(vec2(pos.x + 0.3, pos.y));
+    float heightUp = Terrain(vec2(pos.x, pos.y + 0.3));
+    float heightDown = Terrain(vec2(pos.x, pos.y - 0.3));
 
     // Calculate the two vectors on the surface
     vec3 v1 = vec3(2.0f, heightRight - heightLeft, 0.0f);  // Horizontal vector (x-direction)

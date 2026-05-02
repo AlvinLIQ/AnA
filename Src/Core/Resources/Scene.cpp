@@ -258,6 +258,7 @@ void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIn
         sets.data(),
         static_cast<uint32_t>(offsets.size()),
         offsets.data());
+    aDevice->vkCmdSetPolygonModeEXT(commandBuffer, PolygonMode);
 }
 
 void Scene::Draw(CommandBuffer& commandBuffer)

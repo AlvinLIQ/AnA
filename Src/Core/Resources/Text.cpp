@@ -65,6 +65,7 @@ void Text::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferInd
     sets[2] = meshDescriptor->GetSets()[currentBufferIndex];
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
         shader.GetPipelineLayout(), 0, 3, sets.data(), 0, nullptr);
+    aDevice->vkCmdSetPolygonModeEXT(commandBuffer, PolygonMode);
     glm::vec2 resolution = {float(commandBuffer.Extent.width), float(commandBuffer.Extent.height)};
     vkCmdPushConstants(commandBuffer, shader.GetPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, 0, sizeof(glm::vec2),
         &resolution);

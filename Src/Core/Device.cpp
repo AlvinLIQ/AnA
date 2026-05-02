@@ -994,7 +994,8 @@ void Device::createLogicalDevice()
     primitiveRestartFeatures.pNext = &vulkan13Features;
 
     VkPhysicalDeviceExtendedDynamicState3FeaturesEXT dynamicState3Features{};
-    dynamicState3Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_FEATURES_EXT;
+    dynamicState3Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_3_FEATURES_EXT;
+    dynamicState3Features.extendedDynamicState3PolygonMode = VK_TRUE;
     dynamicState3Features.pNext = &primitiveRestartFeatures;
 
     VkPhysicalDeviceVulkan12Features vulkan12Features{};
@@ -1070,6 +1071,7 @@ void Device::createLogicalDevice()
     vkCmdEndRenderingKHR = reinterpret_cast<PFN_vkCmdEndRenderingKHR>(vkGetDeviceProcAddr(logicalDevice, "vkCmdEndRenderingKHR"));
     vkCmdDrawMeshTasksEXT = reinterpret_cast<PFN_vkCmdDrawMeshTasksEXT>(vkGetDeviceProcAddr(logicalDevice, "vkCmdDrawMeshTasksEXT"));
     vkCmdDrawMeshTasksIndirectCountEXT = reinterpret_cast<PFN_vkCmdDrawMeshTasksIndirectCountEXT>(vkGetDeviceProcAddr(logicalDevice, "vkCmdDrawMeshTasksIndirectCountEXT"));
+    vkCmdSetPolygonModeEXT = reinterpret_cast<PFN_vkCmdSetPolygonModeEXT>(vkGetDeviceProcAddr(logicalDevice, "vkCmdSetPolygonModeEXT"));
     vkGetDeviceQueue(logicalDevice, indices.graphicsAndComputeFamily.value(), 0, &graphicsQueue);
     vkGetDeviceQueue(logicalDevice, indices.presentFamily.value(), 0, &presentQueue);
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include "CommandBuffer.hpp"
+#include <vulkan/vulkan_core.h>
 
 namespace AnA
 {
@@ -12,5 +13,6 @@ namespace AnA
         virtual void Update() = 0;
         virtual bool NeedUpdate() = 0;
         VkPrimitiveTopology Topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        VkPolygonMode PolygonMode = VK_POLYGON_MODE_FILL;
     };
 }

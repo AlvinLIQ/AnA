@@ -60,7 +60,7 @@ namespace AnA
             VkGraphicsPipelineCreateInfo pipelineInfo{};
             VkPipelineRenderingCreateInfoKHR pipelineRenderingInfo{};
             bool hasComputeShader = false;
-            std::vector<VkDynamicState> dynamicStates = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR, VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY };
+            std::vector<VkDynamicState> dynamicStates = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR, VK_DYNAMIC_STATE_POLYGON_MODE_EXT, VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY };
             std::vector<VkSpecializationInfo> specializationInfos{};
             static PipelineConfig GetDefault(VkShaderModule vertexShaderModule, VkShaderModule fragShaderModule,
                 VkPipelineLayout &pipelineLayout, VkRenderPass &renderPass, VkSampleCountFlagBits msaaSamplers, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)

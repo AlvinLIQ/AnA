@@ -26,7 +26,7 @@ namespace AnA
             glm::vec3 origin;
             glm::vec3 direction;
         };
-        
+
         class Light
         {
         public:
@@ -34,8 +34,8 @@ namespace AnA
             ~Light();
 
             glm::vec3 Direction{-1.0f,3.0f, 1.0f};
-            glm::vec3 Color{0.25};
-            float Ambient{0.2f};
+            glm::vec3 Color{0.5f};
+            float Ambient{0.1f};
             std::vector<Buffer>& GetBuffers();
             void UpdateBuffers(Cameras::Camera& lightCamera, uint32_t bufferIndex);
         private:

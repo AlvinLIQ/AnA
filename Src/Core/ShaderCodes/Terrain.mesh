@@ -12,6 +12,8 @@
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 layout(triangles, max_vertices = MAX_ROW_VERTICES * MAX_ROW_VERTICES, max_primitives = MAX_TERRAIN_PRIMITIVES) out;
 
+shared vec3 worldVertices[MAX_COLUMN_VERTICES * MAX_ROW_VERTICES];
+
 #ifdef PER_PRIMITIVE_NORMAL
 struct VertexOutput {
     vec2 texCoord;
@@ -78,7 +80,10 @@ void main()
             pos = vec2(x * scale, y * scale) + offset;
             vertex = vec3(pos.x, -Terrain((pos) * push.height) - 20.0f, pos.y) - taskData.center;
 
-            gl_MeshVerticesEXT[id].gl_Position = viewProj * vec4(vertex, 1.0);
+            gl_MeshVerticesEXT[id].gl_PointSize = 4;
+            vec4 vertexPos = viewProj * vec4(vertex, 1.0);
+            worldVertices[id] = vertexPos.xyz;
+            gl_MeshVerticesEXT[id].gl_Position = vertexPos;
             vertexOutput[id].texCoord = vec2(x * 0.1, y * 0.1);
             vertexOutput[id].texID = push.texID;
             #ifndef PER_PRIMITIVE_NORMAL
@@ -102,11 +107,17 @@ void main()
             c = a + MAX_COLUMN_VERTICES;
             d = b + MAX_COLUMN_VERTICES;
             #ifdef PER_PRIMITIVE_NORMAL
-            primitiveNormals[id] = push.calNormal == 1 ? CalculateNormal(pos * -push.height) : vec3(0.);
+            vec3 pa = worldVertices[a];
+            vec3 pb = worldVertices[b];
+            vec3 pc = worldVertices[c];
+            vec3 normal = normalize(cross(pb - pa, pc - pa));
+            primitiveNormals[id] = push.calNormal == 1 ? normal : vec3(0.);
             #endif
             gl_PrimitiveTriangleIndicesEXT[id++] = uvec3(a, b, c);
             #ifdef PER_PRIMITIVE_NORMAL
-            primitiveNormals[id] = push.calNormal == 1 ? CalculateNormal(pos * -push.height) : vec3(0.);
+            vec3 pd = worldVertices[d];
+            normal = normalize(cross(pb - pc, pd - pc));
+            primitiveNormals[id] = push.calNormal == 1 ? normal : vec3(0.);
             #endif
             gl_PrimitiveTriangleIndicesEXT[id++] = uvec3(c, b, d);
         }

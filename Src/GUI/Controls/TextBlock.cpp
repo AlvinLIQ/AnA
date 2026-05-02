@@ -56,7 +56,8 @@ void TextBlock::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImag
         info->offset.y += renderSize.y() - info->size * charSize.y().value / float(Extent.height);
         info->visible = true;
         textContext.UpdateLayout(id);
-        ControlSize = {FontSize * charSize.x() * float(info->text.length() * 0.5f), FontSize * charSize.y()};
+        ControlSize = {info->size * charSize.x().value * float(info->text.length() * 0.5f),
+            info->size * charSize.y().value};
     }
 
     Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);

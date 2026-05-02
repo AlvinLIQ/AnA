@@ -65,7 +65,7 @@ void main()
 {
     TextData textInfo = textInfos[taskData.textIndex];
     CharacterInfo chInfo = charInfos[gl_WorkGroupID.x + textInfo.chOffset];
-	Meshlet meshlet = meshlets[uint(chInfo.ch)];
+    Meshlet meshlet = meshlets[uint(chInfo.ch)];
     uint primitiveCount = meshlet.indexCount / 3;
     SetMeshOutputsEXT(meshlet.vertexCount, primitiveCount);
     vec2 scale = vec2(textInfo.size / push.resolution.x, textInfo.size / push.resolution.y);
@@ -82,10 +82,10 @@ void main()
     for (uint i = 0, offset; i < primitiveCount; i++)
     {
         offset = meshlet.indexOffset + i * 3;
-	    gl_PrimitiveTriangleIndicesEXT[i] = uvec3(
-            primitives[offset + 0],
-            primitives[offset + 1],
-            primitives[offset + 2]
-        );
+        gl_PrimitiveTriangleIndicesEXT[i] = uvec3(
+                primitives[offset + 0],
+                primitives[offset + 1],
+                primitives[offset + 2]
+            );
     }
 }

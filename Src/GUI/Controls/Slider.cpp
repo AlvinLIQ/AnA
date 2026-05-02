@@ -14,14 +14,14 @@ void slider_Click(void* control, PointerEventArgs& args)
     args.Handled = true;
     slider->Focus();
     int o = slider->Orientation == AnA::Controls::Horizontal ? 0 : 1;
-    auto offset = slider->RenderOffset() + slider->ActualRenderOffset() * 0.5;
+    auto offset = slider->RenderOffset();
     auto size = slider->RenderSize();
     const float curPosF = static_cast<float>(reinterpret_cast<double*>(&args.Position)[o]);
     const float sizeF = reinterpret_cast<float*>(&size)[o];
     const float offsetF = reinterpret_cast<float*>(&offset)[o];
 
-    float pos = (curPosF - offsetF / sizeF) / sizeF;
-    //printf("pos: %f curPosF: %f offsetF: %f sizeF: %f\r", pos, curPosF, offsetF, sizeF);
+    float pos = (curPosF - offsetF) / sizeF;
+    printf("pos: %f curPosF: %f offsetF: %f sizeF: %f\r", pos, curPosF, offsetF, sizeF);
 
     if (pos < 0.0f)
     {
@@ -43,16 +43,15 @@ void Slider::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageIn
     //int invO = 1 - o;
     auto size = RenderSize();
     auto offset = RenderOffset();
-    auto actualOffset = ActualRenderOffset();
     float* size2F = reinterpret_cast<float*>(&size);
     float* offset2F = reinterpret_cast<float*>(&offset);
-    float pos = std::max(std::min(value / size2F[o] * (size2F[o] - offset2F[o] - actualOffset[o]), size2F[o] - SLIDER_HALF_SIZE), SLIDER_HALF_SIZE);
-    offset2F[o] += (pos - 0.5f) * 2.0f;
+    float pos = std::max(std::min(value * size2F[o] + offset2F[o] - SLIDER_SIZE, offset2F[o] + size2F[o] - SLIDER_SIZE),
+                        offset2F[o]);
+    offset2F[o] = pos;
 
     button.GetSizeForRender();
     size2F[o] = SLIDER_SIZE;
     button.RenderSize(size);
-    offset[o] += actualOffset[o] * 2.0f;
     button.RenderOffset(offset);
     button.ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
 

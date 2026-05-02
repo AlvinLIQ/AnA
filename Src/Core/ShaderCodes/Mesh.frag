@@ -50,7 +50,7 @@ layout(set = 5, binding = 0) uniform UBO {
 } ubo;
 
 const vec3 LIGHT_POS = vec3(4., 2., 1.);
-const vec3 LIGHT_COLOR = vec3(0.6, 0.7, 0.5);
+const vec3 LIGHT_COLOR = vec3(1.0, 1.0, 1.0);
 
 void main()
 {
@@ -65,7 +65,7 @@ void main()
 
     float visibility = 1.0; // filterPCF(shadowCoord, cascadeIndex);
 
-    vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility + pointLightIntensity * LIGHT_COLOR;
+    vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility;// + pointLightIntensity * LIGHT_COLOR;
     outColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord) * vec4(finalLight, 1.0);
     #endif
 }
