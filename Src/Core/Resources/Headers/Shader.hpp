@@ -2,6 +2,7 @@
 #include "../../Headers/Pipeline.hpp"
 #include "Descriptor.hpp"
 #include <glslang/Public/ShaderLang.h>
+#include <vulkan/vulkan_core.h>
 
 namespace AnA
 {
@@ -10,11 +11,13 @@ namespace AnA
     public:
         Shader(Device* mDevice);
         Shader(Device* mDevice, std::vector<ShaderInfo>& shaderInfos,
-            std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount, size_t _descriptorOffset, VkDeviceSize pushConstantSize = 0);
+            std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount,
+            size_t _descriptorOffset, VkDeviceSize pushConstantSize = 0,
+            VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
 
         Shader(const Shader&) = delete;
         Shader& operator=(const Shader&) = delete;
-        Shader(Shader& shader) noexcept : aDevice{shader.aDevice}, pipeline{shader.pipeline}, pipelineLayout{shader.pipelineLayout}, descriptorSets{shader.descriptorSets}, descriptors{shader.descriptors}, descriptorCount{shader.descriptorCount}, descriptorOffset{shader.descriptorOffset}
+        Shader(Shader& shader) noexcept : Topology{shader.Topology}, aDevice{shader.aDevice}, pipeline{shader.pipeline}, pipelineLayout{shader.pipelineLayout}, descriptorSets{shader.descriptorSets}, descriptors{shader.descriptors}, descriptorCount{shader.descriptorCount}, descriptorOffset{shader.descriptorOffset}
         {
         }
         Shader& operator=(Shader& shader) noexcept
@@ -29,6 +32,7 @@ namespace AnA
                 descriptors = shader.descriptors;
                 descriptorCount = shader.descriptorCount;
                 descriptorOffset = shader.descriptorOffset;
+                Topology = shader.Topology;
             }
             return *this;
         }
@@ -49,6 +53,7 @@ namespace AnA
                 descriptors = shader.descriptors;
                 descriptorCount = shader.descriptorCount;
                 descriptorOffset = shader.descriptorOffset;
+                Topology = shader.Topology;
 
                 shader.pipelineLayout = VK_NULL_HANDLE;
                 shader.descriptorSets.clear();
@@ -67,6 +72,7 @@ namespace AnA
         {
             return hasMeshShader;
         }
+        VkPrimitiveTopology Topology{};
     private:
         Device* aDevice{nullptr};
         Pipeline pipeline{};
