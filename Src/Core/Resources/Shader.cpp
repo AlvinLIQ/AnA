@@ -13,14 +13,16 @@ Shader::Shader(Device* mDevice) : aDevice{mDevice}
 
 Shader::Shader(Device* mDevice, std::vector<ShaderInfo>& shaderInfos,
             std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount,
-            size_t _descriptorOffset, VkDeviceSize pushConstantSize) : aDevice{mDevice},
+            size_t _descriptorOffset, VkDeviceSize pushConstantSize, VkPrimitiveTopology topology) :
+    Topology{topology}, aDevice{mDevice},
     descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}, descriptorOffset{_descriptorOffset}
 {
     createPipelineLayout(pushConstantSize);
     auto swapChain = SwapChain::GetCurrent();
     Pipeline::PipelineConfig pipelineConfig =
         Pipeline::PipelineConfig::GetForDynamicRendering(mDevice, shaderInfos, pipelineLayout,
-        swapChain->GetFormat(), swapChain->GetDepthFormat(), aDevice->GetMaxUsableSampleCount());
+        swapChain->GetFormat(), swapChain->GetDepthFormat(), aDevice->GetMaxUsableSampleCount(),
+        Topology);
     pipeline = Pipeline(mDevice, pipelineConfig);
     Pipeline::PipelineConfig::CleanupPipelineConfig(mDevice, pipelineConfig);
 }

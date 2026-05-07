@@ -247,7 +247,7 @@ void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIn
     shader.GetPipeline().Bind(commandBuffer);
     sets[DEFAULT_VERTEX_LAYOUT] = vertexDescriptor->GetSets()[currentBufferIndex];
     sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors.front()->GetSets()[0];
-    if (aDevice->MeshShaderSupport())
+    if (aDevice->MeshShaderSupport() && shader.HasMeshShader())
     {
         sets[DEFAULT_MESHLET_LAYOUT] = meshDescriptor->GetSets()[currentBufferIndex];
     }

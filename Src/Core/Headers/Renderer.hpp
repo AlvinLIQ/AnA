@@ -92,7 +92,7 @@ namespace AnA
         bool isFrameStarted = false;
 
         bool needUpdate = false;
-        VkClearValue clearValues[2] = {{.color = {{0.9f, 0.9f, 0.9f, 1.0f}}}, {.depthStencil = {1.0f, 0}}};
+        VkClearValue clearValues[2] = {{.color = {{1.0f, 1.0f, 1.0f, 1.0f}}}, {.depthStencil = {1.0f, 0}}};
         VkCommandBufferInheritanceInfo inheritanceInfos[RENDER_PASS_TYPE_SIZE]{};
     };
 }

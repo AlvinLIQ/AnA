@@ -68,7 +68,7 @@ layout(std430, set = 6, binding = 4) buffer meshletIDSSBO
 
 layout(std430, set = 6, binding = 5) buffer MeshletIDCountSSBO
 {
-	uint meshletIDCount;
+    uint meshletIDCount;
 };
 
 taskPayloadSharedEXT MeshPayload taskData;
@@ -90,8 +90,8 @@ bool isMeshletVisible(uint meshletID, uint objectID)
     if (len != 0.)
         normal /= len;
     vec3 coneApex = (transform * vec4(boundingSphere.coneApex, 1.0)).xyz;
-    return  isSphereInsideFrustum(center, radius, frustum.planes) &&
-            isMeshletFacingCamera(cbo.position.xyz, coneApex, normal, boundingSphere.cutoff);
+    return isSphereInsideFrustum(center, radius, frustum.planes) &&
+        isMeshletFacingCamera(cbo.position.xyz, coneApex, normal, boundingSphere.cutoff);
 }
 
 void main()
@@ -113,5 +113,5 @@ void main()
         taskData.visibleCount = visibleCount;
         barrier();
     }
-	EmitMeshTasksEXT(visibleCount, 1, 1);
+    EmitMeshTasksEXT(visibleCount, 1, 1);
 }

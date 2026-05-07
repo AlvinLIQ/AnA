@@ -3,6 +3,7 @@
 #include "../Headers/ShaderCodes.hpp"
 #include "Headers/Device.hpp"
 #include "Resources/Headers/Animation.hpp"
+#include <vulkan/vulkan_core.h>
 
 using namespace AnA;
 using namespace Resources;
@@ -611,7 +612,7 @@ void ResourceManager::createDefaultShaders()
     Shaders.emplace_back(aDevice, basicShaderStageInfos, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
 
     Shaders.emplace_back(aDevice, shapeShaderStageInfos, shapeDescriptors, SHAPE_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
-    Shaders.emplace_back(aDevice, pointShaderStageInfos, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
+    Shaders.emplace_back(aDevice, pointShaderStageInfos, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0, 0, VK_PRIMITIVE_TOPOLOGY_POINT_LIST);
 
     Shaders.emplace_back(aDevice, collisionShaderStageInfos, computeDescriptors, 1, 0, 0);
     Shaders.emplace_back(aDevice, lightShaderStageInfos, lightDescriptors, 1, 0, 0);

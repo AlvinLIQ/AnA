@@ -112,6 +112,7 @@ void main()
         worldVertices[i] = vertexPos.xyz;
         vec4 viewPos = cbo.view * vertexPos;
         gl_MeshVerticesEXT[i].gl_Position = viewProj * vertexPos;
+        gl_MeshVerticesEXT[i].gl_PointSize = 6.0;
         vertexOutput[i].texCoord = vertex.uv;
         vertexOutput[i].texID = texID;
         #ifndef PER_PRIMITIVE_NORMAL
@@ -136,7 +137,7 @@ void main()
         vec3 normal = normalize(cross(b - a, c - a));
         vec3 coneApex = (a + b + c) / 3.0;
 
-        gl_MeshPrimitivesEXT[i].gl_CullPrimitiveEXT = dot(normal, normalize(cbo.position.xyz - coneApex)) <= 0.0;
+        //gl_MeshPrimitivesEXT[i].gl_CullPrimitiveEXT = dot(normal, normalize(cbo.position.xyz - coneApex)) <= 0.0;
         #ifdef PER_PRIMITIVE_NORMAL
         primitiveNormals[i] = normal;
         #endif

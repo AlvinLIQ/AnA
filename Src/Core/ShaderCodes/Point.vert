@@ -1,10 +1,18 @@
 #version 460
+#extension GL_GOOGLE_include_directive : require
+
+#include "mesh.h"
 
 layout(location = 0) out vec4 outVertex;
 
 layout(std430, set = 1, binding = 0) buffer VertexSSBO
 {
     float vertices[];
+};
+
+layout(std430, set = 1, binding = 1) buffer ObjectSSBO
+{
+    Object objects[];
 };
 
 layout(set = 0, binding = 0) uniform CameraBufferObject {
@@ -38,11 +46,11 @@ struct Ray{
 
 const vec3 LIGHT_DIRECTION = normalize(vec3(1., -3., 1.));
 
-const mat4 biasMat = mat4( 
+const mat4 biasMat = mat4(
 	0.5, 0.0, 0.0, 0.0,
 	0.0, 0.5, 0.0, 0.0,
 	0.0, 0.0, 1.0, 0.0,
-	0.5, 0.5, 0.0, 1.0 
+	0.5, 0.5, 0.0, 1.0
 );
 
 mat4 transform(vec3 scale, vec3 rotation, vec3 transition)
@@ -72,8 +80,11 @@ mat4 transform(vec3 scale, vec3 rotation, vec3 transition)
 
 void main() {
     gl_PointSize = 10;
+    mat4 transform = objects[gl_DrawID].transform;
+    uint texID = uint(transform[3].w);
+    transform[3].w = 1.0;
     uint vertexOffset = gl_VertexIndex * 8;
-    vec4 vertexPos = vec4(vertices[vertexOffset + 0], vertices[vertexOffset + 1], vertices[vertexOffset + 2], 1.0);
+    vec4 vertexPos = transform * vec4(vertices[vertexOffset + 0], vertices[vertexOffset + 1], vertices[vertexOffset + 2], 1.0);
     gl_Position = cbo.proj * cbo.view * vertexPos;
     outVertex = vertexPos;
 }
