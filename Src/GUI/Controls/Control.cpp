@@ -292,7 +292,7 @@ void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input:
     profile.flag = Input::InputProfileFlags::RawMotion;
     Input::CursorConfig cursorConfig{};
     cursorConfig.param = mainControl;
-    cursorConfig.callBack = [](void* param, Input::CursorArgs& curArgs, int leftButtonAction)
+    cursorConfig.callback = [](void* param, Input::CursorArgs& curArgs, int leftButtonAction)
     {
         auto control = static_cast<Control*>(param);
         PointerEventArgs args;

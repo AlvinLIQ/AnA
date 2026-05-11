@@ -9,7 +9,7 @@ Descriptor::Descriptor(Device* mDevice, Buffer* buffers, VkDeviceSize bufferSize
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     layoutInfo.bindingCount = 1;
-    
+
     VkDescriptorSetLayoutBinding layoutBinding = Device::CreateLayoutBinding(binding, descriptorType, stageFlags);
     layoutInfo.pBindings = &layoutBinding;
     if (vkCreateDescriptorSetLayout(aDevice->GetLogicalDevice(), &layoutInfo, nullptr, &setLayout) != VK_SUCCESS)
@@ -23,19 +23,19 @@ Descriptor::Descriptor(Device* mDevice, Buffer* buffers, VkDeviceSize bufferSize
 Descriptor::Descriptor(Device* mDevice, Buffer* buffers, VkDeviceSize bufferSize, uint32_t binding,
     uint32_t descriptorSetCount, uint32_t descriptorCount, VkDescriptorSetLayout descriptorSetLayout,
     const VkDescriptorType descriptorType) : aDevice{mDevice}
-{    
+{
     aDevice->CreateDescriptorPool(descriptorSetCount, descriptorCount, pool, descriptorType);
     aDevice->CreateDescriptorSets(buffers, bufferSize, binding, descriptorSetCount, pool, descriptorSetLayout, descriptorType, sets);
 }
 
-Descriptor::Descriptor(Device* mDevice, VkSampler& sampler, VkImageView& imageView, VkImageLayout imageLayout, uint32_t binding, 
+Descriptor::Descriptor(Device* mDevice, VkSampler& sampler, VkImageView& imageView, VkImageLayout imageLayout, uint32_t binding,
         uint32_t descriptorSetCount, uint32_t descriptorCount, VkShaderStageFlags stageFlags, const VkDescriptorType descriptorType
         ) : aDevice{mDevice}
 {
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     layoutInfo.bindingCount = 1;
-    
+
     VkDescriptorSetLayoutBinding layoutBinding = Device::CreateLayoutBinding(binding, descriptorType, stageFlags);
     layoutInfo.pBindings = &layoutBinding;
     if (vkCreateDescriptorSetLayout(aDevice->GetLogicalDevice(), &layoutInfo, nullptr, &setLayout) != VK_SUCCESS)
@@ -53,7 +53,7 @@ Descriptor::Descriptor(Device* mDevice, VkSampler& sampler, VkImageView& imageVi
     aDevice->CreateDescriptorSets(&imageInfo, binding, descriptorSetCount, pool, setLayout, descriptorType, sets);
 }
 
-Descriptor::Descriptor(Device* mDevice, VkSampler& sampler, VkImageView& imageView, VkImageLayout imageLayout, uint32_t binding, 
+Descriptor::Descriptor(Device* mDevice, VkSampler& sampler, VkImageView& imageView, VkImageLayout imageLayout, uint32_t binding,
         uint32_t descriptorSetCount, uint32_t descriptorCount, VkDescriptorSetLayout descriptorSetLayout, const VkDescriptorType descriptorType
         ) : setLayout(descriptorSetLayout)
 {
@@ -79,7 +79,7 @@ Descriptor::Descriptor(Device* mDevice, VkSampler& sampler, VkImageView& imageVi
 
 Descriptor::Descriptor(Device* mDevice, uint32_t descriptorSetCount, uint32_t descriptorCount, uint32_t bindingCount, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorType descriptorType) : aDevice{mDevice}
 {
-    aDevice->CreateDescriptorPool(descriptorSetCount, descriptorCount * bindingCount, pool, descriptorType, VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT);
+    aDevice->CreateDescriptorPool(descriptorSetCount, descriptorCount * descriptorSetCount, pool, descriptorType, VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT);
     VkDescriptorSetVariableDescriptorCountAllocateInfoEXT countInfo{};
     countInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO;
     std::vector<uint32_t> counts(descriptorSetCount, descriptorCount / descriptorSetCount / bindingCount);
@@ -93,7 +93,7 @@ Descriptor::Descriptor(Device* mDevice, Descriptor::DescriptorConfig* descriptor
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 
-    const VkDescriptorBindingFlags bindlessFlags = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT | 
+    const VkDescriptorBindingFlags bindlessFlags = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT |
                 VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT |
                 VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT_EXT;
     std::vector<VkDescriptorBindingFlags> bindingFlags{};
@@ -108,7 +108,7 @@ Descriptor::Descriptor(Device* mDevice, Descriptor::DescriptorConfig* descriptor
     for (uint32_t i = 0; i < configCount; i++)
     {
         auto& descriptorConfig = descriptorConfigs[i];
-        realDescriptorCount = 
+        realDescriptorCount =
             descriptorConfigs->bindless ? 0 : descriptorConfig.descriptorCount;
         VkDescriptorPoolSize poolSize{};
 
@@ -134,8 +134,8 @@ Descriptor::Descriptor(Device* mDevice, Descriptor::DescriptorConfig* descriptor
             layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT_EXT;
             continue;
         }
-        else if (descriptorConfig.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER || 
-            descriptorConfig.descriptorType == VK_DESCRIPTOR_TYPE_SAMPLER || 
+        else if (descriptorConfig.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER ||
+            descriptorConfig.descriptorType == VK_DESCRIPTOR_TYPE_SAMPLER ||
             descriptorConfig.descriptorType == VK_DESCRIPTOR_TYPE_STORAGE_IMAGE)
         {
             for (uint32_t i = 0; i < descriptorSetCount; i++)
@@ -172,14 +172,14 @@ Descriptor::Descriptor(Device* mDevice, Descriptor::DescriptorConfig* descriptor
     layoutCreated = true;
     if (!totalDescriptorCount)
         return;
-    aDevice->CreateDescriptorPool(descriptorSetCount, 
-        poolSizes.data(), 
+    aDevice->CreateDescriptorPool(descriptorSetCount,
+        poolSizes.data(),
         static_cast<uint32_t>(poolSizes.size()),
         pool, poolFlags);
-    aDevice->CreateDescriptorSets(descriptorSetCount, 
-        pool, 
-        setLayout, 
-        sets, 
+    aDevice->CreateDescriptorSets(descriptorSetCount,
+        pool,
+        setLayout,
+        sets,
         writes);
 }
 
@@ -219,7 +219,7 @@ void Descriptor::UpdateDescriptorSets(DescriptorConfig& descriptorConfig)
     }
 }
 
-void Descriptor::UpdateDescriptorSets(VkDescriptorImageInfo* imageInfos, uint32_t imageCount, uint32_t dstBinding, 
+void Descriptor::UpdateDescriptorSets(VkDescriptorImageInfo* imageInfos, uint32_t imageCount, uint32_t dstBinding,
     VkDescriptorType descriptorType)
 {
     for (size_t i = 0; i < sets.size(); i++)

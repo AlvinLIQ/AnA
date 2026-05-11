@@ -2,6 +2,7 @@
 
 #include "../../Headers/Device.hpp"
 #include "../../Headers/Buffer.hpp"
+#include "Descriptor.hpp"
 #include "Model.hpp"
 
 #include <array>
@@ -42,11 +43,14 @@ namespace AnA
                 Buffer meshletVertexBuffer;
                 Buffer meshletIndexBuffer;
                 Buffer meshletCullingBuffer;
+                VkDescriptorSet vertexDescriptorSet;
                 //Buffer meshletIDBuffer;
             };
 
             Meshes(Device* mDevice);
             ~Meshes();
+
+            void Init();
 
             bool Create(const char* filePath, uint32_t& id);
             void Load(const char* filePath, uint32_t& id);
@@ -58,6 +62,7 @@ namespace AnA
                 return needUpdate;
             }
             void Update();
+            void UpdateMesh(uint32_t id);
 
             MeshFrameResource& GetCurrentFrameResource()
             {
@@ -76,6 +81,7 @@ namespace AnA
             std::array<MeshFrameResource, MAX_FRAMES_IN_FLIGHT> frameResources;
             void initFrameResource(MeshFrameResource& frameResource);
             void rebuildFrameResource(MeshFrameResource& frameResource);
+            void updateDescriptors(uint32_t bufferIndex);
             uint32_t prepareFrameResources();
 
             size_t vertexCount = 0;
@@ -83,6 +89,8 @@ namespace AnA
             uint32_t meshletVertexCount = 0;
             uint32_t meshletIndexCount = 0;
             uint32_t meshletCount = 0;
+
+            Descriptor* vertexDescriptor = nullptr;
         };
     }
 }

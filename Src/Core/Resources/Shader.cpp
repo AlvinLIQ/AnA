@@ -23,6 +23,7 @@ Shader::Shader(Device* mDevice, std::vector<ShaderInfo>& shaderInfos,
         Pipeline::PipelineConfig::GetForDynamicRendering(mDevice, shaderInfos, pipelineLayout,
         swapChain->GetFormat(), swapChain->GetDepthFormat(), aDevice->GetMaxUsableSampleCount(),
         Topology);
+    hasMeshShader= pipelineConfig.hasMeshShader;
     pipeline = Pipeline(mDevice, pipelineConfig);
     Pipeline::PipelineConfig::CleanupPipelineConfig(mDevice, pipelineConfig);
 }

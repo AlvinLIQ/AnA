@@ -59,14 +59,14 @@ void InputManager::keyCallback(GLFWwindow* , int key, int , int action, int )
     auto &keyMapConfigs = _aInputManager->GlobalProfile.keyMapConfigs;
     for (auto &keyMapConfig : keyMapConfigs)
     {
-        if (keyMapConfig.keyCode == key && keyMapConfig.callBack != nullptr && keyMapConfig.action == action)
-            keyMapConfig.callBack(keyMapConfig.param);
+        if (keyMapConfig.keyCode == key && keyMapConfig.callback != nullptr && keyMapConfig.action == action)
+            keyMapConfig.callback(keyMapConfig.param);
     }
     auto& activeProfile = _aInputManager->GetActiveProfile();
     for (auto &keyMapConfig : activeProfile.opKeyMapConfigs)
     {
-        if (keyMapConfig.keyCode == key && keyMapConfig.callBack != nullptr && keyMapConfig.action == action)
-            keyMapConfig.callBack(keyMapConfig.param);
+        if (keyMapConfig.keyCode == key && keyMapConfig.callback != nullptr && keyMapConfig.action == action)
+            keyMapConfig.callback(keyMapConfig.param);
     }
 }
 
@@ -75,7 +75,7 @@ void InputManager::characterCallback(GLFWwindow* , uint32_t ch)
     auto &characterConfigs = _aInputManager->GetActiveProfile().characterConfigs;
     for (auto& characterConfig : characterConfigs)
     {
-        characterConfig.callBack(ch);
+        characterConfig.callback(ch);
     }
 }
 
@@ -84,7 +84,7 @@ void InputManager::scrollCallback(GLFWwindow* , double xoffset, double yoffset)
     auto &scrollConfigs = _aInputManager->GetActiveProfile().scrollConfigs;
     for (auto& scrollConfig : scrollConfigs)
     {
-        scrollConfig.callBack(xoffset, yoffset);
+        scrollConfig.callback(xoffset, yoffset);
     }
 }
 
@@ -101,8 +101,8 @@ void InputManager::checkCursorConfigs(Input::InputProfile& inputProfile)
     int leftButton = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
     for (auto &cursorConfig : cursorConfigs)
     {
-        if (cursorConfig.callBack != nullptr)
-            cursorConfig.callBack(cursorConfig.param, curArgs, leftButton);
+        if (cursorConfig.callback != nullptr)
+            cursorConfig.callback(cursorConfig.param, curArgs, leftButton);
     }
 }
 
@@ -116,8 +116,8 @@ void InputManager::checkProfile(Input::InputProfile& inputProfile)
     auto &keyMapConfigs = inputProfile.keyMapConfigs;
     for (auto &keyMapConfig : keyMapConfigs)
     {
-        if (keyMapConfig.callBack != nullptr && glfwGetKey(window, keyMapConfig.keyCode) == keyMapConfig.action)
-            keyMapConfig.callBack(keyMapConfig.param);
+        if (keyMapConfig.callback != nullptr && glfwGetKey(window, keyMapConfig.keyCode) == keyMapConfig.action)
+            keyMapConfig.callback(keyMapConfig.param);
     }
     //glfwSetCursorPos(window, centerX, centerY);
     if (inputProfile.callback != nullptr && keyMapConfigs.size() + inputProfile.cursorConfigs.size() > 0)

@@ -278,9 +278,10 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     auto& computeShader = aResourceManager.Shaders[COLLISION_PIPELINE_ID];
     computeShader.GetPipeline().Bind(commandBuffer);
     auto& computeSets = computeShader.GetDescriptorSets()[aResourceManager.MainScene.GetBufferIndex()];
-    computeSets[0] = aResourceManager.MainScene.GetVertexDescriptorSet();
+    computeSets[0] = aResourceManager.Meshes.GetCurrentFrameResource().vertexDescriptorSet;
+    computeSets[1] = aResourceManager.MainScene.GetObjectDescriptorSet();
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE,
-        computeShader.GetPipelineLayout(), 0, 1,
+        computeShader.GetPipelineLayout(), 0, 2,
         computeSets.data(), 0, VK_NULL_HANDLE);
     vkCmdDispatch(commandBuffer, (uint32_t(aResourceManager.MainScene.GetMeshCount()) + 63) / 64, 1, 1);
     Device::StageBarrier(commandBuffer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT);

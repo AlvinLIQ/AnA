@@ -5,68 +5,69 @@
 #extension GL_GOOGLE_include_directive : require
 
 #include "mesh.h"
+#include "bindings.h"
 
 layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
-layout(scalar, set = 1, binding = 0) buffer VertexSSBO
+layout(scalar, set = DEFAULT_VERTEX_LAYOUT, binding = BIND_VERTEX) buffer VertexSSBO
 {
     Vertex vertices[];
 };
 
-layout(scalar, set = 1, binding = 1) buffer ObjectSSBO
+layout(scalar, set = DEFAULT_OBJECT_LAYOUT, binding = BIND_OBJECT) buffer ObjectSSBO
 {
     Object objects[];
 };
 
-layout(std430, set = 1, binding = 2) buffer countBuffer
+layout(std430, set = DEFAULT_OBJECT_LAYOUT, binding = BIND_OBJECT_COUNT) buffer countBuffer
 {
     uint objectCount;
     uint collidedCount;
 };
 
-layout(scalar, set = 1, binding = 3) buffer collisionBuffer
+layout(scalar, set = DEFAULT_OBJECT_LAYOUT, binding = BIND_OBJECT_COLLISION) buffer collisionBuffer
 {
     CollisionData collisions[];
 };
 
-layout(set = 0, binding = 0) uniform CameraBufferObject {
+layout(set = DEFAULT_UBO_LAYOUT, binding = BIND_CAMERA) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
     vec4 position;
     vec2 resolution;
 } cbo;
 
-layout(set = 0, binding = 1) uniform Frustum
+layout(set = DEFAULT_UBO_LAYOUT, binding = BIND_FRUSTUM) uniform Frustum
 {
     vec4 planes[6];
 } frustum;
 
-layout(std430, set = 6, binding = 0) buffer meshletSSBO
+layout(std430, set = DEFAULT_MESHLET_LAYOUT, binding = 0) buffer meshletSSBO
 {
     Meshlet meshlets[];
 };
 
-layout(std430, set = 6, binding = 1) buffer meshletVertexSSBO
+layout(std430, set = DEFAULT_MESHLET_LAYOUT, binding = 1) buffer meshletVertexSSBO
 {
     uint vertices[];
 } mvsbo;
 
-layout(set = 6, binding = 2) buffer meshletIndexSSBO
+layout(set = DEFAULT_MESHLET_LAYOUT, binding = 2) buffer meshletIndexSSBO
 {
     uint8_t primitives[];
 };
 
-layout(std430, set = 6, binding = 3) buffer meshletCullingSSBO
+layout(std430, set = DEFAULT_MESHLET_LAYOUT, binding = 3) buffer meshletCullingSSBO
 {
     BoundingSphere boundings[];
 } mcsbo;
 
-layout(std430, set = 6, binding = 4) buffer meshletIDSSBO
+layout(std430, set = DEFAULT_MESHLET_LAYOUT, binding = 4) buffer meshletIDSSBO
 {
     uint meshletIDs[];
 };
 
-layout(std430, set = 6, binding = 5) buffer MeshletIDCountSSBO
+layout(std430, set = DEFAULT_MESHLET_LAYOUT, binding = 5) buffer MeshletIDCountSSBO
 {
     uint meshletIDCount;
 };

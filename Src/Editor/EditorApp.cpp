@@ -29,7 +29,7 @@ void EditorApp::Init()
     Input::KeyMapConfig keyMapConfig;
     keyMapConfig.keyCode = GLFW_KEY_TAB;
     keyMapConfig.param = &aInputManager;
-    keyMapConfig.callBack = [](void* param)
+    keyMapConfig.callback = [](void* param)
     {
         auto aInputManager = reinterpret_cast<Input::InputManager*>(param);
         /*

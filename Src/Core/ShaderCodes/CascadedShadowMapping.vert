@@ -5,12 +5,12 @@
 
 #include "mesh.h"
 
-layout(scalar, set = 1, binding = 0) buffer VertexSSBO
+layout(scalar, set = DEFAULT_VERTEX_LAYOUT, binding = BIND_VERTEX) buffer VertexSSBO
 {
     Vertex vertices[];
 } ssbo;
 
-layout(set = 0, binding = 0) uniform CameraBufferObject {
+layout(set = DEFAULT_UBO_LAYOUT, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
     vec4 position;
@@ -31,12 +31,12 @@ struct Cascade {
     float split;
 };
 
-layout (set = 5, binding = 0) uniform UBO {
-	Cascade[SHADOW_MAP_CASCADE_COUNT] cascades;
+layout(set = 5, binding = 0) uniform UBO {
+    Cascade[SHADOW_MAP_CASCADE_COUNT] cascades;
 } ubo;
 
 layout(push_constant) uniform PushConsts {
-	uint cascadeIndex;
+    uint cascadeIndex;
 } push;
 
 void main()

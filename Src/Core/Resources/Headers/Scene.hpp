@@ -87,6 +87,7 @@ namespace AnA
         void Append(const std::vector<MeshInfo>& meshInfos);
         void Append(const MeshInfo* meshInfos, size_t count);
         void Append(std::vector<Model::Vertex>& vertices, std::vector<uint32_t>& indices, Transform transform = {}, uint32_t textureId = 0);
+        void Append(std::vector<Model::Vertex>& vertices, Transform transform = {});
         void RemoveAt(uint32_t meshIndex);
         void RemoveAt(Range removeRange);
         void RemoveAt(std::vector<uint32_t> meshIndices);
@@ -136,17 +137,17 @@ namespace AnA
         {
             return currentBufferIndex;
         }
-        const Descriptor* GetVertexDescriptor() const
+        const Descriptor* GetObjectDescriptor() const
         {
-            return vertexDescriptor;
+            return objectDescriptor;
         }
         const Descriptor* GetMeshDescriptor() const
         {
             return meshDescriptor;
         }
-        VkDescriptorSet GetVertexDescriptorSet() const
+        VkDescriptorSet GetObjectDescriptorSet() const
         {
-            return vertexDescriptor->GetSets()[currentBufferIndex];
+            return objectDescriptor->GetSets()[currentBufferIndex];
         }
         VkDescriptorSet GetMeshDescriptorSet() const
         {
@@ -178,7 +179,7 @@ namespace AnA
         std::vector<VkDescriptorImageInfo> textureInfos;
         std::vector<Descriptor*> samplersDescriptors;
         void createSamplerDescriptor();
-        Descriptor* vertexDescriptor{nullptr}, *meshDescriptor{nullptr};
+        Descriptor* objectDescriptor{nullptr}, *meshDescriptor{nullptr};
         void createSSBODescriptor();
         void updateSSBODescriptor();
         void appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageInfos);

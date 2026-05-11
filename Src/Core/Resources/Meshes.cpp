@@ -1,8 +1,7 @@
 #include "Headers/Meshes.hpp"
 #include "Headers/Buffer.hpp"
 #include "Headers/SwapChain.hpp"
-#include "Resources/Headers/Model.hpp"
-#include <memory>
+#include "Headers/ResourceManager.hpp"
 
 using namespace AnA;
 using namespace Resources;
@@ -17,7 +16,25 @@ Meshes::Meshes(Device* mDevice) : aDevice {mDevice}
 
 Meshes::~Meshes()
 {
+    if (vertexDescriptor)
+        delete vertexDescriptor;
+}
 
+void Meshes::Init()
+{
+    auto resourceManager = Resources::ResourceManager::GetCurrent();
+    if (vertexDescriptor == nullptr)
+    {
+        vertexDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,
+                MAX_FRAMES_IN_FLIGHT * 1,
+                1, resourceManager->Shaders.front().GetDescriptors()[DEFAULT_VERTEX_LAYOUT].GetLayout(),
+                VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+    }
+    for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    {
+        updateDescriptors(i);
+        frameResources[i].vertexDescriptorSet = vertexDescriptor->GetSets()[i];
+    }
 }
 
 bool Meshes::Create(const char* filePath, uint32_t& id)
@@ -73,6 +90,11 @@ void Meshes::Update()
 {
     currentBufferIndex = prepareFrameResources();
     needUpdate = false;
+}
+
+void Meshes::UpdateMesh(uint32_t id)
+{
+
 }
 
 void Meshes::initFrameResource(MeshFrameResource& frameResource)
@@ -174,6 +196,18 @@ void Meshes::rebuildFrameResource(MeshFrameResource& frameResource)
     }
 }
 
+void Meshes::updateDescriptors(uint32_t bufferIndex)
+{
+    //Vertex Buffer
+    VkDescriptorBufferInfo bufferInfo;
+    bufferInfo.buffer = frameResources[bufferIndex].vertexBuffer.GetBuffer();
+    bufferInfo.offset = 0;
+    bufferInfo.range = frameResources[bufferIndex].vertexBuffer.GetSize();
+    aDevice->UpdateDescriptorSet(bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+        vertexDescriptor->GetSets()[bufferIndex]);
+    frameResources[bufferIndex].vertexDescriptorSet = vertexDescriptor->GetSets()[bufferIndex];
+}
+
 uint32_t Meshes::prepareFrameResources()
 {
     uint32_t bufferIndex = currentBufferIndex;
@@ -200,6 +234,7 @@ uint32_t Meshes::prepareFrameResources()
         initFrameResource(frameResources[bufferIndex]);
     }
     rebuildFrameResource(frameResources[bufferIndex]);
+    updateDescriptors(bufferIndex);
 
     return bufferIndex;
 }

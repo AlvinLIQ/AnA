@@ -3,7 +3,6 @@
 #include "../Headers/ShaderCodes.hpp"
 #include "Headers/Device.hpp"
 #include "Resources/Headers/Animation.hpp"
-#include <vulkan/vulkan_core.h>
 
 using namespace AnA;
 using namespace Resources;
@@ -30,6 +29,7 @@ ResourceManager::ResourceManager(Device* mDevice) :
     //createShadowFramebuffers();
     createDefaultDescriptors();
     createDefaultShaders();
+    Meshes.Init();
     MainScene.Init();
     if (aDevice->MeshShaderSupport())
         TextContext.Init();
@@ -273,7 +273,6 @@ void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Desc
     descriptorSetConfigs.resize(DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT);
     for (auto& configs : descriptorSetConfigs)
         configs.resize(1);
-    descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT].resize(4);
     auto pConfig = &descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT][0];
     pConfig->binding = 0;
     pConfig->descriptorCount = 1;
@@ -283,7 +282,18 @@ void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Desc
     if (aDevice->MeshShaderSupport())
         pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
 
-    pConfig = &descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT][1];
+
+    descriptorSetConfigs[DEFAULT_OBJECT_LAYOUT].resize(3);
+    pConfig = &descriptorSetConfigs[DEFAULT_OBJECT_LAYOUT][0];
+    pConfig->binding = 0;
+    pConfig->descriptorCount = 1;
+    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
+    pConfig->bindless = true;
+    if (aDevice->MeshShaderSupport())
+        pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+
+    pConfig = &descriptorSetConfigs[DEFAULT_OBJECT_LAYOUT][1];
     pConfig->binding = 1;
     pConfig->descriptorCount = 1;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
@@ -292,17 +302,8 @@ void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Desc
     if (aDevice->MeshShaderSupport())
         pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
 
-    pConfig = &descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT][2];
+    pConfig = &descriptorSetConfigs[DEFAULT_OBJECT_LAYOUT][2];
     pConfig->binding = 2;
-    pConfig->descriptorCount = 1;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
-    pConfig->bindless = true;
-    if (aDevice->MeshShaderSupport())
-        pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-
-    pConfig = &descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT][3];
-    pConfig->binding = 3;
     pConfig->descriptorCount = 1;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
@@ -461,10 +462,8 @@ void ResourceManager::GetDefaultTextDescriptorSetConfig(std::vector<std::vector<
 
 void ResourceManager::GetDefaultComputeDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs)
 {
-    descriptorSetConfigs.resize(1);
-    for (auto& configs : descriptorSetConfigs)
-        configs.resize(1);
-    descriptorSetConfigs[0].resize(4);
+    descriptorSetConfigs.resize(2);
+    descriptorSetConfigs[0].resize(1);
     auto pConfig = &descriptorSetConfigs[0][0];
     pConfig->binding = 0;
     pConfig->descriptorCount = 1;
@@ -474,7 +473,17 @@ void ResourceManager::GetDefaultComputeDescriptorSetConfig(std::vector<std::vect
     if (aDevice->MeshShaderSupport())
         pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
 
-    pConfig = &descriptorSetConfigs[0][1];
+    descriptorSetConfigs[1].resize(3);
+    pConfig = &descriptorSetConfigs[1][0];
+    pConfig->binding = 0;
+    pConfig->descriptorCount = 1;
+    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
+    pConfig->bindless = true;
+    if (aDevice->MeshShaderSupport())
+        pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+
+    pConfig = &descriptorSetConfigs[1][1];
     pConfig->binding = 1;
     pConfig->descriptorCount = 1;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
@@ -483,17 +492,8 @@ void ResourceManager::GetDefaultComputeDescriptorSetConfig(std::vector<std::vect
     if (aDevice->MeshShaderSupport())
         pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
 
-    pConfig = &descriptorSetConfigs[0][2];
+    pConfig = &descriptorSetConfigs[1][2];
     pConfig->binding = 2;
-    pConfig->descriptorCount = 1;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
-    pConfig->bindless = true;
-    if (aDevice->MeshShaderSupport())
-        pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-
-    pConfig = &descriptorSetConfigs[0][3];
-    pConfig->binding = 3;
     pConfig->descriptorCount = 1;
     pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
@@ -614,7 +614,7 @@ void ResourceManager::createDefaultShaders()
     Shaders.emplace_back(aDevice, shapeShaderStageInfos, shapeDescriptors, SHAPE_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
     Shaders.emplace_back(aDevice, pointShaderStageInfos, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0, 0, VK_PRIMITIVE_TOPOLOGY_POINT_LIST);
 
-    Shaders.emplace_back(aDevice, collisionShaderStageInfos, computeDescriptors, 1, 0, 0);
+    Shaders.emplace_back(aDevice, collisionShaderStageInfos, computeDescriptors, 2, 0, 0);
     Shaders.emplace_back(aDevice, lightShaderStageInfos, lightDescriptors, 1, 0, 0);
     if (aDevice->MeshShaderSupport())
     {

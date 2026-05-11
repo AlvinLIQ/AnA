@@ -11,18 +11,18 @@ struct Projection
     vec2 pos2;
 };
 
-layout(std430, set = 0, binding = 1) buffer ObjectBuffer
+layout(std430, set = 1, binding = 0) buffer ObjectBuffer
 {
     Object objects[];
 };
 
-layout(std430, set = 0, binding = 2) buffer countBuffer
+layout(std430, set = 1, binding = 1) buffer countBuffer
 {
     uint objectCount;
     uint collidedCount;
 };
 
-layout(scalar, set = 0, binding = 3) buffer collisionBuffer
+layout(scalar, set = 1, binding = 2) buffer collisionBuffer
 {
     CollisionData collisions[];
 };
@@ -44,7 +44,7 @@ void main()
     barrier();
 
     for (uint i = 0; i < pos; i++)
-    { 
+    {
         float r = objects[i].radius + objects[pos].radius;
         vec3 relativePos = objects[i].center - objects[pos].center;
         if (dot(relativePos, relativePos) <= r * r)

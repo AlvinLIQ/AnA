@@ -5,28 +5,29 @@
 #extension GL_GOOGLE_include_directive : require
 
 #include "mesh.h"
+#include "bindings.h"
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 layout(triangles, max_vertices = MAX_VERTICES, max_primitives = MAX_PRIMITIVES) out;
 
-layout(scalar, set = 1, binding = 0) buffer VertexSSBO
+layout(scalar, set = DEFAULT_VERTEX_LAYOUT, binding = BIND_VERTEX) buffer VertexSSBO
 {
     Vertex vertices[];
 };
 
-layout(scalar, set = 1, binding = 1) buffer ObjectSSBO
+layout(scalar, set = DEFAULT_OBJECT_LAYOUT, binding = BIND_OBJECT) buffer ObjectSSBO
 {
     Object objects[];
 };
 
-layout(set = 0, binding = 0) uniform CameraBufferObject {
+layout(set = DEFAULT_UBO_LAYOUT, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
     vec4 position;
     vec2 resolution;
 } cbo;
 
-layout(set = 0, binding = 1) uniform Frustum
+layout(set = DEFAULT_UBO_LAYOUT, binding = 1) uniform Frustum
 {
     vec4 planes[6];
     vec4 lightPlanes[6];
@@ -37,26 +38,26 @@ struct Cascade {
     mat4 viewProj;
     float split;
 };
-layout (set = 5, binding = 0) uniform UBO {
-	Cascade[SHADOW_MAP_CASCADE_COUNT] cascades;
+layout(set = 5, binding = 0) uniform UBO {
+    Cascade[SHADOW_MAP_CASCADE_COUNT] cascades;
 };
 
-layout(scalar, set = 6, binding = 0) buffer meshletSSBO
+layout(scalar, set = DEFAULT_MESHLET_LAYOUT, binding = 0) buffer meshletSSBO
 {
     Meshlet meshlets[];
 };
 
-layout(scalar, set = 6, binding = 1) buffer meshletVertexSSBO
+layout(scalar, set = DEFAULT_MESHLET_LAYOUT, binding = 1) buffer meshletVertexSSBO
 {
     uint vertices[];
 } mvsbo;
 
-layout(scalar, set = 6, binding = 2) buffer meshletIndexSSBO
+layout(scalar, set = DEFAULT_MESHLET_LAYOUT, binding = 2) buffer meshletIndexSSBO
 {
     uint8_t primitives[];
 };
 
-layout(scalar, set = 6, binding = 4) buffer meshletIDSSBO
+layout(scalar, set = DEFAULT_MESHLET_LAYOUT, binding = 4) buffer meshletIDSSBO
 {
     MeshletID meshletIDs[];
 };
@@ -66,13 +67,13 @@ taskPayloadSharedEXT MeshPayload taskData;
 void main()
 {
     MeshletID mid = meshletIDs[taskData.visibleIndices[gl_WorkGroupID.x]];
-	Meshlet meshlet = meshlets[mid.meshletID];
+    Meshlet meshlet = meshlets[mid.meshletID];
     uint primitiveCount = meshlet.indexCount / 3;
     SetMeshOutputsEXT(meshlet.vertexCount, primitiveCount);
 
     mat4 transform = objects[mid.objectID].transform;
     transform[3].w = 1.0;
-    
+
     for (uint i = 0; i < meshlet.vertexCount; i++)
     {
         gl_MeshVerticesEXT[i].gl_Position = cascades[gl_WorkGroupID.y].viewProj * transform * vec4(vertices[mvsbo.vertices[meshlet.vertexOffset + i]].position, 1.0);
@@ -81,11 +82,11 @@ void main()
     for (uint i = 0, offset; i < primitiveCount; i++)
     {
         offset = meshlet.indexOffset + i * 3;
-	    gl_PrimitiveTriangleIndicesEXT[i] = uvec3(
-            primitives[offset + 0], 
-            primitives[offset + 1],
-            primitives[offset + 2]
-        );
+        gl_PrimitiveTriangleIndicesEXT[i] = uvec3(
+                primitives[offset + 0],
+                primitives[offset + 1],
+                primitives[offset + 2]
+            );
         gl_MeshPrimitivesEXT[i].gl_Layer = int(gl_WorkGroupID.y);
     }
 }

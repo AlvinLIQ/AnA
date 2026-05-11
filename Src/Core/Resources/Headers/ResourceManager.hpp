@@ -23,14 +23,6 @@
 
 #define DEFAULT_TEXTURE_ID 0
 
-#define VERTEX_PIPELINE_ID 0
-#define SHAPE_PIPELINE_ID 1
-#define MESH_PIPELINE_ID 6
-#define TEXT_PIPELINE_ID 7
-#define LIGHT_PIPELINE_ID 4
-#define TERRAIN_PIPELINE_ID 8
-#define COLLISION_PIPELINE_ID 3
-
 namespace AnA
 {
     struct RecordCallBackInfo

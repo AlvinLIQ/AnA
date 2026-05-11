@@ -14,7 +14,7 @@ layout(set = 0, binding = 0) uniform CameraBufferObject {
     vec2 resolution;
 } cbo;
 
-struct Object{
+struct Object {
     mat4 model;
 };
 

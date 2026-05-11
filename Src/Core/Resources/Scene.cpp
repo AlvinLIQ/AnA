@@ -2,6 +2,7 @@
 #include "Headers/Device.hpp"
 #include "Headers/ResourceManager.hpp"
 #include "Headers/Texture.hpp"
+#include "Headers/Types.hpp"
 #include "vulkan/vulkan_core.h"
 #include <memory>
 
@@ -67,8 +68,8 @@ Scene::Scene(Device* mDevice) : aDevice{mDevice}
 
 Scene::~Scene()
 {
-    if (vertexDescriptor != nullptr)
-        delete vertexDescriptor;
+    if (objectDescriptor != nullptr)
+        delete objectDescriptor;
     if (meshDescriptor != nullptr)
         delete meshDescriptor;
     for (auto& descriptor : samplersDescriptors)
@@ -243,16 +244,18 @@ void Scene::RemoveAt(std::vector<uint32_t> meshIndices)
 
 void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIndex)
 {
+    auto aResourceManager = Resources::ResourceManager::GetCurrent();
     auto& sets = shader.GetDescriptorSets()[bufferIndex];
     shader.GetPipeline().Bind(commandBuffer);
-    sets[DEFAULT_VERTEX_LAYOUT] = vertexDescriptor->GetSets()[currentBufferIndex];
+    sets[DEFAULT_VERTEX_LAYOUT] = aResourceManager->Meshes.GetCurrentFrameResource().vertexDescriptorSet;
+    sets[DEFAULT_OBJECT_LAYOUT] = objectDescriptor->GetSets()[currentBufferIndex];
     sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors.front()->GetSets()[0];
     if (aDevice->MeshShaderSupport() && shader.HasMeshShader())
     {
         sets[DEFAULT_MESHLET_LAYOUT] = meshDescriptor->GetSets()[currentBufferIndex];
     }
     const auto& offsets =
-        Resources::ResourceManager::GetCurrent()->GetDefaultUBODynamicOffsets();
+        aResourceManager->GetDefaultUBODynamicOffsets();
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
         shader.GetPipelineLayout(), 0, static_cast<uint32_t>(sets.size()),
         sets.data(),
@@ -264,10 +267,13 @@ void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIn
 void Scene::Draw(CommandBuffer& commandBuffer)
 {
     vkCmdSetPrimitiveTopology(commandBuffer, Topology);
-    vkCmdBindIndexBuffer(commandBuffer, Resources::ResourceManager::GetCurrent()->Meshes.GetCurrentFrameResource().indexBuffer.GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
-    vkCmdDrawIndexedIndirectCount(commandBuffer, drawIndexedIndirectBuffer.GetBuffer(),
-    0, drawIndexedCountBuffer.GetBuffer(),
-    0, uint32_t(meshes.size()), sizeof(VkDrawIndexedIndirectCommand));
+    if (PolygonMode == VK_POLYGON_MODE_POINT || Topology == VK_PRIMITIVE_TOPOLOGY_POINT_LIST)
+    {
+        vkCmdBindIndexBuffer(commandBuffer, Resources::ResourceManager::GetCurrent()->Meshes.GetCurrentFrameResource().indexBuffer.GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+        vkCmdDrawIndexedIndirectCount(commandBuffer, drawIndexedIndirectBuffer.GetBuffer(),
+            0, drawIndexedCountBuffer.GetBuffer(),
+            0, uint32_t(meshes.size()), sizeof(VkDrawIndexedIndirectCommand));
+    }
 }
 
 void Scene::DrawIndirect(CommandBuffer& commandBuffer)
@@ -411,12 +417,12 @@ void Scene::createIndirectBuffers()
 void Scene::createSSBODescriptor()
 {
     auto& shaders = Resources::ResourceManager::GetCurrent()->Shaders;
-    auto& vertexDescriptorSetLayout =
-        shaders.front().GetDescriptors()[DEFAULT_VERTEX_LAYOUT].GetLayout();
-    vertexDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,
-        2 * MAX_FRAMES_IN_FLIGHT,
-        2,
-        vertexDescriptorSetLayout,
+    auto& objectDescriptorSetLayout =
+        shaders.front().GetDescriptors()[DEFAULT_OBJECT_LAYOUT].GetLayout();
+    objectDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,
+        3 * MAX_FRAMES_IN_FLIGHT,
+        3,
+        objectDescriptorSetLayout,
         VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
     if (aDevice->MeshShaderSupport())
     {
@@ -443,31 +449,26 @@ void Scene::updateSSBODescriptor()
 {
     auto& meshes = Resources::ResourceManager::GetCurrent()->Meshes;
     auto& frameResource = meshes.GetCurrentFrameResource();
-    //Vertex Buffer
+
     VkDescriptorBufferInfo bufferInfo;
-    bufferInfo.buffer = frameResource.vertexBuffer.GetBuffer();
-    bufferInfo.offset = 0;
-    bufferInfo.range = frameResource.vertexBuffer.GetSize();
-    aDevice->UpdateDescriptorSet(bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-        vertexDescriptor->GetSets()[nextIndex]);
     //Object Buffer
     bufferInfo.buffer = objectBuffers[nextIndex].GetBuffer();
     bufferInfo.offset = 0;
     bufferInfo.range = objectBuffers[nextIndex].GetSize();
-    aDevice->UpdateDescriptorSet(bufferInfo, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-        vertexDescriptor->GetSets()[nextIndex]);
+    aDevice->UpdateDescriptorSet(bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+        objectDescriptor->GetSets()[nextIndex]);
     //Object Data Buffer
     bufferInfo.buffer = objectDataBuffers[nextIndex].GetBuffer();
     bufferInfo.offset = 0;
     bufferInfo.range = objectDataBuffers[nextIndex].GetSize();
-    aDevice->UpdateDescriptorSet(bufferInfo, 2, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-        vertexDescriptor->GetSets()[nextIndex]);
+    aDevice->UpdateDescriptorSet(bufferInfo, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+        objectDescriptor->GetSets()[nextIndex]);
     //Collision Buffer
     bufferInfo.buffer = collisionBuffer[nextIndex].GetBuffer();
     bufferInfo.offset = 0;
     bufferInfo.range = collisionBuffer[nextIndex].GetSize();
-    aDevice->UpdateDescriptorSet(bufferInfo, 3, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-        vertexDescriptor->GetSets()[nextIndex]);
+    aDevice->UpdateDescriptorSet(bufferInfo, 2, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+        objectDescriptor->GetSets()[nextIndex]);
 
     if (aDevice->MeshShaderSupport())
     {

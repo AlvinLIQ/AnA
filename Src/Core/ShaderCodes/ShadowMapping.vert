@@ -3,13 +3,14 @@
 #extension GL_GOOGLE_include_directive : require
 
 #include "mesh.h"
+#include "bindings.h"
 
-layout(scalar, set = 1, binding = 0) buffer VertexSSBO
+layout(scalar, set = DEFAULT_VERTEX_LAYOUT, binding = BIND_VERTEX) buffer VertexSSBO
 {
     Vertex vertices[];
 } ssbo;
 
-layout(set = 0, binding = 0) uniform CameraBufferObject {
+layout(set = DEFAULT_UBO_LAYOUT, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
     vec4 position;
@@ -24,11 +25,11 @@ layout(set = 2, binding = 0) uniform LightBufferObject {
     float ambient;
 } lbo;
 
-const mat4 biasMat = mat4( 
-  0.5, 0.0, 0.0, 0.0,
-  0.0, 0.5, 0.0, 0.0,
-  0.0, 0.0, 1.0, 0.0,
-  0.5, 0.5, 0.0, 1.0 );
+const mat4 biasMat = mat4(
+        0.5, 0.0, 0.0, 0.0,
+        0.0, 0.5, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        0.5, 0.5, 0.0, 1.0);
 
 const vec3 LIGHT_DIRECTION = vec3(1., -3., 1.);
 void main()

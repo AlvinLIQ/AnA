@@ -128,6 +128,7 @@ namespace AnA
         uint32_t indexOffset = 0;
         uint32_t meshletOffset = 0;
 
+
         static void CreateModelFromFile(const char* filePath, std::shared_ptr<Model>& model);
         static void CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo);
         static void CreateVerticesFromFile(const char* filePath, std::vector<Vertex>& vertices);

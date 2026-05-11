@@ -4,6 +4,7 @@
 #extension GL_GOOGLE_include_directive : require
 
 #include "mesh.h"
+#include "bindings.h"
 
 layout(location = 0) in vec2 texCoord;
 layout(location = 1) flat in uint texIndex;
@@ -22,7 +23,7 @@ layout(location = 2) out vec4 outAlbedo;
 layout(location = 0) out vec4 outColor;
 #endif
 
-layout(set = 0, binding = 0) uniform CameraBufferObject {
+layout(set = DEFAULT_UBO_LAYOUT, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
     vec4 position;
@@ -65,7 +66,7 @@ void main()
 
     float visibility = 1.0; // filterPCF(shadowCoord, cascadeIndex);
 
-    vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility;// + pointLightIntensity * LIGHT_COLOR;
+    vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility; // + pointLightIntensity * LIGHT_COLOR;
     outColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord) * vec4(finalLight, 1.0);
     #endif
 }

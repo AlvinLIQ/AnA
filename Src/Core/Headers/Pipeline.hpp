@@ -60,6 +60,7 @@ namespace AnA
             VkGraphicsPipelineCreateInfo pipelineInfo{};
             VkPipelineRenderingCreateInfoKHR pipelineRenderingInfo{};
             bool hasComputeShader = false;
+            bool hasMeshShader = false;
             std::vector<VkDynamicState> dynamicStates = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR, VK_DYNAMIC_STATE_POLYGON_MODE_EXT, VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY };
             std::vector<VkSpecializationInfo> specializationInfos{};
             static PipelineConfig GetDefault(VkShaderModule vertexShaderModule, VkShaderModule fragShaderModule,
@@ -524,7 +525,7 @@ namespace AnA
                         dConfig.specializationInfos[i].pMapEntries = VK_NULL_HANDLE;
                         dConfig.shaderStages[i].pSpecializationInfo = &dConfig.specializationInfos[i];
                     }
-                    isMeshShader = isMeshShader || (shaderInfos[i].stage &
+                    dConfig.hasMeshShader = isMeshShader = isMeshShader || (shaderInfos[i].stage &
                         (VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_TASK_BIT_EXT |
                         VK_SHADER_STAGE_MESH_BIT_NV | VK_SHADER_STAGE_TASK_BIT_NV));
                     hasFragmentShader = hasFragmentShader || (shaderInfos[i].stage & VK_SHADER_STAGE_FRAGMENT_BIT);

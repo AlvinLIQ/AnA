@@ -36,7 +36,7 @@ namespace AnA
             }
             return *this;
         }
-        Shader(Shader&& shader) noexcept : aDevice{shader.aDevice}, pipeline{shader.pipeline}, pipelineLayout{shader.pipelineLayout}, descriptorSets{shader.descriptorSets}, descriptors{shader.descriptors}, descriptorCount{shader.descriptorCount}, descriptorOffset{shader.descriptorOffset}
+        Shader(Shader&& shader) noexcept : aDevice{shader.aDevice}, pipeline{shader.pipeline}, pipelineLayout{shader.pipelineLayout}, descriptorSets{shader.descriptorSets}, descriptors{shader.descriptors}, descriptorCount{shader.descriptorCount}, descriptorOffset{shader.descriptorOffset}, hasMeshShader{shader.hasMeshShader}
         {
             shader.pipelineLayout = VK_NULL_HANDLE;
             shader.descriptorSets.clear();
@@ -54,6 +54,7 @@ namespace AnA
                 descriptorCount = shader.descriptorCount;
                 descriptorOffset = shader.descriptorOffset;
                 Topology = shader.Topology;
+                hasMeshShader = shader.hasMeshShader;
 
                 shader.pipelineLayout = VK_NULL_HANDLE;
                 shader.descriptorSets.clear();

@@ -11,7 +11,7 @@ namespace AnA
         struct KeyMapConfig
         {
             void* param;
-            RegularCallBack callBack;
+            RegularCallBack callback;
             int keyCode;
             int action = GLFW_PRESS;
         };
@@ -24,18 +24,18 @@ namespace AnA
         struct CursorConfig
         {
             void* param;
-            CursorCallBack callBack;
+            CursorCallBack callback;
             int action;
         };
         typedef void(*CharacterCallBack)(uint32_t ch);
         struct CharacterConfig
         {
-            CharacterCallBack callBack;
+            CharacterCallBack callback;
         };
         typedef void(*ScrollConfigCallBack)(float dx, float dy);
         struct ScrollConfig
         {
-            ScrollConfigCallBack callBack;
+            ScrollConfigCallBack callback;
         };
         enum InputProfileFlags
         {

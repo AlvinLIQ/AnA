@@ -6,8 +6,8 @@
 #include <fstream>
 #include <vulkan/vulkan.h>
 #include <glm/glm.hpp>
-#include <vulkan/vulkan_core.h>
 #include "Utils.hpp"
+#include "../ShaderCodes/bindings.h"
 #include "../../3rdParty/VulkanMemoryAllocator/include/vk_mem_alloc.h"
 
 #define INCLUDE_STB_IMAGE
@@ -21,17 +21,6 @@
 #define ANA_TEXT_DEFAULT_LINE_HEIGHT 18
 #define IS_ASCII_CHAR(A) (A) <= 127
 
-#define DEFAULT_UBO_LAYOUT 0
-#define DEFAULT_VERTEX_LAYOUT 1
-#define DEFAULT_LIGHT_LAYOUT 2
-#define DEFAULT_SAMPLER_LAYOUT 3
-#define DEFAULT_SHADOW_SAMPLER_LAYOUT 4
-#define DEFAULT_CASCADED_UBO_LAYOUT 5
-#define DEFAULT_MESHLET_LAYOUT 6
-
-#define DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT 6
-#define MESH_DESCRIPTOR_SET_LAYOUT_COUNT 7
-#define SHAPE_DESCRIPTOR_SET_LAYOUT_COUNT 2
 
 #define MaxBatchSize 4096
 

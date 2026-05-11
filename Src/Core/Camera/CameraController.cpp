@@ -20,7 +20,7 @@ void CameraController::GetCameraKeyMapConfigs(std::vector<Input::KeyMapConfig> &
 {
     Input::KeyMapConfig config;
 
-    config.callBack = reinterpret_cast<Input::RegularCallBack>(CameraController::Move);
+    config.callback = reinterpret_cast<Input::RegularCallBack>(CameraController::Move);
 
     for (size_t i = 0; i < MOVEMENTSIZE; i++)
     {
@@ -34,7 +34,7 @@ void CameraController::GetCameraCursorConfigs(std::vector<Input::CursorConfig> &
 {
     Input::CursorConfig config;
     config.param = &aCamera;
-    config.callBack = reinterpret_cast<Input::CursorCallBack>(CameraController::CursorMoved);
+    config.callback = reinterpret_cast<Input::CursorCallBack>(CameraController::CursorMoved);
     configs.push_back(config);
 }
 
