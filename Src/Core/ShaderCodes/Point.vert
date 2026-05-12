@@ -11,48 +11,12 @@ layout(std430, set = DEFAULT_VERTEX_LAYOUT, binding = BIND_VERTEX) buffer Vertex
     float vertices[];
 };
 
-layout(std430, set = DEFAULT_OBJECT_LAYOUT, binding = BIND_OBJECT) buffer ObjectSSBO
-{
-    Object objects[];
-};
-
 layout(set = DEFAULT_UBO_LAYOUT, binding = 0) uniform CameraBufferObject {
     mat4 proj;
     mat4 view;
     vec4 position;
     vec2 resolution;
 } cbo;
-
-layout(set = 2, binding = 0) uniform LightBufferObject {
-    mat4 proj;
-    mat4 view;
-    vec3 direction;
-    vec3 color;
-    float ambient;
-} lbo;
-
-#define SHADOW_MAP_CASCADE_COUNT 2
-struct Cascade {
-    mat4 viewProj;
-    float split;
-};
-layout(set = 5, binding = 0) uniform UBO {
-    Cascade[SHADOW_MAP_CASCADE_COUNT] cascades;
-} ubo;
-
-struct Ray {
-    vec3 center;
-    vec3 direction;
-};
-
-const vec3 LIGHT_DIRECTION = normalize(vec3(1., -3., 1.));
-
-const mat4 biasMat = mat4(
-        0.5, 0.0, 0.0, 0.0,
-        0.0, 0.5, 0.0, 0.0,
-        0.0, 0.0, 1.0, 0.0,
-        0.5, 0.5, 0.0, 1.0
-    );
 
 mat4 transform(vec3 scale, vec3 rotation, vec3 transition)
 {
@@ -81,11 +45,8 @@ mat4 transform(vec3 scale, vec3 rotation, vec3 transition)
 
 void main() {
     gl_PointSize = 4;
-    mat4 transform = objects[gl_DrawID].transform;
-    uint texID = uint(transform[3].w);
-    transform[3].w = 1.0;
     uint vertexOffset = gl_VertexIndex * 8;
-    vec4 vertexPos = transform * vec4(vertices[vertexOffset + 0], vertices[vertexOffset + 1], vertices[vertexOffset + 2], 1.0);
+    vec4 vertexPos = vec4(vertices[vertexOffset + 0], vertices[vertexOffset + 1], vertices[vertexOffset + 2], 1.0);
     gl_Position = cbo.proj * cbo.view * vertexPos;
     outVertex = vertexPos;
 }

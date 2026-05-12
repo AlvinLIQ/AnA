@@ -53,9 +53,12 @@ namespace AnA
             void Init();
 
             bool Create(const char* filePath, uint32_t& id);
+            bool Create(std::shared_ptr<Model> model, uint32_t& id);
             void Load(const char* filePath, uint32_t& id);
             void Load(std::shared_ptr<Model> model, uint32_t& id);
             void Load(const uint32_t id);
+
+            void Append(uint32_t id, std::vector<AnA::Model::Vertex>& vertices);
 
             bool NeedUpdate()
             {
@@ -67,6 +70,11 @@ namespace AnA
             MeshFrameResource& GetCurrentFrameResource()
             {
                 return frameResources[currentBufferIndex];
+            }
+
+            uint32_t GetVertexCount()
+            {
+                return vertexCount;
             }
 
             std::unordered_map<uint32_t, std::shared_ptr<Model>> MeshMap{};

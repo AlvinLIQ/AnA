@@ -54,6 +54,14 @@ bool Meshes::Create(const char* filePath, uint32_t& id)
     return true;
 }
 
+bool Meshes::Create(std::shared_ptr<AnA::Model> model, uint32_t& id)
+{
+    id = meshId;
+    MeshMap.emplace(meshId++, model);
+
+    return true;
+}
+
 void Meshes::Load(const char* filePath, uint32_t& id)
 {
     Create(filePath, id);
@@ -86,15 +94,37 @@ void Meshes::Load(const uint32_t id)
     needUpdate = true;
 }
 
+void Meshes::Append(uint32_t id, std::vector<AnA::Model::Vertex>& vertices)
+{
+    if (MeshMap.find(id) == MeshMap.end())
+        return;
+
+    auto mesh = MeshMap[id];
+    bool isLastMesh = mesh->vertexOffset + uint32_t(mesh->info.vertices.size()) == vertexCount;
+    mesh->info.vertices.insert(mesh->info.vertices.end(), vertices.begin(), vertices.end());
+    if (loadedSet.find(id) == loadedSet.end())
+        return;
+
+    vertexCount += uint32_t(vertices.size());
+    if (isLastMesh && frameResources[currentBufferIndex].vertexBuffer.GetSize() >= vertexCount + uint32_t(vertices.size()))
+    {
+        auto vertexBufferData =
+            reinterpret_cast<Model::Vertex*>(frameResources[currentBufferIndex].vertexBuffer.GetMappedData());
+        for (uint32_t i = 0; i < uint32_t(vertices.size()); i++)
+        {
+            vertexBufferData[i + vertexCount] = vertices[i];
+        }
+    }
+    else
+    {
+        needUpdate = true;
+    }
+}
+
 void Meshes::Update()
 {
     currentBufferIndex = prepareFrameResources();
     needUpdate = false;
-}
-
-void Meshes::UpdateMesh(uint32_t id)
-{
-
 }
 
 void Meshes::initFrameResource(MeshFrameResource& frameResource)

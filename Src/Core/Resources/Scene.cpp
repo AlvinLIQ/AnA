@@ -269,6 +269,10 @@ void Scene::Draw(CommandBuffer& commandBuffer)
     vkCmdSetPrimitiveTopology(commandBuffer, Topology);
     if (PolygonMode == VK_POLYGON_MODE_POINT || Topology == VK_PRIMITIVE_TOPOLOGY_POINT_LIST)
     {
+        vkCmdDraw(commandBuffer, Resources::ResourceManager::GetCurrent()->Meshes.GetVertexCount(), 1, 0, 0);
+    }
+    else
+    {
         vkCmdBindIndexBuffer(commandBuffer, Resources::ResourceManager::GetCurrent()->Meshes.GetCurrentFrameResource().indexBuffer.GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
         vkCmdDrawIndexedIndirectCount(commandBuffer, drawIndexedIndirectBuffer.GetBuffer(),
             0, drawIndexedCountBuffer.GetBuffer(),
