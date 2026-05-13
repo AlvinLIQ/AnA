@@ -47,6 +47,9 @@ void main() {
     gl_PointSize = 4;
     uint vertexOffset = gl_VertexIndex * 8;
     vec4 vertexPos = vec4(vertices[vertexOffset + 0], vertices[vertexOffset + 1], vertices[vertexOffset + 2], 1.0);
-    gl_Position = cbo.proj * cbo.view * vertexPos;
+    if (vertexPos.x == 0. && vertexPos.y == 0. && vertexPos.z == 0.)
+        gl_PointSize = 50;
+    vec4 finalPos = cbo.proj * cbo.view * vertexPos;
+    gl_Position = finalPos;
     outVertex = vertexPos;
 }

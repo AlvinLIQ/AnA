@@ -85,6 +85,7 @@ namespace AnA
 
             uint32_t currentBufferIndex = 0;
             bool needUpdate = false;
+            std::mutex _mutex;
 
             std::array<MeshFrameResource, MAX_FRAMES_IN_FLIGHT> frameResources;
             void initFrameResource(MeshFrameResource& frameResource);

@@ -96,6 +96,7 @@ void Meshes::Load(const uint32_t id)
 
 void Meshes::Append(uint32_t id, std::vector<AnA::Model::Vertex>& vertices)
 {
+    std::unique_lock<std::mutex> lock(_mutex);
     if (MeshMap.find(id) == MeshMap.end())
         return;
 
@@ -105,8 +106,9 @@ void Meshes::Append(uint32_t id, std::vector<AnA::Model::Vertex>& vertices)
     if (loadedSet.find(id) == loadedSet.end())
         return;
 
-    vertexCount += uint32_t(vertices.size());
-    if (isLastMesh && frameResources[currentBufferIndex].vertexBuffer.GetSize() >= vertexCount + uint32_t(vertices.size()))
+    if (isLastMesh &&
+        frameResources[currentBufferIndex].vertexBuffer.GetSize() >
+        (vertexCount + uint32_t(vertices.size())) * sizeof(Model::Vertex))
     {
         auto vertexBufferData =
             reinterpret_cast<Model::Vertex*>(frameResources[currentBufferIndex].vertexBuffer.GetMappedData());
@@ -119,10 +121,12 @@ void Meshes::Append(uint32_t id, std::vector<AnA::Model::Vertex>& vertices)
     {
         needUpdate = true;
     }
+    vertexCount += uint32_t(vertices.size());
 }
 
 void Meshes::Update()
 {
+    std::unique_lock<std::mutex> lock(_mutex);
     currentBufferIndex = prepareFrameResources();
     needUpdate = false;
 }

@@ -178,6 +178,10 @@ void ResourceManager::UpdateCameraBuffer()
 
 void ResourceManager::Update()
 {
+    if (Meshes.NeedUpdate())
+    {
+        Meshes.Update();
+    }
     if (MainScene.NeedUpdate())
     {
         MainScene.Update();
