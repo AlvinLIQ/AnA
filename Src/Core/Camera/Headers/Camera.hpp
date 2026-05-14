@@ -18,7 +18,9 @@ namespace AnA
             glm::mat4 view{1.f};
             glm::vec4 position{};
             glm::vec2 resolution{};
-            float padding[10];
+            glm::vec2 cursorPosition{};
+            uint32_t selectedIndex;
+            float padding[7];
         };
         class Camera
         {

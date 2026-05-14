@@ -30,7 +30,7 @@ layout(scalar, set = DEFAULT_OBJECT_LAYOUT, binding = BIND_OBJECT_COLLISION) buf
     CollisionData collisions[];
 };
 
-layout(set = DEFAULT_UBO_LAYOUT, binding = BIND_CAMERA) uniform CameraBufferObject {
+layout(set = DEFAULT_UBO_LAYOUT, binding = BIND_CAMERA) buffer CameraBufferObject {
     mat4 proj;
     mat4 view;
     vec4 position;

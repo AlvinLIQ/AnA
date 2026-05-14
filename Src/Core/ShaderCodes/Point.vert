@@ -5,17 +5,21 @@
 #include "bindings.h"
 
 layout(location = 0) out vec4 outVertex;
+layout(location = 1) out uint vertexIndex;
+layout(location = 2) out float intensity;
 
 layout(std430, set = DEFAULT_VERTEX_LAYOUT, binding = BIND_VERTEX) buffer VertexSSBO
 {
     float vertices[];
 };
 
-layout(set = DEFAULT_UBO_LAYOUT, binding = 0) uniform CameraBufferObject {
+layout(set = DEFAULT_UBO_LAYOUT, binding = 0) buffer CameraBufferObject {
     mat4 proj;
     mat4 view;
     vec4 position;
     vec2 resolution;
+    vec2 cursorPosition;
+    uint selectedIndex;
 } cbo;
 
 mat4 transform(vec3 scale, vec3 rotation, vec3 transition)
@@ -47,9 +51,10 @@ void main() {
     gl_PointSize = 4;
     uint vertexOffset = gl_VertexIndex * 8;
     vec4 vertexPos = vec4(vertices[vertexOffset + 0], vertices[vertexOffset + 1], vertices[vertexOffset + 2], 1.0);
-    if (vertexPos.x == 0. && vertexPos.y == 0. && vertexPos.z == 0.)
-        gl_PointSize = 50;
     vec4 finalPos = cbo.proj * cbo.view * vertexPos;
+
     gl_Position = finalPos;
+    intensity = vertices[vertexOffset + 3];
+    vertexIndex = gl_VertexIndex;
     outVertex = vertexPos;
 }

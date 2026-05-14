@@ -71,7 +71,7 @@ namespace AnA
 
             CursorPosition& GetCursorPosition()
             {
-                return curArgs.pos;
+                return curPos;
             }
             InputProfile GlobalProfile{};
             void SetActiveProfile(uint32_t profileIndex);

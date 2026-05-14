@@ -22,7 +22,7 @@ layout(location = 2) out vec4 outAlbedo;
 layout(location = 0) out vec4 outColor;
 #endif
 
-layout(set = DEFAULT_UBO_LAYOUT, binding = 0) uniform CameraBufferObject {
+layout(set = DEFAULT_UBO_LAYOUT, binding = 0) buffer CameraBufferObject {
     mat4 proj;
     mat4 view;
     vec4 position;

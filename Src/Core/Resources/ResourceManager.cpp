@@ -3,6 +3,7 @@
 #include "../Headers/ShaderCodes.hpp"
 #include "Headers/Device.hpp"
 #include "Resources/Headers/Animation.hpp"
+#include "../Headers/App.hpp"
 
 using namespace AnA;
 using namespace Resources;
@@ -159,6 +160,12 @@ void ResourceManager::UpdateCameraBuffer()
         static_cast<Cameras::CameraBufferObject*>(mainCameraBuffer.GetMappedData())[bufferIndex];
     cbo.proj = proj;
     cbo.view = view;
+
+    auto& curPos = App::GetCurrent()->GetInputManager().GetCursorPosition();
+    auto swapChain = SwapChain::GetCurrent();
+    cbo.cursorPosition = {curPos.x.As<float>() * swapChain->ScaleX, curPos.y.As<float>() * swapChain->ScaleY};
+    selectedVertexIndex = cbo.selectedIndex;
+    //printf("x: %f y: %f\r", curPos.x.value, curPos.y.value);
     mainCameraBuffer.Flush();
     //cbo.invView = MainCamera.GetInverseView();
     uboDynamicOffsets[0] = bufferIndex * sizeof(Cameras::CameraBufferObject);
@@ -319,7 +326,7 @@ void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Desc
     pConfig = &descriptorSetConfigs[DEFAULT_UBO_LAYOUT][0];
     pConfig->binding = 0;
     pConfig->descriptorCount = 1;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
     pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_TASK_BIT_EXT;
     pConfig->bindless = false;
     pConfig->bufferInfos.push_back(
@@ -555,7 +562,7 @@ void ResourceManager::createMainCameraBuffers()
     uint32_t imageCount = SwapChain::GetCurrent()->GetImageCount();
     mainCameraBuffer = Buffer(aDevice,
         imageCount * sizeof(Cameras::CameraBufferObject),
-        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
         VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
     mainCameraBuffer.Map();
     MainCamera.SetRotateSpeed(float(imageCount) * 1.5f);
@@ -633,7 +640,7 @@ void ResourceManager::initTextures()
 {
     TextureMap.try_emplace(DEFAULT_TEXTURE_ID, 0xFFFFFFFFu, aDevice);
     TextureMap.try_emplace(1, 0xFFCC9999u, aDevice);
-    TextureMap.try_emplace(2, 0xFF99CC99u, aDevice);
+    TextureMap.try_emplace(2, 0xFF99FF99u, aDevice);
     TextureMap.try_emplace(3, 0xFF9999CCu, aDevice);
     TextureMap.try_emplace(4, 0x00CC9999u, aDevice);
     texId = 5;

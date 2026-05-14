@@ -10,7 +10,7 @@ layout(scalar, set = DEFAULT_VERTEX_LAYOUT, binding = BIND_VERTEX) buffer Vertex
     Vertex vertices[];
 } ssbo;
 
-layout(set = DEFAULT_UBO_LAYOUT, binding = 0) uniform CameraBufferObject {
+layout(set = DEFAULT_UBO_LAYOUT, binding = 0) buffer CameraBufferObject {
     mat4 proj;
     mat4 view;
     vec4 position;

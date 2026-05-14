@@ -1029,6 +1029,7 @@ void Device::createLogicalDevice()
     deviceFeatures2.features.shaderSampledImageArrayDynamicIndexing = VK_TRUE;
     deviceFeatures2.features.vertexPipelineStoresAndAtomics = VK_TRUE;
     deviceFeatures2.features.fillModeNonSolid = VK_TRUE;
+    deviceFeatures2.features.fragmentStoresAndAtomics = VK_TRUE;
 #ifdef ENABLE_MESH_SHADER
     VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures = {};
     meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;

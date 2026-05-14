@@ -95,6 +95,11 @@ namespace AnA
             {
                 return uboDynamicOffsets;
             }
+
+            uint32_t GetSelectedVertexIndex()
+            {
+                return selectedVertexIndex;
+            }
             AnA::Text TextContext;
             Lights::Light GlobalLight;
             AnA::Shapes Shapes;
@@ -125,6 +130,8 @@ namespace AnA
             std::vector<NormalCallBack> callbacks{};
             std::mutex callbacksMutex{};
             std::unordered_map<std::string, uint32_t> textureIDMap{};
+
+            uint32_t selectedVertexIndex = 0;
             //uint32_t recordedCallbacks = 0;
 /*
             std::vector<VkSampler> shadowSamplers;
