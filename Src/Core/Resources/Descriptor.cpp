@@ -94,7 +94,6 @@ Descriptor::Descriptor(Device* mDevice, Descriptor::DescriptorConfig* descriptor
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 
     const VkDescriptorBindingFlags bindlessFlags = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT |
-                VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT |
                 VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT_EXT;
     std::vector<VkDescriptorBindingFlags> bindingFlags{};
     VkDescriptorSetLayoutBindingFlagsCreateInfo flagsInfo{};
@@ -129,7 +128,7 @@ Descriptor::Descriptor(Device* mDevice, Descriptor::DescriptorConfig* descriptor
         if (descriptorConfig.bindless)
         {
             poolFlags |= VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT;
-            bindingFlags.push_back(0);
+            bindingFlags.push_back(bindlessFlags);
 
             layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT_EXT;
             continue;
