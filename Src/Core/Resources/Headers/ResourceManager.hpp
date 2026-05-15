@@ -120,6 +120,11 @@ namespace AnA
             }
             uint32_t AppendTexture(const std::string path);
 
+            std::vector<Descriptor>& GetDefaultDescriptors()
+            {
+                return defaultDescriptors;
+            }
+
             MeshShaderOutput MeshShaderOutputData;
         private:
             Device* aDevice;

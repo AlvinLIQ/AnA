@@ -20,7 +20,7 @@ void slider_Click(void* control, PointerEventArgs& args)
     const float sizeF = reinterpret_cast<float*>(&size)[o];
     const float offsetF = reinterpret_cast<float*>(&offset)[o];
 
-    float pos = (curPosF - offsetF) / sizeF;
+    float pos = (curPosF - offsetF + SLIDER_HALF_SIZE) / sizeF;
     printf("pos: %f curPosF: %f offsetF: %f sizeF: %f\r", pos, curPosF, offsetF, sizeF);
 
     if (pos < 0.0f)

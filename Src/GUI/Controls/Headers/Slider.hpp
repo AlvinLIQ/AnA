@@ -10,7 +10,7 @@ namespace AnA
         {
         public:
             Slider();
-        
+
             float Value()
             {
                 return value;
@@ -20,11 +20,14 @@ namespace AnA
                 if (value != newValue)
                 {
                     value = newValue;
+                    if(OnValueChanged)
+                        OnValueChanged(value);
                     RequestUpdate();
                 }
             }
             Orientations Orientation{Horizontal};
             void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
+            FloatValueCallback OnValueChanged = nullptr;
         private:
             Control button{};
             float value = 0.5f;
