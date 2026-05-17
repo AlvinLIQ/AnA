@@ -20,8 +20,7 @@ void slider_Click(void* control, PointerEventArgs& args)
     const float sizeF = reinterpret_cast<float*>(&size)[o];
     const float offsetF = reinterpret_cast<float*>(&offset)[o];
 
-    float pos = (curPosF - offsetF + SLIDER_HALF_SIZE) / sizeF;
-//    printf("pos: %f curPosF: %f offsetF: %f sizeF: %f\r", pos, curPosF, offsetF, sizeF);
+    float pos = (curPosF - offsetF - SLIDER_HALF_SIZE) / (sizeF - SLIDER_SIZE);
 
     if (pos < 0.0f)
     {
@@ -45,7 +44,7 @@ void Slider::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageIn
     auto offset = RenderOffset();
     float* size2F = reinterpret_cast<float*>(&size);
     float* offset2F = reinterpret_cast<float*>(&offset);
-    float pos = std::max(std::min(value * size2F[o] + offset2F[o] - SLIDER_SIZE, offset2F[o] + size2F[o] - SLIDER_SIZE),
+    float pos = std::max(std::min(offset2F[o] + value * (size2F[o] - SLIDER_SIZE), offset2F[o] + size2F[o] - SLIDER_SIZE),
                         offset2F[o]);
     offset2F[o] = pos;
 
