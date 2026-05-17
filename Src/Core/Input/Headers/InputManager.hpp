@@ -91,7 +91,7 @@ namespace AnA
             Window& aWindow;
             static void keyCallback(int scancode, int action);
             //static void characterCallback(GLFWwindow* window, uint32_t ch);
-            //static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+            static void scrollCallback(float dx);
             int activeProfileIndex = 0;
             std::vector<InputProfile> inputProfiles{1};
             CursorArgs curArgs;

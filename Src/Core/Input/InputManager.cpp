@@ -10,6 +10,7 @@ InputManager::InputManager(Window& mWindow) : aWindow {mWindow}
     _aInputManager = this;
 
     aWindow.KeyCallback = keyCallback;
+    aWindow.ScaleCallback = scrollCallback;
     //glfwSetKeyCallback(window, InputManager::keyCallback);
     //glfwSetCharCallback(window, InputManager::characterCallback);
     //glfwSetScrollCallback(window, InputManager::scrollCallback);
@@ -76,16 +77,16 @@ void InputManager::characterCallback(GLFWwindow* , uint32_t ch)
         characterConfig.callback(ch);
     }
 }
-
-void InputManager::scrollCallback(GLFWwindow* , double xoffset, double yoffset)
+*/
+void InputManager::scrollCallback(float dx)
 {
     auto &scrollConfigs = _aInputManager->GetActiveProfile().scrollConfigs;
     for (auto& scrollConfig : scrollConfigs)
     {
-        scrollConfig.callback(xoffset, yoffset);
+        scrollConfig.callback(dx, dx);
     }
 }
-*/
+
 
 void InputManager::checkCursorConfigs(Input::InputProfile& inputProfile)
 {

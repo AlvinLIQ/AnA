@@ -96,10 +96,13 @@ namespace AnA
 
         bool FramebufferResized = false;
         void (*KeyCallback)(int scancode, int action) = nullptr;
+        void (*ScaleCallback)(float dx) = nullptr;
         //static void FramebufferResizeCallback(GLFWwindow* window, int width, int height);
     private:
         SDL_Window* window;
         SDL_Event event;
+        int fingerCount;
+        float prevFingerDistance = 0.0f;
         VkSurfaceKHR surface{VK_NULL_HANDLE};
         bool exitSignal = false;
         CursorPosition cursorPos{};
