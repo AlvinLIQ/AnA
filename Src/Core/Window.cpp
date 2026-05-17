@@ -1,5 +1,4 @@
 #include "Headers/Window.hpp"
-#include <GLFW/glfw3.h>
 
 using namespace AnA;
 
@@ -11,33 +10,64 @@ Window::Window(const char* title)
 
 Window::~Window()
 {
-    glfwDestroyWindow(window);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+}
 
-    glfwTerminate();
+void Window::PollEvents()
+{
+    if (SDL_PollEvent(&event))
+    {
+        if (event.type == SDL_EVENT_QUIT)
+        {
+            exitSignal = true;
+            return;
+        }
+        switch(event.type)
+        {
+            case SDL_EVENT_MOUSE_MOTION:
+                cursorPos.x = event.motion.x;
+                cursorPos.y = event.motion.y;
+                break;
+            case SDL_EVENT_MOUSE_BUTTON_DOWN:
+                [[fallthrough]];
+            case SDL_EVENT_MOUSE_BUTTON_UP:
+                leftButton = event.button.down;
+                break;
+            case SDL_EVENT_KEY_DOWN:
+                if (KeyCallback)
+                    KeyCallback(event.key.scancode, ANA_PRESS);
+                break;
+            case SDL_EVENT_KEY_UP:
+                if (KeyCallback)
+                    KeyCallback(event.key.scancode, ANA_RELEASE);
+                break;
+            case SDL_EVENT_WINDOW_RESIZED:
+                Width = event.window.data1;
+                Height = event.window.data2;
+                FramebufferResized = true;
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 int Window::init(const char* title)
 {
-    if (!glfwInit())
-        return -1;
-    if (glfwGetPlatform() == GLFW_PLATFORM_WAYLAND)
-        glfwWindowHintString(GLFW_WAYLAND_APP_ID, title);
+    SDL_SetAppMetadata(title, "1.0", "com.engine.ana");
 
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-    glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
-    //glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+    if (!SDL_Init(SDL_INIT_VIDEO))
+    {
+        SDL_Log("Couldn't initialize SDL: %s", SDL_GetError());
+        return SDL_APP_FAILURE;
+    }
 
-    window = glfwCreateWindow(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, title, NULL, NULL);
-    if (!window)
-        return -1;
-
-    glfwSetWindowUserPointer(window, this);
-    glfwSetFramebufferSizeCallback(window, Window::FramebufferResizeCallback);
-    //In case window was created with a different size
-    glfwGetFramebufferSize(window, &Width, &Height);
-    glfwSetWindowPos(window, 100, 100);
-    glfwMakeContextCurrent(window);
+    if (!(window = SDL_CreateWindow(title, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE)))
+    {
+        SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
+        return SDL_APP_FAILURE;
+    }
 
     return 0;
 }
@@ -67,15 +97,17 @@ void Window::StartLoop()
 
 void Window::mainLoop()
 {
-    while (!glfwWindowShouldClose(window))
+    while (exitSignal)
     {
-        glfwPollEvents();
+        PollEvents();
     }
 }
 
+/*
 void Window::FramebufferResizeCallback(GLFWwindow* window, int , int )
 {
     auto aWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
     aWindow->FramebufferResized = true;
     glfwGetFramebufferSize(window, &aWindow->Width, &aWindow->Height);
 }
+*/

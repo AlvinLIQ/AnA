@@ -4,6 +4,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#define ANA_PRESS 1
+#define ANA_RELEASE 0
+
 namespace AnA
 {
     struct Transform

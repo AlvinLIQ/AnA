@@ -1,5 +1,6 @@
 project('AnA', ['c', 'cpp'],
-    default_options: ['c_std=c17', 'cpp_std=c++20', 'warning_level=2'])
+    default_options: ['c_std=c17', 'cpp_std=c++20', 'warning_level=2'],
+    subproject_dir: 'Src/3rdParty/SubProjects')
 
 add_project_arguments(language: 'cpp')
 add_project_link_arguments('-fuse-ld=lld', language: 'cpp')
@@ -14,16 +15,6 @@ else
     cflags += ['-DDEBUG_BUILD']
 endif
 
-if host_machine.system() == 'windows'
-    glfw_dep = declare_dependency(
-        include_directories: include_directories('C:/glfw3/include'),
-        link_args: ['C:/glfw3/lib/glfw3.lib']
-    )
-    cflags += ['-D_CRT_SECURE_NO_WARNINGS']
-else
-    glfw_dep = dependency('glfw3', required: true)      # GLFW
-endif
-
 conf_data = configuration_data()
 conf_data.set('HAVE_GLSLANG', 0)
 
@@ -35,7 +26,7 @@ subdir('Src/Examples/')
 
 AnA_dep = declare_dependency(
   link_with: [AnACore, AnAControls],
-  dependencies: [glfw_dep, vulkan_dep],
+  dependencies: [vulkan_dep, sdl3_dep],
   include_directories: include_directories('Src')
 )
 

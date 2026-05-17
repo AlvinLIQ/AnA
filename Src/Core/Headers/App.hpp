@@ -57,7 +57,7 @@ namespace AnA
         static void startUILoop(std::thread &loopThread);
         static void waitUILoop(std::thread &loopThread);
         static void uiLoop();
-        static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+        //static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
         VkOffset2D actualSceneOffset{};
     protected:

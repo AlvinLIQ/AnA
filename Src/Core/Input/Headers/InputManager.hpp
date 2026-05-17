@@ -13,7 +13,7 @@ namespace AnA
             void* param;
             RegularCallBack callback;
             int keyCode;
-            int action = GLFW_PRESS;
+            int action = 0;
         };
         struct CursorArgs
         {
@@ -84,13 +84,13 @@ namespace AnA
             }
         private:
             Window& aWindow;
-            static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-            static void characterCallback(GLFWwindow* window, uint32_t ch);
-            static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+            static void keyCallback(int scancode, int action);
+            //static void characterCallback(GLFWwindow* window, uint32_t ch);
+            //static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
             int activeProfileIndex = 0;
             std::vector<InputProfile> inputProfiles{1};
             CursorArgs curArgs;
-            CursorPosition curPos, prevPos;
+            CursorPosition curPos, curRelPos, prevRelPos;
             void checkCursorConfigs(Input::InputProfile& inputProfile);
             void checkProfile(Input::InputProfile& inputProfile);
         };

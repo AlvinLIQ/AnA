@@ -1,8 +1,8 @@
 #pragma once
 #include "Device.hpp"
 #include "Types.hpp"
+#include "Window.hpp"
 
-#include <GLFW/glfw3.h>
 #include <vector>
 #include <array>
 
@@ -42,7 +42,7 @@ namespace AnA
     class SwapChain
     {
     public:
-        SwapChain(Device* mDevice, VkSurfaceKHR &mSurface, GLFWwindow* mWindow);
+        SwapChain(Device* mDevice, VkSurfaceKHR &mSurface, Window* mWindow);
         ~SwapChain();
 
         Float Scale[2];
@@ -98,7 +98,7 @@ namespace AnA
 
         VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> &availablePresentModes);
 
-        GLFWwindow* window;
+        Window* window;
         VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
 
         VkSwapchainKHR swapChain;

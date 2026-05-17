@@ -1,7 +1,6 @@
 #include "Headers/Instance.hpp"
 #include "Headers/Window.hpp"
 
-#include <GLFW/glfw3.h>
 #include <iostream>
 #include <string.h>
 
@@ -46,7 +45,7 @@ void Instance::createInstance()
         VK_STRUCTURE_TYPE_APPLICATION_INFO, nullptr, "AnA", VK_MAKE_VERSION(1, 0, 0), "AnA Engine",
         VK_MAKE_VERSION(1, 0, 0), VK_API_VERSION_1_4};
 
-    auto glfwExtensions = getGLFWExtensions();
+    auto glfwExtensions = getWindowExtensions();
     if (!checkExtensions(glfwExtensions))
     {
         throw std::runtime_error("One or More Extensions Not supported!");
@@ -72,11 +71,11 @@ void Instance::createInstance()
     }
 }
 
-std::vector<const char*> Instance::getGLFWExtensions()
+std::vector<const char*> Instance::getWindowExtensions()
 {
-    uint32_t glfwExtensionCount = 0;
-    const char* *glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-    std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+    uint32_t count;
+    auto windowExtensions = SDL_Vulkan_GetInstanceExtensions(&count);
+    std::vector<const char*> extensions(windowExtensions, windowExtensions + count);
 
     if (enableValidationLayers)
         extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);

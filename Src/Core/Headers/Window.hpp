@@ -2,8 +2,11 @@
 
 #include <stdexcept>
 #include <vulkan/vulkan_core.h>
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
+
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_mouse.h>
+#include <SDL3/SDL_vulkan.h>
+
 #include "Instance.hpp"
 #include "Types.hpp"
 
@@ -23,11 +26,11 @@ namespace AnA
 
         void CreateWindowSurface(Instance* instance)
         {
-            if (glfwCreateWindowSurface(instance->GetInstance(), window, nullptr, &surface) != VK_SUCCESS)
+            if (!SDL_Vulkan_CreateSurface(window, instance->GetInstance(), nullptr, &surface))
                 throw std::runtime_error("Failed to create window surface!");
         }
 
-        GLFWwindow* GetGLFWwindow()
+        SDL_Window* GetSDLWindow()
         {
             return window;
         }
@@ -37,14 +40,71 @@ namespace AnA
             return surface;
         }
 
+        void PollEvents();
+        bool GetExitSignal()
+        {
+            return exitSignal;
+        }
+
+        void SetTitle(const char* title)
+        {
+            SDL_SetWindowTitle(window, title);
+        }
+
+        CursorPosition GetCursorPos()
+        {
+            return cursorPos;
+        }
+        CursorPosition GetCursorRelativePos()
+        {
+            float x, y;
+            SDL_GetRelativeMouseState(&x, &y);
+            return {x, y};
+        }
+        void ShowCursor()
+        {
+            SDL_ShowCursor();
+        }
+        void HideCursor()
+        {
+            SDL_HideCursor();
+        }
+        void SetRawMotion(bool enable)
+        {
+            SDL_SetWindowRelativeMouseMode(window, enable);
+        }
+
+        void GetScale(float* x, float* y)
+        {
+            *x = SDL_GetWindowDisplayScale(window);
+            *y = *x;
+        }
+
+        int GetMouseLeftButton()
+        {
+            return leftButton;
+        }
+
+
+        void Exit()
+        {
+            exitSignal = true;
+        }
+
         Int32 Width = DEFAULT_WINDOW_WIDTH;
         Int32 Height = DEFAULT_WINDOW_HEIGHT;
 
         bool FramebufferResized = false;
-        static void FramebufferResizeCallback(GLFWwindow* window, int width, int height);
+        void (*KeyCallback)(int scancode, int action) = nullptr;
+        //static void FramebufferResizeCallback(GLFWwindow* window, int width, int height);
     private:
-        GLFWwindow* window;
+        SDL_Window* window;
+        SDL_Event event;
         VkSurfaceKHR surface{VK_NULL_HANDLE};
+        bool exitSignal = false;
+        CursorPosition cursorPos{};
+
+        int leftButton = 0;
 
         int init(const char* name);
         void mainLoop();

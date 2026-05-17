@@ -257,7 +257,7 @@ PointerEventType GetPointerEventType(int buttonAction)
     PointerEventType eventType = PointerEventType::Moving;
     switch (buttonAction)
     {
-    case GLFW_PRESS:
+    case ANA_PRESS:
         if (!leftButtonPressed)
         {
             leftButtonPressed = true;
@@ -266,7 +266,7 @@ PointerEventType GetPointerEventType(int buttonAction)
                 Control::ClearFocus();
         }
         break;
-    case GLFW_RELEASE:
+    case ANA_RELEASE:
         if (leftButtonPressed)
         {
             leftButtonPressed = false;
@@ -289,7 +289,7 @@ void _characterReceived(uint32_t ch)
 void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input::InputProfile>& profiles)
 {
     Input::InputProfile profile{};
-    profile.flag = Input::InputProfileFlags::RawMotion;
+    profile.flag = Input::InputProfileFlags::None;
     Input::CursorConfig cursorConfig{};
     cursorConfig.param = mainControl;
     cursorConfig.callback = [](void* param, Input::CursorArgs& curArgs, int leftButtonAction)

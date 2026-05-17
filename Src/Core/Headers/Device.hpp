@@ -215,7 +215,7 @@ namespace AnA
         void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
     private:
         VkInstance& instance;
-        VkSurfaceKHR surface;
+        VkSurfaceKHR& surface;
         VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
         void pickPhysicalDevice();
 

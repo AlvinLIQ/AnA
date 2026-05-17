@@ -6,7 +6,7 @@
 using namespace AnA;
 SwapChain* _swapChain;
 SwapChain::SwapChain(Device* mDevice,
-                             VkSurfaceKHR &mSurface, GLFWwindow* mWindow) : aDevice{mDevice}, surface{mSurface}, window{mWindow}
+                             VkSurfaceKHR &mSurface, Window* mWindow) : aDevice{mDevice}, surface{mSurface}, window{mWindow}
 {
     msaaSamplers = aDevice->GetMaxUsableSampleCount();
     createSwapChain();
@@ -183,8 +183,9 @@ void SwapChain::RecreateSwapChain()
     int width, height;
     do
     {
-        glfwGetWindowSize(window, &width, &height);
-        glfwWaitEvents();
+        width = window->Width;
+        height = window->Height;
+        //glfwWaitEvents();
     } while (width == 0 || height == 0);
 
 
@@ -237,15 +238,13 @@ VkPresentModeKHR SwapChain::chooseSwapPresentMode(const std::vector<VkPresentMod
 
 VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
 {
-    int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
     if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
     {
         return capabilities.currentExtent;
     }
     else
     {
-        VkExtent2D actualExtent = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
+        VkExtent2D actualExtent = {static_cast<uint32_t>(window->Width), static_cast<uint32_t>(window->Height)};
 
         actualExtent.width =
             std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
@@ -257,7 +256,8 @@ VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilit
 
 void SwapChain::createSwapChain()
 {
-    glfwGetWindowContentScale(window, &ScaleX, &ScaleY);
+    //glfwGetWindowContentScale(window, &ScaleX, &ScaleY);
+    window->GetScale(&ScaleX, &ScaleY);
 
     Device::SwapChainSupportDetails swapChainSupport = aDevice->QuerySwapChainSupport(aDevice->GetPhysicalDevice());
 

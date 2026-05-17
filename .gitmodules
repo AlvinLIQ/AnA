@@ -1,3 +1,6 @@
+[submodule "Src/3rdParty/SubProjects/SDL"]
+	path = Src/3rdParty/SubProjects/SDL
+	url = https://github.com/libsdl-org/SDL
 [submodule "Src/3rdParty/stb"]
 	path = Src/3rdParty/stb
 	url = https://github.com/nothings/stb

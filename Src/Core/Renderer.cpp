@@ -12,7 +12,7 @@ Renderer::Renderer(Window& mWindow, Device* mDevice) : aWindow {mWindow}, aDevic
     commandBuffers{mDevice, MAX_FRAMES_IN_FLIGHT, VK_COMMAND_BUFFER_LEVEL_PRIMARY, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT},
     offscreenSecondaryCommandBuffers(mDevice, MAX_FRAMES_IN_FLIGHT, VK_COMMAND_BUFFER_LEVEL_SECONDARY, VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT | VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT)
 {
-    aSwapChain = new SwapChain(aDevice, aWindow.GetSurface(), aWindow.GetGLFWwindow());
+    aSwapChain = new SwapChain(aDevice, aWindow.GetSurface(), &aWindow);
     createTimestampQueryPool();
 }
 

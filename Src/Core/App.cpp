@@ -105,10 +105,9 @@ void App::Run()
     const char cTitle[] = "FPS:";
     AnA::String title{cTitle, sizeof(cTitle), sizeof(cTitle) + 40};
 
-    auto window = aWindow.GetGLFWwindow();
-    while(!glfwWindowShouldClose(window))
+    while(!aWindow.GetExitSignal())
     {
-        glfwPollEvents();
+        aWindow.PollEvents();
         curTime = std::chrono::high_resolution_clock::now();
         frameTime = std::chrono::duration<float, std::chrono::seconds::period>(curTime - prevTime).count();
         prevTime = curTime;
@@ -127,7 +126,8 @@ void App::Run()
                 std::to_string(aWindow.Width) + "x" + std::to_string(aWindow.Height);
             title.Copy(info.c_str(), info.length(), sizeof(cTitle) - 1);
             //aResourceManager.TextContext.UpdateText(0, title.Str());
-            glfwSetWindowTitle(aWindow.GetGLFWwindow(), title.Str());
+            aWindow.SetTitle(title.Str());
+            //glfwSetWindowTitle(aWindow.GetGLFWwindow(), title.Str());
             //printf("{\"FPS\":%d}\r", frameCount.value);
             prevSecond = 0.0f;
             frameCount = 0;
@@ -181,7 +181,7 @@ void App::Run()
 
 void App::Exit()
 {
-    glfwSetWindowShouldClose(aWindow.GetGLFWwindow(), 1);
+    aWindow.Exit();
 }
 
 void App::Cleanup()
@@ -236,17 +236,17 @@ void App::uiLoop()
             {/*
             auto &camera = _aApp->GetCamera();
             auto &key = _uiParam[0];
-            if (key == GLFW_KEY_W)
+            if (key == SDL_SCANCODE_W)
                 camera.MoveForward();
-            if (key == GLFW_KEY_S)
+            if (key == SDL_SCANCODE_S)
                 camera.MoveBack();
-            if (key == GLFW_KEY_A)
+            if (key == SDL_SCANCODE_A)
                 camera.MoveLeft();
-            if (key == GLFW_KEY_D)
+            if (key == SDL_SCANCODE_D)
                 camera.MoveRight();
-            if (key == GLFW_KEY_SPACE)
+            if (key == SDL_SCANCODE_SPACE)
                 camera.MoveUp();
-            if (key == GLFW_KEY_C)
+            if (key == SDL_SCANCODE_C)
                 camera.MoveDown();*/
             }
             _uiSignal = UI_SIGNAL_WAIT;

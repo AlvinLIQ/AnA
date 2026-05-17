@@ -27,7 +27,7 @@ void EditorApp::Init()
     sceneOffset.x = EDITOR_LEFT_PANEL_WIDTH;
     aInputManager.GlobalProfile.flag = Input::InputProfileFlags::None;
     Input::KeyMapConfig keyMapConfig;
-    keyMapConfig.keyCode = GLFW_KEY_TAB;
+    keyMapConfig.keyCode = SDL_SCANCODE_TAB;
     keyMapConfig.param = &aInputManager;
     keyMapConfig.callback = [](void* param)
     {
@@ -56,13 +56,13 @@ void EditorApp::Init()
 //Transform Action Mode
     editorInputProfile.opKeyMapConfigs.push_back({this,
         createActionModeCallback<1>()
-        , GLFW_KEY_G, GLFW_PRESS});// Grab Mode
+        , SDL_SCANCODE_G, ANA_PRESS});// Grab Mode
     editorInputProfile.opKeyMapConfigs.push_back({this,
         createActionModeCallback<2>()
-        , GLFW_KEY_S, GLFW_PRESS});// Scale Mode
+        , SDL_SCANCODE_S, ANA_PRESS});// Scale Mode
     editorInputProfile.opKeyMapConfigs.push_back({this,
         createActionModeCallback<3>()
-        , GLFW_KEY_R, GLFW_PRESS});// Rotate Mode
+        , SDL_SCANCODE_R, ANA_PRESS});// Rotate Mode
     editorInputProfile.opKeyMapConfigs.push_back({this,
         [](void* param)
         {
@@ -78,7 +78,7 @@ void EditorApp::Init()
             for (int i = selectionIndex; i < int(modelList->Children().size()); i++)
                 reinterpret_cast<ObjectViewItem*>(modelList->Children()[i])->Data.id--;
         }
-        , GLFW_KEY_D, GLFW_PRESS});// Rotate Mode
+        , SDL_SCANCODE_D, ANA_PRESS});// Rotate Mode
     editorInputProfile.opKeyMapConfigs.push_back({this,
         [](void* param)
         {
@@ -91,7 +91,7 @@ void EditorApp::Init()
             object.transform = _originalTransform;
             editorApp->aResourceManager.MainScene.UpdateMeshTransform(editorApp->SelectedObjectData->id);
         }
-        , GLFW_KEY_ESCAPE, GLFW_PRESS});// Rotate Mode
+        , SDL_SCANCODE_ESCAPE, ANA_PRESS});// Rotate Mode
 
     editorInputProfile.cursorConfigs.push_back({this,
     [](void* param, Input::CursorArgs& curArgs, int leftButtonAction)

@@ -9,7 +9,7 @@
 
 namespace AnA
 {
-    const std::vector<const char*> validationLayers = 
+    const std::vector<const char*> validationLayers =
     {
         "VK_LAYER_KHRONOS_validation"
     };
@@ -35,8 +35,8 @@ namespace AnA
         VkSurfaceKHR surface{VK_NULL_HANDLE};
         void createInstance();
 
-        std::vector<const char*> getGLFWExtensions();
-        
+        std::vector<const char*> getWindowExtensions();
+
         bool checkExtensions(std::vector<const char*> targetExtensions);
 
         bool checkValidationLayerSupport();
