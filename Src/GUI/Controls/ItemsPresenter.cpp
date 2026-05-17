@@ -62,7 +62,6 @@ void ItemsPresenter::PointerEventTrigger(PointerEventArgs& args)
     {
         if (args.Handled)
             return;
-        item->PointerEventTrigger(args);
         if (!_cursorInside)
             item->PointerEventTrigger(args);
         _cursorInside = _cursorInside || item->IsCursorInside();
