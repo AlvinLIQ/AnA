@@ -100,6 +100,10 @@ namespace AnA
 
             Control* Parent{nullptr};
 
+            bool IsCursorInside() const
+            {
+                return cursorInside;
+            }
             bool IsInside(CursorPosition pos);
             static bool IsInside(CursorPosition& pos, Vec2& offset, Vec2& size);
 

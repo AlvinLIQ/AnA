@@ -57,11 +57,15 @@ void ItemsPresenter::PointerEventTrigger(PointerEventArgs& args)
         GetFocused()->PointerEventTrigger(args);
         return;
     }
+    bool _cursorInside = false;
     for (auto& item : items)
     {
         if (args.Handled)
             return;
         item->PointerEventTrigger(args);
+        if (!_cursorInside)
+            item->PointerEventTrigger(args);
+        _cursorInside = _cursorInside || item->IsCursorInside();
     }
     Control::PointerEventTrigger(args);
 }

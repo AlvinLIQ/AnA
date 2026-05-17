@@ -308,6 +308,7 @@ void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input:
         args.Position = {curArgs.pos.x * scale[0].As<double>() / (control->Extent.width / static_cast<double>(extent.width)),
                         curArgs.pos.y * scale[1].As<double>() / (control->Extent.height / static_cast<double>(extent.height))};
 #endif
+        args.Duration = curArgs.duration;
         if (focusedControl && focusedControl != control)
             focusedControl->PointerEventTrigger(args);
         else

@@ -93,9 +93,8 @@ void App::Run()
 {
     Cameras::Camera& camera = aResourceManager.MainCamera;
     Cameras::CameraController cameraController{camera};
-    auto& activeProfile = aInputManager.GetActiveProfile();
-    cameraController.GetInputProfile(activeProfile);
-    aInputManager.SetActiveProfile(0);
+    auto& firstProfile = aInputManager.GetProfiles()[0];
+    cameraController.GetInputProfile(firstProfile);
     aResourceManager.UpdateCamera(aRenderer.GetAspect());
 
     auto prevTime = std::chrono::high_resolution_clock::now();

@@ -23,6 +23,7 @@ namespace AnA
     struct PointerEventArgs
     {
         CursorPosition Position;
+        CursorPosition Duration;
         PointerEventType EventType;
         PointerTriggerType TriggerType;
         bool Handled = false;

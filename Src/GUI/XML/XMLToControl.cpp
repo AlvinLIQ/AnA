@@ -23,6 +23,10 @@ void traverse_node(rapidxml::xml_node<> *node, std::set<std::string>& usedNodes,
             ss << "controlMap.insert(std::pair<std::string, Controls::Control*>(\""
                 << attr.value() << "\", (Controls::Control*)node" << id << "));\n";
         }
+        else if (attr.name() == "PointerMoving")
+        {
+            ss << "node" << id << "->PointerEvents[PointerEventType::Moving].emplace_back(" << attr.value() << ");\n";
+        }
         else if (attr.name() == "Click")
         {
             ss << "node" << id << "->PointerEvents[PointerEventType::Released].emplace_back(" << attr.value() << ");\n";
