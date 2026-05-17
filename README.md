@@ -25,7 +25,7 @@
 ## Build&Run
 Clone the repo and submodules
 
-Install glfw, glm, Vulkan SDK(including validation layer), make, clang(you can use other c/cpp compilers if you want)
+Install glm, Vulkan SDK(including validation layer), clang(you can use other c/cpp compilers if you want)
 
 ### for Linux
 ```shell
@@ -36,9 +36,8 @@ meson install -C build
 
 ### for Windows
 * Install [Meson](https://mesonbuild.com/Getting-meson.html) for windows
-* Edit meson.build (you can skip this step if you're using a MinGW ToolChain)
 
-Sometimes glfw, vulkan lib name can be different, make sure it does match yours
+Sometimes vulkan lib name can be different, make sure it does match yours
 
 ```
 meson setup build
