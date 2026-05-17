@@ -69,6 +69,11 @@ namespace AnA
                 return inputProfiles;
             }
 
+            int GetActiveProfileIndex()
+            {
+                return activeProfileIndex;
+            }
+
             CursorPosition& GetCursorPosition()
             {
                 return curPos;
