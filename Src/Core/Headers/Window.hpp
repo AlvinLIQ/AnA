@@ -85,6 +85,10 @@ namespace AnA
             return leftButton;
         }
 
+        int GetFingerCount()
+        {
+            return fingerCount;
+        }
 
         void Exit()
         {
