@@ -11,7 +11,6 @@ sub_options.add_cmake_defines({
 sub_options.set_install(false)
 sdl3_proj = cmake.subproject('SDL', options: sub_options)
 sdl3_dep = sdl3_proj.dependency('SDL3-static')
-sdl3_include = include_directories('SubProjects/SDL/include', is_system: true)
 
 meshoptimizer_lib = static_library('meshoptimizer', [
 'meshoptimizer/src/allocator.cpp', 'meshoptimizer/src/partition.cpp', 'meshoptimizer/src/vcacheoptimizer.cpp',
