@@ -41,6 +41,10 @@ namespace AnA
         }
 
         void PollEvents();
+        void WaitEvent()
+        {
+            SDL_WaitEvent(&event);
+        }
         bool GetExitSignal()
         {
             return exitSignal;

@@ -6,6 +6,7 @@
 #include <glm/trigonometric.hpp>
 #include <memory>
 
+#define TINYOBJLOADER_DISABLE_FAST_FLOAT
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "../../3rdParty/tinyobjloader/tiny_obj_loader.h"
 

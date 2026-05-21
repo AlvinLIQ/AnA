@@ -107,6 +107,7 @@ void Renderer::EndFrame()
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || aWindow.FramebufferResized)
     {
         aWindow.FramebufferResized = false;
+        printf("resized\n");
         aSwapChain->RecreateSwapChain();
         needUpdate = true;
     }

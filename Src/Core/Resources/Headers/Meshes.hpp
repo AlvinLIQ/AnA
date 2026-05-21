@@ -9,6 +9,7 @@
 #include <set>
 #include <memory>
 #include <unordered_map>
+#include <mutex>
 
 namespace AnA
 {
@@ -74,7 +75,7 @@ namespace AnA
 
             uint32_t GetVertexCount()
             {
-                return vertexCount;
+                return uint32_t(vertexCount);
             }
 
             std::unordered_map<uint32_t, std::shared_ptr<Model>> MeshMap{};

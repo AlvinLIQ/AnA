@@ -1,5 +1,6 @@
 #include "Headers/SwapChain.hpp"
 #include "Resources/Headers/CommandBuffer.hpp"
+#include "vulkan/vulkan_core.h"
 #include <algorithm>
 #include <limits>
 
@@ -40,11 +41,14 @@ SwapChain::~SwapChain()
 VkResult SwapChain::AcquireNextImage()
 {
     vkWaitForFences(aDevice->GetLogicalDevice(), 1, &inFlightFences[CurrentFrame], VK_TRUE, UINT64_MAX);
-    vkResetFences(aDevice->GetLogicalDevice(), 1, &inFlightFences[CurrentFrame]);
 
-    return vkAcquireNextImageKHR(aDevice->GetLogicalDevice(), swapChain, UINT64_MAX,
+    auto result = vkAcquireNextImageKHR(aDevice->GetLogicalDevice(), swapChain, UINT64_MAX,
                                  imageAvailableSemaphores[CurrentFrame], VK_NULL_HANDLE,
                                  &CurrentImage);
+    if (result != VK_ERROR_OUT_OF_DATE_KHR)
+        vkResetFences(aDevice->GetLogicalDevice(), 1, &inFlightFences[CurrentFrame]);
+
+    return result;
 }
 
 VkResult SwapChain::SubmitCommandBuffer(VkCommandBuffer commandBuffer)
@@ -183,11 +187,11 @@ void SwapChain::RecreateSwapChain()
     int width, height;
     do
     {
+        window->PollEvents();
         width = window->Width;
         height = window->Height;
         //glfwWaitEvents();
     } while (width == 0 || height == 0);
-
 
     vkDeviceWaitIdle(aDevice->GetLogicalDevice());
     cleanupSwapChain();
