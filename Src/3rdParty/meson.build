@@ -6,7 +6,8 @@ sub_options.add_cmake_defines({
     'ENABLE_CUSTOM_FEATURE': 'ON',
     'SDL_X11': 'OFF',
     'SDL_X11_XCURSOR': 'OFF',
-    'SDL_WAYLAND': 'ON'
+    'SDL_WAYLAND': 'ON',
+    'SDL_WERROR': 'OFF',
 })
 sub_options.set_install(false)
 sdl3_proj = cmake.subproject('SDL', options: sub_options)
@@ -23,3 +24,4 @@ meshoptimizer_lib = static_library('meshoptimizer', [
 
 vma_include = include_directories('VulkanMemoryAllocator/include', is_system: true)
 cdt_include = include_directories('CDT/CDT/include', is_system: true)
+tinyobj_include = include_directories('tinyobjloader', is_system: true)

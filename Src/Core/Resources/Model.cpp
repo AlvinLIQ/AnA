@@ -8,7 +8,7 @@
 
 #define TINYOBJLOADER_DISABLE_FAST_FLOAT
 #define TINYOBJLOADER_IMPLEMENTATION
-#include "../../3rdParty/tinyobjloader/tiny_obj_loader.h"
+#include "tiny_obj_loader.h"
 
 #include "../../3rdParty/meshoptimizer/src/meshoptimizer.h"
 
