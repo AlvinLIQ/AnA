@@ -11,6 +11,7 @@
 #include "tiny_obj_loader.h"
 
 #include "../../3rdParty/meshoptimizer/src/meshoptimizer.h"
+#include "../../3rdParty/meshoptimizer/extern/cgltf.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
