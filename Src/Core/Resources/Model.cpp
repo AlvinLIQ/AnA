@@ -6,12 +6,15 @@
 #include <glm/trigonometric.hpp>
 #include <memory>
 
+#ifdef TINYOBJ_LOADER
 #define TINYOBJLOADER_DISABLE_FAST_FLOAT
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
+#endif
 
 #include "../../3rdParty/meshoptimizer/src/meshoptimizer.h"
 #include "../../3rdParty/meshoptimizer/extern/cgltf.h"
+#include "../../3rdParty/meshoptimizer/extern/fast_obj.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
@@ -82,7 +85,7 @@ void Model::CreateModelFromFile(const char *filePath, std::shared_ptr<Model>& mo
     model = std::make_shared<Model>(modelInfo);
     model->Path = filePath;
 }
-
+#ifdef TINYOBJ_LOADER
 void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo)
 {
     tinyobj::attrib_t attrib;
@@ -197,7 +200,57 @@ void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo)
         }
     }
 }
+#else
+void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo)
+{
+    fastObjMesh* mesh = fast_obj_read(filePath);
 
+    std::unordered_map<Vertex, Index, VertexHash> vertexMap{};
+    //std::set<glm::vec3, Vec3Less> facesSet, edgesSet;
+    modelInfo.minBounding = glm::vec3(FLT_MAX);
+    modelInfo.maxBounding = glm::vec3(-FLT_MAX);
+    Model::Vertex vertex{};
+    uint32_t offset = 0;
+    for (uint32_t f = 0, v, i; f < mesh->face_count; f++)
+    {
+        uint32_t fv = mesh->face_vertices[f];
+        for (v = 0; v + 1 < fv; v++)
+        {
+            fastObjIndex tri[3] = {
+                        mesh->indices[offset],
+                        mesh->indices[offset + v],
+                        mesh->indices[offset + v + 1]
+                    };
+            for (i = 0; i < 3; i++)
+            {
+                auto& index = tri[i];
+                vertex.position = *reinterpret_cast<glm::vec3*>(&mesh->positions[3 * index.p]);
+                vertex.normal = *reinterpret_cast<glm::vec3*>(&mesh->normals[3 * index.n]);
+                vertex.uv = *reinterpret_cast<glm::vec2*>(&mesh->texcoords[2 * index.t]);
+                auto result = vertexMap.find(vertex);
+                if (result != vertexMap.end())
+                {
+                    modelInfo.indices.push_back(result->second);
+                    //modelInfo.nodes.back().indices.push_back(result->second);
+                }
+                else
+                {
+                    modelInfo.indices.push_back(static_cast<Index>(vertexMap.size()));
+                    //modelInfo.nodes.back().indices.push_back(static_cast<Index>(vertexMap.size()));
+
+                    vertexMap.insert(std::pair<Vertex, Index>(vertex, static_cast<Index>(vertexMap.size())));
+                    modelInfo.vertices.push_back(vertex);
+                    modelInfo.minBounding = glm::min(modelInfo.minBounding, vertex.position);
+                    modelInfo.maxBounding = glm::max(modelInfo.maxBounding, vertex.position);
+                }
+            }
+        }
+        offset += fv;
+
+    }
+    fast_obj_destroy(mesh);
+}
+#endif
 void Model::CreateVerticesFromFile(const char *filePath, std::vector<Vertex> &vertices)
 {
     auto data = ReadFile(filePath);

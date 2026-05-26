@@ -21,6 +21,7 @@ meshoptimizer_lib = static_library('meshoptimizer', [
 'meshoptimizer/src/stripifier.cpp', 'meshoptimizer/src/vfetchoptimizer.cpp', 'meshoptimizer/src/meshletutils.cpp',
 'meshoptimizer/src/overdrawoptimizer.cpp', 'meshoptimizer/src/vcacheoptimizer.cpp'
 ])
+fastobj_lib = static_library('fastobj', ['fast_obj/fast_obj.c'])
 
 vma_include = include_directories('VulkanMemoryAllocator/include', is_system: true)
 cdt_include = include_directories('CDT/CDT/include', is_system: true)

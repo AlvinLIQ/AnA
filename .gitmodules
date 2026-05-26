@@ -4,9 +4,9 @@
 [submodule "Src/3rdParty/stb"]
 	path = Src/3rdParty/stb
 	url = https://github.com/nothings/stb
-[submodule "Src/3rdParty/tinyobjloader"]
-	path = Src/3rdParty/tinyobjloader
-	url = https://github.com/tinyobjloader/tinyobjloader
+[submodule "Src/3rdParty/fast_obj"]
+	path = Src/3rdParty/fast_obj
+	url = https://github.com/thisistherk/fast_obj
 [submodule "Src/3rdParty/meshoptimizer"]
 	path = Src/3rdParty/meshoptimizer
 	url = https://github.com/zeux/meshoptimizer
