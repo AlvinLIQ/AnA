@@ -461,8 +461,8 @@ void Model::buildMeshletsWithOptimizer()
         meshlet.center = (minBounding + maxBounding) * 0.5f;
         meshlet.center = meshlet.center;
         meshlet.cutoff = bounds.cone_cutoff;
-        meshlet.radius = bounds.radius;
-        /*
+        //meshlet.radius = bounds.radius;
+
         float maxDistance = 0.0f;
         for (uint32_t i = 0; i < meshlet.vertexCount; i++)
         {
@@ -470,9 +470,9 @@ void Model::buildMeshletsWithOptimizer()
             if (distance > maxDistance)
             {
                 maxDistance = distance;
-                meshlet.farVertexID = i;
+                meshlet.radius = maxDistance;
             }
-        }*/
+        }
         meshlets.push_back(meshlet);
     }
 }
