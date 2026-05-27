@@ -284,7 +284,7 @@ void Scene::DrawIndirect(CommandBuffer& commandBuffer)
 {
     if (aDevice->MeshShaderSupport())
     {
-        aDevice->vkCmdDrawMeshTasksIndirectCountEXT(commandBuffer, drawMeshIndirectBuffer.GetBuffer(), 0,
+        aDevice->vkCmdDrawMeshTasksIndirectCountEXT(commandBuffer, drawMeshIndirectBuffers[currentBufferIndex].GetBuffer(), 0,
             drawMeshCountBuffer.GetBuffer(),
             0, 1, sizeof(VkDrawMeshTasksIndirectCommandEXT));
     }
@@ -362,13 +362,9 @@ void Scene::UpdateMeshlets()
     meshletIDCount = i;
 
     *static_cast<uint32_t*>(meshletIDCountBuffers[nextIndex].GetMappedData()) = meshletIDCount;
-    auto drawMeshTaskCommand = static_cast<VkDrawMeshTasksIndirectCommandEXT*>(drawMeshIndirectBuffer.GetMappedData());
+    auto drawMeshTaskCommand = static_cast<VkDrawMeshTasksIndirectCommandEXT*>(drawMeshIndirectBuffers[nextIndex].GetMappedData());
     uint32_t numofGroup = (meshletIDCount + numOfGroup - 1) / numOfGroup;
-    VkDrawMeshTasksIndirectCommandEXT groupSize;
-    groupSize.groupCountX = numofGroup;
-    groupSize.groupCountY = 1;
-    groupSize.groupCountZ = 1;
-    *drawMeshTaskCommand = groupSize;
+    drawMeshTaskCommand->groupCountX = numofGroup;
 
     //meshletBuffers[nextIndex].Flush();
 }
@@ -398,13 +394,17 @@ void Scene::createIndirectBuffers()
     drawIndexedIndirectCommand->instanceCount = 1;
     drawIndexedIndirectCommand->vertexOffset = 0;
 
-    drawMeshIndirectBuffer = Buffer(aDevice, sizeof(VkDrawMeshTasksIndirectCommandEXT),
-    VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-    drawMeshIndirectBuffer.Map();
-    auto drawMeshIndirectCommand = static_cast<VkDrawMeshTasksIndirectCommandEXT*>(drawMeshIndirectBuffer.GetMappedData());
-    drawMeshIndirectCommand->groupCountX = 1;
-    drawMeshIndirectCommand->groupCountY = 1;
-    drawMeshIndirectCommand->groupCountZ = 1;
+    drawMeshIndirectBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+    for (auto& drawMeshIndirectBuffer : drawMeshIndirectBuffers)
+    {
+        drawMeshIndirectBuffer = Buffer(aDevice, sizeof(VkDrawMeshTasksIndirectCommandEXT),
+            VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        drawMeshIndirectBuffer.Map();
+        auto drawMeshIndirectCommand = static_cast<VkDrawMeshTasksIndirectCommandEXT*>(drawMeshIndirectBuffer.GetMappedData());
+        drawMeshIndirectCommand->groupCountX = 0;
+        drawMeshIndirectCommand->groupCountY = 1;
+        drawMeshIndirectCommand->groupCountZ = 1;
+    }
 
     drawIndexedCountBuffer = Buffer(aDevice, 4,
     VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);

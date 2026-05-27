@@ -164,6 +164,7 @@ void App::Run()
             aResourceManager.MainControl->EndUpdate();
         }
 #endif
+
         aResourceManager.Update();
         if (loopCallback)
             loopCallback();

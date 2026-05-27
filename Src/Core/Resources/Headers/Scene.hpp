@@ -165,7 +165,7 @@ namespace AnA
         std::vector<Buffer> collisionBuffer{};
         Buffer drawIndexedIndirectBuffer{};
         Buffer drawIndexedCountBuffer{};
-        Buffer drawMeshIndirectBuffer{};
+        std::vector<Buffer> drawMeshIndirectBuffers{};
         Buffer drawMeshCountBuffer{};
         void createIndirectBuffers();
         std::vector<Mesh> meshes{};

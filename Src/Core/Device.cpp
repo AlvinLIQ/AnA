@@ -742,7 +742,7 @@ void Device::TransitionImageLayout(VkImage &image, VkImageLayout oldLayout, VkIm
     EndSingleTimeCommands(commandBuffer);
 }
 
-void Device::WaitBufferIdle(VkBuffer &buffer)
+void Device::WaitBufferIdle(VkBuffer buffer)
 {
     VkBufferMemoryBarrier bufferBarrier{};
     bufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
@@ -874,7 +874,7 @@ void Device::pickPhysicalDevice()
             vkGetPhysicalDeviceProperties2(device, &deviceProperties2);
             currentScore += deviceProperties2.properties.limits.framebufferColorSampleCounts & deviceProperties2.properties.limits.framebufferDepthSampleCounts;
             currentScore += deviceProperties2.properties.limits.storageImageSampleCounts + deviceProperties2.properties.limits.maxColorAttachments;
-            std::string deviceName = physicalDeviceProperties.deviceName;
+            std::string deviceName = deviceProperties2.properties.deviceName;
             if (deviceProperties2.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
                 currentScore += 10;
             if (deviceName.find("AMD") != size_t(-1))
