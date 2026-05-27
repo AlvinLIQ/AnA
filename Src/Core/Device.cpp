@@ -488,6 +488,25 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
     }
 }
 
+void Triangulation(std::vector<glm::vec2>& vertices, std::vector<uint32_t>& indices)
+{
+    CDT::Triangulation<float> cdt;
+    std::vector<CDT::Edge> edges{};
+    for (uint32_t i = 1; i < uint32_t(vertices.size()); i++)
+    {
+        edges.push_back({i - 1, i});
+    }
+    cdt.insertVertices(*reinterpret_cast<std::vector<CDT::V2d<float>>*>(&vertices));
+    cdt.insertEdges(edges);
+    cdt.eraseOuterTriangles();
+    for (auto& triangle : cdt.triangles)
+    {
+        indices.push_back(triangle.vertices[0]);
+        indices.push_back(triangle.vertices[1]);
+        indices.push_back(triangle.vertices[2]);
+    }
+}
+
 void Device::CreateSampler(VkSampler* pSampler, enum VkSamplerAddressMode samplerAddressMode, VkBorderColor borderColor, VkCompareOp compareOp)
 {
     vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
