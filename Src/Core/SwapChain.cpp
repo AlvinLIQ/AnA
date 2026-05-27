@@ -41,12 +41,9 @@ SwapChain::~SwapChain()
 VkResult SwapChain::AcquireNextImage()
 {
     vkWaitForFences(aDevice->GetLogicalDevice(), 1, &inFlightFences[CurrentFrame], VK_TRUE, UINT64_MAX);
-
     auto result = vkAcquireNextImageKHR(aDevice->GetLogicalDevice(), swapChain, UINT64_MAX,
                                  imageAvailableSemaphores[CurrentFrame], VK_NULL_HANDLE,
                                  &CurrentImage);
-    if (result != VK_ERROR_OUT_OF_DATE_KHR)
-        vkResetFences(aDevice->GetLogicalDevice(), 1, &inFlightFences[CurrentFrame]);
 
     return result;
 }
@@ -91,6 +88,7 @@ VkResult SwapChain::SubmitCommandBuffer(VkCommandBuffer commandBuffer)
     submitInfo.pSignalSemaphoreInfos = &signalSemaphoreSubmitInfo;
     submitInfo.signalSemaphoreInfoCount = 1;
 
+    vkResetFences(aDevice->GetLogicalDevice(), 1, &inFlightFences[CurrentFrame]);
     VkResult result;
     if ((result = vkQueueSubmit2(aDevice->GetGraphicsQueue(), 1, &submitInfo, inFlightFences[CurrentFrame])) != VK_SUCCESS)
     {
