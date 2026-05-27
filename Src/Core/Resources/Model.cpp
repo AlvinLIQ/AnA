@@ -211,19 +211,18 @@ void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo)
     modelInfo.maxBounding = glm::vec3(-FLT_MAX);
     Model::Vertex vertex{};
     uint32_t offset = 0;
-    for (uint32_t f = 0, v, i; f < mesh->face_count; f++)
+    uint32_t triangleIndices[3];
+    for (uint32_t f = 0, v, fv, i; f < mesh->face_count; f++)
     {
-        uint32_t fv = mesh->face_vertices[f];
-        for (v = 0; v + 1 < fv; v++)
+        fv = mesh->face_vertices[f];
+        triangleIndices[0] = offset;
+        for (v = 0; v + 1 < fv; v++) // deal with face triangulation
         {
-            fastObjIndex tri[3] = {
-                        mesh->indices[offset],
-                        mesh->indices[offset + v],
-                        mesh->indices[offset + v + 1]
-                    };
+            triangleIndices[1] = offset + v;
+            triangleIndices[2] = offset + v + 1;
             for (i = 0; i < 3; i++)
             {
-                auto& index = tri[i];
+                auto& index = mesh->indices[triangleIndices[i]];
                 vertex.position = *reinterpret_cast<glm::vec3*>(&mesh->positions[3 * index.p]);
                 vertex.normal = *reinterpret_cast<glm::vec3*>(&mesh->normals[3 * index.n]);
                 vertex.uv = *reinterpret_cast<glm::vec2*>(&mesh->texcoords[2 * index.t]);
