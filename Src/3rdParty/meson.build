@@ -25,4 +25,3 @@ fastobj_lib = static_library('fastobj', ['fast_obj/fast_obj.c'])
 
 vma_include = include_directories('VulkanMemoryAllocator/include', is_system: true)
 cdt_include = include_directories('CDT/CDT/include', is_system: true)
-tinyobj_include = include_directories('tinyobjloader', is_system: true)

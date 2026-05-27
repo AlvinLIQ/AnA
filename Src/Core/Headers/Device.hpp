@@ -11,9 +11,9 @@
 #include "../../3rdParty/VulkanMemoryAllocator/include/vk_mem_alloc.h"
 
 #define INCLUDE_STB_IMAGE
-#ifndef RELEASE_BUILD
+//#ifndef RELEASE_BUILD
 #define ENABLE_MESH_SHADER
-#endif
+//#endif
 #define MAX_FRAMES_IN_FLIGHT 2
 
 #define numsof(A) sizeof(A) / sizeof(A[0])

@@ -9,7 +9,7 @@ cc = meson.get_compiler('cpp')
 vulkan_dep = dependency('vulkan', required: true)  # Vulkan SDK
 
 cflags = []
-if get_option('buildtype') == 'release'
+if get_option('buildtype') != 'debug'
     cflags += ['-DRELEASE_BUILD']
 else
     cflags += ['-DDEBUG_BUILD']
