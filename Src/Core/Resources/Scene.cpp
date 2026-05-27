@@ -70,8 +70,6 @@ Scene::~Scene()
 {
     if (objectDescriptor != nullptr)
         delete objectDescriptor;
-    if (meshDescriptor != nullptr)
-        delete meshDescriptor;
     for (auto& descriptor : samplersDescriptors)
         delete descriptor;
 }
@@ -221,9 +219,7 @@ void Scene::Append(std::vector<Model::Vertex>& meshVertices, std::vector<uint32_
 
 void Scene::RemoveAt(uint32_t meshIndex)
 {
-    auto& modelMap = Resources::ResourceManager::GetCurrent()->Meshes.MeshMap;
-    meshletIDCount -= uint32_t(modelMap[meshes[meshIndex].modelID]->meshlets.size());
-
+    //auto& modelMap = Resources::ResourceManager::GetCurrent()->Meshes.MeshMap;
     meshes.erase(meshes.begin() + meshIndex);
     needUpdate = true;
 }
@@ -247,12 +243,13 @@ void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIn
     auto aResourceManager = Resources::ResourceManager::GetCurrent();
     auto& sets = shader.GetDescriptorSets()[bufferIndex];
     shader.GetPipeline().Bind(commandBuffer);
-    sets[DEFAULT_VERTEX_LAYOUT] = aResourceManager->Meshes.GetCurrentFrameResource().vertexDescriptorSet;
+    auto& frameResource = aResourceManager->Meshes.GetCurrentFrameResource();
+    sets[DEFAULT_VERTEX_LAYOUT] = frameResource.vertexDescriptorSet;
     sets[DEFAULT_OBJECT_LAYOUT] = objectDescriptor->GetSets()[currentBufferIndex];
     sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors.front()->GetSets()[0];
     if (aDevice->MeshShaderSupport() && shader.HasMeshShader())
     {
-        sets[DEFAULT_MESHLET_LAYOUT] = meshDescriptor->GetSets()[currentBufferIndex];
+        sets[DEFAULT_MESHLET_LAYOUT] = frameResource.meshDescriptorSet;
     }
     const auto& offsets =
         aResourceManager->GetDefaultUBODynamicOffsets();
@@ -428,32 +425,12 @@ void Scene::createSSBODescriptor()
         3,
         objectDescriptorSetLayout,
         VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-    if (aDevice->MeshShaderSupport())
-    {
-        auto& meshDescriptorSetLayout = shaders[MESH_PIPELINE_ID].GetDescriptors()[DEFAULT_MESHLET_LAYOUT].GetLayout();
-        meshDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,
-            MAX_FRAMES_IN_FLIGHT * 4,
-            4,
-            meshDescriptorSetLayout,
-            VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-        for (size_t i = 0; i < meshletIDCountBuffers.size(); i++)
-        {
-            VkDescriptorBufferInfo bufferInfo;
-            bufferInfo.buffer = meshletIDCountBuffers[i].GetBuffer();
-            bufferInfo.offset = 0;
-            bufferInfo.range = meshletIDCountBuffers[i].GetSize();
-            aDevice->UpdateDescriptorSet(bufferInfo, 5, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                    meshDescriptor->GetSets()[i]);
-        }
-    }
+
     updateSSBODescriptor();
 }
 
 void Scene::updateSSBODescriptor()
 {
-    auto& meshes = Resources::ResourceManager::GetCurrent()->Meshes;
-    auto& frameResource = meshes.GetCurrentFrameResource();
-
     VkDescriptorBufferInfo bufferInfo;
     //Object Buffer
     bufferInfo.buffer = objectBuffers[nextIndex].GetBuffer();
@@ -476,39 +453,21 @@ void Scene::updateSSBODescriptor()
 
     if (aDevice->MeshShaderSupport())
     {
-        //Meshlet Buffer
-        bufferInfo.buffer = frameResource.meshletBuffer.GetBuffer();
-        bufferInfo.offset = 0;
-        bufferInfo.range = frameResource.meshletBuffer.GetSize();
-        aDevice->UpdateDescriptorSet(bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-        meshDescriptor->GetSets()[nextIndex]);
-        bufferInfo.buffer = frameResource.meshletVertexBuffer.GetBuffer();
-        bufferInfo.offset = 0;
-        bufferInfo.range = frameResource.meshletVertexBuffer.GetSize();
-        aDevice->UpdateDescriptorSet(bufferInfo, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-        meshDescriptor->GetSets()[nextIndex]);
-        bufferInfo.buffer = frameResource.meshletIndexBuffer.GetBuffer();
-        bufferInfo.offset = 0;
-        bufferInfo.range = frameResource.meshletIndexBuffer.GetSize();
-        aDevice->UpdateDescriptorSet(bufferInfo, 2, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-        meshDescriptor->GetSets()[nextIndex]);
-
-        //Meshlet Boundings Buffer
-        bufferInfo.buffer = frameResource.meshletCullingBuffer.GetBuffer();
-        bufferInfo.offset = 0;
-        bufferInfo.range = frameResource.meshletCullingBuffer.GetSize();
-        aDevice->UpdateDescriptorSet(bufferInfo, 3, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                meshDescriptor->GetSets()[nextIndex]);
         //Meshlet ID Buffer
         bufferInfo.buffer = meshletIDBuffers[nextIndex].GetBuffer();
         bufferInfo.offset = 0;
         bufferInfo.range = meshletIDBuffers[nextIndex].GetSize();
+        aDevice->UpdateDescriptorSet(bufferInfo, 3, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                objectDescriptor->GetSets()[nextIndex]);
+        //Meshlet ID Count Buffer
+        bufferInfo.buffer = meshletIDCountBuffers[nextIndex].GetBuffer();
+        bufferInfo.offset = 0;
+        bufferInfo.range = meshletIDCountBuffers[nextIndex].GetSize();
         aDevice->UpdateDescriptorSet(bufferInfo, 4, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                meshDescriptor->GetSets()[nextIndex]);
+                objectDescriptor->GetSets()[nextIndex]);
     }
     currentBufferIndex = nextIndex;
     nextIndex = NextFrameIndex(currentBufferIndex);
-
     commandBufferNeedUpdate = true;
 }
 

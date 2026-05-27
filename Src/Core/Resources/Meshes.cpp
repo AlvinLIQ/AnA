@@ -18,6 +18,8 @@ Meshes::~Meshes()
 {
     if (vertexDescriptor)
         delete vertexDescriptor;
+    if (meshDescriptor != nullptr)
+        delete meshDescriptor;
 }
 
 void Meshes::Init()
@@ -30,10 +32,21 @@ void Meshes::Init()
                 1, resourceManager->Shaders.front().GetDescriptors()[DEFAULT_VERTEX_LAYOUT].GetLayout(),
                 VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
     }
+    if (aDevice->MeshShaderSupport() && meshDescriptor == nullptr)
+    {
+        auto& meshDescriptorSetLayout = resourceManager->Shaders[MESH_PIPELINE_ID].GetDescriptors()[DEFAULT_MESHLET_LAYOUT].GetLayout();
+        meshDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,
+            MAX_FRAMES_IN_FLIGHT * 4,
+            4,
+            meshDescriptorSetLayout,
+            VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+    }
     for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
         updateDescriptors(i);
         frameResources[i].vertexDescriptorSet = vertexDescriptor->GetSets()[i];
+        if (meshDescriptor)
+            frameResources[i].meshDescriptorSet = meshDescriptor->GetSets()[i];
     }
 }
 
@@ -240,6 +253,32 @@ void Meshes::updateDescriptors(uint32_t bufferIndex)
     aDevice->UpdateDescriptorSet(bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
         vertexDescriptor->GetSets()[bufferIndex]);
     frameResources[bufferIndex].vertexDescriptorSet = vertexDescriptor->GetSets()[bufferIndex];
+    if(aDevice->MeshShaderSupport())
+    {
+        //Meshlet Buffer
+        bufferInfo.buffer = frameResources[bufferIndex].meshletBuffer.GetBuffer();
+        bufferInfo.offset = 0;
+        bufferInfo.range = frameResources[bufferIndex].meshletBuffer.GetSize();
+        aDevice->UpdateDescriptorSet(bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                meshDescriptor->GetSets()[bufferIndex]);
+        bufferInfo.buffer = frameResources[bufferIndex].meshletVertexBuffer.GetBuffer();
+        bufferInfo.offset = 0;
+        bufferInfo.range = frameResources[bufferIndex].meshletVertexBuffer.GetSize();
+        aDevice->UpdateDescriptorSet(bufferInfo, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                meshDescriptor->GetSets()[bufferIndex]);
+        bufferInfo.buffer = frameResources[bufferIndex].meshletIndexBuffer.GetBuffer();
+        bufferInfo.offset = 0;
+        bufferInfo.range = frameResources[bufferIndex].meshletIndexBuffer.GetSize();
+        aDevice->UpdateDescriptorSet(bufferInfo, 2, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                meshDescriptor->GetSets()[bufferIndex]);
+
+        //Meshlet Boundings Buffer
+        bufferInfo.buffer = frameResources[bufferIndex].meshletCullingBuffer.GetBuffer();
+        bufferInfo.offset = 0;
+        bufferInfo.range = frameResources[bufferIndex].meshletCullingBuffer.GetSize();
+        aDevice->UpdateDescriptorSet(bufferInfo, 3, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                meshDescriptor->GetSets()[bufferIndex]);
+    }
 }
 
 uint32_t Meshes::prepareFrameResources()

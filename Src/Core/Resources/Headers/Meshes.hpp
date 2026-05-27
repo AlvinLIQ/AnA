@@ -45,6 +45,7 @@ namespace AnA
                 Buffer meshletIndexBuffer;
                 Buffer meshletCullingBuffer;
                 VkDescriptorSet vertexDescriptorSet;
+                VkDescriptorSet meshDescriptorSet;
                 //Buffer meshletIDBuffer;
             };
 
@@ -101,6 +102,7 @@ namespace AnA
             uint32_t meshletCount = 0;
 
             Descriptor* vertexDescriptor = nullptr;
+            Descriptor* meshDescriptor = nullptr;
         };
     }
 }

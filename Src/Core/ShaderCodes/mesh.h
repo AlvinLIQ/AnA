@@ -71,7 +71,7 @@ struct CollisionData
 
 bool isSphereInsideFrustum(in vec3 center, in float radius, in vec4 frustumPlanes[6])
 {
-    for (int i = 0; i < 6; ++i)
+    for (int i = 0; i < 6; i++)
     {
         vec4 plane = frustumPlanes[i];
         float d = dot(plane.xyz, center) + plane.w + radius;

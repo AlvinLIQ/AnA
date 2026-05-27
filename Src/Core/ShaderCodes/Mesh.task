@@ -30,6 +30,16 @@ layout(scalar, set = DEFAULT_OBJECT_LAYOUT, binding = BIND_OBJECT_COLLISION) buf
     CollisionData collisions[];
 };
 
+layout(std430, set = DEFAULT_OBJECT_LAYOUT, binding = BIND_OBJECT_MESHLET_ID) buffer meshletIDSSBO
+{
+    uint meshletIDs[];
+};
+
+layout(std430, set = DEFAULT_OBJECT_LAYOUT, binding = BIND_OBJECT_MESHLET_ID_COUNT) buffer MeshletIDCountSSBO
+{
+    uint meshletIDCount;
+};
+
 layout(set = DEFAULT_UBO_LAYOUT, binding = BIND_CAMERA) buffer CameraBufferObject {
     mat4 proj;
     mat4 view;
@@ -62,16 +72,6 @@ layout(std430, set = DEFAULT_MESHLET_LAYOUT, binding = 3) buffer meshletCullingS
     BoundingSphere boundings[];
 } mcsbo;
 
-layout(std430, set = DEFAULT_MESHLET_LAYOUT, binding = 4) buffer meshletIDSSBO
-{
-    uint meshletIDs[];
-};
-
-layout(std430, set = DEFAULT_MESHLET_LAYOUT, binding = 5) buffer MeshletIDCountSSBO
-{
-    uint meshletIDCount;
-};
-
 taskPayloadSharedEXT MeshPayload taskData;
 shared uint visibleCount;
 
@@ -82,7 +82,6 @@ bool isMeshletVisible(uint meshletID, uint objectID)
     mat4 transform = objects[objectID].transform;
     transform[3].w = 1.0;
     vec3 center = (transform * vec4(boundingSphere.center, 1.0)).xyz;
-
     float scale = max(length(transform[0].xyz), max(length(transform[1].xyz), length(transform[2].xyz)));
     float radius = boundingSphere.radius * scale;
 

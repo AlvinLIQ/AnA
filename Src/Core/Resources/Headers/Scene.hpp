@@ -141,17 +141,9 @@ namespace AnA
         {
             return objectDescriptor;
         }
-        const Descriptor* GetMeshDescriptor() const
-        {
-            return meshDescriptor;
-        }
         VkDescriptorSet GetObjectDescriptorSet() const
         {
             return objectDescriptor->GetSets()[currentBufferIndex];
-        }
-        VkDescriptorSet GetMeshDescriptorSet() const
-        {
-            return meshDescriptor->GetSets()[currentBufferIndex];
         }
         VkDescriptorSet GetSamplersDescriptorSet() const
         {
@@ -179,7 +171,7 @@ namespace AnA
         std::vector<VkDescriptorImageInfo> textureInfos;
         std::vector<Descriptor*> samplersDescriptors;
         void createSamplerDescriptor();
-        Descriptor* objectDescriptor{nullptr}, *meshDescriptor{nullptr};
+        Descriptor* objectDescriptor{nullptr};
         void createSSBODescriptor();
         void updateSSBODescriptor();
         void appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageInfos);

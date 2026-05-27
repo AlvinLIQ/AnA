@@ -20,6 +20,16 @@ layout(scalar, set = DEFAULT_OBJECT_LAYOUT, binding = BIND_OBJECT) buffer Object
     Object objects[];
 };
 
+layout(std430, set = DEFAULT_OBJECT_LAYOUT, binding = BIND_OBJECT_MESHLET_ID) buffer meshletIDSSBO
+{
+    MeshletID meshletIDs[];
+};
+
+layout(std430, set = DEFAULT_OBJECT_LAYOUT, binding = BIND_OBJECT_MESHLET_ID_COUNT) buffer MeshletIDCountSSBO
+{
+    uint meshletIDCount;
+};
+
 layout(set = DEFAULT_UBO_LAYOUT, binding = 0) buffer CameraBufferObject {
     mat4 proj;
     mat4 view;
@@ -55,11 +65,6 @@ layout(scalar, set = DEFAULT_MESHLET_LAYOUT, binding = 1) buffer meshletVertexSS
 layout(scalar, set = DEFAULT_MESHLET_LAYOUT, binding = 2) buffer meshletIndexSSBO
 {
     uint8_t primitives[];
-};
-
-layout(scalar, set = DEFAULT_MESHLET_LAYOUT, binding = 4) buffer meshletIDSSBO
-{
-    MeshletID meshletIDs[];
 };
 
 taskPayloadSharedEXT MeshPayload taskData;
