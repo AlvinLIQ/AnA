@@ -142,6 +142,7 @@ void App::Run()
             aResourceManager.Resize();
             updateSceneOffset();
         }
+#ifdef ANA_INCLUDE_CONTROL
         if ((aResourceManager.MainControl &&
             aResourceManager.MainControl->NeedUpdate()) || aRenderer.NeedUpdate())
         {
@@ -162,6 +163,7 @@ void App::Run()
             aResourceManager.Shapes.PrepareDraw(aResourceManager.MainControl);
             aResourceManager.MainControl->EndUpdate();
         }
+#endif
         aResourceManager.Update();
         if (loopCallback)
             loopCallback();
