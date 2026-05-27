@@ -488,7 +488,7 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
     }
 }
 
-void Triangulation(std::vector<glm::vec2>& vertices, std::vector<uint32_t>& indices)
+void Device::Triangulation(std::vector<glm::vec2>& vertices, std::vector<uint32_t>& indices)
 {
     CDT::Triangulation<float> cdt;
     std::vector<CDT::Edge> edges{};

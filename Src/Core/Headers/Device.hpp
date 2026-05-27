@@ -108,6 +108,7 @@ namespace AnA
         #endif
 
         void BuildFontVertices(std::vector<Character>& characters, int range = 128);
+        static void Triangulation(std::vector<glm::vec2>& vertices, std::vector<uint32_t>& indices);
 
         void CreateSampler(VkSampler* pSampler, enum VkSamplerAddressMode samplerAddressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT, VkBorderColor borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK, VkCompareOp compareOp = VK_COMPARE_OP_ALWAYS);
 
