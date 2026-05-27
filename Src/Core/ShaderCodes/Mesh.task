@@ -23,6 +23,7 @@ layout(std430, set = DEFAULT_OBJECT_LAYOUT, binding = BIND_OBJECT_COUNT) buffer 
 {
     uint objectCount;
     uint collidedCount;
+    uint meshletCount;
 };
 
 layout(scalar, set = DEFAULT_OBJECT_LAYOUT, binding = BIND_OBJECT_COLLISION) buffer collisionBuffer
@@ -32,7 +33,7 @@ layout(scalar, set = DEFAULT_OBJECT_LAYOUT, binding = BIND_OBJECT_COLLISION) buf
 
 layout(std430, set = DEFAULT_OBJECT_LAYOUT, binding = BIND_OBJECT_MESHLET_ID) buffer meshletIDSSBO
 {
-    uint meshletIDs[];
+    MeshletID meshletIDs[];
 };
 
 layout(std430, set = DEFAULT_OBJECT_LAYOUT, binding = BIND_OBJECT_MESHLET_ID_COUNT) buffer MeshletIDCountSSBO
@@ -77,6 +78,8 @@ shared uint visibleCount;
 
 bool isMeshletVisible(uint meshletID, uint objectID)
 {
+    if (meshletID > meshletCount || objectID > objectCount)
+        return false;
     Meshlet meshlet = meshlets[meshletID];
     BoundingSphere boundingSphere = mcsbo.boundings[meshletID];
     mat4 transform = objects[objectID].transform;
@@ -102,7 +105,7 @@ void main()
 
     if (globalID < meshletIDCount)
     {
-        bool visible = isMeshletVisible(meshletIDs[globalID << 1], meshletIDs[(globalID << 1) ^ 1]);
+        bool visible = isMeshletVisible(meshletIDs[globalID].meshletID, meshletIDs[globalID].objectID);//meshletIDs[globalID << 1], meshletIDs[(globalID << 1) ^ 1]);
 
         if (visible)
         {

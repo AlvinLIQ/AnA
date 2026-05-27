@@ -78,6 +78,10 @@ namespace AnA
             {
                 return uint32_t(vertexCount);
             }
+            uint32_t GetMeshletCount()
+            {
+                return meshletCount;
+            }
 
             std::unordered_map<uint32_t, std::shared_ptr<Model>> MeshMap{};
             std::unordered_map<std::string, uint32_t> MeshPathIndexMap{};

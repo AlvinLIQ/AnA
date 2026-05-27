@@ -66,6 +66,13 @@ namespace AnA
         float padding;
     };
 
+    struct ObjectData
+    {
+        uint32_t objectCount;
+        uint32_t collidedCount;
+        uint32_t meshletCount;
+    };
+
     struct CollisionData
     {
         glm::uvec2 pair;

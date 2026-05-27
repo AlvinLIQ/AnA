@@ -89,7 +89,7 @@ void Scene::Init()
         VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         objectBuffers[i].Map();
 
-        objectDataBuffers[i] = Buffer(aDevice, 2 * sizeof(uint32_t),
+        objectDataBuffers[i] = Buffer(aDevice, sizeof(ObjectData),
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         objectDataBuffers[i].Map();
@@ -511,10 +511,12 @@ void Scene::updateAll()
         objectBuffers[nextIndex].Resize((meshes.size() + 1000) * sizeof(Object));
         objectBuffers[nextIndex].Map();
     }
-    Resources::ResourceManager::GetCurrent()->Meshes.Update();
+    //Resources::ResourceManager::GetCurrent()->Meshes.Update();
     CommitBufferUpdate(&objectBuffers[nextIndex]);
-    *reinterpret_cast<uint32_t*>(objectDataBuffers[nextIndex].GetMappedData()) = uint32_t(meshes.size());
     UpdateMeshlets();
 
+    auto objectData = reinterpret_cast<ObjectData*>(objectDataBuffers[nextIndex].GetMappedData());
+    objectData->objectCount = uint32_t(meshes.size());
+    objectData->meshletCount = Resources::ResourceManager::GetCurrent()->Meshes.GetMeshletCount();
     updateSSBODescriptor();
 }
