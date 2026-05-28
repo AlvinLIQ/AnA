@@ -134,7 +134,7 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
         auto model = resourceManager->Meshes.MeshMap[mesh.modelID];
         mesh.vertexCount = uint32_t(model->info.vertices.size());
         mesh.indexCount = uint32_t(model->info.indices.size());
-
+/*
         if (i == 1)
         {
             mesh.animationInfo.id = 0;
@@ -142,7 +142,7 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
             mesh.animationInfo.time = 0.0f;
             mesh.animationInfo.loop = true;
             mesh.animationInfo.playing = true;
-        }
+        }*/
 
         meshletIDCount += uint32_t(model->meshlets.size());
 
