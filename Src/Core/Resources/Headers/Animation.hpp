@@ -38,6 +38,7 @@ namespace AnA
     public:
         Animations();
 
+        uint32_t Append(Animation& animation);
         void Update(Scene& scene, float dt);
         bool ProcessAnimationInfo(AnimationInfo& info, Transform& transform, float dt);
     private:

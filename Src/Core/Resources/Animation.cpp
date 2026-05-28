@@ -31,6 +31,12 @@ Animations::Animations()
     animations.push_back(animation);
 }
 
+uint32_t Animations::Append(Animation& animation)
+{
+    animations.push_back(animation);
+    return uint32_t(animations.size() - 1);
+}
+
 void Animations::Update(Scene& scene, float dt)
 {
     auto& meshes = scene.meshes;
