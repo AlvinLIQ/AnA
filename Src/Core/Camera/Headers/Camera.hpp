@@ -69,7 +69,7 @@ namespace AnA
             Transform CameraTransform;
             void UpdateViewMatrix();
 
-            AnimationInfo AnimationInfo{};
+            AnA::AnimationInfo AnimationInfo{};
         private:
             glm::mat4 projectionMatrix{1.f};
             glm::mat4 viewMatrix{1.f};
