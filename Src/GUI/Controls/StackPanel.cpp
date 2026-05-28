@@ -38,7 +38,6 @@ Vec2 StackPanel::GetSizeForRender()
         items[i]->Aspect = Aspect;
         items[i]->Extent = Extent;
         auto _size = items[i]->GetSizeForRender();
-        offset2F[invO] += size[invO];
         size = _size;
 
         items[i]->RenderOffset(offset);
@@ -46,6 +45,7 @@ Vec2 StackPanel::GetSizeForRender()
 
         maxSize2F[invO] = std::max(maxSize2F[invO], (offset2F[invO] + size2F[invO]) + (Padding[invO] + Padding[2 + invO]) * 0.5f);
         maxSize2F[o] = std::max(maxSize2F[o], size2F[o]);
+        offset2F[invO] += size[invO];
         offset2F[invO] += Spacing * 0.5f;
     }
     RenderSize(maxSize);
@@ -63,9 +63,12 @@ void StackPanel::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorIma
     float offset = renderOffset[invO];
     for (auto& item : items)
     {
+        AlignmentType aligns[2] = {item->HorizontalAlignment, item->VerticalAlignment};//(items[i] + offsets[o]);
+        if (aligns[invO] == Stretch && item == items.back())
+            items.back()->RenderSize()[invO] = renderSize[invO] - items.back()->RenderOffset()[invO];
+
         item->RenderOffset()[invO] += offset;
-        auto align = invO ? item->HorizontalAlignment : item->VerticalAlignment;//(items[i] + offsets[o]);
-        switch (align)
+        switch (aligns[o])
         {
         case Center:
             item->RenderOffset()[o] = renderOffset[o] + (renderSize[o] - item->RenderSize()[o]) * 0.5f - Padding[o] * 0.5f;
