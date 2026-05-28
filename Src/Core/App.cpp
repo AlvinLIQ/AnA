@@ -143,8 +143,8 @@ void App::Run()
             updateSceneOffset();
         }
 #ifdef ANA_INCLUDE_CONTROL
-        if ((aResourceManager.MainControl &&
-            aResourceManager.MainControl->NeedUpdate()) || aRenderer.NeedUpdate())
+        if (aResourceManager.MainControl &&
+            (aResourceManager.MainControl->NeedUpdate() || aRenderer.NeedUpdate()))
         {
             auto controlExtent = aRenderer.GetSwapChainExtent();
             if (actualSceneOffset.x)

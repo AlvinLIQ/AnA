@@ -31,6 +31,21 @@ typedef VmaAllocation_T* VmaAllocation;
 
 namespace AnA
 {
+    template<typename T>
+    inline void ReadFile(const std::string& filename, std::vector<T>& buffer)
+    {
+        std::ifstream file(filename, std::ios::ate | std::ios::binary);
+        if (!file.is_open())
+        {
+            throw std::runtime_error("Failed to open " + filename + "!");
+        }
+
+        std::streamsize fs = file.tellg();
+        buffer.resize(static_cast<size_t>(fs) / sizeof(T));
+        file.seekg(0);
+        file.read(reinterpret_cast<char*>(buffer.data()), fs);
+        file.close();
+    }
     inline std::vector<unsigned char> ReadFile(const std::string &filename)
     {
         std::ifstream file(filename, std::ios::ate | std::ios::binary);
