@@ -92,7 +92,15 @@ void EditorApp::Init()
             editorApp->aResourceManager.MainScene.UpdateMeshTransform(editorApp->SelectedObjectData->id);
         }
         , SDL_SCANCODE_ESCAPE, ANA_PRESS});// Rotate Mode
-
+    editorInputProfile.opKeyMapConfigs.push_back({this,
+        [](void* param)
+        {
+            auto editorApp = reinterpret_cast<EditorApp*>(param);
+            auto transform = editorApp->aResourceManager.MainCamera.CameraTransform;
+            printf("{{%f, %f, %f},\n{1.0f, 1.0f, 1.0f},\n{%f, %f, %f}}\n", transform.translation.x, transform.translation.y, transform.translation.z,
+                transform.rotation.x, transform.rotation.y, transform.rotation.z);
+        }
+            , SDL_SCANCODE_F, ANA_PRESS});// Output Camera Transform
     editorInputProfile.cursorConfigs.push_back({this,
     [](void* param, Input::CursorArgs& curArgs, int leftButtonAction)
     {

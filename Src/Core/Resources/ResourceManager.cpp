@@ -197,9 +197,14 @@ void ResourceManager::Update()
     {
         TextContext.Update();
     }
+
+    float dt = MainCamera.GetSpeedRatio() * 0.5f;
+    //Process Ccamera Animation
+    if (Animations.ProcessAnimationInfo(MainCamera.AnimationInfo, MainCamera.CameraTransform, dt))
+        MainCamera.UpdateViewMatrix();
     UpdateCameraBuffer();
 
-    Animations.Update(MainScene, MainCamera.GetSpeedRatio() * 0.5f);
+    Animations.Update(MainScene, dt);
 
     uint32_t frameIndex = SwapChain::GetCurrent()->CurrentFrame;
     GlobalLight.UpdateBuffers(LightCamera, frameIndex);

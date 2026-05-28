@@ -35,42 +35,53 @@ void Animations::Update(Scene& scene, float dt)
 {
     auto& meshes = scene.meshes;
 
-    for (size_t i = 0, j; i < meshes.size(); i++)
+    for (size_t i = 0; i < meshes.size(); i++)
     {
-        if (meshes[i].animationInfo.id >= animations.size() || !meshes[i].animationInfo.playing)
-            continue;
-
-        auto& animation = animations[meshes[i].animationInfo.id];
-        meshes[i].animationInfo.time += dt;
-        for (j = meshes[i].animationInfo.pos + 1; j < animation.keyFrames.size(); j++)
-        {
-            auto& keyFrame0 = animation.keyFrames[j - 1];
-            auto& keyFrame1 = animation.keyFrames[j];
-            float factor = (meshes[i].animationInfo.time - keyFrame0.time)
-                        / (keyFrame1.time - keyFrame0.time);
-
-            if (meshes[i].animationInfo.time >= keyFrame1.time)
-                meshes[i].animationInfo.pos++;
-
-            if (animation.type & ANA_SCALE)
-                meshes[i].transform.scale = keyFrame0.transform.scale +
-                    factor * (keyFrame1.transform.scale - keyFrame0.transform.scale);
-            if (animation.type & ANA_ROTATION)
-                meshes[i].transform.rotation = keyFrame0.transform.rotation +
-                    factor * (keyFrame1.transform.rotation - keyFrame0.transform.rotation);
-            if (animation.type & ANA_TRANSLATION)
-                meshes[i].transform.translation = keyFrame0.transform.translation +
-                    factor * (keyFrame1.transform.translation - keyFrame0.transform.translation);
+        if (ProcessAnimationInfo(meshes[i].animationInfo, meshes[i].transform, dt))
             scene.UpdateMeshTransform(uint32_t(i));
-            break;
+    }
+}
+
+bool Animations::ProcessAnimationInfo(AnimationInfo& info, Transform& transform, float dt)
+{
+    if (!info.playing || info.id >= animations.size())
+        return false;
+
+    auto& animation = animations[info.id];
+    info.time += dt;
+    for (uint32_t j = info.pos + 1; j < animation.keyFrames.size(); j++)
+    {
+        auto& keyFrame0 = animation.keyFrames[j - 1];
+        auto& keyFrame1 = animation.keyFrames[j];
+        float factor = (info.time - keyFrame0.time)
+            / (keyFrame1.time - keyFrame0.time);
+
+        if (info.time >= keyFrame1.time)
+        {
+            info.pos++;
+            continue;
         }
 
-        if (meshes[i].animationInfo.pos + 1 >= animation.keyFrames.size())
-        {
-            meshes[i].animationInfo.pos = 0;
-            meshes[i].animationInfo.time = 0;
-            if (!meshes[i].animationInfo.loop)
-                meshes[i].animationInfo.playing = false;
-        }
+        if (animation.type & ANA_SCALE)
+            transform.scale = keyFrame0.transform.scale +
+                factor * (keyFrame1.transform.scale - keyFrame0.transform.scale);
+        if (animation.type & ANA_ROTATION)
+            transform.rotation = keyFrame0.transform.rotation +
+                factor * (keyFrame1.transform.rotation - keyFrame0.transform.rotation);
+        if (animation.type & ANA_TRANSLATION)
+            transform.translation = keyFrame0.transform.translation +
+                factor * (keyFrame1.transform.translation - keyFrame0.transform.translation);
+        //scene.UpdateMeshTransform(uint32_t(i));
+        break;
     }
+
+    if (info.pos + 1 >= animation.keyFrames.size())
+    {
+        info.pos = 0;
+        info.time = 0;
+        if (!info.loop)
+            info.playing = false;
+    }
+
+    return true;
 }

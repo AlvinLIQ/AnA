@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 
 #include "../../Headers/Types.hpp"
+#include "../../Resources/Headers/Animation.hpp"
 
 #define moveStep 1.0f
 #define rotateStep 0.8f
@@ -67,6 +68,8 @@ namespace AnA
             glm::vec3 offset{};
             Transform CameraTransform;
             void UpdateViewMatrix();
+
+            AnimationInfo AnimationInfo{};
         private:
             glm::mat4 projectionMatrix{1.f};
             glm::mat4 viewMatrix{1.f};

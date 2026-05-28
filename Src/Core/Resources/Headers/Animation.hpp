@@ -39,7 +39,7 @@ namespace AnA
         Animations();
 
         void Update(Scene& scene, float dt);
-
+        bool ProcessAnimationInfo(AnimationInfo& info, Transform& transform, float dt);
     private:
         std::vector<Animation> animations;
     };
