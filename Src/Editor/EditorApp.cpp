@@ -150,6 +150,8 @@ void EditorApp::Init()
     };
     static_cast<Controls::ListView*>((static_cast<EditorApp*>(App::GetCurrent())->controlMap["camLockToggle"]))->Select(0);
 
+    auto pageTabs = static_cast<Controls::ListView*>(static_cast<EditorApp*>(App::GetCurrent())->controlMap["pageTabs"]);
+    pageTabs->Select(0);
     loopCallback = EditorApp::onLoop;
 
     App::Init();
@@ -220,10 +222,11 @@ void EditorApp::exitButton_Click(void* , PointerEventArgs& )
     exit(0);
 }
 
-void EditorApp::pageButton_Click(void* , PointerEventArgs& )
+void EditorApp::pageTabs_SelectionChanged(void* )
 {
     auto pageView = static_cast<Controls::PageView*>(static_cast<EditorApp*>(App::GetCurrent())->controlMap["pageView"]);
-    pageView->PageIndex(1 - pageView->PageIndex());
+    auto pageTabs = static_cast<Controls::ListView*>(static_cast<EditorApp*>(App::GetCurrent())->controlMap["pageTabs"]);
+    pageView->PageIndex(pageTabs->SelectionIndex());
 }
 
 void EditorApp::mainScene_MeshAppend(std::string name, uint32_t id)

@@ -23,7 +23,7 @@ namespace AnA
             static void loadModelButton_Click(void* control, PointerEventArgs& args);
             static void saveSceneButton_Click(void* control, PointerEventArgs& args);
             static void exitButton_Click(void* control, PointerEventArgs& args);
-            static void pageButton_Click(void* , PointerEventArgs& );
+            static void pageTabs_SelectionChanged(void*);
             static void mainScene_MeshAppend(std::string name, uint32_t id);
             template<char actionMode>
             Input::RegularCallBack createActionModeCallback();

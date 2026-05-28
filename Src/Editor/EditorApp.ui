@@ -1,14 +1,16 @@
 <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Color="0.5f, 0.5f, 0.5f, 1.0f">
-    <ListView HorizontalAlignment="Start" VerticalAlignment="Stretch"
-        Color="0.1f, 0.1f, 0.1f, 1.0f">
-        <TextBlock Text=" A " HorizontalAlignment="Stretch" FontSize="(Float)25.0f" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
+    <ListView Name="pageTabs" HorizontalAlignment="Start" VerticalAlignment="Stretch"
+        Orientation="Vertical"
+        Color="0.1f, 0.1f, 0.1f, 1.0f" SelectionChanged="pageTabs_SelectionChanged">
+        <TextBlock Text=" G " HorizontalAlignment="Stretch" FontSize="(Float)28.0f" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
+        <TextBlock Text=" A " HorizontalAlignment="Stretch" FontSize="(Float)28.0f" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
     </ListView>
     <PageView Name="pageView" Color="0.156f, 0.156f, 0.156f, 1.0f" ControlSize="0.0f, 0.0f"
         VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
         VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch">
         <StackPanel ControlSize="0.0f, 0.0f" Spacing="0.01f" Orientation="Vertical"
             Color="" Padding="0.05f, 0.01f, 0.05f, 0.01f">
-            <TextBlock Text="Editor" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
+            <TextBlock Text="General" FontColor="0.8f, 0.8f, 0.8f, 1.0f" FontSize="(Float)25.0f"/>
             <Button HorizontalAlignment="Start" Click="loadModelButton_Click">
                 <TextBlock Text="Load Model" FontColor="0.8f, 0.8f, 0.8f, 1.0f" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Button>
@@ -34,16 +36,10 @@
             <Button HorizontalAlignment="Start" Click="exitButton_Click">
                 <TextBlock Text="Exit" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
             </Button>
-            <Button Click="pageButton_Click">
-                <TextBlock Text="Test" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
-            </Button>
         </StackPanel>
         <StackPanel ControlSize="0.0f, 0.0f" Spacing="0.01f" Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
             Color="0.156f, 0.156f, 0.156f, 1.0f" Padding="0.05f, 0.01f, 0.05f, 0.01f">
-            <TextBox Text="123"/>
-            <Button Click="pageButton_Click">
-                <TextBlock Text="Back" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
-            </Button>
+            <TextBlock Text="Animation" FontColor="0.8f, 0.8f, 0.8f, 1.0f" FontSize="(Float)25.0f"/>
         </StackPanel>
     </PageView>
 </StackPanel>
