@@ -25,6 +25,7 @@ Renderer::~Renderer()
 CommandBuffer* Renderer::BeginFrame()
 {
     assert(!isFrameStarted && "Can't call BeginFrame while already in progress!");
+    aSwapChain->WaitForFence();
     auto result = aSwapChain->AcquireNextImage();
     if (result == VK_ERROR_OUT_OF_DATE_KHR)
     {
@@ -36,6 +37,7 @@ CommandBuffer* Renderer::BeginFrame()
     {
         throw std::runtime_error("Failed to acquire swap chain image!");
     }
+    aSwapChain->ResetFence();
     needUpdate = false;
     isFrameStarted = true;
 

@@ -47,6 +47,8 @@ namespace AnA
 
         Float Scale[2];
 
+        void WaitForFence();
+        void ResetFence();
         VkResult AcquireNextImage();
 
         VkResult SubmitCommandBuffer(VkCommandBuffer commandBuffer);

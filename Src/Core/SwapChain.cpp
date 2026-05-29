@@ -38,9 +38,18 @@ SwapChain::~SwapChain()
     cleanupSwapChain();
 }
 
-VkResult SwapChain::AcquireNextImage()
+void SwapChain::WaitForFence()
 {
     vkWaitForFences(aDevice->GetLogicalDevice(), 1, &inFlightFences[CurrentFrame], VK_TRUE, UINT64_MAX);
+}
+
+void SwapChain::ResetFence()
+{
+    vkResetFences(aDevice->GetLogicalDevice(), 1, &inFlightFences[CurrentFrame]);
+}
+
+VkResult SwapChain::AcquireNextImage()
+{
     auto result = vkAcquireNextImageKHR(aDevice->GetLogicalDevice(), swapChain, UINT64_MAX,
                                  imageAvailableSemaphores[CurrentFrame], VK_NULL_HANDLE,
                                  &CurrentImage);
@@ -88,7 +97,6 @@ VkResult SwapChain::SubmitCommandBuffer(VkCommandBuffer commandBuffer)
     submitInfo.pSignalSemaphoreInfos = &signalSemaphoreSubmitInfo;
     submitInfo.signalSemaphoreInfoCount = 1;
 
-    vkResetFences(aDevice->GetLogicalDevice(), 1, &inFlightFences[CurrentFrame]);
     VkResult result;
     if ((result = vkQueueSubmit2(aDevice->GetGraphicsQueue(), 1, &submitInfo, inFlightFences[CurrentFrame])) != VK_SUCCESS)
     {
