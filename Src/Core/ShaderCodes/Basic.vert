@@ -92,7 +92,7 @@ void main() {
     vec4 vertexPos = transform * vec4(vertex.position, 1.0);
     vec4 viewPos = cbo.view * vertexPos;
     gl_Position = cbo.proj * viewPos;
-    outNormalSpace = vertex.normal;
+    outNormalSpace = CalculateNormal(vertex.pitch, vertex.yaw);
     outVertex = vertexPos.xyz;
     outViewPosZ = viewPos.z / viewPos.w + ubo.cascades[1].split - ubo.cascades[0].split + 1.0;
 

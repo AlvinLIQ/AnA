@@ -10,7 +10,7 @@ layout(location = 2) out float intensity;
 
 layout(std430, set = DEFAULT_VERTEX_LAYOUT, binding = BIND_VERTEX) buffer VertexSSBO
 {
-    float vertices[];
+    Vertex vertices[];
 };
 
 layout(set = DEFAULT_UBO_LAYOUT, binding = 0) buffer CameraBufferObject {
@@ -49,12 +49,11 @@ mat4 transform(vec3 scale, vec3 rotation, vec3 transition)
 
 void main() {
     gl_PointSize = 4;
-    uint vertexOffset = gl_VertexIndex * 8;
-    vec4 vertexPos = vec4(vertices[vertexOffset + 0], vertices[vertexOffset + 1], vertices[vertexOffset + 2], 1.0);
+    vec4 vertexPos = vec4(vertices[gl_VertexIndex].position, 1.0);
     vec4 finalPos = cbo.proj * cbo.view * vertexPos;
 
     gl_Position = finalPos;
-    intensity = vertices[vertexOffset + 3];
+    intensity = vertices[gl_VertexIndex].pitch;
     vertexIndex = gl_VertexIndex;
     outVertex = vertexPos;
 }

@@ -224,7 +224,7 @@ void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo)
             {
                 auto& index = mesh->indices[triangleIndices[i]];
                 vertex.position = *reinterpret_cast<glm::vec3*>(&mesh->positions[3 * index.p]);
-                vertex.normal = *reinterpret_cast<glm::vec3*>(&mesh->normals[3 * index.n]);
+                ExtractPitchYaw(*reinterpret_cast<glm::vec3*>(&mesh->normals[3 * index.n]), vertex.pitch, vertex.yaw);
                 vertex.uv = *reinterpret_cast<glm::vec2*>(&mesh->texcoords[2 * index.t]);
                 auto result = vertexMap.find(vertex);
                 if (result != vertexMap.end())
@@ -263,18 +263,6 @@ void Model::CreateVerticesFromFile(const char *filePath, std::vector<Vertex> &ve
         vertices.push_back(vertex);
         while(str[j++] != '\n');
     }
-}
-
-void CalculateNormal(std::vector<Model::Vertex>& vertices, size_t index, size_t period)
-{
-    size_t imp = index % period;
-    auto& left = imp ? vertices[index - 1] : vertices[index];
-    auto& right = imp != period - 1 ?  vertices[index + 1] : vertices[index];
-    auto& up = index >= period ? vertices[index - period] : vertices[index];
-    auto& down = index + period < vertices.size() ? vertices[index + period] : vertices[index];
-    auto v1 = right.position - left.position;
-    auto v2 = down.position - up.position;
-    vertices[index].normal = glm::normalize(glm::cross(v1, v2));
 }
 
 float Slope(const glm::vec3& v)
@@ -345,6 +333,12 @@ void Model::CreateTerrainFromVertices(std::vector<Vertex> &vertices, std::vector
             b = d;
         }
     }
+}
+
+void Model::ExtractPitchYaw(glm::vec3& normal, uint16_t& pitch, uint16_t& yaw)
+{
+    yaw = (glm::degrees(atan2(normal.x, normal.z)) / 360.0f) * 65535.0f;
+    pitch = (glm::degrees(asin(normal.y)) / 360.0f) * 65535.0f;
 }
 
 void Model::buildMeshlets()

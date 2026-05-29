@@ -1033,12 +1033,11 @@ void Device::createLogicalDevice()
     vulkan12Features.storageBuffer8BitAccess = VK_TRUE;
     vulkan12Features.pNext = &dynamicState3Features;
 
-    VkPhysicalDeviceShaderDrawParametersFeatures shaderDrawParametersFeatures{};
-    shaderDrawParametersFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETERS_FEATURES;
-    shaderDrawParametersFeatures.shaderDrawParameters = VK_TRUE;
-    shaderDrawParametersFeatures.pNext = &vulkan12Features;
-    //VkPhysicalDeviceFeatures deviceFeatures1{};
-    //vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures1);
+    VkPhysicalDeviceVulkan11Features vulkan11Features{};
+    vulkan11Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES;
+    vulkan11Features.storageBuffer16BitAccess = VK_TRUE;
+    vulkan11Features.shaderDrawParameters = VK_TRUE;
+    vulkan11Features.pNext = &vulkan12Features;
 
     VkPhysicalDeviceFeatures2 deviceFeatures2{};
     deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
@@ -1049,16 +1048,17 @@ void Device::createLogicalDevice()
     deviceFeatures2.features.vertexPipelineStoresAndAtomics = VK_TRUE;
     deviceFeatures2.features.fillModeNonSolid = VK_TRUE;
     deviceFeatures2.features.fragmentStoresAndAtomics = VK_TRUE;
+    deviceFeatures2.features.shaderInt16 = VK_TRUE;
 #ifdef ENABLE_MESH_SHADER
     VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures = {};
     meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
     meshShaderFeatures.meshShader = VK_TRUE;
     meshShaderFeatures.taskShader = VK_TRUE;
-    meshShaderFeatures.pNext = &shaderDrawParametersFeatures;
+    meshShaderFeatures.pNext = &vulkan11Features;
     if (meshShaderSupport)
         deviceFeatures2.pNext = &meshShaderFeatures;
     else
-        deviceFeatures2.pNext = &shaderDrawParametersFeatures;
+        deviceFeatures2.pNext = &vulkan11Features;
 
 #else
     deviceFeatures2.pNext = &shaderDrawParametersFeatures;

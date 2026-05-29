@@ -117,7 +117,7 @@ void main()
         vertexOutput[i].texCoord = vertex.uv;
         vertexOutput[i].texID = texID;
         #ifndef PER_PRIMITIVE_NORMAL
-        vertexOutput[i].normalSpace = normalize(transpose(inverse(mat3(transform))) * vertex.normal);
+        vertexOutput[i].normalSpace = normalize(transpose(inverse(mat3(transform))) * CalculateNormal(vertex.pitch, vertex.yaw));
         #endif
         vertexOutput[i].vertexPosition = vertexPos.xyz;
     }

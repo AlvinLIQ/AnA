@@ -1,4 +1,5 @@
-#define PER_PRIMITIVE_NORMAL
+#extension GL_EXT_shader_explicit_arithmetic_types_int16 : enable
+#extension GL_EXT_shader_16bit_storage : enable
 
 #define MAX_VERTICES 64
 #define MAX_PRIMITIVES 128
@@ -12,7 +13,8 @@ const uint rQBytesMask[4] = {0x0u, 0x0u, 0xFFu, 0xFFFFu};
 struct Vertex
 {
     vec3 position;
-    vec3 normal;
+    uint16_t pitch;
+    uint16_t yaw;
     vec2 uv;
 };
 
@@ -84,4 +86,17 @@ bool isSphereInsideFrustum(in vec3 center, in float radius, in vec4 frustumPlane
 bool isMeshletFacingCamera(in vec3 cameraPosition, in vec3 coneApex, in vec3 coneAxis, in float cutoff)
 {
     return dot(normalize(coneApex - cameraPosition), coneAxis) <= cutoff;
+}
+
+vec3 CalculateNormal(uint16_t _pitch, uint16_t _yaw)
+{
+    float pitch = radians(float(_pitch) / 65535.0f * 360.0f);
+    float yaw = radians(float(_yaw) / 65535.0f * 360.0f);
+    float cosPitch = cos(pitch);
+    return vec3
+    (
+        cosPitch * cos(yaw),
+        sin(pitch),
+        cosPitch * sin(yaw)
+    );
 }

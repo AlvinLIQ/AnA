@@ -22,12 +22,13 @@ namespace AnA
         struct Vertex
         {
             glm::vec3 position{};
-            glm::vec3 normal{};
+            uint16_t pitch{};
+            uint16_t yaw{};
             glm::vec2 uv{};
 
             bool operator==(const Vertex& vertex) const
             {
-                return position == vertex.position && normal == vertex.normal && uv == vertex.uv;
+                return position == vertex.position && pitch == vertex.pitch && yaw == vertex.yaw && uv == vertex.uv;
             }
             static std::vector<VkVertexInputBindingDescription> GetBindingDescription();
             static std::vector<VkVertexInputAttributeDescription> GetAttributeDescription();
@@ -37,9 +38,8 @@ namespace AnA
             std::size_t operator() (const Vertex& vertex) const
             {
                 return std::hash<float>()(vertex.position.x) ^ std::hash<float>()(vertex.position.y) ^ std::hash<float>()(vertex.position.z)
-                    ^ std::hash<float>()(vertex.normal.x)
-                    ^ std::hash<float>()(vertex.normal.y)
-                    ^ std::hash<float>()(vertex.normal.z)
+                    ^ std::hash<float>()(vertex.pitch)
+                    ^ std::hash<float>()(vertex.yaw)
                     ^ std::hash<float>()(vertex.uv.x)
                     ^ std::hash<float>()(vertex.uv.y);
             }
@@ -134,6 +134,8 @@ namespace AnA
         static void CreateVerticesFromFile(const char* filePath, std::vector<Vertex>& vertices);
         static bool CreateQuad(std::vector<Vertex> &vertices, std::vector<Index> &indices, Index a, Index b, Index c, Index d);
         static void CreateTerrainFromVertices(std::vector<Vertex>& vertices, std::vector<Index> &terrainVertices, size_t period);
+
+        static void ExtractPitchYaw(glm::vec3& normal, uint16_t& pitch, uint16_t& yaw);
     private:
         void buildMeshlets();
         void buildMeshletsWithOptimizer();
