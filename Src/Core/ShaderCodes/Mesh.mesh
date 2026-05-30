@@ -119,10 +119,10 @@ void main()
         vertexOutput[i].texCoord = vertex.uv;
         vertexOutput[i].texID = texID;
         vertexOutput[i].color = vec3(
-            float(vertex.color.r) / 255.0,
-            float(vertex.color.g) / 255.0,
-            float(vertex.color.b) / 255.0
-        );
+                float(vertex.color.r) / 255.0,
+                float(vertex.color.g) / 255.0,
+                float(vertex.color.b) / 255.0
+            );
         #ifndef PER_PRIMITIVE_NORMAL
         vertexOutput[i].normalSpace = normalize(transpose(inverse(mat3(transform))) * CalculateNormal(vertex.pitch, vertex.yaw));
         #endif

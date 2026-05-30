@@ -15,7 +15,7 @@ layout(location = 4) perprimitiveEXT in vec3 normalSpace;
 #else
 layout(location = 2) in vec3 normalSpace;
 layout(location = 3) in vec3 vertex;
-layout(location = 4) flat in vec3 color;
+layout(location = 4) in vec3 color;
 #endif
 #ifdef DEFERRED
 layout(location = 0) out vec4 outPosition;

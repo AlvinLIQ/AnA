@@ -20,6 +20,7 @@ struct VertexOutput {
     vec2 texCoord;
     uint texID;
     vec3 vertexPosition;
+    vec3 color;
 };
 layout(location = 4) perprimitiveEXT out vec3 primitiveNormals[];
 #else
@@ -28,6 +29,7 @@ struct VertexOutput {
     uint texID;
     vec3 normalSpace;
     vec3 vertexPosition;
+    vec3 color;
 };
 #endif
 
@@ -91,6 +93,7 @@ void main()
             vertexOutput[id].normalSpace = push.calNormal == 1 ? CalculateNormal(pos * -push.height) : vec3(0.);
             #endif
             vertexOutput[id].vertexPosition = vertex;
+            vertexOutput[id].color = vec3(1.);
             viewPos = cbo.view * vec4(vertex, 1.0);
             ++id;
         }
