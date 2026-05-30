@@ -1,5 +1,6 @@
-#extension GL_EXT_shader_explicit_arithmetic_types_int16 : enable
+#extension GL_EXT_shader_explicit_arithmetic_types : enable
 #extension GL_EXT_shader_16bit_storage : enable
+#extension GL_EXT_shader_8bit_storage : enable
 
 #define MAX_VERTICES 64
 #define MAX_PRIMITIVES 128
@@ -15,6 +16,7 @@ struct Vertex
     vec3 position;
     uint16_t pitch;
     uint16_t yaw;
+    u8vec3 color;
     vec2 uv;
 };
 

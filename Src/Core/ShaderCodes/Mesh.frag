@@ -10,10 +10,12 @@ layout(location = 0) in vec2 texCoord;
 layout(location = 1) flat in uint texIndex;
 #ifdef PER_PRIMITIVE_NORMAL
 layout(location = 2) in vec3 vertex;
+layout(location = 3) in vec3 color;
 layout(location = 4) perprimitiveEXT in vec3 normalSpace;
 #else
 layout(location = 2) in vec3 normalSpace;
 layout(location = 3) in vec3 vertex;
+layout(location = 4) flat in vec3 color;
 #endif
 #ifdef DEFERRED
 layout(location = 0) out vec4 outPosition;
@@ -67,6 +69,6 @@ void main()
     float visibility = 1.0; // filterPCF(shadowCoord, cascadeIndex);
 
     vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility; // + pointLightIntensity * LIGHT_COLOR;
-    outColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord) * vec4(finalLight, 1.0);
+    outColor = vec4(color, 1.0) * texture(texSampler[nonuniformEXT(texIndex)], texCoord) * vec4(finalLight, 1.0);
     #endif
 }

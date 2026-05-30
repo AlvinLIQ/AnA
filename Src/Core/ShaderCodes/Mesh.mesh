@@ -15,6 +15,7 @@ struct VertexOutput {
     vec2 texCoord;
     uint texID;
     vec3 vertexPosition;
+    vec3 color;
 };
 layout(location = 4) perprimitiveEXT out vec3 primitiveNormals[];
 #else
@@ -23,6 +24,7 @@ struct VertexOutput {
     uint texID;
     vec3 normalSpace;
     vec3 vertexPosition;
+    vec3 color;
 };
 #endif
 
@@ -116,6 +118,11 @@ void main()
         gl_MeshVerticesEXT[i].gl_PointSize = 6.0;
         vertexOutput[i].texCoord = vertex.uv;
         vertexOutput[i].texID = texID;
+        vertexOutput[i].color = vec3(
+            float(vertex.color.r) / 255.0,
+            float(vertex.color.g) / 255.0,
+            float(vertex.color.b) / 255.0
+        );
         #ifndef PER_PRIMITIVE_NORMAL
         vertexOutput[i].normalSpace = normalize(transpose(inverse(mat3(transform))) * CalculateNormal(vertex.pitch, vertex.yaw));
         #endif

@@ -212,10 +212,20 @@ void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo)
     Model::Vertex vertex{};
     uint32_t offset = 0;
     uint32_t triangleIndices[3];
+    glm::u8vec3 color{};
     for (uint32_t f = 0, v, fv, i; f < mesh->face_count; f++)
     {
         fv = mesh->face_vertices[f];
         triangleIndices[0] = offset;
+        if (mesh->material_count)
+        {
+            auto& material = mesh->materials[mesh->face_materials[f]];
+            color = {
+                uint8_t(material.Kd[0] * 255.0f),
+                uint8_t(material.Kd[1] * 255.0f),
+                uint8_t(material.Kd[2] * 255.0f),
+            };
+        }
         for (v = 0; v + 1 < fv; v++) // deal with face triangulation
         {
             triangleIndices[1] = offset + v;
@@ -225,6 +235,7 @@ void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo)
                 auto& index = mesh->indices[triangleIndices[i]];
                 vertex.position = *reinterpret_cast<glm::vec3*>(&mesh->positions[3 * index.p]);
                 ExtractPitchYaw(*reinterpret_cast<glm::vec3*>(&mesh->normals[3 * index.n]), vertex.pitch, vertex.yaw);
+                vertex.color = color;
                 vertex.uv = *reinterpret_cast<glm::vec2*>(&mesh->texcoords[2 * index.t]);
                 auto result = vertexMap.find(vertex);
                 if (result != vertexMap.end())
@@ -337,8 +348,8 @@ void Model::CreateTerrainFromVertices(std::vector<Vertex> &vertices, std::vector
 
 void Model::ExtractPitchYaw(glm::vec3& normal, uint16_t& pitch, uint16_t& yaw)
 {
-    yaw = (glm::degrees(atan2(normal.x, normal.z)) / 360.0f) * 65535.0f;
-    pitch = (glm::degrees(asin(normal.y)) / 360.0f) * 65535.0f;
+    yaw = uint16_t((glm::degrees(atan2(normal.x, normal.z)) / 360.0f) * 65535.0f);
+    pitch = uint16_t((glm::degrees(asin(normal.y)) / 360.0f) * 65535.0f);
 }
 
 void Model::buildMeshlets()
