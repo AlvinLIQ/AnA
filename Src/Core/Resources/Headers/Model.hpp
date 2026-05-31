@@ -105,6 +105,7 @@ namespace AnA
             glm::vec3 maxBounding;
             Index indexStep;
             std::vector<Index> indices;
+            std::string texturePath;
         };
 
         struct ModelStorageBufferObject

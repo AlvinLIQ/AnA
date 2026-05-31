@@ -53,34 +53,7 @@ void Model::CreateModelFromFile(const char *filePath, std::shared_ptr<Model>& mo
 {
     ModelInfo modelInfo{};
     CreateMeshFromFile(filePath, modelInfo);
-/*
-    const glm::vec<2, int> sets[] = {{0, 1}, {0, 2}, {1, 2}};
-    for (size_t i = 0, j, k = 0; i < modelInfo.indices.size(); i += k)
-    {
-        for (k = 0; k < 3; k++)
-        {
-            glm::vec3 xBase = glm::normalize(modelInfo.vertices[modelInfo.indices[i + static_cast<size_t>(sets[k].y)]].position - modelInfo.vertices[modelInfo.indices[i + static_cast<size_t>(sets[k].x)]].position);
-            glm::vec3 yBase = glm::mat3({0.0, -1.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 0.0, 1.0}) * xBase;
-            glm::vec3 zBase = glm::mat3({1.0, 0.0, 0.0}, {0.0, 0.0, 1.0}, {0.0, 1.0, 0.0}) * xBase;
-            glm::mat3 transform{xBase, yBase, zBase};
-            glm::vec2 currentProjection{(transform * modelInfo.vertices[modelInfo.indices[0]].position).y};
-            //1.0
-            //glm::length(currentPlane);
-            for (j = 1; j < modelInfo.indices.size(); j++)
-            {
-                auto positionY = (transform * modelInfo.vertices[modelInfo.indices[j]].position).y;
-                if (positionY < currentProjection.x)
-                {
-                    currentProjection[0] = positionY;
-                }
-                else if (positionY > currentProjection.y)
-                {
-                    currentProjection[1] = positionY;
-                }
-            }
-            modelInfo.vertexProjections.push_back(currentProjection);
-        }
-    }*/
+
     modelInfo.indexStep = static_cast<Index>(modelInfo.vertices.size());
     model = std::make_shared<Model>(modelInfo);
     model->Path = filePath;
@@ -201,7 +174,7 @@ void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo)
     }
 }
 #else
-void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo)
+void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo) // split model later
 {
     fastObjMesh* mesh = fast_obj_read(filePath);
 
