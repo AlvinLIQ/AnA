@@ -212,7 +212,7 @@ void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo)
     Model::Vertex vertex{};
     uint32_t offset = 0;
     uint32_t triangleIndices[3];
-    glm::u8vec3 color{};
+    glm::u8vec3 color{255, 255, 255};
     for (uint32_t f = 0, v, fv, i; f < mesh->face_count; f++)
     {
         fv = mesh->face_vertices[f];

@@ -106,6 +106,8 @@ namespace AnA
         void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
         void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, uint32_t regionCount, const VkBufferCopy* copyRegions);
         void CopyBufferToImage(VkBuffer srcBuffer, VkImage& dstImage, VkExtent3D extent);
+        void HostImageLayoutTrasition(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout);
+        void CopyHostBufferToImage(void* buffer, VkImage dstImage, VkExtent3D extent);
 
         void CreateImage(VkImageCreateInfo* pCreateInfo, VkImage* pImage, VmaAllocation& allocation);
         void DestroyImage(VkImage image, VmaAllocation allocation);
@@ -252,6 +254,7 @@ namespace AnA
 
         bool meshShaderSupport = false;
         bool unifiedLayoutsSupport = false;
+        bool hostImageCopySupport = false;
 
         VkDevice logicalDevice;
         VkQueue graphicsQueue;

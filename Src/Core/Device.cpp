@@ -95,6 +95,42 @@ void Device::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, uint32_t regionC
     EndSingleTimeCommands(commandBuffer);
 }
 
+void Device::HostImageLayoutTrasition(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout)
+{
+    VkHostImageLayoutTransitionInfo transitionInfo{};
+    transitionInfo.sType = VK_STRUCTURE_TYPE_HOST_IMAGE_LAYOUT_TRANSITION_INFO;
+    transitionInfo.image = image;
+    transitionInfo.oldLayout = oldLayout;
+    transitionInfo.newLayout = newLayout;
+    transitionInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    transitionInfo.subresourceRange.layerCount = 1;
+    transitionInfo.subresourceRange.levelCount = 1;
+
+    vkTransitionImageLayout(logicalDevice, 1, &transitionInfo);
+}
+
+void Device::CopyHostBufferToImage(void* buffer, VkImage dstImage, VkExtent3D extent)
+{
+    VkMemoryToImageCopyEXT region{};
+
+    region.sType = VK_STRUCTURE_TYPE_MEMORY_TO_IMAGE_COPY;
+    region.pHostPointer = buffer;
+    region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    region.imageSubresource.mipLevel = 0;
+    region.imageSubresource.baseArrayLayer = 0;
+    region.imageSubresource.layerCount = 1;
+    region.imageExtent = extent;
+
+    VkCopyMemoryToImageInfo copyInfo{};
+    copyInfo.sType = VK_STRUCTURE_TYPE_COPY_MEMORY_TO_IMAGE_INFO;
+    copyInfo.dstImage = dstImage;
+    copyInfo.dstImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    copyInfo.regionCount = 1;
+    copyInfo.pRegions = &region;
+
+    vkCopyMemoryToImage(logicalDevice, &copyInfo);
+}
+
 void Device::CopyBufferToImage(VkBuffer srcBuffer, VkImage& dstImage, VkExtent3D extent)
 {
     VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
@@ -158,7 +194,6 @@ void Device::CreateColorImage(const uint32_t color, VkImage* pTexImage, VmaAlloc
     Buffer aBuffer(this, sizeof(color), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_HOST);
     aBuffer.Map();
     memcpy(aBuffer.GetMappedData(), &color, sizeof(color));
-    aBuffer.Unmap();
 
     VkImageCreateInfo imageInfo{};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -171,15 +206,27 @@ void Device::CreateColorImage(const uint32_t color, VkImage* pTexImage, VmaAlloc
     imageInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
     imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    imageInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT;
+    if (hostImageCopySupport)
+        imageInfo.usage |= VK_IMAGE_USAGE_HOST_TRANSFER_BIT;
+    else
+        imageInfo.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     imageInfo.flags = 0;
     CreateImage(&imageInfo, pTexImage, allocation);
 
-    TransitionImageLayout(*pTexImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-    CopyBufferToImage(aBuffer.GetBuffer(), *pTexImage, imageInfo.extent);
-    TransitionImageLayout(*pTexImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    if (hostImageCopySupport)
+    {
+        HostImageLayoutTrasition(*pTexImage, imageInfo.initialLayout, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        CopyHostBufferToImage(aBuffer.GetMappedData(), *pTexImage, imageInfo.extent);
+    }
+    else
+    {
+        TransitionImageLayout(*pTexImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        CopyBufferToImage(aBuffer.GetBuffer(), *pTexImage, imageInfo.extent);
+        TransitionImageLayout(*pTexImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    }
 }
 
 #ifdef INCLUDE_STB_IMAGE
@@ -192,32 +239,57 @@ void Device::CreateTextureImage(const char* imagePath, VkImage* pTexImage, VmaAl
     if (!pixels)
         throw std::runtime_error(std::string("Failed to load texture image! ") + imagePath);
 
-    Buffer aBuffer(this, imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_HOST);
-    aBuffer.Map();
-    memcpy(aBuffer.GetMappedData(), pixels, static_cast<size_t>(imageSize));
-    aBuffer.Unmap();
-    stbi_image_free(pixels);
+    if (hostImageCopySupport)
+    {
+        VkImageCreateInfo imageInfo{};
+        imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+        imageInfo.imageType = VK_IMAGE_TYPE_2D;
+        imageInfo.extent.width = static_cast<uint32_t>(texWidth);
+        imageInfo.extent.height = static_cast<uint32_t>(texHeight);
+        imageInfo.extent.depth = 1;
+        imageInfo.mipLevels = 1;
+        imageInfo.arrayLayers = 1;
+        imageInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+        imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+        imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        imageInfo.usage = VK_IMAGE_USAGE_HOST_TRANSFER_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+        imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        imageInfo.flags = 0;
+        CreateImage(&imageInfo, pTexImage, allocation);
+        HostImageLayoutTrasition(*pTexImage, imageInfo.initialLayout, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        CopyHostBufferToImage(pixels, *pTexImage, imageInfo.extent);
+        stbi_image_free(pixels);
+    }
+    else
+    {
+        Buffer aBuffer(this, imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_HOST);
+        aBuffer.Map();
+        memcpy(aBuffer.GetMappedData(), pixels, static_cast<size_t>(imageSize));
+        aBuffer.Unmap();
+        stbi_image_free(pixels);
 
-    VkImageCreateInfo imageInfo{};
-    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-    imageInfo.imageType = VK_IMAGE_TYPE_2D;
-    imageInfo.extent.width = static_cast<uint32_t>(texWidth);
-    imageInfo.extent.height = static_cast<uint32_t>(texHeight);
-    imageInfo.extent.depth = 1;
-    imageInfo.mipLevels = 1;
-    imageInfo.arrayLayers = 1;
-    imageInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
-    imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-    imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-    imageInfo.flags = 0;
-    CreateImage(&imageInfo, pTexImage, allocation);
+        VkImageCreateInfo imageInfo{};
+        imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+        imageInfo.imageType = VK_IMAGE_TYPE_2D;
+        imageInfo.extent.width = static_cast<uint32_t>(texWidth);
+        imageInfo.extent.height = static_cast<uint32_t>(texHeight);
+        imageInfo.extent.depth = 1;
+        imageInfo.mipLevels = 1;
+        imageInfo.arrayLayers = 1;
+        imageInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+        imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+        imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+        imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        imageInfo.flags = 0;
+        CreateImage(&imageInfo, pTexImage, allocation);
 
-    TransitionImageLayout(*pTexImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-    CopyBufferToImage(aBuffer.GetBuffer(), *pTexImage, imageInfo.extent);
-    TransitionImageLayout(*pTexImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        TransitionImageLayout(*pTexImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        CopyBufferToImage(aBuffer.GetBuffer(), *pTexImage, imageInfo.extent);
+        TransitionImageLayout(*pTexImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    }
 }
 
 void Device::CreateTextImage(const char* text, int& width, int& height, float lineHeight, VkImage* pTextImage, VmaAllocation& allocation, float scaleX, float scaleY)
@@ -935,6 +1007,11 @@ bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device)
     }
     VkPhysicalDeviceUnifiedImageLayoutsFeaturesKHR unifiedLayoutsFeatures{};
     unifiedLayoutsFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFIED_IMAGE_LAYOUTS_FEATURES_KHR;
+
+    VkPhysicalDeviceHostImageCopyFeaturesEXT hostImageCopyFeatures = {};
+    hostImageCopyFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_HOST_IMAGE_COPY_FEATURES_EXT;
+    hostImageCopyFeatures.pNext = &unifiedLayoutsFeatures;
+
 #ifdef ENABLE_MESH_SHADER
     VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures = {};
     meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
@@ -943,7 +1020,7 @@ bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device)
 
     VkPhysicalDeviceFeatures2 deviceFeatures = {};
     deviceFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-    deviceFeatures.pNext = &unifiedLayoutsFeatures;
+    deviceFeatures.pNext = &hostImageCopyFeatures;
     vkGetPhysicalDeviceFeatures2(device, &deviceFeatures);
 
 #ifdef ENABLE_MESH_SHADER
@@ -956,6 +1033,9 @@ bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device)
 
     if (unifiedLayoutsFeatures.unifiedImageLayouts == VK_TRUE)
         unifiedLayoutsSupport = true;
+
+    if (hostImageCopyFeatures.hostImageCopy == VK_TRUE)
+        hostImageCopySupport = true;
 
     return requiredExtensions.empty();
 }
@@ -997,6 +1077,7 @@ void Device::createLogicalDevice()
     }
     VkPhysicalDeviceVulkan14Features vulkan14Features{};
     vulkan14Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_4_FEATURES;
+    vulkan14Features.hostImageCopy = hostImageCopySupport;
     //vulkan14Features.dynamicRenderingLocalRead = VK_TRUE;
 
     VkPhysicalDeviceVulkan13Features vulkan13Features{};
