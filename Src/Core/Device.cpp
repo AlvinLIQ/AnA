@@ -3,6 +3,7 @@
 
 #include <set>
 #include <stdexcept>
+//#include <chrono>
 
 #ifdef INCLUDE_STB_IMAGE
 #define STB_IMAGE_IMPLEMENTATION
@@ -191,6 +192,7 @@ VkImageView Device::CreateImageView(VkImage& image, VkFormat format, VkImageView
 
 void Device::CreateColorImage(const uint32_t color, VkImage* pTexImage, VmaAllocation& allocation)
 {
+    //auto p = std::chrono::high_resolution_clock::now();
     Buffer aBuffer(this, sizeof(color), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_HOST);
     aBuffer.Map();
     memcpy(aBuffer.GetMappedData(), &color, sizeof(color));
@@ -227,6 +229,11 @@ void Device::CreateColorImage(const uint32_t color, VkImage* pTexImage, VmaAlloc
         CopyBufferToImage(aBuffer.GetBuffer(), *pTexImage, imageInfo.extent);
         TransitionImageLayout(*pTexImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     }
+    /*
+    auto c = std::chrono::high_resolution_clock::now();
+
+    auto transTime = std::chrono::duration<float, std::chrono::seconds::period>(c - p).count();
+    printf("%f\n", transTime);*/
 }
 
 #ifdef INCLUDE_STB_IMAGE
