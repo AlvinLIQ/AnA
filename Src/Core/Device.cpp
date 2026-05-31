@@ -209,7 +209,7 @@ void Device::CreateColorImage(const uint32_t color, VkImage* pTexImage, VmaAlloc
     imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     imageInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT;
-    if (hostImageCopySupport)
+    if (deviceFeatures.hostImageCopySupport)
         imageInfo.usage |= VK_IMAGE_USAGE_HOST_TRANSFER_BIT;
     else
         imageInfo.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
@@ -218,7 +218,7 @@ void Device::CreateColorImage(const uint32_t color, VkImage* pTexImage, VmaAlloc
     imageInfo.flags = 0;
     CreateImage(&imageInfo, pTexImage, allocation);
 
-    if (hostImageCopySupport)
+    if (deviceFeatures.hostImageCopySupport)
     {
         HostImageLayoutTrasition(*pTexImage, imageInfo.initialLayout, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
         CopyHostBufferToImage(aBuffer.GetMappedData(), *pTexImage, imageInfo.extent);
@@ -246,7 +246,7 @@ void Device::CreateTextureImage(const char* imagePath, VkImage* pTexImage, VmaAl
     if (!pixels)
         throw std::runtime_error(std::string("Failed to load texture image! ") + imagePath);
 
-    if (hostImageCopySupport)
+    if (deviceFeatures.hostImageCopySupport)
     {
         VkImageCreateInfo imageInfo{};
         imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -944,10 +944,12 @@ void Device::pickPhysicalDevice()
     VkPhysicalDeviceProperties2 deviceProperties2 = {};
     deviceProperties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
     deviceProperties2.pNext = &dynamicStateProperties;
+
     for (const auto &device : devices)
     {
         currentScore = 0;
-        if (isDeviceSuitable(device))
+        DeviceFeatures _deviceFeatures{};
+        if (isDeviceSuitable(device, _deviceFeatures))
         {
             currentScore = 30;
             vkGetPhysicalDeviceProperties2(device, &deviceProperties2);
@@ -972,6 +974,7 @@ void Device::pickPhysicalDevice()
             }
             if (currentScore > bestScore)
             {
+                deviceFeatures = _deviceFeatures;
                 physicalDevice = device;
                 physicalDeviceProperties = deviceProperties2.properties;
                 meshShaderProperties = _meshShaderProperties;
@@ -998,7 +1001,7 @@ void Device::checkUsableSamples()
     usableSamples.push_back(VK_SAMPLE_COUNT_1_BIT);
 }
 
-bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device)
+bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device, DeviceFeatures& _deviceFeatures)
 {
     uint32_t extensionCount;
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
@@ -1033,25 +1036,25 @@ bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device)
 #ifdef ENABLE_MESH_SHADER
     if (meshShaderFeatures.meshShader == VK_TRUE)
     {
-        meshShaderSupport = true;
+        _deviceFeatures.meshShaderSupport = true;
         deviceExtensions.push_back(VK_EXT_MESH_SHADER_EXTENSION_NAME);
     }
 #endif
 
     if (unifiedLayoutsFeatures.unifiedImageLayouts == VK_TRUE)
-        unifiedLayoutsSupport = true;
+        _deviceFeatures.unifiedLayoutsSupport = true;
 
     if (hostImageCopyFeatures.hostImageCopy == VK_TRUE)
-        hostImageCopySupport = true;
+        _deviceFeatures.hostImageCopySupport = true;
 
     return requiredExtensions.empty();
 }
 
-bool Device::isDeviceSuitable(VkPhysicalDevice device)
+bool Device::isDeviceSuitable(VkPhysicalDevice device, DeviceFeatures& _deviceFeatures)
 {
     QueueFamilyIndices indices = FindQueueFamilies(device);
 
-    bool extSupported = checkDeviceExtensionSupport(device), swapChainAdequate = false;
+    bool extSupported = checkDeviceExtensionSupport(device, _deviceFeatures), swapChainAdequate = false;
 
     if (extSupported)
     {
@@ -1084,7 +1087,7 @@ void Device::createLogicalDevice()
     }
     VkPhysicalDeviceVulkan14Features vulkan14Features{};
     vulkan14Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_4_FEATURES;
-    vulkan14Features.hostImageCopy = hostImageCopySupport;
+    vulkan14Features.hostImageCopy = deviceFeatures.hostImageCopySupport;
     //vulkan14Features.dynamicRenderingLocalRead = VK_TRUE;
 
     VkPhysicalDeviceVulkan13Features vulkan13Features{};
@@ -1143,7 +1146,7 @@ void Device::createLogicalDevice()
     meshShaderFeatures.meshShader = VK_TRUE;
     meshShaderFeatures.taskShader = VK_TRUE;
     meshShaderFeatures.pNext = &vulkan11Features;
-    if (meshShaderSupport)
+    if (deviceFeatures.meshShaderSupport)
         deviceFeatures2.pNext = &meshShaderFeatures;
     else
         deviceFeatures2.pNext = &vulkan11Features;

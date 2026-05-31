@@ -181,7 +181,12 @@ namespace AnA
         };
 
         SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device);
-
+        struct DeviceFeatures
+        {
+            bool meshShaderSupport;
+            bool unifiedLayoutsSupport;
+            bool hostImageCopySupport;
+        };
         VkDevice GetLogicalDevice();
         VkPhysicalDevice GetPhysicalDevice();
         const VkPhysicalDeviceProperties& GetPhysicalDeviceProperties() const
@@ -191,7 +196,7 @@ namespace AnA
 
         bool MeshShaderSupport() const
         {
-            return meshShaderSupport;
+            return deviceFeatures.meshShaderSupport;
         }
         PFN_vkCmdDrawMeshTasksEXT vkCmdDrawMeshTasksEXT{ VK_NULL_HANDLE };
         PFN_vkCmdDrawMeshTasksIndirectCountEXT vkCmdDrawMeshTasksIndirectCountEXT{ VK_NULL_HANDLE };
@@ -248,13 +253,10 @@ namespace AnA
         std::vector<VkSampleCountFlagBits> usableSamples{};
         void checkUsableSamples();
 
-        bool checkDeviceExtensionSupport(VkPhysicalDevice device);
+        bool checkDeviceExtensionSupport(VkPhysicalDevice device, DeviceFeatures& _deviceFeatures);
+        bool isDeviceSuitable(VkPhysicalDevice device, DeviceFeatures& _deviceFeatures);
 
-        bool isDeviceSuitable(VkPhysicalDevice device);
-
-        bool meshShaderSupport = false;
-        bool unifiedLayoutsSupport = false;
-        bool hostImageCopySupport = false;
+        DeviceFeatures deviceFeatures{};
 
         VkDevice logicalDevice;
         VkQueue graphicsQueue;
