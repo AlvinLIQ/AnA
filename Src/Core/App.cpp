@@ -272,9 +272,12 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
         aRenderer.RenderIndirect(commandBuffer, aResourceManager.TextContext,
             aResourceManager.Shaders[TEXT_PIPELINE_ID], swapChain.CurrentFrame);
     }
-    swapChain.SetViewport(commandBuffer, aResourceManager.Shapes.Extent);
-    aRenderer.RenderIndirect(commandBuffer, aResourceManager.Shapes,
-        aResourceManager.Shaders[SHAPE_PIPELINE_ID], swapChain.CurrentFrame);
+    if (aResourceManager.Shapes.Extent.width && aResourceManager.Shapes.Extent.height)
+    {
+        swapChain.SetViewport(commandBuffer, aResourceManager.Shapes.Extent);
+        aRenderer.RenderIndirect(commandBuffer, aResourceManager.Shapes,
+            aResourceManager.Shaders[SHAPE_PIPELINE_ID], swapChain.CurrentFrame);
+    }
     //Device.StageBarrier(commandBuffer,
     //    VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT|VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
     aRenderer.EndRendering(commandBuffer);

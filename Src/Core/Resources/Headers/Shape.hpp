@@ -54,7 +54,7 @@ namespace AnA
                 shapes.samplersDescriptor = nullptr;
                 shapes.ssboDescriptor = nullptr;
                 shapes.shapeCount = 0;
-                
+
             }
             return *this;
         }
@@ -65,11 +65,11 @@ namespace AnA
         void DrawIndirect(CommandBuffer& commandBuffer) override;
         void Update() override
         {
-            
+
         }
         bool NeedUpdate() override;
-        VkOffset2D Offset;
-        VkExtent2D Extent;
+        VkOffset2D Offset{};
+        VkExtent2D Extent{};
     private:
         Device* aDevice{nullptr};
         Buffer shapeBuffer{};

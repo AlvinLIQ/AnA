@@ -567,17 +567,16 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
     }
 }
 
-void Device::Triangulation(std::vector<glm::vec2>& vertices, std::vector<uint32_t>& indices)
+void Device::Triangulation(std::vector<glm::vec2>& vertices, std::vector<glm::uvec2>& edges, std::vector<uint32_t>& indices)
 {
     CDT::Triangulation<float> cdt;
-    std::vector<CDT::Edge> edges{};
-    for (uint32_t i = 1; i < uint32_t(vertices.size()); i++)
-    {
-        edges.push_back({i - 1, i});
-    }
+
+    CDT::RemoveDuplicatesAndRemapEdges(*reinterpret_cast<std::vector<CDT::V2d<float>>*>(&vertices), *reinterpret_cast<std::vector<CDT::Edge>*>(&edges));
     cdt.insertVertices(*reinterpret_cast<std::vector<CDT::V2d<float>>*>(&vertices));
-    cdt.insertEdges(edges);
+    cdt.insertEdges(*reinterpret_cast<std::vector<CDT::Edge>*>(&edges));
     cdt.eraseOuterTriangles();
+
+    vertices = *reinterpret_cast<std::vector<glm::vec2>*>(&cdt.vertices);
     for (auto& triangle : cdt.triangles)
     {
         indices.push_back(triangle.vertices[0]);
