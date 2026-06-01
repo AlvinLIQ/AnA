@@ -205,6 +205,10 @@ namespace AnA
         PFN_vkCmdEndRenderingKHR vkCmdEndRenderingKHR{ VK_NULL_HANDLE };
         PFN_vkCmdSetPolygonModeEXT vkCmdSetPolygonModeEXT{ VK_NULL_HANDLE };
 
+        bool HostImageCopySupport() const
+        {
+           return deviceFeatures.hostImageCopySupport;
+        }
         VmaAllocator GetAllocator();
 
         VkShaderModule CreateShaderModule(const std::vector<unsigned char>& code);
