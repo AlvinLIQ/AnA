@@ -9,7 +9,6 @@
 
 using namespace AnA;
 
-std::shared_ptr<Model> _2DModel;
 Device* _aDevice;
 App* _aApp;
 
@@ -149,25 +148,6 @@ void App::Exit()
 
 void App::Cleanup()
 {
-    _2DModel.reset();
-}
-
-std::shared_ptr<Model> &App::Get2DModel()
-{
-    if (_2DModel == nullptr)
-    {
-        std::vector<Model::Vertex> vertices
-        {
-            {{-1.0f, -1.0f, 0.f}, {}, {}, {}, {0.0f, 0.0f}},
-            {{1.0f, -1.0f, 0.f}, {}, {}, {}, {1.0f, 0.0f}},
-            {{-1.0f, 1.0f, 0.f}, {}, {}, {}, {0.0f, 1.0f}},
-            {{1.0f, 1.0f, 0.f}, {}, {}, {}, {1.0f, 1.0f}}
-        };
-        Model::ModelInfo modelInfo{{}, vertices, {}, {}, {}, {0, 2, 1, 1, 2, 3}};
-        _2DModel = std::make_shared<Model>(modelInfo);
-    }
-
-    return _2DModel;
 }
 
 void App::CreateModel(const Model::ModelInfo &modelInfo, std::shared_ptr<Model> &model)
