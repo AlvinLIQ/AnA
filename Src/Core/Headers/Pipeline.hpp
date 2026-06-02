@@ -724,10 +724,10 @@ namespace AnA
         }
     private:
         Device* aDevice;
-        VkRenderPass renderPass;
+        VkRenderPass renderPass{VK_NULL_HANDLE};
 
-        VkPipelineLayout pipelineLayout;
-        VkPipeline pipeline;//Graphics Pipeline
+        VkPipelineLayout pipelineLayout{VK_NULL_HANDLE};
+        VkPipeline pipeline{VK_NULL_HANDLE};//Graphics Pipeline
         void createGraphicsPipeline(PipelineConfig& pipelineConfig);
         void createComputePipeline(const std::string &computeShaderFileName);
         void createComputePipeline(const std::vector<unsigned char>& computeShaderCode);

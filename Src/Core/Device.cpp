@@ -577,6 +577,7 @@ void Device::Triangulation(std::vector<glm::vec2>& vertices, std::vector<glm::uv
     cdt.eraseOuterTriangles();
 
     vertices = *reinterpret_cast<std::vector<glm::vec2>*>(&cdt.vertices);
+
     for (auto& triangle : cdt.triangles)
     {
         indices.push_back(triangle.vertices[0]);
