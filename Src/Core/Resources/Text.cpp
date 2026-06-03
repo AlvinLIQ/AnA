@@ -67,7 +67,9 @@ void Text::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferInd
         shader.GetPipelineLayout(), 0, 3, sets.data(), 0, nullptr);
     aDevice->vkCmdSetPolygonModeEXT(commandBuffer, PolygonMode);
     glm::vec2 resolution = {float(commandBuffer.Extent.width), float(commandBuffer.Extent.height)};
-    vkCmdPushConstants(commandBuffer, shader.GetPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, 0, sizeof(glm::vec2),
+    vkCmdPushConstants(commandBuffer, shader.GetPipelineLayout(),
+        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT |
+        VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, 0, sizeof(glm::vec2),
         &resolution);
 }
 
