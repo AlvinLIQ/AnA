@@ -132,9 +132,8 @@ void Device::CopyHostBufferToImage(void* buffer, VkImage dstImage, VkExtent3D ex
     vkCopyMemoryToImage(logicalDevice, &copyInfo);
 }
 
-void Device::CopyBufferToImage(VkBuffer srcBuffer, VkImage& dstImage, VkExtent3D extent)
+void Device::CopyBufferToImage(VkCommandBuffer commandBuffer, VkBuffer srcBuffer, VkImage& dstImage, VkExtent3D extent)
 {
-    VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
     VkBufferImageCopy region{};
     region.bufferOffset = 0;
     region.bufferRowLength = 0;
@@ -150,7 +149,6 @@ void Device::CopyBufferToImage(VkBuffer srcBuffer, VkImage& dstImage, VkExtent3D
 
     vkCmdCopyBufferToImage(commandBuffer, srcBuffer, dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
         1, &region);
-    EndSingleTimeCommands(commandBuffer);
 }
 
 void Device::CreateImage(VkImageCreateInfo* pCreateInfo, VkImage* pImage, VmaAllocation& allocation)
@@ -190,6 +188,17 @@ VkImageView Device::CreateImageView(VkImage& image, VkFormat format, VkImageView
     return imageView;
 }
 
+void Device::CopyBufferToImage(Buffer& aBuffer, VkImage* pTexImage, VkExtent3D& extent)
+{
+    auto commandBuffer = BeginSingleTimeCommands();
+    TransitionImageLayout(commandBuffer,
+        *pTexImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    CopyBufferToImage(commandBuffer, aBuffer.GetBuffer(), *pTexImage, extent);
+    TransitionImageLayout(commandBuffer,
+        *pTexImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    EndSingleTimeCommands(commandBuffer);
+}
+
 void Device::CreateColorImage(const uint32_t color, VkImage* pTexImage, VmaAllocation& allocation)
 {
     //auto p = std::chrono::high_resolution_clock::now();
@@ -225,9 +234,7 @@ void Device::CreateColorImage(const uint32_t color, VkImage* pTexImage, VmaAlloc
     }
     else
     {
-        TransitionImageLayout(*pTexImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-        CopyBufferToImage(aBuffer.GetBuffer(), *pTexImage, imageInfo.extent);
-        TransitionImageLayout(*pTexImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        CopyBufferToImage(aBuffer, pTexImage, imageInfo.extent);
     }
     /*
     auto c = std::chrono::high_resolution_clock::now();
@@ -246,23 +253,23 @@ void Device::CreateTextureImage(const char* imagePath, VkImage* pTexImage, VmaAl
     if (!pixels)
         throw std::runtime_error(std::string("Failed to load texture image! ") + imagePath);
 
+    VkImageCreateInfo imageInfo{};
+    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    imageInfo.imageType = VK_IMAGE_TYPE_2D;
+    imageInfo.extent.width = static_cast<uint32_t>(texWidth);
+    imageInfo.extent.height = static_cast<uint32_t>(texHeight);
+    imageInfo.extent.depth = 1;
+    imageInfo.mipLevels = 1;
+    imageInfo.arrayLayers = 1;
+    imageInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+    imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+    imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    imageInfo.flags = 0;
     if (deviceFeatures.hostImageCopySupport)
     {
-        VkImageCreateInfo imageInfo{};
-        imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-        imageInfo.imageType = VK_IMAGE_TYPE_2D;
-        imageInfo.extent.width = static_cast<uint32_t>(texWidth);
-        imageInfo.extent.height = static_cast<uint32_t>(texHeight);
-        imageInfo.extent.depth = 1;
-        imageInfo.mipLevels = 1;
-        imageInfo.arrayLayers = 1;
-        imageInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
-        imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-        imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         imageInfo.usage = VK_IMAGE_USAGE_HOST_TRANSFER_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-        imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-        imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        imageInfo.flags = 0;
         CreateImage(&imageInfo, pTexImage, allocation);
         HostImageLayoutTrasition(*pTexImage, imageInfo.initialLayout, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
         CopyHostBufferToImage(pixels, *pTexImage, imageInfo.extent);
@@ -276,26 +283,10 @@ void Device::CreateTextureImage(const char* imagePath, VkImage* pTexImage, VmaAl
         aBuffer.Unmap();
         stbi_image_free(pixels);
 
-        VkImageCreateInfo imageInfo{};
-        imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-        imageInfo.imageType = VK_IMAGE_TYPE_2D;
-        imageInfo.extent.width = static_cast<uint32_t>(texWidth);
-        imageInfo.extent.height = static_cast<uint32_t>(texHeight);
-        imageInfo.extent.depth = 1;
-        imageInfo.mipLevels = 1;
-        imageInfo.arrayLayers = 1;
-        imageInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
-        imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-        imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-        imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-        imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        imageInfo.flags = 0;
         CreateImage(&imageInfo, pTexImage, allocation);
 
-        TransitionImageLayout(*pTexImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-        CopyBufferToImage(aBuffer.GetBuffer(), *pTexImage, imageInfo.extent);
-        TransitionImageLayout(*pTexImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        CopyBufferToImage(aBuffer, pTexImage, imageInfo.extent);
     }
 }
 
@@ -402,9 +393,7 @@ void Device::CreateTextImage(const char* text, int& width, int& height, float li
     imageInfo.flags = 0;
     CreateImage(&imageInfo, pTextImage, allocation);
 
-    TransitionImageLayout(*pTextImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-    CopyBufferToImage(aBuffer.GetBuffer(), *pTextImage, imageInfo.extent);
-    TransitionImageLayout(*pTextImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    CopyBufferToImage(aBuffer, pTextImage, imageInfo.extent);
 }
 
 #endif
@@ -767,9 +756,8 @@ std::vector<VkDescriptorSetLayoutBinding> Device::CreateLayoutBindings(uint32_t 
     return layoutBindings;
 }
 
-void Device::TransitionImageLayout(VkImage &image, VkImageLayout oldLayout, VkImageLayout newLayout)
+void Device::TransitionImageLayout(VkCommandBuffer commandBuffer, VkImage &image, VkImageLayout oldLayout, VkImageLayout newLayout)
 {
-    VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
     VkImageMemoryBarrier barrier{};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
     barrier.oldLayout = oldLayout;
@@ -817,8 +805,6 @@ void Device::TransitionImageLayout(VkImage &image, VkImageLayout oldLayout, VkIm
         0, nullptr,
         1, &barrier
         );
-
-    EndSingleTimeCommands(commandBuffer);
 }
 
 void Device::WaitBufferIdle(VkBuffer buffer)
@@ -870,9 +856,14 @@ Device::QueueFamilyIndices Device::FindQueueFamilies(VkPhysicalDevice device)
     for (const auto &queueFamily : queueFamilies)
     {
         //if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
-        if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT && (queueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT))
+        if (!indices.graphicsAndComputeFamily.has_value()
+            && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT && (queueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT))
         {
             indices.graphicsAndComputeFamily = i;
+        }
+        if (queueFamily.queueFlags & VK_QUEUE_TRANSFER_BIT)
+        {
+
         }
         VkBool32 presentSupport = false;
         vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);

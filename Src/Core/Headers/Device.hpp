@@ -105,9 +105,11 @@ namespace AnA
         void FlushAllocation(VmaAllocation allocation);
         void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
         void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, uint32_t regionCount, const VkBufferCopy* copyRegions);
-        void CopyBufferToImage(VkBuffer srcBuffer, VkImage& dstImage, VkExtent3D extent);
+        void CopyBufferToImage(VkCommandBuffer commandBuffer, VkBuffer srcBuffer, VkImage& dstImage, VkExtent3D extent);
         void HostImageLayoutTrasition(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout);
         void CopyHostBufferToImage(void* buffer, VkImage dstImage, VkExtent3D extent);
+
+        void CopyBufferToImage(Buffer& aBuffer, VkImage* pTexImage, VkExtent3D& extent);
 
         void CreateImage(VkImageCreateInfo* pCreateInfo, VkImage* pImage, VmaAllocation& allocation);
         void DestroyImage(VkImage image, VmaAllocation allocation);
@@ -143,7 +145,7 @@ namespace AnA
         static VkDescriptorSetLayoutBinding CreateLayoutBinding(uint32_t binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags, uint32_t descriptorCount = 1);
         static std::vector<VkDescriptorSetLayoutBinding> CreateLayoutBindings(uint32_t binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags, uint32_t descriptorCount = 1);
 
-        void TransitionImageLayout(VkImage& image, VkImageLayout oldLayout, VkImageLayout newLayout);
+        void TransitionImageLayout(VkCommandBuffer commandBuffer, VkImage& image, VkImageLayout oldLayout, VkImageLayout newLayout);
         void WaitBufferIdle(VkBuffer buffer);
         struct QueueFamilyIndices
         {
