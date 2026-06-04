@@ -9,11 +9,12 @@
 
 ## To do
 * [x] separate shared mesh buffers from Scene
+* [ ] create submit info queue and only do single submit call every frame
 * [ ] optimize resource management before scaling
   * [x] rewrite scene buffers with lazy buffer rebuild
   * [ ] make resource manager a facade, real logic in specialized classes.
     * [x] meshes
-    * [ ] text
+    * [x] text
     * [ ] textures
     * [x] cameras
     * [ ] lights
