@@ -52,6 +52,7 @@ namespace AnA
         VkResult AcquireNextImage();
 
         VkResult SubmitCommandBuffer(VkCommandBuffer commandBuffer);
+        VkResult SubmitCommandBufferQueue();
 
         uint32_t CurrentFrame = 0;
         uint32_t CurrentImage = 0;
@@ -140,6 +141,9 @@ namespace AnA
         std::vector<VkSemaphore> renderFinishedSemaphores;
         std::vector<VkFence> inFlightFences;
         void createSyncObjects();
+
+        std::mutex queueMutex{};
+        std::vector<VkCommandBufferSubmitInfo> commandBuffersSubmitQueue{};
 
         void cleanupSwapChain();
         friend class Renderer;

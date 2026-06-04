@@ -59,6 +59,20 @@ VkResult SwapChain::AcquireNextImage()
 
 VkResult SwapChain::SubmitCommandBuffer(VkCommandBuffer commandBuffer)
 {
+    VkCommandBufferSubmitInfo commandBufferSubmitInfo =
+    {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO,
+        .pNext = VK_NULL_HANDLE,
+        .commandBuffer = commandBuffer,
+        .deviceMask = 0
+    };
+    std::unique_lock<std::mutex> lock(queueMutex);
+    commandBuffersSubmitQueue.emplace_back(commandBufferSubmitInfo);
+    return VK_SUCCESS;
+}
+
+VkResult SwapChain::SubmitCommandBufferQueue()
+{
     VkSubmitInfo2 submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
 
@@ -73,16 +87,6 @@ VkResult SwapChain::SubmitCommandBuffer(VkCommandBuffer commandBuffer)
     };
     submitInfo.pWaitSemaphoreInfos = &waitSemaphoreSubmitInfo;
     submitInfo.waitSemaphoreInfoCount = 1;
-    VkCommandBufferSubmitInfo commandBufferInfo =
-    {
-        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO,
-        .pNext = VK_NULL_HANDLE,
-        .commandBuffer = commandBuffer,
-        .deviceMask = 0
-    };
-
-    submitInfo.pCommandBufferInfos = &commandBufferInfo;
-    submitInfo.commandBufferInfoCount = 1;
 
     VkSemaphoreSubmitInfoKHR signalSemaphoreSubmitInfo =
     {
@@ -98,9 +102,15 @@ VkResult SwapChain::SubmitCommandBuffer(VkCommandBuffer commandBuffer)
     submitInfo.signalSemaphoreInfoCount = 1;
 
     VkResult result;
-    if ((result = vkQueueSubmit2(aDevice->GetGraphicsQueue(), 1, &submitInfo, inFlightFences[CurrentFrame])) != VK_SUCCESS)
     {
-        throw std::runtime_error("failed to submit draw command buffer!");
+        std::unique_lock<std::mutex> lock(queueMutex);
+        submitInfo.pCommandBufferInfos = commandBuffersSubmitQueue.data();
+        submitInfo.commandBufferInfoCount = uint32_t(commandBuffersSubmitQueue.size());
+        if ((result = vkQueueSubmit2(aDevice->GetGraphicsQueue(), 1, &submitInfo, inFlightFences[CurrentFrame])) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to submit draw command buffer!");
+        }
+        commandBuffersSubmitQueue.clear();
     }
 
     VkPresentInfoKHR presentInfo = {};

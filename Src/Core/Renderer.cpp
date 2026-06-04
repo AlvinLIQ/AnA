@@ -89,6 +89,7 @@ void Renderer::EndFrame()
     commandBuffers.End();
     auto commandBuffer = commandBuffers.Get();
     auto result = aSwapChain->SubmitCommandBuffer(commandBuffer);
+    aSwapChain->SubmitCommandBufferQueue();
 
     vkGetQueryPoolResults(
         aDevice->GetLogicalDevice(),
