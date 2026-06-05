@@ -76,7 +76,8 @@ void EditorApp::Init()
         [](void* param)
         {
             auto editorApp = reinterpret_cast<EditorApp*>(param);
-            if (editorApp->SelectedObjectData == nullptr)
+            auto keys = SDL_GetKeyboardState(nullptr);
+            if (editorApp->SelectedObjectData == nullptr || !keys[SDL_SCANCODE_LSHIFT])
                 return;
             editorApp->ActionMode = ActionModes::Normal;
 
@@ -110,6 +111,19 @@ void EditorApp::Init()
                 transform.rotation.x, transform.rotation.y, transform.rotation.z);
         }
             , SDL_SCANCODE_F, ANA_PRESS});// Output Camera Transform
+    editorInputProfile.opKeyMapConfigs.push_back({this,
+        [](void* param)
+        {
+            auto editorApp = reinterpret_cast<EditorApp*>(param);
+            if (editorApp->SelectedObjectData == nullptr)
+                return;
+
+            auto& object = editorApp->aResourceManager.MainScene.At(editorApp->SelectedObjectData->id);
+            auto transform = object.transform;
+            printf("{{%f, %f, %f},\n{1.0f, 1.0f, 1.0f},\n{%f, %f, %f}}\n", transform.translation.x, transform.translation.y, transform.translation.z,
+                transform.rotation.x, transform.rotation.y, transform.rotation.z);
+        }
+            , SDL_SCANCODE_O, ANA_PRESS});// Output Object Transform
     editorInputProfile.cursorConfigs.push_back({this,
     [](void* param, Input::CursorArgs& curArgs, int leftButtonAction)
     {
@@ -154,10 +168,17 @@ void EditorApp::Init()
         case ActionModes::Rotate:
         {
             const float rotateSpeed = speedRatio * mainCamera.GetRotateSpeed() * 6.283f * 80.f;
-            object.transform.rotation.y =
-                glm::mod(object.transform.rotation.y - static_cast<float>(duration.x) * rotateSpeed,
-                glm::two_pi<float>());
-            object.transform.rotation.x += static_cast<float>(duration.y) * rotateSpeed;
+            if (editorApp->FocusedAxis == AxisType::All)
+            {
+                object.transform.rotation.y =
+                    glm::mod(object.transform.rotation.y - static_cast<float>(duration.x) * rotateSpeed,
+                        glm::two_pi<float>());
+                object.transform.rotation.x += static_cast<float>(duration.y) * rotateSpeed;
+            }
+            else
+            {
+                object.transform.rotation[(int)editorApp->FocusedAxis] += (duration.x.value - duration.y) * rotateSpeed;
+            }
         }
             break;
         default:
