@@ -5,7 +5,10 @@ using namespace Controls;
 
 void ToggleSwitch::ToggleSwitch_Toggled(ToggleSwitch* toggleSwitch, PointerEventArgs& )
 {
-    toggleSwitch->Toggle(!toggleSwitch->toggled);
+    bool toggle = toggleSwitch->toggled;
+    toggleSwitch->Toggle(!toggle);
+    if (toggleSwitch->Toggled)
+        toggleSwitch->Toggled(toggle);
 }
 
 ToggleSwitch::ToggleSwitch() : Control()

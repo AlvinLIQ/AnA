@@ -10,12 +10,13 @@ namespace AnA
         {
         public:
             ToggleSwitch();
-        
+
             void Toggle(bool _toggled);
             bool Toggle() const
             {
                 return toggled;
             }
+            void (*Toggled)(bool toggled) = nullptr;
             //void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
         private:
             bool toggled = false;
