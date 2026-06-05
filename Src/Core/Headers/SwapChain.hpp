@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <array>
+#include <mutex>
 
 #define INCLUDE_STB_IMAGE
 
