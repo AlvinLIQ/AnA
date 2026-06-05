@@ -38,7 +38,7 @@ void EditorApp::Init()
             aInputManager->GlobalProfile.flag :
             activeProfile.flag);*/
         auto editorApp = reinterpret_cast<EditorApp*>(EditorApp::GetCurrent());
-        editorApp->ActionMode = 0;
+        editorApp->ActionMode = ActionModes::Normal;
         if (&aInputManager->GetActiveProfile() == aInputManager->GetProfiles().data())
         {
             aInputManager->GlobalProfile.flag = Input::InputProfileFlags::None;
@@ -55,21 +55,30 @@ void EditorApp::Init()
     auto& editorInputProfile = aInputManager.GetProfiles().back();
 //Transform Action Mode
     editorInputProfile.opKeyMapConfigs.push_back({this,
-        createActionModeCallback<1>()
+        createActionModeCallback<ActionModes::Grab>()
         , SDL_SCANCODE_G, ANA_PRESS});// Grab Mode
     editorInputProfile.opKeyMapConfigs.push_back({this,
-        createActionModeCallback<2>()
+        createActionModeCallback<ActionModes::Scale>()
         , SDL_SCANCODE_S, ANA_PRESS});// Scale Mode
     editorInputProfile.opKeyMapConfigs.push_back({this,
-        createActionModeCallback<3>()
+        createActionModeCallback<ActionModes::Rotate>()
         , SDL_SCANCODE_R, ANA_PRESS});// Rotate Mode
+    editorInputProfile.opKeyMapConfigs.push_back({this,
+            createAxisTypeCallback<AxisType::X>()
+            , SDL_SCANCODE_X, ANA_PRESS});// Rotate Mode
+    editorInputProfile.opKeyMapConfigs.push_back({this,
+            createAxisTypeCallback<AxisType::Y>()
+            , SDL_SCANCODE_Y, ANA_PRESS});// Rotate Mode
+    editorInputProfile.opKeyMapConfigs.push_back({this,
+            createAxisTypeCallback<AxisType::Z>()
+            , SDL_SCANCODE_Z, ANA_PRESS});// Rotate Mode
     editorInputProfile.opKeyMapConfigs.push_back({this,
         [](void* param)
         {
             auto editorApp = reinterpret_cast<EditorApp*>(param);
             if (editorApp->SelectedObjectData == nullptr)
                 return;
-            editorApp->ActionMode = 0;
+            editorApp->ActionMode = ActionModes::Normal;
 
             auto modelList = reinterpret_cast<Controls::ObjectView*>(editorApp->controlMap["modelList"]);
             Resources::ResourceManager::GetCurrent()->MainScene.RemoveAt(editorApp->SelectedObjectData->id);
@@ -78,20 +87,20 @@ void EditorApp::Init()
             for (int i = selectionIndex; i < int(modelList->Children().size()); i++)
                 reinterpret_cast<ObjectViewItem*>(modelList->Children()[i])->Data.id--;
         }
-        , SDL_SCANCODE_D, ANA_PRESS});// Rotate Mode
+        , SDL_SCANCODE_D, ANA_PRESS});
     editorInputProfile.opKeyMapConfigs.push_back({this,
         [](void* param)
         {
             auto editorApp = reinterpret_cast<EditorApp*>(param);
-            if (editorApp->ActionMode == 0 || editorApp->SelectedObjectData == nullptr)
+            if (editorApp->ActionMode == ActionModes::Normal || editorApp->SelectedObjectData == nullptr)
                 return;
 
-            editorApp->ActionMode = 0;
+            editorApp->ActionMode = ActionModes::Normal;
             auto& object = editorApp->aResourceManager.MainScene.At(editorApp->SelectedObjectData->id);
             object.transform = _originalTransform;
             editorApp->aResourceManager.MainScene.UpdateMeshTransform(editorApp->SelectedObjectData->id);
         }
-        , SDL_SCANCODE_ESCAPE, ANA_PRESS});// Rotate Mode
+        , SDL_SCANCODE_ESCAPE, ANA_PRESS});
     editorInputProfile.opKeyMapConfigs.push_back({this,
         [](void* param)
         {
@@ -105,12 +114,12 @@ void EditorApp::Init()
     [](void* param, Input::CursorArgs& curArgs, int leftButtonAction)
     {
         auto editorApp = reinterpret_cast<EditorApp*>(param);
-        if (editorApp->ActionMode == 0 || editorApp->SelectedObjectData == nullptr)
+        if (editorApp->ActionMode == ActionModes::Normal || editorApp->SelectedObjectData == nullptr)
             return;
 
         if (leftButtonAction)
         {
-            editorApp->ActionMode = 0;
+            editorApp->ActionMode = ActionModes::Normal;
             return;
         }
         auto& object = editorApp->aResourceManager.MainScene.At(editorApp->SelectedObjectData->id);
@@ -119,17 +128,30 @@ void EditorApp::Init()
         float speedRatio = mainCamera.GetSpeedRatio();
         switch(editorApp->ActionMode)
         {
-        case 1:
-            object.transform.translation -=
-                glm::vec3(cosf(mainCamera.CameraTransform.rotation.y),
-                0.0f,
-                -sinf(mainCamera.CameraTransform.rotation.y)) * duration.x.As<float>() * speedRatio * 10000.0f;
-            object.transform.translation.y -= duration.y.As<float>() * speedRatio * 10000.0f;
+        case ActionModes::Grab:
+            if (editorApp->FocusedAxis == AxisType::All)
+            {
+                object.transform.translation -=
+                    glm::vec3(cosf(mainCamera.CameraTransform.rotation.y),
+                        0.0f,
+                        -sinf(mainCamera.CameraTransform.rotation.y)) * duration.x.As<float>() * speedRatio * 10000.0f;
+                object.transform.translation.y -= duration.y.As<float>() * speedRatio * 10000.0f;
+            }
+            else
+            {
+                object.transform.translation[(int)editorApp->FocusedAxis] += (duration.x - duration.y).As<float>() * speedRatio * 10000.0f;
+            }
             break;
-        case 2:
-            object.transform.scale += (duration.x - duration.y).As<float>() * speedRatio * 10000.0f;
+        case ActionModes::Scale:
+        {
+            float d = (duration.x - duration.y).As<float>() * speedRatio * 10000.0f;
+            if (editorApp->FocusedAxis == AxisType::All)
+                object.transform.scale += d;
+            else
+                object.transform.scale[(int)editorApp->FocusedAxis] += d;
             break;
-        case 3:
+        }
+        case ActionModes::Rotate:
         {
             const float rotateSpeed = speedRatio * mainCamera.GetRotateSpeed() * 6.283f * 80.f;
             object.transform.rotation.y =
@@ -248,7 +270,7 @@ void EditorApp::mainScene_MeshAppend(std::string name, uint32_t id)
 }
 //const VkDeviceSize offset = 0;
 
-template<char actionMode>
+template<ActionModes actionMode>
 Input::RegularCallBack EditorApp::createActionModeCallback()
 {
     return [](void* param)
@@ -256,10 +278,24 @@ Input::RegularCallBack EditorApp::createActionModeCallback()
         auto editorApp = reinterpret_cast<EditorApp*>(param);
         if (editorApp->SelectedObjectData == nullptr)
             return;
+        editorApp->FocusedAxis = AxisType::All;
 
         auto& object = editorApp->aResourceManager.MainScene.At(editorApp->SelectedObjectData->id);
         _originalTransform = object.transform;
-        editorApp->ActionMode = editorApp->ActionMode == actionMode ? 0 : actionMode;
+        editorApp->ActionMode = editorApp->ActionMode == actionMode ? ActionModes::Normal : actionMode;
+    };
+}
+
+template<AxisType axisType>
+Input::RegularCallBack EditorApp::createAxisTypeCallback()
+{
+    return [](void* param)
+    {
+        auto editorApp = reinterpret_cast<EditorApp*>(param);
+        if (editorApp->SelectedObjectData == nullptr)
+            return;
+
+        editorApp->FocusedAxis = editorApp->FocusedAxis == axisType ? AxisType::All : axisType;
     };
 }
 
