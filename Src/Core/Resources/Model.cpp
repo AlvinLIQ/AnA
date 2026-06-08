@@ -188,7 +188,7 @@ void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo) // sp
     uint32_t triangleIndices[3];
     glm::u8vec3 color{255, 255, 255};
     auto parentPath = std::filesystem::path(filePath).parent_path().string();
-    for (uint t = 0; t < mesh->texture_count; t++)
+    for (uint32_t t = 0; t < mesh->texture_count; t++)
         if (mesh->textures[t].path)
             printf("%s\n", mesh->textures[t].path + parentPath.length() + 1);
     for (uint32_t f = 0, v, fv, i; f < mesh->face_count; f++)
