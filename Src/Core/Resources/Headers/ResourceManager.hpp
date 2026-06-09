@@ -15,6 +15,12 @@
 #include <unordered_map>
 //#include <map>
 
+#ifdef NO_CULL
+#define DEFAULT_CULL 0
+#else
+#define DEFAULT_CULL 3
+#endif
+
 #define ANA_INCLUDE_CONTROL
 
 #ifdef ANA_INCLUDE_CONTROL
