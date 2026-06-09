@@ -15,9 +15,7 @@ else
     cflags += ['-DDEBUG_BUILD']
 endif
 
-if get_option('no_cull')
-    cflags += ['-DNO_CULL']
-endif
+cflags += ['-DCULL=' + get_option('cull').to_string()]
 
 conf_data = configuration_data()
 conf_data.set('HAVE_GLSLANG', 0)
