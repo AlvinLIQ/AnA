@@ -7,7 +7,6 @@
 #include "../../Headers/Types.hpp"
 #include "../../Resources/Headers/Animation.hpp"
 
-#define moveStep 1.0f
 #define rotateStep 0.8f
 namespace AnA
 {
@@ -64,6 +63,14 @@ namespace AnA
             {
                 return rotateSpeed;
             }
+            void SetMoveStep(float newStep)
+            {
+                moveStep = newStep;
+            }
+            float GetMoveStep() const
+            {
+                return moveStep;
+            }
 
             glm::vec3 offset{};
             Transform CameraTransform;
@@ -75,6 +82,7 @@ namespace AnA
             glm::mat4 viewMatrix{1.f};
             glm::mat4 inverseViewMatrix;
 
+            float moveStep = 1.0f;
             float speedRatio = 1.0f;
             float rotateSpeed = 8.0f;
         };
