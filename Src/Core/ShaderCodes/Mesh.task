@@ -8,6 +8,7 @@
 #include "bindings.h"
 
 layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
+layout(constant_id = CULL_MODE_ID) const int CullMode = 0;
 
 layout(scalar, set = DEFAULT_VERTEX_LAYOUT, binding = BIND_VERTEX) buffer VertexSSBO
 {
@@ -93,8 +94,12 @@ bool isMeshletVisible(uint meshletID, uint objectID)
     if (len != 0.)
         normal /= len;
     vec3 coneApex = (transform * vec4(boundingSphere.coneApex, 1.0)).xyz;
-    return isSphereInsideFrustum(center, radius, frustum.planes) &&
-        isMeshletFacingCamera(cbo.position.xyz, coneApex, normal, boundingSphere.cutoff);
+
+    if (((CullMode & CULL_FRUSTUM) != 0 && !isSphereInsideFrustum(center, radius, frustum.planes)) ||
+            ((CullMode & CULL_BACKFACE) != 0 && !isMeshletFacingCamera(cbo.position.xyz, coneApex, normal, boundingSphere.cutoff)))
+        return false;
+
+    return true;
 }
 
 void main()
@@ -105,7 +110,7 @@ void main()
 
     if (globalID < meshletIDCount)
     {
-        bool visible = isMeshletVisible(meshletIDs[globalID].meshletID, meshletIDs[globalID].objectID); //meshletIDs[globalID << 1], meshletIDs[(globalID << 1) ^ 1]);
+        bool visible = CullMode == 0 || isMeshletVisible(meshletIDs[globalID].meshletID, meshletIDs[globalID].objectID); //meshletIDs[globalID << 1], meshletIDs[(globalID << 1) ^ 1]);
 
         if (visible)
         {

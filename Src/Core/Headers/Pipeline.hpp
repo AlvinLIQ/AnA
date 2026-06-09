@@ -63,6 +63,7 @@ namespace AnA
             bool hasMeshShader = false;
             std::vector<VkDynamicState> dynamicStates = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR, VK_DYNAMIC_STATE_POLYGON_MODE_EXT, VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY };
             std::vector<VkSpecializationInfo> specializationInfos{};
+            std::vector<std::vector<VkSpecializationMapEntry>> specializationMapEntries{};
             static PipelineConfig GetDefault(VkShaderModule vertexShaderModule, VkShaderModule fragShaderModule,
                 VkPipelineLayout &pipelineLayout, VkRenderPass &renderPass, VkSampleCountFlagBits msaaSamplers, const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
             {
@@ -509,6 +510,7 @@ namespace AnA
                 bool isMeshShader = false, hasFragmentShader = false, hasGBuffer = false;
                 dConfig.pipelineInfo.layout = pipelineLayout;
                 dConfig.specializationInfos.resize(shaderInfos.size());
+                dConfig.specializationMapEntries.resize(shaderInfos.size());
                 for (size_t i = 0; i < shaderInfos.size(); i++)
                 {
                     dConfig.shaderStages[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -519,10 +521,18 @@ namespace AnA
 
                     if (shaderInfos[i].constants.size())
                     {
-                        dConfig.specializationInfos[i].dataSize =  shaderInfos[i].constants.size();
+                        dConfig.specializationMapEntries[i].resize(shaderInfos[i].constants.size());
+                        for (size_t j = 0; j < dConfig.specializationMapEntries[i].size(); j++)
+                        {
+                            auto& entry = dConfig.specializationMapEntries[i][j];
+                            entry.constantID = uint32_t(j);
+                            entry.offset = uint32_t(j * sizeof(int));
+                            entry.size = sizeof(int);
+                        }
+                        dConfig.specializationInfos[i].dataSize = shaderInfos[i].constants.size() * sizeof(int);
                         dConfig.specializationInfos[i].pData = shaderInfos[i].constants.begin();
-                        dConfig.specializationInfos[i].mapEntryCount = 0;
-                        dConfig.specializationInfos[i].pMapEntries = VK_NULL_HANDLE;
+                        dConfig.specializationInfos[i].mapEntryCount = dConfig.specializationMapEntries[i].size();
+                        dConfig.specializationInfos[i].pMapEntries = dConfig.specializationMapEntries[i].data();
                         dConfig.shaderStages[i].pSpecializationInfo = &dConfig.specializationInfos[i];
                     }
                     dConfig.hasMeshShader = isMeshShader = isMeshShader || (shaderInfos[i].stage &
