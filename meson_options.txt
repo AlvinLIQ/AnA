@@ -3,3 +3,8 @@ option(
     type: 'integer',
     value: 3
 )
+option(
+    'theme',
+    type: 'integer',
+    value: 0
+)
