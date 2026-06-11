@@ -1,45 +1,48 @@
-<StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Color="0.5f, 0.5f, 0.5f, 1.0f">
+<StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Color="">
     <ListView Name="pageTabs" HorizontalAlignment="Start" VerticalAlignment="Stretch"
         Orientation="Vertical"
-        Color="0.1f, 0.1f, 0.1f, 1.0f" SelectionChanged="pageTabs_SelectionChanged">
-        <TextBlock Text=" G " HorizontalAlignment="Stretch" FontSize="(Float)28.0f" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
-        <TextBlock Text=" A " HorizontalAlignment="Stretch" FontSize="(Float)28.0f" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
+        Color="DefaultPrimaryColor" SelectionChanged="pageTabs_SelectionChanged">
+        <TextBlock Text=" G " HorizontalAlignment="Stretch" FontSize="(Float)28.0f"/>
+        <TextBlock Text=" A " HorizontalAlignment="Stretch" FontSize="(Float)28.0f"/>
     </ListView>
-    <PageView Name="pageView" Color="0.156f, 0.156f, 0.156f, 1.0f" ControlSize="0.0f, 0.0f"
+    <PageView Name="pageView" Color="DefaultSecondaryColor" ControlSize="0.0f, 0.0f"
         VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
         VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch">
         <StackPanel ControlSize="0.0f, 0.0f" Spacing="0.01f" Orientation="Vertical"
             Color="" Padding="0.05f, 0.01f, 0.05f, 0.01f">
-            <TextBlock Text="General" FontColor="0.8f, 0.8f, 0.8f, 1.0f" FontSize="(Float)25.0f"/>
+            <TextBlock Text="General" FontSize="(Float)25.0f"/>
             <Button HorizontalAlignment="Start" Click="loadModelButton_Click">
-                <TextBlock Text="Load Model" FontColor="0.8f, 0.8f, 0.8f, 1.0f" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <TextBlock Text="Load Model" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Button>
             <Button HorizontalAlignment="Start" Click="saveSceneButton_Click">
-                <TextBlock Text="Save Scene" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
+                <TextBlock Text="Save Scene"/>
             </Button>
-            <TextBlock Text="Meshes" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
-            <ObjectView Name="modelList" Orientation="Vertical" HorizontalAlignment="Stretch" Color="0.2f, 0.2f, 0.2, 1.0f"/>
-            <TextBlock Text="Near" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
+            <TextBlock Text="Meshes"/>
+            <ObjectView Name="modelList" Orientation="Vertical" HorizontalAlignment="Stretch" Color="DefaultControlBackgroundColor"/>
+            <TextBlock Text="Near"/>
             <Slider Name="nearSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.0f"/>
-            <TextBlock Text="Far" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
+            <TextBlock Text="Far"/>
             <Slider Name="farSlider" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="1.0f"/>
-            <TextBlock Text="Light Direction" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
+            <TextBlock Text="Light Direction"/>
             <Slider Name="lightX" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.24f"/>
             <Slider Name="lightY" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.9f"/>
             <Slider Name="lightZ" HorizontalAlignment="Stretch" ControlSize="0.0f, 0.02f" Value="0.3f"/>
-            <TextBlock Text="Lock Camera" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
+            <TextBlock Text="Lock Camera"/>
             <ListView Name="camLockToggle" Orientation="Horizontal" HorizontalAlignment="Start" RenderMode="Passive"
-                ControlSize="0.f, 40.0f" Color="0.2f, 0.2f, 0.2f, 1.0f" Spacing="0.01f">
-                <TextBlock Text=" Off " FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
-                <TextBlock Text=" On " FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
+                ControlSize="0.f, 40.0f" Color="DefaultControlBackgroundColor" Spacing="0.01f">
+                <TextBlock Text=" Off "/>
+                <TextBlock Text=" On "/>
             </ListView>
+            <ComboBox Text="Test" Color="DefaultControlBackgroundColor"
+                HorizontalAlignment="Stretch">
+            </ComboBox>
             <Button HorizontalAlignment="Start" Click="exitButton_Click">
-                <TextBlock Text="Exit" FontColor="0.8f, 0.8f, 0.8f, 1.0f"/>
+                <TextBlock Text="Exit"/>
             </Button>
         </StackPanel>
         <StackPanel ControlSize="0.0f, 0.0f" Spacing="0.01f" Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-            Color="0.156f, 0.156f, 0.156f, 1.0f" Padding="0.05f, 0.01f, 0.05f, 0.01f">
-            <TextBlock Text="Animation" FontColor="0.8f, 0.8f, 0.8f, 1.0f" FontSize="(Float)25.0f"/>
+            Color="DefaultSecondaryColor" Padding="0.05f, 0.01f, 0.05f, 0.01f">
+            <TextBlock Text="Animation" FontSize="(Float)25.0f"/>
         </StackPanel>
     </PageView>
 </StackPanel>

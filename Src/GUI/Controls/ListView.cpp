@@ -18,7 +18,7 @@ void ListView::ListView_PointerMoving(ListView* control, PointerEventArgs& args)
                     control->hoverItem->Color = {};
                 }
                 control->hoverItem = item;
-                item->Color = {0.25f, 0.25f, 0.25f, 1.0f};
+                item->Color = DefaultListItemHoverColor;
                 item->RequestUpdate();
             }
             return;
@@ -73,7 +73,7 @@ void ListView::Select(int index)
     else
     {
         auto item = items[index];
-        item->Color = {0.3f, 0.3f, 0.3f, 1.0f};
+        item->Color = DefaultListItemSelectedColor;
         item->RequestUpdate();
         selectedItem = item;
         selectionIndex = index;
