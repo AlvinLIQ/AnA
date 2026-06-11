@@ -4,6 +4,7 @@
 #include <optional>
 #include <vector>
 #include <fstream>
+#include <unordered_map>
 #include <vulkan/vulkan.h>
 #include <glm/glm.hpp>
 #include "Utils.hpp"
@@ -126,7 +127,7 @@ namespace AnA
         void CreateTextImage(const String& text, int& width, int& height, float lineHeight, VkImage* pTextImage, VmaAllocation& allocation);
         #endif
 
-        void BuildFontVertices(std::vector<Character>& characters, int range = 128);
+        void BuildFontVertices(std::unordered_map<int, Character>& characters, int offset = 0, int range = 128);
         static void Triangulation(std::vector<glm::vec2>& vertices, std::vector<glm::uvec2>& edges,
             std::vector<uint32_t>& indices);
 

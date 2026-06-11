@@ -10,7 +10,7 @@ namespace AnA
 {
     struct CharacterInfo
     {
-        char ch;
+        uint32_t ch;
         uint32_t index;
     };
     struct TextData
@@ -59,8 +59,8 @@ namespace AnA
         Device* aDevice{nullptr};
         size_t totalCharCount = 0;
         std::unordered_map<uint32_t, TextMapData> textMap{};
-        std::unordered_map<char, char> characterMap{};
-        std::vector<char> meshlets;
+        std::unordered_map<int, int> characterMap{};
+        std::vector<int> meshlets;
         std::mutex _mutex;
         void updateMeshlets(size_t meshletOffset);
         void updateAll();

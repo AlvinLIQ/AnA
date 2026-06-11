@@ -113,7 +113,7 @@ namespace AnA
             AnA::Controls::Control* MainControl = NULL;
 #endif
             std::unordered_map<uint32_t, Texture> TextureMap{};
-            std::vector<Character> Characters{};
+            std::unordered_map<int, Character> Characters{};
             AnA::Resources::ShadowMap ShadowMap;
             ThreadPool<void()> TaskPool{MAX_FRAMES_IN_FLIGHT};
             //CommandBufferPool SecondaryCommandBufferPool;

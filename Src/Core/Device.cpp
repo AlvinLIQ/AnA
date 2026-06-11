@@ -398,7 +398,7 @@ void Device::CreateTextImage(const char* text, int& width, int& height, float li
 
 #endif
 
-void Device::BuildFontVertices(std::vector<Character>& characters, int range)
+void Device::BuildFontVertices(std::unordered_map<int, Character>& characters, int offset, int range)
 {
     auto fontData = ReadFile("Fonts/SourceCodePro-Black.otf");
     stbtt_fontinfo info{};
@@ -406,14 +406,13 @@ void Device::BuildFontVertices(std::vector<Character>& characters, int range)
         throw std::runtime_error("failed to init font");
 
     const float scale = 1.0f / 660.0f;
-    characters.resize(static_cast<size_t>(range));
     uint32_t indexCount = 0;
-    for (int cid = 0; cid < range; cid++)
+    for (int cid = offset; cid < range; cid++)
     {
         int glyphIndex = stbtt_FindGlyphIndex(&info, cid);
         stbtt_vertex* vertices;
         int vertexCount = stbtt_GetGlyphShape(&info, glyphIndex, &vertices);
-        auto& character = characters[static_cast<size_t>(cid)];
+        auto& character = characters.try_emplace(cid).first->second;
         character.paths = {};
         character.indexOffset = indexCount;
         auto& paths = character.paths;
