@@ -10,7 +10,7 @@ namespace AnA
         {
         public:
             TextBlock();
-            TextBlock(const char* newText, glm::vec4 color = {0.0f, 0.0f, 0.0f, 1.0f});
+            TextBlock(const char* newText, glm::vec4 color = {DefaultFontColor});
             ~TextBlock();
 
             void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
