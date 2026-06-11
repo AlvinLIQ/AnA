@@ -17,7 +17,7 @@
 //#endif
 #define MAX_FRAMES_IN_FLIGHT 2
 
-#define numsof(A) sizeof(A) / sizeof(A[0])
+#define numsof(A) (sizeof(A) / sizeof(A[0]))
 
 #define ANA_TEXT_DEFAULT_LINE_HEIGHT 18
 #define IS_ASCII_CHAR(A) (A) <= 127
