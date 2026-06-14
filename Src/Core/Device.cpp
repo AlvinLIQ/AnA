@@ -155,6 +155,8 @@ void Device::CreateImage(VkImageCreateInfo* pCreateInfo, VkImage* pImage, VmaAll
 {
     VmaAllocationCreateInfo allocInfo{};
     allocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+    if (HostImageCopySupport())
+        pCreateInfo->usage |= VK_IMAGE_USAGE_HOST_TRANSFER_BIT;
     vmaCreateImage(allocator, pCreateInfo, &allocInfo, pImage, &allocation, nullptr);
 }
 

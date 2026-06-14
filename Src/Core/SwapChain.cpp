@@ -399,28 +399,48 @@ void SwapChain::createColorResources()
     imageInfo.format = colorFormat;
     imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    imageInfo.usage = VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    imageInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
     imageInfo.samples = msaaSamplers;
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     imageInfo.flags = 0;
     aDevice->CreateImage(&imageInfo, &colorImage, colorImageAllocation);
-    auto imageBarrier = Device::ImageMemoryBarrier2(
-        colorImage,
-        VK_IMAGE_LAYOUT_UNDEFINED,
-        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-        VK_ACCESS_2_NONE,
-        VK_ACCESS_2_NONE,
-        VK_PIPELINE_STAGE_2_NONE,
-        VK_PIPELINE_STAGE_2_NONE,
-        VK_IMAGE_ASPECT_COLOR_BIT
-    );
-    auto commandbuffer = aDevice->BeginSingleTimeCommands();
-    Device::PipelineBarrier2(commandbuffer, VK_DEPENDENCY_BY_REGION_BIT,
-        &imageBarrier,
-        1,
-        VK_NULL_HANDLE,
-        0);
-    aDevice->EndSingleTimeCommands(commandbuffer);
+    if (aDevice->HostImageCopySupport())
+    {
+        VkHostImageLayoutTransitionInfo transitionInfo{};
+        transitionInfo.sType = VK_STRUCTURE_TYPE_HOST_IMAGE_LAYOUT_TRANSITION_INFO;
+        transitionInfo.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        transitionInfo.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        transitionInfo.image = colorImage;
+        transitionInfo.subresourceRange =
+        {
+            VK_IMAGE_ASPECT_COLOR_BIT,
+            0,
+            1,
+            0,
+            1
+        };
+        vkTransitionImageLayout(aDevice->GetLogicalDevice(), 1, &transitionInfo);
+    }
+    else
+    {
+        auto imageBarrier = Device::ImageMemoryBarrier2(
+            colorImage,
+            VK_IMAGE_LAYOUT_UNDEFINED,
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            VK_ACCESS_2_NONE,
+            VK_ACCESS_2_NONE,
+            VK_PIPELINE_STAGE_2_NONE,
+            VK_PIPELINE_STAGE_2_NONE,
+            VK_IMAGE_ASPECT_COLOR_BIT
+        );
+        auto commandbuffer = aDevice->BeginSingleTimeCommands();
+        Device::PipelineBarrier2(commandbuffer, VK_DEPENDENCY_BY_REGION_BIT,
+            &imageBarrier,
+            1,
+            VK_NULL_HANDLE,
+            0);
+        aDevice->EndSingleTimeCommands(commandbuffer);
+    }
     colorImageView = aDevice->CreateImageView(colorImage, colorFormat);
 }
 

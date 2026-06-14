@@ -152,7 +152,7 @@ void Renderer::BeginRendering(CommandBuffer& commandBuffer)
     colorAttachmentInfo.clearValue = clearValues[0];
     colorAttachmentInfo.resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT;
     colorAttachmentInfo.resolveImageView = aSwapChain->swapChainImageViews[aSwapChain->CurrentImage];
-    colorAttachmentInfo.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    colorAttachmentInfo.resolveImageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
     VkRenderingAttachmentInfoKHR depthAttachment{};
     depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
