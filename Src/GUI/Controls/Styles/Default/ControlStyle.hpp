@@ -35,8 +35,8 @@ namespace AnA
     const glm::vec4 DefaultSecondaryColor = {0.956f, 0.956f, 0.956f, 1.0f};
     const glm::vec4 DefaultControlBackgroundColor = {0.84f, 0.84f, 0.84f, 1.0f};
     const glm::vec4 DefaultFontColor = {0.2f, 0.2f, 0.2f, 1.0f};
-    const glm::vec4 DefaultListItemHoverColor = {0.75, 0.75f, 0.75f, 1.0f};
-    const glm::vec4 DefaultListItemSelectedColor = {0.7f, 0.7f, 0.7f, 1.0f};
+    const glm::vec4 DefaultListItemHoverColor = {0.9f, 0.9f, 0.9f, 1.0f};
+    const glm::vec4 DefaultListItemSelectedColor = {0.83f, 0.83f, 0.83f, 1.0f};
     const glm::vec4 ButtonBackgroundColor = {0.8f, 0.8f, 0.8f, 1.0f};
     const glm::vec4 ButtonPointerMovedBackgroundColor = {0.7f, 0.7f, 0.7f, 1.0f};
     const glm::vec4 ButtonPointerPressedBackgroundColor = {0.6f, 0.6f, 0.6f, 1.0f};
