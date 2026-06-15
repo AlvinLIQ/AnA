@@ -131,7 +131,6 @@ namespace AnA
         std::vector<VmaAllocation> depthImageAllocations;
         std::vector<VkImageView> depthImageViews;
         void createDepthResources();
-        void initImages();
         // Framebuffers holding the deferred attachments
         std::array<FrameBuffer, MAX_FRAMES_IN_FLIGHT> offScreenFrameBuffers{};
         VkSampler colorSampler{};

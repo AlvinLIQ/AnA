@@ -14,7 +14,6 @@ SwapChain::SwapChain(Device* mDevice,
     createImageViews();
     createColorResources();
     createDepthResources();
-    initImages();
     createOffscreenSampler();
     createOffscreenFramebuffer();
     createSyncObjects();
@@ -216,7 +215,6 @@ void SwapChain::RecreateSwapChain()
     createImageViews();
     createColorResources();
     createDepthResources();
-    initImages();
     createOffscreenFramebuffer();
 }
 
@@ -404,6 +402,7 @@ void SwapChain::createColorResources()
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     imageInfo.flags = 0;
     aDevice->CreateImage(&imageInfo, &colorImage, colorImageAllocation);
+    /*
     if (aDevice->HostImageCopySupport())
     {
         VkHostImageLayoutTransitionInfo transitionInfo{};
@@ -440,7 +439,7 @@ void SwapChain::createColorResources()
             VK_NULL_HANDLE,
             0);
         aDevice->EndSingleTimeCommands(commandbuffer);
-    }
+    }*/
     colorImageView = aDevice->CreateImageView(colorImage, colorFormat);
 }
 
@@ -490,45 +489,6 @@ void SwapChain::createDepthResources()
             throw std::runtime_error("failed to create texture image view!");
         }
     }
-}
-
-void SwapChain::initImages()
-{
-    VkImageMemoryBarrier2 imageBarriers[32];
-    uint32_t imageBarrierCount = 0;
-    for (size_t i = 0; i < swapChainImages.size(); i++)
-    {
-        /*
-        imageBarriers[imageBarrierCount++] = Device::ImageMemoryBarrier2(
-            swapChainImages[i],
-            VK_IMAGE_LAYOUT_UNDEFINED,
-            VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-            VK_ACCESS_2_NONE,
-            VK_ACCESS_2_NONE,
-            VK_PIPELINE_STAGE_2_NONE,
-            VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT,
-            VK_IMAGE_ASPECT_COLOR_BIT
-        );*/
-        imageBarriers[imageBarrierCount++] = Device::ImageMemoryBarrier2(
-            depthImages[i],
-            VK_IMAGE_LAYOUT_UNDEFINED,
-            VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
-            VK_ACCESS_2_NONE,
-            VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT |
-                VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT,
-            VK_PIPELINE_STAGE_2_NONE,
-            VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT |
-                VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT,
-            VK_IMAGE_ASPECT_DEPTH_BIT
-        );
-    }
-    auto commandbuffer = aDevice->BeginSingleTimeCommands();
-    Device::PipelineBarrier2(commandbuffer, VK_DEPENDENCY_BY_REGION_BIT,
-        imageBarriers,
-        imageBarrierCount,
-        VK_NULL_HANDLE,
-        0);
-    aDevice->EndSingleTimeCommands(commandbuffer);
 }
 
 void SwapChain::createOffscreenFramebuffer()

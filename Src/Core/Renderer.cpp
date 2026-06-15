@@ -125,17 +125,38 @@ void Renderer::BeginRendering(CommandBuffer& commandBuffer)
 {
     VkImageMemoryBarrier2 imageBarriers[] =
     {
-        {
         Device::ImageMemoryBarrier2(
             aSwapChain->swapChainImages[aSwapChain->CurrentImage],
             VK_IMAGE_LAYOUT_UNDEFINED,
-            VK_IMAGE_LAYOUT_GENERAL,
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
             VK_ACCESS_2_NONE,
             VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
             VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
             VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
             VK_IMAGE_ASPECT_COLOR_BIT
-        )}
+        ),
+        Device::ImageMemoryBarrier2(
+            aSwapChain->colorImage,
+            VK_IMAGE_LAYOUT_UNDEFINED,
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            VK_ACCESS_2_NONE,
+            VK_ACCESS_2_NONE,
+            VK_PIPELINE_STAGE_2_NONE,
+            VK_PIPELINE_STAGE_2_NONE,
+            VK_IMAGE_ASPECT_COLOR_BIT
+        ),
+        Device::ImageMemoryBarrier2(
+            aSwapChain->depthImages[aSwapChain->CurrentImage],
+            VK_IMAGE_LAYOUT_UNDEFINED,
+            VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+            VK_ACCESS_2_NONE,
+            VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT |
+                VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT,
+            VK_PIPELINE_STAGE_2_NONE,
+            VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT |
+                VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT,
+            VK_IMAGE_ASPECT_DEPTH_BIT
+        )
     };
     Device::PipelineBarrier2(commandBuffer, VK_DEPENDENCY_BY_REGION_BIT,
         imageBarriers, numsof(imageBarriers),
@@ -152,7 +173,7 @@ void Renderer::BeginRendering(CommandBuffer& commandBuffer)
     colorAttachmentInfo.clearValue = clearValues[0];
     colorAttachmentInfo.resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT;
     colorAttachmentInfo.resolveImageView = aSwapChain->swapChainImageViews[aSwapChain->CurrentImage];
-    colorAttachmentInfo.resolveImageLayout = VK_IMAGE_LAYOUT_GENERAL;
+    colorAttachmentInfo.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
     VkRenderingAttachmentInfoKHR depthAttachment{};
     depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
@@ -182,7 +203,7 @@ void Renderer::EndRendering(CommandBuffer& commandBuffer)
         {
             Device::ImageMemoryBarrier2(
             aSwapChain->swapChainImages[aSwapChain->CurrentImage],
-            VK_IMAGE_LAYOUT_GENERAL,
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
             VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
             VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
             0,
