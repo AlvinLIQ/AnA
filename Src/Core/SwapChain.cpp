@@ -498,6 +498,7 @@ void SwapChain::initImages()
     uint32_t imageBarrierCount = 0;
     for (size_t i = 0; i < swapChainImages.size(); i++)
     {
+        /*
         imageBarriers[imageBarrierCount++] = Device::ImageMemoryBarrier2(
             swapChainImages[i],
             VK_IMAGE_LAYOUT_UNDEFINED,
@@ -507,7 +508,7 @@ void SwapChain::initImages()
             VK_PIPELINE_STAGE_2_NONE,
             VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT,
             VK_IMAGE_ASPECT_COLOR_BIT
-        );
+        );*/
         imageBarriers[imageBarrierCount++] = Device::ImageMemoryBarrier2(
             depthImages[i],
             VK_IMAGE_LAYOUT_UNDEFINED,

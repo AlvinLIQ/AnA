@@ -128,7 +128,7 @@ void Renderer::BeginRendering(CommandBuffer& commandBuffer)
         {
         Device::ImageMemoryBarrier2(
             aSwapChain->swapChainImages[aSwapChain->CurrentImage],
-            VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+            VK_IMAGE_LAYOUT_UNDEFINED,
             VK_IMAGE_LAYOUT_GENERAL,
             VK_ACCESS_2_NONE,
             VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
