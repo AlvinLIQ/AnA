@@ -266,6 +266,7 @@ void Text::updateAll()
             chIndex++;
         }
         textBuffer[textIndex].count = chIndex;
+        textInfo.length = chIndex;
         index += iter.second.capacity;
         textIndex++;
     }

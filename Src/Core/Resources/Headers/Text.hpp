@@ -30,6 +30,7 @@ namespace AnA
         glm::vec4 scissor;
         std::string text;
         bool visible;
+        size_t length;
     };
     struct TextMapData
     {
