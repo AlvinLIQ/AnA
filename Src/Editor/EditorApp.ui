@@ -2,8 +2,12 @@
     <ListView Name="pageTabs" HorizontalAlignment="Start" VerticalAlignment="Stretch"
         Orientation="Vertical"
         Color="DefaultPrimaryColor" SelectionChanged="pageTabs_SelectionChanged">
-        <TextBlock Text=" G " HorizontalAlignment="Stretch" FontSize="(Float)28.0f"/>
-        <TextBlock Text=" A " HorizontalAlignment="Stretch" FontSize="(Float)28.0f"/>
+        <ItemPresenter ControlSize="0.05f, 0.05f" Color="">
+            <Control ControlSize="0.03f, 0.03f" Texture="Icons/general.png" Color="DefaultFontColor"/>
+        </ItemPresenter>
+        <ItemPresenter ControlSize="0.05f, 0.05f" Color="">
+            <Control ControlSize="0.03f, 0.03f" Texture="Icons/animation.png" Color="DefaultFontColor"/>
+        </ItemPresenter>
     </ListView>
     <PageView Name="pageView" Color="DefaultSecondaryColor" ControlSize="0.0f, 0.0f"
         VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
