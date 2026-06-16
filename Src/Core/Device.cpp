@@ -1,5 +1,6 @@
 #include "Headers/Device.hpp"
 
+#include <mutex>
 #include <set>
 #include <stdexcept>
 //#include <chrono>
@@ -1366,13 +1367,10 @@ void Device::EndSingleTimeCommandsSubmit(VkFence& fence)
     subCommandBufferSubmitBegan = false;
     subCommandBufferRecorded = false;
 
-    Resources::ResourceManager::GetCurrent()->TaskPool.Enqueue([this, fence]
-    {
-        vkWaitForFences(logicalDevice, 1, &fence, VK_TRUE, UINT64_MAX);
-        if (stagingBuffers.size())
-            cleanupStagingBuffers();
-        subCommandMutex.unlock();
-    });
+    vkWaitForFences(logicalDevice, 1, &fence, VK_TRUE, UINT64_MAX);
+    if (stagingBuffers.size())
+        cleanupStagingBuffers();
+    subCommandMutex.unlock();
 }
 
 VmaAllocator Device::GetAllocator()

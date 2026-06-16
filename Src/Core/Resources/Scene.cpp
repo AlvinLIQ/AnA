@@ -147,7 +147,7 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
         meshletIDCount += uint32_t(model->meshlets.size());
 
         auto& textureMap = Resources::ResourceManager::GetCurrent()->TextureMap;
-        mesh.textureId = textureMap.find(meshInfo.tetureId) == textureMap.end() ? DEFAULT_TEXTURE_ID : meshInfo.tetureId;
+        mesh.textureId = textureMap.find(meshInfo.textureId) == textureMap.end() ? DEFAULT_TEXTURE_ID : meshInfo.textureId;
         auto& texture = textureMap.at(mesh.textureId);
         if (textureIdMap.find(mesh.textureId) == textureIdMap.end())
         {

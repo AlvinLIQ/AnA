@@ -47,7 +47,7 @@ namespace AnA
     {
         char filePath[256];
         AnA::Transform transform;
-        uint32_t tetureId{};
+        uint32_t textureId{};
     };
 
     struct FrustumPlanes

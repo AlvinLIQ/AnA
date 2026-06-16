@@ -1,5 +1,6 @@
 #include "Headers/Model.hpp"
 #include "Headers/Device.hpp"
+#include "Resources/Headers/ResourceManager.hpp"
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
@@ -188,9 +189,14 @@ void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo) // sp
     uint32_t triangleIndices[3];
     glm::u8vec3 color{255, 255, 255};
     auto parentPath = std::filesystem::path(filePath).parent_path().string();
+    auto resourceManager = Resources::ResourceManager::GetCurrent();
+    std::vector<uint32_t> textures(mesh->texture_count);
     for (uint32_t t = 0; t < mesh->texture_count; t++)
         if (mesh->textures[t].path)
-            printf("%s\n", mesh->textures[t].path + parentPath.length() + 1);
+        {
+            auto path = std::string(mesh->textures[t].path + parentPath.length() + 1);
+            textures[t] = resourceManager->AppendTexture(path);
+        }
     for (uint32_t f = 0, v, fv, i; f < mesh->face_count; f++)
     {
         fv = mesh->face_vertices[f];
