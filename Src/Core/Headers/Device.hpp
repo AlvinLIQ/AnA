@@ -5,6 +5,7 @@
 #include <vector>
 #include <fstream>
 #include <unordered_map>
+#include <mutex>
 #include <vulkan/vulkan.h>
 #include <glm/glm.hpp>
 #include "Utils.hpp"
@@ -104,13 +105,11 @@ namespace AnA
         void MapBuffer(void** data, VmaAllocation allocation);
         void UnmapBuffer(VmaAllocation);
         void FlushAllocation(VmaAllocation allocation);
-        void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
-        void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, uint32_t regionCount, const VkBufferCopy* copyRegions);
         void CopyBufferToImage(VkCommandBuffer commandBuffer, VkBuffer srcBuffer, VkImage& dstImage, VkExtent3D extent);
-        void HostImageLayoutTrasition(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout);
+        void HostImageLayoutTransition(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout);
         void CopyHostBufferToImage(void* buffer, VkImage dstImage, VkExtent3D extent);
 
-        void CopyBufferToImage(Buffer& aBuffer, VkImage* pTexImage, VkExtent3D& extent);
+        void CopyBufferToImage(Buffer* stagingBuffer, VkImage* pTexImage, VkExtent3D& extent);
 
         void CreateImage(VkImageCreateInfo* pCreateInfo, VkImage* pImage, VmaAllocation& allocation);
         void DestroyImage(VkImage image, VmaAllocation allocation);
@@ -147,7 +146,6 @@ namespace AnA
         static std::vector<VkDescriptorSetLayoutBinding> CreateLayoutBindings(uint32_t binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags, uint32_t descriptorCount = 1);
 
         void TransitionImageLayout(VkCommandBuffer commandBuffer, VkImage& image, VkImageLayout oldLayout, VkImageLayout newLayout);
-        void WaitBufferIdle(VkBuffer buffer);
         struct QueueFamilyIndices
         {
             std::optional<uint32_t> graphicsAndComputeFamily;
@@ -243,7 +241,12 @@ namespace AnA
             VkAccessFlags srcAccessMask, VkImageAspectFlags aspectMask,
             VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask);
         VkCommandBuffer BeginSingleTimeCommands();
-        void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
+        void RecordSingleTimeCommands(void(*recordCallback)(VkCommandBuffer));
+        void EndSingleTimeCommands();
+        bool SingleTimeCommandsRecorded();
+        bool SingleTimeCommandsSubmitBegan();
+        VkCommandBuffer BeginSingleTimeCommandsSubmit();
+        void EndSingleTimeCommandsSubmit(VkFence& fence);
     private:
         VkInstance& instance;
         VkSurfaceKHR& surface;
@@ -271,7 +274,16 @@ namespace AnA
         VkQueue presentQueue;
         void createLogicalDevice();
 
-        VkCommandPool commandPool{VK_NULL_HANDLE};
+        std::mutex subCommandMutex{};
+        bool subCommandBufferBegan = false;
+        bool subCommandBufferRecorded = false;
+        bool subCommandBufferSubmitBegan = false;
+        VkCommandPool commandPool{VK_NULL_HANDLE}, subCommandPool{VK_NULL_HANDLE};
+        VkCommandBuffer subCommandBuffer{};
+        void createSubCommandResources();
+
+        std::vector<Buffer*> stagingBuffers{};
+        void cleanupStagingBuffers();
 
         VkPhysicalDeviceProperties physicalDeviceProperties{};
         VkPhysicalDeviceMeshShaderPropertiesEXT meshShaderProperties{};

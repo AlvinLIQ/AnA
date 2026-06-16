@@ -73,6 +73,7 @@ namespace AnA
         static void SetViewport(CommandBuffer& commandBuffer, VkOffset2D& offset, VkExtent2D& extent);
 
         VkSemaphore& GetCurrentSemaphore();
+        VkFence& GetCurrentFence();
 
         std::vector<VkFramebuffer> GetSwapChainFramebuffers();
 

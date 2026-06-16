@@ -228,6 +228,11 @@ VkSemaphore& SwapChain::GetCurrentSemaphore()
     return renderFinishedSemaphores[CurrentImage];
 }
 
+VkFence& SwapChain::GetCurrentFence()
+{
+    return inFlightFences[CurrentFrame];
+}
+
 VkSurfaceFormatKHR SwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats)
 {
     for (const auto &availableFormat : availableFormats)

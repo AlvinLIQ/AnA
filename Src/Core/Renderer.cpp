@@ -26,6 +26,7 @@ CommandBuffer* Renderer::BeginFrame()
 {
     assert(!isFrameStarted && "Can't call BeginFrame while already in progress!");
     aSwapChain->WaitForFence();
+
     auto result = aSwapChain->AcquireNextImage();
     if (result == VK_ERROR_OUT_OF_DATE_KHR)
     {
@@ -87,9 +88,19 @@ void Renderer::EndFrame()
         vkCmdWriteTimestamp(commandBuffers, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
             timestampQueryPool, firstQuery + 1);
     commandBuffers.End();
+    if (aDevice->SingleTimeCommandsRecorded())
+    {
+        aSwapChain->SubmitCommandBuffer(aDevice->BeginSingleTimeCommandsSubmit());
+    }
+
     auto commandBuffer = commandBuffers.Get();
     auto result = aSwapChain->SubmitCommandBuffer(commandBuffer);
+    auto& currentFence = aSwapChain->GetCurrentFence();
     aSwapChain->SubmitCommandBufferQueue();
+    if (aDevice->SingleTimeCommandsSubmitBegan())
+    {
+        aDevice->EndSingleTimeCommandsSubmit(currentFence);
+    }
 
     vkGetQueryPoolResults(
         aDevice->GetLogicalDevice(),

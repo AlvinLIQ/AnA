@@ -78,16 +78,6 @@ namespace AnA
             }
         }
 
-        void CopyToBuffer(Buffer& srcBuffer, VkDeviceSize dataSize)
-        {
-            aDevice->CopyBuffer(srcBuffer.GetBuffer(), buffer, dataSize);
-        }
-
-        void CopyToBuffer(Buffer& srcBuffer, uint32_t regionCount, const VkBufferCopy* regions)
-        {
-            aDevice->CopyBuffer(srcBuffer.GetBuffer(), buffer, regionCount, regions);
-        }
-
         void CopyToBuffer(Buffer& srcBuffer, uint32_t regionCount, const VkBufferCopy* regions, VkCommandBuffer commandBuffer)
         {
             vkCmdCopyBuffer(commandBuffer, srcBuffer.GetBuffer(), buffer, regionCount, regions);

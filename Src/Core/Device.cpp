@@ -1,13 +1,14 @@
 #include "Headers/Device.hpp"
-#include "Headers/Instance.hpp"
 
 #include <set>
 #include <stdexcept>
 //#include <chrono>
 
+#include "Headers/Buffer.hpp"
+#include "Resources/Headers/ResourceManager.hpp"
+
 #ifdef INCLUDE_STB_IMAGE
 #define STB_IMAGE_IMPLEMENTATION
-#include "Headers/Buffer.hpp"
 #include "../3rdParty/stb/stb_image.h"
 #endif
 #define STB_TRUETYPE_IMPLEMENTATION
@@ -28,10 +29,12 @@ Device::Device(VkInstance &mInstance, VkSurfaceKHR &mSurface) : instance {mInsta
     createLogicalDevice();
     createVmaAllocator();
     CreateCommandPool(VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT, &commandPool);
+    createSubCommandResources();
 }
 
 Device::~Device()
 {
+    vkDestroyCommandPool(logicalDevice, subCommandPool, nullptr);
     vkDestroyCommandPool(logicalDevice, commandPool, nullptr);
     vmaDestroyAllocator(allocator);
     vkDestroyDevice(logicalDevice, nullptr);
@@ -76,27 +79,7 @@ void Device::FlushAllocation(VmaAllocation allocation)
     vmaFlushAllocation(allocator, allocation, 0, VK_WHOLE_SIZE);
 }
 
-void Device::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
-{
-    VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
-
-    VkBufferCopy copyRegion{};
-    copyRegion.size = size;
-    vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
-
-    EndSingleTimeCommands(commandBuffer);
-}
-
-void Device::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, uint32_t regionCount, const VkBufferCopy* copyRegions)
-{
-    VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
-
-    vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, regionCount, copyRegions);
-
-    EndSingleTimeCommands(commandBuffer);
-}
-
-void Device::HostImageLayoutTrasition(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout)
+void Device::HostImageLayoutTransition(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout)
 {
     VkHostImageLayoutTransitionInfo transitionInfo{};
     transitionInfo.sType = VK_STRUCTURE_TYPE_HOST_IMAGE_LAYOUT_TRANSITION_INFO;
@@ -190,23 +173,25 @@ VkImageView Device::CreateImageView(VkImage& image, VkFormat format, VkImageView
     return imageView;
 }
 
-void Device::CopyBufferToImage(Buffer& aBuffer, VkImage* pTexImage, VkExtent3D& extent)
+void Device::CopyBufferToImage(Buffer* stagingBuffer, VkImage* pTexImage, VkExtent3D& extent)
 {
-    auto commandBuffer = BeginSingleTimeCommands();
+    VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
     TransitionImageLayout(commandBuffer,
         *pTexImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-    CopyBufferToImage(commandBuffer, aBuffer.GetBuffer(), *pTexImage, extent);
+    CopyBufferToImage(commandBuffer, stagingBuffer->GetBuffer(), *pTexImage, extent);
     TransitionImageLayout(commandBuffer,
         *pTexImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-    EndSingleTimeCommands(commandBuffer);
+
+    stagingBuffers.push_back(stagingBuffer);
+    EndSingleTimeCommands();
 }
 
 void Device::CreateColorImage(const uint32_t color, VkImage* pTexImage, VmaAllocation& allocation)
 {
     //auto p = std::chrono::high_resolution_clock::now();
-    Buffer aBuffer(this, sizeof(color), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_HOST);
-    aBuffer.Map();
-    memcpy(aBuffer.GetMappedData(), &color, sizeof(color));
+    Buffer* aBuffer = new Buffer(this, sizeof(color), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_HOST);
+    aBuffer->Map();
+    memcpy(aBuffer->GetMappedData(), &color, sizeof(color));
 
     VkImageCreateInfo imageInfo{};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -231,8 +216,9 @@ void Device::CreateColorImage(const uint32_t color, VkImage* pTexImage, VmaAlloc
 
     if (deviceFeatures.hostImageCopySupport)
     {
-        HostImageLayoutTrasition(*pTexImage, imageInfo.initialLayout, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-        CopyHostBufferToImage(aBuffer.GetMappedData(), *pTexImage, imageInfo.extent);
+        HostImageLayoutTransition(*pTexImage, imageInfo.initialLayout, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        CopyHostBufferToImage(aBuffer->GetMappedData(), *pTexImage, imageInfo.extent);
+        delete aBuffer;
     }
     else
     {
@@ -273,16 +259,16 @@ void Device::CreateTextureImage(const char* imagePath, VkImage* pTexImage, VmaAl
     {
         imageInfo.usage = VK_IMAGE_USAGE_HOST_TRANSFER_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
         CreateImage(&imageInfo, pTexImage, allocation);
-        HostImageLayoutTrasition(*pTexImage, imageInfo.initialLayout, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        HostImageLayoutTransition(*pTexImage, imageInfo.initialLayout, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
         CopyHostBufferToImage(pixels, *pTexImage, imageInfo.extent);
         stbi_image_free(pixels);
     }
     else
     {
-        Buffer aBuffer(this, imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_HOST);
-        aBuffer.Map();
-        memcpy(aBuffer.GetMappedData(), pixels, static_cast<size_t>(imageSize));
-        aBuffer.Unmap();
+        Buffer* aBuffer = new Buffer(this, imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_HOST);
+        aBuffer->Map();
+        memcpy(aBuffer->GetMappedData(), pixels, static_cast<size_t>(imageSize));
+        aBuffer->Unmap();
         stbi_image_free(pixels);
 
         imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -355,10 +341,10 @@ void Device::CreateTextImage(const char* text, int& width, int& height, float li
     }
 
     VkDeviceSize bufSize = static_cast<VkDeviceSize>(imageSize) * 4;
-    Buffer aBuffer(this, bufSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_HOST);
-    aBuffer.Map();
+    Buffer* aBuffer = new Buffer(this, bufSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_HOST);
+    aBuffer->Map();
     //memcpy(aBuffer.Getconst stbtt_fontinfo *infoMappedData(), textBitmap.data(), static_cast<size_t>(imageSize));
-    auto bufData = static_cast<unsigned char*>(aBuffer.GetMappedData());
+    auto bufData = static_cast<unsigned char*>(aBuffer->GetMappedData());
     for (VkDeviceSize i = 0, j = 0; i < bufSize; i += 4, j++)
     {
         if (textBitmap[j] >= 0xC0)
@@ -376,7 +362,7 @@ void Device::CreateTextImage(const char* text, int& width, int& height, float li
             bufData[i + 3] = 0x00;
         }
     }
-    aBuffer.Unmap();
+    aBuffer->Unmap();
 
     VkImageCreateInfo imageInfo{};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -808,22 +794,6 @@ void Device::TransitionImageLayout(VkCommandBuffer commandBuffer, VkImage &image
         );
 }
 
-void Device::WaitBufferIdle(VkBuffer buffer)
-{
-    VkBufferMemoryBarrier bufferBarrier{};
-    bufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
-    bufferBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-    bufferBarrier.dstAccessMask = 0;
-    bufferBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    bufferBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    bufferBarrier.buffer = buffer;
-    bufferBarrier.offset = 0;
-    bufferBarrier.size = VK_WHOLE_SIZE;
-    auto commandBuffer = BeginSingleTimeCommands();
-    vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 1, &bufferBarrier, 0, nullptr);
-    EndSingleTimeCommands(commandBuffer);
-}
-
 Device::QueueFamilyIndices Device::GetQueueFamiliesForCurrent()
 {
     return FindQueueFamilies(physicalDevice);
@@ -1179,6 +1149,25 @@ void Device::createLogicalDevice()
     vkGetDeviceQueue(logicalDevice, indices.presentFamily.value(), 0, &presentQueue);
 }
 
+void Device::createSubCommandResources()
+{
+    CreateCommandPool(VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT, &subCommandPool);
+
+    VkCommandBufferAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocInfo.commandPool = subCommandPool;
+    allocInfo.commandBufferCount = 1;
+    vkAllocateCommandBuffers(logicalDevice, &allocInfo, &subCommandBuffer);
+}
+
+void Device::cleanupStagingBuffers()
+{
+    for (auto stagingBuffer : stagingBuffers)
+        delete stagingBuffer;
+    stagingBuffers.clear();
+}
+
 uint32_t Device::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
 {
     VkPhysicalDeviceMemoryProperties memProperties;
@@ -1329,36 +1318,61 @@ void Device::ImageMemoryBarrier(VkCommandBuffer commandBuffer, VkImage image,
 
 VkCommandBuffer Device::BeginSingleTimeCommands()
 {
-    VkCommandBufferAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandPool = commandPool;
-    allocInfo.commandBufferCount = 1;
+    subCommandMutex.lock();
+    if (!subCommandBufferBegan)
+    {
+        subCommandBufferBegan = true;
+        VkCommandBufferBeginInfo beginInfo{};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-    VkCommandBuffer commandBuffer;
-    vkAllocateCommandBuffers(logicalDevice, &allocInfo, &commandBuffer);
+        vkBeginCommandBuffer(subCommandBuffer, &beginInfo);
+    }
 
-    VkCommandBufferBeginInfo beginInfo{};
-    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-    vkBeginCommandBuffer(commandBuffer, &beginInfo);
-    return commandBuffer;
+    return subCommandBuffer;
 }
 
-void Device::EndSingleTimeCommands(VkCommandBuffer commandBuffer)
+void Device::EndSingleTimeCommands()
 {
-    vkEndCommandBuffer(commandBuffer);
+    subCommandBufferRecorded = true;
+    subCommandMutex.unlock();
+}
 
-    VkSubmitInfo submitInfo{};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffer;
+bool Device::SingleTimeCommandsRecorded()
+{
+    return subCommandBufferRecorded;
+}
 
-    vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-    vkQueueWaitIdle(graphicsQueue);
+bool Device::SingleTimeCommandsSubmitBegan()
+{
+    return subCommandBufferSubmitBegan;
+}
 
-    vkFreeCommandBuffers(logicalDevice, commandPool, 1, &commandBuffer);
+VkCommandBuffer Device::BeginSingleTimeCommandsSubmit()
+{
+    subCommandMutex.lock();
+    if (subCommandBufferBegan)
+    {
+        vkEndCommandBuffer(subCommandBuffer);
+        subCommandBufferBegan = false;
+    }
+    subCommandBufferSubmitBegan = true;
+
+    return subCommandBuffer;
+}
+
+void Device::EndSingleTimeCommandsSubmit(VkFence& fence)
+{
+    subCommandBufferSubmitBegan = false;
+    subCommandBufferRecorded = false;
+
+    Resources::ResourceManager::GetCurrent()->TaskPool.Enqueue([this, fence]
+    {
+        vkWaitForFences(logicalDevice, 1, &fence, VK_TRUE, UINT64_MAX);
+        if (stagingBuffers.size())
+            cleanupStagingBuffers();
+        subCommandMutex.unlock();
+    });
 }
 
 VmaAllocator Device::GetAllocator()
