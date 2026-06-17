@@ -5,6 +5,7 @@ using namespace AnA;
 using namespace AnA::Controls;
 
 const Vec2 charSize = {0.836363613f, 0.99999994f};
+const Vec2 widthCharSize = {0.836363613f, 0.99999994f};
 
 TextBlock::TextBlock()
 {
@@ -56,11 +57,40 @@ void TextBlock::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImag
         info->offset.y += renderSize.y() - info->size * charSize.y().value * 0.75f / float(Extent.height);
         info->visible = true;
         textContext.UpdateLayout(id);
-        ControlSize = {FontSize * charSize.x().value * float(info->length * 0.5f),
+        ControlSize = {FontSize * (charSize.x().value * float(asciiLen) + widthCharSize.x().value * float(wideLen)) * 0.5f,
             FontSize * charSize.y().value};
     }
 
     Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
+}
+
+inline void getTextLength(const char* newText, uint32_t len, uint32_t& asciiLen, uint32_t& wideLen)
+{
+    asciiLen = 0;
+    wideLen = 0;
+    for (uint32_t i = 0, ch; i < len; i++)
+    {
+            //assert(ch < char(resourceManager->Characters.size()));
+        ch = int(newText[i]);
+        if ((ch & 0x80) == 0x00)
+        {
+            asciiLen++;
+            continue;
+        }
+        else if ((ch & 0xE0) == 0xC0)
+        {
+            i += 1;
+        }
+        else if ((ch & 0xF0) == 0xE0)
+        {
+            i += 2;
+        }
+        else if ((ch & 0xF8) == 0xF0)
+        {
+            i += 3;
+        }
+        wideLen++;
+    }
 }
 
 void TextBlock::Text(const char* newText)
@@ -75,6 +105,7 @@ void TextBlock::Text(const char* newText)
     {
         id = textContext.Insert({0, {0.0f, 0.0f}, FontColor, {}, newText, true, 0});
     }
+    getTextLength(newText, strlen(newText), asciiLen, wideLen);
     RequestUpdate();
 }
 

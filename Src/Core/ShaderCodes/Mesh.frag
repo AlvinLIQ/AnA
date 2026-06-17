@@ -62,6 +62,9 @@ void main()
     outNormal = vec4(normalSpace, 1.0);
     outAlbedo = texture(texSampler[nonuniformEXT(texIndex)], texCoord);
     #else
+    vec4 texColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord);
+    if (texColor.w < 0.5)
+        discard;
     float pointLightIntensity = max(dot(normalSpace, normalize(LIGHT_POS - vertex)), 0);
     float normalLightPos = dot(normalSpace, normalize(lbo.direction));
     float diffuseLightItensity = (normalLightPos + 2.0) * 0.5;
@@ -69,6 +72,6 @@ void main()
     float visibility = 1.0; // filterPCF(shadowCoord, cascadeIndex);
 
     vec3 finalLight = (diffuseLightItensity * lbo.color + lbo.ambient) * visibility; // + pointLightIntensity * LIGHT_COLOR;
-    outColor = vec4(color, 1.0) * texture(texSampler[nonuniformEXT(texIndex)], texCoord) * vec4(finalLight, 1.0);
+    outColor = vec4(color * texColor.xyz * finalLight, texColor.w);
     #endif
 }

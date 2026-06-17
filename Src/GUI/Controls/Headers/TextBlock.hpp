@@ -25,7 +25,8 @@ namespace AnA
             glm::vec4 FontColor{DefaultFontColor};
             void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
         private:
-
+            uint32_t asciiLen = 0;
+            uint32_t wideLen = 0;
         protected:
             uint32_t id = uint32_t(-1);
         };

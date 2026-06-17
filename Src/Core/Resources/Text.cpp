@@ -1,6 +1,7 @@
 #include "Headers/Text.hpp"
 #include "Headers/Shader.hpp"
 #include "Headers/ResourceManager.hpp"
+#include "Resources/Headers/Scene.hpp"
 
 using namespace AnA;
 
@@ -139,6 +140,53 @@ void Text::UpdateLayout(uint32_t id)
     _mutex.unlock();
 }
 
+void Text::updateTextInfo(TextInfo& textInfo, uint32_t& chIndex, uint32_t& index, CharacterInfo* chInfoBuffer)
+{
+    int realChar;
+    for (size_t i = 0; i < textInfo.text.length(); i++)
+    {
+        //assert(ch < char(resourceManager->Characters.size()));
+        int ch = int(textInfo.text[i]);
+        if ((ch & 0x80) == 0x00)
+            realChar = ch;
+        else if ((ch & 0xE0) == 0xC0)
+        {
+            realChar =
+                    ((ch & 0x1F) << 6) |
+                    ((textInfo.text[i + 1] & 0x3F));
+            i += 1;
+        }
+        else if ((ch & 0xF0) == 0xE0)
+        {
+            realChar =
+                    ((ch & 0x0F) << 12) |
+                    ((textInfo.text[i + 1] & 0x3F) << 6) |
+                    (textInfo.text[i + 2] & 0x3F);
+            i += 2;
+        }
+        else if ((ch & 0xF8) == 0xF0)
+        {
+            realChar =
+                    ((ch & 0x07) << 18) |
+                    ((textInfo.text[i + 1] & 0x3F) << 12) |
+                    ((textInfo.text[i + 2] & 0x3F) << 6) |
+                    (textInfo.text[i + 3] & 0x3F);
+            i += 3;
+        }
+        auto& chInfo = chInfoBuffer[index + chIndex];
+        auto iter = characterMap.find(realChar);
+        if (iter == characterMap.end())
+        {
+            iter = characterMap.emplace(realChar, int(meshlets.size())).first;
+            meshlets.push_back(realChar);
+        }
+        chInfo.ch = iter->second;
+        chInfo.index = chIndex;
+        chIndex++;
+    }
+    textInfo.length = chIndex;
+}
+
 void Text::UpdateText(uint32_t id, const std::string& text)
 {
     auto& textMapData = textMap[id];
@@ -155,20 +203,11 @@ void Text::UpdateText(uint32_t id, const std::string& text)
         CharacterInfo* chInfoBuffer = reinterpret_cast<CharacterInfo*>(charInfoBuffers[currentBufferIndex].GetMappedData());
         uint32_t chOffset = textBuffer[textMapData.index].chOffset;
         size_t meshletOffset = meshlets.size();
-        for (size_t i = 0; i < textMapData.textInfo.text.size(); i++)
-        {
-            auto& chInfo = chInfoBuffer[chOffset + i];
-            auto iter = characterMap.find(textMapData.textInfo.text[i]);
-            if (iter == characterMap.end())
-            {
-                iter = characterMap.emplace(textMapData.textInfo.text[i], char(meshlets.size())).first;
-                meshlets.push_back(textMapData.textInfo.text[i]);
-            }
-            chInfo.ch = iter->second;
-            chInfo.index = uint32_t(i);
-        }
+        uint32_t index = 0;
+
+        updateTextInfo(textMapData.textInfo, chOffset, index, chInfoBuffer);
+        textBuffer[textMapData.index].count = chOffset;
         updateMeshlets(meshletOffset);
-        textBuffer[textMapData.index].count = uint32_t(textMapData.textInfo.text.length());
         _mutex.unlock();
     }
 }
@@ -213,7 +252,6 @@ void Text::updateAll()
     CharacterInfo* chInfoBuffer = reinterpret_cast<CharacterInfo*>(charInfoBuffers[nextIndex].GetMappedData());
     TextData* textBuffer = reinterpret_cast<TextData*>(textBuffers[nextIndex].GetMappedData());
     auto meshletOffset = meshlets.size();
-    int realChar = 0;
     for (auto& iter : textMap)
     {
         iter.second.index = textIndex;
@@ -224,49 +262,9 @@ void Text::updateAll()
         textBuffer[textIndex].color = textInfo.color;
         textBuffer[textIndex].scissor = textInfo.scissor;
         textBuffer[textIndex].chOffset = index;
-        for (size_t i = 0; i < textInfo.text.length(); i++)
-        {
-            //assert(ch < char(resourceManager->Characters.size()));
-            int ch = int(textInfo.text[i]);
-            if ((ch & 0x80) == 0x00)
-                realChar = ch;
-            else if ((ch & 0xE0) == 0xC0)
-            {
-                realChar =
-                        ((ch & 0x1F) << 6) |
-                        ((textInfo.text[i + 1] & 0x3F));
-                i += 1;
-            }
-            else if ((ch & 0xF0) == 0xE0)
-            {
-                realChar =
-                        ((ch & 0x0F) << 12) |
-                        ((textInfo.text[i + 1] & 0x3F) << 6) |
-                        (textInfo.text[i + 2] & 0x3F);
-                i += 2;
-            }
-            else if ((ch & 0xF8) == 0xF0)
-            {
-                realChar =
-                        ((ch & 0x07) << 18) |
-                        ((textInfo.text[i + 1] & 0x3F) << 12) |
-                        ((textInfo.text[i + 2] & 0x3F) << 6) |
-                        (textInfo.text[i + 3] & 0x3F);
-                i += 3;
-            }
-            auto& chInfo = chInfoBuffer[index + chIndex];
-            auto iter = characterMap.find(realChar);
-            if (iter == characterMap.end())
-            {
-                iter = characterMap.emplace(realChar, int(meshlets.size())).first;
-                meshlets.push_back(realChar);
-            }
-            chInfo.ch = iter->second;
-            chInfo.index = chIndex;
-            chIndex++;
-        }
+        updateTextInfo(textInfo, chIndex, index, chInfoBuffer);
+
         textBuffer[textIndex].count = chIndex;
-        textInfo.length = chIndex;
         index += iter.second.capacity;
         textIndex++;
     }

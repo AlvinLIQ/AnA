@@ -9,7 +9,7 @@ layout(location = 0) out vec2 outTexCoord;
 layout(location = 1) out uint outTexID;
 layout(location = 2) out vec3 outNormalSpace;
 layout(location = 3) out vec3 outVertex;
-layout(location = 4) out float outViewPosZ;
+layout(location = 4) out vec3 outColor;
 
 layout(scalar, set = DEFAULT_VERTEX_LAYOUT, binding = BIND_VERTEX) buffer VertexSSBO
 {
@@ -91,9 +91,12 @@ void main() {
     vec4 viewPos = cbo.view * vertexPos;
     gl_Position = cbo.proj * viewPos;
     outNormalSpace = CalculateNormal(vertex.pitch, vertex.yaw);
-    outVertex = vertexPos.xyz;
-    outViewPosZ = viewPos.z / viewPos.w + ubo.cascades[1].split - ubo.cascades[0].split + 1.0;
+    outVertex = vertexPos.xyz / vertexPos.w;
 
+    outColor = vec3(
+        float(vertex.color.r) / 255.0f,
+        float(vertex.color.g) / 255.0f,
+        float(vertex.color.b) / 255.0f);
     outTexCoord = vec2(vertex.uv);
     outTexID = uint(vertex.textureId);
 }

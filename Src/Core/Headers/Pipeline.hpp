@@ -531,7 +531,7 @@ namespace AnA
                         }
                         dConfig.specializationInfos[i].dataSize = shaderInfos[i].constants.size() * sizeof(int);
                         dConfig.specializationInfos[i].pData = shaderInfos[i].constants.begin();
-                        dConfig.specializationInfos[i].mapEntryCount = dConfig.specializationMapEntries[i].size();
+                        dConfig.specializationInfos[i].mapEntryCount = uint32_t(dConfig.specializationMapEntries[i].size());
                         dConfig.specializationInfos[i].pMapEntries = dConfig.specializationMapEntries[i].data();
                         dConfig.shaderStages[i].pSpecializationInfo = &dConfig.specializationInfos[i];
                     }

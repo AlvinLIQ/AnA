@@ -63,6 +63,7 @@ namespace AnA
         std::unordered_map<int, int> characterMap{};
         std::vector<int> meshlets;
         std::mutex _mutex;
+        void updateTextInfo(TextInfo& textInfo, uint32_t& chIndex, uint32_t& index, CharacterInfo* chInfoBuffer);
         void updateMeshlets(size_t meshletOffset);
         void updateAll();
         Buffer vertexBuffer;
