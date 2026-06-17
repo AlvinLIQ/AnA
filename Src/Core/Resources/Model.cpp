@@ -59,6 +59,16 @@ void Model::CreateModelFromFile(const char *filePath, std::shared_ptr<Model>& mo
     modelInfo.indexStep = static_cast<Index>(modelInfo.vertices.size());
     model = std::make_shared<Model>(std::move(modelInfo));
     model->Path = filePath;
+    /*
+    FILE* fp = fopen("b_vertices", "wb");
+    fwrite(model->info.vertices.data(), sizeof(Model::Vertex), model->info.vertices.size(), fp);
+    fflush(fp);
+    fclose(fp);
+    fp = fopen("b_indices", "wb");
+    fwrite(model->info.indices.data(), sizeof(Model::Index), model->info.indices.size(), fp);
+    fflush(fp);
+    fclose(fp);
+    */
 }
 #ifdef TINYOBJ_LOADER
 void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo)
@@ -211,7 +221,7 @@ void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo) // sp
                 uint8_t(material.Kd[2] * 255.0f),
             };
             if (material.map_Kd < mesh->texcoord_count)
-                texIndex = uint16_t(textures[material.map_Kd]);
+                texIndex = textures[material.map_Kd];
         }
         for (v = 0; v + 1 < fv; v++) // deal with face triangulation
         {

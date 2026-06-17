@@ -16,7 +16,7 @@ struct Vertex
     vec3 position;
     uint16_t pitch;
     uint16_t yaw;
-    uint16_t textureId;
+    uint textureId;
     u8vec3 color;
     vec2 uv;
 };
