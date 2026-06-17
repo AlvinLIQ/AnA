@@ -21,15 +21,13 @@ namespace AnA
             {
                 char path[256] = "";
                 std::string cmd = " --file-selection " + Mode;
-                if (!Filter.empty())
-                    cmd += " --file-filter=" + Filter;
 #ifdef _WIN32
                 cmd = "zenity" + cmd;
 #else
                 cmd = "/usr/bin/zenity" + cmd;
 #endif
                 if (!Filter.empty())
-                    cmd += " --file-filter=" + Filter;
+                    cmd += " --file-filter=\"" + Filter + "\"";
                 FILE* f = popen(cmd.c_str(), "r");
                 fgets(path, 256, f);
                 size_t len = strlen(path);
