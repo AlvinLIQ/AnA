@@ -233,7 +233,7 @@ void EditorApp::loadModelButton_Click(void* , PointerEventArgs& )
             return;
         MeshInfo mesh;
         memcpy(mesh.filePath, path.c_str(), path.length() + 1);
-        mesh.tetureId = 0;
+        mesh.textureId = 0;
         resourceManager->MainScene.Append(std::vector<MeshInfo>(1, mesh));
         resourceManager->AppendCallback([]()
         {
@@ -260,7 +260,7 @@ void EditorApp::saveSceneButton_Click(void* , PointerEventArgs& )
         MeshInfo info{};
         auto& model = resourceManager->Meshes.MeshMap[mesh.modelID];
         memcpy(info.filePath, model->Path.data(), model->Path.size());
-        info.tetureId = mesh.textureId;
+        info.textureId = mesh.textureId;
         info.transform = mesh.transform;
         fwrite((const void*)&info, sizeof(MeshInfo), 1, f);
     }

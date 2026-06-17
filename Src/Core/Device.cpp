@@ -6,7 +6,6 @@
 //#include <chrono>
 
 #include "Headers/Buffer.hpp"
-#include "Resources/Headers/ResourceManager.hpp"
 
 #ifdef INCLUDE_STB_IMAGE
 #define STB_IMAGE_IMPLEMENTATION
@@ -139,8 +138,6 @@ void Device::CreateImage(VkImageCreateInfo* pCreateInfo, VkImage* pImage, VmaAll
 {
     VmaAllocationCreateInfo allocInfo{};
     allocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
-    if (HostImageCopySupport())
-        pCreateInfo->usage |= VK_IMAGE_USAGE_HOST_TRANSFER_BIT;
     vmaCreateImage(allocator, pCreateInfo, &allocInfo, pImage, &allocation, nullptr);
 }
 
