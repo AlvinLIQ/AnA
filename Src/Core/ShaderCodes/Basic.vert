@@ -95,5 +95,5 @@ void main() {
     outViewPosZ = viewPos.z / viewPos.w + ubo.cascades[1].split - ubo.cascades[0].split + 1.0;
 
     outTexCoord = vec2(vertex.uv);
-    outTexID = uint(vertex.texureId);
+    outTexID = uint(vertex.textureId);
 }
