@@ -105,8 +105,6 @@ void main()
 
     mat4 viewProj = cbo.proj * cbo.view;
     mat4 transform = objects[objectID].transform;
-    uint texID = uint(transform[3].w);
-    transform[3].w = 1.0;
 
     uint i = gl_LocalInvocationID.x;
     if (i < meshlet.vertexCount)

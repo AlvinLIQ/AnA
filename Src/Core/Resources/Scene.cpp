@@ -274,7 +274,6 @@ void Scene::CommitBufferUpdate(Buffer* newObjectBuffer, size_t meshOffset)
         bufferObjects[i].center = transform * glm::vec4(model->center, 1.0f);
         auto& scale = meshes[i].transform.scale;
         bufferObjects[i].radius = model->radius * std::max(scale.x, std::max(scale.y, scale.z));
-        transform[3].w = meshes[i].textureId;
         bufferObjects[i].transform = transform;
 
         bufferDrawIndexedIndirect[i].indexCount = meshes[i].indexCount;
@@ -338,7 +337,6 @@ void Scene::UpdateMeshTransform(uint32_t meshIndex)
     objectBufferData[meshIndex].center = transform * glm::vec4(model->center, 1.0f);
     auto& scale = meshes[meshIndex].transform.scale;
     objectBufferData[meshIndex].radius = model->radius * std::max(scale.x, std::max(scale.y, scale.z));
-    transform[3].w = float(meshes[meshIndex].textureId);
     objectBufferData[meshIndex].transform = transform;
 }
 

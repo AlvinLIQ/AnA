@@ -77,7 +77,6 @@ void main()
     SetMeshOutputsEXT(meshlet.vertexCount, primitiveCount);
 
     mat4 transform = objects[mid.objectID].transform;
-    transform[3].w = 1.0;
 
     for (uint i = 0; i < meshlet.vertexCount; i++)
     {

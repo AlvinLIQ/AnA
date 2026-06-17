@@ -86,8 +86,6 @@ mat4 transform(vec3 scale, vec3 rotation, vec3 transition)
 
 void main() {
     mat4 transform = objects[gl_DrawID].transform;
-    uint texID = uint(transform[3].w);
-    transform[3].w = 1.0;
     Vertex vertex = vertices[gl_VertexIndex];
     vec4 vertexPos = transform * vec4(vertex.position, 1.0);
     vec4 viewPos = cbo.view * vertexPos;
@@ -97,5 +95,5 @@ void main() {
     outViewPosZ = viewPos.z / viewPos.w + ubo.cascades[1].split - ubo.cascades[0].split + 1.0;
 
     outTexCoord = vec2(vertex.uv);
-    outTexID = texID;
+    outTexID = uint(vertex.texureId);
 }

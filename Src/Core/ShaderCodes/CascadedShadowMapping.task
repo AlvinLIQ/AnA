@@ -70,7 +70,6 @@ bool isMeshletVisible(MeshletID mid)
     Meshlet meshlet = meshlets[mid.meshletID];
     BoundingSphere boundingSphere = mcsbo.boundings[mid.meshletID];
     mat4 transform = objects[mid.objectID].transform;
-    transform[3].w = 1.0;
     vec3 center = (transform * vec4(boundingSphere.center, 1.0)).xyz;
     float scale = max(length(transform[0].xyz), max(length(transform[1].xyz), length(transform[2].xyz)));
     float radius = boundingSphere.radius * scale;
