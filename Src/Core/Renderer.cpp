@@ -81,6 +81,8 @@ void Renderer::RenderIndirect(CommandBuffer& commandBuffer, Renderable& renderab
     renderable.Bind(commandBuffer, shader, bufferIndex);
     renderable.DrawIndirect(commandBuffer);
 }
+
+VkFence commandFence{VK_NULL_HANDLE};
 void Renderer::EndFrame()
 {
     assert(isFrameStarted && "Can't call EndFrame while frame is not in progress!");
@@ -91,15 +93,15 @@ void Renderer::EndFrame()
     if (aDevice->SingleTimeCommandsRecorded())
     {
         aSwapChain->SubmitCommandBuffer(aDevice->BeginSingleTimeCommandsSubmit());
+        commandFence = aSwapChain->GetCurrentFence();
     }
 
     auto commandBuffer = commandBuffers.Get();
     auto result = aSwapChain->SubmitCommandBuffer(commandBuffer);
-    auto& currentFence = aSwapChain->GetCurrentFence();
     aSwapChain->SubmitCommandBufferQueue();
     if (aDevice->SingleTimeCommandsSubmitBegan())
     {
-        aDevice->EndSingleTimeCommandsSubmit(currentFence);
+        aDevice->EndSingleTimeCommandsSubmit(commandFence);
     }
 
     vkGetQueryPoolResults(
