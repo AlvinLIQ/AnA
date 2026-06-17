@@ -24,6 +24,7 @@ namespace AnA
             glm::vec3 position{};
             uint16_t pitch{};
             uint16_t yaw{};
+            uint16_t texureId;
             glm::u8vec3 color{};
             glm::vec2 uv{};
 

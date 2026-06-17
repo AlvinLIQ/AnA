@@ -118,7 +118,7 @@ void main()
         gl_MeshVerticesEXT[i].gl_Position = viewProj * vertexPos;
         gl_MeshVerticesEXT[i].gl_PointSize = 6.0;
         vertexOutput[i].texCoord = vertex.uv;
-        vertexOutput[i].texID = texID;
+        vertexOutput[i].texID = uint(vertex.texureId); //texID;
         vertexOutput[i].color = vec3(
                 float(vertex.color.r) / 255.0,
                 float(vertex.color.g) / 255.0,

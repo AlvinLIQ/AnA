@@ -124,7 +124,12 @@ namespace AnA
                 std::unique_lock<std::mutex> lock(callbacksMutex);
                 callbacks.push_back(callback);
             }
-            uint32_t AppendTexture(const std::string path);
+            uint32_t AppendTexture(const uint32_t color, uint32_t* index = nullptr);
+            uint32_t AppendTexture(const std::string path, uint32_t* index = nullptr);
+            std::vector<Descriptor*>& GetSamplerDescriptors()
+            {
+                return samplersDescriptors;
+            }
 
             std::vector<Descriptor>& GetDefaultDescriptors()
             {
@@ -140,7 +145,12 @@ namespace AnA
 
             std::vector<NormalCallBack> callbacks{};
             std::mutex callbacksMutex{};
-            std::unordered_map<std::string, uint32_t> textureIDMap{};
+            std::unordered_map<std::string, uint32_t> texturePathMap{};
+            std::unordered_map<uint32_t, uint32_t> textureIdMap{};
+            std::vector<VkDescriptorImageInfo> textureInfos;
+            std::vector<Descriptor*> samplersDescriptors;
+            void createSamplerDescriptor();
+            void appendSamplerDescriptor(VkDescriptorImageInfo& imageInfo);
 
             uint32_t selectedVertexIndex = 0;
             //uint32_t recordedCallbacks = 0;

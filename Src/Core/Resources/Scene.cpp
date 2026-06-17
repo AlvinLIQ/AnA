@@ -1,7 +1,6 @@
 #include "Headers/Scene.hpp"
 #include "Headers/Device.hpp"
 #include "Headers/ResourceManager.hpp"
-#include "Headers/Texture.hpp"
 #include "Headers/Types.hpp"
 #include "vulkan/vulkan_core.h"
 #include <memory>
@@ -70,8 +69,6 @@ Scene::~Scene()
 {
     if (objectDescriptor != nullptr)
         delete objectDescriptor;
-    for (auto& descriptor : samplersDescriptors)
-        delete descriptor;
 }
 
 void Scene::Init()
@@ -109,7 +106,6 @@ void Scene::Init()
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         meshletIDCountBuffers[i].Map();
     }
-    createSamplerDescriptor();
     //createBuffers();
     createIndirectBuffers();
     createSSBODescriptor();
@@ -123,7 +119,6 @@ void Scene::Append(const std::vector<MeshInfo>& meshInfos)
 void Scene::Append(const MeshInfo* meshInfos, size_t count)
 {
     std::unique_lock<std::mutex> unique_lock(_mutex);
-    std::vector<VkDescriptorImageInfo> imageInfos{};
     auto resourceManager = Resources::ResourceManager::GetCurrent();
     for (size_t i = 0; i < count; i++)
     {
@@ -134,6 +129,7 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
         auto model = resourceManager->Meshes.MeshMap[mesh.modelID];
         mesh.vertexCount = uint32_t(model->info.vertices.size());
         mesh.indexCount = uint32_t(model->info.indices.size());
+        mesh.textureId = meshInfo.textureId;
 /*
         if (i == 1)
         {
@@ -146,19 +142,6 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
 
         meshletIDCount += uint32_t(model->meshlets.size());
 
-        auto& textureMap = Resources::ResourceManager::GetCurrent()->TextureMap;
-        mesh.textureId = textureMap.find(meshInfo.textureId) == textureMap.end() ? DEFAULT_TEXTURE_ID : meshInfo.textureId;
-        auto& texture = textureMap.at(mesh.textureId);
-        if (textureIdMap.find(mesh.textureId) == textureIdMap.end())
-        {
-            textureIdMap.insert(std::pair<uint32_t, uint32_t>(mesh.textureId, static_cast<uint32_t>(textureIdMap.size())));
-            imageInfos.push_back(texture.GetImageInfo());
-            if (imageInfos.size() == batchSize)
-            {
-                appendSamplersDescriptor(imageInfos);
-                imageInfos.clear();
-            }
-        }
         meshes.push_back(mesh);
         if (this->MeshAppend)
             this->MeshAppend(meshInfo.filePath, uint32_t(meshes.size()) - 1);
@@ -173,17 +156,12 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
             drawIndexedCommand;
         drawIndexedCommands.push_back(drawIndexedCommand);
     }
-    if (imageInfos.size())
-    {
-        appendSamplersDescriptor(imageInfos);
-    }
     needUpdate = true;
 }
 
 void Scene::Append(std::vector<Model::Vertex>& meshVertices, std::vector<uint32_t>& meshIndices, Transform transform, uint32_t textureId)
 {
     std::unique_lock<std::mutex> unique_lock(_mutex);
-    std::vector<VkDescriptorImageInfo> imageInfos{};
 
     Mesh mesh{};
     mesh.transform = transform;
@@ -197,23 +175,8 @@ void Scene::Append(std::vector<Model::Vertex>& meshVertices, std::vector<uint32_
 
     meshletIDCount += uint32_t(model->meshlets.size());
 
-    auto& textureMap = Resources::ResourceManager::GetCurrent()->TextureMap;
-    auto& texture = textureMap.at(mesh.textureId);
-    if (textureIdMap.find(mesh.textureId) == textureIdMap.end())
-    {
-        textureIdMap.insert(std::pair<uint32_t, uint32_t>(mesh.textureId, static_cast<uint32_t>(textureIdMap.size())));
-        imageInfos.push_back(texture.GetImageInfo());
-        if (imageInfos.size() == batchSize)
-        {
-            appendSamplersDescriptor(imageInfos);
-            imageInfos.clear();
-        }
-    }
     meshes.push_back(mesh);
-    if (imageInfos.size())
-    {
-        appendSamplersDescriptor(imageInfos);
-    }
+
     needUpdate = true;
 }
 
@@ -246,7 +209,7 @@ void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIn
     auto& frameResource = aResourceManager->Meshes.GetCurrentFrameResource();
     sets[DEFAULT_VERTEX_LAYOUT] = frameResource.vertexDescriptorSet;
     sets[DEFAULT_OBJECT_LAYOUT] = objectDescriptor->GetSets()[currentBufferIndex];
-    sets[DEFAULT_SAMPLER_LAYOUT] = samplersDescriptors.front()->GetSets()[0];
+    sets[DEFAULT_SAMPLER_LAYOUT] = aResourceManager->GetSamplerDescriptors().front()->GetSets()[0]; //samplersDescriptors.front()->GetSets()[0];
     if (aDevice->MeshShaderSupport() && shader.HasMeshShader())
     {
         sets[DEFAULT_MESHLET_LAYOUT] = frameResource.meshDescriptorSet;
@@ -311,7 +274,7 @@ void Scene::CommitBufferUpdate(Buffer* newObjectBuffer, size_t meshOffset)
         bufferObjects[i].center = transform * glm::vec4(model->center, 1.0f);
         auto& scale = meshes[i].transform.scale;
         bufferObjects[i].radius = model->radius * std::max(scale.x, std::max(scale.y, scale.z));
-        transform[3].w = float(textureIdMap[meshes[i].textureId]);
+        transform[3].w = meshes[i].textureId;
         bufferObjects[i].transform = transform;
 
         bufferDrawIndexedIndirect[i].indexCount = meshes[i].indexCount;
@@ -469,38 +432,6 @@ void Scene::updateSSBODescriptor()
     currentBufferIndex = nextIndex;
     nextIndex = NextFrameIndex(currentBufferIndex);
     commandBufferNeedUpdate = true;
-}
-
-void Scene::appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageInfos)
-{
-    uint32_t remaining = static_cast<uint32_t>(textureInfos.size()) % batchSize;
-    uint32_t offset = static_cast<uint32_t>(textureInfos.size()) - remaining;
-    textureInfos.insert(textureInfos.end(), imageInfos.begin(), imageInfos.end());
-    if (batchSize - remaining && samplersDescriptors.size())
-    {
-        remaining = std::min(remaining + static_cast<uint32_t>(imageInfos.size()), batchSize);
-        samplersDescriptors.back()->UpdateDescriptorSets(&textureInfos[offset], remaining, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
-        offset += remaining;
-    }
-
-    if (offset < textureInfos.size())
-    {
-        createSamplerDescriptor();
-        samplersDescriptors.back()->UpdateDescriptorSets(&textureInfos[offset], static_cast<uint32_t>(textureInfos.size()) - offset, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
-    }
-}
-
-void Scene::createSamplerDescriptor()
-{
-    auto& descriptorSetLayout =
-        Resources::ResourceManager::GetCurrent()->Shaders[VERTEX_PIPELINE_ID].GetDescriptors()[DEFAULT_SAMPLER_LAYOUT].GetLayout();
-    auto descriptor = new Descriptor(aDevice, 1,
-        batchSize,
-        1,
-        descriptorSetLayout,
-        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
-        );
-    samplersDescriptors.push_back(descriptor);
 }
 
 void Scene::updateAll()

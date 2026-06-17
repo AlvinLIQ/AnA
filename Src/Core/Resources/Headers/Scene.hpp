@@ -152,10 +152,6 @@ namespace AnA
         {
             return objectDescriptor->GetSets()[currentBufferIndex];
         }
-        VkDescriptorSet GetSamplersDescriptorSet() const
-        {
-            return samplersDescriptors[0]->GetSets()[0];
-        }
         void (*MeshAppend)(std::string, uint32_t) = nullptr;
     private:
         Device* aDevice;
@@ -174,14 +170,9 @@ namespace AnA
         bool needUpdate;
         bool commandBufferNeedUpdate = false;
         std::mutex _mutex;
-        std::unordered_map<uint32_t, uint32_t> textureIdMap{};
-        std::vector<VkDescriptorImageInfo> textureInfos;
-        std::vector<Descriptor*> samplersDescriptors;
-        void createSamplerDescriptor();
         Descriptor* objectDescriptor{nullptr};
         void createSSBODescriptor();
         void updateSSBODescriptor();
-        void appendSamplersDescriptor(std::vector<VkDescriptorImageInfo>& imageInfos);
         uint32_t meshletIDCount = 0;
         std::vector<Buffer> meshletIDBuffers{};
         std::vector<Buffer> meshletIDCountBuffers{};

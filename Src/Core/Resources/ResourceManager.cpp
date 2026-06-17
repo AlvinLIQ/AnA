@@ -30,6 +30,7 @@ ResourceManager::ResourceManager(Device* mDevice) :
     //createShadowFramebuffers();
     createDefaultDescriptors();
     createDefaultShaders();
+    createSamplerDescriptor();
     Meshes.Init();
     MainScene.Init();
     if (aDevice->MeshShaderSupport())
@@ -46,6 +47,9 @@ ResourceManager::ResourceManager(Device* mDevice) :
 
 ResourceManager::~ResourceManager()
 {
+    for (auto& descriptor : samplersDescriptors)
+        delete descriptor;
+
     TextureMap.clear();
     //for (auto& shader : Shaders)
     //    delete shader;
@@ -274,13 +278,35 @@ void ResourceManager::RecreateResources()
     //createShadowFramebuffers();
 }
 
-uint32_t ResourceManager::AppendTexture(const std::string path)
+uint32_t ResourceManager::AppendTexture(const uint32_t color, uint32_t* index)
 {
-    auto iter = textureIDMap.find(path);
-    if (iter != textureIDMap.end())
+    auto result = TextureMap.try_emplace(texId, color, aDevice);
+
+    if (index)
+        *index = uint32_t(textureInfos.size());
+
+    textureIdMap.emplace(result.first->first, uint32_t(textureInfos.size()));
+    appendSamplerDescriptor(result.first->second.GetImageInfo());
+
+    texId++;
+    return result.first->first;
+}
+
+uint32_t ResourceManager::AppendTexture(const std::string path, uint32_t* index)
+{
+    auto iter = texturePathMap.find(path);
+    if (iter != texturePathMap.end())
         return iter->second;
 
-    auto result = TextureMap.try_emplace(texId++, path.c_str(), aDevice);
+    auto result = TextureMap.try_emplace(texId, path.c_str(), aDevice);
+
+    if (index)
+        *index = uint32_t(textureInfos.size());
+
+    textureIdMap.emplace(result.first->first, uint32_t(textureInfos.size()));
+    appendSamplerDescriptor(result.first->second.GetImageInfo());
+
+    texId++;
     return result.first->first;
 }
 
@@ -626,6 +652,38 @@ void ResourceManager::createDefaultDescriptors()
     Descriptor::CreateDescriptors(aDevice, lightDescriptorConfig, lightDescriptors);
 }
 
+void ResourceManager::createSamplerDescriptor()
+{
+    auto& descriptorSetLayout =
+        Resources::ResourceManager::GetCurrent()->Shaders[VERTEX_PIPELINE_ID].GetDescriptors()[DEFAULT_SAMPLER_LAYOUT].GetLayout();
+    auto descriptor = new Descriptor(aDevice, 1,
+        4096,
+        1,
+        descriptorSetLayout,
+        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+        );
+    samplersDescriptors.push_back(descriptor);
+}
+
+void ResourceManager::appendSamplerDescriptor(VkDescriptorImageInfo& imageInfo)
+{
+    uint32_t remaining = static_cast<uint32_t>(textureInfos.size()) % MaxBatchSize;
+    uint32_t offset = static_cast<uint32_t>(textureInfos.size()) - remaining;
+    textureInfos.push_back(imageInfo);
+    if (MaxBatchSize - remaining && samplersDescriptors.size())
+    {
+        remaining = std::min(remaining + 1, uint32_t(MaxBatchSize));
+        samplersDescriptors.back()->UpdateDescriptorSets(&textureInfos[offset], remaining, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+        offset += remaining;
+    }
+
+    if (offset < textureInfos.size())
+    {
+        createSamplerDescriptor();
+        samplersDescriptors.back()->UpdateDescriptorSets(&textureInfos[offset], static_cast<uint32_t>(textureInfos.size()) - offset, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+    }
+}
+
 std::vector<ShaderInfo> basicShaderStageInfos{{Basic_vert, 0, VK_SHADER_STAGE_VERTEX_BIT, false, {}},
                                   {Basic_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
 std::vector<ShaderInfo> shapeShaderStageInfos{{Shape_vert, 0, VK_SHADER_STAGE_VERTEX_BIT, false, {}},
@@ -666,24 +724,20 @@ void ResourceManager::createDefaultShaders()
     }
 }
 
+const uint32_t defaultTextureColors[] =
+{
+    0xFFFFFFFFu,
+    0xFFCC9999u,
+    0xFF99FF99u,
+    0xFF9999CCu,
+    0x00CC9999u,
+};
 void ResourceManager::initTextures()
 {
-    TextureMap.try_emplace(DEFAULT_TEXTURE_ID, 0xFFFFFFFFu, aDevice);
-    TextureMap.try_emplace(1, 0xFFCC9999u, aDevice);
-    TextureMap.try_emplace(2, 0xFF99FF99u, aDevice);
-    TextureMap.try_emplace(3, 0xFF9999CCu, aDevice);
-    TextureMap.try_emplace(4, 0x00CC9999u, aDevice);
-    texId = 5;
-    //TextureMap.try_emplace(4, "Textures/rock3.jpg", aDevice);
+    for (auto& color : defaultTextureColors)
+    {
+        AppendTexture(color);
+    }
 
     aDevice->BuildFontVertices(Characters);
-/*
-    char chStr[2];
-    chStr[1] = '\0';
-    uint32_t width = 0, height = 0;
-    for (unsigned char i = 1; i < 128; i++)
-    {
-        chStr[0] = (char)i;
-        CharacterMap.try_emplace(static_cast<char>(i), chStr, width, height, 0, aDevice, 1.0f, 1.0f);
-    }*/
 }

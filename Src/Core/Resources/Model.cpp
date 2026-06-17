@@ -57,7 +57,7 @@ void Model::CreateModelFromFile(const char *filePath, std::shared_ptr<Model>& mo
     CreateMeshFromFile(filePath, modelInfo);
 
     modelInfo.indexStep = static_cast<Index>(modelInfo.vertices.size());
-    model = std::make_shared<Model>(modelInfo);
+    model = std::make_shared<Model>(std::move(modelInfo));
     model->Path = filePath;
 }
 #ifdef TINYOBJ_LOADER
@@ -195,12 +195,13 @@ void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo) // sp
         if (mesh->textures[t].path)
         {
             auto path = std::string(mesh->textures[t].path + parentPath.length() + 1);
-            textures[t] = resourceManager->AppendTexture(path);
+            resourceManager->AppendTexture(path, &textures[t]);
         }
     for (uint32_t f = 0, v, fv, i; f < mesh->face_count; f++)
     {
         fv = mesh->face_vertices[f];
         triangleIndices[0] = offset;
+        uint16_t texIndex = 0;
         if (mesh->material_count)
         {
             auto& material = mesh->materials[mesh->face_materials[f]];
@@ -209,6 +210,8 @@ void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo) // sp
                 uint8_t(material.Kd[1] * 255.0f),
                 uint8_t(material.Kd[2] * 255.0f),
             };
+            if (material.map_Kd < mesh->texcoord_count)
+                texIndex = uint16_t(textures[material.map_Kd]);
         }
         for (v = 0; v + 1 < fv; v++) // deal with face triangulation
         {
@@ -221,6 +224,7 @@ void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo) // sp
                 ExtractPitchYaw(*reinterpret_cast<glm::vec3*>(&mesh->normals[3 * index.n]), vertex.pitch, vertex.yaw);
                 vertex.color = color;
                 vertex.uv = *reinterpret_cast<glm::vec2*>(&mesh->texcoords[2 * index.t]);
+                vertex.texureId = texIndex;
                 auto result = vertexMap.find(vertex);
                 if (result != vertexMap.end())
                 {
