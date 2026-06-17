@@ -207,11 +207,13 @@ void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo) // sp
             auto path = std::string(mesh->textures[t].path + parentPath.length() + 1);
             resourceManager->AppendTexture(path, &textures[t]);
         }
+        else
+            textures[t] = 0;
     for (uint32_t f = 0, v, fv, i; f < mesh->face_count; f++)
     {
         fv = mesh->face_vertices[f];
         triangleIndices[0] = offset;
-        uint16_t texIndex = 0;
+        uint32_t texIndex = 0;
         if (mesh->material_count)
         {
             auto& material = mesh->materials[mesh->face_materials[f]];
