@@ -241,8 +241,10 @@ namespace AnA
             VkAccessFlags srcAccessMask, VkImageAspectFlags aspectMask,
             VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask);
         VkCommandBuffer BeginSingleTimeCommands();
+        void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
+        VkCommandBuffer BeginSubCommands();
         void RecordSingleTimeCommands(void(*recordCallback)(VkCommandBuffer));
-        void EndSingleTimeCommands();
+        void EndSubCommands();
         bool SingleTimeCommandsRecorded();
         bool SingleTimeCommandsSubmitBegan();
         VkCommandBuffer BeginSingleTimeCommandsSubmit();
