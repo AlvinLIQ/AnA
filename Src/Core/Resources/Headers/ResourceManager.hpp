@@ -126,6 +126,8 @@ namespace AnA
             }
             uint32_t AppendTexture(const uint32_t color, uint32_t* index = nullptr, const std::string& name = "");
             uint32_t AppendTexture(const std::string& path, uint32_t* index = nullptr);
+            uint32_t AppendTexture(VkImage image, VmaAllocation allocation,
+                VkImageView imageView, uint32_t* index = nullptr, const std::string& name = "");
             std::vector<Descriptor*>& GetSamplerDescriptors()
             {
                 return samplersDescriptors;

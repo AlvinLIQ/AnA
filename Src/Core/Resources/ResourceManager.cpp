@@ -313,6 +313,27 @@ uint32_t ResourceManager::AppendTexture(const std::string& path, uint32_t* index
     return result.first->first;
 }
 
+uint32_t ResourceManager::AppendTexture(VkImage image, VmaAllocation allocation,
+    VkImageView imageView, uint32_t* index, const std::string& name)
+{
+    auto iter = texturePathMap.find(name);
+    if (iter != texturePathMap.end())
+        return iter->second;
+
+    auto result = TextureMap.try_emplace(texId, image, allocation, imageView, aDevice);
+
+    if (index)
+        *index = uint32_t(textureInfos.size());
+    if (!name.empty())
+        texturePathMap.try_emplace(name, texId);
+
+    textureIdMap.emplace(result.first->first, uint32_t(textureInfos.size()));
+    appendSamplerDescriptor(result.first->second.GetImageInfo());
+
+    texId++;
+    return result.first->first;
+}
+
 void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs)
 {
     descriptorSetConfigs.resize(DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT);
