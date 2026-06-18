@@ -16,7 +16,7 @@
             Color="" Padding="0.05f, 0.01f, 0.05f, 0.01f">
             <TextBlock Text="General" FontSize="(Float)25.0f"/>
             <Button HorizontalAlignment="Start" Click="loadModelButton_Click">
-                <TextBlock Text="Lo↑ad Model" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <TextBlock Text="Load Model" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Button>
             <Button HorizontalAlignment="Start" Click="saveSceneButton_Click">
                 <TextBlock Text="Save Scene"/>

@@ -63,7 +63,7 @@ void main()
     outAlbedo = texture(texSampler[nonuniformEXT(texIndex)], texCoord);
     #else
     vec4 texColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord);
-    if (texColor.w < 0.5)
+    if (texColor.w < 0.8)
         discard;
     float pointLightIntensity = max(dot(normalSpace, normalize(LIGHT_POS - vertex)), 0);
     float normalLightPos = dot(normalSpace, normalize(lbo.direction));
