@@ -278,12 +278,14 @@ void ResourceManager::RecreateResources()
     //createShadowFramebuffers();
 }
 
-uint32_t ResourceManager::AppendTexture(const uint32_t color, uint32_t* index)
+uint32_t ResourceManager::AppendTexture(const uint32_t color, uint32_t* index, const std::string& name)
 {
     auto result = TextureMap.try_emplace(texId, color, aDevice);
 
     if (index)
         *index = uint32_t(textureInfos.size());
+    if (!name.empty())
+        texturePathMap.try_emplace(name, texId);
 
     textureIdMap.emplace(result.first->first, uint32_t(textureInfos.size()));
     appendSamplerDescriptor(result.first->second.GetImageInfo());
@@ -292,7 +294,7 @@ uint32_t ResourceManager::AppendTexture(const uint32_t color, uint32_t* index)
     return result.first->first;
 }
 
-uint32_t ResourceManager::AppendTexture(const std::string path, uint32_t* index)
+uint32_t ResourceManager::AppendTexture(const std::string& path, uint32_t* index)
 {
     auto iter = texturePathMap.find(path);
     if (iter != texturePathMap.end())
@@ -302,6 +304,7 @@ uint32_t ResourceManager::AppendTexture(const std::string path, uint32_t* index)
 
     if (index)
         *index = uint32_t(textureInfos.size());
+    texturePathMap.emplace(path, texId);
 
     textureIdMap.emplace(result.first->first, uint32_t(textureInfos.size()));
     appendSamplerDescriptor(result.first->second.GetImageInfo());

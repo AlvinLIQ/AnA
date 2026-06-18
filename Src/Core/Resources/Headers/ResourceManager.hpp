@@ -124,8 +124,8 @@ namespace AnA
                 std::unique_lock<std::mutex> lock(callbacksMutex);
                 callbacks.push_back(callback);
             }
-            uint32_t AppendTexture(const uint32_t color, uint32_t* index = nullptr);
-            uint32_t AppendTexture(const std::string path, uint32_t* index = nullptr);
+            uint32_t AppendTexture(const uint32_t color, uint32_t* index = nullptr, const std::string& name = "");
+            uint32_t AppendTexture(const std::string& path, uint32_t* index = nullptr);
             std::vector<Descriptor*>& GetSamplerDescriptors()
             {
                 return samplersDescriptors;
