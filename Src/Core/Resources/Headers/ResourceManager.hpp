@@ -113,6 +113,8 @@ namespace AnA
             AnA::Controls::Control* MainControl = NULL;
 #endif
             std::unordered_map<uint32_t, Texture> TextureMap{};
+            std::unordered_map<std::string, uint32_t> TexturePathMap{};
+            std::unordered_map<uint32_t, uint32_t> TextureIdMap{};
             std::unordered_map<int, Character> Characters{};
             AnA::Resources::ShadowMap ShadowMap;
             ThreadPool<void()> TaskPool{MAX_FRAMES_IN_FLIGHT};
@@ -147,8 +149,6 @@ namespace AnA
 
             std::vector<NormalCallBack> callbacks{};
             std::mutex callbacksMutex{};
-            std::unordered_map<std::string, uint32_t> texturePathMap{};
-            std::unordered_map<uint32_t, uint32_t> textureIdMap{};
             std::vector<VkDescriptorImageInfo> textureInfos;
             std::vector<Descriptor*> samplersDescriptors;
             void createSamplerDescriptor();
