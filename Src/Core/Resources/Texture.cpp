@@ -35,6 +35,15 @@ Texture::Texture(VkImage _image, VmaAllocation _allocation)
     init();
 }
 
+Texture::Texture(VkImage _image, VmaAllocation _allocation, VkImageView imageView)
+{
+    textureImage = _image;
+    allocation = _allocation;
+    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    imageInfo.imageView = imageView;
+    imageInfo.sampler = SwapChain::GetCurrent()->GetColorSampler();
+}
+
 Texture::~Texture()
 {
     cleanup();
