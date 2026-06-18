@@ -6,6 +6,7 @@
 #include <fstream>
 #include <unordered_map>
 #include <mutex>
+#include <functional>
 #include <vulkan/vulkan.h>
 #include <glm/glm.hpp>
 #include "Utils.hpp"
@@ -245,6 +246,7 @@ namespace AnA
         VkCommandBuffer BeginSubCommands();
         void RecordSingleTimeCommands(void(*recordCallback)(VkCommandBuffer));
         void EndSubCommands();
+        void EndSubCommands(std::function<void()> postProcess);
         bool SingleTimeCommandsRecorded();
         bool SingleTimeCommandsSubmitBegan();
         VkCommandBuffer BeginSingleTimeCommandsSubmit();
@@ -286,6 +288,8 @@ namespace AnA
 
         std::vector<Buffer*> stagingBuffers{};
         void cleanupStagingBuffers();
+
+        std::vector<std::function<void()>> subCommandPostProcesses;
 
         VkPhysicalDeviceProperties physicalDeviceProperties{};
         VkPhysicalDeviceMeshShaderPropertiesEXT meshShaderProperties{};

@@ -1370,6 +1370,12 @@ void Device::EndSubCommands()
     subCommandMutex.unlock();
 }
 
+void Device::EndSubCommands(std::function<void()> postProcess)
+{
+    subCommandPostProcesses.push_back(postProcess);
+    EndSubCommands();
+}
+
 bool Device::SingleTimeCommandsRecorded()
 {
     return subCommandBufferRecorded;
@@ -1401,6 +1407,11 @@ void Device::EndSingleTimeCommandsSubmit(VkFence& fence)
     vkWaitForFences(logicalDevice, 1, &fence, VK_TRUE, UINT64_MAX);
     if (stagingBuffers.size())
         cleanupStagingBuffers();
+    for (auto& postProcess : subCommandPostProcesses)
+    {
+        postProcess();
+    }
+    subCommandPostProcesses.clear();
     subCommandMutex.unlock();
 }
 
