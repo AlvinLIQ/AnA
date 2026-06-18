@@ -11,6 +11,7 @@ namespace AnA
         Texture(const char* filename, Device* mDevice);
         Texture(const uint32_t color, Device* mDevice);
         Texture(const char* text, int& width, int& height, float lineHeight, Device* mDevice, float scaleX = 1.0f, float scaleY = 1.0f);
+        Texture(VkImage _image, VmaAllocation _allocation);
         Texture(Texture& texture) noexcept
         {
             cleanup();

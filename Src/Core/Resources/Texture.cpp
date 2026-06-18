@@ -28,6 +28,13 @@ Texture::Texture(const char* text, int& width, int& height, float lineHeight, De
     init();
 }
 
+Texture::Texture(VkImage _image, VmaAllocation _allocation)
+{
+    textureImage = _image;
+    allocation = _allocation;
+    init();
+}
+
 Texture::~Texture()
 {
     cleanup();
