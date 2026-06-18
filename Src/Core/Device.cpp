@@ -1362,11 +1362,9 @@ VkCommandBuffer Device::BeginSingleTimeCommandsSubmit()
 void Device::EndSingleTimeCommandsSubmit(VkFence& fence)
 {
     subCommandBufferRecorded = false;
-    if (vkWaitForFences(logicalDevice, 1, &fence, VK_TRUE, 0) != VK_SUCCESS)
-        return;
-
     subCommandBufferSubmitBegan = false;
 
+    vkWaitForFences(logicalDevice, 1, &fence, VK_TRUE, UINT64_MAX);
     if (stagingBuffers.size())
         cleanupStagingBuffers();
     subCommandMutex.unlock();

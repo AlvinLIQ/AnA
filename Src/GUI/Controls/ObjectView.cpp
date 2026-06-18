@@ -17,7 +17,6 @@ void ObjectView::AddItem(ObjectViewItemData itemData)
 {
     auto item = new ObjectViewItem(itemData);
     item->HorizontalAlignment = Stretch;
-    item->HorizontalContentAlignment = Start;
     item->VerticalAlignment = Start;
     Child(item);
 }

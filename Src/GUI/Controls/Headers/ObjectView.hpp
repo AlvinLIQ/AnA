@@ -1,5 +1,4 @@
 #pragma once
-#include "ItemPresenter.hpp"
 #include "TextBlock.hpp"
 #include "ListView.hpp"
 #include "Types.hpp"
@@ -11,6 +10,7 @@ namespace AnA
     struct ObjectViewItemData
     {
         std::string name;
+        std::string icon;
         ObjectViewItemType type;
         uint32_t id;
         void *data;
@@ -18,15 +18,25 @@ namespace AnA
 
     namespace Controls
     {
-        class ObjectViewItem : public ItemPresenter
+        class ObjectViewItem : public StackPanel
         {
         public:
-            ObjectViewItem(ObjectViewItemData data) : ItemPresenter(), Data{data}
+            ObjectViewItem(ObjectViewItemData data) : StackPanel(), Data{data}
             {
                 RenderMode(Absolute);
                 Color = {};
                 ControlSize = {10.0f, 25.0f};
-                item = new TextBlock((std::to_string(Data.id) + " " + Data.name).c_str());
+                if (!data.icon.empty())
+                {
+                    auto image = new Control;
+                    image->RenderMode(Absolute);
+                    image->ControlSize = {64.0f, 64.0f};
+                    image->Texture(data.icon);
+                    Child(image);
+                }
+                auto itemTextBlock = new TextBlock((std::to_string(Data.id) + " " + Data.name).c_str());
+                itemTextBlock->VerticalAlignment = AlignmentType::Center;
+                Child(itemTextBlock);
             }
             ObjectViewItemData Data;
         };

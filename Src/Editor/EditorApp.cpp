@@ -287,6 +287,7 @@ void EditorApp::mainScene_MeshAppend(std::string name, uint32_t id)
     ObjectViewItemData itemData;
     itemData.id = id;
     itemData.name = name.substr(name.find_last_of('/') + 1).c_str();
+    itemData.icon = "";
     panel->AddItem(itemData);
 }
 //const VkDeviceSize offset = 0;
