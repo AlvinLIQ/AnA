@@ -53,17 +53,14 @@ void Window::PollEvents()
                     auto dPos = glm::vec2(fingers[0]->x - fingers[1]->x,
                         fingers[0]->y - fingers[1]->y);
                     float fingerDistance = glm::length(dPos);
-
-                    if (ScaleCallback)
-                    {
-                        float diff = fingerDistance - prevFingerDistance;
-                        if (prevFingerDistance != 0 && (diff > 0.005f || diff < -0.005f))
-                        {
-                            ScaleCallback(diff);
-                        }
-                    }
                     prevFingerDistance = fingerDistance;
                 }
+            }
+                break;
+            case SDL_EVENT_MOUSE_WHEEL:
+            {
+                if (ScrollCallback)
+                    ScrollCallback(event.wheel.x, event.wheel.y);
             }
                 break;
             case SDL_EVENT_WINDOW_RESIZED:
