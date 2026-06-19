@@ -13,9 +13,9 @@ ObjectView::~ObjectView()
 {
 }
 
-void ObjectView::AddItem(ObjectViewItemData itemData)
+void ObjectView::AddItem(ObjectViewItemData itemData, uint32_t iconLayer)
 {
-    auto item = new ObjectViewItem(itemData);
+    auto item = new ObjectViewItem(itemData, iconLayer);
     item->HorizontalAlignment = Stretch;
     item->VerticalAlignment = Start;
     Child(item);

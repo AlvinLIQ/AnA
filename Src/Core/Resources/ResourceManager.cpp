@@ -285,9 +285,9 @@ uint32_t ResourceManager::AppendTexture(const uint32_t color, uint32_t* index, c
     if (index)
         *index = uint32_t(textureInfos.size());
     if (!name.empty())
-        texturePathMap.try_emplace(name, texId);
+        TexturePathMap.try_emplace(name, texId);
 
-    textureIdMap.emplace(result.first->first, uint32_t(textureInfos.size()));
+    TextureIdMap.emplace(result.first->first, uint32_t(textureInfos.size()));
     appendSamplerDescriptor(result.first->second.GetImageInfo());
 
     texId++;
@@ -296,17 +296,38 @@ uint32_t ResourceManager::AppendTexture(const uint32_t color, uint32_t* index, c
 
 uint32_t ResourceManager::AppendTexture(const std::string& path, uint32_t* index)
 {
-    auto iter = texturePathMap.find(path);
-    if (iter != texturePathMap.end())
+    auto iter = TexturePathMap.find(path);
+    if (iter != TexturePathMap.end())
         return iter->second;
 
     auto result = TextureMap.try_emplace(texId, path.c_str(), aDevice);
 
     if (index)
         *index = uint32_t(textureInfos.size());
-    texturePathMap.emplace(path, texId);
+    TexturePathMap.emplace(path, texId);
 
-    textureIdMap.emplace(result.first->first, uint32_t(textureInfos.size()));
+    TextureIdMap.emplace(result.first->first, uint32_t(textureInfos.size()));
+    appendSamplerDescriptor(result.first->second.GetImageInfo());
+
+    texId++;
+    return result.first->first;
+}
+
+uint32_t ResourceManager::AppendTexture(VkImage image, VmaAllocation allocation,
+    VkImageView imageView, uint32_t* index, const std::string& name)
+{
+    auto iter = TexturePathMap.find(name);
+    if (iter != TexturePathMap.end())
+        return iter->second;
+
+    auto result = TextureMap.try_emplace(texId, image, allocation, imageView, aDevice);
+
+    if (index)
+        *index = uint32_t(textureInfos.size());
+    if (!name.empty())
+        TexturePathMap.try_emplace(name, texId);
+
+    TextureIdMap.emplace(result.first->first, uint32_t(textureInfos.size()));
     appendSamplerDescriptor(result.first->second.GetImageInfo());
 
     texId++;

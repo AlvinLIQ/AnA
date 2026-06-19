@@ -28,14 +28,14 @@ Texture::Texture(const char* text, int& width, int& height, float lineHeight, De
     init();
 }
 
-Texture::Texture(VkImage _image, VmaAllocation _allocation)
+Texture::Texture(VkImage _image, VmaAllocation _allocation, Device* mDevice) : aDevice{mDevice}
 {
     textureImage = _image;
     allocation = _allocation;
     init();
 }
 
-Texture::Texture(VkImage _image, VmaAllocation _allocation, VkImageView imageView)
+Texture::Texture(VkImage _image, VmaAllocation _allocation, VkImageView imageView, Device* mDevice) : aDevice{mDevice}
 {
     textureImage = _image;
     allocation = _allocation;

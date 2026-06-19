@@ -21,7 +21,7 @@ namespace AnA
         class ObjectViewItem : public StackPanel
         {
         public:
-            ObjectViewItem(ObjectViewItemData data) : StackPanel(), Data{data}
+            ObjectViewItem(ObjectViewItemData data, uint32_t iconLayer = 0) : StackPanel(), Data{data}
             {
                 RenderMode(Absolute);
                 Color = {};
@@ -32,6 +32,7 @@ namespace AnA
                     image->RenderMode(Absolute);
                     image->ControlSize = {64.0f, 64.0f};
                     image->Texture(data.icon);
+                    image->TextureLayer = iconLayer;
                     Child(image);
                 }
                 auto itemTextBlock = new TextBlock((std::to_string(Data.id) + " " + Data.name).c_str());
@@ -46,7 +47,7 @@ namespace AnA
             ObjectView();
             ~ObjectView();
 
-            void AddItem(ObjectViewItemData itemData);
+            void AddItem(ObjectViewItemData itemData, uint32_t iconLayer = 0);
         };
     }
 }
