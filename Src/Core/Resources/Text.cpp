@@ -205,8 +205,8 @@ void Text::UpdateText(uint32_t id, const std::string& text)
         size_t meshletOffset = meshlets.size();
         uint32_t index = 0;
 
-        updateTextInfo(textMapData.textInfo, chOffset, index, chInfoBuffer);
-        textBuffer[textMapData.index].count = chOffset;
+        updateTextInfo(textMapData.textInfo, index, chOffset, chInfoBuffer);
+        textBuffer[textMapData.index].count = index;
         updateMeshlets(meshletOffset);
         _mutex.unlock();
     }
