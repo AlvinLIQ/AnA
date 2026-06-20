@@ -177,6 +177,10 @@ VkDescriptorImageInfo Control::GetDescriptorImageInfo()
 
 void Control::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
+    if (renderOffset.x() < -renderSize.x() || renderOffset.y() < -renderSize.y() ||
+        renderOffset.x() + renderSize.x() > 1.0f || renderOffset.y() + renderSize.y() > 1.0f)
+        return;
+
     this->scale = {renderSize.x(), renderSize.y()};
     this->translation = {renderOffset.x() * 2.0f - 1.0f + renderSize.x(), renderOffset.y() * 2.0f - 1.0f + renderSize.y()};
     this->bounding.x = renderOffset.x() * float(Extent.width);
