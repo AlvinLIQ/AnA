@@ -1,5 +1,4 @@
 #pragma once
-#include "../../Headers/Types.hpp"
 #include "../../Headers/Device.hpp"
 #include "../../Headers/Buffer.hpp"
 #include "Renderable.hpp"
@@ -9,13 +8,17 @@ namespace AnA
 {
     struct Shape
     {
-        glm::mat4 transform{1.0f};
+        glm::vec2 scale{1.0f};
+        glm::vec2 translation{};
+        glm::vec4 bounding{0.0f, 0.0f, 1.0f, 1.0f};
         glm::vec4 color{1.0f};
         uint32_t texLayer{0};
     };
     struct ShapeInfo
     {
-        AnA::Transform Transform{};
+        glm::vec2 scale{1.0f};
+        glm::vec2 translation{};
+        glm::vec4 bounding{0.0f, 0.0f, 1.0f, 1.0f};
         glm::vec4 Color{1.0f};
         uint32_t TextureId{0};
         uint32_t TextureLayer{0};

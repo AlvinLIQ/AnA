@@ -177,9 +177,16 @@ VkDescriptorImageInfo Control::GetDescriptorImageInfo()
 
 void Control::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
-    this->Transform.scale = {renderSize.x(), renderSize.y(), 1.f};
-    this->Transform.translation = {renderOffset.x() * 2.0f - 1.0f + renderSize.x(), renderOffset.y() * 2.0f - 1.0f + renderSize.y(), 0.f};
-    shapeBuffer[shapeCount].transform = Transform.mat4();
+    this->scale = {renderSize.x(), renderSize.y()};
+    this->translation = {renderOffset.x() * 2.0f - 1.0f + renderSize.x(), renderOffset.y() * 2.0f - 1.0f + renderSize.y()};
+    this->bounding.x = renderOffset.x() * float(Extent.width);
+    this->bounding.y = renderOffset.y() * float(Extent.height);
+    this->bounding.z = this->bounding.x + renderSize.x() * float(Extent.width);
+    this->bounding.w = this->bounding.y + renderSize.y() * float(Extent.height);
+
+    shapeBuffer[shapeCount].scale = this->scale;
+    shapeBuffer[shapeCount].translation = this->translation;
+    shapeBuffer[shapeCount].bounding = this->bounding;
     shapeBuffer[shapeCount].color = Color;
     shapeBuffer[shapeCount].texLayer = TextureLayer;
     if (imageInfos.size() <= shapeCount)

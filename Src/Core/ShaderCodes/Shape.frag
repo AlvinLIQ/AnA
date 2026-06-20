@@ -2,9 +2,10 @@
 #extension GL_EXT_nonuniform_qualifier : enable
 
 layout(location = 0) in vec4 baseColor;
-layout(location = 1) in vec2 texCoord;
-layout(location = 2) flat in uint texIndex;
-layout(location = 3) flat in uint texLayer;
+layout(location = 1) in vec4 bounding;
+layout(location = 2) in vec2 texCoord;
+layout(location = 3) flat in uint texIndex;
+layout(location = 4) flat in uint texLayer;
 layout(location = 0) out vec4 outColor;
 
 layout(set = 1, binding = 0) uniform sampler2DArray texSampler[];
@@ -13,7 +14,7 @@ float rect(vec2 uv, float l, float t, float r, float b)
 {
     float c = 1.;
     c -= smoothstep(l, l - 0.001, uv.x) + smoothstep(uv.x, uv.x - 0.001, r)
-        + smoothstep(t, t - 0.001, uv.y) + smoothstep(uv.y, uv.y - 0.001, b);
+            + smoothstep(t, t - 0.001, uv.y) + smoothstep(uv.y, uv.y - 0.001, b);
     return c;
 }
 
@@ -58,7 +59,7 @@ float rounded_rect(vec2 uv, float l, float t, float r, float b, vec2 radius)
     c = rect(uv, l + radius.x, t, r - radius.x, b) + rect(uv, l, t + radius.y, r, b - radius.y);
 
     c += ellipse(uv, vec2(l + radius.x, t + radius.y), radius) + ellipse(uv, vec2(r - radius.x, t + radius.y), radius)
-        + ellipse(uv, vec2(l + radius.x, b - radius.y), radius) + ellipse(uv, vec2(r - radius.x, b - radius.y), radius);
+            + ellipse(uv, vec2(l + radius.x, b - radius.y), radius) + ellipse(uv, vec2(r - radius.x, b - radius.y), radius);
     if (c >= 1.)
         c = 1.;
     return c;
@@ -72,6 +73,10 @@ float rounded_rect2(vec2 uv, vec2 offset, vec2 size, vec2 radius)
 void main()
 {
     //outColor = vec4(baseColor, 1.0);
+    if (gl_FragCoord.x < bounding.x || gl_FragCoord.x > bounding.z ||
+            gl_FragCoord.y < bounding.y || gl_FragCoord.y > bounding.w)
+        discard;
+
     vec4 texColor = texture(texSampler[nonuniformEXT(texIndex)], vec3(texCoord, texLayer));
     if (texColor.a < 0.5 || baseColor.w == 0.)
         discard;
