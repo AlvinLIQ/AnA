@@ -14,7 +14,7 @@ namespace AnA
 
     enum PointerEventType
     {
-        Pressed, Entered, Released, Exited, Moved, Moving
+        Pressed, Entered, Released, Exited, Moved, Moving, Scrolled
     };
     enum PointerTriggerType
     {

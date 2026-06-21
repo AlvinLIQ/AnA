@@ -42,6 +42,10 @@ namespace AnA
         {
             return aRenderer;
         }
+        Window& GetWindow()
+        {
+            return aWindow;
+        }
 
         Device* GetDevice()
         {

@@ -1,5 +1,6 @@
 #include "Headers/Control.hpp"
 #include "../../Core/Resources/Headers/ResourceManager.hpp"
+#include "../../Core/Headers/App.hpp"
 
 using namespace AnA;
 using namespace AnA::Controls;
@@ -177,8 +178,12 @@ VkDescriptorImageInfo Control::GetDescriptorImageInfo()
 
 void Control::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
+    if (Parent && (Parent->renderOffset.x() < -renderOffset.x() || Parent->renderOffset.y() < -renderSize.y() ||
+        Parent->renderOffset.x() > 1.0f || Parent->renderOffset.y() > 1.0f))
+        return;
+
     if (renderOffset.x() < -renderSize.x() || renderOffset.y() < -renderSize.y() ||
-        renderOffset.x() + renderSize.x() > 1.0f || renderOffset.y() + renderSize.y() > 1.0f)
+        renderOffset.x() > 1.0f || renderOffset.y() > 1.0f)
         return;
 
     this->scale = {renderSize.x(), renderSize.y()};
@@ -297,6 +302,23 @@ void _characterReceived(uint32_t ch)
         focusedControl->CharacterRecevied(ch);
 }
 
+void _scrolled(float dx, float dy)
+{
+    auto mainControl = Resources::ResourceManager::GetCurrent()->MainControl;
+    PointerEventArgs args;
+    args.EventType = Scrolled;
+    args.Position = Controls::Control::GetRelativePosition(App::GetCurrent()->GetWindow().GetCursorPos(), mainControl->Extent);
+    args.Duration = Controls::Control::GetRelativePosition({(double)dx, (double)dy}, mainControl->Extent);
+    if (focusedControl)
+        focusedControl->PointerEventTrigger(args);
+    else
+        mainControl->PointerEventTrigger(args);
+    /*
+    mainControl->ControlOffset.x() += args.Duration.x.As<float>();
+    mainControl->ControlOffset.y() += args.Duration.y.As<float>();
+    mainControl->RequestUpdate();*/
+}
+
 void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input::InputProfile>& profiles)
 {
     Input::InputProfile profile{};
@@ -310,15 +332,8 @@ void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input:
 
         args.EventType = GetPointerEventType(leftButtonAction);
         args.TriggerType = PointerTriggerType::Mouse;
-        auto extent = Control::GetSwapChainExtent();
-#ifdef _WIN32
-        args.Position = {curArgs.pos.x / (control->Extent.width / static_cast<double>(extent.width)),
-                        curArgs.pos.y / (control->Extent.height / static_cast<double>(extent.height))};
-#else
-        auto scale = Control::GetScale();
-        args.Position = {curArgs.pos.x * scale[0].As<double>() / (control->Extent.width / static_cast<double>(extent.width)),
-                        curArgs.pos.y * scale[1].As<double>() / (control->Extent.height / static_cast<double>(extent.height))};
-#endif
+        args.Position = GetRelativePosition(curArgs.pos, control->Extent);
+
         args.Duration = curArgs.duration;
         if (focusedControl)
             focusedControl->PointerEventTrigger(args);
@@ -327,5 +342,19 @@ void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input:
     };
     profile.cursorConfigs.push_back(cursorConfig);
     profile.characterConfigs.push_back({_characterReceived});
+    profile.scrollConfigs.push_back({_scrolled});
     profiles.push_back(profile);
+}
+
+CursorPosition Controls::Control::GetRelativePosition(const CursorPosition& pos, const VkExtent2D& extent)
+{
+    auto _extent = Control::GetSwapChainExtent();
+    #ifdef _WIN32
+            return {curArgs.pos.x / (control->Extent.width / static_cast<double>(extent.width)),
+                            curArgs.pos.y / (control->Extent.height / static_cast<double>(extent.height))};
+    #else
+            auto scale = Control::GetScale();
+            return {pos.x * scale[0].As<double>() / (extent.width / static_cast<double>(_extent.width)),
+                            pos.y * scale[1].As<double>() / (extent.height / static_cast<double>(_extent.height))};
+    #endif
 }

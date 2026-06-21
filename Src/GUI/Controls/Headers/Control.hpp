@@ -59,6 +59,7 @@ namespace AnA
             static VkExtent2D GetSwapChainExtent();
             static Device* GetDevice();
             static void GetInputProfile(Control* mainControl, std::vector<Input::InputProfile>& profiles);
+            static CursorPosition GetRelativePosition(const CursorPosition& pos, const VkExtent2D& extent);
 
             void RenderOffset(Vec2 newOffset)
             {
@@ -85,7 +86,7 @@ namespace AnA
                 return RenderSize();
             }
 
-            std::vector<PointerEventHandler> PointerEvents[PointerEventType::Moving + 1] = {};
+            std::vector<PointerEventHandler> PointerEvents[PointerEventType::Scrolled + 1] = {};
 
             bool IsFocused();
             void Focus();

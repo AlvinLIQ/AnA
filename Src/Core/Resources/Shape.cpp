@@ -50,7 +50,8 @@ void Shapes::PrepareDraw(Controls::Control* control)
     uint32_t newShapeCount = 0;
     control->PrepareDraw((Shape*)shapeBuffer.GetMappedData(), imageInfos, newShapeCount);
     ((VkDrawIndirectCommand*)indirectBuffer.GetMappedData())->vertexCount = (shapeCount = newShapeCount) * 6;
-    samplersDescriptor->UpdateDescriptorSets(imageInfos.data(), newShapeCount, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+    if (newShapeCount)
+        samplersDescriptor->UpdateDescriptorSets(imageInfos.data(), newShapeCount, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
     sets[0] = ssboDescriptor->GetSets()[0];
     sets[1] = samplersDescriptor->GetSets()[0];
     updated = true;
