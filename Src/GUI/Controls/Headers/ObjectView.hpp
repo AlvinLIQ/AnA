@@ -13,6 +13,7 @@ namespace AnA
         std::string icon;
         ObjectViewItemType type;
         uint32_t id;
+        uint32_t subId;
         void *data;
     };
 
