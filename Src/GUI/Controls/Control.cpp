@@ -366,8 +366,8 @@ CursorPosition Controls::Control::GetRelativePosition(const CursorPosition& pos,
 {
     auto _extent = Control::GetSwapChainExtent();
     #ifdef _WIN32
-            return {curArgs.pos.x / (extent.width / static_cast<double>(extent.width)),
-                            curArgs.pos.y / (extent.height / static_cast<double>(extent.height))};
+            return {pos.x / (extent.width / static_cast<double>(extent.width)),
+                            pos.y / (extent.height / static_cast<double>(extent.height))};
     #else
             auto scale = Control::GetScale();
             return {pos.x * scale[0].As<double>() / (extent.width / static_cast<double>(_extent.width)),
