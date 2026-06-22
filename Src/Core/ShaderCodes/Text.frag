@@ -6,14 +6,16 @@ layout(push_constant) uniform PushConsts {
 } push;
 
 layout(location = 0) in vec3 fragColor;
-layout(location = 1) flat in vec4 scissor;
+layout(location = 1) flat in vec4 bounding;
 
 layout(location = 0) out vec4 outColor;
 
 void main()
 {
-    vec2 uv = (gl_FragCoord.xy - 0.5) / push.resolution;
-    if (scissor.x > uv.x || scissor.y > uv.y || 1.0 - scissor.z < uv.x || 1.0 - scissor.w < uv.y)
-        discard; //culled
+    vec2 uv = gl_FragCoord.xy;
+    if (uv.x < bounding.x || uv.x > bounding.z ||
+            uv.y < bounding.y || uv.y > bounding.w)
+        discard;
+
     outColor = vec4(fragColor, 1.0);
 }

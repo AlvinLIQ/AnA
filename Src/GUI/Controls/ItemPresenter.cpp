@@ -38,43 +38,15 @@ void ItemPresenter::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImag
 {
     GetSizeForRender();
     GetActualControlOffset();
-    ItemPresenter::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
+    ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
 }
 
 void ItemPresenter::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
     if (item != nullptr)
     {
-        item->Extent = Extent;
-        item->Aspect = Aspect;
-        auto itemRenderSize = item->GetSizeForRender();
-        Vec2 itemRenderOffset = renderOffset;
-        AlignmentType alignments[] = {HorizontalContentAlignment, VerticalContentAlignment};
-        for (int i = 0; i < 2; i++)
-        {
-            if (renderSize[i] < itemRenderSize[i])
-            {
-                //renderOffset[i] = renderOffset[i] - renderSize[i] + itemRenderSize[i];
-                itemRenderOffset[i] = renderOffset[i];
-                renderSize[i] = itemRenderSize[i];
-            }
-            else if (alignments[i] == AlignmentType::Center)
-            {
-                itemRenderOffset[i] = renderOffset[i] + (renderSize[i] - itemRenderSize[i]) * 0.5f;
-            }
-            else if (alignments[i] == AlignmentType::End)
-            {
-                itemRenderOffset[i] = renderOffset[i] + renderSize[i] - itemRenderSize[i];
-            }
-            else
-            {
-                itemRenderOffset[i] = renderOffset[i];
-                if(alignments[i] == AlignmentType::Stretch)
-                {
-                    itemRenderSize[i] = renderSize[i];
-                }
-            }
-        }
+        Vec2 itemRenderOffset, itemRenderSize;
+        GetItemRenderInfo(itemOffset, itemRenderOffset, itemRenderSize);
 
         item->RenderOffset(itemRenderOffset);
         item->RenderSize(itemRenderSize);
@@ -86,6 +58,40 @@ void ItemPresenter::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptor
 void ItemPresenter::PointerEventTrigger(PointerEventArgs& args)
 {
     Control::PointerEventTrigger(args);
-    if (item != nullptr)
+    if (IsCursorInside() && item != nullptr)
         item->PointerEventTrigger(args);
+}
+
+void ItemPresenter::GetItemRenderInfo(const Vec2 itemOffset, Vec2& itemRenderOffset, Vec2& itemRenderSize)
+{
+    item->Extent = Extent;
+    item->Aspect = Aspect;
+    itemRenderSize = item->GetSizeForRender();
+    itemRenderOffset = renderOffset;
+    AlignmentType alignments[] = {HorizontalContentAlignment, VerticalContentAlignment};
+    for (int i = 0; i < 2; i++)
+    {
+        if (renderSize[i] < itemRenderSize[i])
+        {
+            //renderOffset[i] = renderOffset[i] - renderSize[i] + itemRenderSize[i];
+            renderSize[i] = std::min(itemRenderSize[i], maxSize[i]);
+        }
+        else if (alignments[i] == AlignmentType::Center)
+        {
+            itemRenderOffset[i] = renderOffset[i] + (renderSize[i] - itemRenderSize[i]) * 0.5f;
+        }
+        else if (alignments[i] == AlignmentType::End)
+        {
+            itemRenderOffset[i] = renderOffset[i] + renderSize[i] - itemRenderSize[i];
+        }
+        else
+        {
+            itemRenderOffset[i] = renderOffset[i];
+            if(alignments[i] == AlignmentType::Stretch)
+            {
+                itemRenderSize[i] = renderSize[i];
+            }
+        }
+    }
+    itemRenderOffset += itemOffset;
 }

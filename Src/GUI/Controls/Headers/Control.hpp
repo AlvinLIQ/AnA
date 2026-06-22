@@ -130,6 +130,7 @@ namespace AnA
             Vec2 renderSize{};
             Vec2 minSize {ControlMinSize};
             Vec2 maxSize {std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
+            bool visible = false;
         };
     }
 }

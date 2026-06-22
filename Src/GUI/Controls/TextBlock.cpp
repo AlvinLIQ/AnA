@@ -41,6 +41,7 @@ void TextBlock::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInf
 
 void TextBlock::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
+    Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
     if (id != uint32_t(-1))
     {
         auto swapChain = SwapChain::GetCurrent();
@@ -55,13 +56,16 @@ void TextBlock::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImag
         info->offset = {offset.x(), offset.y()};
         info->size = FontSize * sqrtf(glm::length(glm::vec2(swapChain->ScaleX * 0.7071f, swapChain->ScaleY * 0.7071f)));
         info->offset.y += renderSize.y() - info->size * charSize.y().value * 0.75f / float(Extent.height);
-        info->visible = true;
+        info->visible = visible;
+        info->scissor = {bounding.x / float(Extent.width) * float(swapChainExtent.width),
+            bounding.y / float(Extent.height) * float(swapChainExtent.height),
+            bounding.z / float(Extent.width) * float(swapChainExtent.width),
+            bounding.w / float(Extent.height) * float(swapChainExtent.height)};
         textContext.UpdateLayout(id);
         ControlSize = {FontSize * (charSize.x().value * float(asciiLen) + widthCharSize.x().value * float(wideLen)) * 0.5f,
             FontSize * charSize.y().value};
     }
 
-    Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
 }
 
 inline void getTextLength(const char* newText, uint32_t len, uint32_t& asciiLen, uint32_t& wideLen)

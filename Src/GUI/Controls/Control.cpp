@@ -178,20 +178,35 @@ VkDescriptorImageInfo Control::GetDescriptorImageInfo()
 
 void Control::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
 {
-    if (Parent && (Parent->renderOffset.x() < -renderOffset.x() || Parent->renderOffset.y() < -renderSize.y() ||
-        Parent->renderOffset.x() > 1.0f || Parent->renderOffset.y() > 1.0f))
+    Vec2 maxBounding = renderOffset + renderSize;
+    if (Parent && (Parent->renderOffset.x() + Parent->renderSize.x() < renderOffset.x() ||
+        Parent->renderOffset.y() + Parent->renderSize.y() < renderOffset.y() ||
+        Parent->renderOffset.x() > maxBounding.x() || Parent->renderOffset.y() > maxBounding.y()))
+    {
+        visible = false;
         return;
+    }
 
     if (renderOffset.x() < -renderSize.x() || renderOffset.y() < -renderSize.y() ||
         renderOffset.x() > 1.0f || renderOffset.y() > 1.0f)
+    {
+        visible = false;
         return;
+    }
 
     this->scale = {renderSize.x(), renderSize.y()};
     this->translation = {renderOffset.x() * 2.0f - 1.0f + renderSize.x(), renderOffset.y() * 2.0f - 1.0f + renderSize.y()};
     this->bounding.x = renderOffset.x() * float(Extent.width);
     this->bounding.y = renderOffset.y() * float(Extent.height);
-    this->bounding.z = this->bounding.x + renderSize.x() * float(Extent.width);
-    this->bounding.w = this->bounding.y + renderSize.y() * float(Extent.height);
+    this->bounding.z = maxBounding.x() * float(Extent.width);
+    this->bounding.w = maxBounding.y() * float(Extent.height);
+    if (Parent)
+    {
+        bounding.x = std::max(bounding.x, Parent->bounding.x);
+        bounding.y = std::max(bounding.y, Parent->bounding.y);
+        bounding.z = std::min(bounding.z, Parent->bounding.z);
+        bounding.w = std::min(bounding.w, Parent->bounding.w);
+    }
 
     shapeBuffer[shapeCount].scale = this->scale;
     shapeBuffer[shapeCount].translation = this->translation;
@@ -205,6 +220,7 @@ void Control::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageI
     imageInfos[shapeCount] = this->GetDescriptorImageInfo();
     shapeId = shapeCount;
     shapeCount++;
+    visible = true;
 }
 
 inline void RunPointerEvents(std::vector<PointerEventHandler>& events, void* param, PointerEventArgs& args)
@@ -308,7 +324,7 @@ void _scrolled(float dx, float dy)
     PointerEventArgs args;
     args.EventType = Scrolled;
     args.Position = Controls::Control::GetRelativePosition(App::GetCurrent()->GetWindow().GetCursorPos(), mainControl->Extent);
-    args.Duration = Controls::Control::GetRelativePosition({(double)dx, (double)dy}, mainControl->Extent);
+    args.Duration = Controls::Control::GetRelativePosition({(double)dx * 0.04f, (double)dy * 0.04f}, mainControl->Extent);
     if (focusedControl)
         focusedControl->PointerEventTrigger(args);
     else

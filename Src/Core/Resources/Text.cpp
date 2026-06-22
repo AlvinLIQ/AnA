@@ -134,9 +134,10 @@ void Text::UpdateLayout(uint32_t id)
     _mutex.lock();
     auto& textMapData = textMap[id];
     TextData* textBuffer = reinterpret_cast<TextData*>(textBuffers[currentBufferIndex].GetMappedData());
-    textBuffer[textMapData.index].size = textMapData.textInfo.size;
+    textBuffer[textMapData.index].size = textMapData.textInfo.visible ? textMapData.textInfo.size : 0.0f;
     textBuffer[textMapData.index].offset = textMapData.textInfo.offset * 2.0f;
     textBuffer[textMapData.index].color = textMapData.textInfo.color;
+    textBuffer[textMapData.index].scissor = textMapData.textInfo.scissor;
     _mutex.unlock();
 }
 
