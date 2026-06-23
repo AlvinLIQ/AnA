@@ -285,7 +285,7 @@ void Control::CharacterRecevied(uint32_t ch)
     printf("%c", ch);
 }
 
-PointerEventType GetPointerEventType(int buttonAction)
+PointerEventType GetPointerEventType(int buttonAction, const Input::CursorArgs& args)
 {
     PointerEventType eventType = PointerEventType::Moving;
     switch (buttonAction)
@@ -298,30 +298,36 @@ PointerEventType GetPointerEventType(int buttonAction)
             if (focusedControl != nullptr && focusedControl->FocusType)
                 Control::ClearFocus();
         }
-        else if (dragStarted)
+        else if (args.duration.x + args.duration.y > std::numeric_limits<double>::epsilon())
         {
-            dragStarted = true;
-            printf("dragStarted\n");
-        }
-        else
-        {
-            printf("dragging\n");
-        }
+            if (!dragStarted)
+            {
+                dragStarted = true;
+                eventType = PointerEventType::DragStarted;
+            }
+            else
+            {
+                eventType = PointerEventType::Dragging;
+            }
 
+        }
         break;
     case ANA_RELEASE:
         if (leftButtonPressed)
         {
             leftButtonPressed = false;
-            eventType = PointerEventType::Released;
+            if (dragStarted)
+            {
+                dragStarted = false;
+                eventType = PointerEventType::DragEnded;
+            }
+            else
+                eventType = PointerEventType::Released;
             if (focusedControl != nullptr && !focusedControl->FocusType)
                 Control::ClearFocus();
         }
-        if (dragStarted)
-        {
-            dragStarted = false;
-            printf("drag stopped\n");
-        }
+
+        break;
     default:
         break;
     }
@@ -362,7 +368,7 @@ void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input:
         auto control = static_cast<Control*>(param);
         PointerEventArgs args;
 
-        args.EventType = GetPointerEventType(leftButtonAction);
+        args.EventType = GetPointerEventType(leftButtonAction, curArgs);
         args.TriggerType = PointerTriggerType::Mouse;
         args.Position = GetRelativePosition(curArgs.pos, control->Extent);
 
