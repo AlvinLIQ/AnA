@@ -264,6 +264,14 @@ bool Control::ProcessEventArgs(PointerEventArgs& args, PointerEventType& actualE
         result = isInside;
         pressed = false;
         break;
+    case DragBegan:
+        result = isInside;
+        pressed = true;
+        break;
+    case DragEnded:
+        result = isInside;
+        pressed = false;
+        break;
     default:
         result = true;
         break;
@@ -298,12 +306,12 @@ PointerEventType GetPointerEventType(int buttonAction, const Input::CursorArgs& 
             if (focusedControl != nullptr && focusedControl->FocusType)
                 Control::ClearFocus();
         }
-        else if (args.duration.x + args.duration.y > std::numeric_limits<double>::epsilon())
+        else if (std::abs(args.duration.x.value) + std::abs(args.duration.y.value) > std::numeric_limits<double>::epsilon())
         {
             if (!dragStarted)
             {
                 dragStarted = true;
-                eventType = PointerEventType::DragStarted;
+                eventType = PointerEventType::DragBegan;
             }
             else
             {

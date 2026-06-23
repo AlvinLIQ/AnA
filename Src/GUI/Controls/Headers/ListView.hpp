@@ -22,6 +22,10 @@ namespace AnA
             void Select(Control* item);
 
             void RemoveChildAt(size_t index) override;
+            size_t FindItem(Control* item);
+            bool TryResetItemColor(Control* item);
+
+            void Child(Control* child) override;
 
             void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
             Input::RegularCallBack SelectionChanged{nullptr};

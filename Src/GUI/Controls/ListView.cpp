@@ -5,6 +5,11 @@
 using namespace AnA;
 using namespace Controls;
 
+inline glm::vec4 getColorFromIndex(uint32_t index)
+{
+    return {0.0f, 0.0f, 0.0f, (index & 1) * 0.05f};
+}
+
 void ListView::ListView_PointerMoving(ListView* control, PointerEventArgs& args)
 {
     for (auto& item : control->Children())
@@ -15,7 +20,7 @@ void ListView::ListView_PointerMoving(ListView* control, PointerEventArgs& args)
             {
                 if (control->hoverItem != nullptr && control->hoverItem != control->selectedItem)
                 {
-                    control->hoverItem->Color = {};
+                    control->TryResetItemColor(control->hoverItem);
                 }
                 control->hoverItem = item;
                 item->Color = DefaultListItemHoverColor;
@@ -33,11 +38,9 @@ void ListView::ListView_PointerMoving(ListView* control, PointerEventArgs& args)
 }
 
 
-void ListView::ListView_PointerPressed(ListView* control, PointerEventArgs& )
+void ListView::ListView_PointerPressed(ListView* control, PointerEventArgs& args)
 {
-    if (control->hoverItem == control->selectedItem)
-        return;
-    if (control->hoverItem != nullptr)
+    if (control->hoverItem != control->selectedItem && control->hoverItem != nullptr && control->hoverItem->IsInside(args.Position))
     {
         control->Select(control->hoverItem);
     }
@@ -48,9 +51,10 @@ void ListView::ListView_PointerExited(ListView* control, PointerEventArgs& )
     if (control->hoverItem != nullptr)
     {
         if (control->hoverItem != control->selectedItem)
-            control->hoverItem->Color = {};
-        control->hoverItem->RequestUpdate();
+            control->TryResetItemColor(control->hoverItem);
+
         control->hoverItem = nullptr;
+        RequestUpdate();
     }
 }
 
@@ -64,7 +68,7 @@ ListView::ListView()
 void ListView::Select(int index)
 {
     if (selectedItem != nullptr)
-        selectedItem->Color = {};
+        TryResetItemColor(selectedItem);
     if (index < 0)
     {
         selectionIndex = -1;
@@ -101,6 +105,31 @@ void ListView::RemoveChildAt(size_t index)
         else if (selectionIndex >= int(index))
             Select(selectionIndex - 1);
     }
+}
+
+size_t ListView::FindItem(Control* item)
+{
+    for (size_t i = 0; i < items.size(); i++)
+        if (items[i] == item)
+            return i;
+
+    return (size_t)-1;
+}
+
+bool ListView::TryResetItemColor(Control* item)
+{
+    size_t i = FindItem(item);
+    if (i == (size_t)-1)
+        return false;
+
+    item->Color = getColorFromIndex(uint32_t(i));
+    return true;
+}
+
+void ListView::Child(Control* child)
+{
+    child->Color = getColorFromIndex(uint32_t(items.size()));
+    ItemsPresenter::Child(child);
 }
 
 void ListView::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
