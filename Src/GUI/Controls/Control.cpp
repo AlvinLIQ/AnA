@@ -12,6 +12,7 @@ bool leftButtonPressed = false;
 short needUpdate = 0;
 bool textLayoutNeedReset = false;
 Vec2 lastPressedPos{};
+bool dragStarted = false;
 
 Control::Control()
 {
@@ -297,6 +298,16 @@ PointerEventType GetPointerEventType(int buttonAction)
             if (focusedControl != nullptr && focusedControl->FocusType)
                 Control::ClearFocus();
         }
+        else if (dragStarted)
+        {
+            dragStarted = true;
+            printf("dragStarted\n");
+        }
+        else
+        {
+            printf("dragging\n");
+        }
+
         break;
     case ANA_RELEASE:
         if (leftButtonPressed)
@@ -305,6 +316,11 @@ PointerEventType GetPointerEventType(int buttonAction)
             eventType = PointerEventType::Released;
             if (focusedControl != nullptr && !focusedControl->FocusType)
                 Control::ClearFocus();
+        }
+        if (dragStarted)
+        {
+            dragStarted = false;
+            printf("drag stopped\n");
         }
     default:
         break;
