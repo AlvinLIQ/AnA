@@ -20,7 +20,7 @@ void ListView::ListView_PointerMoving(ListView* control, PointerEventArgs& args)
             {
                 if (control->hoverItem != nullptr && control->hoverItem != control->selectedItem)
                 {
-                    control->TryResetItemColor(control->hoverItem);
+                    control->hoverItem->Color = {};
                 }
                 control->hoverItem = item;
                 item->Color = DefaultListItemHoverColor;
@@ -51,7 +51,7 @@ void ListView::ListView_PointerExited(ListView* control, PointerEventArgs& )
     if (control->hoverItem != nullptr)
     {
         if (control->hoverItem != control->selectedItem)
-            control->TryResetItemColor(control->hoverItem);
+            control->hoverItem->Color = {};
 
         control->hoverItem = nullptr;
         RequestUpdate();
@@ -68,7 +68,7 @@ ListView::ListView()
 void ListView::Select(int index)
 {
     if (selectedItem != nullptr)
-        TryResetItemColor(selectedItem);
+        selectedItem->Color = {};
     if (index < 0)
     {
         selectionIndex = -1;
@@ -105,31 +105,6 @@ void ListView::RemoveChildAt(size_t index)
         else if (selectionIndex >= int(index))
             Select(selectionIndex - 1);
     }
-}
-
-size_t ListView::FindItem(Control* item)
-{
-    for (size_t i = 0; i < items.size(); i++)
-        if (items[i] == item)
-            return i;
-
-    return (size_t)-1;
-}
-
-bool ListView::TryResetItemColor(Control* item)
-{
-    size_t i = FindItem(item);
-    if (i == (size_t)-1)
-        return false;
-
-    item->Color = getColorFromIndex(uint32_t(i));
-    return true;
-}
-
-void ListView::Child(Control* child)
-{
-    child->Color = getColorFromIndex(uint32_t(items.size()));
-    ItemsPresenter::Child(child);
 }
 
 void ListView::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
