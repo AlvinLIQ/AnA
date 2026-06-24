@@ -48,6 +48,7 @@ void Slider::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageIn
                         offset2F[o]);
     offset2F[o] = pos;
 
+    button.Extent = Extent;
     button.GetSizeForRender();
     size2F[o] = SLIDER_SIZE;
     button.RenderSize(size);
