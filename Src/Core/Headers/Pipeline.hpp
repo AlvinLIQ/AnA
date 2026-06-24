@@ -1,9 +1,8 @@
 #pragma once
 #include "Device.hpp"
-#include "vulkan/vulkan_core.h"
 
 #include <initializer_list>
-#include <vulkan/vulkan.h>
+#include <volk.h>
 #include <vector>
 #include <string>
 

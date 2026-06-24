@@ -1,6 +1,5 @@
 #include "Headers/SwapChain.hpp"
 #include "Resources/Headers/CommandBuffer.hpp"
-#include "vulkan/vulkan_core.h"
 #include <algorithm>
 #include <limits>
 

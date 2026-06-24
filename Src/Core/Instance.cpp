@@ -8,13 +8,17 @@ using namespace AnA;
 
 Instance::Instance()
 {
+    volkInitialize();
     createInstance();
+    volkLoadInstance(instance);
     setupDebugMessenger();
 }
 
 Instance::Instance(Window& window)
 {
+    volkInitialize();
     createInstance();
+    volkLoadInstance(instance);
     setupDebugMessenger();
 
     window.CreateWindowSurface(this);

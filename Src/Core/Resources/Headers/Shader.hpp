@@ -1,8 +1,6 @@
 #pragma once
 #include "../../Headers/Pipeline.hpp"
 #include "Descriptor.hpp"
-#include <glslang/Public/ShaderLang.h>
-#include <vulkan/vulkan_core.h>
 
 namespace AnA
 {

@@ -1,13 +1,13 @@
 #pragma once
 
 #include <stdexcept>
-#include <vulkan/vulkan_core.h>
+
+#include "Instance.hpp"
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_mouse.h>
 #include <SDL3/SDL_vulkan.h>
 
-#include "Instance.hpp"
 #include "Types.hpp"
 
 #define DEFAULT_WINDOW_WIDTH 1366

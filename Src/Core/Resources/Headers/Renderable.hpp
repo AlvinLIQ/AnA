@@ -1,6 +1,5 @@
 #pragma once
 #include "CommandBuffer.hpp"
-#include <vulkan/vulkan_core.h>
 
 namespace AnA
 {

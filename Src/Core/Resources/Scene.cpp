@@ -2,7 +2,6 @@
 #include "Headers/Device.hpp"
 #include "Headers/ResourceManager.hpp"
 #include "Headers/Types.hpp"
-#include "vulkan/vulkan_core.h"
 #include <memory>
 
 using namespace AnA;

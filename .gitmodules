@@ -22,3 +22,6 @@
 [submodule "Src/3rdParty/volk"]
     path = Src/3rdParty/volk
     url = https://github.com/zeux/volk
+[submodule "Src/3rdParty/vulkan-headers"]
+	path = Src/3rdParty/vulkan-headers
+	url = https://github.com/KhronosGroup/vulkan-headers

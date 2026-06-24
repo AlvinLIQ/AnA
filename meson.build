@@ -9,7 +9,8 @@ add_project_arguments(language: 'cpp')
 add_project_link_arguments('-fuse-ld=lld', language: 'cpp')
 cc = meson.get_compiler('cpp')
 
-vulkan_dep = dependency('vulkan', required: true) # Vulkan SDK
+#vulkan_dep = dependency('vulkan', required: true) # Vulkan SDK
+vulkan_include = include_directories('Src/3rdParty/vulkan-headers/include', 'Src/3rdParty/volk', 'Src/3rdParty/glm')
 
 cflags = []
 if get_option('buildtype') != 'debug'
@@ -34,8 +35,8 @@ subdir('Src/Examples/')
 
 AnA_dep = declare_dependency(
     link_with: [AnACore, AnAControls],
-    dependencies: [vulkan_dep, sdl3_dep],
-    include_directories: include_directories('Src'),
+    dependencies: [sdl3_dep],
+    include_directories: [vulkan_include, include_directories('Src')],
 )
 
 meson.override_dependency('AnA', AnA_dep)

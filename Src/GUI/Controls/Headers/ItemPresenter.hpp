@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Control.hpp"
-#include <vulkan/vulkan_core.h>
 
 namespace AnA
 {

@@ -1,11 +1,11 @@
 #pragma once
 
+#include <volk.h>
 #include "Animation.hpp"
 
 #include <functional>
 #include <glm/fwd.hpp>
 #include <glm/gtc/epsilon.hpp>
-#include <vulkan/vulkan_core.h>
 
 #include <memory>
 

@@ -1,6 +1,5 @@
 #include "Headers/ItemPresenter.hpp"
 #include "Headers/Types.hpp"
-#include <vulkan/vulkan_core.h>
 
 using namespace AnA;
 using namespace Controls;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <volk.h>
 #include <cstdint>
 #include <optional>
 #include <vector>
@@ -7,7 +8,6 @@
 #include <unordered_map>
 #include <mutex>
 #include <functional>
-#include <vulkan/vulkan.h>
 #include <glm/glm.hpp>
 #include "Utils.hpp"
 #include "../ShaderCodes/bindings.h"

@@ -1,6 +1,5 @@
 #include "Headers/Shader.hpp"
 #include "Headers/SwapChain.hpp"
-#include "vulkan/vulkan_core.h"
 //#include <glslang/Public/ShaderLang.h>
 //#include <glslang/SPIRV/GlslangToSpv.h>
 
@@ -32,6 +31,7 @@ Shader::~Shader()
 {
 
 }
+#ifdef HAVE_GLSLANG
 
 EShLanguage ShaderStageToEshLanguage(VkShaderStageFlagBits stage)
 {
@@ -46,7 +46,6 @@ EShLanguage ShaderStageToEshLanguage(VkShaderStageFlagBits stage)
     }
 }
 
-#ifdef HAVE_GLSLANG
 bool Shader::Compile(std::vector<ShaderInfo>& shaderInfos)
 {
     glslang::InitializeProcess();
