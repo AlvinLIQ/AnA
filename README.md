@@ -26,7 +26,7 @@
 ## Build&Run
 Clone the repo and submodules
 
-Install glm, Vulkan SDK(including validation layer), clang(you can use other c/cpp compilers if you want)
+Install a cpp compiler (tested gcc, clang, msvc)
 
 ### for Linux
 ```shell
