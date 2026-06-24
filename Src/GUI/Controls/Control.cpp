@@ -203,10 +203,11 @@ void Control::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageI
     this->bounding.w = maxBounding.y() * float(Extent.height);
     if (Parent)
     {
-        bounding.x = std::max(bounding.x, Parent->bounding.x);
-        bounding.y = std::max(bounding.y, Parent->bounding.y);
-        bounding.z = std::min(bounding.z, Parent->bounding.z);
-        bounding.w = std::min(bounding.w, Parent->bounding.w);
+        maxBounding = Parent->renderOffset + Parent->renderSize;
+        bounding.x = std::max(bounding.x, Parent->renderOffset.x().value * float(Parent->Extent.width));
+        bounding.y = std::max(bounding.y, Parent->renderOffset.y().value * float(Parent->Extent.height));
+        bounding.z = std::min(bounding.z, maxBounding.x().value * float(Parent->Extent.width));
+        bounding.w = std::min(bounding.w, maxBounding.y().value * float(Parent->Extent.height));
     }
 
     shapeBuffer[shapeCount].scale = this->scale;
