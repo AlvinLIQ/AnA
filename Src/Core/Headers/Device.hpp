@@ -269,13 +269,14 @@ namespace AnA
         void checkUsableSamples();
 
         bool checkDeviceExtensionSupport(VkPhysicalDevice device, DeviceFeatures& _deviceFeatures);
-        bool isDeviceSuitable(VkPhysicalDevice device, DeviceFeatures& _deviceFeatures);
+        bool isDeviceSuitable(VkPhysicalDevice device, DeviceFeatures& _deviceFeatures, QueueFamilyIndices& indices);
 
         DeviceFeatures deviceFeatures{};
 
         VkDevice logicalDevice;
         VkQueue graphicsQueue;
         VkQueue presentQueue;
+        QueueFamilyIndices queueFamilyIndices;
         void createLogicalDevice();
 
         std::mutex subCommandMutex{};

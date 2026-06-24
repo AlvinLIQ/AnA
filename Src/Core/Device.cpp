@@ -794,7 +794,7 @@ void Device::TransitionImageLayout(VkCommandBuffer commandBuffer, VkImage &image
 
 Device::QueueFamilyIndices Device::GetQueueFamiliesForCurrent()
 {
-    return FindQueueFamilies(physicalDevice);
+    return queueFamilyIndices;
 }
 
 VkQueue &Device::GetGraphicsQueue()
@@ -905,11 +905,13 @@ void Device::pickPhysicalDevice()
     deviceProperties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
     deviceProperties2.pNext = &dynamicStateProperties;
 
+    QueueFamilyIndices indices;
+
     for (const auto &device : devices)
     {
         currentScore = 0;
         DeviceFeatures _deviceFeatures{};
-        if (isDeviceSuitable(device, _deviceFeatures))
+        if (isDeviceSuitable(device, _deviceFeatures, indices))
         {
             currentScore = 30;
             vkGetPhysicalDeviceProperties2(device, &deviceProperties2);
@@ -938,6 +940,7 @@ void Device::pickPhysicalDevice()
                 physicalDevice = device;
                 physicalDeviceProperties = deviceProperties2.properties;
                 meshShaderProperties = _meshShaderProperties;
+                queueFamilyIndices = indices;
                 bestScore = currentScore;
             }
         }
@@ -1010,9 +1013,9 @@ bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device, DeviceFeatures
     return requiredExtensions.empty();
 }
 
-bool Device::isDeviceSuitable(VkPhysicalDevice device, DeviceFeatures& _deviceFeatures)
+bool Device::isDeviceSuitable(VkPhysicalDevice device, DeviceFeatures& _deviceFeatures, QueueFamilyIndices& indices)
 {
-    QueueFamilyIndices indices = FindQueueFamilies(device);
+    indices = FindQueueFamilies(device);
 
     bool extSupported = checkDeviceExtensionSupport(device, _deviceFeatures), swapChainAdequate = false;
 
@@ -1030,10 +1033,8 @@ bool Device::isDeviceSuitable(VkPhysicalDevice device, DeviceFeatures& _deviceFe
 
 void Device::createLogicalDevice()
 {
-    QueueFamilyIndices indices = FindQueueFamilies(physicalDevice);
-
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-    std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsAndComputeFamily.value(), indices.presentFamily.value()};
+    std::set<uint32_t> uniqueQueueFamilies = {queueFamilyIndices.graphicsAndComputeFamily.value(), queueFamilyIndices.presentFamily.value()};
 
     float queuePriority = 1.0f; // 0.0~1.0
     for (uint32_t queueFamily : uniqueQueueFamilies)
@@ -1143,8 +1144,8 @@ void Device::createLogicalDevice()
     vkCmdDrawMeshTasksEXT = reinterpret_cast<PFN_vkCmdDrawMeshTasksEXT>(vkGetDeviceProcAddr(logicalDevice, "vkCmdDrawMeshTasksEXT"));
     vkCmdDrawMeshTasksIndirectCountEXT = reinterpret_cast<PFN_vkCmdDrawMeshTasksIndirectCountEXT>(vkGetDeviceProcAddr(logicalDevice, "vkCmdDrawMeshTasksIndirectCountEXT"));
     vkCmdSetPolygonModeEXT = reinterpret_cast<PFN_vkCmdSetPolygonModeEXT>(vkGetDeviceProcAddr(logicalDevice, "vkCmdSetPolygonModeEXT"));
-    vkGetDeviceQueue(logicalDevice, indices.graphicsAndComputeFamily.value(), 0, &graphicsQueue);
-    vkGetDeviceQueue(logicalDevice, indices.presentFamily.value(), 0, &presentQueue);
+    vkGetDeviceQueue(logicalDevice, queueFamilyIndices.graphicsAndComputeFamily.value(), 0, &graphicsQueue);
+    vkGetDeviceQueue(logicalDevice, queueFamilyIndices.presentFamily.value(), 0, &presentQueue);
 }
 
 void Device::createSubCommandResources()

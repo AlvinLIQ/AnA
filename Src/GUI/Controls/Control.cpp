@@ -394,11 +394,11 @@ void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input:
 
 CursorPosition Controls::Control::GetRelativePosition(const CursorPosition& pos, const VkExtent2D& extent)
 {
+    auto _extent = Control::GetSwapChainExtent();
     #ifdef _WIN32
-        return {pos.x / (extent.width / static_cast<double>(extent.width)),
-                    pos.y / (extent.height / static_cast<double>(extent.height))};
+        return {pos.x / (extent.width / static_cast<double>(_extent.width)),
+                    pos.y / (extent.height / static_cast<double>(_extent.height))};
     #else
-        auto _extent = Control::GetSwapChainExtent();
         auto scale = Control::GetScale();
         return {pos.x * scale[0].As<double>() / (extent.width / static_cast<double>(_extent.width)),
                     pos.y * scale[1].As<double>() / (extent.height / static_cast<double>(_extent.height))};
