@@ -19,3 +19,6 @@
 [submodule "Src/3rdParty/CDT"]
 	path = Src/3rdParty/CDT
 	url = https://github.com/artem-ogre/CDT.git
+[submodule "Src/3rdParty/volk"]
+    path = Src/3rdParty/volk
+    url = https://github.com/zeux/volk
