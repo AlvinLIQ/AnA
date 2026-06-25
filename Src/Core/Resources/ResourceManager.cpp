@@ -734,7 +734,7 @@ void ResourceManager::createDefaultShaders()
     Shaders.reserve(10);
     Shaders.emplace_back(aDevice, basicShaderStageInfos, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
 
-    Shaders.emplace_back(aDevice, shapeShaderStageInfos, shapeDescriptors, SHAPE_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
+    Shaders.emplace_back(aDevice, shapeShaderStageInfos, shapeDescriptors, SHAPE_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(glm::vec2));
     Shaders.emplace_back(aDevice, pointShaderStageInfos, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0, 0, VK_PRIMITIVE_TOPOLOGY_POINT_LIST);
 
     Shaders.emplace_back(aDevice, collisionShaderStageInfos, computeDescriptors, 2, 0, 0);

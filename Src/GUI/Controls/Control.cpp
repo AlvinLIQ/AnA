@@ -197,17 +197,16 @@ void Control::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageI
 
     this->scale = {renderSize.x(), renderSize.y()};
     this->translation = {renderOffset.x() * 2.0f - 1.0f + renderSize.x(), renderOffset.y() * 2.0f - 1.0f + renderSize.y()};
-    this->bounding.x = renderOffset.x() * float(Extent.width);
-    this->bounding.y = renderOffset.y() * float(Extent.height);
-    this->bounding.z = maxBounding.x() * float(Extent.width);
-    this->bounding.w = maxBounding.y() * float(Extent.height);
+    this->bounding.x = renderOffset.x();
+    this->bounding.y = renderOffset.y();
+    this->bounding.z = maxBounding.x();
+    this->bounding.w = maxBounding.y();
     if (Parent)
     {
-        maxBounding = Parent->renderOffset + Parent->renderSize;
-        bounding.x = std::max(bounding.x, Parent->renderOffset.x().value * float(Parent->Extent.width));
-        bounding.y = std::max(bounding.y, Parent->renderOffset.y().value * float(Parent->Extent.height));
-        bounding.z = std::min(bounding.z, maxBounding.x().value * float(Parent->Extent.width));
-        bounding.w = std::min(bounding.w, maxBounding.y().value * float(Parent->Extent.height));
+        bounding.x = std::max(bounding.x, Parent->renderOffset.x().value);//Parent->renderOffset.x().value * float(Parent->Extent.width));
+        bounding.y = std::max(bounding.y, Parent->renderOffset.y().value);//Parent->renderOffset.y().value * float(Parent->Extent.height));
+        bounding.z = std::min(bounding.z, Parent->renderOffset.x().value + Parent->renderSize.x().value);//maxBounding.x().value * float(Parent->Extent.width));
+        bounding.w = std::min(bounding.w, Parent->renderOffset.y().value + Parent->renderSize.y().value);//maxBounding.y().value * float(Parent->Extent.height));
     }
 
     shapeBuffer[shapeCount].scale = this->scale;

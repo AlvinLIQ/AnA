@@ -10,6 +10,10 @@ layout(location = 0) out vec4 outColor;
 
 layout(set = 1, binding = 0) uniform sampler2DArray texSampler[];
 
+layout(push_constant) uniform PushConsts {
+    vec2 resolution;
+} push;
+
 float rect(vec2 uv, float l, float t, float r, float b)
 {
     float c = 1.;
@@ -73,8 +77,9 @@ float rounded_rect2(vec2 uv, vec2 offset, vec2 size, vec2 radius)
 void main()
 {
     //outColor = vec4(baseColor, 1.0);
-    if (gl_FragCoord.x < bounding.x || gl_FragCoord.x > bounding.z ||
-            gl_FragCoord.y < bounding.y || gl_FragCoord.y > bounding.w)
+    vec2 uv = gl_FragCoord.xy / push.resolution;
+    if (uv.x < bounding.x || uv.x > bounding.z ||
+            uv.y < bounding.y || uv.y > bounding.w)
         discard;
 
     vec4 texColor = texture(texSampler[nonuniformEXT(texIndex)], vec3(texCoord, texLayer));
