@@ -57,10 +57,20 @@ void TextBlock::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImag
         info->size = FontSize * sqrtf(glm::length(glm::vec2(swapChain->ScaleX * 0.7071f, swapChain->ScaleY * 0.7071f)));
         info->offset.y += renderSize.y() - info->size * charSize.y().value * 0.75f / float(Extent.height);
         info->visible = visible;
-        info->scissor = {   bounding.x * float(Extent.width),
-                            bounding.y * float(Extent.height),
-                            bounding.z * float(Extent.width),
-                            bounding.w * float(Extent.height)};
+        if (Parent)
+        {
+            info->scissor = {   Parent->RenderOffset().x() * float(Extent.width),
+                                Parent->RenderOffset().y() * float(Extent.height),
+                                (Parent->RenderOffset().x() + Parent->RenderSize().x()) * float(Extent.width),
+                                (Parent->RenderOffset().y() + Parent->RenderSize().y()) * float(Extent.height)};
+        }
+        else
+        {
+            info->scissor = {   bounding.x * float(Extent.width),
+                                bounding.y * float(Extent.height),
+                                bounding.z * float(Extent.width),
+                                bounding.w * float(Extent.height)};
+        }
         textContext.UpdateLayout(id);
         ControlSize = {FontSize * (charSize.x().value * float(asciiLen) + widthCharSize.x().value * float(wideLen)) * 0.5f,
             FontSize * charSize.y().value};
