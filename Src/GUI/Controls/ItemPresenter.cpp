@@ -57,7 +57,7 @@ void ItemPresenter::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptor
 void ItemPresenter::PointerEventTrigger(PointerEventArgs& args)
 {
     Control::PointerEventTrigger(args);
-    if (IsCursorInside() && item != nullptr)
+    if (item != nullptr)
         item->PointerEventTrigger(args);
 }
 
