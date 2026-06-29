@@ -161,8 +161,6 @@ namespace AnA
         bool needUpdate;
         bool commandBufferNeedUpdate = false;
         std::mutex _mutex;
-        void createSSBODescriptor();
-        void updateSSBODescriptor();
         uint32_t meshletIDCount = 0;
         std::vector<Buffer> meshletIDBuffers{};
         std::vector<Buffer> meshletIDCountBuffers{};

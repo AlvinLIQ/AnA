@@ -95,7 +95,6 @@ namespace AnA
             std::array<MeshFrameResource, MAX_FRAMES_IN_FLIGHT> frameResources;
             void initFrameResource(MeshFrameResource& frameResource);
             void rebuildFrameResource(MeshFrameResource& frameResource);
-            void updateDescriptors(uint32_t bufferIndex);
             uint32_t prepareFrameResources();
 
             size_t vertexCount = 0;
@@ -103,7 +102,6 @@ namespace AnA
             uint32_t meshletVertexCount = 0;
             uint32_t meshletIndexCount = 0;
             uint32_t meshletCount = 0;
-
         };
     }
 }
