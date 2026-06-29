@@ -177,7 +177,7 @@ void EditorApp::Init()
             }
             else
             {
-                object.transform.rotation[(int)editorApp->FocusedAxis] += (duration.x.value - duration.y) * rotateSpeed;
+                object.transform.rotation[(int)editorApp->FocusedAxis] += (duration.x - duration.y).As<float>() * rotateSpeed;
             }
         }
             break;

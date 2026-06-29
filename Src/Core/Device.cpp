@@ -6,6 +6,7 @@
 //#include <chrono>
 
 #include "Headers/Buffer.hpp"
+#include "vulkan/vulkan_core.h"
 
 #ifdef INCLUDE_STB_IMAGE
 #define STB_IMAGE_IMPLEMENTATION
@@ -978,8 +979,12 @@ bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device, DeviceFeatures
     {
         requiredExtensions.erase(extension.extensionName);
     }
+    VkPhysicalDeviceBufferDeviceAddressFeatures bufferDeviceAddressFeatures{};
+    bufferDeviceAddressFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
+
     VkPhysicalDeviceUnifiedImageLayoutsFeaturesKHR unifiedLayoutsFeatures{};
     unifiedLayoutsFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFIED_IMAGE_LAYOUTS_FEATURES_KHR;
+    unifiedLayoutsFeatures.pNext = &bufferDeviceAddressFeatures;
 
     VkPhysicalDeviceHostImageCopyFeaturesEXT hostImageCopyFeatures = {};
     hostImageCopyFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_HOST_IMAGE_COPY_FEATURES_EXT;
@@ -1004,11 +1009,9 @@ bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device, DeviceFeatures
     }
 #endif
 
-    if (unifiedLayoutsFeatures.unifiedImageLayouts == VK_TRUE)
-        _deviceFeatures.unifiedLayoutsSupport = true;
-
-    if (hostImageCopyFeatures.hostImageCopy == VK_TRUE)
-        _deviceFeatures.hostImageCopySupport = true;
+    _deviceFeatures.unifiedLayoutsSupport = unifiedLayoutsFeatures.unifiedImageLayouts == VK_TRUE;
+    _deviceFeatures.hostImageCopySupport = hostImageCopyFeatures.hostImageCopy == VK_TRUE;
+    _deviceFeatures.bufferDeviceAddressSupport = bufferDeviceAddressFeatures.bufferDeviceAddress == VK_TRUE;
 
     return requiredExtensions.empty();
 }
@@ -1080,6 +1083,7 @@ void Device::createLogicalDevice()
     vulkan12Features.descriptorBindingSampledImageUpdateAfterBind = VK_TRUE;
     vulkan12Features.runtimeDescriptorArray = VK_TRUE;
     vulkan12Features.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
+    vulkan12Features.bufferDeviceAddress = deviceFeatures.bufferDeviceAddressSupport;
     vulkan12Features.scalarBlockLayout = VK_TRUE;
     vulkan12Features.shaderInt8 = VK_TRUE;
     vulkan12Features.storageBuffer8BitAccess = VK_TRUE;
@@ -1445,7 +1449,10 @@ void Device::createVmaAllocator()
     vulkanFunctions.vkGetDeviceProcAddr = vkGetDeviceProcAddr;
 
     VmaAllocatorCreateInfo allocatorCreateInfo = {};
-    allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT;
+    if (deviceFeatures.bufferDeviceAddressSupport)
+        allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
+    else
+        allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT;
     allocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_4;
     allocatorCreateInfo.physicalDevice = physicalDevice;
     allocatorCreateInfo.device = logicalDevice;

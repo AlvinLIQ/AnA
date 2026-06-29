@@ -189,6 +189,7 @@ namespace AnA
             bool meshShaderSupport;
             bool unifiedLayoutsSupport;
             bool hostImageCopySupport;
+            bool bufferDeviceAddressSupport;
         };
         VkDevice GetLogicalDevice();
         VkPhysicalDevice GetPhysicalDevice();
