@@ -14,12 +14,6 @@ Text::Text(Device* mDevice) : aDevice{mDevice}
 
 Text::~Text()
 {
-    if (charInfoDescriptor)
-        delete charInfoDescriptor;
-    if (vertexDescriptor)
-        delete vertexDescriptor;
-    if (meshDescriptor)
-        delete meshDescriptor;
 }
 
 void Text::Init()
@@ -54,18 +48,11 @@ void Text::Init()
         countBuffers[i].Map();
         *reinterpret_cast<uint32_t*>(countBuffers[i].GetMappedData()) = 0u;
     }
-    createSSBODescriptor();
 }
 
 void Text::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIndex)
 {
     shader.GetPipeline().Bind(commandBuffer);
-    auto& sets = shader.GetDescriptorSets()[bufferIndex];
-    sets[0] = vertexDescriptor->GetSets()[currentBufferIndex];
-    sets[1] = charInfoDescriptor->GetSets()[currentBufferIndex];
-    sets[2] = meshDescriptor->GetSets()[currentBufferIndex];
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-        shader.GetPipelineLayout(), 0, 3, sets.data(), 0, nullptr);
     aDevice->vkCmdSetPolygonModeEXT(commandBuffer, PolygonMode);
     glm::vec2 resolution = {float(commandBuffer.Extent.width), float(commandBuffer.Extent.height)};
     vkCmdPushConstants(commandBuffer, shader.GetPipelineLayout(),
@@ -274,7 +261,6 @@ void Text::updateAll()
     *drawCommand = glm::uvec3(uint32_t(textMap.size()), 1, 1);
     *reinterpret_cast<uint32_t*>(countBuffers[nextIndex].GetMappedData()) = textIndex ? 1u : 0u;
 
-    updateSSBODescriptor();
 }
 
 void Text::updateMeshlets(size_t meshletOffset)
@@ -310,75 +296,4 @@ void Text::updateMeshlets(size_t meshletOffset)
         meshletVertexCount += uint32_t(ch.vertices.size());
         meshletIndexCount += uint32_t(ch.indices.size());
     }
-}
-
-void Text::createSSBODescriptor()
-{
-    auto& shaders = Resources::ResourceManager::GetCurrent()->Shaders;
-    auto& descriptors = shaders[TEXT_PIPELINE_ID].GetDescriptors();
-    auto& vertexDescriptorSetLayout =
-        descriptors[0].GetLayout();
-    vertexDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,
-        MAX_FRAMES_IN_FLIGHT,
-        1,
-        vertexDescriptorSetLayout,
-        VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-    auto& charInfoDescriptorSetLayout =
-        descriptors[1].GetLayout();
-    charInfoDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,
-        MAX_FRAMES_IN_FLIGHT * 2,
-        2,
-        charInfoDescriptorSetLayout,
-        VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-    if (aDevice->MeshShaderSupport())
-    {
-        auto& meshDescriptorSetLayout = descriptors[2].GetLayout();
-        meshDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,
-            MAX_FRAMES_IN_FLIGHT * 3,
-            3,
-            meshDescriptorSetLayout,
-            VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-    }
-    updateSSBODescriptor();
-}
-
-void Text::updateSSBODescriptor()
-{
-    //Vertex Buffer
-    VkDescriptorBufferInfo bufferInfo;
-    bufferInfo.buffer = vertexBuffer.GetBuffer();
-    bufferInfo.offset = 0;
-    bufferInfo.range = vertexBuffer.GetSize();
-    aDevice->UpdateDescriptorSet(bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-        vertexDescriptor->GetSets()[nextIndex]);
-
-    //Char Buffer
-    bufferInfo.buffer = charInfoBuffers[nextIndex].GetBuffer();
-    bufferInfo.offset = 0;
-    bufferInfo.range = charInfoBuffers[nextIndex].GetSize();
-    aDevice->UpdateDescriptorSet(bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-        charInfoDescriptor->GetSets()[nextIndex]);
-    bufferInfo.buffer = textBuffers[nextIndex].GetBuffer();
-    bufferInfo.offset = 0;
-    bufferInfo.range = textBuffers[nextIndex].GetSize();
-    aDevice->UpdateDescriptorSet(bufferInfo, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-        charInfoDescriptor->GetSets()[nextIndex]);
-
-    if (aDevice->MeshShaderSupport())
-    {
-        //Meshlet Buffer
-        bufferInfo.buffer = meshletBuffer.GetBuffer();
-        bufferInfo.offset = 0;
-        bufferInfo.range = meshletBuffer.GetSize();
-        aDevice->UpdateDescriptorSet(bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-        meshDescriptor->GetSets()[nextIndex]);
-        bufferInfo.buffer = meshletIndexBuffer.GetBuffer();
-        bufferInfo.offset = 0;
-        bufferInfo.range = meshletIndexBuffer.GetSize();
-        aDevice->UpdateDescriptorSet(bufferInfo, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-        meshDescriptor->GetSets()[nextIndex]);
-    }
-
-    currentBufferIndex = nextIndex;
-    nextIndex = (currentBufferIndex + 1) % MAX_FRAMES_IN_FLIGHT;
 }

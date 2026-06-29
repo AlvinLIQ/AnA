@@ -11,10 +11,9 @@ Shader::Shader(Device* mDevice) : aDevice{mDevice}
 }
 
 Shader::Shader(Device* mDevice, std::vector<ShaderInfo>& shaderInfos,
-            std::vector<Descriptor>& _descriptors, size_t actualDescriptorCount,
-            size_t _descriptorOffset, VkDeviceSize pushConstantSize, VkPrimitiveTopology topology) :
+            VkDescriptorSetLayout _setLayout, VkDeviceSize pushConstantSize, VkPrimitiveTopology topology) :
     Topology{topology}, aDevice{mDevice},
-    descriptors{&_descriptors}, descriptorCount{actualDescriptorCount}, descriptorOffset{_descriptorOffset}
+    setLayout{_setLayout}
 {
     createPipelineLayout(pushConstantSize);
     auto swapChain = SwapChain::GetCurrent();
@@ -87,32 +86,12 @@ VkPipelineLayout Shader::GetPipelineLayout() const
     return pipeline.GetLayout();
 }
 
-std::vector<std::vector<VkDescriptorSet>>& Shader::GetDescriptorSets()
-{
-    return descriptorSets;
-}
-
 void Shader::createPipelineLayout(VkDeviceSize pushConstantSize)
 {
-    std::vector<VkDescriptorSetLayout> descriptorSetLayouts(descriptorCount);
-    if (descriptorCount)
-    {
-        descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
-        for (size_t i = 0; i < descriptorCount; i++)
-        {
-            auto& descriptor = descriptors->data()[i + descriptorOffset];
-            descriptorSetLayouts[i] = descriptor.GetLayout();
-            for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-            {
-                descriptorSets[i].push_back(descriptor.GetSets().size() ? descriptor.GetSets()[i % (int)descriptor.GetSets().size()] :
-                VK_NULL_HANDLE);
-            }
-        }
-    }
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = uint32_t(descriptorCount);
-    pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
+    pipelineLayoutInfo.setLayoutCount = 1;
+    pipelineLayoutInfo.pSetLayouts = &setLayout;
 
     VkPushConstantRange range;
     if (pushConstantSize)
@@ -130,9 +109,4 @@ void Shader::createPipelineLayout(VkDeviceSize pushConstantSize)
     {
         throw std::runtime_error("Failed to create pipeline layout!");
     }
-}
-
-const std::vector<Descriptor>& Shader::GetDescriptors() const
-{
-    return *descriptors;
 }

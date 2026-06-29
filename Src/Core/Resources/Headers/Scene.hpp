@@ -5,7 +5,6 @@
 #include <mutex>
 #include "Renderable.hpp"
 #include "Model.hpp"
-#include "Descriptor.hpp"
 #include "CommandBuffer.hpp"
 #include "../../Headers/Buffer.hpp"
 #include "../../Headers/Types.hpp"
@@ -144,14 +143,6 @@ namespace AnA
         {
             return currentBufferIndex;
         }
-        const Descriptor* GetObjectDescriptor() const
-        {
-            return objectDescriptor;
-        }
-        VkDescriptorSet GetObjectDescriptorSet() const
-        {
-            return objectDescriptor->GetSets()[currentBufferIndex];
-        }
         void (*MeshAppend)(std::string, uint32_t) = nullptr;
     private:
         Device* aDevice;
@@ -170,7 +161,6 @@ namespace AnA
         bool needUpdate;
         bool commandBufferNeedUpdate = false;
         std::mutex _mutex;
-        Descriptor* objectDescriptor{nullptr};
         void createSSBODescriptor();
         void updateSSBODescriptor();
         uint32_t meshletIDCount = 0;

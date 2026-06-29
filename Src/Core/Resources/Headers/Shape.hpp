@@ -2,7 +2,6 @@
 #include "../../Headers/Device.hpp"
 #include "../../Headers/Buffer.hpp"
 #include "Renderable.hpp"
-#include "Descriptor.hpp"
 
 namespace AnA
 {
@@ -34,11 +33,9 @@ namespace AnA
         Shapes(Device* mDeivce);
         Shapes(const Shapes&) = delete;
         Shapes& operator=(const Shapes&) = delete;
-        Shapes(Shapes&& shapes) noexcept : aDevice{shapes.aDevice}, shapeBuffer{std::move(shapes.shapeBuffer)}, indirectBuffer{std::move(shapes.indirectBuffer)}, ssboDescriptor{shapes.ssboDescriptor}
+        Shapes(Shapes&& shapes) noexcept : aDevice{shapes.aDevice}, shapeBuffer{std::move(shapes.shapeBuffer)}, indirectBuffer{std::move(shapes.indirectBuffer)}
         {
             shapeCount = shapes.shapeCount;
-            shapes.samplersDescriptor = nullptr;
-            shapes.ssboDescriptor = nullptr;
             shapes.shapeCount = 0;
         }
         Shapes& operator=(Shapes&& shapes) noexcept
@@ -51,11 +48,7 @@ namespace AnA
                 shapeCount = shapes.shapeCount;
                 indirectBuffer = std::move(shapes.indirectBuffer);
                 countBuffer = std::move(shapes.countBuffer);
-                ssboDescriptor = shapes.ssboDescriptor;
-                samplersDescriptor = shapes.samplersDescriptor;
 
-                shapes.samplersDescriptor = nullptr;
-                shapes.ssboDescriptor = nullptr;
                 shapes.shapeCount = 0;
 
             }
@@ -78,8 +71,6 @@ namespace AnA
         Buffer shapeBuffer{};
         Buffer indirectBuffer{};
         Buffer countBuffer{};
-        Descriptor* ssboDescriptor{nullptr};
-        Descriptor* samplersDescriptor{nullptr};
         uint32_t shapeCount{};
         std::vector<VkDescriptorImageInfo> imageInfos{};
         VkDescriptorSet sets[2];

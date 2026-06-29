@@ -2,7 +2,6 @@
 
 #include "../../Headers/Device.hpp"
 #include "../../Headers/Buffer.hpp"
-#include "Descriptor.hpp"
 #include "Model.hpp"
 
 #include <array>
@@ -105,8 +104,6 @@ namespace AnA
             uint32_t meshletIndexCount = 0;
             uint32_t meshletCount = 0;
 
-            Descriptor* vertexDescriptor = nullptr;
-            Descriptor* meshDescriptor = nullptr;
         };
     }
 }

@@ -1,6 +1,5 @@
 #pragma once
 #include "Renderable.hpp"
-#include "Descriptor.hpp"
 #include "../../Headers/Buffer.hpp"
 #include <unordered_map>
 #include <string>
@@ -77,11 +76,6 @@ namespace AnA
         Buffer meshletBuffer;
         Buffer meshletIndexBuffer;
         Buffer countBuffers[MAX_FRAMES_IN_FLIGHT];
-        Descriptor* vertexDescriptor{};
-        Descriptor* charInfoDescriptor{};
-        Descriptor* meshDescriptor{};
-        void createSSBODescriptor();
-        void updateSSBODescriptor();
         bool needUpdate = false;
     };
 }

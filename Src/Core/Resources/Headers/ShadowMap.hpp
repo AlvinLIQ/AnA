@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 #include "../../Headers/Device.hpp"
 #include "../../Headers/Buffer.hpp"
-#include "Descriptor.hpp"
 
 #define SHADOW_MAP_CASCADE_COUNT 2
 
@@ -79,7 +78,6 @@ namespace AnA
             }
             glm::vec4 FrustumPlanes[6];
             void UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, uint32_t bufferIndex);
-            void GetUBODescriptorConfig(Descriptor::DescriptorConfig* pConfig);
         private:
             Device* aDevice{nullptr};
             std::vector<VkSampler> samplers;
