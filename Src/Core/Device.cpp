@@ -47,6 +47,8 @@ void Device::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VmaMemory
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.size = size;
     bufferInfo.usage = usage;
+    if (deviceFeatures.bufferDeviceAddressSupport)
+        bufferInfo.usage |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
     VmaAllocationCreateInfo allocInfo{};

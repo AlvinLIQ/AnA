@@ -109,7 +109,7 @@ void TextBlock::Text(const char* newText)
     {
         id = textContext.Insert({0, {0.0f, 0.0f}, FontColor, {}, newText, true, 0});
     }
-    getTextLength(newText, strlen(newText), asciiLen, wideLen);
+    getTextLength(newText, uint32_t(strlen(newText)), asciiLen, wideLen);
     RequestUpdate();
 }
 
