@@ -66,6 +66,7 @@ layout(push_constant) uniform PushConstants
     VertexRef vertexPtr;
     ObjectRef objectPtr;
     MiscRef miscPtr;
+    MeshletIDRef meshletIDPtr;
     MeshletRef meshletPtr;
     MeshletVertexRef meshVertexPtr;
     MeshletIndexRef meshIndexPtr;
@@ -83,7 +84,7 @@ void main()
 
     if (globalID < miscPtr.meshletIDCount)
     {
-        bool visible = true;//CullMode == 0 || isMeshletVisible(meshletIDs[globalID].meshletID, meshletIDs[globalID].objectID); //meshletIDs[globalID << 1], meshletIDs[(globalID << 1) ^ 1]);
+        bool visible = true; //CullMode == 0 || isMeshletVisible(meshletIDs[globalID].meshletID, meshletIDs[globalID].objectID); //meshletIDs[globalID << 1], meshletIDs[(globalID << 1) ^ 1]);
 
         if (visible)
         {
