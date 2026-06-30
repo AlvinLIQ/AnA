@@ -43,8 +43,6 @@ namespace AnA
                 Buffer meshletVertexBuffer;
                 Buffer meshletIndexBuffer;
                 Buffer meshletCullingBuffer;
-                VkDescriptorSet vertexDescriptorSet;
-                VkDescriptorSet meshDescriptorSet;
                 //Buffer meshletIDBuffer;
             };
 
