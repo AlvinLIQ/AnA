@@ -1,0 +1,101 @@
+#version 450
+#extension GL_EXT_mesh_shader: require
+#extension GL_EXT_shader_8bit_storage: require
+#extension GL_EXT_scalar_block_layout: require
+#extension GL_EXT_buffer_reference: require
+#extension GL_GOOGLE_include_directive : require
+
+#include "mesh.h"
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout(triangles, max_vertices = 128, max_primitives = 256) out;
+
+layout(location = 0) out vec3 outColors[];
+layout(location = 1) flat out vec4 scissors[];
+
+layout(scalar, buffer_reference) buffer VertexRef
+{
+    vec2 vertices[];
+};
+
+struct CharacterInfo
+{
+    uint8_t ch;
+    uint index;
+};
+
+layout(scalar, buffer_reference) buffer CharacterInfoRef
+{
+    CharacterInfo charInfos[];
+};
+
+struct TextData
+{
+    float size;
+    vec2 offset;
+    vec3 color;
+    vec4 scissor;
+    uint chOffset;
+    uint count;
+};
+
+layout(scalar, buffer_reference) buffer TextDataRef
+{
+    TextData textInfos[];
+};
+
+layout(scalar, buffer_reference) buffer MeshletRef
+{
+    Meshlet meshlets[];
+};
+
+layout(scalar, buffer_reference) buffer MeshIndexRef
+{
+    uint8_t indices[];
+};
+
+const vec2 charSize = vec2(0.836363613, 0.99999994);
+
+layout(push_constant) uniform PushConstants
+{
+    VertexRef vertexPtr;
+    CharacterInfoRef charInfoPtr;
+    TextDataRef textDataPtr;
+    MeshletRef meshletPtr;
+    MeshIndexRef meshIndexPtr;
+    vec2 resolution;
+};
+
+taskPayloadSharedEXT struct
+{
+    uint textIndex;
+} taskData;
+
+void main()
+{
+    TextData textInfo = textDataPtr.textInfos[taskData.textIndex];
+    CharacterInfo chInfo = charInfoPtr.charInfos[gl_WorkGroupID.x + textInfo.chOffset];
+    Meshlet meshlet = meshletPtr.meshlets[uint(chInfo.ch)];
+    uint primitiveCount = meshlet.indexCount / 3;
+    SetMeshOutputsEXT(meshlet.vertexCount, primitiveCount);
+    vec2 scale = vec2(textInfo.size / resolution.x, textInfo.size / resolution.y);
+    for (uint i = 0; i < meshlet.vertexCount; i++)
+    {
+        vec2 pos = scale * charSize * vertexPtr.vertices[meshlet.vertexOffset + i];
+        pos.x += scale.x * charSize.x * float(chInfo.index) - 1.;
+        pos.y = -pos.y - charSize.y + scale.y;
+        gl_MeshVerticesEXT[i].gl_Position = vec4(pos + textInfo.offset, 0.0, 1.0);
+        outColors[i] = textInfo.color;
+        scissors[i] = textInfo.scissor;
+    }
+
+    for (uint i = 0, offset; i < primitiveCount; i++)
+    {
+        offset = meshlet.indexOffset + i * 3;
+        gl_PrimitiveTriangleIndicesEXT[i] = uvec3(
+                meshIndexPtr.indices[offset + 0],
+                meshIndexPtr.indices[offset + 1],
+                meshIndexPtr.indices[offset + 2]
+            );
+    }
+}

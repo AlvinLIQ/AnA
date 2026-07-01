@@ -194,6 +194,8 @@ namespace AnA
         uint32_t numOfGroup = 64;
         uint8_t currentBufferIndex = 0;
         uint8_t nextIndex = 1 % MAX_FRAMES_IN_FLIGHT;
+
+        MeshPushConstant meshPushConstant;
         void updateAll();
 
         friend class Animations;

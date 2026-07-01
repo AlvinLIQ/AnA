@@ -92,10 +92,11 @@ void ResourceManager::UpdateMiscBuffer()
     mbo.meshletIDCount = MainScene.GetMeshletIDCount();
     if (!LockCamera)
     {
-        FrustumPlanes::ExtractFrustumPlanes(MainCamera.GetProjectionMatrix(), MainCameraFrustumPlanes);
+        FrustumPlanes::ExtractFrustumPlanes(MainCamera.GetViewProj(), MainCameraFrustumPlanes);
         memcpy(&mbo.planes,
             &MainCameraFrustumPlanes,
             sizeof(FrustumPlanes));
+        mbo.cameraPosition = MainCamera.GetInverseView()[3];
     }
 }
 
@@ -257,10 +258,11 @@ std::vector<ShaderInfo> meshShaderStageInfos{{Mesh_task, 0, VK_SHADER_STAGE_TASK
                                       {Mesh_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
 /*
 std::vector<ShaderInfo> lightShaderStageInfos{{Light_vert, 0, VK_SHADER_STAGE_VERTEX_BIT, false, {}},
-                                {Light_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
+                                {Light_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};*/
 std::vector<ShaderInfo> textShaderStageInfos{{Text_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT, false, {}},
                                         {Text_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT, false, {}},
                                             {Text_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
+/*
 std::vector<ShaderInfo> terrainShaderStageInfos{{Terrain_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT, false, {}},
                                         {Terrain_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT, false, {}},
                                             {Mesh_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
@@ -270,6 +272,7 @@ void ResourceManager::createDefaultShaders()
 {
     Shaders.reserve(10);
     Shaders.emplace_back(aDevice, meshShaderStageInfos, VK_NULL_HANDLE, sizeof(MeshPushConstant));
+    Shaders.emplace_back(aDevice, textShaderStageInfos, VK_NULL_HANDLE, sizeof(TextPushConstant));
 }
 
 const uint32_t defaultTextureColors[] =

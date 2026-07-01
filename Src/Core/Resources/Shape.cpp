@@ -43,9 +43,6 @@ bool Shapes::NeedUpdate()
 void Shapes::Bind(CommandBuffer& commandBuffer, Shader& shader)
 {
     shader.GetPipeline().Bind(commandBuffer);
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-        shader.GetPipelineLayout(), 0, numsof(sets),
-        sets, 0, nullptr);
     aDevice->vkCmdSetPolygonModeEXT(commandBuffer, PolygonMode);
     vkCmdSetPrimitiveTopology(commandBuffer, Topology);
     glm::vec2 resolution = {float(commandBuffer.Extent.width), float(commandBuffer.Extent.height)};

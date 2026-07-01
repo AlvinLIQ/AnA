@@ -58,6 +58,7 @@ namespace AnA
         uint32_t meshletIDCount;
         glm::vec4 planes[6];
         glm::vec2 resolution;
+        glm::vec3 cameraPosition;
     };
     namespace Resources
     {

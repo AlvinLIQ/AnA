@@ -1,6 +1,8 @@
 fs = import('fs')
 shader_sources = files(
-    'Mesh.mesh', 'Mesh.task', 'Mesh.frag')
+    'Mesh.mesh', 'Mesh.task', 'Mesh.frag',
+    'Text.task', 'Text.mesh', 'Text.frag'
+    )
 shader_outputs = []
 shader_args = ['--target-env', 'vulkan1.4']
 foreach shader_source : shader_sources
@@ -8,7 +10,7 @@ foreach shader_source : shader_sources
   shader_output = custom_target('compile ' + fs.name(shader_source),
     output: output_file,
     command: ['glslangValidator', '-V', shader_source, '-o', '@OUTPUT@', shader_args],
-#    depend_files: [shader_source, 'mesh.h']
+#    depend_files: [shader_source, 'mesh.h', 'bindings.h']
   )
   shader_outputs += shader_output
 endforeach

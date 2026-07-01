@@ -54,11 +54,17 @@ void Text::Bind(CommandBuffer& commandBuffer, Shader& shader)
 {
     shader.GetPipeline().Bind(commandBuffer);
     aDevice->vkCmdSetPolygonModeEXT(commandBuffer, PolygonMode);
-    glm::vec2 resolution = {float(commandBuffer.Extent.width), float(commandBuffer.Extent.height)};
+
+    textPushConstant.vertexPtr = vertexBuffer.GetAddress();
+    textPushConstant.charInfoPtr = charInfoBuffers[currentBufferIndex].GetAddress();
+    textPushConstant.textDataPtr = textBuffers[currentBufferIndex].GetAddress();
+    textPushConstant.meshletPtr = meshletBuffer.GetAddress();
+    textPushConstant.meshIndexPtr = meshletIndexBuffer.GetAddress();
+    textPushConstant.resolution = {float(commandBuffer.Extent.width), float(commandBuffer.Extent.height)};
     vkCmdPushConstants(commandBuffer, shader.GetPipelineLayout(),
         VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT |
-        VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, 0, sizeof(glm::vec2),
-        &resolution);
+        VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, 0, sizeof(textPushConstant),
+        &textPushConstant);
 }
 
 void Text::Draw(CommandBuffer& commandBuffer)
@@ -261,6 +267,8 @@ void Text::updateAll()
     *drawCommand = glm::uvec3(uint32_t(textMap.size()), 1, 1);
     *reinterpret_cast<uint32_t*>(countBuffers[nextIndex].GetMappedData()) = textIndex ? 1u : 0u;
 
+    currentBufferIndex = nextIndex;
+    nextIndex = NextFrameIndex(nextIndex);
 }
 
 void Text::updateMeshlets(size_t meshletOffset)

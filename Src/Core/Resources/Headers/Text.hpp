@@ -37,6 +37,16 @@ namespace AnA
         uint32_t index;
         uint32_t capacity;
     };
+    struct TextPushConstant
+    {
+        VkDeviceAddress vertexPtr;
+        VkDeviceAddress charInfoPtr;
+        VkDeviceAddress textDataPtr;
+        VkDeviceAddress meshletPtr;
+        VkDeviceAddress meshIndexPtr;
+        glm::vec2 resolution;
+    };
+
     class Text : public Renderable
     {
     public:
@@ -76,6 +86,9 @@ namespace AnA
         Buffer meshletBuffer;
         Buffer meshletIndexBuffer;
         Buffer countBuffers[MAX_FRAMES_IN_FLIGHT];
+
+        TextPushConstant textPushConstant;
+
         bool needUpdate = false;
     };
 }

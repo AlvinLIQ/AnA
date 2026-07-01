@@ -196,7 +196,7 @@ void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader)
     auto aResourceManager = Resources::ResourceManager::GetCurrent();
     shader.GetPipeline().Bind(commandBuffer);
     auto& frameResource = aResourceManager->Meshes.GetCurrentFrameResource();
-    MeshPushConstant meshPushConstant;
+
     meshPushConstant.projView = aResourceManager->MainCamera.GetProjectionMatrix()
         * aResourceManager->MainCamera.GetView();
     meshPushConstant.vertexPtr = frameResource.vertexBuffer.GetAddress();

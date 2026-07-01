@@ -212,5 +212,8 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     aRenderer.RenderIndirect(commandBuffer, aResourceManager.MainScene,
         aResourceManager.Shaders[0]);
 
+    aRenderer.RenderIndirect(commandBuffer, aResourceManager.TextContext,
+        aResourceManager.Shaders[1]);
+
     aRenderer.EndRendering(commandBuffer);
 }

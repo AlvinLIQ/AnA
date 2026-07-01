@@ -6,6 +6,7 @@
 #extension GL_GOOGLE_include_directive : require
 
 #include "mesh.h"
+#include "bindings.h"
 
 layout(local_size_x = MAX_PRIMITIVES, local_size_y = 1, local_size_z = 1) in;
 layout(triangles, max_vertices = MAX_VERTICES, max_primitives = MAX_PRIMITIVES) out;
@@ -49,6 +50,7 @@ layout(scalar, buffer_reference) buffer MiscRef
     uint meshletIDCount;
     vec4 planes[6];
     vec2 resolution;
+    vec3 cameraPosition;
 };
 
 layout(scalar, buffer_reference) buffer CollisionRef
@@ -146,8 +148,8 @@ void main()
         vec3 normal = normalize(cross(b - a, c - a));
         vec3 coneApex = (a + b + c) / 3.0;
 
-        //if ((CullMode & CULL_BACKFACE) != 0)
-        //gl_MeshPrimitivesEXT[i].gl_CullPrimitiveEXT = dot(normal, normalize(cbo.position.xyz - coneApex)) <= 0.0;
+        if ((CullMode & CULL_BACKFACE) != 0)
+            gl_MeshPrimitivesEXT[i].gl_CullPrimitiveEXT = dot(normal, normalize(miscPtr.cameraPosition - coneApex)) <= 0.0;
         #ifdef PER_PRIMITIVE_NORMAL
         primitiveNormals[i] = normal;
         #endif
