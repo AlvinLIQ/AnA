@@ -45,11 +45,13 @@ void Shapes::Bind(CommandBuffer& commandBuffer, Shader& shader)
     shader.GetPipeline().Bind(commandBuffer);
     aDevice->vkCmdSetPolygonModeEXT(commandBuffer, PolygonMode);
     vkCmdSetPrimitiveTopology(commandBuffer, Topology);
-    glm::vec2 resolution = {float(commandBuffer.Extent.width), float(commandBuffer.Extent.height)};
+
+    shapePushConstant.shapePtr = shapeBuffer.GetAddress();
+    shapePushConstant.resolution = {float(commandBuffer.Extent.width), float(commandBuffer.Extent.height)};
     vkCmdPushConstants(commandBuffer, shader.GetPipelineLayout(),
         VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT |
-        VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, 0, sizeof(glm::vec2),
-        &resolution);
+        VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, 0, sizeof(shapePushConstant),
+        &shapePushConstant);
 }
 
 void Shapes::Draw(CommandBuffer& commandBuffer)

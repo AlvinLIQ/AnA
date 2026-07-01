@@ -1,7 +1,8 @@
 fs = import('fs')
 shader_sources = files(
     'Mesh.mesh', 'Mesh.task', 'Mesh.frag',
-    'Text.task', 'Text.mesh', 'Text.frag'
+    'Text.task', 'Text.mesh', 'Text.frag',
+    'Shape.vert', 'Shape.frag'
     )
 shader_outputs = []
 shader_args = ['--target-env', 'vulkan1.4']

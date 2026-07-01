@@ -246,12 +246,12 @@ void ResourceManager::createMiscBuffers()
 /*
 std::vector<ShaderInfo> basicShaderStageInfos{{Basic_vert, 0, VK_SHADER_STAGE_VERTEX_BIT, false, {}},
                                   {Basic_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
-std::vector<ShaderInfo> shapeShaderStageInfos{{Shape_vert, 0, VK_SHADER_STAGE_VERTEX_BIT, false, {}},
-                                  {Shape_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
 std::vector<ShaderInfo> pointShaderStageInfos{{Point_vert, 0, VK_SHADER_STAGE_VERTEX_BIT, false, {}},
                                   {Point_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
 std::vector<ShaderInfo> csmShaderStageInfos{{CascadedShadowMapping_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT, false, {}},
                                   {CascadedShadowMapping_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT, false, {}}};*/
+std::vector<ShaderInfo> shapeShaderStageInfos{{Shape_vert, 0, VK_SHADER_STAGE_VERTEX_BIT, false, {}},
+                                  {Shape_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
 std::initializer_list<int> shaderConstants{DEFAULT_CULL};
 std::vector<ShaderInfo> meshShaderStageInfos{{Mesh_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT, false, shaderConstants},
                                   {Mesh_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT, false, shaderConstants},
@@ -273,6 +273,7 @@ void ResourceManager::createDefaultShaders()
     Shaders.reserve(10);
     Shaders.emplace_back(aDevice, meshShaderStageInfos, VK_NULL_HANDLE, sizeof(MeshPushConstant));
     Shaders.emplace_back(aDevice, textShaderStageInfos, VK_NULL_HANDLE, sizeof(TextPushConstant));
+    Shaders.emplace_back(aDevice, shapeShaderStageInfos, VK_NULL_HANDLE, sizeof(ShapePushConstant));
 }
 
 const uint32_t defaultTextureColors[] =

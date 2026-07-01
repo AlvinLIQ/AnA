@@ -207,13 +207,18 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
     auto& swapChain = aRenderer.GetSwapChain();
 
     aRenderer.BeginRendering(commandBuffer);
-    swapChain.SetViewport(commandBuffer);
 
+    swapChain.SetViewport(commandBuffer, actualSceneOffset);
     aRenderer.RenderIndirect(commandBuffer, aResourceManager.MainScene,
         aResourceManager.Shaders[0]);
 
+    swapChain.SetViewport(commandBuffer);
     aRenderer.RenderIndirect(commandBuffer, aResourceManager.TextContext,
         aResourceManager.Shaders[1]);
+
+    swapChain.SetViewport(commandBuffer, aResourceManager.Shapes.Extent);
+    aRenderer.RenderIndirect(commandBuffer, aResourceManager.Shapes,
+        aResourceManager.Shaders[2]);
 
     aRenderer.EndRendering(commandBuffer);
 }

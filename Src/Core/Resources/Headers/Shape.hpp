@@ -23,6 +23,11 @@ namespace AnA
         uint32_t TextureLayer{0};
         uint32_t shapeId;
     };
+    struct ShapePushConstant
+    {
+        VkDeviceAddress shapePtr;
+        glm::vec2 resolution;
+    };
     class Shapes : public Renderable
     {
     public:
@@ -74,6 +79,7 @@ namespace AnA
         uint32_t shapeCount{};
         std::vector<VkDescriptorImageInfo> imageInfos{};
         VkDescriptorSet sets[2];
+        ShapePushConstant shapePushConstant;
         bool updated = false;
     };
 }
