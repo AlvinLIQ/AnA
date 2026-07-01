@@ -56,7 +56,7 @@ layout(scalar, buffer_reference) buffer CollisionRef
     CollisionData collisions[];
 };
 
-layout(std430, buffer_reference) buffer MeshletIDRef
+layout(scalar, buffer_reference) buffer MeshletIDRef
 {
     MeshletID meshletIDs[];
 };
@@ -100,7 +100,7 @@ shared vec3 worldVertices[MAX_VERTICES];
 
 void main()
 {
-    uint midOffset = taskData.visibleIndices[gl_WorkGroupID.x] << 1;
+    uint midOffset = taskData.visibleIndices[gl_WorkGroupID.x];
     uint meshletID = meshletIDPtr.meshletIDs[midOffset].meshletID;
     uint objectID = meshletIDPtr.meshletIDs[midOffset].objectID;
     Meshlet meshlet = meshletPtr.meshlets[meshletID];

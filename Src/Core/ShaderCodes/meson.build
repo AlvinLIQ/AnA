@@ -2,7 +2,7 @@ fs = import('fs')
 shader_sources = files(
     'Mesh.mesh', 'Mesh.task', 'Mesh.frag')
 shader_outputs = []
-shader_args = ['--target-env', 'vulkan1.3']
+shader_args = ['--target-env', 'vulkan1.4']
 foreach shader_source : shader_sources
   output_file = fs.name(shader_source) + '.spv'
   shader_output = custom_target('compile ' + fs.name(shader_source),
