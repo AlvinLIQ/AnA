@@ -26,6 +26,7 @@ ResourceManager::ResourceManager(Device* mDevice) :
     aDevice = mDevice;
     _resourceManager = this;
     createMiscBuffers();
+    createSampledImageDescriptorBuffer();
     //createShadowFramebuffers();
     createDefaultShaders();
     Meshes.Init();
@@ -206,6 +207,7 @@ uint32_t ResourceManager::AppendTexture(const std::string& path, uint32_t* index
     TexturePathMap.emplace(path, texId);
 
     TextureIdMap.emplace(result.first->first, uint32_t(textureInfos.size()));
+    appendSampledImage(result.first->second.GetImageInfo());
 
     texId++;
     return result.first->first;
@@ -226,6 +228,7 @@ uint32_t ResourceManager::AppendTexture(VkImage image, VmaAllocation allocation,
         TexturePathMap.try_emplace(name, texId);
 
     TextureIdMap.emplace(result.first->first, uint32_t(textureInfos.size()));
+    appendSampledImage(result.first->second.GetImageInfo());
 
     texId++;
     return result.first->first;
@@ -241,6 +244,31 @@ void ResourceManager::createMiscBuffers()
     miscBuffer.Map();
     MainCamera.SetRotateSpeed(float(imageCount) * 1.5f);
 
+}
+
+void ResourceManager::createSampledImageDescriptorBuffer()
+{
+    const auto& prop = aDevice->GetDescriptorBufferProperties();
+    samplerDescriptorBuffer = Buffer(aDevice,
+        MaxBatchSize * prop.sampledImageDescriptorSize,
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+        VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+    samplerDescriptorBuffer.Map();
+}
+
+void ResourceManager::appendSampledImage(VkDescriptorImageInfo& imageInfo)
+{
+    const auto& prop = aDevice->GetDescriptorBufferProperties();
+    uint8_t* dst = reinterpret_cast<uint8_t*>(samplerDescriptorBuffer.GetMappedData()) +
+        (textureInfos.size()) * prop.sampledImageDescriptorSize;
+
+    VkDescriptorGetInfoEXT getInfo{};
+    getInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_GET_INFO_EXT;
+    getInfo.type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+    getInfo.data.pSampledImage = &imageInfo;
+    vkGetDescriptorEXT(aDevice->GetLogicalDevice(), &getInfo, prop.sampledImageDescriptorSize, dst);
+
+    textureInfos.push_back(imageInfo);
 }
 
 /*

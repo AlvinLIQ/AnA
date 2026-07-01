@@ -141,6 +141,10 @@ namespace AnA
             Buffer miscBuffer;
             void createMiscBuffers();
 
+            Buffer samplerDescriptorBuffer{};
+            void createSampledImageDescriptorBuffer();
+            void appendSampledImage(VkDescriptorImageInfo& imageInfo);
+
             std::vector<NormalCallBack> callbacks{};
             std::mutex callbacksMutex{};
             std::vector<VkDescriptorImageInfo> textureInfos;

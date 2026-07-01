@@ -187,6 +187,10 @@ namespace AnA
         {
             return physicalDeviceProperties;
         }
+        const VkPhysicalDeviceDescriptorBufferPropertiesEXT& GetDescriptorBufferProperties() const
+        {
+            return descriptorBufferProperties;
+        }
 
         bool MeshShaderSupport() const
         {
@@ -254,6 +258,7 @@ namespace AnA
             VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME,
             VK_EXT_SHADER_OBJECT_EXTENSION_NAME,
             VK_EXT_PRIMITIVE_TOPOLOGY_LIST_RESTART_EXTENSION_NAME,
+            VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME,
             VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME
         };
         std::vector<VkSampleCountFlagBits> usableSamples{};
@@ -285,6 +290,7 @@ namespace AnA
 
         VkPhysicalDeviceProperties physicalDeviceProperties{};
         VkPhysicalDeviceMeshShaderPropertiesEXT meshShaderProperties{};
+        VkPhysicalDeviceDescriptorBufferPropertiesEXT descriptorBufferProperties{};
 
         VmaAllocator allocator{nullptr};
         void createVmaAllocator();

@@ -769,8 +769,12 @@ void Device::pickPhysicalDevice()
     std::vector<VkPhysicalDevice> devices(deviceCount);
     vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
     int currentScore, bestScore = 0;
-    VkPhysicalDeviceMeshShaderPropertiesEXT _meshShaderProperties = {};
+    VkPhysicalDeviceDescriptorBufferPropertiesEXT _descriptorBufferProperties{};
+    _descriptorBufferProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_PROPERTIES_EXT;
+
+    VkPhysicalDeviceMeshShaderPropertiesEXT _meshShaderProperties{};
     _meshShaderProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_PROPERTIES_EXT;
+    _meshShaderProperties.pNext = &_descriptorBufferProperties;
 
     VkPhysicalDeviceExtendedDynamicState3PropertiesEXT dynamicStateProperties{};
     dynamicStateProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_3_PROPERTIES_EXT;
@@ -815,6 +819,7 @@ void Device::pickPhysicalDevice()
                 physicalDevice = device;
                 physicalDeviceProperties = deviceProperties2.properties;
                 meshShaderProperties = _meshShaderProperties;
+                descriptorBufferProperties = _descriptorBufferProperties;
                 queueFamilyIndices = indices;
                 bestScore = currentScore;
             }
@@ -936,10 +941,15 @@ void Device::createLogicalDevice()
     vulkan13Features.shaderDemoteToHelperInvocation = VK_TRUE;
     vulkan13Features.pNext = &vulkan14Features;
 
+    VkPhysicalDeviceDescriptorBufferFeaturesEXT descriptorBufferFeatures{};
+    descriptorBufferFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_FEATURES_EXT;
+    descriptorBufferFeatures.descriptorBuffer = VK_TRUE;
+    descriptorBufferFeatures.pNext = &vulkan13Features;
+
     VkPhysicalDevicePrimitiveTopologyListRestartFeaturesEXT primitiveRestartFeatures{};
     primitiveRestartFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRIMITIVE_TOPOLOGY_LIST_RESTART_FEATURES_EXT;
     primitiveRestartFeatures.primitiveTopologyListRestart = VK_TRUE;
-    primitiveRestartFeatures.pNext = &vulkan13Features;
+    primitiveRestartFeatures.pNext = &descriptorBufferFeatures;
 
     VkPhysicalDeviceExtendedDynamicState3FeaturesEXT dynamicState3Features{};
     dynamicState3Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_3_FEATURES_EXT;
