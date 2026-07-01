@@ -25,9 +25,11 @@ namespace AnA
             bufferSize = buf.bufferSize;
             bufferUsage = buf.bufferUsage;
             memoryUsage = buf.memoryUsage;
+            address = buf.address;
             allocation = buf.allocation;
             newBufferRecords = buf.newBufferRecords;
             buf.mappedData = nullptr;
+            buf.address = 0;
             buf.buffer = VK_NULL_HANDLE;
             buf.allocation = nullptr;
         }
@@ -42,10 +44,12 @@ namespace AnA
                 bufferSize = buf.bufferSize;
                 bufferUsage = buf.bufferUsage;
                 memoryUsage = buf.memoryUsage;
+                address = buf.address;
                 allocation = buf.allocation;
                 newBufferRecords = buf.newBufferRecords;
                 buf.mappedData = nullptr;
                 buf.buffer = VK_NULL_HANDLE;
+                buf.address = 0;
                 buf.allocation = nullptr;
             }
             return *this;
@@ -57,6 +61,7 @@ namespace AnA
         void Flush();
 
         VkBuffer GetBuffer();
+        VkDeviceAddress GetAddress();
         void* GetMappedData()
         {
             return mappedData;
@@ -74,6 +79,12 @@ namespace AnA
                 *this = Buffer(aDevice, newSize, bufferUsage, memoryUsage);
                 if (isMapped)
                     Map();
+
+                VkBufferDeviceAddressInfo addressInfo{};
+                addressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+                addressInfo.buffer = buffer;
+
+                address = vkGetBufferDeviceAddress(aDevice->GetLogicalDevice(), &addressInfo);
             }
         }
 
@@ -93,6 +104,7 @@ namespace AnA
 
         void* mappedData = nullptr;
         VkBuffer buffer = VK_NULL_HANDLE;
+        VkDeviceAddress address = 0;
         VkDeviceSize bufferSize = 0;
         VkBufferUsageFlags bufferUsage;
         VmaMemoryUsage memoryUsage;

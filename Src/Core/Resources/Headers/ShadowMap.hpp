@@ -68,10 +68,6 @@ namespace AnA
             {
                 return cascadeBuffers;
             }
-            std::vector<VkDescriptorImageInfo>& GetDescriptorImageInfos()
-            {
-                return descriptorImageInfos;
-            }
             std::vector<VkFramebuffer>& GetFramebuffers()
             {
                 return framebuffers;
@@ -84,7 +80,6 @@ namespace AnA
             std::vector<Image> images;
             std::vector<Buffer> cascadeBuffers;
             std::vector<glm::mat4> cascades;
-            std::vector<VkDescriptorImageInfo> descriptorImageInfos;
             std::vector<VkFramebuffer> framebuffers;
             void createShadowResources();
             void cleanupShadowResources();

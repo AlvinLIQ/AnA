@@ -885,7 +885,7 @@ bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device, DeviceFeatures
 
     _deviceFeatures.unifiedLayoutsSupport = unifiedLayoutsFeatures.unifiedImageLayouts == VK_TRUE;
     _deviceFeatures.hostImageCopySupport = hostImageCopyFeatures.hostImageCopy == VK_TRUE;
-    _deviceFeatures.bufferDeviceAddressSupport = bufferDeviceAddressFeatures.bufferDeviceAddress == VK_TRUE;
+    _deviceFeatures.bufferDeviceAddressSupport = true;//bufferDeviceAddressFeatures.bufferDeviceAddress == VK_TRUE;
 
     return requiredExtensions.empty();
 }

@@ -3,7 +3,6 @@
 #include "../Headers/ShaderCodes.hpp"
 #include "Headers/Device.hpp"
 #include "Resources/Headers/Animation.hpp"
-#include "../Headers/App.hpp"
 
 using namespace AnA;
 using namespace Resources;
@@ -26,7 +25,7 @@ ResourceManager::ResourceManager(Device* mDevice) :
 {
     aDevice = mDevice;
     _resourceManager = this;
-    createMainCameraBuffers();
+    createMiscBuffers();
     //createShadowFramebuffers();
     createDefaultShaders();
     Meshes.Init();
@@ -81,36 +80,23 @@ void ResourceManager::UpdateCamera(float aspect)
     //    -10.0f, 32.0f);
 }
 
-void ResourceManager::UpdateCameraBuffer()
+void ResourceManager::UpdateMiscBuffer()
 {
-    auto& proj = MainCamera.GetProjectionMatrix();
-    auto& view = MainCamera.GetView();
     uint32_t bufferIndex = SwapChain::GetCurrent()->CurrentImage;
-    Cameras::CameraBufferObject& cbo =
-        static_cast<Cameras::CameraBufferObject*>(mainCameraBuffer.GetMappedData())[bufferIndex];
-    cbo.proj = proj;
-    cbo.view = view;
 
-    auto& curPos = App::GetCurrent()->GetInputManager().GetCursorPosition();
-    auto swapChain = SwapChain::GetCurrent();
-    cbo.cursorPosition = {curPos.x.As<float>() * swapChain->ScaleX, curPos.y.As<float>() * swapChain->ScaleY};
-    selectedVertexIndex = cbo.selectedIndex;
     //printf("x: %f y: %f\r", curPos.x.value, curPos.y.value);
-    mainCameraBuffer.Flush();
     //cbo.invView = MainCamera.GetInverseView();
-    uboDynamicOffsets[0] = bufferIndex * sizeof(Cameras::CameraBufferObject);
-
-    auto extent = SwapChain::GetCurrent()->GetExtent();
-    cbo.resolution = {static_cast<float>(extent.width), static_cast<float>(extent.height)};
+    auto& mbo = reinterpret_cast<MiscBufferObject*>(miscBuffer.GetMappedData())[bufferIndex];
+    mbo.objectCount = MainScene.GetMeshCount();
+    mbo.meshletCount = MainScene.GetMeshletCount();
+    mbo.meshletIDCount = MainScene.GetMeshletIDCount();
     if (!LockCamera)
     {
-        cbo.position = MainCamera.GetInverseView()[3];
-        FrustumPlanes::ExtractFrustumPlanes(proj * view, MainCameraFrustumPlanes);
-        memcpy(&static_cast<FrustumPlanes*>(frustumBuffer.GetMappedData())[bufferIndex * 2],
+        FrustumPlanes::ExtractFrustumPlanes(MainCamera.GetProjectionMatrix(), MainCameraFrustumPlanes);
+        memcpy(&mbo.planes,
             &MainCameraFrustumPlanes,
             sizeof(FrustumPlanes));
     }
-    uboDynamicOffsets[1] = bufferIndex * sizeof(FrustumPlanes) * 2;
 }
 
 void ResourceManager::Update()
@@ -132,7 +118,7 @@ void ResourceManager::Update()
     //Process Ccamera Animation
     if (Animations.ProcessAnimationInfo(MainCamera.AnimationInfo, MainCamera.CameraTransform, dt))
         MainCamera.UpdateViewMatrix();
-    UpdateCameraBuffer();
+    UpdateMiscBuffer();
 
     Animations.Update(MainScene, dt);
 
@@ -244,23 +230,19 @@ uint32_t ResourceManager::AppendTexture(VkImage image, VmaAllocation allocation,
     return result.first->first;
 }
 
-void ResourceManager::createMainCameraBuffers()
+void ResourceManager::createMiscBuffers()
 {
     uint32_t imageCount = SwapChain::GetCurrent()->GetImageCount();
-    mainCameraBuffer = Buffer(aDevice,
-        imageCount * sizeof(Cameras::CameraBufferObject),
+    miscBuffer = Buffer(aDevice,
+        imageCount * sizeof(MiscBufferObject),
         VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
         VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-    mainCameraBuffer.Map();
+    miscBuffer.Map();
     MainCamera.SetRotateSpeed(float(imageCount) * 1.5f);
 
-    frustumBuffer = Buffer(aDevice,
-        imageCount * 2 * sizeof(FrustumPlanes),
-        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-        VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-    frustumBuffer.Map();
 }
 
+/*
 std::vector<ShaderInfo> basicShaderStageInfos{{Basic_vert, 0, VK_SHADER_STAGE_VERTEX_BIT, false, {}},
                                   {Basic_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
 std::vector<ShaderInfo> shapeShaderStageInfos{{Shape_vert, 0, VK_SHADER_STAGE_VERTEX_BIT, false, {}},
@@ -268,11 +250,12 @@ std::vector<ShaderInfo> shapeShaderStageInfos{{Shape_vert, 0, VK_SHADER_STAGE_VE
 std::vector<ShaderInfo> pointShaderStageInfos{{Point_vert, 0, VK_SHADER_STAGE_VERTEX_BIT, false, {}},
                                   {Point_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
 std::vector<ShaderInfo> csmShaderStageInfos{{CascadedShadowMapping_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT, false, {}},
-                                  {CascadedShadowMapping_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT, false, {}}};
+                                  {CascadedShadowMapping_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT, false, {}}};*/
 std::initializer_list<int> shaderConstants{DEFAULT_CULL};
 std::vector<ShaderInfo> meshShaderStageInfos{{Mesh_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT, false, shaderConstants},
                                   {Mesh_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT, false, shaderConstants},
                                       {Mesh_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
+/*
 std::vector<ShaderInfo> lightShaderStageInfos{{Light_vert, 0, VK_SHADER_STAGE_VERTEX_BIT, false, {}},
                                 {Light_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
 std::vector<ShaderInfo> textShaderStageInfos{{Text_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT, false, {}},
@@ -281,24 +264,12 @@ std::vector<ShaderInfo> textShaderStageInfos{{Text_task, 0, VK_SHADER_STAGE_TASK
 std::vector<ShaderInfo> terrainShaderStageInfos{{Terrain_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT, false, {}},
                                         {Terrain_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT, false, {}},
                                             {Mesh_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
-std::vector<ShaderInfo> collisionShaderStageInfos{{CollisionDetect_comp, 0, VK_SHADER_STAGE_COMPUTE_BIT, false, {}}};
+std::vector<ShaderInfo> collisionShaderStageInfos{{CollisionDetect_comp, 0, VK_SHADER_STAGE_COMPUTE_BIT, false, {}}};*/
+
 void ResourceManager::createDefaultShaders()
 {
     Shaders.reserve(10);
-    Shaders.emplace_back(aDevice, basicShaderStageInfos, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
-
-    Shaders.emplace_back(aDevice, shapeShaderStageInfos, SHAPE_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(glm::vec2));
-    Shaders.emplace_back(aDevice, pointShaderStageInfos, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0, 0, VK_PRIMITIVE_TOPOLOGY_POINT_LIST);
-
-    Shaders.emplace_back(aDevice, collisionShaderStageInfos, 2, 0, 0);
-    Shaders.emplace_back(aDevice, lightShaderStageInfos, 1, 0, 0);
-    if (aDevice->MeshShaderSupport())
-    {
-        Shaders.emplace_back(aDevice, csmShaderStageInfos, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
-        Shaders.emplace_back(aDevice, meshShaderStageInfos, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(uint32_t));
-        Shaders.emplace_back(aDevice, textShaderStageInfos, 3, 0, sizeof(glm::vec2));
-        Shaders.emplace_back(aDevice, terrainShaderStageInfos, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(TerrainPushConstants));
-    }
+    Shaders.emplace_back(aDevice, meshShaderStageInfos, VK_NULL_HANDLE, sizeof(MeshPushConstant));
 }
 
 const uint32_t defaultTextureColors[] =

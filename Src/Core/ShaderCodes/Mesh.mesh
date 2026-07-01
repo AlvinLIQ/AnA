@@ -41,7 +41,7 @@ layout(scalar, buffer_reference) buffer ObjectRef
     Object objects[];
 };
 
-layout(std430, buffer_reference) buffer MiscRef
+layout(scalar, buffer_reference) buffer MiscRef
 {
     uint objectCount;
     uint collidedCount;
@@ -61,22 +61,22 @@ layout(std430, buffer_reference) buffer MeshletIDRef
     MeshletID meshletIDs[];
 };
 
-layout(std430, buffer_reference) buffer MeshletRef
+layout(scalar, buffer_reference) buffer MeshletRef
 {
     Meshlet meshlets[];
 };
 
-layout(std430, buffer_reference, buffer_reference_align = 4) buffer MeshletVertexRef
+layout(scalar, buffer_reference) buffer MeshletVertexRef
 {
     uint vertices[];
 };
 
-layout(buffer_reference) buffer MeshletIndexRef
+layout(scalar, buffer_reference) buffer MeshletIndexRef
 {
     uint8_t indices[];
 };
 
-layout(std430, buffer_reference) buffer MeshletCullingRef
+layout(scalar, buffer_reference) buffer MeshletCullingRef
 {
     BoundingSphere boundings[];
 };

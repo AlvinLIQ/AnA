@@ -43,7 +43,7 @@ namespace AnA
         Text(Device* mDevice);
         ~Text();
         void Init();
-        void Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIndex) override;
+        void Bind(CommandBuffer& commandBuffer, Shader& shader) override;
         void Draw(CommandBuffer& commandBuffer) override;
         void DrawIndirect(CommandBuffer& commandBuffer) override;
         void Update() override;

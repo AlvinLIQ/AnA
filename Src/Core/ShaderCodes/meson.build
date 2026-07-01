@@ -8,7 +8,7 @@ foreach shader_source : shader_sources
   shader_output = custom_target('compile ' + fs.name(shader_source),
     output: output_file,
     command: ['glslangValidator', '-V', shader_source, '-o', '@OUTPUT@', shader_args],
-#    depend_files: [shader_source, 'mesh.h', 'math.h']
+#    depend_files: [shader_source, 'mesh.h']
   )
   shader_outputs += shader_output
 endforeach

@@ -50,7 +50,7 @@ void Text::Init()
     }
 }
 
-void Text::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIndex)
+void Text::Bind(CommandBuffer& commandBuffer, Shader& shader)
 {
     shader.GetPipeline().Bind(commandBuffer);
     aDevice->vkCmdSetPolygonModeEXT(commandBuffer, PolygonMode);

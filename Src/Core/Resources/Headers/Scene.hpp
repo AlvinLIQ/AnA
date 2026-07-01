@@ -79,6 +79,19 @@ namespace AnA
         float penetration;
     };
 
+    struct MeshPushConstant
+    {
+        glm::mat4 projView;
+        VkDeviceAddress vertexPtr;
+        VkDeviceAddress objectPtr;
+        VkDeviceAddress miscPtr;
+        VkDeviceAddress meshletIDPtr;
+        VkDeviceAddress meshletPtr;
+        VkDeviceAddress meshVertexPtr;
+        VkDeviceAddress meshIndexPtr;
+        VkDeviceAddress meshletCullingPtr;
+    };
+
     class Scene : public Renderable
     {
     public:
@@ -97,7 +110,7 @@ namespace AnA
         void RemoveAt(uint32_t meshIndex);
         void RemoveAt(Range removeRange);
         void RemoveAt(std::vector<uint32_t> meshIndices);
-        void Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIndex) override;
+        void Bind(CommandBuffer& commandBuffer, Shader& shader) override;
         void Draw(CommandBuffer& commandBuffer) override;
         void DrawIndirect(CommandBuffer& commandBuffer) override;
         bool NeedUpdate() override
@@ -143,6 +156,18 @@ namespace AnA
         {
             return currentBufferIndex;
         }
+        uint32_t GetObjectCount() const
+        {
+            return objectCount;
+        }
+        uint32_t GetMeshletCount() const
+        {
+            return meshletCount;
+        }
+        uint32_t GetMeshletIDCount() const
+        {
+            return meshletIDCount;
+        }
         void (*MeshAppend)(std::string, uint32_t) = nullptr;
     private:
         Device* aDevice;
@@ -161,9 +186,10 @@ namespace AnA
         bool needUpdate;
         bool commandBufferNeedUpdate = false;
         std::mutex _mutex;
+        uint32_t objectCount = 0;
+        uint32_t meshletCount = 0;
         uint32_t meshletIDCount = 0;
         std::vector<Buffer> meshletIDBuffers{};
-        std::vector<Buffer> meshletIDCountBuffers{};
 
         uint32_t numOfGroup = 64;
         uint8_t currentBufferIndex = 0;

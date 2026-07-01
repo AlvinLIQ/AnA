@@ -6,7 +6,7 @@ namespace AnA
     class Renderable
     {
     public:
-        virtual void Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIndex) = 0;
+        virtual void Bind(CommandBuffer& commandBuffer, Shader& shader) = 0;
         virtual void Draw(CommandBuffer& commandBuffer) = 0;
         virtual void DrawIndirect(CommandBuffer& commandBuffer) = 0;
         virtual void Update() = 0;

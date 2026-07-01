@@ -206,59 +206,11 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
 {
     auto& swapChain = aRenderer.GetSwapChain();
 
-#ifdef DEFERRED
-    aRenderer.BeginOffscreenRendering(commandBuffer);
-
-    swapChain.SetViewport(commandBuffer);
-    aRenderer.RenderIndirect(commandBuffer, aResourceManager.MainScene,
-        aResourceManager.Shaders[MESH_PIPELINE_ID],
-        swapChain.CurrentFrame);
-
-    aRenderer.EndOffscreenRendering(commandBuffer);
-#endif
-//#ifndef RELEASE_BUILD
-    Device::StageBarrier(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-    auto& computeShader = aResourceManager.Shaders[COLLISION_PIPELINE_ID];
-    computeShader.GetPipeline().Bind(commandBuffer);
-    auto& computeSets = computeShader.GetDescriptorSets()[aResourceManager.MainScene.GetBufferIndex()];
-    computeSets[0] = aResourceManager.Meshes.GetCurrentFrameResource().vertexDescriptorSet;
-    computeSets[1] = aResourceManager.MainScene.GetObjectDescriptorSet();
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE,
-        computeShader.GetPipelineLayout(), 0, 2,
-        computeSets.data(), 0, VK_NULL_HANDLE);
-    vkCmdDispatch(commandBuffer, (uint32_t(aResourceManager.MainScene.GetMeshCount()) + 63) / 64, 1, 1);
-    Device::StageBarrier(commandBuffer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT);
-//#endif
     aRenderer.BeginRendering(commandBuffer);
-    swapChain.SetViewport(commandBuffer, actualSceneOffset);
+    swapChain.SetViewport(commandBuffer);
 
-#ifdef DEFERRED
-    auto& lightShader = aResourceManager.Shaders[LIGHT_PIPELINE_ID];
-    lightShader.GetPipeline().Bind(commandBuffer);
-    vkCmdSetPrimitiveTopology(commandBuffer, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-    auto& sets = lightShader.GetDescriptorSets()[0];
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, lightShader.GetPipelineLayout(),
-        0, uint32_t(sets.size()), sets.data(), 0, VK_NULL_HANDLE);
-    vkCmdDraw(commandBuffer, 6, 1, 0, 0);
-#else
     aRenderer.RenderIndirect(commandBuffer, aResourceManager.MainScene,
-        aDevice.MeshShaderSupport() ? aResourceManager.Shaders[MESH_PIPELINE_ID] : aResourceManager.Shaders[VERTEX_PIPELINE_ID],
-        swapChain.CurrentFrame);
-#endif
+        aResourceManager.Shaders[0]);
 
-    if (aDevice.MeshShaderSupport())
-    {
-        swapChain.SetViewport(commandBuffer);
-        aRenderer.RenderIndirect(commandBuffer, aResourceManager.TextContext,
-            aResourceManager.Shaders[TEXT_PIPELINE_ID], swapChain.CurrentFrame);
-    }
-    if (aResourceManager.Shapes.Extent.width && aResourceManager.Shapes.Extent.height)
-    {
-        swapChain.SetViewport(commandBuffer, aResourceManager.Shapes.Extent);
-        aRenderer.RenderIndirect(commandBuffer, aResourceManager.Shapes,
-            aResourceManager.Shaders[SHAPE_PIPELINE_ID], swapChain.CurrentFrame);
-    }
-    //Device.StageBarrier(commandBuffer,
-    //    VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT|VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
     aRenderer.EndRendering(commandBuffer);
 }

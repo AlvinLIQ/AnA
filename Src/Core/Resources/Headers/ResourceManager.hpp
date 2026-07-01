@@ -50,6 +50,15 @@ namespace AnA
         uint32_t texture;
         uint32_t calNormal;
     };
+    struct MiscBufferObject
+    {
+        uint32_t objectCount;
+        uint32_t collidedCount;
+        uint32_t meshletCount;
+        uint32_t meshletIDCount;
+        glm::vec4 planes[6];
+        glm::vec2 resolution;
+    };
     namespace Resources
     {
         class ResourceManager
@@ -80,7 +89,7 @@ namespace AnA
             FrustumPlanes MainCameraFrustumPlanes{};
             bool LockCamera = false;
             void UpdateCamera(float aspect);
-            void UpdateCameraBuffer();
+            void UpdateMiscBuffer();
             void Update();
 
             void Resize();
@@ -92,14 +101,13 @@ namespace AnA
             //Scene Points;
             std::vector<Shader> Shaders;
 
-            const std::array<uint32_t, 2>& GetDefaultUBODynamicOffsets() const
-            {
-                return uboDynamicOffsets;
-            }
-
             uint32_t GetSelectedVertexIndex()
             {
                 return selectedVertexIndex;
+            }
+            VkDeviceAddress GetMiscBufferAddress()
+            {
+                return miscBuffer.GetAddress() + SwapChain::GetCurrent()->CurrentImage * sizeof(MiscBufferObject);
             }
             AnA::Text TextContext;
             Lights::Light GlobalLight;
@@ -129,9 +137,8 @@ namespace AnA
             MeshShaderOutput MeshShaderOutputData;
         private:
             Device* aDevice;
-            Buffer mainCameraBuffer;
-            Buffer frustumBuffer;
-            void createMainCameraBuffers();
+            Buffer miscBuffer;
+            void createMiscBuffers();
 
             std::vector<NormalCallBack> callbacks{};
             std::mutex callbacksMutex{};

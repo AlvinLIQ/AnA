@@ -75,7 +75,6 @@ void Scene::Init()
     collisionBuffer.resize(objectBuffers.size());
 
     meshletIDBuffers.resize(objectBuffers.size());
-    meshletIDCountBuffers.resize((objectBuffers.size()));
     for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
         objectBuffers[i] = Buffer(aDevice, 1000 * sizeof(Object),
@@ -97,11 +96,6 @@ void Scene::Init()
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         meshletIDBuffers[i].Map();
-
-        meshletIDCountBuffers[i] = Buffer(aDevice, sizeof(uint32_t),
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-        meshletIDCountBuffers[i].Map();
     }
     //createBuffers();
     createIndirectBuffers();
@@ -197,12 +191,26 @@ void Scene::RemoveAt(std::vector<uint32_t> meshIndices)
     needUpdate = true;
 }
 
-void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIndex)
+void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader)
 {
     auto aResourceManager = Resources::ResourceManager::GetCurrent();
     shader.GetPipeline().Bind(commandBuffer);
     auto& frameResource = aResourceManager->Meshes.GetCurrentFrameResource();
-
+    MeshPushConstant meshPushConstant;
+    meshPushConstant.projView = aResourceManager->MainCamera.GetProjectionMatrix()
+        * aResourceManager->MainCamera.GetView();
+    meshPushConstant.vertexPtr = frameResource.vertexBuffer.GetAddress();
+    meshPushConstant.objectPtr = objectBuffers[currentBufferIndex].GetAddress();
+    meshPushConstant.miscPtr = aResourceManager->GetMiscBufferAddress();
+    meshPushConstant.meshletIDPtr = meshletIDBuffers[currentBufferIndex].GetAddress();
+    meshPushConstant.meshletPtr = frameResource.meshletBuffer.GetAddress();
+    meshPushConstant.meshVertexPtr = frameResource.meshletVertexBuffer.GetAddress();
+    meshPushConstant.meshIndexPtr = frameResource.meshletIndexBuffer.GetAddress();
+    meshPushConstant.meshletCullingPtr = frameResource.meshletCullingBuffer.GetAddress();
+    vkCmdPushConstants(commandBuffer, shader.GetPipelineLayout(),
+        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT |
+        VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, 0, sizeof(meshPushConstant),
+        &meshPushConstant);
 
     aDevice->vkCmdSetPolygonModeEXT(commandBuffer, PolygonMode);
 }
@@ -303,7 +311,6 @@ void Scene::UpdateMeshlets()
     }
     meshletIDCount = i;
 
-    *static_cast<uint32_t*>(meshletIDCountBuffers[nextIndex].GetMappedData()) = meshletIDCount;
     auto drawMeshTaskCommand = static_cast<VkDrawMeshTasksIndirectCommandEXT*>(drawMeshIndirectBuffers[nextIndex].GetMappedData());
     uint32_t numofGroup = (meshletIDCount + numOfGroup - 1) / numOfGroup;
     drawMeshTaskCommand->groupCountX = numofGroup;
@@ -371,9 +378,8 @@ void Scene::updateAll()
     CommitBufferUpdate(&objectBuffers[nextIndex]);
     UpdateMeshlets();
 
-    auto objectData = reinterpret_cast<ObjectData*>(objectDataBuffers[nextIndex].GetMappedData());
-    objectData->objectCount = uint32_t(meshes.size());
-    objectData->meshletCount = Resources::ResourceManager::GetCurrent()->Meshes.GetMeshletCount();
+    objectCount = uint32_t(meshes.size());
+    meshletCount = Resources::ResourceManager::GetCurrent()->Meshes.GetMeshletCount();
 
     currentBufferIndex = nextIndex;
     nextIndex = NextFrameIndex(nextIndex);
