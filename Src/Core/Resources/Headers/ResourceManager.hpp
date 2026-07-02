@@ -62,6 +62,15 @@ namespace AnA
     };
     namespace Resources
     {
+        struct DescriptorResources
+        {
+            VkDescriptorSetLayout setLayout;
+            Buffer buffer;
+            void cleanup(VkDevice device)
+            {
+                vkDestroyDescriptorSetLayout(device, setLayout, VK_NULL_HANDLE);
+            }
+        };
         class ResourceManager
         {
         public:
@@ -95,6 +104,8 @@ namespace AnA
 
             void Resize();
 
+            void BindDescriptors(VkCommandBuffer commandBuffer);
+
             Resources::Meshes Meshes;
             Scene MainScene;
             AnA::Animations Animations;
@@ -109,6 +120,10 @@ namespace AnA
             VkDeviceAddress GetMiscBufferAddress()
             {
                 return miscBuffer.GetAddress() + SwapChain::GetCurrent()->CurrentImage * sizeof(MiscBufferObject);
+            }
+            DescriptorResources& GetSampledImageResources()
+            {
+                return sampledImageDescriptor;
             }
             AnA::Text TextContext;
             Lights::Light GlobalLight;
@@ -141,8 +156,8 @@ namespace AnA
             Buffer miscBuffer;
             void createMiscBuffers();
 
-            Buffer samplerDescriptorBuffer{};
-            void createSampledImageDescriptorBuffer();
+            DescriptorResources sampledImageDescriptor;
+            void createSampledImageResources();
             void appendSampledImage(VkDescriptorImageInfo& imageInfo);
 
             std::vector<NormalCallBack> callbacks{};

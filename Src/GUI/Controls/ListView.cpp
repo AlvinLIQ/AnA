@@ -107,7 +107,7 @@ void ListView::RemoveChildAt(size_t index)
     }
 }
 
-void ListView::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
+void ListView::PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount)
 {
-    StackPanel::PrepareDraw(shapeBuffer, imageInfos, shapeCount);
+    StackPanel::PrepareDraw(shapeBuffer, shapeCount);
 }

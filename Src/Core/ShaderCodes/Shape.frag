@@ -9,7 +9,7 @@ layout(location = 3) flat in uint texIndex;
 layout(location = 4) flat in uint texLayer;
 layout(location = 0) out vec4 outColor;
 
-//layout(set = 0, binding = 0) uniform sampler2DArray texSampler[];
+layout(set = 0, binding = 0) uniform sampler2DArray texSampler[];
 
 layout(push_constant) uniform PushConstants
 {
@@ -25,7 +25,7 @@ void main()
             uv.y < bounding.y || uv.y > bounding.w)
         discard;
 
-    vec4 texColor = vec4(1.0);//texture(texSampler[nonuniformEXT(texIndex)], vec3(texCoord, texLayer));
+    vec4 texColor = texture(texSampler[nonuniformEXT(texIndex)], vec3(texCoord, texLayer));
     if (texColor.a < 0.5 || baseColor.w == 0.)
         discard;
     outColor = vec4(baseColor.x * texColor.x, baseColor.y * texColor.y, baseColor.z * texColor.z, baseColor.w);

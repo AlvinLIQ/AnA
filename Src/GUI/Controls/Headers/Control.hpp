@@ -50,7 +50,7 @@ namespace AnA
             float Aspect = 1.0f;
             VkExtent2D Extent;
 
-            virtual void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount);
+            virtual void PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount);
             bool ProcessEventArgs(PointerEventArgs& args, PointerEventType& actualEventType);
             virtual void PointerEventTrigger(PointerEventArgs& args);
             virtual void CharacterRecevied(uint32_t ch);
@@ -120,7 +120,7 @@ namespace AnA
             void Texture(const std::string path);
 
             virtual VkDescriptorImageInfo GetDescriptorImageInfo();
-            virtual void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount);
+            virtual void ApplyRenderInfo(Shape* shapeBuffer, uint32_t& shapeCount);
         private:
             AlignType renderMode {ControlRenderMode};
             bool cursorInside = false;

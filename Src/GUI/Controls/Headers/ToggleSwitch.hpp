@@ -17,7 +17,7 @@ namespace AnA
                 return toggled;
             }
             void (*Toggled)(bool toggled) = nullptr;
-            //void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
+            //void ApplyRenderInfo(Shape* shapeBuffer, uint32_t& shapeCount) override;
         private:
             bool toggled = false;
             static void ToggleSwitch_Toggled(ToggleSwitch* toggleSwitch, PointerEventArgs& );

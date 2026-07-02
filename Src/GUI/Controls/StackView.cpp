@@ -15,12 +15,12 @@ StackView::~StackView()
 
 }
 
-void StackView::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
+void StackView::PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount)
 {
-    ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
+    ApplyRenderInfo(shapeBuffer, shapeCount);
 }
 
-void StackView::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
+void StackView::ApplyRenderInfo(Shape* shapeBuffer, uint32_t& shapeCount)
 {
     GetActualControlOffset();
     for (auto& item : items)
@@ -29,7 +29,7 @@ void StackView::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImag
         item->Extent = Extent;
         item->GetSizeForRender();
         item->GetActualControlOffset();
-        item->ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
+        item->ApplyRenderInfo(shapeBuffer, shapeCount);
     }
-    Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
+    Control::ApplyRenderInfo(shapeBuffer, shapeCount);
 }

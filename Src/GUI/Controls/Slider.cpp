@@ -36,7 +36,7 @@ Slider::Slider()
     PointerEvents[PointerEventType::Moving].emplace_back(slider_Click);
 }
 
-void Slider::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
+void Slider::ApplyRenderInfo(Shape* shapeBuffer, uint32_t& shapeCount)
 {
     int o = Orientation == Horizontal ? 0 : 1;
     //int invO = 1 - o;
@@ -53,9 +53,9 @@ void Slider::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageIn
     size2F[o] = SLIDER_SIZE;
     button.RenderSize(size);
     button.RenderOffset(offset);
-    button.ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
+    button.ApplyRenderInfo(shapeBuffer, shapeCount);
 
     //((float*)&size)[invO] = SLIDER_SIZE;
     //RenderSize(size);
-    Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
+    Control::ApplyRenderInfo(shapeBuffer, shapeCount);
 }

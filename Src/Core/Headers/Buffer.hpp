@@ -70,6 +70,10 @@ namespace AnA
         {
             return bufferSize;
         }
+        VkBufferUsageFlags GetUsage() const
+        {
+            return bufferUsage;
+        }
 
         void Resize(VkDeviceSize newSize)
         {

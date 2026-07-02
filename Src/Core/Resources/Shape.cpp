@@ -6,8 +6,6 @@ using namespace AnA;
 
 Shapes::Shapes(Device* mDeivce) : aDevice{mDeivce}
 {
-    imageInfos.resize(MaxBatchSize);
-
     shapeBuffer = Buffer(aDevice, sizeof(Shape) * MaxBatchSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
     shapeBuffer.Map();
 
@@ -30,7 +28,7 @@ Shapes::~Shapes()
 void Shapes::PrepareDraw(Controls::Control* control)
 {
     uint32_t newShapeCount = 0;
-    control->PrepareDraw((Shape*)shapeBuffer.GetMappedData(), imageInfos, newShapeCount);
+    control->PrepareDraw((Shape*)shapeBuffer.GetMappedData(), newShapeCount);
     ((VkDrawIndirectCommand*)indirectBuffer.GetMappedData())->vertexCount = (shapeCount = newShapeCount) * 6;
     updated = true;
 }
@@ -45,6 +43,11 @@ void Shapes::Bind(CommandBuffer& commandBuffer, Shader& shader)
     shader.GetPipeline().Bind(commandBuffer);
     aDevice->vkCmdSetPolygonModeEXT(commandBuffer, PolygonMode);
     vkCmdSetPrimitiveTopology(commandBuffer, Topology);
+
+    uint32_t bufferIndex = 0;
+    VkDeviceSize offset = 0;
+    vkCmdSetDescriptorBufferOffsetsEXT(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+        shader.GetPipelineLayout(), 0, 1, &bufferIndex, &offset);
 
     shapePushConstant.shapePtr = shapeBuffer.GetAddress();
     shapePushConstant.resolution = {float(commandBuffer.Extent.width), float(commandBuffer.Extent.height)};

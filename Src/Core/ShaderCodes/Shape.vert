@@ -14,6 +14,7 @@ struct Shape
     vec2 translation;
     vec4 bounding;
     vec4 color;
+    uint texIndex;
     uint texLayer;
 };
 
@@ -53,7 +54,7 @@ void main()
     gl_Position = vec4(shapePtr.shapes[index].scale * vertices[vIndex] + shapePtr.shapes[index].translation, 0.0, 1.0);
     fragColor = shapePtr.shapes[index].color;
     bounding = shapePtr.shapes[index].bounding;
-    texIndex = index;
+    texIndex = shapePtr.shapes[index].texIndex;
     texCoord = uvs[vIndex];
     texLayer = shapePtr.shapes[index].texLayer;
 }

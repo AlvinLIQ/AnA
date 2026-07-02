@@ -11,6 +11,7 @@ namespace AnA
         glm::vec2 translation{};
         glm::vec4 bounding{0.0f, 0.0f, 1.0f, 1.0f};
         glm::vec4 color{1.0f};
+        uint32_t texIndex{0};
         uint32_t texLayer{0};
     };
     struct ShapeInfo
@@ -77,7 +78,6 @@ namespace AnA
         Buffer indirectBuffer{};
         Buffer countBuffer{};
         uint32_t shapeCount{};
-        std::vector<VkDescriptorImageInfo> imageInfos{};
         VkDescriptorSet sets[2];
         ShapePushConstant shapePushConstant;
         bool updated = false;

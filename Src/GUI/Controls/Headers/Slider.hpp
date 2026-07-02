@@ -26,7 +26,7 @@ namespace AnA
                 }
             }
             Orientations Orientation{Horizontal};
-            void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
+            void ApplyRenderInfo(Shape* shapeBuffer, uint32_t& shapeCount) override;
             FloatValueCallback OnValueChanged = nullptr;
         private:
             Control button{};

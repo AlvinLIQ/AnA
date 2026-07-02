@@ -26,7 +26,7 @@ ResourceManager::ResourceManager(Device* mDevice) :
     aDevice = mDevice;
     _resourceManager = this;
     createMiscBuffers();
-    createSampledImageDescriptorBuffer();
+    createSampledImageResources();
     //createShadowFramebuffers();
     createDefaultShaders();
     Meshes.Init();
@@ -45,6 +45,7 @@ ResourceManager::ResourceManager(Device* mDevice) :
 
 ResourceManager::~ResourceManager()
 {
+    sampledImageDescriptor.cleanup(aDevice->GetLogicalDevice());
     TextureMap.clear();
     //for (auto& shader : Shaders)
     //    delete shader;
@@ -173,6 +174,15 @@ void ResourceManager::Resize()
 #endif
 }
 
+void ResourceManager::BindDescriptors(VkCommandBuffer commandBuffer)
+{
+    VkDescriptorBufferBindingInfoEXT bindInfo{};
+    bindInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_BUFFER_BINDING_INFO_EXT;
+    bindInfo.address = sampledImageDescriptor.buffer.GetAddress();
+    bindInfo.usage = sampledImageDescriptor.buffer.GetUsage();
+    vkCmdBindDescriptorBuffersEXT(commandBuffer, 1, &bindInfo);
+}
+
 void ResourceManager::RecreateResources()
 {
     //cleanupShadowResources();
@@ -189,6 +199,7 @@ uint32_t ResourceManager::AppendTexture(const uint32_t color, uint32_t* index, c
         TexturePathMap.try_emplace(name, texId);
 
     TextureIdMap.emplace(result.first->first, uint32_t(textureInfos.size()));
+    appendSampledImage(result.first->second.GetImageInfo());
 
     texId++;
     return result.first->first;
@@ -246,27 +257,41 @@ void ResourceManager::createMiscBuffers()
 
 }
 
-void ResourceManager::createSampledImageDescriptorBuffer()
+void ResourceManager::createSampledImageResources()
 {
     const auto& prop = aDevice->GetDescriptorBufferProperties();
-    samplerDescriptorBuffer = Buffer(aDevice,
-        MaxBatchSize * prop.sampledImageDescriptorSize,
-        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+    sampledImageDescriptor.buffer = Buffer(aDevice,
+        MaxBatchSize * prop.combinedImageSamplerDescriptorSize,
+        VK_BUFFER_USAGE_SAMPLER_DESCRIPTOR_BUFFER_BIT_EXT | VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT,
         VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-    samplerDescriptorBuffer.Map();
+    sampledImageDescriptor.buffer.Map();
+
+    VkDescriptorSetLayoutBinding binding{};
+    binding.descriptorCount = MaxBatchSize;
+    binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    VkDescriptorSetLayoutCreateInfo layoutInfo{};
+    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    layoutInfo.bindingCount = 1;
+    layoutInfo.pBindings = &binding;
+    layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
+
+    vkCreateDescriptorSetLayout(aDevice->GetLogicalDevice(), &layoutInfo,
+       VK_NULL_HANDLE, &sampledImageDescriptor.setLayout);
 }
 
 void ResourceManager::appendSampledImage(VkDescriptorImageInfo& imageInfo)
 {
     const auto& prop = aDevice->GetDescriptorBufferProperties();
-    uint8_t* dst = reinterpret_cast<uint8_t*>(samplerDescriptorBuffer.GetMappedData()) +
-        (textureInfos.size()) * prop.sampledImageDescriptorSize;
+    uint8_t* dst = reinterpret_cast<uint8_t*>(sampledImageDescriptor.buffer.GetMappedData()) +
+        (textureInfos.size()) * prop.combinedImageSamplerDescriptorSize;
 
     VkDescriptorGetInfoEXT getInfo{};
     getInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_GET_INFO_EXT;
-    getInfo.type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-    getInfo.data.pSampledImage = &imageInfo;
-    vkGetDescriptorEXT(aDevice->GetLogicalDevice(), &getInfo, prop.sampledImageDescriptorSize, dst);
+    getInfo.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    getInfo.data.pCombinedImageSampler = &imageInfo;
+    vkGetDescriptorEXT(aDevice->GetLogicalDevice(), &getInfo, prop.combinedImageSamplerDescriptorSize, dst);
 
     textureInfos.push_back(imageInfo);
 }
@@ -299,9 +324,9 @@ std::vector<ShaderInfo> collisionShaderStageInfos{{CollisionDetect_comp, 0, VK_S
 void ResourceManager::createDefaultShaders()
 {
     Shaders.reserve(10);
-    Shaders.emplace_back(aDevice, meshShaderStageInfos, VK_NULL_HANDLE, sizeof(MeshPushConstant));
+    Shaders.emplace_back(aDevice, meshShaderStageInfos, sampledImageDescriptor.setLayout, sizeof(MeshPushConstant));
     Shaders.emplace_back(aDevice, textShaderStageInfos, VK_NULL_HANDLE, sizeof(TextPushConstant));
-    Shaders.emplace_back(aDevice, shapeShaderStageInfos, VK_NULL_HANDLE, sizeof(ShapePushConstant));
+    Shaders.emplace_back(aDevice, shapeShaderStageInfos, sampledImageDescriptor.setLayout, sizeof(ShapePushConstant));
 }
 
 const uint32_t defaultTextureColors[] =

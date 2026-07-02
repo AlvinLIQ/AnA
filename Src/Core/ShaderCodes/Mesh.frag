@@ -24,14 +24,20 @@ layout(location = 2) out vec4 outAlbedo;
 layout(location = 0) out vec4 outColor;
 #endif
 
+layout(binding = 0) uniform sampler2D texSampler[];
+
 const vec3 LIGHT_POS = vec3(4., 2., 1.);
 const vec3 LIGHT_COLOR = vec3(1.0, 1.0, 1.0);
 const vec3 AMBIENT = vec3(0.13);
 
 void main()
 {
+    vec4 texColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord);
+    if (texColor.a < 0.8)
+        discard;
+
     float normalLightPos = dot(normalSpace, normalize(LIGHT_POS));
     float diffuseLightItensity = (normalLightPos + 2.0) * 0.3;
     vec3 finalLight = (diffuseLightItensity * LIGHT_COLOR) + AMBIENT;
-    outColor = vec4(color * finalLight, 1.0);
+    outColor = vec4(color * finalLight * texColor.rgb, 1.0);
 }

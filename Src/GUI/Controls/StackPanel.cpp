@@ -12,10 +12,10 @@ StackPanel::~StackPanel()
 {
 }
 
-void StackPanel::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
+void StackPanel::PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount)
 {
     GetSizeForRender();
-    StackPanel::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
+    StackPanel::ApplyRenderInfo(shapeBuffer, shapeCount);
 }
 
 Vec2 StackPanel::GetSizeForRender()
@@ -57,7 +57,7 @@ Vec2 StackPanel::ContentRenderSize()
     return RenderSize() - Vec2(Padding.x(), Padding.y()) * 0.5f - Vec2(Padding.z(), Padding.w()) * 0.5f;
 }
 
-void StackPanel::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
+void StackPanel::ApplyRenderInfo(Shape* shapeBuffer, uint32_t& shapeCount)
 {
     int o = Orientation, invO = 1 - Orientation;
     float offset = renderOffset[invO];
@@ -85,7 +85,7 @@ void StackPanel::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorIma
             item->RenderOffset()[o] = renderOffset[o] + Padding[o] * 0.5f;
             break;
         }
-        item->ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
+        item->ApplyRenderInfo(shapeBuffer, shapeCount);
     }
-    Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
+    Control::ApplyRenderInfo(shapeBuffer, shapeCount);
 }

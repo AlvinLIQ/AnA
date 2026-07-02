@@ -133,6 +133,7 @@ void App::Run()
 
         if (auto commandBuffer = aRenderer.BeginFrame())
         {
+            aResourceManager.BindDescriptors(*commandBuffer);
             onCommandBufferRecording(*commandBuffer);
             aRenderer.EndFrame();
         }

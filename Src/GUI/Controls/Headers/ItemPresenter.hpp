@@ -15,8 +15,8 @@ namespace AnA
             virtual void Child(Control* newItem);
             Control* Child();
 
-            void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
-            void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
+            void PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount) override;
+            void ApplyRenderInfo(Shape* shapeBuffer, uint32_t& shapeCount) override;
             void PointerEventTrigger(PointerEventArgs& args) override;
             void GetItemRenderInfo(const Vec2 itemOffset, Vec2& itemRenderOffset, Vec2& itemRenderSize);
 
