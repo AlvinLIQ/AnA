@@ -48,5 +48,4 @@ AnA.exe
 
 ### Screenshots
 
-![Screenshot1](https://github.com/AlvinLIQ/AnA_Docs/blob/main/Img/Screenshots/Screenshot_20240416_004750.png "Screenshot")
-![Screenshot2](https://github.com/AlvinLIQ/AnA_Docs/blob/main/Img/Screenshots/Screenshot_20240416_004836.png "Screenshot")
+![Screenshot1](https://github.com/AlvinLIQ/AnA_Docs/blob/main/Img/Screenshots/s1.png "Screenshot")
