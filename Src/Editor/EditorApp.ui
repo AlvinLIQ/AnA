@@ -1,4 +1,5 @@
-<StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Color="">
+<StackPanel Orientation="Horizontal" HorizontalAlignment="Start" VerticalAlignment="Stretch" Color=""
+    ControlSize="350.0f, 0.0f">
     <ListView Name="pageTabs" HorizontalAlignment="Start" VerticalAlignment="Stretch"
         Orientation="Vertical"
         Color="DefaultPrimaryColor" SelectionChanged="pageTabs_SelectionChanged">
@@ -13,7 +14,7 @@
         VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
         VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch">
         <StackPanel ControlSize="0.0f, 0.0f" Spacing="0.01f" Orientation="Vertical"
-            Color="" Padding="0.05f, 0.01f, 0.05f, 0.01f">
+            Color="" Padding="0.02f, 0.01f, 0.02f, 0.01f">
             <TextBlock Text="General" FontSize="(Float)25.0f"/>
             <Button HorizontalAlignment="Start" Click="loadModelButton_Click">
                 <TextBlock Text="Load Model" HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -44,8 +45,8 @@
                 <TextBlock Text="Exit"/>
             </Button>
         </StackPanel>
-        <StackPanel ControlSize="0.0f, 0.0f" Spacing="0.01f" Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-            Color="DefaultSecondaryColor" Padding="0.05f, 0.01f, 0.05f, 0.01f">
+        <StackPanel ControlSize="0.0f, 0.0f" Spacing="0.01f" Orientation="Vertical"
+            Color="DefaultSecondaryColor" Padding="0.01f, 0.01f, 0.01f, 0.01f">
             <TextBlock Text="Animation" FontSize="(Float)25.0f"/>
         </StackPanel>
     </PageView>

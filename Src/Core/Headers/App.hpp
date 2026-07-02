@@ -51,10 +51,6 @@ namespace AnA
         {
             return &aDevice;
         }
-        VkOffset2D &GetSceneOffset()
-        {
-            return actualSceneOffset;
-        }
     private:
         std::thread uiThread;
         static void startUILoop(std::thread &loopThread);
@@ -62,7 +58,6 @@ namespace AnA
         static void uiLoop();
         //static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-        VkOffset2D actualSceneOffset{};
     protected:
         virtual void onCommandBufferRecording(CommandBuffer& commandBuffer);
         Window aWindow;
@@ -77,10 +72,5 @@ namespace AnA
         bool commandBufferNeedUpdate = false;
         TerrainPushConstants terrainPushConstants = {0.5f, 5.0f, 0, 0};
         void(*loopCallback)() = nullptr;
-        void updateSceneOffset()
-        {
-            actualSceneOffset = {static_cast<int32_t>(static_cast<float>(sceneOffset.x) * aRenderer.GetSwapChain().ScaleX),
-                            static_cast<int32_t>(static_cast<float>(sceneOffset.y) * aRenderer.GetSwapChain().ScaleY)};
-        }
     };
 }

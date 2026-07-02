@@ -45,7 +45,6 @@ App* App::GetCurrent()
 void App::Init()
 {
     //glfwSetKeyCallback(aWindow->GetGLFWwindow(), App::keyCallback);
-    updateSceneOffset();
 }
 
 void App::Run()
@@ -99,15 +98,12 @@ void App::Run()
         if (aRenderer.NeedUpdate())
         {
             aResourceManager.Resize();
-            updateSceneOffset();
         }
 #ifdef ANA_INCLUDE_CONTROL
         if (aResourceManager.MainControl &&
             (aResourceManager.MainControl->NeedUpdate() || aRenderer.NeedUpdate()))
         {
             auto controlExtent = aRenderer.GetSwapChainExtent();
-            if (actualSceneOffset.x)
-                controlExtent.width = static_cast<uint32_t>(actualSceneOffset.x);
             aResourceManager.MainControl->Aspect = static_cast<float>(controlExtent.width) / static_cast<float>(controlExtent.height);
             aResourceManager.MainControl->Extent = controlExtent;
             aResourceManager.Shapes.Extent = controlExtent;
@@ -209,15 +205,13 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
 
     aRenderer.BeginRendering(commandBuffer);
 
-    swapChain.SetViewport(commandBuffer, actualSceneOffset);
+    swapChain.SetViewport(commandBuffer);
     aRenderer.RenderIndirect(commandBuffer, aResourceManager.MainScene,
         aResourceManager.Shaders[0]);
 
-    swapChain.SetViewport(commandBuffer);
     aRenderer.RenderIndirect(commandBuffer, aResourceManager.TextContext,
         aResourceManager.Shaders[1]);
 
-    swapChain.SetViewport(commandBuffer, aResourceManager.Shapes.Extent);
     aRenderer.RenderIndirect(commandBuffer, aResourceManager.Shapes,
         aResourceManager.Shaders[2]);
 

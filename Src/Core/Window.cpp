@@ -84,7 +84,7 @@ int Window::init(const char* title)
         return SDL_APP_FAILURE;
     }
 
-    if (!(window = SDL_CreateWindow(title, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE)))
+    if (!(window = SDL_CreateWindow(title, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE | SDL_WINDOW_BORDERLESS)))
     {
         SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
         return SDL_APP_FAILURE;

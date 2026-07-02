@@ -29,8 +29,7 @@ namespace AnA
                 if (!Filter.empty())
                     cmd += " --file-filter=\"" + Filter + "\"";
                 FILE* f = popen(cmd.c_str(), "r");
-                fgets(path, 256, f);
-                size_t len = strlen(path);
+                size_t len = fread(path, 1, 256, f);
                 if (len <= 1)
                     return "";
                 path[len - 1] = '\0';
