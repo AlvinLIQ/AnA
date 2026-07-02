@@ -78,7 +78,6 @@ namespace AnA
         Buffer indirectBuffer{};
         Buffer countBuffer{};
         uint32_t shapeCount{};
-        VkDescriptorSet sets[2];
         ShapePushConstant shapePushConstant;
         bool updated = false;
     };

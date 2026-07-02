@@ -80,7 +80,7 @@ bool isSphereInsideFrustum(in vec3 center, in float radius, in vec4 frustumPlane
     {
         vec4 plane = frustumPlanes[i];
         float d = dot(plane.xyz, center) + plane.w + radius;
-        if (d < 0)
+        if (d < 0.)
             return false;
     }
     return true;
