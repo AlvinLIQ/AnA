@@ -12,14 +12,13 @@
 * [x] create submit info queue and only do single submit call every frame
 * [ ] optimize resource management before scaling
   * [x] rewrite scene buffers with lazy buffer rebuild
-  * [ ] use descriptor heap for textures
-  * [ ] use device memory address for buffers
+  * [ ] use descriptor heap for textures (until mesa 26.2)
+  * [x] use device memory address for buffers
   * [ ] make resource manager a facade, real logic in specialized classes.
     * [x] meshes
     * [x] text
     * [ ] textures
     * [x] cameras
-    * [ ] lights
 * [ ] SSAO
 * [ ] occlusion culling
 * [ ] try pipeline cache
