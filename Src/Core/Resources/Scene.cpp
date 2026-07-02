@@ -284,9 +284,9 @@ void Scene::CommitBufferUpdate(Buffer* newObjectBuffer, size_t meshOffset)
 void Scene::Update()
 {
     needUpdate = false;
-    Resources::ResourceManager::GetCurrent()->TaskPool.Enqueue([this]()
+    auto& taskPool = Resources::ResourceManager::GetCurrent()->TaskPool;
+    taskPool.Enqueue([this]()
     {
-        Resources::ResourceManager::GetCurrent()->TaskPool.Join();
         this->updateAll();
     });
 }

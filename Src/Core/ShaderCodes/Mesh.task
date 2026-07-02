@@ -111,7 +111,7 @@ void main()
     if (globalID < miscPtr.meshletIDCount)
     {
         bool visible = isMeshletVisible(meshletIDPtr.meshletIDs[globalID].meshletID,
-            meshletIDPtr.meshletIDs[globalID].objectID); //meshletIDs[globalID << 1], meshletIDs[(globalID << 1) ^ 1]);
+                meshletIDPtr.meshletIDs[globalID].objectID); //meshletIDs[globalID << 1], meshletIDs[(globalID << 1) ^ 1]);
 
         if (visible)
         {
