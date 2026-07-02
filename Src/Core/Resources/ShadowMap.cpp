@@ -125,22 +125,11 @@ void ShadowMap::UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, u
 	}
 }
 
-void ShadowMap::GetUBODescriptorConfig(Descriptor::DescriptorConfig* pConfig)
-{
-	*pConfig = {};
-	pConfig->binding = 0;
-    pConfig->descriptorCount = 1;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_MESH_BIT_EXT;
-    Resources::ResourceManager::GetBufferInfos(cascadeBuffers, pConfig->bufferInfos);
-}
-
 void ShadowMap::createShadowResources()
 {
     images.resize(MAX_FRAMES_IN_FLIGHT);
     framebuffers.resize(images.size());
 	cascadeBuffers.reserve(images.size());
-    descriptorImageInfos.resize(images.size());
     bool samplersNotCreated = samplers.empty();
     if (samplersNotCreated)
         samplers.resize(images.size());
@@ -190,10 +179,6 @@ void ShadowMap::createShadowResources()
 		cascadeBuffers.emplace_back(aDevice, SHADOW_MAP_CASCADE_COUNT * sizeof(CascadeBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 		VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
 		cascadeBuffers[i].Map();
-
-        descriptorImageInfos[i].imageLayout = shadowImage.imageLayout;
-        descriptorImageInfos[i].imageView = shadowImage.imageView;
-        descriptorImageInfos[i].sampler = samplers[i];
     }
 }
 

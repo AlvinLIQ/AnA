@@ -42,6 +42,10 @@ namespace AnA
             {
                 return inverseViewMatrix;
             }
+            const glm::mat4 &GetViewProj() const
+            {
+                return viewProj;
+            }
 
             void SetViewDirection(glm::vec3 position, glm::vec3 direction, glm::vec3 up = glm::vec3{ 0.0f, -1.0f , 0.0f });
             void SetViewTarget(glm::vec3 position, glm::vec3 target, glm::vec3 up = glm::vec3{ 0.0f, -1.0f , 0.0f });
@@ -81,6 +85,7 @@ namespace AnA
             glm::mat4 projectionMatrix{1.f};
             glm::mat4 viewMatrix{1.f};
             glm::mat4 inverseViewMatrix;
+            glm::mat4 viewProj{1.f};
 
             float moveStep = 1.0f;
             float speedRatio = 1.0f;

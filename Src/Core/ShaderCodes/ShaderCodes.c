@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
                 break;
             }
         }
-        
+
         //printf ("static unsigned char[] %s = {", argv[1]);
         argv[i][fileNameLen - 4] = '\0';
         fprintf (outputFile, "static const std::vector<unsigned char> %s = {", filename);

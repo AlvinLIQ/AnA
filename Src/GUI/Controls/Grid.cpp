@@ -28,12 +28,12 @@ void Grid::Child(Control* newItem, uint32_t x, uint32_t y)
     RequestUpdate();
 }
 
-void Grid::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
+void Grid::PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount)
 {
-    ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
+    ApplyRenderInfo(shapeBuffer, shapeCount);
 }
 
-void Grid::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
+void Grid::ApplyRenderInfo(Shape* shapeBuffer, uint32_t& shapeCount)
 {
     auto renderSize = GetSizeForRender();
     auto renderOffset = GetActualControlOffset();
@@ -75,7 +75,7 @@ void Grid::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo
             items[pos]->RenderOffset()[1] = cellY.offset;
             items[pos]->RenderSize()[0] = cellX.size;
             items[pos]->RenderSize()[1] = cellY.size;
-            items[pos]->ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
+            items[pos]->ApplyRenderInfo(shapeBuffer, shapeCount);
         }
     }
 }

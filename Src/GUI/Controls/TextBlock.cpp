@@ -29,19 +29,19 @@ TextBlock::~TextBlock()
     textContext.Remove(id);
 }
 
-void TextBlock::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
+void TextBlock::PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount)
 {
     auto size = GetSizeForRender();
     auto offset = GetActualControlOffset();
 
     this->scale = {size.x(), size.y()};
     this->translation = {offset.x(), offset.y()};
-    Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
+    Control::ApplyRenderInfo(shapeBuffer, shapeCount);
 }
 
-void TextBlock::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
+void TextBlock::ApplyRenderInfo(Shape* shapeBuffer, uint32_t& shapeCount)
 {
-    Control::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
+    Control::ApplyRenderInfo(shapeBuffer, shapeCount);
     if (id != uint32_t(-1))
     {
         auto swapChain = SwapChain::GetCurrent();

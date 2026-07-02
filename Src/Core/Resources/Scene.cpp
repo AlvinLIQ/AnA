@@ -66,8 +66,6 @@ Scene::Scene(Device* mDevice) : aDevice{mDevice}
 
 Scene::~Scene()
 {
-    if (objectDescriptor != nullptr)
-        delete objectDescriptor;
 }
 
 void Scene::Init()
@@ -77,7 +75,6 @@ void Scene::Init()
     collisionBuffer.resize(objectBuffers.size());
 
     meshletIDBuffers.resize(objectBuffers.size());
-    meshletIDCountBuffers.resize((objectBuffers.size()));
     for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
         objectBuffers[i] = Buffer(aDevice, 1000 * sizeof(Object),
@@ -99,15 +96,9 @@ void Scene::Init()
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         meshletIDBuffers[i].Map();
-
-        meshletIDCountBuffers[i] = Buffer(aDevice, sizeof(uint32_t),
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-        meshletIDCountBuffers[i].Map();
     }
     //createBuffers();
     createIndirectBuffers();
-    createSSBODescriptor();
 }
 
 void Scene::Append(const std::vector<MeshInfo>& meshInfos)
@@ -200,26 +191,33 @@ void Scene::RemoveAt(std::vector<uint32_t> meshIndices)
     needUpdate = true;
 }
 
-void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIndex)
+void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader)
 {
     auto aResourceManager = Resources::ResourceManager::GetCurrent();
-    auto& sets = shader.GetDescriptorSets()[bufferIndex];
     shader.GetPipeline().Bind(commandBuffer);
+
+    uint32_t bufferIndex = 0;
+    VkDeviceSize offset = 0;
+    vkCmdSetDescriptorBufferOffsetsEXT(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+        shader.GetPipelineLayout(), 0, 1, &bufferIndex, &offset);
+
     auto& frameResource = aResourceManager->Meshes.GetCurrentFrameResource();
-    sets[DEFAULT_VERTEX_LAYOUT] = frameResource.vertexDescriptorSet;
-    sets[DEFAULT_OBJECT_LAYOUT] = objectDescriptor->GetSets()[currentBufferIndex];
-    sets[DEFAULT_SAMPLER_LAYOUT] = aResourceManager->GetSamplerDescriptors().front()->GetSets()[0]; //samplersDescriptors.front()->GetSets()[0];
-    if (aDevice->MeshShaderSupport() && shader.HasMeshShader())
-    {
-        sets[DEFAULT_MESHLET_LAYOUT] = frameResource.meshDescriptorSet;
-    }
-    const auto& offsets =
-        aResourceManager->GetDefaultUBODynamicOffsets();
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-        shader.GetPipelineLayout(), 0, static_cast<uint32_t>(sets.size()),
-        sets.data(),
-        static_cast<uint32_t>(offsets.size()),
-        offsets.data());
+
+    meshPushConstant.projView = aResourceManager->MainCamera.GetProjectionMatrix()
+        * aResourceManager->MainCamera.GetView();
+    meshPushConstant.vertexPtr = frameResource.vertexBuffer.GetAddress();
+    meshPushConstant.objectPtr = objectBuffers[currentBufferIndex].GetAddress();
+    meshPushConstant.miscPtr = aResourceManager->GetMiscBufferAddress();
+    meshPushConstant.meshletIDPtr = meshletIDBuffers[currentBufferIndex].GetAddress();
+    meshPushConstant.meshletPtr = frameResource.meshletBuffer.GetAddress();
+    meshPushConstant.meshVertexPtr = frameResource.meshletVertexBuffer.GetAddress();
+    meshPushConstant.meshIndexPtr = frameResource.meshletIndexBuffer.GetAddress();
+    meshPushConstant.meshletCullingPtr = frameResource.meshletCullingBuffer.GetAddress();
+    vkCmdPushConstants(commandBuffer, shader.GetPipelineLayout(),
+        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT |
+        VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, 0, sizeof(meshPushConstant),
+        &meshPushConstant);
+
     aDevice->vkCmdSetPolygonModeEXT(commandBuffer, PolygonMode);
 }
 
@@ -319,7 +317,6 @@ void Scene::UpdateMeshlets()
     }
     meshletIDCount = i;
 
-    *static_cast<uint32_t*>(meshletIDCountBuffers[nextIndex].GetMappedData()) = meshletIDCount;
     auto drawMeshTaskCommand = static_cast<VkDrawMeshTasksIndirectCommandEXT*>(drawMeshIndirectBuffers[nextIndex].GetMappedData());
     uint32_t numofGroup = (meshletIDCount + numOfGroup - 1) / numOfGroup;
     drawMeshTaskCommand->groupCountX = numofGroup;
@@ -375,62 +372,6 @@ void Scene::createIndirectBuffers()
     drawMeshCountBuffer.Unmap();
 }
 
-void Scene::createSSBODescriptor()
-{
-    auto& shaders = Resources::ResourceManager::GetCurrent()->Shaders;
-    auto& objectDescriptorSetLayout =
-        shaders.front().GetDescriptors()[DEFAULT_OBJECT_LAYOUT].GetLayout();
-    objectDescriptor = new Descriptor(aDevice, MAX_FRAMES_IN_FLIGHT,
-        3 * MAX_FRAMES_IN_FLIGHT,
-        3,
-        objectDescriptorSetLayout,
-        VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-
-    updateSSBODescriptor();
-}
-
-void Scene::updateSSBODescriptor()
-{
-    VkDescriptorBufferInfo bufferInfo;
-    //Object Buffer
-    bufferInfo.buffer = objectBuffers[nextIndex].GetBuffer();
-    bufferInfo.offset = 0;
-    bufferInfo.range = objectBuffers[nextIndex].GetSize();
-    aDevice->UpdateDescriptorSet(bufferInfo, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-        objectDescriptor->GetSets()[nextIndex]);
-    //Object Data Buffer
-    bufferInfo.buffer = objectDataBuffers[nextIndex].GetBuffer();
-    bufferInfo.offset = 0;
-    bufferInfo.range = objectDataBuffers[nextIndex].GetSize();
-    aDevice->UpdateDescriptorSet(bufferInfo, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-        objectDescriptor->GetSets()[nextIndex]);
-    //Collision Buffer
-    bufferInfo.buffer = collisionBuffer[nextIndex].GetBuffer();
-    bufferInfo.offset = 0;
-    bufferInfo.range = collisionBuffer[nextIndex].GetSize();
-    aDevice->UpdateDescriptorSet(bufferInfo, 2, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-        objectDescriptor->GetSets()[nextIndex]);
-
-    if (aDevice->MeshShaderSupport())
-    {
-        //Meshlet ID Buffer
-        bufferInfo.buffer = meshletIDBuffers[nextIndex].GetBuffer();
-        bufferInfo.offset = 0;
-        bufferInfo.range = meshletIDBuffers[nextIndex].GetSize();
-        aDevice->UpdateDescriptorSet(bufferInfo, 3, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                objectDescriptor->GetSets()[nextIndex]);
-        //Meshlet ID Count Buffer
-        bufferInfo.buffer = meshletIDCountBuffers[nextIndex].GetBuffer();
-        bufferInfo.offset = 0;
-        bufferInfo.range = meshletIDCountBuffers[nextIndex].GetSize();
-        aDevice->UpdateDescriptorSet(bufferInfo, 4, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                objectDescriptor->GetSets()[nextIndex]);
-    }
-    currentBufferIndex = nextIndex;
-    nextIndex = NextFrameIndex(currentBufferIndex);
-    commandBufferNeedUpdate = true;
-}
-
 void Scene::updateAll()
 {
     std::unique_lock<std::mutex> unique_lock(_mutex);
@@ -443,8 +384,10 @@ void Scene::updateAll()
     CommitBufferUpdate(&objectBuffers[nextIndex]);
     UpdateMeshlets();
 
-    auto objectData = reinterpret_cast<ObjectData*>(objectDataBuffers[nextIndex].GetMappedData());
-    objectData->objectCount = uint32_t(meshes.size());
-    objectData->meshletCount = Resources::ResourceManager::GetCurrent()->Meshes.GetMeshletCount();
-    updateSSBODescriptor();
+    objectCount = uint32_t(meshes.size());
+    meshletCount = Resources::ResourceManager::GetCurrent()->Meshes.GetMeshletCount();
+
+    currentBufferIndex = nextIndex;
+    nextIndex = NextFrameIndex(nextIndex);
+    commandBufferNeedUpdate = true;
 }

@@ -96,5 +96,6 @@ void Camera::UpdateViewMatrix()
 {
     CameraTransform.translation += offset * moveStep * speedRatio;
     SetViewYXZ(CameraTransform.translation, CameraTransform.rotation);
+    viewProj = projectionMatrix * viewMatrix;
     offset = {};
 }

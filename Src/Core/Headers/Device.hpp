@@ -10,7 +10,6 @@
 #include <functional>
 #include <glm/glm.hpp>
 #include "Utils.hpp"
-#include "../ShaderCodes/bindings.h"
 #include "../../3rdParty/VulkanMemoryAllocator/include/vk_mem_alloc.h"
 
 #define INCLUDE_STB_IMAGE
@@ -132,15 +131,6 @@ namespace AnA
             std::vector<uint32_t>& indices);
 
         void CreateSampler(VkSampler* pSampler, enum VkSamplerAddressMode samplerAddressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT, VkBorderColor borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK, VkCompareOp compareOp = VK_COMPARE_OP_ALWAYS);
-
-        void UpdateDescriptorSet(const VkDescriptorBufferInfo& bufferInfo, uint32_t binding, VkDescriptorType descriptorType, VkDescriptorSet descriptorSet);
-        void CreateDescriptorPool(uint32_t descriptorSetCount, uint32_t descriptorCount, VkDescriptorPool& descriptorPool, VkDescriptorType descriptorType, VkDescriptorPoolCreateFlags flags = 0);
-        void CreateDescriptorPool(uint32_t descriptorSetCount, const VkDescriptorPoolSize* poolSizes, uint32_t poolSizeCount, VkDescriptorPool& descriptorPool, VkCommandPoolCreateFlags flags);
-        void CreateDescriptorSets(Buffer* buffers, VkDeviceSize bufferSize, uint32_t binding, uint32_t descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets);
-        void CreateDescriptorSets(VkDescriptorImageInfo* imageInfos, uint32_t binding, uint32_t descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets);
-        void CreateDescriptorSets(uint32_t descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, std::vector<VkDescriptorSet>& descriptorSets, void* pNext);
-        void CreateDescriptorSets(uint32_t descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, std::vector<VkDescriptorSet>& descriptorSets, std::vector<std::vector<VkWriteDescriptorSet>>& writes);
-
         void CreateCommandPool(VkCommandPoolCreateFlags flags, VkCommandPool* pool);
 
         static VkDescriptorSetLayoutBinding CreateLayoutBinding(uint32_t binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags, uint32_t descriptorCount = 1);
@@ -196,6 +186,10 @@ namespace AnA
         const VkPhysicalDeviceProperties& GetPhysicalDeviceProperties() const
         {
             return physicalDeviceProperties;
+        }
+        const VkPhysicalDeviceDescriptorBufferPropertiesEXT& GetDescriptorBufferProperties() const
+        {
+            return descriptorBufferProperties;
         }
 
         bool MeshShaderSupport() const
@@ -264,6 +258,7 @@ namespace AnA
             VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME,
             VK_EXT_SHADER_OBJECT_EXTENSION_NAME,
             VK_EXT_PRIMITIVE_TOPOLOGY_LIST_RESTART_EXTENSION_NAME,
+            VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME,
             VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME
         };
         std::vector<VkSampleCountFlagBits> usableSamples{};
@@ -295,6 +290,7 @@ namespace AnA
 
         VkPhysicalDeviceProperties physicalDeviceProperties{};
         VkPhysicalDeviceMeshShaderPropertiesEXT meshShaderProperties{};
+        VkPhysicalDeviceDescriptorBufferPropertiesEXT descriptorBufferProperties{};
 
         VmaAllocator allocator{nullptr};
         void createVmaAllocator();

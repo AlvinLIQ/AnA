@@ -23,7 +23,7 @@ namespace AnA
 
             void RemoveChildAt(size_t index) override;
 
-            void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
+            void PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount) override;
             Input::RegularCallBack SelectionChanged{nullptr};
         private:
             int selectionIndex = -1;

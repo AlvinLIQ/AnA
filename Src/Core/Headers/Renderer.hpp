@@ -64,8 +64,8 @@ namespace AnA
         void RecordOffscreenSecondaryCommandBuffer(RecordCallBack recordCallBack);
         void ExecuteOffscreenSecondaryCommandBuffer(CommandBuffer& commandBuffer);
 
-        void Render(CommandBuffer& commandBuffer, Renderable& renderable, Shader& shader, uint32_t bufferIndex = 0);
-        void RenderIndirect(CommandBuffer& commandBuffer, Renderable& renderable, Shader& shader, uint32_t bufferIndex = 0);
+        void Render(CommandBuffer& commandBuffer, Renderable& renderable, Shader& shader);
+        void RenderIndirect(CommandBuffer& commandBuffer, Renderable& renderable, Shader& shader);
 
         void EndFrame();
         void BeginRendering(CommandBuffer& commandBuffer);

@@ -19,7 +19,7 @@ Scrollable::Scrollable() : ItemPresenter()
     PointerEvents[PointerEventType::Scrolled].push_back(scrolled);
 }
 
-void Scrollable::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
+void Scrollable::ApplyRenderInfo(Shape* shapeBuffer, uint32_t& shapeCount)
 {
-    ItemPresenter::ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
+    ItemPresenter::ApplyRenderInfo(shapeBuffer, shapeCount);
 }

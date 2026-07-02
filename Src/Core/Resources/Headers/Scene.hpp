@@ -5,7 +5,6 @@
 #include <mutex>
 #include "Renderable.hpp"
 #include "Model.hpp"
-#include "Descriptor.hpp"
 #include "CommandBuffer.hpp"
 #include "../../Headers/Buffer.hpp"
 #include "../../Headers/Types.hpp"
@@ -80,6 +79,19 @@ namespace AnA
         float penetration;
     };
 
+    struct MeshPushConstant
+    {
+        glm::mat4 projView;
+        VkDeviceAddress vertexPtr;
+        VkDeviceAddress objectPtr;
+        VkDeviceAddress miscPtr;
+        VkDeviceAddress meshletIDPtr;
+        VkDeviceAddress meshletPtr;
+        VkDeviceAddress meshVertexPtr;
+        VkDeviceAddress meshIndexPtr;
+        VkDeviceAddress meshletCullingPtr;
+    };
+
     class Scene : public Renderable
     {
     public:
@@ -98,7 +110,7 @@ namespace AnA
         void RemoveAt(uint32_t meshIndex);
         void RemoveAt(Range removeRange);
         void RemoveAt(std::vector<uint32_t> meshIndices);
-        void Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIndex) override;
+        void Bind(CommandBuffer& commandBuffer, Shader& shader) override;
         void Draw(CommandBuffer& commandBuffer) override;
         void DrawIndirect(CommandBuffer& commandBuffer) override;
         bool NeedUpdate() override
@@ -144,13 +156,17 @@ namespace AnA
         {
             return currentBufferIndex;
         }
-        const Descriptor* GetObjectDescriptor() const
+        uint32_t GetObjectCount() const
         {
-            return objectDescriptor;
+            return objectCount;
         }
-        VkDescriptorSet GetObjectDescriptorSet() const
+        uint32_t GetMeshletCount() const
         {
-            return objectDescriptor->GetSets()[currentBufferIndex];
+            return meshletCount;
+        }
+        uint32_t GetMeshletIDCount() const
+        {
+            return meshletIDCount;
         }
         void (*MeshAppend)(std::string, uint32_t) = nullptr;
     private:
@@ -170,16 +186,16 @@ namespace AnA
         bool needUpdate;
         bool commandBufferNeedUpdate = false;
         std::mutex _mutex;
-        Descriptor* objectDescriptor{nullptr};
-        void createSSBODescriptor();
-        void updateSSBODescriptor();
+        uint32_t objectCount = 0;
+        uint32_t meshletCount = 0;
         uint32_t meshletIDCount = 0;
         std::vector<Buffer> meshletIDBuffers{};
-        std::vector<Buffer> meshletIDCountBuffers{};
 
         uint32_t numOfGroup = 64;
         uint8_t currentBufferIndex = 0;
         uint8_t nextIndex = 1 % MAX_FRAMES_IN_FLIGHT;
+
+        MeshPushConstant meshPushConstant;
         void updateAll();
 
         friend class Animations;

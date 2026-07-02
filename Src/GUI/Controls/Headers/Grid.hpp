@@ -19,8 +19,8 @@ namespace AnA
             Grid();
             ~Grid();
             virtual void Child(Control* newItem, uint32_t x = 0, uint32_t y = 0) override;
-            void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
-            void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
+            void PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount) override;
+            void ApplyRenderInfo(Shape* shapeBuffer, uint32_t& shapeCount) override;
         private:
             std::vector<GridCell> cells[2];
             std::vector<std::vector<uint32_t>> itemsPositions;

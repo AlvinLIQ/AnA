@@ -11,6 +11,12 @@ Buffer::Buffer(Device* mDevice, VkDeviceSize size, VkBufferUsageFlags usage, Vma
     if (bufferSize)
     {
         aDevice->CreateBuffer(size, usage, memUsage, buffer, allocation);
+
+        VkBufferDeviceAddressInfo addressInfo{};
+        addressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+        addressInfo.buffer = buffer;
+
+        address = vkGetBufferDeviceAddress(aDevice->GetLogicalDevice(), &addressInfo);
     }
 }
 
@@ -42,6 +48,11 @@ void Buffer::Flush()
 VkBuffer Buffer::GetBuffer()
 {
     return buffer;
+}
+
+VkDeviceAddress Buffer::GetAddress()
+{
+    return address;
 }
 
 void Buffer::cleanup()

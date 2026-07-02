@@ -72,11 +72,11 @@ Vec2 Control::GetSizeForRender()
     return renderSize;
 }
 
-void Control::PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
+void Control::PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount)
 {
     GetSizeForRender();
     GetActualControlOffset();
-    ApplyRenderInfo(shapeBuffer, imageInfos, shapeCount);
+    ApplyRenderInfo(shapeBuffer, shapeCount);
 }
 
 void Control::InitControl(SwapChain* swapChain)
@@ -177,7 +177,7 @@ VkDescriptorImageInfo Control::GetDescriptorImageInfo()
     return Resources::ResourceManager::GetCurrent()->TextureMap.at(TextureId).GetImageInfo();
 }
 
-void Control::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount)
+void Control::ApplyRenderInfo(Shape* shapeBuffer, uint32_t& shapeCount)
 {
     Vec2 maxBounding = renderOffset + renderSize;
     if (Parent && (Parent->renderOffset.x() + Parent->renderSize.x() < renderOffset.x() ||
@@ -213,12 +213,9 @@ void Control::ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageI
     shapeBuffer[shapeCount].translation = this->translation;
     shapeBuffer[shapeCount].bounding = this->bounding;
     shapeBuffer[shapeCount].color = Color;
+    shapeBuffer[shapeCount].texIndex = Resources::ResourceManager::GetCurrent()->TextureIdMap[TextureId];
     shapeBuffer[shapeCount].texLayer = TextureLayer;
-    if (imageInfos.size() <= shapeCount)
-    {
-        imageInfos.resize(shapeCount + MaxBatchSize);
-    }
-    imageInfos[shapeCount] = this->GetDescriptorImageInfo();
+
     shapeId = shapeCount;
     shapeCount++;
     visible = true;

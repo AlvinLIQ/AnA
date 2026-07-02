@@ -2,6 +2,7 @@
 #extension GL_EXT_mesh_shader : require
 #extension GL_EXT_shader_8bit_storage: require
 #extension GL_EXT_scalar_block_layout: require
+#extension GL_EXT_buffer_reference: require
 #extension GL_GOOGLE_include_directive : require
 
 #include "mesh.h"
@@ -10,80 +11,80 @@
 layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 layout(constant_id = CULL_MODE_ID) const int CullMode = 0;
 
-layout(scalar, set = DEFAULT_VERTEX_LAYOUT, binding = BIND_VERTEX) buffer VertexSSBO
+layout(scalar, buffer_reference) buffer VertexRef
 {
     Vertex vertices[];
 };
 
-layout(scalar, set = DEFAULT_OBJECT_LAYOUT, binding = BIND_OBJECT) buffer ObjectSSBO
+layout(scalar, buffer_reference) buffer ObjectRef
 {
     Object objects[];
 };
 
-layout(std430, set = DEFAULT_OBJECT_LAYOUT, binding = BIND_OBJECT_COUNT) buffer countBuffer
+layout(scalar, buffer_reference) buffer MiscRef
 {
     uint objectCount;
     uint collidedCount;
     uint meshletCount;
+    uint meshletIDCount;
+    vec4 planes[6];
+    vec2 resolution;
+    vec3 cameraPosition;
 };
 
-layout(scalar, set = DEFAULT_OBJECT_LAYOUT, binding = BIND_OBJECT_COLLISION) buffer collisionBuffer
+layout(scalar, buffer_reference) buffer CollisionRef
 {
     CollisionData collisions[];
 };
 
-layout(std430, set = DEFAULT_OBJECT_LAYOUT, binding = BIND_OBJECT_MESHLET_ID) buffer meshletIDSSBO
+layout(scalar, buffer_reference) buffer MeshletIDRef
 {
     MeshletID meshletIDs[];
 };
 
-layout(std430, set = DEFAULT_OBJECT_LAYOUT, binding = BIND_OBJECT_MESHLET_ID_COUNT) buffer MeshletIDCountSSBO
-{
-    uint meshletIDCount;
-};
-
-layout(set = DEFAULT_UBO_LAYOUT, binding = BIND_CAMERA) buffer CameraBufferObject {
-    mat4 proj;
-    mat4 view;
-    vec4 position;
-    vec2 resolution;
-} cbo;
-
-layout(set = DEFAULT_UBO_LAYOUT, binding = BIND_FRUSTUM) uniform Frustum
-{
-    vec4 planes[6];
-} frustum;
-
-layout(std430, set = DEFAULT_MESHLET_LAYOUT, binding = 0) buffer meshletSSBO
+layout(scalar, buffer_reference) buffer MeshletRef
 {
     Meshlet meshlets[];
 };
 
-layout(std430, set = DEFAULT_MESHLET_LAYOUT, binding = 1) buffer meshletVertexSSBO
+layout(scalar, buffer_reference) buffer MeshletVertexRef
 {
     uint vertices[];
-} mvsbo;
-
-layout(set = DEFAULT_MESHLET_LAYOUT, binding = 2) buffer meshletIndexSSBO
-{
-    uint8_t primitives[];
 };
 
-layout(std430, set = DEFAULT_MESHLET_LAYOUT, binding = 3) buffer meshletCullingSSBO
+layout(scalar, buffer_reference) buffer MeshletIndexRef
+{
+    uint8_t indices[];
+};
+
+layout(scalar, buffer_reference) buffer MeshletCullingRef
 {
     BoundingSphere boundings[];
-} mcsbo;
+};
+
+layout(push_constant) uniform PushConstants
+{
+    mat4 viewProj;
+    VertexRef vertexPtr;
+    ObjectRef objectPtr;
+    MiscRef miscPtr;
+    MeshletIDRef meshletIDPtr;
+    MeshletRef meshletPtr;
+    MeshletVertexRef meshVertexPtr;
+    MeshletIndexRef meshIndexPtr;
+    MeshletCullingRef meshletCullingPtr;
+};
 
 taskPayloadSharedEXT MeshPayload taskData;
 shared uint visibleCount;
 
 bool isMeshletVisible(uint meshletID, uint objectID)
 {
-    if (meshletID > meshletCount || objectID > objectCount)
+    if (meshletID > miscPtr.meshletCount || objectID > miscPtr.objectCount)
         return false;
-    Meshlet meshlet = meshlets[meshletID];
-    BoundingSphere boundingSphere = mcsbo.boundings[meshletID];
-    mat4 transform = objects[objectID].transform;
+    Meshlet meshlet = meshletPtr.meshlets[meshletID];
+    BoundingSphere boundingSphere = meshletCullingPtr.boundings[meshletID];
+    mat4 transform = objectPtr.objects[objectID].transform;
     vec3 center = (transform * vec4(boundingSphere.center, 1.0)).xyz;
     float scale = max(length(transform[0].xyz), max(length(transform[1].xyz), length(transform[2].xyz)));
     float radius = boundingSphere.radius * scale;
@@ -94,8 +95,8 @@ bool isMeshletVisible(uint meshletID, uint objectID)
         normal /= len;
     vec3 coneApex = (transform * vec4(boundingSphere.coneApex, 1.0)).xyz;
 
-    if (((CullMode & CULL_FRUSTUM) != 0 && !isSphereInsideFrustum(center, radius, frustum.planes)) ||
-            ((CullMode & CULL_BACKFACE) != 0 && !isMeshletFacingCamera(cbo.position.xyz, coneApex, normal, boundingSphere.cutoff)))
+    if (((CullMode & CULL_FRUSTUM) != 0 && !isSphereInsideFrustum(center, radius, miscPtr.planes)) ||
+            ((CullMode & CULL_BACKFACE) != 0 && !isMeshletFacingCamera(miscPtr.cameraPosition, coneApex, normal, boundingSphere.cutoff)))
         return false;
 
     return true;
@@ -107,9 +108,10 @@ void main()
     visibleCount = 0;
     barrier();
 
-    if (globalID < meshletIDCount)
+    if (globalID < miscPtr.meshletIDCount)
     {
-        bool visible = CullMode == 0 || isMeshletVisible(meshletIDs[globalID].meshletID, meshletIDs[globalID].objectID); //meshletIDs[globalID << 1], meshletIDs[(globalID << 1) ^ 1]);
+        bool visible = isMeshletVisible(meshletIDPtr.meshletIDs[globalID].meshletID,
+            meshletIDPtr.meshletIDs[globalID].objectID); //meshletIDs[globalID << 1], meshletIDs[(globalID << 1) ^ 1]);
 
         if (visible)
         {

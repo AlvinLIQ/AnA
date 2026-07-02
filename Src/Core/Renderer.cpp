@@ -69,15 +69,15 @@ void Renderer::ExecuteOffscreenSecondaryCommandBuffer(CommandBuffer& commandBuff
     &cmd);
 }
 
-void Renderer::Render(CommandBuffer& commandBuffer, Renderable& renderable, Shader& shader, uint32_t bufferIndex)
+void Renderer::Render(CommandBuffer& commandBuffer, Renderable& renderable, Shader& shader)
 {
-    renderable.Bind(commandBuffer, shader, bufferIndex);
+    renderable.Bind(commandBuffer, shader);
     renderable.Draw(commandBuffer);
 }
 
-void Renderer::RenderIndirect(CommandBuffer& commandBuffer, Renderable& renderable, Shader& shader, uint32_t bufferIndex)
+void Renderer::RenderIndirect(CommandBuffer& commandBuffer, Renderable& renderable, Shader& shader)
 {
-    renderable.Bind(commandBuffer, shader, bufferIndex);
+    renderable.Bind(commandBuffer, shader);
     renderable.DrawIndirect(commandBuffer);
 }
 

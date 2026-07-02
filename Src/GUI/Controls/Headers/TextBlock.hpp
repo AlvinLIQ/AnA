@@ -13,7 +13,7 @@ namespace AnA
             TextBlock(const char* newText, glm::vec4 color = {DefaultFontColor});
             ~TextBlock();
 
-            void PrepareDraw(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
+            void PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount) override;
 
             void Text(const char* newText);
             const char* Text();
@@ -23,7 +23,7 @@ namespace AnA
             bool IsWrapping;
             Float FontSize = 14.0f;
             glm::vec4 FontColor{DefaultFontColor};
-            void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
+            void ApplyRenderInfo(Shape* shapeBuffer, uint32_t& shapeCount) override;
         private:
             uint32_t asciiLen = 0;
             uint32_t wideLen = 0;

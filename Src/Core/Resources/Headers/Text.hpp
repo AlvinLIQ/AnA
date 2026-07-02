@@ -1,6 +1,5 @@
 #pragma once
 #include "Renderable.hpp"
-#include "Descriptor.hpp"
 #include "../../Headers/Buffer.hpp"
 #include <unordered_map>
 #include <string>
@@ -38,13 +37,23 @@ namespace AnA
         uint32_t index;
         uint32_t capacity;
     };
+    struct TextPushConstant
+    {
+        VkDeviceAddress vertexPtr;
+        VkDeviceAddress charInfoPtr;
+        VkDeviceAddress textDataPtr;
+        VkDeviceAddress meshletPtr;
+        VkDeviceAddress meshIndexPtr;
+        glm::vec2 resolution;
+    };
+
     class Text : public Renderable
     {
     public:
         Text(Device* mDevice);
         ~Text();
         void Init();
-        void Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIndex) override;
+        void Bind(CommandBuffer& commandBuffer, Shader& shader) override;
         void Draw(CommandBuffer& commandBuffer) override;
         void DrawIndirect(CommandBuffer& commandBuffer) override;
         void Update() override;
@@ -77,11 +86,9 @@ namespace AnA
         Buffer meshletBuffer;
         Buffer meshletIndexBuffer;
         Buffer countBuffers[MAX_FRAMES_IN_FLIGHT];
-        Descriptor* vertexDescriptor{};
-        Descriptor* charInfoDescriptor{};
-        Descriptor* meshDescriptor{};
-        void createSSBODescriptor();
-        void updateSSBODescriptor();
+
+        TextPushConstant textPushConstant;
+
         bool needUpdate = false;
     };
 }

@@ -3,7 +3,6 @@
 #include "../Headers/ShaderCodes.hpp"
 #include "Headers/Device.hpp"
 #include "Resources/Headers/Animation.hpp"
-#include "../Headers/App.hpp"
 
 using namespace AnA;
 using namespace Resources;
@@ -26,11 +25,10 @@ ResourceManager::ResourceManager(Device* mDevice) :
 {
     aDevice = mDevice;
     _resourceManager = this;
-    createMainCameraBuffers();
+    createMiscBuffers();
+    createSampledImageResources();
     //createShadowFramebuffers();
-    createDefaultDescriptors();
     createDefaultShaders();
-    createSamplerDescriptor();
     Meshes.Init();
     MainScene.Init();
     if (aDevice->MeshShaderSupport())
@@ -47,9 +45,7 @@ ResourceManager::ResourceManager(Device* mDevice) :
 
 ResourceManager::~ResourceManager()
 {
-    for (auto& descriptor : samplersDescriptors)
-        delete descriptor;
-
+    sampledImageDescriptor.cleanup(aDevice->GetLogicalDevice());
     TextureMap.clear();
     //for (auto& shader : Shaders)
     //    delete shader;
@@ -73,75 +69,6 @@ ResourceManager* ResourceManager::GetCurrent()
     return _resourceManager;
 }
 
-void ResourceManager::GetBufferInfos(std::vector<Buffer>& buffers, std::vector<VkDescriptorBufferInfo>& bufferInfos)
-{
-    bufferInfos.resize(buffers.size());
-    for (size_t i = 0; i < bufferInfos.size(); i++)
-    {
-        auto& bufferInfo = bufferInfos[i];
-        bufferInfo.buffer = buffers[i].GetBuffer();
-        bufferInfo.offset = 0;
-        bufferInfo.range = buffers[i].GetSize();
-    }
-}
-
-void ResourceManager::GetBufferInfos(Buffer* buffers,
-    uint32_t bufferCount,
-    std::vector<VkDescriptorBufferInfo>& bufferInfos)
-{
-    bufferInfos.resize(bufferCount);
-    for (size_t i = 0; i < bufferInfos.size(); i++)
-    {
-        auto& bufferInfo = bufferInfos[i];
-        bufferInfo.buffer = buffers[i].GetBuffer();
-        bufferInfo.offset = 0;
-        bufferInfo.range = buffers[i].GetSize();
-    }
-}
-
-void ResourceManager::GetBufferInfos(Buffer& buffer,
-    uint32_t bufferCount,
-    std::vector<VkDescriptorBufferInfo>& bufferInfos)
-{
-    bufferInfos.resize(bufferCount);
-    for (size_t i = 0; i < bufferInfos.size(); i++)
-    {
-        auto& bufferInfo = bufferInfos[i];
-        bufferInfo.buffer = buffer.GetBuffer();
-        bufferInfo.offset = 0;
-        bufferInfo.range = buffer.GetSize();
-    }
-}
-
-void ResourceManager::GetBufferInfos(Buffer& buffer,
-    uint32_t bufferCount,
-    std::vector<VkDescriptorBufferInfo>& bufferInfos, uint32_t stride)
-{
-    bufferInfos.resize(bufferCount);
-    VkDeviceSize offset = 0;
-    for (size_t i = 0; i < bufferInfos.size(); i++)
-    {
-        assert(offset + stride <= bufferInfos.size() && "buffer info out of range");
-        auto& bufferInfo = bufferInfos[i];
-        bufferInfo.buffer = buffer.GetBuffer();
-        bufferInfo.offset = offset;
-        bufferInfo.range = offset + stride;
-        offset += stride;
-    }
-}
-
-void ResourceManager::GetImageInfos(const std::vector<Image>& images, const std::vector<VkSampler>& samplers, std::vector<VkDescriptorImageInfo>& imageInfos)
-{
-    imageInfos.resize(images.size());
-    for (size_t i = 0; i < imageInfos.size(); i++)
-    {
-        auto& imageInfo = imageInfos[i];
-        imageInfo.imageLayout = images[i].imageLayout;
-        imageInfo.imageView = images[i].imageView;
-        imageInfo.sampler = samplers[i];
-    }
-}
-
 void ResourceManager::UpdateCamera(float aspect)
 {
     MainCameraInfo.aspect = aspect;
@@ -155,36 +82,24 @@ void ResourceManager::UpdateCamera(float aspect)
     //    -10.0f, 32.0f);
 }
 
-void ResourceManager::UpdateCameraBuffer()
+void ResourceManager::UpdateMiscBuffer()
 {
-    auto& proj = MainCamera.GetProjectionMatrix();
-    auto& view = MainCamera.GetView();
     uint32_t bufferIndex = SwapChain::GetCurrent()->CurrentImage;
-    Cameras::CameraBufferObject& cbo =
-        static_cast<Cameras::CameraBufferObject*>(mainCameraBuffer.GetMappedData())[bufferIndex];
-    cbo.proj = proj;
-    cbo.view = view;
 
-    auto& curPos = App::GetCurrent()->GetInputManager().GetCursorPosition();
-    auto swapChain = SwapChain::GetCurrent();
-    cbo.cursorPosition = {curPos.x.As<float>() * swapChain->ScaleX, curPos.y.As<float>() * swapChain->ScaleY};
-    selectedVertexIndex = cbo.selectedIndex;
     //printf("x: %f y: %f\r", curPos.x.value, curPos.y.value);
-    mainCameraBuffer.Flush();
     //cbo.invView = MainCamera.GetInverseView();
-    uboDynamicOffsets[0] = bufferIndex * sizeof(Cameras::CameraBufferObject);
-
-    auto extent = SwapChain::GetCurrent()->GetExtent();
-    cbo.resolution = {static_cast<float>(extent.width), static_cast<float>(extent.height)};
+    auto& mbo = reinterpret_cast<MiscBufferObject*>(miscBuffer.GetMappedData())[bufferIndex];
+    mbo.objectCount = MainScene.GetMeshCount();
+    mbo.meshletCount = MainScene.GetMeshletCount();
+    mbo.meshletIDCount = MainScene.GetMeshletIDCount();
     if (!LockCamera)
     {
-        cbo.position = MainCamera.GetInverseView()[3];
-        FrustumPlanes::ExtractFrustumPlanes(proj * view, MainCameraFrustumPlanes);
-        memcpy(&static_cast<FrustumPlanes*>(frustumBuffer.GetMappedData())[bufferIndex * 2],
+        FrustumPlanes::ExtractFrustumPlanes(MainCamera.GetViewProj(), MainCameraFrustumPlanes);
+        memcpy(&mbo.planes,
             &MainCameraFrustumPlanes,
             sizeof(FrustumPlanes));
+        mbo.cameraPosition = MainCamera.GetInverseView()[3];
     }
-    uboDynamicOffsets[1] = bufferIndex * sizeof(FrustumPlanes) * 2;
 }
 
 void ResourceManager::Update()
@@ -206,7 +121,7 @@ void ResourceManager::Update()
     //Process Ccamera Animation
     if (Animations.ProcessAnimationInfo(MainCamera.AnimationInfo, MainCamera.CameraTransform, dt))
         MainCamera.UpdateViewMatrix();
-    UpdateCameraBuffer();
+    UpdateMiscBuffer();
 
     Animations.Update(MainScene, dt);
 
@@ -222,19 +137,6 @@ void ResourceManager::Update()
         }
         callbacks.clear();
     }
-    /*
-    recordedCallbacks = 0;
-    for (auto& recordCallBackInfo : RecordCallBacks)
-    {
-        if (recordCallBackInfo.needRecord())
-        {
-            if (!recordedCallbacks)
-                SecondaryCommandBufferPool.Reset();
-
-            recordCallBackInfo.recordCallBack(recordCallBackInfo.offset, recordCallBackInfo.extent);
-            ++recordedCallbacks;
-        }
-    }*/
 }
 
 void ResourceManager::Resize()
@@ -272,6 +174,15 @@ void ResourceManager::Resize()
 #endif
 }
 
+void ResourceManager::BindDescriptors(VkCommandBuffer commandBuffer)
+{
+    VkDescriptorBufferBindingInfoEXT bindInfo{};
+    bindInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_BUFFER_BINDING_INFO_EXT;
+    bindInfo.address = sampledImageDescriptor.buffer.GetAddress();
+    bindInfo.usage = sampledImageDescriptor.buffer.GetUsage();
+    vkCmdBindDescriptorBuffersEXT(commandBuffer, 1, &bindInfo);
+}
+
 void ResourceManager::RecreateResources()
 {
     //cleanupShadowResources();
@@ -288,7 +199,7 @@ uint32_t ResourceManager::AppendTexture(const uint32_t color, uint32_t* index, c
         TexturePathMap.try_emplace(name, texId);
 
     TextureIdMap.emplace(result.first->first, uint32_t(textureInfos.size()));
-    appendSamplerDescriptor(result.first->second.GetImageInfo());
+    appendSampledImage(result.first->second.GetImageInfo());
 
     texId++;
     return result.first->first;
@@ -307,7 +218,7 @@ uint32_t ResourceManager::AppendTexture(const std::string& path, uint32_t* index
     TexturePathMap.emplace(path, texId);
 
     TextureIdMap.emplace(result.first->first, uint32_t(textureInfos.size()));
-    appendSamplerDescriptor(result.first->second.GetImageInfo());
+    appendSampledImage(result.first->second.GetImageInfo());
 
     texId++;
     return result.first->first;
@@ -328,424 +239,94 @@ uint32_t ResourceManager::AppendTexture(VkImage image, VmaAllocation allocation,
         TexturePathMap.try_emplace(name, texId);
 
     TextureIdMap.emplace(result.first->first, uint32_t(textureInfos.size()));
-    appendSamplerDescriptor(result.first->second.GetImageInfo());
+    appendSampledImage(result.first->second.GetImageInfo());
 
     texId++;
     return result.first->first;
 }
 
-void ResourceManager::GetDefaultDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs)
-{
-    descriptorSetConfigs.resize(DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT);
-    for (auto& configs : descriptorSetConfigs)
-        configs.resize(1);
-    auto pConfig = &descriptorSetConfigs[DEFAULT_VERTEX_LAYOUT][0];
-    pConfig->binding = 0;
-    pConfig->descriptorCount = 1;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    pConfig->bindless = true;
-    if (aDevice->MeshShaderSupport())
-        pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-
-
-    descriptorSetConfigs[DEFAULT_OBJECT_LAYOUT].resize(3);
-    pConfig = &descriptorSetConfigs[DEFAULT_OBJECT_LAYOUT][0];
-    pConfig->binding = 0;
-    pConfig->descriptorCount = 1;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
-    pConfig->bindless = true;
-    if (aDevice->MeshShaderSupport())
-        pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-
-    pConfig = &descriptorSetConfigs[DEFAULT_OBJECT_LAYOUT][1];
-    pConfig->binding = 1;
-    pConfig->descriptorCount = 1;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
-    pConfig->bindless = true;
-    if (aDevice->MeshShaderSupport())
-        pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-
-    pConfig = &descriptorSetConfigs[DEFAULT_OBJECT_LAYOUT][2];
-    pConfig->binding = 2;
-    pConfig->descriptorCount = 1;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
-    pConfig->bindless = true;
-    if (aDevice->MeshShaderSupport())
-    {
-        pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-
-        Descriptor::DescriptorConfig meshletIDConfig{};
-        meshletIDConfig.binding = 3;
-        meshletIDConfig.descriptorCount = 1;
-        meshletIDConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-        meshletIDConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-        meshletIDConfig.bindless = true;
-        Descriptor::DescriptorConfig meshletIDCountConfig{};
-        meshletIDCountConfig.binding = 4;
-        meshletIDCountConfig.descriptorCount = 1;
-        meshletIDCountConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-        meshletIDCountConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-        meshletIDCountConfig.bindless = true;
-        descriptorSetConfigs[DEFAULT_OBJECT_LAYOUT].push_back(meshletIDConfig);
-        descriptorSetConfigs[DEFAULT_OBJECT_LAYOUT].push_back(meshletIDCountConfig);
-    }
-
-
-    descriptorSetConfigs[DEFAULT_UBO_LAYOUT].resize(2);
-    pConfig = &descriptorSetConfigs[DEFAULT_UBO_LAYOUT][0];
-    pConfig->binding = 0;
-    pConfig->descriptorCount = 1;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
-    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_TASK_BIT_EXT;
-    pConfig->bindless = false;
-    pConfig->bufferInfos.push_back(
-    {
-        mainCameraBuffer.GetBuffer(),
-        0,
-        sizeof(Cameras::CameraBufferObject)
-    });
-    pConfig->bufferInfos.push_back(pConfig->bufferInfos.back());
-    pConfig = &descriptorSetConfigs[DEFAULT_UBO_LAYOUT][1];
-    pConfig->binding = 1;
-    pConfig->descriptorCount = 1;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-    pConfig->stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT;
-    pConfig->bindless = false;
-    pConfig->bufferInfos.push_back(
-    {
-        frustumBuffer.GetBuffer(),
-        0,
-        sizeof(FrustumPlanes) * 2
-    });
-    pConfig->bufferInfos.push_back(pConfig->bufferInfos.back());
-
-    pConfig = &descriptorSetConfigs[DEFAULT_LIGHT_LAYOUT][0];
-    pConfig->binding = 0;
-    pConfig->descriptorCount = 1;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_MESH_BIT_EXT;
-    pConfig->bindless = false;
-    GetBufferInfos(GlobalLight.GetBuffers(), pConfig->bufferInfos);
-
-    pConfig = &descriptorSetConfigs[DEFAULT_SAMPLER_LAYOUT][0];
-    pConfig->binding = 0;
-    pConfig->descriptorCount = MaxBatchSize;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    pConfig->stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    pConfig->bindless = true;
-
-    pConfig = &descriptorSetConfigs[DEFAULT_SHADOW_SAMPLER_LAYOUT][0];
-    pConfig->binding = 0;
-    pConfig->descriptorCount = 1;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    pConfig->stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    pConfig->imageInfos = ShadowMap.GetDescriptorImageInfos();
-    pConfig->bindless = false;
-    //GetImageInfos(ShadowMap.GetImages(), ShadowMap.GetSamplers(), pConfig->imageInfos);
-
-    ShadowMap.GetUBODescriptorConfig(&descriptorSetConfigs[DEFAULT_CASCADED_UBO_LAYOUT][0]);
-    if (aDevice->MeshShaderSupport())
-    {
-        Descriptor::DescriptorConfig meshletConfig{};
-        meshletConfig.binding = 0;
-        meshletConfig.descriptorCount = 1;
-        meshletConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-        meshletConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-        meshletConfig.bindless = true;
-        Descriptor::DescriptorConfig meshletVertexConfig{};
-        meshletVertexConfig.binding = 1;
-        meshletVertexConfig.descriptorCount = 1;
-        meshletVertexConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-        meshletVertexConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-        meshletVertexConfig.bindless = true;
-        Descriptor::DescriptorConfig meshletIndexConfig{};
-        meshletIndexConfig.binding = 2;
-        meshletIndexConfig.descriptorCount = 1;
-        meshletIndexConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-        meshletIndexConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-        meshletIndexConfig.bindless = true;
-        Descriptor::DescriptorConfig meshletCullingConfig{};
-        meshletCullingConfig.binding = 3;
-        meshletCullingConfig.descriptorCount = 1;
-        meshletCullingConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-        meshletCullingConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT;
-        meshletCullingConfig.bindless = true;
-
-
-        descriptorSetConfigs.push_back({meshletConfig, meshletVertexConfig, meshletIndexConfig, meshletCullingConfig});
-    }
-}
-
-void ResourceManager::GetDefaultShapesDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs)
-{
-    descriptorSetConfigs.resize(2);
-    for (auto& configs : descriptorSetConfigs)
-        configs.resize(1);
-    auto pConfig = descriptorSetConfigs[0].begin();
-    pConfig->binding = 0;
-    pConfig->descriptorCount = 1;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    pConfig->bindless = true;
-    pConfig = descriptorSetConfigs[1].begin();
-    pConfig->binding = 0;
-    pConfig->descriptorCount = MaxBatchSize;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    pConfig->stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    pConfig->bindless = true;
-}
-
-void ResourceManager::GetDefaultTextDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs)
-{
-    descriptorSetConfigs.resize(2);
-    Descriptor::DescriptorConfig config;
-    config.binding = 0;
-    config.descriptorCount = 1;
-    config.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    config.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    config.bindless = true;
-    if (aDevice->MeshShaderSupport())
-        config.stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-    descriptorSetConfigs[0].push_back(config);
-    descriptorSetConfigs[1].push_back(config);
-    config.binding = 1;
-    descriptorSetConfigs[1].push_back(config);
-
-    if (aDevice->MeshShaderSupport())
-    {
-        Descriptor::DescriptorConfig meshletConfig{};
-        meshletConfig.binding = 0;
-        meshletConfig.descriptorCount = 1;
-        meshletConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-        meshletConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-        meshletConfig.bindless = true;
-        Descriptor::DescriptorConfig meshletIndexConfig{};
-        meshletIndexConfig.binding = 1;
-        meshletIndexConfig.descriptorCount = 1;
-        meshletIndexConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-        meshletIndexConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-        meshletIndexConfig.bindless = true;
-        descriptorSetConfigs.push_back({meshletConfig, meshletIndexConfig});
-    }
-}
-
-void ResourceManager::GetDefaultComputeDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs)
-{
-    descriptorSetConfigs.resize(2);
-    descriptorSetConfigs[0].resize(1);
-    auto pConfig = &descriptorSetConfigs[0][0];
-    pConfig->binding = 0;
-    pConfig->descriptorCount = 1;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    pConfig->bindless = true;
-    if (aDevice->MeshShaderSupport())
-        pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-
-    descriptorSetConfigs[1].resize(3);
-    pConfig = &descriptorSetConfigs[1][0];
-    pConfig->binding = 0;
-    pConfig->descriptorCount = 1;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
-    pConfig->bindless = true;
-    if (aDevice->MeshShaderSupport())
-        pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-
-    pConfig = &descriptorSetConfigs[1][1];
-    pConfig->binding = 1;
-    pConfig->descriptorCount = 1;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
-    pConfig->bindless = true;
-    if (aDevice->MeshShaderSupport())
-        pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-
-    pConfig = &descriptorSetConfigs[1][2];
-    pConfig->binding = 2;
-    pConfig->descriptorCount = 1;
-    pConfig->descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    pConfig->stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
-    pConfig->bindless = true;
-    if (aDevice->MeshShaderSupport())
-    {
-        pConfig->stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-
-        Descriptor::DescriptorConfig meshletIDConfig{};
-        meshletIDConfig.binding = 3;
-        meshletIDConfig.descriptorCount = 1;
-        meshletIDConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-        meshletIDConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-        meshletIDConfig.bindless = true;
-        Descriptor::DescriptorConfig meshletIDCountConfig{};
-        meshletIDCountConfig.binding = 4;
-        meshletIDCountConfig.descriptorCount = 1;
-        meshletIDCountConfig.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-        meshletIDCountConfig.stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
-        meshletIDCountConfig.bindless = true;
-        descriptorSetConfigs[1].push_back(meshletIDConfig);
-        descriptorSetConfigs[1].push_back(meshletIDCountConfig);
-    }
-}
-
-void ResourceManager::GetDefaultLightDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs)
-{
-    descriptorSetConfigs.resize(1);
-    descriptorSetConfigs[0].resize(4);
-    auto& framebuffers = SwapChain::GetCurrent()->GetOffscreenFramebuffers();
-    VkSampler colorSampler = SwapChain::GetCurrent()->GetColorSampler();
-    for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-    {
-        auto& framebuffer = framebuffers[i];
-        VkDescriptorImageInfo imageInfo;
-        imageInfo.sampler = colorSampler;
-
-        imageInfo.imageLayout = framebuffer.position.imageLayout;
-        imageInfo.imageView = framebuffer.position.imageView;
-        descriptorSetConfigs[0][0].bindless = false;
-        descriptorSetConfigs[0][0].imageInfos.push_back(imageInfo);
-
-        imageInfo.imageLayout = framebuffer.normal.imageLayout;
-        imageInfo.imageView = framebuffer.normal.imageView;
-        descriptorSetConfigs[0][1].bindless = false;
-        descriptorSetConfigs[0][1].imageInfos.push_back(imageInfo);
-
-        imageInfo.imageLayout = framebuffer.albedo.imageLayout;
-        imageInfo.imageView = framebuffer.albedo.imageView;
-        descriptorSetConfigs[0][2].bindless = false;
-        descriptorSetConfigs[0][2].imageInfos.push_back(imageInfo);
-
-        imageInfo.imageLayout = framebuffer.depth.imageLayout;
-        imageInfo.imageView = framebuffer.depth.imageView;
-        descriptorSetConfigs[0][3].bindless = false;
-        descriptorSetConfigs[0][3].imageInfos.push_back(imageInfo);
-
-    }
-    for (uint32_t i = 0; i < 4; i++)
-    {
-        auto& dConfig = descriptorSetConfigs[0][i];
-        dConfig.descriptorCount = 1;
-        dConfig.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        dConfig.binding = i;
-        dConfig.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-        dConfig.bindless = false;
-    }
-}
-
-void ResourceManager::createMainCameraBuffers()
+void ResourceManager::createMiscBuffers()
 {
     uint32_t imageCount = SwapChain::GetCurrent()->GetImageCount();
-    mainCameraBuffer = Buffer(aDevice,
-        imageCount * sizeof(Cameras::CameraBufferObject),
+    miscBuffer = Buffer(aDevice,
+        imageCount * sizeof(MiscBufferObject),
         VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
         VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-    mainCameraBuffer.Map();
+    miscBuffer.Map();
     MainCamera.SetRotateSpeed(float(imageCount) * 1.5f);
 
-    frustumBuffer = Buffer(aDevice,
-        imageCount * 2 * sizeof(FrustumPlanes),
-        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+}
+
+void ResourceManager::createSampledImageResources()
+{
+    const auto& prop = aDevice->GetDescriptorBufferProperties();
+    sampledImageDescriptor.buffer = Buffer(aDevice,
+        MaxBatchSize * prop.combinedImageSamplerDescriptorSize,
+        VK_BUFFER_USAGE_SAMPLER_DESCRIPTOR_BUFFER_BIT_EXT | VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT,
         VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-    frustumBuffer.Map();
+    sampledImageDescriptor.buffer.Map();
+
+    VkDescriptorSetLayoutBinding binding{};
+    binding.descriptorCount = MaxBatchSize;
+    binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    VkDescriptorSetLayoutCreateInfo layoutInfo{};
+    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    layoutInfo.bindingCount = 1;
+    layoutInfo.pBindings = &binding;
+    layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
+
+    vkCreateDescriptorSetLayout(aDevice->GetLogicalDevice(), &layoutInfo,
+       VK_NULL_HANDLE, &sampledImageDescriptor.setLayout);
 }
 
-void ResourceManager::createDefaultDescriptors()
+void ResourceManager::appendSampledImage(VkDescriptorImageInfo& imageInfo)
 {
-    std::vector<std::vector<Descriptor::DescriptorConfig>> descriptorSetConfigs;
-    GetDefaultDescriptorSetConfig(descriptorSetConfigs);
-    Descriptor::CreateDescriptors(aDevice, descriptorSetConfigs, defaultDescriptors);
+    const auto& prop = aDevice->GetDescriptorBufferProperties();
+    uint8_t* dst = reinterpret_cast<uint8_t*>(sampledImageDescriptor.buffer.GetMappedData()) +
+        (textureInfos.size()) * prop.combinedImageSamplerDescriptorSize;
 
-    std::vector<std::vector<Descriptor::DescriptorConfig>> shapesDescriptorConfig;
-    GetDefaultShapesDescriptorSetConfig(shapesDescriptorConfig);
-    Descriptor::CreateDescriptors(aDevice, shapesDescriptorConfig, shapeDescriptors);
+    VkDescriptorGetInfoEXT getInfo{};
+    getInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_GET_INFO_EXT;
+    getInfo.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    getInfo.data.pCombinedImageSampler = &imageInfo;
+    vkGetDescriptorEXT(aDevice->GetLogicalDevice(), &getInfo, prop.combinedImageSamplerDescriptorSize, dst);
 
-    std::vector<std::vector<Descriptor::DescriptorConfig>> textDescriptorConfig;
-    GetDefaultTextDescriptorSetConfig(textDescriptorConfig);
-    Descriptor::CreateDescriptors(aDevice, textDescriptorConfig, textDescriptors);
-
-    std::vector<std::vector<Descriptor::DescriptorConfig>> computeDescriptorConfig;
-    GetDefaultComputeDescriptorSetConfig(computeDescriptorConfig);
-    Descriptor::CreateDescriptors(aDevice, computeDescriptorConfig, computeDescriptors);
-
-    std::vector<std::vector<Descriptor::DescriptorConfig>> lightDescriptorConfig;
-    GetDefaultLightDescriptorSetConfig(lightDescriptorConfig);
-    Descriptor::CreateDescriptors(aDevice, lightDescriptorConfig, lightDescriptors);
-}
-
-void ResourceManager::createSamplerDescriptor()
-{
-    auto& descriptorSetLayout =
-        Resources::ResourceManager::GetCurrent()->Shaders[VERTEX_PIPELINE_ID].GetDescriptors()[DEFAULT_SAMPLER_LAYOUT].GetLayout();
-    auto descriptor = new Descriptor(aDevice, 1,
-        4096,
-        1,
-        descriptorSetLayout,
-        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
-        );
-    samplersDescriptors.push_back(descriptor);
-}
-
-void ResourceManager::appendSamplerDescriptor(VkDescriptorImageInfo& imageInfo)
-{
-    uint32_t remaining = static_cast<uint32_t>(textureInfos.size()) % MaxBatchSize;
-    uint32_t offset = static_cast<uint32_t>(textureInfos.size()) - remaining;
     textureInfos.push_back(imageInfo);
-    if (MaxBatchSize - remaining && samplersDescriptors.size())
-    {
-        remaining = std::min(remaining + 1, uint32_t(MaxBatchSize));
-        samplersDescriptors.back()->UpdateDescriptorSets(&textureInfos[offset], remaining, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
-        offset += remaining;
-    }
-
-    if (offset < textureInfos.size())
-    {
-        createSamplerDescriptor();
-        samplersDescriptors.back()->UpdateDescriptorSets(&textureInfos[offset], static_cast<uint32_t>(textureInfos.size()) - offset, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
-    }
 }
 
+/*
 std::vector<ShaderInfo> basicShaderStageInfos{{Basic_vert, 0, VK_SHADER_STAGE_VERTEX_BIT, false, {}},
                                   {Basic_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
-std::vector<ShaderInfo> shapeShaderStageInfos{{Shape_vert, 0, VK_SHADER_STAGE_VERTEX_BIT, false, {}},
-                                  {Shape_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
 std::vector<ShaderInfo> pointShaderStageInfos{{Point_vert, 0, VK_SHADER_STAGE_VERTEX_BIT, false, {}},
                                   {Point_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
 std::vector<ShaderInfo> csmShaderStageInfos{{CascadedShadowMapping_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT, false, {}},
-                                  {CascadedShadowMapping_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT, false, {}}};
+                                  {CascadedShadowMapping_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT, false, {}}};*/
+std::vector<ShaderInfo> shapeShaderStageInfos{{Shape_vert, 0, VK_SHADER_STAGE_VERTEX_BIT, false, {}},
+                                  {Shape_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
 std::initializer_list<int> shaderConstants{DEFAULT_CULL};
 std::vector<ShaderInfo> meshShaderStageInfos{{Mesh_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT, false, shaderConstants},
                                   {Mesh_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT, false, shaderConstants},
                                       {Mesh_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
+/*
 std::vector<ShaderInfo> lightShaderStageInfos{{Light_vert, 0, VK_SHADER_STAGE_VERTEX_BIT, false, {}},
-                                {Light_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
+                                {Light_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};*/
 std::vector<ShaderInfo> textShaderStageInfos{{Text_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT, false, {}},
                                         {Text_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT, false, {}},
                                             {Text_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
+/*
 std::vector<ShaderInfo> terrainShaderStageInfos{{Terrain_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT, false, {}},
                                         {Terrain_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT, false, {}},
                                             {Mesh_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
-std::vector<ShaderInfo> collisionShaderStageInfos{{CollisionDetect_comp, 0, VK_SHADER_STAGE_COMPUTE_BIT, false, {}}};
+std::vector<ShaderInfo> collisionShaderStageInfos{{CollisionDetect_comp, 0, VK_SHADER_STAGE_COMPUTE_BIT, false, {}}};*/
+
 void ResourceManager::createDefaultShaders()
 {
     Shaders.reserve(10);
-    Shaders.emplace_back(aDevice, basicShaderStageInfos, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
-
-    Shaders.emplace_back(aDevice, shapeShaderStageInfos, shapeDescriptors, SHAPE_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(glm::vec2));
-    Shaders.emplace_back(aDevice, pointShaderStageInfos, defaultDescriptors, DEFAULT_DESCRIPTOR_SET_LAYOUT_COUNT, 0, 0, VK_PRIMITIVE_TOPOLOGY_POINT_LIST);
-
-    Shaders.emplace_back(aDevice, collisionShaderStageInfos, computeDescriptors, 2, 0, 0);
-    Shaders.emplace_back(aDevice, lightShaderStageInfos, lightDescriptors, 1, 0, 0);
-    if (aDevice->MeshShaderSupport())
-    {
-        Shaders.emplace_back(aDevice, csmShaderStageInfos, defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0);
-        Shaders.emplace_back(aDevice, meshShaderStageInfos, defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(uint32_t));
-        Shaders.emplace_back(aDevice, textShaderStageInfos, textDescriptors, 3, 0, sizeof(glm::vec2));
-        Shaders.emplace_back(aDevice, terrainShaderStageInfos, defaultDescriptors, MESH_DESCRIPTOR_SET_LAYOUT_COUNT, 0, sizeof(TerrainPushConstants));
-    }
+    Shaders.emplace_back(aDevice, meshShaderStageInfos, sampledImageDescriptor.setLayout, sizeof(MeshPushConstant));
+    Shaders.emplace_back(aDevice, textShaderStageInfos, VK_NULL_HANDLE, sizeof(TextPushConstant));
+    Shaders.emplace_back(aDevice, shapeShaderStageInfos, sampledImageDescriptor.setLayout, sizeof(ShapePushConstant));
 }
 
 const uint32_t defaultTextureColors[] =

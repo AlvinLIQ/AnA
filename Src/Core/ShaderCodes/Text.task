@@ -1,15 +1,16 @@
 #version 450
 #extension GL_EXT_mesh_shader: require
 #extension GL_EXT_shader_8bit_storage: require
-#extension GL_EXT_scalar_block_layout: enable
-#extension GL_KHR_shader_subgroup_ballot : require
+#extension GL_EXT_scalar_block_layout: require
+#extension GL_EXT_buffer_reference: require
 #extension GL_GOOGLE_include_directive : require
 
 #include "mesh.h"
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
-layout(scalar, set = 0, binding = 0) buffer VertexBufferObject {
+layout(scalar, buffer_reference) buffer VertexRef
+{
     vec2 vertices[];
 };
 
@@ -17,10 +18,10 @@ struct CharacterInfo
 {
     uint8_t ch;
     uint index;
-    uint textIndex;
 };
 
-layout(scalar, set = 1, binding = 0) buffer CharacterInfoBufferObject {
+layout(scalar, buffer_reference) buffer CharacterInfoRef
+{
     CharacterInfo charInfos[];
 };
 
@@ -34,37 +35,39 @@ struct TextData
     uint count;
 };
 
-layout(scalar, set = 1, binding = 1) buffer TextDataBufferObject {
+layout(scalar, buffer_reference) buffer TextDataRef
+{
     TextData textInfos[];
 };
 
-layout(scalar, set = 2, binding = 0) buffer meshletSSBO
+layout(scalar, buffer_reference) buffer MeshletRef
 {
     Meshlet meshlets[];
 };
 
-layout(scalar, set = 2, binding = 1) buffer meshletVertexSSBO
+layout(scalar, buffer_reference) buffer MeshIndexRef
 {
-    uint vertices[];
-} mvsbo;
-
-layout(scalar, set = 2, binding = 2) buffer meshletIndexSSBO
-{
-    uint8_t primitives[];
+    uint8_t indices[];
 };
 
-layout(scalar, set = 2, binding = 3) buffer meshletCountSSBO
+layout(push_constant) uniform PushConstants
 {
-    uint meshletCount;
+    VertexRef vertexPtr;
+    CharacterInfoRef charInfoPtr;
+    TextDataRef textDataPtr;
+    MeshletRef meshletPtr;
+    MeshIndexRef meshIndexPtr;
+    vec2 resolution;
 };
 
-taskPayloadSharedEXT struct {
+taskPayloadSharedEXT struct
+{
     uint textIndex;
 } taskData;
 
 void main()
 {
-    if (textInfos[gl_WorkGroupID.x].size == 0.)
+    if (textDataPtr.textInfos[gl_WorkGroupID.x].size == 0.)
     {
         EmitMeshTasksEXT(0, 0, 0);
         return;
@@ -72,5 +75,5 @@ void main()
 
     taskData.textIndex = gl_WorkGroupID.x;
     barrier();
-    EmitMeshTasksEXT(textInfos[gl_WorkGroupID.x].count, 1, 1);
+    EmitMeshTasksEXT(textDataPtr.textInfos[gl_WorkGroupID.x].count, 1, 1);
 }

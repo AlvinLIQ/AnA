@@ -1,7 +1,8 @@
 #version 460
-#extension GL_EXT_mesh_shader: require
+#extension GL_EXT_mesh_shader : require
 #extension GL_EXT_shader_8bit_storage: require
 #extension GL_EXT_scalar_block_layout: require
+#extension GL_EXT_buffer_reference: require
 #extension GL_GOOGLE_include_directive : require
 
 #include "mesh.h"
@@ -9,7 +10,7 @@
 
 layout(local_size_x = MAX_PRIMITIVES, local_size_y = 1, local_size_z = 1) in;
 layout(triangles, max_vertices = MAX_VERTICES, max_primitives = MAX_PRIMITIVES) out;
-layout(constant_id = CULL_MODE_ID) const int CullMode = 0;
+layout(constant_id = 0) const int CullMode = 0;
 
 #ifdef PER_PRIMITIVE_NORMAL
 struct VertexOutput {
@@ -31,63 +32,68 @@ struct VertexOutput {
 
 layout(location = 0) out VertexOutput vertexOutput[];
 
-layout(scalar, set = DEFAULT_VERTEX_LAYOUT, binding = BIND_VERTEX) buffer VertexSSBO
+layout(scalar, buffer_reference) buffer VertexRef
 {
     Vertex vertices[];
 };
 
-layout(std430, set = DEFAULT_OBJECT_LAYOUT, binding = BIND_OBJECT) buffer ObjectSSBO
+layout(scalar, buffer_reference) buffer ObjectRef
 {
     Object objects[];
 };
 
-layout(std430, set = DEFAULT_OBJECT_LAYOUT, binding = BIND_OBJECT_MESHLET_ID) buffer meshletIDSSBO
+layout(scalar, buffer_reference) buffer MiscRef
 {
-    uint meshletIDs[];
-};
-
-layout(std430, set = DEFAULT_OBJECT_LAYOUT, binding = BIND_OBJECT_MESHLET_ID_COUNT) buffer MeshletIDCountSSBO
-{
+    uint objectCount;
+    uint collidedCount;
+    uint meshletCount;
     uint meshletIDCount;
-};
-
-layout(set = DEFAULT_UBO_LAYOUT, binding = BIND_CAMERA) buffer CameraBufferObject {
-    mat4 proj;
-    mat4 view;
-    vec4 position;
+    vec4 planes[6];
     vec2 resolution;
-} cbo;
-
-layout(set = 2, binding = 0) uniform LightBufferObject {
-    mat4 proj;
-    mat4 view;
-    vec3 direction;
-    vec3 color;
-    float ambient;
-} lbo;
-
-#define SHADOW_MAP_CASCADE_COUNT 2
-struct Cascade {
-    mat4 viewProj;
-    float split;
+    vec3 cameraPosition;
 };
-layout(set = 5, binding = 0) uniform UBO {
-    Cascade[SHADOW_MAP_CASCADE_COUNT] cascades;
-} ubo;
 
-layout(set = DEFAULT_MESHLET_LAYOUT, binding = 0) buffer meshletSSBO
+layout(scalar, buffer_reference) buffer CollisionRef
+{
+    CollisionData collisions[];
+};
+
+layout(scalar, buffer_reference) buffer MeshletIDRef
+{
+    MeshletID meshletIDs[];
+};
+
+layout(scalar, buffer_reference) buffer MeshletRef
 {
     Meshlet meshlets[];
 };
 
-layout(std430, set = DEFAULT_MESHLET_LAYOUT, binding = 1) buffer meshletVertexSSBO
+layout(scalar, buffer_reference) buffer MeshletVertexRef
 {
     uint vertices[];
-} mvsbo;
+};
 
-layout(set = DEFAULT_MESHLET_LAYOUT, binding = 2) buffer meshletIndexSSBO
+layout(scalar, buffer_reference) buffer MeshletIndexRef
 {
-    uint8_t primitives[];
+    uint8_t indices[];
+};
+
+layout(scalar, buffer_reference) buffer MeshletCullingRef
+{
+    BoundingSphere boundings[];
+};
+
+layout(push_constant) uniform PushConstants
+{
+    mat4 viewProj;
+    VertexRef vertexPtr;
+    ObjectRef objectPtr;
+    MiscRef miscPtr;
+    MeshletIDRef meshletIDPtr;
+    MeshletRef meshletPtr;
+    MeshletVertexRef meshVertexPtr;
+    MeshletIndexRef meshIndexPtr;
+    MeshletCullingRef meshletCullingPtr;
 };
 
 taskPayloadSharedEXT MeshPayload taskData;
@@ -96,23 +102,21 @@ shared vec3 worldVertices[MAX_VERTICES];
 
 void main()
 {
-    uint midOffset = taskData.visibleIndices[gl_WorkGroupID.x] << 1;
-    uint meshletID = meshletIDs[midOffset];
-    uint objectID = meshletIDs[midOffset ^ 1];
-    Meshlet meshlet = meshlets[meshletID];
+    uint midOffset = taskData.visibleIndices[gl_WorkGroupID.x];
+    uint meshletID = meshletIDPtr.meshletIDs[midOffset].meshletID;
+    uint objectID = meshletIDPtr.meshletIDs[midOffset].objectID;
+    Meshlet meshlet = meshletPtr.meshlets[meshletID];
     uint primitiveCount = meshlet.indexCount / 3;
     SetMeshOutputsEXT(meshlet.vertexCount, primitiveCount);
 
-    mat4 viewProj = cbo.proj * cbo.view;
-    mat4 transform = objects[objectID].transform;
+    mat4 transform = objectPtr.objects[objectID].transform;
 
     uint i = gl_LocalInvocationID.x;
     if (i < meshlet.vertexCount)
     {
-        Vertex vertex = vertices[mvsbo.vertices[meshlet.vertexOffset + i]];
+        Vertex vertex = vertexPtr.vertices[meshVertexPtr.vertices[meshlet.vertexOffset + i]];
         vec4 vertexPos = transform * vec4(vertex.position, 1.0);
         worldVertices[i] = vertexPos.xyz;
-        vec4 viewPos = cbo.view * vertexPos;
         gl_MeshVerticesEXT[i].gl_Position = viewProj * vertexPos;
         gl_MeshVerticesEXT[i].gl_PointSize = 6.0;
         vertexOutput[i].texCoord = vertex.uv;
@@ -134,18 +138,18 @@ void main()
     {
         uint indexOffset = meshlet.indexOffset + i * 3;
         gl_PrimitiveTriangleIndicesEXT[i] = uvec3(
-                primitives[indexOffset + 0],
-                primitives[indexOffset + 1],
-                primitives[indexOffset + 2]
+                meshIndexPtr.indices[indexOffset + 0],
+                meshIndexPtr.indices[indexOffset + 1],
+                meshIndexPtr.indices[indexOffset + 2]
             );
-        vec3 a = worldVertices[uint(primitives[indexOffset + 0])];
-        vec3 b = worldVertices[uint(primitives[indexOffset + 1])];
-        vec3 c = worldVertices[uint(primitives[indexOffset + 2])];
+        vec3 a = worldVertices[uint(meshIndexPtr.indices[indexOffset + 0])];
+        vec3 b = worldVertices[uint(meshIndexPtr.indices[indexOffset + 1])];
+        vec3 c = worldVertices[uint(meshIndexPtr.indices[indexOffset + 2])];
         vec3 normal = normalize(cross(b - a, c - a));
         vec3 coneApex = (a + b + c) / 3.0;
 
         if ((CullMode & CULL_BACKFACE) != 0)
-            gl_MeshPrimitivesEXT[i].gl_CullPrimitiveEXT = dot(normal, normalize(cbo.position.xyz - coneApex)) <= 0.0;
+            gl_MeshPrimitivesEXT[i].gl_CullPrimitiveEXT = dot(normal, normalize(miscPtr.cameraPosition - coneApex)) <= 0.0;
         #ifdef PER_PRIMITIVE_NORMAL
         primitiveNormals[i] = normal;
         #endif

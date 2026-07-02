@@ -9,7 +9,7 @@ namespace AnA
         {
         public:
             Scrollable();
-            void ApplyRenderInfo(Shape* shapeBuffer, std::vector<VkDescriptorImageInfo>& imageInfos, uint32_t& shapeCount) override;
+            void ApplyRenderInfo(Shape* shapeBuffer, uint32_t& shapeCount) override;
         private:
             static void scrolled(void*, AnA::PointerEventArgs& args);
         };

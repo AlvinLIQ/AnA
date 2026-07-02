@@ -587,134 +587,6 @@ void Device::CreateSampler(VkSampler* pSampler, enum VkSamplerAddressMode sample
         throw std::runtime_error("Failed to create sampler");
 }
 
-void Device::CreateDescriptorPool(uint32_t descriptorSetCount, uint32_t descriptorCount, VkDescriptorPool& descriptorPool, VkDescriptorType descriptorType, VkCommandPoolCreateFlags flags)
-{
-    VkDescriptorPoolSize poolSizes[1];
-    poolSizes[0].type = descriptorType;
-    poolSizes[0].descriptorCount = static_cast<uint32_t>(descriptorCount * descriptorSetCount);
-
-    VkDescriptorPoolCreateInfo poolInfo{};
-    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = numsof(poolSizes);
-    poolInfo.pPoolSizes = poolSizes;
-    poolInfo.maxSets = static_cast<uint32_t>(descriptorSetCount);
-    poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT | flags;
-
-    if (vkCreateDescriptorPool(logicalDevice, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create descriptor pool!");
-}
-
-void Device::CreateDescriptorPool(uint32_t descriptorSetCount, const VkDescriptorPoolSize* poolSizes, uint32_t poolSizeCount, VkDescriptorPool& descriptorPool, VkCommandPoolCreateFlags flags)
-{
-    VkDescriptorPoolCreateInfo poolInfo{};
-    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = poolSizeCount;
-    poolInfo.pPoolSizes = poolSizes;
-    poolInfo.maxSets = descriptorSetCount;
-    poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT | flags;
-
-    if (vkCreateDescriptorPool(logicalDevice, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create descriptor pool!");
-}
-
-void Device::UpdateDescriptorSet(const VkDescriptorBufferInfo& bufferInfo, uint32_t binding, VkDescriptorType descriptorType, VkDescriptorSet descriptorSet)
-{
-    VkWriteDescriptorSet descriptorWrite{};
-    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    descriptorWrite.dstSet = descriptorSet;
-    descriptorWrite.dstBinding = binding;
-    descriptorWrite.dstArrayElement = 0;
-    descriptorWrite.descriptorType = descriptorType;
-    descriptorWrite.descriptorCount = 1;
-    descriptorWrite.pBufferInfo = &bufferInfo;
-    vkUpdateDescriptorSets(logicalDevice, 1,
-        &descriptorWrite, 0, nullptr);
-}
-
-void Device::CreateDescriptorSets(Buffer* buffers, VkDeviceSize bufferSize, uint32_t binding, uint32_t descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets)
-{
-    std::vector<VkDescriptorSetLayout> layouts(descriptorSetCount, descriptorSetLayout);
-    VkDescriptorSetAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorPool = descriptorPool;
-    allocInfo.descriptorSetCount = static_cast<uint32_t>(descriptorSetCount);
-    allocInfo.pSetLayouts = layouts.data();
-    descriptorSets.resize(descriptorSetCount);
-
-    if (vkAllocateDescriptorSets(logicalDevice, &allocInfo, descriptorSets.data()) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to allocate descriptor sets!");
-    }
-    for (uint32_t i = 0; i < descriptorSetCount; i++)
-    {
-        auto& buffer = buffers[i];
-        VkDescriptorBufferInfo bufferInfo{};
-        bufferInfo.buffer = buffer.GetBuffer();
-        bufferInfo.offset = 0;
-        bufferInfo.range = bufferSize;
-        UpdateDescriptorSet(bufferInfo, binding, descriptorType, descriptorSets[i]);
-    }
-}
-
-void Device::CreateDescriptorSets(VkDescriptorImageInfo* imageInfos, uint32_t binding, uint32_t descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, const VkDescriptorType descriptorType, std::vector<VkDescriptorSet>& descriptorSets)
-{
-    std::vector<VkDescriptorSetLayout> layouts(descriptorSetCount, descriptorSetLayout);
-    VkDescriptorSetAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorPool = descriptorPool;
-    allocInfo.descriptorSetCount = static_cast<uint32_t>(descriptorSetCount);
-    allocInfo.pSetLayouts = layouts.data();
-    descriptorSets.resize(descriptorSetCount);
-
-    if (vkAllocateDescriptorSets(logicalDevice, &allocInfo, descriptorSets.data()) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to allocate descriptor sets!");
-    }
-    for (uint32_t i = 0; i < descriptorSetCount; i++)
-    {
-        VkWriteDescriptorSet descriptorWrite{};
-        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrite.dstSet = descriptorSets[i];
-        descriptorWrite.dstBinding = binding;
-        descriptorWrite.dstArrayElement = 0;
-        descriptorWrite.descriptorType = descriptorType;
-        descriptorWrite.descriptorCount = 1;
-        descriptorWrite.pImageInfo = &imageInfos[i];
-        vkUpdateDescriptorSets(logicalDevice, 1,
-            &descriptorWrite, 0, nullptr);
-    }
-}
-
-void Device::CreateDescriptorSets(uint32_t descriptorSetCount, VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout, std::vector<VkDescriptorSet>& descriptorSets, void* pNext)
-{
-    std::vector<VkDescriptorSetLayout> layouts(descriptorSetCount, descriptorSetLayout);
-    VkDescriptorSetAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorPool = descriptorPool;
-    allocInfo.descriptorSetCount = descriptorSetCount;
-    allocInfo.pSetLayouts = layouts.data();
-    allocInfo.pNext = pNext;
-    descriptorSets.resize(descriptorSetCount);
-    if (vkAllocateDescriptorSets(logicalDevice, &allocInfo, descriptorSets.data()) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to allocate descriptor sets!");
-    }
-}
-
-void Device::CreateDescriptorSets(uint32_t descriptorSetCount, VkDescriptorPool& descriptorPool,
-    VkDescriptorSetLayout& descriptorSetLayout, std::vector<VkDescriptorSet>& descriptorSets,
-    std::vector<std::vector<VkWriteDescriptorSet>>& writes)
-{
-    CreateDescriptorSets(descriptorSetCount, descriptorPool, descriptorSetLayout, descriptorSets, nullptr);
-    for (uint32_t i = 0; i < descriptorSetCount; i++)
-    {
-        for (auto& write : writes[i])
-            write.dstSet = descriptorSets[i];
-        vkUpdateDescriptorSets(logicalDevice, static_cast<uint32_t>(writes[i].size()),
-            writes[i].data(), 0, nullptr);
-    }
-}
-
 VkDescriptorSetLayoutBinding Device::CreateLayoutBinding(uint32_t binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags, uint32_t descriptorCount)
 {
     VkDescriptorSetLayoutBinding layoutBinding{};
@@ -897,8 +769,12 @@ void Device::pickPhysicalDevice()
     std::vector<VkPhysicalDevice> devices(deviceCount);
     vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
     int currentScore, bestScore = 0;
-    VkPhysicalDeviceMeshShaderPropertiesEXT _meshShaderProperties = {};
+    VkPhysicalDeviceDescriptorBufferPropertiesEXT _descriptorBufferProperties{};
+    _descriptorBufferProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_PROPERTIES_EXT;
+
+    VkPhysicalDeviceMeshShaderPropertiesEXT _meshShaderProperties{};
     _meshShaderProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_PROPERTIES_EXT;
+    _meshShaderProperties.pNext = &_descriptorBufferProperties;
 
     VkPhysicalDeviceExtendedDynamicState3PropertiesEXT dynamicStateProperties{};
     dynamicStateProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_3_PROPERTIES_EXT;
@@ -943,6 +819,7 @@ void Device::pickPhysicalDevice()
                 physicalDevice = device;
                 physicalDeviceProperties = deviceProperties2.properties;
                 meshShaderProperties = _meshShaderProperties;
+                descriptorBufferProperties = _descriptorBufferProperties;
                 queueFamilyIndices = indices;
                 bestScore = currentScore;
             }
@@ -1013,7 +890,7 @@ bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device, DeviceFeatures
 
     _deviceFeatures.unifiedLayoutsSupport = unifiedLayoutsFeatures.unifiedImageLayouts == VK_TRUE;
     _deviceFeatures.hostImageCopySupport = hostImageCopyFeatures.hostImageCopy == VK_TRUE;
-    _deviceFeatures.bufferDeviceAddressSupport = bufferDeviceAddressFeatures.bufferDeviceAddress == VK_TRUE;
+    _deviceFeatures.bufferDeviceAddressSupport = true;//bufferDeviceAddressFeatures.bufferDeviceAddress == VK_TRUE;
 
     return requiredExtensions.empty();
 }
@@ -1064,10 +941,15 @@ void Device::createLogicalDevice()
     vulkan13Features.shaderDemoteToHelperInvocation = VK_TRUE;
     vulkan13Features.pNext = &vulkan14Features;
 
+    VkPhysicalDeviceDescriptorBufferFeaturesEXT descriptorBufferFeatures{};
+    descriptorBufferFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_FEATURES_EXT;
+    descriptorBufferFeatures.descriptorBuffer = VK_TRUE;
+    descriptorBufferFeatures.pNext = &vulkan13Features;
+
     VkPhysicalDevicePrimitiveTopologyListRestartFeaturesEXT primitiveRestartFeatures{};
     primitiveRestartFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRIMITIVE_TOPOLOGY_LIST_RESTART_FEATURES_EXT;
     primitiveRestartFeatures.primitiveTopologyListRestart = VK_TRUE;
-    primitiveRestartFeatures.pNext = &vulkan13Features;
+    primitiveRestartFeatures.pNext = &descriptorBufferFeatures;
 
     VkPhysicalDeviceExtendedDynamicState3FeaturesEXT dynamicState3Features{};
     dynamicState3Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_3_FEATURES_EXT;
@@ -1107,6 +989,7 @@ void Device::createLogicalDevice()
     deviceFeatures2.features.fillModeNonSolid = VK_TRUE;
     deviceFeatures2.features.fragmentStoresAndAtomics = VK_TRUE;
     deviceFeatures2.features.shaderInt16 = VK_TRUE;
+    deviceFeatures2.features.shaderInt64 = VK_TRUE;
 #ifdef ENABLE_MESH_SHADER
     VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures = {};
     meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;

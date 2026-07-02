@@ -1,5 +1,6 @@
-#version 460
-#extension GL_EXT_scalar_block_layout: enable
+#version 450
+#extension GL_EXT_scalar_block_layout: require
+#extension GL_EXT_buffer_reference: require
 
 layout(location = 0) out vec4 fragColor;
 layout(location = 1) out vec4 bounding;
@@ -13,13 +14,20 @@ struct Shape
     vec2 translation;
     vec4 bounding;
     vec4 color;
+    uint texIndex;
     uint texLayer;
 };
 
-layout(scalar, set = 0, binding = 0) buffer SSBO
+layout(scalar, buffer_reference) buffer ShapeRef
 {
     Shape shapes[];
-} ssbo;
+};
+
+layout(push_constant) uniform PushConstants
+{
+    ShapeRef shapePtr;
+    vec2 resolution;
+};
 
 const vec2 vertices[] = vec2[](
         vec2(-1.0, -1.0),
@@ -43,10 +51,10 @@ void main()
 {
     uint index = gl_VertexIndex / 6;
     uint vIndex = gl_VertexIndex % 6;
-    gl_Position = vec4(ssbo.shapes[index].scale * vertices[vIndex] + ssbo.shapes[index].translation, 0.0, 1.0);
-    fragColor = ssbo.shapes[index].color;
-    bounding = ssbo.shapes[index].bounding;
-    texIndex = index;
+    gl_Position = vec4(shapePtr.shapes[index].scale * vertices[vIndex] + shapePtr.shapes[index].translation, 0.0, 1.0);
+    fragColor = shapePtr.shapes[index].color;
+    bounding = shapePtr.shapes[index].bounding;
+    texIndex = shapePtr.shapes[index].texIndex;
     texCoord = uvs[vIndex];
-    texLayer = ssbo.shapes[index].texLayer;
+    texLayer = shapePtr.shapes[index].texLayer;
 }

@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 #include "../../Headers/Device.hpp"
 #include "../../Headers/Buffer.hpp"
-#include "Descriptor.hpp"
 
 #define SHADOW_MAP_CASCADE_COUNT 2
 
@@ -69,24 +68,18 @@ namespace AnA
             {
                 return cascadeBuffers;
             }
-            std::vector<VkDescriptorImageInfo>& GetDescriptorImageInfos()
-            {
-                return descriptorImageInfos;
-            }
             std::vector<VkFramebuffer>& GetFramebuffers()
             {
                 return framebuffers;
             }
             glm::vec4 FrustumPlanes[6];
             void UpdateBuffers(Cameras::Camera& camera, Cameras::Camera& light, uint32_t bufferIndex);
-            void GetUBODescriptorConfig(Descriptor::DescriptorConfig* pConfig);
         private:
             Device* aDevice{nullptr};
             std::vector<VkSampler> samplers;
             std::vector<Image> images;
             std::vector<Buffer> cascadeBuffers;
             std::vector<glm::mat4> cascades;
-            std::vector<VkDescriptorImageInfo> descriptorImageInfos;
             std::vector<VkFramebuffer> framebuffers;
             void createShadowResources();
             void cleanupShadowResources();

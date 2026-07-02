@@ -4,7 +4,6 @@
 #include "Animation.hpp"
 #include "Meshes.hpp"
 #include "Scene.hpp"
-#include "Descriptor.hpp"
 #include "Shader.hpp"
 #include "Lights.hpp"
 #include "Text.hpp"
@@ -51,8 +50,27 @@ namespace AnA
         uint32_t texture;
         uint32_t calNormal;
     };
+    struct MiscBufferObject
+    {
+        uint32_t objectCount;
+        uint32_t collidedCount;
+        uint32_t meshletCount;
+        uint32_t meshletIDCount;
+        glm::vec4 planes[6];
+        glm::vec2 resolution;
+        glm::vec3 cameraPosition;
+    };
     namespace Resources
     {
+        struct DescriptorResources
+        {
+            VkDescriptorSetLayout setLayout;
+            Buffer buffer;
+            void cleanup(VkDevice device)
+            {
+                vkDestroyDescriptorSetLayout(device, setLayout, VK_NULL_HANDLE);
+            }
+        };
         class ResourceManager
         {
         public:
@@ -81,10 +99,12 @@ namespace AnA
             FrustumPlanes MainCameraFrustumPlanes{};
             bool LockCamera = false;
             void UpdateCamera(float aspect);
-            void UpdateCameraBuffer();
+            void UpdateMiscBuffer();
             void Update();
 
             void Resize();
+
+            void BindDescriptors(VkCommandBuffer commandBuffer);
 
             Resources::Meshes Meshes;
             Scene MainScene;
@@ -92,19 +112,18 @@ namespace AnA
             //Test scene
             //Scene Points;
             std::vector<Shader> Shaders;
-            void GetDefaultDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);
-            void GetDefaultShapesDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);
-            void GetDefaultTextDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);
-            void GetDefaultComputeDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);
-            void GetDefaultLightDescriptorSetConfig(std::vector<std::vector<Descriptor::DescriptorConfig>>& descriptorSetConfigs);
-            const std::array<uint32_t, 2>& GetDefaultUBODynamicOffsets() const
-            {
-                return uboDynamicOffsets;
-            }
 
             uint32_t GetSelectedVertexIndex()
             {
                 return selectedVertexIndex;
+            }
+            VkDeviceAddress GetMiscBufferAddress()
+            {
+                return miscBuffer.GetAddress() + SwapChain::GetCurrent()->CurrentImage * sizeof(MiscBufferObject);
+            }
+            DescriptorResources& GetSampledImageResources()
+            {
+                return sampledImageDescriptor;
             }
             AnA::Text TextContext;
             Lights::Light GlobalLight;
@@ -130,29 +149,20 @@ namespace AnA
             uint32_t AppendTexture(const std::string& path, uint32_t* index = nullptr);
             uint32_t AppendTexture(VkImage image, VmaAllocation allocation,
                 VkImageView imageView, uint32_t* index = nullptr, const std::string& name = "");
-            std::vector<Descriptor*>& GetSamplerDescriptors()
-            {
-                return samplersDescriptors;
-            }
-
-            std::vector<Descriptor>& GetDefaultDescriptors()
-            {
-                return defaultDescriptors;
-            }
 
             MeshShaderOutput MeshShaderOutputData;
         private:
             Device* aDevice;
-            Buffer mainCameraBuffer;
-            Buffer frustumBuffer;
-            void createMainCameraBuffers();
+            Buffer miscBuffer;
+            void createMiscBuffers();
+
+            DescriptorResources sampledImageDescriptor;
+            void createSampledImageResources();
+            void appendSampledImage(VkDescriptorImageInfo& imageInfo);
 
             std::vector<NormalCallBack> callbacks{};
             std::mutex callbacksMutex{};
             std::vector<VkDescriptorImageInfo> textureInfos;
-            std::vector<Descriptor*> samplersDescriptors;
-            void createSamplerDescriptor();
-            void appendSamplerDescriptor(VkDescriptorImageInfo& imageInfo);
 
             uint32_t selectedVertexIndex = 0;
             //uint32_t recordedCallbacks = 0;
@@ -164,12 +174,6 @@ namespace AnA
             void cleanupShadowResources();*/
             void createDefaultShaders();
             void initTextures();
-            void createDefaultDescriptors();
-            std::vector<Descriptor> defaultDescriptors;
-            std::vector<Descriptor> shapeDescriptors;
-            std::vector<Descriptor> textDescriptors;
-            std::vector<Descriptor> computeDescriptors;
-            std::vector<Descriptor> lightDescriptors;
             std::array<uint32_t, 2> uboDynamicOffsets{0, 0};
         };
     }

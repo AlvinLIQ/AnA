@@ -2,7 +2,6 @@
 #include "../../Headers/Device.hpp"
 #include "../../Headers/Buffer.hpp"
 #include "Renderable.hpp"
-#include "Descriptor.hpp"
 
 namespace AnA
 {
@@ -12,6 +11,7 @@ namespace AnA
         glm::vec2 translation{};
         glm::vec4 bounding{0.0f, 0.0f, 1.0f, 1.0f};
         glm::vec4 color{1.0f};
+        uint32_t texIndex{0};
         uint32_t texLayer{0};
     };
     struct ShapeInfo
@@ -24,6 +24,11 @@ namespace AnA
         uint32_t TextureLayer{0};
         uint32_t shapeId;
     };
+    struct ShapePushConstant
+    {
+        VkDeviceAddress shapePtr;
+        glm::vec2 resolution;
+    };
     class Shapes : public Renderable
     {
     public:
@@ -34,11 +39,9 @@ namespace AnA
         Shapes(Device* mDeivce);
         Shapes(const Shapes&) = delete;
         Shapes& operator=(const Shapes&) = delete;
-        Shapes(Shapes&& shapes) noexcept : aDevice{shapes.aDevice}, shapeBuffer{std::move(shapes.shapeBuffer)}, indirectBuffer{std::move(shapes.indirectBuffer)}, ssboDescriptor{shapes.ssboDescriptor}
+        Shapes(Shapes&& shapes) noexcept : aDevice{shapes.aDevice}, shapeBuffer{std::move(shapes.shapeBuffer)}, indirectBuffer{std::move(shapes.indirectBuffer)}
         {
             shapeCount = shapes.shapeCount;
-            shapes.samplersDescriptor = nullptr;
-            shapes.ssboDescriptor = nullptr;
             shapes.shapeCount = 0;
         }
         Shapes& operator=(Shapes&& shapes) noexcept
@@ -51,11 +54,7 @@ namespace AnA
                 shapeCount = shapes.shapeCount;
                 indirectBuffer = std::move(shapes.indirectBuffer);
                 countBuffer = std::move(shapes.countBuffer);
-                ssboDescriptor = shapes.ssboDescriptor;
-                samplersDescriptor = shapes.samplersDescriptor;
 
-                shapes.samplersDescriptor = nullptr;
-                shapes.ssboDescriptor = nullptr;
                 shapes.shapeCount = 0;
 
             }
@@ -63,7 +62,7 @@ namespace AnA
         }
         virtual ~Shapes();
         void PrepareDraw(Controls::Control* control);
-        void Bind(CommandBuffer& commandBuffer, Shader& shader, uint32_t bufferIndex) override;
+        void Bind(CommandBuffer& commandBuffer, Shader& shader) override;
         void Draw(CommandBuffer& commandBuffer) override;
         void DrawIndirect(CommandBuffer& commandBuffer) override;
         void Update() override
@@ -78,11 +77,9 @@ namespace AnA
         Buffer shapeBuffer{};
         Buffer indirectBuffer{};
         Buffer countBuffer{};
-        Descriptor* ssboDescriptor{nullptr};
-        Descriptor* samplersDescriptor{nullptr};
         uint32_t shapeCount{};
-        std::vector<VkDescriptorImageInfo> imageInfos{};
         VkDescriptorSet sets[2];
+        ShapePushConstant shapePushConstant;
         bool updated = false;
     };
 }
