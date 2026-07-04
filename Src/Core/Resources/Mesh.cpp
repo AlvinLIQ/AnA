@@ -1,6 +1,8 @@
 #include "Headers/Mesh.hpp"
+#include "Headers/Buffer.hpp"
 #include "Headers/Device.hpp"
 #include "Resources/Headers/ResourceManager.hpp"
+#include <cstdint>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
@@ -49,6 +51,51 @@ Mesh::Mesh(const MeshData& meshData)
 Mesh::~Mesh()
 {
 
+}
+
+void Mesh::Load(Device* device, MeshletInfo* meshletInfos, uint32_t& meshletOffset)
+{
+    if (loaded)
+        return;
+
+    CopyBufferInfo infos[] =
+    {
+        {&vertexBuffer, data.vertices.data(), data.vertices.size() * sizeof(data.vertices[0])},
+        {&meshletVertexBuffer, nullptr, meshletVertexCount * sizeof(uint32_t)},
+        {&meshletIndexBuffer, nullptr, meshletIndexCount},
+    };
+    CopyBuffer(device, numsof(infos), infos);
+
+    uint32_t meshletVertexOffset = 0, meshletIndexOffset = 0;
+    uint32_t* meshletVertexData = reinterpret_cast<uint32_t*>(meshletVertexBuffer.GetMappedData());
+    uint8_t* meshletIndexData = reinterpret_cast<uint8_t*>(meshletIndexBuffer.GetMappedData());
+    for (auto& meshlet : meshlets)
+    {
+        memcpy(&meshletVertexData[meshletVertexOffset], meshlet.vertices, sizeof(uint32_t) * meshlet.vertexCount);
+        memcpy(&meshletIndexData[meshletIndexOffset], meshlet.indices, meshlet.indexCount);
+        meshletInfos[meshletOffset] =
+            {meshletVertexOffset, meshletIndexOffset,
+                            meshlet.vertexCount, meshlet.indexCount,
+                            {meshlet.center, meshlet.radius,
+                                meshlet.normal, meshlet.cutoff,
+                                meshlet.coneApex, 0.0f}};
+
+        meshletVertexOffset += meshlet.vertexCount;
+        meshletIndexOffset += meshlet.indexCount;
+
+        meshletOffset++;
+    }
+}
+
+void Mesh::Unload()
+{
+    if (loaded)
+    {
+        vertexBuffer = {};
+        meshletVertexBuffer = {};
+        meshletIndexBuffer = {};
+        loaded = false;
+    }
 }
 
 void Mesh::CreateMeshFromFile(const char *filePath, std::shared_ptr<Mesh>& mesh)

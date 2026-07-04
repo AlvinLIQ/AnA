@@ -1,5 +1,6 @@
 #pragma once
 #include "Device.hpp"
+#include "vulkan/vulkan_core.h"
 #include <string.h>
 #include <stdint.h>
 
@@ -119,4 +120,25 @@ namespace AnA
         void replace();
         void cleanup();
     };
+
+    struct CopyBufferInfo
+    {
+        Buffer* dstBuffer;
+        void* src;
+        size_t size;
+    };
+
+    inline void CopyBuffer(Device* device, uint32_t infoCount, CopyBufferInfo* infos, VkBufferUsageFlags usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT)
+    {
+        for (uint32_t i = 0; i < infoCount; i++)
+        {
+            if (infos[i].dstBuffer->GetSize() < infos[i].size)
+            {
+                *infos[i].dstBuffer = Buffer(device, infos[i].size, usage, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+                infos[i].dstBuffer->Map();
+            }
+            if (infos[i].src)
+                memcpy(infos[i].dstBuffer->GetMappedData(), infos[i].src, infos[i].size);
+        }
+    }
 }

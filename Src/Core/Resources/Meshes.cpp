@@ -1,6 +1,7 @@
 #include "Headers/Meshes.hpp"
 #include "Headers/Buffer.hpp"
 #include "Headers/SwapChain.hpp"
+#include "vulkan/vulkan_core.h"
 
 using namespace AnA;
 using namespace Resources;
@@ -119,89 +120,40 @@ void Meshes::Update()
 
 void Meshes::initFrameResource(MeshFrameResource& frameResource)
 {
-    if (frameResource.vertexBuffer.GetSize() <= vertexCount * sizeof(Mesh::Vertex))
+    if (frameResource.vertexBuffer.GetSize() <= loadedSet.size() * sizeof(VkDeviceSize))
     {
-        frameResource.vertexBuffer = Buffer(aDevice, (vertexCount + 1000) * sizeof(Mesh::Vertex),
+        frameResource.vertexBuffer = Buffer(aDevice, (loadedSet.size() + 10) * sizeof(VkDeviceSize),
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         frameResource.vertexBuffer.Map();
     }
 
-    if (frameResource.meshletBuffer.GetSize() <= meshletCount * sizeof(MeshletInfo))
+    if (frameResource.meshletBuffer.GetSize() <= meshletCount * sizeof(Mesh::MeshletInfo))
     {
-        frameResource.meshletBuffer = Buffer(aDevice, (meshletCount + 100) * sizeof(MeshletInfo),
+        frameResource.meshletBuffer = Buffer(aDevice, (meshletCount + 100) * sizeof(Mesh::MeshletInfo),
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
 
         frameResource.meshletBuffer.Map();
     }
-
-    if (frameResource.meshletVertexBuffer.GetSize() <= meshletVertexCount * sizeof(uint32_t))
-    {
-        frameResource.meshletVertexBuffer = Buffer(aDevice, (meshletVertexCount + 500) * sizeof(uint32_t),
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-
-        frameResource.meshletVertexBuffer.Map();
-    }
-
-    if (frameResource.meshletIndexBuffer.GetSize() <= meshletIndexCount)
-    {
-        frameResource.meshletIndexBuffer = Buffer(aDevice, meshletIndexCount + 1000,
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-
-        frameResource.meshletIndexBuffer.Map();
-    }
-
-    if (frameResource.meshletCullingBuffer.GetSize() <= meshletCount * sizeof(BoundingSphere))
-    {
-        frameResource.meshletCullingBuffer = Buffer(aDevice, (meshletCount + 100) * sizeof(BoundingSphere),
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-        frameResource.meshletCullingBuffer.Map();
-    }
 }
 
 void Meshes::rebuildFrameResource(MeshFrameResource& frameResource)
 {
-    size_t vertexOffset = 0, indexOffset = 0, meshletOffset = 0;
-    uint32_t meshletVertexOffset = 0, meshletIndexOffset = 0;
-    auto vertexBufferData = reinterpret_cast<Mesh::Vertex*>(frameResource.vertexBuffer.GetMappedData());
-    auto meshletBufferData = reinterpret_cast<MeshletInfo*>(frameResource.meshletBuffer.GetMappedData());
-    auto meshletVertexBufferData = reinterpret_cast<uint32_t*>(frameResource.meshletVertexBuffer.GetMappedData());
-    auto meshletIndexBufferData = reinterpret_cast<uint8_t*>(frameResource.meshletIndexBuffer.GetMappedData());
-    auto meshletCullingBufferData = reinterpret_cast<BoundingSphere*>(frameResource.meshletCullingBuffer.GetMappedData());
+    uint32_t meshletOffset = 0, vertexOffset = 0;
+    auto vertexBufferData = reinterpret_cast<VkDeviceAddress*>(frameResource.vertexBuffer.GetMappedData());
+    auto meshletBufferData = reinterpret_cast<Mesh::MeshletInfo*>(frameResource.meshletBuffer.GetMappedData());
 
     for (auto& id : loadedSet)
     {
         auto mesh = MeshMap[id];
+        mesh->meshletOffset = meshletOffset;
+        if (!mesh->loaded)
+            mesh->Load(aDevice, meshletBufferData, meshletOffset);
+        else
+            meshletOffset += uint32_t(mesh->meshlets.size());
 
-        for (size_t i = 0; i < mesh->data.vertices.size(); i++)
-            vertexBufferData[vertexOffset + i] = mesh->data.vertices[i];
-
-        mesh->meshletOffset = uint32_t(meshletOffset);
-        for (auto& meshlet : mesh->meshlets)
-        {
-            meshletBufferData[meshletOffset] =
-                {uint32_t(meshletVertexOffset), uint32_t(meshletIndexOffset),
-                    meshlet.vertexCount, meshlet.indexCount};
-            for (uint32_t j = 0; j < meshlet.vertexCount; j++)
-                meshletVertexBufferData[meshletVertexOffset + j] = meshlet.vertices[j] + uint32_t(vertexOffset);
-            for (uint32_t j = 0; j < meshlet.indexCount; j++)
-                meshletIndexBufferData[meshletIndexOffset + j] = meshlet.indices[j];
-
-            meshletVertexOffset += meshlet.vertexCount;
-            meshletIndexOffset += meshlet.indexCount;
-
-            meshletCullingBufferData[meshletOffset++] = {meshlet.center, meshlet.radius,
-                meshlet.normal, meshlet.cutoff,
-                meshlet.coneApex, 0.0f};
-        }
-        mesh->vertexOffset = uint32_t(vertexOffset);
-        mesh->indexOffset = uint32_t(indexOffset);
-        vertexOffset += mesh->data.vertices.size();
-        indexOffset += mesh->data.indices.size();
+        vertexBufferData[vertexOffset++] = mesh->vertexBuffer.GetAddress();
     }
 }
 

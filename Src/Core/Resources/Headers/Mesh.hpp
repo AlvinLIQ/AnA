@@ -1,6 +1,7 @@
 #pragma once
 
 #include <volk.h>
+#include "../../Headers/Buffer.hpp"
 #include "Animation.hpp"
 
 #include <functional>
@@ -83,7 +84,23 @@ namespace AnA
             glm::vec3 coneApex;
             float cutoff;
         };
-
+        struct BoundingSphere
+        {
+            glm::vec3 center;
+            float radius;
+            glm::vec3 normal;
+            float cutoff;
+            glm::vec3 coneApex;
+            float padding;
+        };
+        struct MeshletInfo
+        {
+            uint32_t vertexOffset;
+            uint32_t indexOffset;
+            uint32_t vertexCount;
+            uint32_t indexCount;
+            BoundingSphere bounding;
+        };
         struct BSPNode
         {
             BSPNode* left = nullptr;
@@ -125,6 +142,12 @@ namespace AnA
         uint32_t indexOffset = 0;
         uint32_t meshletOffset = 0;
 
+        Buffer vertexBuffer;
+        Buffer meshletVertexBuffer;
+        Buffer meshletIndexBuffer;
+        bool loaded = false;
+        void Load(Device* device, MeshletInfo* meshletInfos, uint32_t& meshletOffset);
+        void Unload();
 
         static void CreateMeshFromFile(const char* filePath, std::shared_ptr<Mesh>& mesh);
         static void CreateMeshFromFile(const char *filePath, MeshData& meshData);

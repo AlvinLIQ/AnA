@@ -20,13 +20,6 @@ namespace AnA
         uint32_t meshId;
         AnimationInfo animationInfo{};
     };
-    struct MeshletInfo
-    {
-        uint32_t vertexOffset;
-        uint32_t indexOffset;
-        uint32_t vertexCount;
-        uint32_t indexCount;
-    };
 
     struct Object
     {
@@ -53,16 +46,6 @@ namespace AnA
     {
         glm::vec4 planes[6];
         static void ExtractFrustumPlanes(const glm::mat4& m, FrustumPlanes& fp);
-    };
-
-    struct BoundingSphere
-    {
-        glm::vec3 center;
-        float radius;
-        glm::vec3 normal;
-        float cutoff;
-        glm::vec3 coneApex;
-        float padding;
     };
 
     struct ObjectData
