@@ -17,7 +17,7 @@
 
 namespace AnA
 {
-    struct Model
+    struct Mesh
     {
         struct Vertex
         {
@@ -98,7 +98,7 @@ namespace AnA
             glm::mat4 transform{};
         };
 
-        struct ModelInfo
+        struct MeshData
         {
             std::vector<Node> nodes;
             std::vector<Vertex> vertices;
@@ -109,16 +109,10 @@ namespace AnA
             std::string texturePath;
         };
 
-        struct ModelStorageBufferObject
-        {
-            glm::mat4 model;
-            static VkDescriptorSetLayoutBinding GetBindingDescriptionSet();
-        };
+        Mesh(const MeshData& meshData);
+        ~Mesh();
 
-        Model(const ModelInfo& modelInfo);
-        ~Model();
-
-        ModelInfo info{};
+        MeshData data{};
         glm::vec3 center{};
         float radius{};
         std::vector<Animation> Animations;
@@ -132,11 +126,10 @@ namespace AnA
         uint32_t meshletOffset = 0;
 
 
-        static void CreateModelFromFile(const char* filePath, std::shared_ptr<Model>& model);
-        static void CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo);
+        static void CreateMeshFromFile(const char* filePath, std::shared_ptr<Mesh>& mesh);
+        static void CreateMeshFromFile(const char *filePath, MeshData& meshData);
         static void CreateVerticesFromFile(const char* filePath, std::vector<Vertex>& vertices);
         static bool CreateQuad(std::vector<Vertex> &vertices, std::vector<Index> &indices, Index a, Index b, Index c, Index d);
-        static void CreateTerrainFromVertices(std::vector<Vertex>& vertices, std::vector<Index> &terrainVertices, size_t period);
 
         static void ExtractPitchYaw(glm::vec3& normal, uint16_t& pitch, uint16_t& yaw);
     private:

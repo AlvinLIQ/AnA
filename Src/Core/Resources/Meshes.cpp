@@ -31,8 +31,8 @@ bool Meshes::Create(const char* filePath, uint32_t& id)
         id = iter->second;
         return false;
     }
-    std::shared_ptr<Model> mesh;
-    Model::CreateModelFromFile(filePath, mesh);
+    std::shared_ptr<Mesh> mesh;
+    Mesh::CreateMeshFromFile(filePath, mesh);
     MeshPathIndexMap.emplace(filePath, meshId);
     id = meshId;
     MeshMap.emplace(meshId++, mesh);
@@ -40,10 +40,10 @@ bool Meshes::Create(const char* filePath, uint32_t& id)
     return true;
 }
 
-bool Meshes::Create(std::shared_ptr<AnA::Model> model, uint32_t& id)
+bool Meshes::Create(std::shared_ptr<AnA::Mesh> mesh, uint32_t& id)
 {
     id = meshId;
-    MeshMap.emplace(meshId++, model);
+    MeshMap.emplace(meshId++, mesh);
 
     return true;
 }
@@ -54,7 +54,7 @@ void Meshes::Load(const char* filePath, uint32_t& id)
     Load(id);
 }
 
-void Meshes::Load(std::shared_ptr<Model> mesh, uint32_t& id)
+void Meshes::Load(std::shared_ptr<Mesh> mesh, uint32_t& id)
 {
     id = meshId;
     MeshMap.emplace(meshId++, mesh);
@@ -72,32 +72,32 @@ void Meshes::Load(const uint32_t id)
     mesh->vertexOffset = uint32_t(vertexCount);
     mesh->indexOffset = uint32_t(indexCount);
     mesh->meshletOffset = meshletCount;
-    vertexCount += (mesh->info.vertices.size());
-    indexCount += (mesh->info.indices.size());
+    vertexCount += (mesh->data.vertices.size());
+    indexCount += (mesh->data.indices.size());
     meshletCount += uint32_t(mesh->meshlets.size());
     meshletVertexCount += uint32_t(mesh->meshletVertexCount);
     meshletIndexCount += uint32_t(mesh->meshletIndexCount);
     needUpdate = true;
 }
 
-void Meshes::Append(uint32_t id, std::vector<AnA::Model::Vertex>& vertices)
+void Meshes::Append(uint32_t id, std::vector<AnA::Mesh::Vertex>& vertices)
 {
     std::unique_lock<std::mutex> lock(_mutex);
     if (MeshMap.find(id) == MeshMap.end())
         return;
 
     auto mesh = MeshMap[id];
-    bool isLastMesh = mesh->vertexOffset + uint32_t(mesh->info.vertices.size()) == vertexCount;
-    mesh->info.vertices.insert(mesh->info.vertices.end(), vertices.begin(), vertices.end());
+    bool isLastMesh = mesh->vertexOffset + uint32_t(mesh->data.vertices.size()) == vertexCount;
+    mesh->data.vertices.insert(mesh->data.vertices.end(), vertices.begin(), vertices.end());
     if (loadedSet.find(id) == loadedSet.end())
         return;
 
     if (isLastMesh &&
         frameResources[currentBufferIndex].vertexBuffer.GetSize() >
-        (vertexCount + uint32_t(vertices.size())) * sizeof(Model::Vertex))
+        (vertexCount + uint32_t(vertices.size())) * sizeof(Mesh::Vertex))
     {
         auto vertexBufferData =
-            reinterpret_cast<Model::Vertex*>(frameResources[currentBufferIndex].vertexBuffer.GetMappedData());
+            reinterpret_cast<Mesh::Vertex*>(frameResources[currentBufferIndex].vertexBuffer.GetMappedData());
         for (uint32_t i = 0; i < uint32_t(vertices.size()); i++)
         {
             vertexBufferData[i + vertexCount] = vertices[i];
@@ -119,20 +119,12 @@ void Meshes::Update()
 
 void Meshes::initFrameResource(MeshFrameResource& frameResource)
 {
-    if (frameResource.vertexBuffer.GetSize() <= vertexCount * sizeof(Model::Vertex))
+    if (frameResource.vertexBuffer.GetSize() <= vertexCount * sizeof(Mesh::Vertex))
     {
-        frameResource.vertexBuffer = Buffer(aDevice, (vertexCount + 1000) * sizeof(Model::Vertex),
+        frameResource.vertexBuffer = Buffer(aDevice, (vertexCount + 1000) * sizeof(Mesh::Vertex),
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         frameResource.vertexBuffer.Map();
-    }
-
-    if (frameResource.indexBuffer.GetSize() <= indexCount * sizeof(Model::Index))
-    {
-        frameResource.indexBuffer = Buffer(aDevice, (indexCount + 1000) * sizeof(Model::Index),
-            VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-        frameResource.indexBuffer.Map();
     }
 
     if (frameResource.meshletBuffer.GetSize() <= meshletCount * sizeof(MeshletInfo))
@@ -175,8 +167,7 @@ void Meshes::rebuildFrameResource(MeshFrameResource& frameResource)
 {
     size_t vertexOffset = 0, indexOffset = 0, meshletOffset = 0;
     uint32_t meshletVertexOffset = 0, meshletIndexOffset = 0;
-    auto vertexBufferData = reinterpret_cast<Model::Vertex*>(frameResource.vertexBuffer.GetMappedData());
-    auto indexBufferData = reinterpret_cast<Model::Index*>(frameResource.indexBuffer.GetMappedData());
+    auto vertexBufferData = reinterpret_cast<Mesh::Vertex*>(frameResource.vertexBuffer.GetMappedData());
     auto meshletBufferData = reinterpret_cast<MeshletInfo*>(frameResource.meshletBuffer.GetMappedData());
     auto meshletVertexBufferData = reinterpret_cast<uint32_t*>(frameResource.meshletVertexBuffer.GetMappedData());
     auto meshletIndexBufferData = reinterpret_cast<uint8_t*>(frameResource.meshletIndexBuffer.GetMappedData());
@@ -186,10 +177,8 @@ void Meshes::rebuildFrameResource(MeshFrameResource& frameResource)
     {
         auto mesh = MeshMap[id];
 
-        for (size_t i = 0; i < mesh->info.vertices.size(); i++)
-            vertexBufferData[vertexOffset + i] = mesh->info.vertices[i];
-        for (size_t i = 0; i < mesh->info.indices.size(); i++)
-            indexBufferData[indexOffset + i] = mesh->info.indices[i] + Model::Index(vertexOffset);
+        for (size_t i = 0; i < mesh->data.vertices.size(); i++)
+            vertexBufferData[vertexOffset + i] = mesh->data.vertices[i];
 
         mesh->meshletOffset = uint32_t(meshletOffset);
         for (auto& meshlet : mesh->meshlets)
@@ -211,19 +200,16 @@ void Meshes::rebuildFrameResource(MeshFrameResource& frameResource)
         }
         mesh->vertexOffset = uint32_t(vertexOffset);
         mesh->indexOffset = uint32_t(indexOffset);
-        vertexOffset += mesh->info.vertices.size();
-        indexOffset += mesh->info.indices.size();
+        vertexOffset += mesh->data.vertices.size();
+        indexOffset += mesh->data.indices.size();
     }
 }
 
 uint32_t Meshes::prepareFrameResources()
 {
     uint32_t bufferIndex = currentBufferIndex;
-    if (vertexCount * sizeof(Model::Vertex) >
+    if (vertexCount * sizeof(Mesh::Vertex) >
         frameResources[currentBufferIndex].vertexBuffer.GetSize() ||
-
-        indexCount * sizeof(Model::Index) >
-        frameResources[currentBufferIndex].indexBuffer.GetSize() ||
 
         meshletVertexCount * sizeof(uint32_t) >
         frameResources[currentBufferIndex].meshletVertexBuffer.GetSize() ||

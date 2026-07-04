@@ -1,4 +1,4 @@
-#include "Headers/Model.hpp"
+#include "Headers/Mesh.hpp"
 #include "Headers/Device.hpp"
 #include "Resources/Headers/ResourceManager.hpp"
 #include <glm/ext/matrix_transform.hpp>
@@ -26,19 +26,19 @@
 
 using namespace AnA;
 
-Model::Model(const ModelInfo& modelInfo)
+Mesh::Mesh(const MeshData& meshData)
 {
-    info = std::move(modelInfo);
-    if (modelInfo.indices.size()) //indexed model
+    data = std::move(meshData);
+    if (data.indices.size()) //indexed model
     {
         center = {};
-        for(auto& vertex : info.vertices)
+        for(auto& vertex : data.vertices)
         {
             center += vertex.position;
         }
-        center /= float(info.vertices.size());
+        center /= float(data.vertices.size());
         radius = 0.0f;
-        for(auto& vertex : info.vertices)
+        for(auto& vertex : data.vertices)
         {
             radius = std::max(radius, glm::distance(vertex.position, center));
         }
@@ -46,155 +46,40 @@ Model::Model(const ModelInfo& modelInfo)
     }
 }
 
-Model::~Model()
+Mesh::~Mesh()
 {
 
 }
 
-void Model::CreateModelFromFile(const char *filePath, std::shared_ptr<Model>& model)
+void Mesh::CreateMeshFromFile(const char *filePath, std::shared_ptr<Mesh>& mesh)
 {
-    ModelInfo modelInfo{};
-    CreateMeshFromFile(filePath, modelInfo);
+    MeshData meshData{};
+    CreateMeshFromFile(filePath, meshData);
 
-    modelInfo.indexStep = static_cast<Index>(modelInfo.vertices.size());
-    model = std::make_shared<Model>(std::move(modelInfo));
-    model->Path = filePath;
+    meshData.indexStep = static_cast<Index>(meshData.vertices.size());
+    mesh = std::make_shared<Mesh>(std::move(meshData));
+    mesh->Path = filePath;
     /*
     FILE* fp = fopen("b_vertices", "wb");
-    fwrite(model->info.vertices.data(), sizeof(Model::Vertex), model->info.vertices.size(), fp);
+    fwrite(model->info.vertices.data(), sizeof(Mesh::Vertex), model->info.vertices.size(), fp);
     fflush(fp);
     fclose(fp);
     fp = fopen("b_indices", "wb");
-    fwrite(model->info.indices.data(), sizeof(Model::Index), model->info.indices.size(), fp);
+    fwrite(model->info.indices.data(), sizeof(Mesh::Index), model->info.indices.size(), fp);
     fflush(fp);
     fclose(fp);
     */
 }
-#ifdef TINYOBJ_LOADER
-void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo)
-{
-    tinyobj::attrib_t attrib;
-    std::vector<tinyobj::shape_t> shapes;
-    std::vector<tinyobj::material_t> materials;
-    std::string warn, err;
 
-    if (!tinyobj::LoadObj(&attrib,& shapes,& materials,& warn,& err, filePath, "Models/"))
-        throw std::runtime_error(warn + err);
-
-    std::unordered_map<Vertex, Index, VertexHash> vertexMap;
-    //std::set<glm::vec3, Vec3Less> facesSet, edgesSet;
-    modelInfo.minBounding = glm::vec3(FLT_MAX);
-    modelInfo.maxBounding = glm::vec3(-FLT_MAX);
-    for (const auto& shape : shapes)
-    {
-        modelInfo.nodes.push_back({});
-        for (size_t i = 0; i < shape.mesh.indices.size(); i++)
-        {
-            const auto& index = shape.mesh.indices[i];
-            Vertex vertex{};
-
-            if (index.vertex_index >= 0)
-            {
-                vertex.position =
-                {
-                    attrib.vertices[3 * static_cast<size_t>(index.vertex_index)],
-                    attrib.vertices[3 * static_cast<size_t>(index.vertex_index) + 1],
-                    attrib.vertices[3 * static_cast<size_t>(index.vertex_index) + 2]
-                };
-                /*
-                auto colorIndex = 3 * index.vertex_index + 2;
-                if (colorIndex < attrib.colors.size())
-                {
-                    vertex.color =
-                    {
-                        attrib.colors[colorIndex - 2],
-                        attrib.colors[colorIndex - 1],
-                        attrib.colors[colorIndex],
-                    };
-                }
-                if (materials.size())
-                {
-                    vertex.color =
-                    {
-                        materials[0].diffuse[0],
-                        materials[0].diffuse[1],
-                        materials[0].diffuse[2]
-                    };
-                }*/
-            }
-            if (index.normal_index >= 0)
-            {
-                vertex.normal =
-                {
-                    attrib.normals[3 * static_cast<size_t>(index.normal_index)],
-                    attrib.normals[3 * static_cast<size_t>(index.normal_index) + 1],
-                    attrib.normals[3 * static_cast<size_t>(index.normal_index) + 2]
-                };
-            }
-            if (index.texcoord_index >= 0)
-            {
-                vertex.uv =
-                {
-                    attrib.texcoords[2 * static_cast<size_t>(index.texcoord_index)],
-                    attrib.texcoords[2 * static_cast<size_t>(index.texcoord_index) + 1],
-                };
-            }
-            auto result = vertexMap.find(vertex);
-            if (result != vertexMap.end())
-            {
-                modelInfo.indices.push_back(result->second);
-                modelInfo.nodes.back().indices.push_back(result->second);
-            }
-            else
-            {
-                modelInfo.indices.push_back(static_cast<Index>(vertexMap.size()));
-                modelInfo.nodes.back().indices.push_back(static_cast<Index>(vertexMap.size()));
-
-                vertexMap.insert(std::pair<Vertex, Index>(vertex, static_cast<Index>(vertexMap.size())));
-                modelInfo.vertices.push_back(vertex);
-                modelInfo.minBounding = glm::min(modelInfo.minBounding, vertex.position);
-                modelInfo.maxBounding = glm::max(modelInfo.maxBounding, vertex.position);
-            }
-/*
-            if (i > 0 && (i + 1) % 3 == 0)
-            {
-                Index v0 = modelInfo.indices[i - 2], v1 = modelInfo.indices[i - 1], v2 = modelInfo.indices[i];
-                glm::vec3 edges[3] = {
-                glm::normalize(modelInfo.vertices[v2].position - modelInfo.vertices[v1].position),
-                glm::normalize(modelInfo.vertices[v2].position - modelInfo.vertices[v0].position),
-                glm::normalize(modelInfo.vertices[v1].position - modelInfo.vertices[v0].position)
-                };
-                for (auto& edge : edges)
-                {
-                    if (edge.x < 0 ||
-                        (edge.x == 0 && edge.y < 0) ||
-                        (edge.x == 0 && edge.y == 0 && edge.z < 0))
-                        edge = -edge;
-                    if (edgesSet.emplace(edge).second)
-                        modelInfo.edges.push_back(edge);
-                }
-
-                glm::vec3 normal =
-                    glm::normalize(
-                        glm::cross(modelInfo.vertices[v1].position -
-                            modelInfo.vertices[v0].position,
-                            modelInfo.vertices[v2].position - modelInfo.vertices[v0].position));
-                if (facesSet.emplace(normal).second)
-                    modelInfo.faces.push_back(normal);
-            }*/
-        }
-    }
-}
-#else
-void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo) // split model later
+void Mesh::CreateMeshFromFile(const char *filePath, MeshData& meshData) // split model later
 {
     fastObjMesh* mesh = fast_obj_read(filePath);
 
     std::unordered_map<Vertex, Index, VertexHash> vertexMap{};
     //std::set<glm::vec3, Vec3Less> facesSet, edgesSet;
-    modelInfo.minBounding = glm::vec3(FLT_MAX);
-    modelInfo.maxBounding = glm::vec3(-FLT_MAX);
-    Model::Vertex vertex{};
+    meshData.minBounding = glm::vec3(FLT_MAX);
+    meshData.maxBounding = glm::vec3(-FLT_MAX);
+    Mesh::Vertex vertex{};
     uint32_t offset = 0;
     uint32_t triangleIndices[3];
     glm::u8vec3 color{255, 255, 255};
@@ -240,18 +125,18 @@ void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo) // sp
                 auto result = vertexMap.find(vertex);
                 if (result != vertexMap.end())
                 {
-                    modelInfo.indices.push_back(result->second);
-                    //modelInfo.nodes.back().indices.push_back(result->second);
+                    meshData.indices.push_back(result->second);
+                    //meshData.nodes.back().indices.push_back(result->second);
                 }
                 else
                 {
-                    modelInfo.indices.push_back(static_cast<Index>(vertexMap.size()));
-                    //modelInfo.nodes.back().indices.push_back(static_cast<Index>(vertexMap.size()));
+                    meshData.indices.push_back(static_cast<Index>(vertexMap.size()));
+                    //meshData.nodes.back().indices.push_back(static_cast<Index>(vertexMap.size()));
 
                     vertexMap.insert(std::pair<Vertex, Index>(vertex, static_cast<Index>(vertexMap.size())));
-                    modelInfo.vertices.push_back(vertex);
-                    modelInfo.minBounding = glm::min(modelInfo.minBounding, vertex.position);
-                    modelInfo.maxBounding = glm::max(modelInfo.maxBounding, vertex.position);
+                    meshData.vertices.push_back(vertex);
+                    meshData.minBounding = glm::min(meshData.minBounding, vertex.position);
+                    meshData.maxBounding = glm::max(meshData.maxBounding, vertex.position);
                 }
             }
         }
@@ -260,14 +145,14 @@ void Model::CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo) // sp
     }
     fast_obj_destroy(mesh);
 }
-#endif
-void Model::CreateVerticesFromFile(const char *filePath, std::vector<Vertex> &vertices)
+
+void Mesh::CreateVerticesFromFile(const char *filePath, std::vector<Vertex> &vertices)
 {
     auto data = ReadFile(filePath);
     auto str = reinterpret_cast<char*>(data.data());
     for (size_t j = 0; j < data.size();)
     {
-        Model::Vertex vertex{};
+        Mesh::Vertex vertex{};
         sscanf(str + j, "%f,%f,%f\n",
             &vertex.position.x, &vertex.position.y, &vertex.position.z);
 
@@ -282,7 +167,7 @@ float Slope(const glm::vec3& v)
     return std::abs(v.z / h);
 }
 
-bool Model::CreateQuad(std::vector<Vertex> &vertices, std::vector<Index> &indices, Index a, Index b, Index c, Index d)
+bool Mesh::CreateQuad(std::vector<Vertex> &vertices, std::vector<Index> &indices, Index a, Index b, Index c, Index d)
 {
     auto& va = vertices[a].position;
     auto& vb = vertices[b].position;
@@ -316,49 +201,19 @@ bool Model::CreateQuad(std::vector<Vertex> &vertices, std::vector<Index> &indice
     return true;
 }
 
-void Model::CreateTerrainFromVertices(std::vector<Vertex> &vertices, std::vector<Index> &indices, size_t period)
-{
-    assert(period > 1);
-    assert(vertices.size() % period == 0);
-    size_t rowCount = vertices.size() / period;
-    assert(rowCount > 1);
-    //offset = i, -period 0 1, -period, -period + 1, 1
-    Index a, b, c, d;
-    for (size_t i = period, vi; i < vertices.size(); i += period)
-    {
-        a = Index(i);
-        b = Index(i - period);
-        for (vi = 0; vi < period - 1; vi++)
-        {
-            c = Index(vi + i + 1);
-            d = Index(vi + i - period + 1);
-
-            Index t = c, u = d;
-
-            while (t % period < period - 1 && u % period < period - 1 && !CreateQuad(vertices, indices, a, b, t, u))
-            {
-                ++t;
-                ++u;
-            }
-            a = c;
-            b = d;
-        }
-    }
-}
-
-void Model::ExtractPitchYaw(glm::vec3& normal, uint16_t& pitch, uint16_t& yaw)
+void Mesh::ExtractPitchYaw(glm::vec3& normal, uint16_t& pitch, uint16_t& yaw)
 {
     yaw = uint16_t((glm::degrees(atan2(normal.x, normal.z)) / 360.0f) * 65535.0f);
     pitch = uint16_t((glm::degrees(asin(normal.y)) / 360.0f) * 65535.0f);
 }
 
-void Model::buildMeshlets()
+void Mesh::buildMeshlets()
 {
     constexpr uint32_t maxVerticesPerMeshlet = numsof(Meshlet::vertices);
     constexpr uint32_t maxIndicesPerMeshlet = numsof(Meshlet::indices);
     meshlets.clear();
 
-    uint32_t totalIndices = uint32_t(info.indices.size());
+    uint32_t totalIndices = uint32_t(data.indices.size());
     uint32_t indexOffset = 0;
     uint32_t indexEnd;
     while (indexOffset < totalIndices)
@@ -369,27 +224,27 @@ void Model::buildMeshlets()
         for (; indexOffset < indexEnd; indexOffset+= 3)
         {
             uint32_t iid = indexOffset;
-            if (vertexMap.try_emplace(info.indices[iid], static_cast<uint8_t>(vertexMap.size())).second)
+            if (vertexMap.try_emplace(data.indices[iid], static_cast<uint8_t>(vertexMap.size())).second)
             {
                 if (meshlet.vertexCount >= maxVerticesPerMeshlet)
                     break;
-                meshlet.vertices[meshlet.vertexCount++] = info.indices[iid];
+                meshlet.vertices[meshlet.vertexCount++] = data.indices[iid];
             }
-            if (vertexMap.try_emplace(info.indices[iid + 1], static_cast<uint8_t>(vertexMap.size())).second)
+            if (vertexMap.try_emplace(data.indices[iid + 1], static_cast<uint8_t>(vertexMap.size())).second)
             {
                 if (meshlet.vertexCount >= maxVerticesPerMeshlet)
                     break;
-                meshlet.vertices[meshlet.vertexCount++] = info.indices[iid + 1];
+                meshlet.vertices[meshlet.vertexCount++] = data.indices[iid + 1];
             }
-            if (vertexMap.try_emplace(info.indices[iid + 2], static_cast<uint8_t>(vertexMap.size())).second)
+            if (vertexMap.try_emplace(data.indices[iid + 2], static_cast<uint8_t>(vertexMap.size())).second)
             {
                 if (meshlet.vertexCount > maxVerticesPerMeshlet)
                     break;
-                meshlet.vertices[meshlet.vertexCount++] = info.indices[iid + 2];
+                meshlet.vertices[meshlet.vertexCount++] = data.indices[iid + 2];
             }
-            meshlet.indices[meshlet.indexCount++] = vertexMap[info.indices[iid + 0]];
-            meshlet.indices[meshlet.indexCount++] = vertexMap[info.indices[iid + 1]];
-            meshlet.indices[meshlet.indexCount++] = vertexMap[info.indices[iid + 2]];
+            meshlet.indices[meshlet.indexCount++] = vertexMap[data.indices[iid + 0]];
+            meshlet.indices[meshlet.indexCount++] = vertexMap[data.indices[iid + 1]];
+            meshlet.indices[meshlet.indexCount++] = vertexMap[data.indices[iid + 2]];
         }
         if (indexOffset < indexEnd)
             indexOffset -= 3;
@@ -399,16 +254,16 @@ void Model::buildMeshlets()
     }
 }
 
-void Model::buildMeshletsWithOptimizer()
+void Mesh::buildMeshletsWithOptimizer()
 {
     const uint32_t maxVerticesPerMeshlet = numsof(Meshlet::vertices);
     const uint32_t maxIndicesPerMeshlet = numsof(Meshlet::indices);
 
     meshlets.clear();
 
-    auto& meshIndices = info.indices;
+    auto& meshIndices = data.indices;
     // Estimate output sizes
-    size_t maxMeshlets = meshopt_buildMeshletsBound(uint32_t(info.indices.size()), maxVerticesPerMeshlet, maxIndicesPerMeshlet / 3);
+    size_t maxMeshlets = meshopt_buildMeshletsBound(uint32_t(data.indices.size()), maxVerticesPerMeshlet, maxIndicesPerMeshlet / 3);
     std::vector<meshopt_Meshlet> meshopt_meshlets(maxMeshlets);
     std::vector<uint32_t> uniqueVertexIndices(maxMeshlets * maxVerticesPerMeshlet);
     std::vector<uint8_t> primitiveIndices(maxMeshlets * maxIndicesPerMeshlet);
@@ -418,9 +273,9 @@ void Model::buildMeshletsWithOptimizer()
         primitiveIndices.data(),
         meshIndices.data(),
         meshIndices.size(),
-        &info.vertices.data()->position.x, // Optional vertex data pointer, can be nullptr
-        uint32_t(info.vertices.size()),
-        sizeof(Model::Vertex),
+        &data.vertices.data()->position.x, // Optional vertex data pointer, can be nullptr
+        uint32_t(data.vertices.size()),
+        sizeof(Mesh::Vertex),
         maxVerticesPerMeshlet,
         maxIndicesPerMeshlet / 3,
         0.6f
@@ -446,15 +301,15 @@ void Model::buildMeshletsWithOptimizer()
         for (uint32_t i = 0; i < meshlet.vertexCount; i++)
         {
             meshlet.vertices[i] = uniqueVertexIndices[i + meshletInfo.vertex_offset];
-            auto& vertex = info.vertices[meshlet.vertices[i]];
+            auto& vertex = data.vertices[meshlet.vertices[i]];
             minBounding = glm::min(minBounding, vertex.position);
             maxBounding = glm::max(maxBounding, vertex.position);
         }
         //meshopt_optimizeMeshlet(meshlet.vertices, meshlet.indices, meshletInfo.triangle_count, meshletInfo.vertex_count);
         meshopt_Bounds bounds = meshopt_computeMeshletBounds(&uniqueVertexIndices[meshletInfo.vertex_offset],
             &primitiveIndices[meshletInfo.triangle_offset], meshletInfo.triangle_count,
-                &info.vertices.data()->position.x,
-                uint32_t(info.vertices.size()), sizeof(Model::Vertex));
+                &data.vertices.data()->position.x,
+                uint32_t(data.vertices.size()), sizeof(Mesh::Vertex));
         meshlet.normal = *reinterpret_cast<glm::vec3*>(&bounds.cone_axis);
         float len = glm::length(meshlet.normal);
         if (len != 0.)
@@ -471,7 +326,7 @@ void Model::buildMeshletsWithOptimizer()
         float maxDistance = 0.0f;
         for (uint32_t i = 0; i < meshlet.vertexCount; i++)
         {
-            float distance = glm::distance(meshlet.center, info.vertices[uniqueVertexIndices[i + meshletInfo.vertex_offset]].position);
+            float distance = glm::distance(meshlet.center, data.vertices[uniqueVertexIndices[i + meshletInfo.vertex_offset]].position);
             if (distance > maxDistance)
             {
                 maxDistance = distance;

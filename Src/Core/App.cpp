@@ -147,9 +147,9 @@ void App::Cleanup()
 {
 }
 
-void App::CreateModel(const Model::ModelInfo &modelInfo, std::shared_ptr<Model> &model)
+void App::CreateModel(const Mesh::MeshData &meshData, std::shared_ptr<Mesh> &mesh)
 {
-    model = std::make_shared<Model>(modelInfo);
+    mesh = std::make_shared<Mesh>(meshData);
 }
 
 void App::startUILoop(std::thread &loopThread)

@@ -4,20 +4,20 @@
 #include <memory>
 #include <mutex>
 #include "Renderable.hpp"
-#include "Model.hpp"
+#include "Mesh.hpp"
 #include "CommandBuffer.hpp"
 #include "../../Headers/Buffer.hpp"
 #include "../../Headers/Types.hpp"
 
 namespace AnA
 {
-    struct Mesh
+    struct MeshObject
     {
         AnA::Transform transform;
         uint32_t vertexCount;
         uint32_t indexCount;
         uint32_t textureId{};
-        uint32_t modelID;
+        uint32_t meshId;
         AnimationInfo animationInfo{};
     };
     struct MeshletInfo
@@ -105,8 +105,8 @@ namespace AnA
         void Init();
         void Append(const std::vector<MeshInfo>& meshInfos);
         void Append(const MeshInfo* meshInfos, size_t count);
-        void Append(std::vector<Model::Vertex>& vertices, std::vector<uint32_t>& indices, Transform transform = {}, uint32_t textureId = 0);
-        void Append(std::vector<Model::Vertex>& vertices, Transform transform = {});
+        void Append(std::vector<Mesh::Vertex>& vertices, std::vector<uint32_t>& indices, Transform transform = {}, uint32_t textureId = 0);
+        void Append(std::vector<Mesh::Vertex>& vertices, Transform transform = {});
         void RemoveAt(uint32_t meshIndex);
         void RemoveAt(Range removeRange);
         void RemoveAt(std::vector<uint32_t> meshIndices);
@@ -129,14 +129,14 @@ namespace AnA
         void Update() override;
         void UpdateBuffers(Range updateRange);
         void UpdateMeshlets();
-        void UpdateVertexPositions(std::shared_ptr<Model> model);
+        void UpdateVertexPositions(std::shared_ptr<Mesh> model);
         void UpdateMeshTransform(uint32_t meshIndex);
 
-        Mesh& At(size_t index)
+        MeshObject& At(size_t index)
         {
             return meshes[index];
         }
-        const Mesh* Get() const
+        const MeshObject* Get() const
         {
             return meshes.data();
         }
@@ -179,7 +179,7 @@ namespace AnA
         std::vector<Buffer> drawMeshIndirectBuffers{};
         Buffer drawMeshCountBuffer{};
         void createIndirectBuffers();
-        std::vector<Mesh> meshes{};
+        std::vector<MeshObject> meshes{};
         std::vector<VkDrawIndexedIndirectCommand> drawIndexedCommands{};
         uint32_t batchSize;
         std::vector<Range> updateQueue{};

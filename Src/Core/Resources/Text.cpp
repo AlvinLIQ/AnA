@@ -136,7 +136,7 @@ void Text::UpdateLayout(uint32_t id)
 
 void Text::updateTextInfo(TextInfo& textInfo, uint32_t& chIndex, uint32_t& index, CharacterInfo* chInfoBuffer)
 {
-    int realChar;
+    int realChar = 0;
     for (size_t i = 0; i < textInfo.text.length(); i++)
     {
         //assert(ch < char(resourceManager->Characters.size()));

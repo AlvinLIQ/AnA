@@ -2,7 +2,7 @@
 
 #include "../../Headers/Device.hpp"
 #include "../../Headers/Buffer.hpp"
-#include "Model.hpp"
+#include "Mesh.hpp"
 
 #include <array>
 #include <set>
@@ -37,7 +37,6 @@ namespace AnA
             struct MeshFrameResource
             {
                 Buffer vertexBuffer;
-                Buffer indexBuffer;
                 //Buffer objectBuffer;
                 Buffer meshletBuffer;
                 Buffer meshletVertexBuffer;
@@ -52,12 +51,12 @@ namespace AnA
             void Init();
 
             bool Create(const char* filePath, uint32_t& id);
-            bool Create(std::shared_ptr<Model> model, uint32_t& id);
+            bool Create(std::shared_ptr<Mesh> model, uint32_t& id);
             void Load(const char* filePath, uint32_t& id);
-            void Load(std::shared_ptr<Model> model, uint32_t& id);
+            void Load(std::shared_ptr<Mesh> model, uint32_t& id);
             void Load(const uint32_t id);
 
-            void Append(uint32_t id, std::vector<AnA::Model::Vertex>& vertices);
+            void Append(uint32_t id, std::vector<AnA::Mesh::Vertex>& vertices);
 
             bool NeedUpdate()
             {
@@ -80,7 +79,7 @@ namespace AnA
                 return meshletCount;
             }
 
-            std::unordered_map<uint32_t, std::shared_ptr<Model>> MeshMap{};
+            std::unordered_map<uint32_t, std::shared_ptr<Mesh>> MeshMap{};
             std::unordered_map<std::string, uint32_t> MeshPathIndexMap{};
         private:
             Device* aDevice;
