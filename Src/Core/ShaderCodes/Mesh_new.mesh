@@ -1,0 +1,172 @@
+#version 460
+#extension GL_EXT_mesh_shader : require
+#extension GL_EXT_shader_8bit_storage: require
+#extension GL_EXT_scalar_block_layout: require
+#extension GL_EXT_buffer_reference: require
+#extension GL_GOOGLE_include_directive : require
+
+#include "mesh.h"
+#include "bindings.h"
+
+layout(local_size_x = MAX_PRIMITIVES, local_size_y = 1, local_size_z = 1) in;
+layout(triangles, max_vertices = MAX_VERTICES, max_primitives = MAX_PRIMITIVES) out;
+layout(constant_id = 0) const int CullMode = 0;
+
+#ifdef PER_PRIMITIVE_NORMAL
+struct VertexOutput {
+    vec2 texCoord;
+    uint texID;
+    vec3 vertexPosition;
+    vec3 color;
+};
+layout(location = 4) perprimitiveEXT out vec3 primitiveNormals[];
+#else
+struct VertexOutput {
+    vec2 texCoord;
+    uint texID;
+    vec3 normalSpace;
+    vec3 vertexPosition;
+    vec3 color;
+};
+#endif
+
+layout(location = 0) out VertexOutput vertexOutput[];
+
+layout(scalar, buffer_reference) buffer VertexRef
+{
+    Vertex vertices[];
+};
+
+layout(scalar, buffer_reference) buffer VertexBufferRef
+{
+    VertexRef buffers[];
+};
+
+layout(scalar, buffer_reference) buffer MeshletVertexRef
+{
+    uint vertices[];
+};
+
+layout(scalar, buffer_reference) buffer MeshletIndexRef
+{
+    uint8_t indices[];
+};
+
+struct Meshlet2
+{
+    MeshletVertexRef meshletVertexPtr;
+    MeshletIndexRef meshletIndexPtr;
+    uint vertexCount;
+    uint indexCount;
+    BoundingSphere bounding;
+};
+
+layout(scalar, buffer_reference) buffer MeshletRef
+{
+    Meshlet2 meshlets[];
+};
+
+struct Mesh
+{
+    mat4 transform;
+    uint textureId;
+    uint vertexId;
+    uint meshletId;
+};
+
+layout(scalar, buffer_reference) buffer MeshRef
+{
+    Mesh meshes[];
+};
+
+struct MeshletID2
+{
+    uint meshletID;
+    uint meshID;
+};
+
+layout(scalar, buffer_reference) buffer MeshletIDRef
+{
+    MeshletID2 ids[];
+};
+
+layout(scalar, buffer_reference) buffer MiscRef
+{
+    uint objectCount;
+    uint collidedCount;
+    uint meshletCount;
+    uint meshletIDCount;
+    vec4 planes[6];
+    vec2 resolution;
+    vec3 cameraPosition;
+};
+
+layout(push_constant) uniform PushConstants
+{
+    mat4 viewProj;
+    VertexBufferRef vertexBufferPtr;
+    MeshRef meshPtr;
+    MeshletRef meshletPtr;
+    MeshletIDRef meshletIDPtr;
+    MiscRef miscPtr;
+};
+
+taskPayloadSharedEXT MeshPayload taskData;
+
+shared vec3 worldVertices[MAX_VERTICES];
+
+void main()
+{
+    uint midOffset = taskData.visibleIndices[gl_WorkGroupID.x];
+    MeshletID2 mid = meshletIDPtr.ids[midOffset];
+    Meshlet2 meshlet = meshletPtr.meshlets[mid.meshletID];
+    uint primitiveCount = meshlet.indexCount / 3;
+    SetMeshOutputsEXT(meshlet.vertexCount, primitiveCount);
+
+    Mesh mesh = meshPtr.meshes[mid.meshID];
+    VertexRef vertexPtr = vertexBufferPtr.buffers[mesh.vertexId];
+
+    uint i = gl_LocalInvocationID.x;
+    if (i < meshlet.vertexCount)
+    {
+        Vertex vertex = vertexPtr.vertices[meshlet.meshletVertexPtr.vertices[i]];
+        vec4 vertexPos = mesh.transform * vec4(vertex.position, 1.0);
+        worldVertices[i] = vertexPos.xyz;
+        gl_MeshVerticesEXT[i].gl_Position = viewProj * vertexPos;
+        gl_MeshVerticesEXT[i].gl_PointSize = 6.0;
+        vertexOutput[i].texCoord = vertex.uv;
+        vertexOutput[i].texID = uint(vertex.textureId); //texID;
+        vertexOutput[i].color = vec3(
+                float(vertex.color.r) / 255.0,
+                float(vertex.color.g) / 255.0,
+                float(vertex.color.b) / 255.0
+            );
+        #ifndef PER_PRIMITIVE_NORMAL
+        vertexOutput[i].normalSpace = normalize(transpose(inverse(mat3(mesh.transform))) * CalculateNormal(vertex.pitch, vertex.yaw));
+        #endif
+        vertexOutput[i].vertexPosition = vertexPos.xyz;
+    }
+
+    barrier();
+
+    if (i < primitiveCount)
+    {
+        uint indexOffset = i * 3;
+        gl_PrimitiveTriangleIndicesEXT[i] = uvec3(
+                meshlet.meshletIndexPtr.indices[indexOffset + 0],
+                meshlet.meshletIndexPtr.indices[indexOffset + 1],
+                meshlet.meshletIndexPtr.indices[indexOffset + 2]
+            );
+        vec3 a = worldVertices[uint(meshlet.meshletIndexPtr.indices[indexOffset + 0])];
+        vec3 b = worldVertices[uint(meshlet.meshletIndexPtr.indices[indexOffset + 1])];
+        vec3 c = worldVertices[uint(meshlet.meshletIndexPtr.indices[indexOffset + 2])];
+        vec3 normal = normalize(cross(b - a, c - a));
+        vec3 coneApex = (a + b + c) / 3.0;
+
+        if ((CullMode & CULL_BACKFACE) != 0)
+            gl_MeshPrimitivesEXT[i].gl_CullPrimitiveEXT = dot(normal, normalize(miscPtr.cameraPosition - coneApex)) <= 0.0;
+        #ifdef PER_PRIMITIVE_NORMAL
+        primitiveNormals[i] = normal;
+        #endif
+    }
+}
