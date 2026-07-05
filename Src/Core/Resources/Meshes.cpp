@@ -41,7 +41,9 @@ bool Meshes::Create(const char* filePath, uint32_t& id, uint32_t& count)
     id = meshId;
 
     for (auto& meshData : meshDatas)
-        MeshMap.emplace(meshId++, std::make_shared<Mesh>(std::move(meshData)));
+    {
+        auto mesh = MeshMap.emplace(meshId++, std::make_shared<Mesh>(std::move(meshData))).first->second->Path = filePath;
+    }
 
     return true;
 }
@@ -74,6 +76,8 @@ void Meshes::Load(const uint32_t id)
     {
         return;
     }
+    std::lock_guard<std::mutex> lock(updateMutex);
+
     loadedSet.emplace(id);
     auto mesh = MeshMap[id];
     vertexCount += (mesh->data.vertices.size());

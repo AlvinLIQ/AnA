@@ -114,7 +114,8 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
         resourceManager->Meshes.Load(meshInfo.filePath, meshId, meshCount);
         for (uint32_t m = 0; m < meshCount; m++)
         {
-            auto mesh = resourceManager->Meshes.MeshMap[meshObj.meshId = m + meshId];
+            meshObj.meshId = m + meshId;
+            auto mesh = resourceManager->Meshes.MeshMap[meshObj.meshId];
             meshObj.vertexCount = uint32_t(mesh->data.vertices.size());
             meshObj.indexCount = uint32_t(mesh->data.indices.size());
             meshObj.textureId = mesh->data.textureId;
@@ -122,6 +123,11 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
             meshletIDCount += uint32_t(mesh->meshlets.size());
 
             meshes.push_back(meshObj);
+
+            if (MeshAppend)
+            {
+                MeshAppend(meshInfo.filePath + std::to_string(m), uint32_t(meshes.size() - 1));
+            }
         }
 
     }

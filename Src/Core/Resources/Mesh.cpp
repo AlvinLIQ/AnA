@@ -65,6 +65,7 @@ void Mesh::Load(Device* device)
         {&meshletIndexBuffer, meshletIndices.data(), meshletIndices.size()},
     };
     CopyBuffer(device, numsof(infos), infos);
+    loaded = true;
 }
 
 void Mesh::Unload()
