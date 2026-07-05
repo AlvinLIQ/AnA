@@ -132,7 +132,7 @@ namespace AnA
         std::vector<uint32_t> meshletVertices;
         std::vector<uint8_t> meshletIndices;
 
-        uint meshletOffset = 0;
+        uint32_t meshletOffset = 0;
         Buffer vertexBuffer;
         Buffer meshletVertexBuffer;
         Buffer meshletIndexBuffer;
