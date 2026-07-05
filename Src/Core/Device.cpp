@@ -1334,10 +1334,9 @@ void Device::createVmaAllocator()
     vulkanFunctions.vkGetDeviceProcAddr = vkGetDeviceProcAddr;
 
     VmaAllocatorCreateInfo allocatorCreateInfo = {};
+    allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT;
     if (deviceFeatures.bufferDeviceAddressSupport)
-        allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
-    else
-        allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT;
+        allocatorCreateInfo.flags |= VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
     allocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_4;
     allocatorCreateInfo.physicalDevice = physicalDevice;
     allocatorCreateInfo.device = logicalDevice;

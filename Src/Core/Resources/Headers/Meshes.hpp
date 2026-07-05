@@ -63,7 +63,6 @@ namespace AnA
             Device* aDevice;
             std::set<uint32_t> loadedSet{};
 
-            std::mutex updateMutex;
             uint32_t currentBufferIndex = 0;
             bool needUpdate = false;
             std::mutex _mutex;

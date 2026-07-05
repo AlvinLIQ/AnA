@@ -3,6 +3,7 @@
 #include "Headers/SwapChain.hpp"
 #include "vulkan/vulkan_core.h"
 #include <memory>
+#include <mutex>
 
 using namespace AnA;
 using namespace Resources;
@@ -27,6 +28,7 @@ void Meshes::Init()
 
 bool Meshes::Create(const char* filePath, uint32_t& id, uint32_t& count)
 {
+    std::lock_guard<std::mutex> lock(_mutex);
     auto iter = MeshPathIndexMap.find(filePath);
     if (iter != MeshPathIndexMap.end())
     {
@@ -50,6 +52,7 @@ bool Meshes::Create(const char* filePath, uint32_t& id, uint32_t& count)
 
 bool Meshes::Create(std::shared_ptr<AnA::Mesh> mesh, uint32_t& id)
 {
+    std::lock_guard<std::mutex> lock(_mutex);
     id = meshId;
     MeshMap.emplace(meshId++, mesh);
 
@@ -65,8 +68,10 @@ void Meshes::Load(const char* filePath, uint32_t& id, uint32_t& count)
 
 void Meshes::Load(std::shared_ptr<Mesh> mesh, uint32_t& id)
 {
+    _mutex.lock();
     id = meshId;
     MeshMap.emplace(meshId++, mesh);
+    _mutex.unlock();
     Load(id);
 }
 
@@ -76,7 +81,7 @@ void Meshes::Load(const uint32_t id)
     {
         return;
     }
-    std::lock_guard<std::mutex> lock(updateMutex);
+    std::lock_guard<std::mutex> lock(_mutex);
 
     loadedSet.emplace(id);
     auto mesh = MeshMap[id];
@@ -88,7 +93,7 @@ void Meshes::Load(const uint32_t id)
 
 void Meshes::Append(uint32_t id, std::vector<AnA::Mesh::Vertex>& vertices)
 {
-    std::unique_lock<std::mutex> lock(_mutex);
+    std::lock_guard<std::mutex> lock(_mutex);
     if (MeshMap.find(id) == MeshMap.end())
         return;
 
@@ -103,7 +108,7 @@ void Meshes::Append(uint32_t id, std::vector<AnA::Mesh::Vertex>& vertices)
 
 void Meshes::Update()
 {
-    std::unique_lock<std::mutex> lock(_mutex);
+    std::lock_guard<std::mutex> lock(_mutex);
     currentBufferIndex = prepareFrameResources();
     needUpdate = false;
 }
