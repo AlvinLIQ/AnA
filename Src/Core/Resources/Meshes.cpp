@@ -2,6 +2,7 @@
 #include "Headers/Buffer.hpp"
 #include "Headers/SwapChain.hpp"
 #include "vulkan/vulkan_core.h"
+#include <memory>
 
 using namespace AnA;
 using namespace Resources;
@@ -24,7 +25,7 @@ void Meshes::Init()
 
 }
 
-bool Meshes::Create(const char* filePath, uint32_t& id)
+bool Meshes::Create(const char* filePath, uint32_t& id, uint32_t& count)
 {
     auto iter = MeshPathIndexMap.find(filePath);
     if (iter != MeshPathIndexMap.end())
@@ -32,11 +33,14 @@ bool Meshes::Create(const char* filePath, uint32_t& id)
         id = iter->second;
         return false;
     }
-    std::shared_ptr<Mesh> mesh;
-    Mesh::CreateMeshFromFile(filePath, mesh);
+    std::vector<Mesh::MeshData> meshDatas;
+    Mesh::CreateMeshesFromFile(filePath, meshDatas);
+    count = uint32_t(meshDatas.size());
     MeshPathIndexMap.emplace(filePath, meshId);
     id = meshId;
-    MeshMap.emplace(meshId++, mesh);
+
+    for (auto& meshData : meshDatas)
+        MeshMap.emplace(meshId++, std::make_shared<Mesh>(std::move(meshData)));
 
     return true;
 }
@@ -49,10 +53,11 @@ bool Meshes::Create(std::shared_ptr<AnA::Mesh> mesh, uint32_t& id)
     return true;
 }
 
-void Meshes::Load(const char* filePath, uint32_t& id)
+void Meshes::Load(const char* filePath, uint32_t& id, uint32_t& count)
 {
-    Create(filePath, id);
-    Load(id);
+    Create(filePath, id, count);
+    for (uint32_t i = 0; i < count; i++)
+        Load(id + i);
 }
 
 void Meshes::Load(std::shared_ptr<Mesh> mesh, uint32_t& id)

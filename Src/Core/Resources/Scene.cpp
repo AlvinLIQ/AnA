@@ -104,22 +104,27 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
 {
     std::unique_lock<std::mutex> unique_lock(_mutex);
     auto resourceManager = Resources::ResourceManager::GetCurrent();
+    uint32_t meshCount;
     for (size_t i = 0; i < count; i++)
     {
         auto& meshInfo = meshInfos[i];
         MeshObject meshObj;
         meshObj.transform = meshInfo.transform;
-        resourceManager->Meshes.Load(meshInfo.filePath, meshObj.meshId);
-        auto mesh = resourceManager->Meshes.MeshMap[meshObj.meshId];
-        meshObj.vertexCount = uint32_t(mesh->data.vertices.size());
-        meshObj.indexCount = uint32_t(mesh->data.indices.size());
-        meshObj.textureId = meshInfo.textureId;
 
-        meshletIDCount += uint32_t(mesh->meshlets.size());
+        resourceManager->Meshes.Load(meshInfo.filePath, meshObj.meshId, meshCount);
+        for (uint32_t m = 0; m < meshCount; m++)
+        {
+            auto mesh = resourceManager->Meshes.MeshMap[meshObj.meshId + m];
+            meshObj.vertexCount = uint32_t(mesh->data.vertices.size());
+            meshObj.indexCount = uint32_t(mesh->data.indices.size());
+            meshObj.textureId = mesh->data.textureId;
 
-        meshes.push_back(meshObj);
-        if (this->MeshAppend)
-            this->MeshAppend(meshInfo.filePath, uint32_t(meshes.size()) - 1);
+            meshletIDCount += uint32_t(mesh->meshlets.size());
+
+            meshes.push_back(meshObj);
+            if (this->MeshAppend)
+                this->MeshAppend(meshInfo.filePath, uint32_t(meshes.size()) - 1);
+        }
 
     }
     needUpdate = true;
@@ -135,7 +140,7 @@ void Scene::Append(std::vector<Mesh::Vertex>& meshVertices, std::vector<uint32_t
     meshObj.indexCount = static_cast<uint32_t>(meshIndices.size());
     meshObj.textureId = textureId;
     //temporary solution for now
-    Mesh::MeshData data{{}, std::move(meshVertices), {}, {}, uint32_t(meshIndices.size()), std::move(meshIndices), ""};
+    Mesh::MeshData data{{}, std::move(meshVertices), {}, {}, std::move(meshIndices), textureId};
     auto model = std::make_shared<Mesh>(data);
     Resources::ResourceManager::GetCurrent()->Meshes.Load(model, meshObj.meshId);
 

@@ -28,9 +28,9 @@ namespace AnA
 
             void Init();
 
-            bool Create(const char* filePath, uint32_t& id);
+            bool Create(const char* filePath, uint32_t& id, uint32_t& count);
             bool Create(std::shared_ptr<Mesh> model, uint32_t& id);
-            void Load(const char* filePath, uint32_t& id);
+            void Load(const char* filePath, uint32_t& id, uint32_t& count);
             void Load(std::shared_ptr<Mesh> model, uint32_t& id);
             void Load(const uint32_t id);
 

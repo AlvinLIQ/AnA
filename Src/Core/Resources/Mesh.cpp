@@ -78,34 +78,17 @@ void Mesh::Unload()
     }
 }
 
-void Mesh::CreateMeshFromFile(const char *filePath, std::shared_ptr<Mesh>& mesh)
+void Mesh::CreateMesh(MeshData& meshData, std::shared_ptr<Mesh>& mesh)
 {
-    MeshData meshData{};
-    CreateMeshFromFile(filePath, meshData);
-
-    meshData.indexStep = static_cast<Index>(meshData.vertices.size());
     mesh = std::make_shared<Mesh>(std::move(meshData));
-    mesh->Path = filePath;
-    /*
-    FILE* fp = fopen("b_vertices", "wb");
-    fwrite(model->info.vertices.data(), sizeof(Mesh::Vertex), model->info.vertices.size(), fp);
-    fflush(fp);
-    fclose(fp);
-    fp = fopen("b_indices", "wb");
-    fwrite(model->info.indices.data(), sizeof(Mesh::Index), model->info.indices.size(), fp);
-    fflush(fp);
-    fclose(fp);
-    */
 }
 
-void Mesh::CreateMeshFromFile(const char *filePath, MeshData& meshData) // split model later
+void Mesh::CreateMeshesFromFile(const char *filePath, std::vector<MeshData>& meshDatas) // split model later
 {
     fastObjMesh* mesh = fast_obj_read(filePath);
 
-    std::unordered_map<Vertex, Index, VertexHash> vertexMap{};
     //std::set<glm::vec3, Vec3Less> facesSet, edgesSet;
-    meshData.minBounding = glm::vec3(FLT_MAX);
-    meshData.maxBounding = glm::vec3(-FLT_MAX);
+
     Mesh::Vertex vertex{};
     uint32_t offset = 0;
     uint32_t triangleIndices[3];
@@ -121,54 +104,62 @@ void Mesh::CreateMeshFromFile(const char *filePath, MeshData& meshData) // split
         }
         else
             textures[t] = 0;
-    for (uint32_t f = 0, v, fv, i; f < mesh->face_count; f++)
-    {
-        fv = mesh->face_vertices[f];
-        triangleIndices[0] = offset;
-        uint32_t texIndex = 0;
-        if (mesh->material_count)
-        {
-            auto& material = mesh->materials[mesh->face_materials[f]];
-            color = {
-                uint8_t(material.Kd[0] * 255.0f),
-                uint8_t(material.Kd[1] * 255.0f),
-                uint8_t(material.Kd[2] * 255.0f),
-            };
-            if (material.map_Kd < mesh->texcoord_count)
-                texIndex = textures[material.map_Kd];
-        }
-        for (v = 0; v + 1 < fv; v++) // deal with face triangulation
-        {
-            triangleIndices[1] = offset + v;
-            triangleIndices[2] = offset + v + 1;
-            for (i = 0; i < 3; i++)
-            {
-                auto& index = mesh->indices[triangleIndices[i]];
-                vertex.position = *reinterpret_cast<glm::vec3*>(&mesh->positions[3 * index.p]);
-                ExtractPitchYaw(*reinterpret_cast<glm::vec3*>(&mesh->normals[3 * index.n]), vertex.pitch, vertex.yaw);
-                vertex.color = color;
-                vertex.uv = *reinterpret_cast<glm::vec2*>(&mesh->texcoords[2 * index.t]);
-                vertex.textureId = texIndex;
-                auto result = vertexMap.find(vertex);
-                if (result != vertexMap.end())
-                {
-                    meshData.indices.push_back(result->second);
-                    //meshData.nodes.back().indices.push_back(result->second);
-                }
-                else
-                {
-                    meshData.indices.push_back(static_cast<Index>(vertexMap.size()));
-                    //meshData.nodes.back().indices.push_back(static_cast<Index>(vertexMap.size()));
 
-                    vertexMap.insert(std::pair<Vertex, Index>(vertex, static_cast<Index>(vertexMap.size())));
-                    meshData.vertices.push_back(vertex);
-                    meshData.minBounding = glm::min(meshData.minBounding, vertex.position);
-                    meshData.maxBounding = glm::max(meshData.maxBounding, vertex.position);
+    for (uint32_t o = 0, f, v, fv, i; o < mesh->object_count; o++)
+    {
+        std::unordered_map<Vertex, Index, VertexHash> vertexMap{};
+        MeshData meshData;
+        meshData.minBounding = glm::vec3(FLT_MAX);
+        meshData.maxBounding = glm::vec3(-FLT_MAX);
+        auto& obj = mesh->objects[o];
+        offset = obj.index_offset;
+        for (f = 0; f < obj.face_count; f++)
+        {
+            fv = mesh->face_vertices[f + obj.face_offset];
+            triangleIndices[0] = offset;
+            if (mesh->material_count)
+            {
+                auto& material = mesh->materials[mesh->face_materials[f + obj.face_offset]];
+                color = {
+                    uint8_t(material.Kd[0] * 255.0f),
+                    uint8_t(material.Kd[1] * 255.0f),
+                    uint8_t(material.Kd[2] * 255.0f),
+                };
+                if (material.map_Kd < mesh->texcoord_count)
+                    meshData.textureId = textures[material.map_Kd];
+            }
+            for (v = 0; v + 1 < fv; v++) // deal with face triangulation
+            {
+                triangleIndices[1] = offset + v;
+                triangleIndices[2] = offset + v + 1;
+                for (i = 0; i < 3; i++)
+                {
+                    auto& index = mesh->indices[triangleIndices[i]];
+                    vertex.position = *reinterpret_cast<glm::vec3*>(&mesh->positions[3 * index.p]);
+                    ExtractPitchYaw(*reinterpret_cast<glm::vec3*>(&mesh->normals[3 * index.n]), vertex.pitch, vertex.yaw);
+                    vertex.color = color;
+                    vertex.uv = *reinterpret_cast<glm::vec2*>(&mesh->texcoords[2 * index.t]);
+                    auto result = vertexMap.find(vertex);
+                    if (result != vertexMap.end())
+                    {
+                        meshData.indices.push_back(result->second);
+                        //meshData.nodes.back().indices.push_back(result->second);
+                    }
+                    else
+                    {
+                        meshData.indices.push_back(static_cast<Index>(vertexMap.size()));
+                        //meshData.nodes.back().indices.push_back(static_cast<Index>(vertexMap.size()));
+
+                        vertexMap.insert(std::pair<Vertex, Index>(vertex, static_cast<Index>(vertexMap.size())));
+                        meshData.vertices.push_back(vertex);
+                        meshData.minBounding = glm::min(meshData.minBounding, vertex.position);
+                        meshData.maxBounding = glm::max(meshData.maxBounding, vertex.position);
+                    }
                 }
             }
+            offset += fv;
         }
-        offset += fv;
-
+        meshDatas.emplace_back(std::move(meshData));
     }
     fast_obj_destroy(mesh);
 }

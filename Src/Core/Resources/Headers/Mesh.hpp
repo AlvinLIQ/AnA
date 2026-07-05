@@ -114,9 +114,8 @@ namespace AnA
             std::vector<Vertex> vertices;
             glm::vec3 minBounding;
             glm::vec3 maxBounding;
-            Index indexStep;
             std::vector<Index> indices;
-            std::string texturePath;
+            uint32_t textureId;
         };
 
         Mesh(const MeshData& meshData);
@@ -140,8 +139,8 @@ namespace AnA
         void Load(Device* device);
         void Unload();
 
-        static void CreateMeshFromFile(const char* filePath, std::shared_ptr<Mesh>& mesh);
-        static void CreateMeshFromFile(const char *filePath, MeshData& meshData);
+        static void CreateMesh(MeshData& meshData, std::shared_ptr<Mesh>& mesh);
+        static void CreateMeshesFromFile(const char *filePath, std::vector<MeshData>& meshDatas);
         static void CreateVerticesFromFile(const char* filePath, std::vector<Vertex>& vertices);
         static bool CreateQuad(std::vector<Vertex> &vertices, std::vector<Index> &indices, Index a, Index b, Index c, Index d);
 
