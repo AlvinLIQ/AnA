@@ -104,17 +104,17 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
 {
     std::unique_lock<std::mutex> unique_lock(_mutex);
     auto resourceManager = Resources::ResourceManager::GetCurrent();
-    uint32_t meshCount;
+    uint32_t meshCount, meshId;
     for (size_t i = 0; i < count; i++)
     {
         auto& meshInfo = meshInfos[i];
         MeshObject meshObj;
         meshObj.transform = meshInfo.transform;
 
-        resourceManager->Meshes.Load(meshInfo.filePath, meshObj.meshId, meshCount);
+        resourceManager->Meshes.Load(meshInfo.filePath, meshId, meshCount);
         for (uint32_t m = 0; m < meshCount; m++)
         {
-            auto mesh = resourceManager->Meshes.MeshMap[meshObj.meshId + m];
+            auto mesh = resourceManager->Meshes.MeshMap[meshObj.meshId = m + meshId];
             meshObj.vertexCount = uint32_t(mesh->data.vertices.size());
             meshObj.indexCount = uint32_t(mesh->data.indices.size());
             meshObj.textureId = mesh->data.textureId;
@@ -122,8 +122,6 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
             meshletIDCount += uint32_t(mesh->meshlets.size());
 
             meshes.push_back(meshObj);
-            if (this->MeshAppend)
-                this->MeshAppend(meshInfo.filePath, uint32_t(meshes.size()) - 1);
         }
 
     }

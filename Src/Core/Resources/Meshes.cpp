@@ -31,6 +31,7 @@ bool Meshes::Create(const char* filePath, uint32_t& id, uint32_t& count)
     if (iter != MeshPathIndexMap.end())
     {
         id = iter->second;
+        count = 1;
         return false;
     }
     std::vector<Mesh::MeshData> meshDatas;

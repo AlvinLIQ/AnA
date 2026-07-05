@@ -109,6 +109,7 @@ void Mesh::CreateMeshesFromFile(const char *filePath, std::vector<MeshData>& mes
     {
         std::unordered_map<Vertex, Index, VertexHash> vertexMap{};
         MeshData meshData;
+        meshData.textureId = 0;
         meshData.minBounding = glm::vec3(FLT_MAX);
         meshData.maxBounding = glm::vec3(-FLT_MAX);
         auto& obj = mesh->objects[o];
@@ -159,7 +160,7 @@ void Mesh::CreateMeshesFromFile(const char *filePath, std::vector<MeshData>& mes
             }
             offset += fv;
         }
-        meshDatas.emplace_back(std::move(meshData));
+        meshDatas.emplace_back(meshData);
     }
     fast_obj_destroy(mesh);
 }
