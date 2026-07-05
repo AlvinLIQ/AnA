@@ -37,9 +37,56 @@ layout(scalar, buffer_reference) buffer VertexRef
     Vertex vertices[];
 };
 
-layout(scalar, buffer_reference) buffer ObjectRef
+layout(scalar, buffer_reference) buffer MeshletVertexRef
 {
-    Object objects[];
+    uint vertices[];
+};
+
+layout(scalar, buffer_reference) buffer MeshletIndexRef
+{
+    uint8_t indices[];
+};
+
+struct Meshlet2
+{
+    uint vertexOffset;
+    uint indexOffset;
+    uint vertexCount;
+    uint indexCount;
+    BoundingSphere bounding;
+};
+
+layout(scalar, buffer_reference) buffer MeshletRef
+{
+    Meshlet2 meshlets[];
+};
+
+struct Mesh
+{
+    vec3 center;
+    float radius;
+    vec4 halfVolume;
+    mat4 transform;
+    uint textureId;
+    VertexRef vertexPtr;
+    MeshletVertexRef meshletVertexPtr;
+    MeshletIndexRef meshletIndexPtr;
+};
+
+layout(scalar, buffer_reference) buffer MeshRef
+{
+    Mesh meshes[];
+};
+
+struct MeshletID2
+{
+    uint meshletID;
+    uint meshID;
+};
+
+layout(scalar, buffer_reference) buffer MeshletIDRef
+{
+    MeshletID2 ids[];
 };
 
 layout(scalar, buffer_reference) buffer MiscRef
@@ -53,47 +100,13 @@ layout(scalar, buffer_reference) buffer MiscRef
     vec3 cameraPosition;
 };
 
-layout(scalar, buffer_reference) buffer CollisionRef
-{
-    CollisionData collisions[];
-};
-
-layout(scalar, buffer_reference) buffer MeshletIDRef
-{
-    MeshletID meshletIDs[];
-};
-
-layout(scalar, buffer_reference) buffer MeshletRef
-{
-    Meshlet meshlets[];
-};
-
-layout(scalar, buffer_reference) buffer MeshletVertexRef
-{
-    uint vertices[];
-};
-
-layout(scalar, buffer_reference) buffer MeshletIndexRef
-{
-    uint8_t indices[];
-};
-
-layout(scalar, buffer_reference) buffer MeshletCullingRef
-{
-    BoundingSphere boundings[];
-};
-
 layout(push_constant) uniform PushConstants
 {
     mat4 viewProj;
-    VertexRef vertexPtr;
-    ObjectRef objectPtr;
-    MiscRef miscPtr;
-    MeshletIDRef meshletIDPtr;
+    MeshRef meshPtr;
     MeshletRef meshletPtr;
-    MeshletVertexRef meshVertexPtr;
-    MeshletIndexRef meshIndexPtr;
-    MeshletCullingRef meshletCullingPtr;
+    MeshletIDRef meshletIDPtr;
+    MiscRef miscPtr;
 };
 
 taskPayloadSharedEXT MeshPayload taskData;
@@ -103,19 +116,18 @@ shared vec3 worldVertices[MAX_VERTICES];
 void main()
 {
     uint midOffset = taskData.visibleIndices[gl_WorkGroupID.x];
-    uint meshletID = meshletIDPtr.meshletIDs[midOffset].meshletID;
-    uint objectID = meshletIDPtr.meshletIDs[midOffset].objectID;
-    Meshlet meshlet = meshletPtr.meshlets[meshletID];
+    MeshletID2 mid = meshletIDPtr.ids[midOffset];
+    Meshlet2 meshlet = meshletPtr.meshlets[mid.meshletID];
     uint primitiveCount = meshlet.indexCount / 3;
     SetMeshOutputsEXT(meshlet.vertexCount, primitiveCount);
 
-    mat4 transform = objectPtr.objects[objectID].transform;
+    Mesh mesh = meshPtr.meshes[mid.meshID];
 
     uint i = gl_LocalInvocationID.x;
     if (i < meshlet.vertexCount)
     {
-        Vertex vertex = vertexPtr.vertices[meshVertexPtr.vertices[meshlet.vertexOffset + i]];
-        vec4 vertexPos = transform * vec4(vertex.position, 1.0);
+        Vertex vertex = mesh.vertexPtr.vertices[mesh.meshletVertexPtr.vertices[meshlet.vertexOffset + i]];
+        vec4 vertexPos = mesh.transform * vec4(vertex.position, 1.0);
         worldVertices[i] = vertexPos.xyz;
         gl_MeshVerticesEXT[i].gl_Position = viewProj * vertexPos;
         gl_MeshVerticesEXT[i].gl_PointSize = 6.0;
@@ -127,7 +139,7 @@ void main()
                 float(vertex.color.b) / 255.0
             );
         #ifndef PER_PRIMITIVE_NORMAL
-        vertexOutput[i].normalSpace = normalize(transpose(inverse(mat3(transform))) * CalculateNormal(vertex.pitch, vertex.yaw));
+        vertexOutput[i].normalSpace = normalize(transpose(inverse(mat3(mesh.transform))) * CalculateNormal(vertex.pitch, vertex.yaw));
         #endif
         vertexOutput[i].vertexPosition = vertexPos.xyz;
     }
@@ -138,13 +150,13 @@ void main()
     {
         uint indexOffset = meshlet.indexOffset + i * 3;
         gl_PrimitiveTriangleIndicesEXT[i] = uvec3(
-                meshIndexPtr.indices[indexOffset + 0],
-                meshIndexPtr.indices[indexOffset + 1],
-                meshIndexPtr.indices[indexOffset + 2]
+                mesh.meshletIndexPtr.indices[indexOffset + 0],
+                mesh.meshletIndexPtr.indices[indexOffset + 1],
+                mesh.meshletIndexPtr.indices[indexOffset + 2]
             );
-        vec3 a = worldVertices[uint(meshIndexPtr.indices[indexOffset + 0])];
-        vec3 b = worldVertices[uint(meshIndexPtr.indices[indexOffset + 1])];
-        vec3 c = worldVertices[uint(meshIndexPtr.indices[indexOffset + 2])];
+        vec3 a = worldVertices[uint(mesh.meshletIndexPtr.indices[indexOffset + 0])];
+        vec3 b = worldVertices[uint(mesh.meshletIndexPtr.indices[indexOffset + 1])];
+        vec3 c = worldVertices[uint(mesh.meshletIndexPtr.indices[indexOffset + 2])];
         vec3 normal = normalize(cross(b - a, c - a));
         vec3 coneApex = (a + b + c) / 3.0;
 

@@ -21,12 +21,24 @@ namespace AnA
         AnimationInfo animationInfo{};
     };
 
-    struct Object
+    struct MeshletInfo
+    {
+        uint32_t vertexOffset;
+        uint32_t indexOffset;
+        uint32_t vertexCount;
+        uint32_t indexCount;
+    };
+
+    struct MeshBufferObject
     {
         glm::vec3 center;
         float radius;
         glm::vec4 halfVolume;
         glm::mat4 transform;
+        uint32_t textureId;
+        VkDeviceAddress vertexPtr;
+        VkDeviceAddress meshletVertexPtr;
+        VkDeviceAddress meshletIndexPtr;
     };
 
     struct MeshletID
@@ -65,14 +77,10 @@ namespace AnA
     struct MeshPushConstant
     {
         glm::mat4 projView;
-        VkDeviceAddress vertexPtr;
-        VkDeviceAddress objectPtr;
-        VkDeviceAddress miscPtr;
-        VkDeviceAddress meshletIDPtr;
+        VkDeviceAddress meshPtr;
         VkDeviceAddress meshletPtr;
-        VkDeviceAddress meshVertexPtr;
-        VkDeviceAddress meshIndexPtr;
-        VkDeviceAddress meshletCullingPtr;
+        VkDeviceAddress meshletIDPtr;
+        VkDeviceAddress miscPtr;
     };
 
     class Scene : public Renderable
@@ -141,7 +149,7 @@ namespace AnA
         }
         uint32_t GetObjectCount() const
         {
-            return objectCount;
+            return uint32_t(meshes.size());
         }
         uint32_t GetMeshletCount() const
         {
@@ -154,11 +162,8 @@ namespace AnA
         void (*MeshAppend)(std::string, uint32_t) = nullptr;
     private:
         Device* aDevice;
-        std::vector<Buffer> objectBuffers{};
-        std::vector<Buffer> objectDataBuffers{};
+        std::vector<Buffer> meshBuffers{};
         std::vector<Buffer> collisionBuffer{};
-        Buffer drawIndexedIndirectBuffer{};
-        Buffer drawIndexedCountBuffer{};
         std::vector<Buffer> drawMeshIndirectBuffers{};
         Buffer drawMeshCountBuffer{};
         void createIndirectBuffers();
@@ -169,7 +174,6 @@ namespace AnA
         bool needUpdate;
         bool commandBufferNeedUpdate = false;
         std::mutex _mutex;
-        uint32_t objectCount = 0;
         uint32_t meshletCount = 0;
         uint32_t meshletIDCount = 0;
         std::vector<Buffer> meshletIDBuffers{};

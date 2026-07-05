@@ -72,17 +72,10 @@ namespace AnA
                 return a.z < b.z;
             }
         };
-        struct Meshlet
+        struct MeshletData
         {
             uint32_t vertices[64];
             uint8_t indices[128 * 3];
-            uint32_t indexCount;
-            uint32_t vertexCount;
-            float radius;
-            glm::vec3 center;
-            glm::vec3 normal;
-            glm::vec3 coneApex;
-            float cutoff;
         };
         struct BoundingSphere
         {
@@ -93,7 +86,7 @@ namespace AnA
             glm::vec3 coneApex;
             float padding;
         };
-        struct MeshletInfo
+        struct Meshlet
         {
             uint32_t vertexOffset;
             uint32_t indexOffset;
@@ -136,17 +129,15 @@ namespace AnA
         std::string Path = "";
 
         std::vector<Meshlet> meshlets;
-        uint32_t meshletVertexCount = 0;
-        uint32_t meshletIndexCount = 0;
-        uint32_t vertexOffset = 0;
-        uint32_t indexOffset = 0;
-        uint32_t meshletOffset = 0;
+        std::vector<uint32_t> meshletVertices;
+        std::vector<uint8_t> meshletIndices;
 
+        uint meshletOffset = 0;
         Buffer vertexBuffer;
         Buffer meshletVertexBuffer;
         Buffer meshletIndexBuffer;
         bool loaded = false;
-        void Load(Device* device, MeshletInfo* meshletInfos, uint32_t& meshletOffset);
+        void Load(Device* device);
         void Unload();
 
         static void CreateMeshFromFile(const char* filePath, std::shared_ptr<Mesh>& mesh);
@@ -156,7 +147,6 @@ namespace AnA
 
         static void ExtractPitchYaw(glm::vec3& normal, uint16_t& pitch, uint16_t& yaw);
     private:
-        void buildMeshlets();
         void buildMeshletsWithOptimizer();
     };
 }

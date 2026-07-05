@@ -19,7 +19,6 @@ namespace AnA
         public:
             struct MeshFrameResource
             {
-                Buffer vertexBuffer;
                 Buffer meshletBuffer;
                 Buffer meshBuffer;
             };
@@ -75,8 +74,6 @@ namespace AnA
 
             size_t vertexCount = 0;
             size_t indexCount = 0;
-            uint32_t meshletVertexCount = 0;
-            uint32_t meshletIndexCount = 0;
             uint32_t meshletCount = 0;
         };
     }
