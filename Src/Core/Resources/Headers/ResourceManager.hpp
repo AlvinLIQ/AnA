@@ -56,6 +56,7 @@ namespace AnA
         uint32_t collidedCount;
         uint32_t meshletCount;
         uint32_t meshletIDCount;
+        glm::mat4 viewProj;
         glm::vec4 planes[6];
         glm::vec2 resolution;
         glm::vec3 cameraPosition;

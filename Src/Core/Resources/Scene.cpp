@@ -179,8 +179,6 @@ void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader)
 
     auto& frameResource = aResourceManager->Meshes.GetCurrentFrameResource();
 
-    meshPushConstant.projView = aResourceManager->MainCamera.GetProjectionMatrix()
-        * aResourceManager->MainCamera.GetView();
     meshPushConstant.meshPtr = meshBuffers[currentBufferIndex].GetAddress();
     meshPushConstant.miscPtr = aResourceManager->GetMiscBufferAddress();
     meshPushConstant.meshletIDPtr = meshletIDBuffers[currentBufferIndex].GetAddress();

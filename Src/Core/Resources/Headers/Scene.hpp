@@ -76,7 +76,6 @@ namespace AnA
 
     struct MeshPushConstant
     {
-        glm::mat4 projView;
         VkDeviceAddress meshPtr;
         VkDeviceAddress meshletPtr;
         VkDeviceAddress meshletIDPtr;

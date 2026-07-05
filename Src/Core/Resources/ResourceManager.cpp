@@ -92,6 +92,7 @@ void ResourceManager::UpdateMiscBuffer()
     mbo.objectCount = MainScene.GetMeshCount();
     mbo.meshletCount = MainScene.GetMeshletCount();
     mbo.meshletIDCount = MainScene.GetMeshletIDCount();
+    mbo.viewProj = MainCamera.GetViewProj();
     if (!LockCamera)
     {
         FrustumPlanes::ExtractFrustumPlanes(MainCamera.GetViewProj(), MainCameraFrustumPlanes);

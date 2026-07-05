@@ -95,6 +95,7 @@ layout(scalar, buffer_reference) buffer MiscRef
     uint collidedCount;
     uint meshletCount;
     uint meshletIDCount;
+    mat4 viewProj;
     vec4 planes[6];
     vec2 resolution;
     vec3 cameraPosition;
@@ -102,7 +103,6 @@ layout(scalar, buffer_reference) buffer MiscRef
 
 layout(push_constant) uniform PushConstants
 {
-    mat4 viewProj;
     MeshRef meshPtr;
     MeshletRef meshletPtr;
     MeshletIDRef meshletIDPtr;
@@ -129,7 +129,7 @@ void main()
         Vertex vertex = mesh.vertexPtr.vertices[mesh.meshletVertexPtr.vertices[meshlet.vertexOffset + i]];
         vec4 vertexPos = mesh.transform * vec4(vertex.position, 1.0);
         worldVertices[i] = vertexPos.xyz;
-        gl_MeshVerticesEXT[i].gl_Position = viewProj * vertexPos;
+        gl_MeshVerticesEXT[i].gl_Position = miscPtr.viewProj * vertexPos;
         gl_MeshVerticesEXT[i].gl_PointSize = 6.0;
         vertexOutput[i].texCoord = vertex.uv;
         vertexOutput[i].texID = uint(vertex.textureId); //texID;
