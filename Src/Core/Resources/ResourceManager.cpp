@@ -89,7 +89,7 @@ void ResourceManager::UpdateMiscBuffer()
     //printf("x: %f y: %f\r", curPos.x.value, curPos.y.value);
     //cbo.invView = MainCamera.GetInverseView();
     auto& mbo = reinterpret_cast<MiscBufferObject*>(miscBuffer.GetMappedData())[bufferIndex];
-    mbo.objectCount = MainScene.GetMeshCount();
+    mbo.objectCount = uint32_t(MainScene.GetMeshCount());
     mbo.meshletCount = MainScene.GetMeshletCount();
     mbo.meshletIDCount = MainScene.GetMeshletIDCount();
     mbo.viewProj = MainCamera.GetViewProj();
