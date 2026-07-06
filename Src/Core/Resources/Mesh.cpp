@@ -141,6 +141,7 @@ void Mesh::CreateMeshesFromFile(const char *filePath, std::vector<MeshData>& mes
                     ExtractPitchYaw(*reinterpret_cast<glm::vec3*>(&mesh->normals[3 * index.n]), vertex.pitch, vertex.yaw);
                     vertex.color = color;
                     vertex.uv = *reinterpret_cast<glm::vec2*>(&mesh->texcoords[2 * index.t]);
+                    vertex.textureId = meshData.textureId;
                     auto result = vertexMap.find(vertex);
                     if (result != vertexMap.end())
                     {

@@ -72,6 +72,11 @@ namespace AnA
         bool NeedUpdate() override;
         VkOffset2D Offset{};
         VkExtent2D Extent{};
+
+        std::mutex& GetMutex()
+        {
+            return _mutex;
+        }
     private:
         Device* aDevice{nullptr};
         Buffer shapeBuffer{};
@@ -79,6 +84,7 @@ namespace AnA
         Buffer countBuffer{};
         uint32_t shapeCount{};
         ShapePushConstant shapePushConstant;
+        std::mutex _mutex;
         bool updated = false;
     };
 }
