@@ -254,7 +254,7 @@ void ResourceManager::createMiscBuffers()
         VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
         VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
     miscBuffer.Map();
-    MainCamera.SetRotateSpeed(float(imageCount) * 1.5f);
+    //MainCamera.SetRotateSpeed(float(imageCount) * 1.5f);
 
 }
 

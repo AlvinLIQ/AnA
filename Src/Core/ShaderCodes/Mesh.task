@@ -116,7 +116,9 @@ bool isMeshletVisible(uint globalID)
 void main()
 {
     uint globalID = gl_GlobalInvocationID.x;
-    visibleCount = 0;
+    if (gl_LocalInvocationIndex == 0)
+        visibleCount = 0;
+
     barrier();
 
     if (globalID < miscPtr.meshletIDCount)
@@ -128,9 +130,10 @@ void main()
             uint index = atomicAdd(visibleCount, 1);
             taskData.visibleIndices[index] = globalID;
         }
-
-        taskData.visibleCount = visibleCount;
     }
     barrier();
-    EmitMeshTasksEXT(visibleCount, 1, 1);
+    if (gl_LocalInvocationIndex == 0)
+        EmitMeshTasksEXT(visibleCount, 1, 1);
+    else
+        EmitMeshTasksEXT(0, 0, 0);
 }
