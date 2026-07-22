@@ -291,6 +291,7 @@ void Scene::UpdateMeshTransform(uint32_t meshIndex)
     auto& scale = meshes[meshIndex].transform.scale;
     objectBufferData[meshIndex].radius = model->radius * std::max(scale.x, std::max(scale.y, scale.z));
     objectBufferData[meshIndex].transform = transform;
+    objectBufferData[meshIndex].vertexPtr = model->vertexBuffer.GetAddress();
 }
 
 void Scene::createIndirectBuffers()

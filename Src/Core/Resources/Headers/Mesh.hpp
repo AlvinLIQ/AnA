@@ -146,6 +146,7 @@ namespace AnA
 
         static void ExtractPitchYaw(glm::vec3& normal, uint16_t& pitch, uint16_t& yaw);
     private:
+        size_t verticesSize = 0;
         void buildMeshletsWithOptimizer();
     };
 }

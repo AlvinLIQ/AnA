@@ -55,16 +55,19 @@ Mesh::~Mesh()
 
 void Mesh::Load(Device* device)
 {
-    if (loaded)
+    size_t _verticesSize = data.vertices.size() * sizeof(data.vertices[0]);
+    if (loaded && verticesSize > _verticesSize)
         return;
-
+    size_t vertexReserve = size_t(loaded ? 1000 * sizeof(data.vertices[0]) : 0);
     CopyBufferInfo infos[] =
     {
-        {&vertexBuffer, data.vertices.data(), data.vertices.size() * sizeof(data.vertices[0])},
-        {&meshletVertexBuffer, meshletVertices.data(), meshletVertices.size() * sizeof(uint32_t)},
-        {&meshletIndexBuffer, meshletIndices.data(), meshletIndices.size()},
+                                                /*offset*/
+        {&vertexBuffer, data.vertices.data(), verticesSize, _verticesSize, vertexReserve},
+        {&meshletVertexBuffer, meshletVertices.data(), 0, meshletVertices.size() * sizeof(uint32_t), 0},
+        {&meshletIndexBuffer, meshletIndices.data(), 0, meshletIndices.size(), 0},
     };
     CopyBuffer(device, numsof(infos), infos);
+    verticesSize = _verticesSize;
     loaded = true;
 }
 

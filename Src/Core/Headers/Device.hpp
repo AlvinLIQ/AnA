@@ -10,6 +10,7 @@
 #include <functional>
 #include <glm/glm.hpp>
 #include "Utils.hpp"
+#include "../ShaderCodes/bindings.h"
 #include "../../3rdParty/VulkanMemoryAllocator/include/vk_mem_alloc.h"
 
 #define INCLUDE_STB_IMAGE

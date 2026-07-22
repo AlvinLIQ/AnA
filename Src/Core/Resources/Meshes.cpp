@@ -102,7 +102,7 @@ void Meshes::Append(uint32_t id, std::vector<AnA::Mesh::Vertex>& vertices)
     if (loadedSet.find(id) == loadedSet.end())
         return;
 
-    needUpdate = true;
+    mesh->Load(aDevice);
     vertexCount += uint32_t(vertices.size());
 }
 
