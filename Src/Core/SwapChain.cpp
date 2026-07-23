@@ -90,7 +90,7 @@ VkResult SwapChain::SubmitCommandBufferQueue()
     submitInfo.pWaitSemaphoreInfos = waitSemaphoreSubmitInfos;
     submitInfo.waitSemaphoreInfoCount = numsof(waitSemaphoreSubmitInfos);
 
-    frameIndex++;
+    aDevice->FrameIndex++;
 
     VkSemaphoreSubmitInfoKHR signalSemaphoreSubmitInfos[] =
     {
@@ -106,7 +106,7 @@ VkResult SwapChain::SubmitCommandBufferQueue()
             .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
             .pNext = VK_NULL_HANDLE,
             .semaphore = timelineSemaphore,
-            .value = frameIndex, // replaces VkTimelineSemaphoreSubmitInfo
+            .value = aDevice->FrameIndex, // replaces VkTimelineSemaphoreSubmitInfo
             .stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
             .deviceIndex = 0, // replaces VkDeviceGroupSubmitInfo
         }

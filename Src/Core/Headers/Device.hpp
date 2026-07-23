@@ -265,6 +265,7 @@ namespace AnA
         void DumpGarbage(const Garbage& garbage);
         void CleanupGarbage(const uint64_t& timePoint);
 
+        uint32_t FrameIndex = 0;
         uint64_t CompletedFrameCount = 0;
     private:
         VkInstance& instance;
