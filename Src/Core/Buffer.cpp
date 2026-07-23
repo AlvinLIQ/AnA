@@ -63,7 +63,7 @@ void Buffer::cleanup()
         BufferResourceInfo info{buffer, allocation};
         Garbage garbage;
         garbage.info = info;
-        garbage.cleanTime = aDevice->CompletedFrameCount + 1;
+        garbage.cleanTime = aDevice->CompletedFrameCount + MAX_FRAMES_IN_FLIGHT;
         aDevice->DumpGarbage(garbage);
     }
 }

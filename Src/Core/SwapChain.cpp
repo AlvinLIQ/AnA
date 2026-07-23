@@ -26,6 +26,7 @@ SwapChain::~SwapChain()
     {
         vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
     }
+    vkDestroySemaphore(device, timelineSemaphore, nullptr);
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
         vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
@@ -74,30 +75,45 @@ VkResult SwapChain::SubmitCommandBufferQueue()
     VkSubmitInfo2 submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
 
-    VkSemaphoreSubmitInfoKHR waitSemaphoreSubmitInfo =
+    VkSemaphoreSubmitInfoKHR waitSemaphoreSubmitInfos[] =
     {
-        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
-        .pNext = VK_NULL_HANDLE,
-        .semaphore = imageAvailableSemaphores[CurrentFrame],
-        .value = 1, // replaces VkTimelineSemaphoreSubmitInfo
-        .stageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT_KHR,
-        .deviceIndex = 0, // replaces VkDeviceGroupSubmitInfo
-    };
-    submitInfo.pWaitSemaphoreInfos = &waitSemaphoreSubmitInfo;
-    submitInfo.waitSemaphoreInfoCount = 1;
-
-    VkSemaphoreSubmitInfoKHR signalSemaphoreSubmitInfo =
-    {
-        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
-        .pNext = VK_NULL_HANDLE,
-        .semaphore = renderFinishedSemaphores[CurrentImage],
-        .value = 2, // replaces VkTimelineSemaphoreSubmitInfo
-        .stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
-        .deviceIndex = 0, // replaces VkDeviceGroupSubmitInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
+            .pNext = VK_NULL_HANDLE,
+            .semaphore = imageAvailableSemaphores[CurrentFrame],
+            .value = 1,
+            .stageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT_KHR,
+            .deviceIndex = 0,
+        },
     };
 
-    submitInfo.pSignalSemaphoreInfos = &signalSemaphoreSubmitInfo;
-    submitInfo.signalSemaphoreInfoCount = 1;
+    submitInfo.pWaitSemaphoreInfos = waitSemaphoreSubmitInfos;
+    submitInfo.waitSemaphoreInfoCount = numsof(waitSemaphoreSubmitInfos);
+
+    frameIndex++;
+
+    VkSemaphoreSubmitInfoKHR signalSemaphoreSubmitInfos[] =
+    {
+        {
+            .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
+            .pNext = VK_NULL_HANDLE,
+            .semaphore = renderFinishedSemaphores[CurrentImage],
+            .value = 2, // replaces VkTimelineSemaphoreSubmitInfo
+            .stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+            .deviceIndex = 0, // replaces VkDeviceGroupSubmitInfo
+        },
+        {
+            .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
+            .pNext = VK_NULL_HANDLE,
+            .semaphore = timelineSemaphore,
+            .value = frameIndex, // replaces VkTimelineSemaphoreSubmitInfo
+            .stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+            .deviceIndex = 0, // replaces VkDeviceGroupSubmitInfo
+        }
+    };
+
+    submitInfo.pSignalSemaphoreInfos = signalSemaphoreSubmitInfos;
+    submitInfo.signalSemaphoreInfoCount = numsof(signalSemaphoreSubmitInfos);
 
     VkResult result;
     {
@@ -115,7 +131,7 @@ VkResult SwapChain::SubmitCommandBufferQueue()
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
     presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = &signalSemaphoreSubmitInfo.semaphore;
+    presentInfo.pWaitSemaphores = &renderFinishedSemaphores[CurrentImage];
 
     VkSwapchainKHR swapChains[] = {swapChain};
     presentInfo.swapchainCount = 1;
@@ -126,6 +142,14 @@ VkResult SwapChain::SubmitCommandBufferQueue()
     vkQueuePresentKHR(aDevice->GetPresentQueue(), &presentInfo);
 
     CurrentFrame = (CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+    uint64_t completedFrameIndex = 0;
+    if (vkGetSemaphoreCounterValue(aDevice->GetLogicalDevice(), timelineSemaphore, &completedFrameIndex) == VK_SUCCESS &&
+        completedFrameIndex > aDevice->CompletedFrameCount)
+    {
+        aDevice->CompletedFrameCount = completedFrameIndex;
+        aDevice->CleanupGarbage(completedFrameIndex);
+    }
+
     return result;
 }
 
@@ -556,6 +580,15 @@ void SwapChain::createSyncObjects()
             vkCreateFence(device, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS)
             throw std::runtime_error("failed to create semaphores or fences!");
     }
+
+    VkSemaphoreTypeCreateInfo semaphoreTypeCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO,
+        .pNext = nullptr,
+        .semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE,
+        .initialValue = 0
+    };
+    semaphoreInfo.pNext = &semaphoreTypeCreateInfo;
+    vkCreateSemaphore(device, &semaphoreInfo, nullptr, &timelineSemaphore);
 }
 
 void SwapChain::cleanupSwapChain()
