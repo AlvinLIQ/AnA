@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <mutex>
 #include <functional>
+#include <variant>
 #include <glm/glm.hpp>
 #include "Utils.hpp"
 #include "../ShaderCodes/bindings.h"
@@ -94,6 +95,19 @@ namespace AnA
     typedef void(*NormalCallBack)();
     typedef void(*ViewportCallBack)(VkOffset2D& offset, VkExtent2D& extent);
     enum RenderPassType {RENDER_PASS_TYPE_ONSCREEN, RENDER_PASS_TYPE_OFFSCREEN, RENDER_PASS_TYPE_SIZE};
+
+    struct BufferResourceInfo
+    {
+        VkBuffer buffer;
+        VmaAllocation allocation;
+    };
+
+    typedef std::variant<BufferResourceInfo> ResourceInfo;
+    struct Garbage
+    {
+        uint64_t cleanTime;
+        ResourceInfo info;
+    };
 
     class Device
     {
@@ -247,6 +261,11 @@ namespace AnA
         bool SingleTimeCommandsSubmitBegan();
         VkCommandBuffer BeginSingleTimeCommandsSubmit();
         void EndSingleTimeCommandsSubmit(VkFence& fence);
+
+        void DumpGarbage(const Garbage& garbage);
+        void CleanupGarbage(const uint64_t& timePoint);
+
+        uint64_t CompletedFrameCount = 0;
     private:
         VkInstance& instance;
         VkSurfaceKHR& surface;
@@ -295,6 +314,9 @@ namespace AnA
 
         VmaAllocator allocator{nullptr};
         void createVmaAllocator();
+
+        std::mutex garbageStationDoor;
+        std::vector<Garbage> garbageStation;
     };
 
     namespace Resources

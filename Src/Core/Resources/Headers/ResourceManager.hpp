@@ -151,6 +151,7 @@ namespace AnA
             uint32_t AppendTexture(VkImage image, VmaAllocation allocation,
                 VkImageView imageView, uint32_t* index = nullptr, const std::string& name = "");
 
+
             MeshShaderOutput MeshShaderOutputData;
         private:
             Device* aDevice;

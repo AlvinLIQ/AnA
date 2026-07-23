@@ -35,6 +35,7 @@ Device::Device(VkInstance &mInstance, VkSurfaceKHR &mSurface) : instance {mInsta
 
 Device::~Device()
 {
+    CleanupGarbage(UINT64_MAX);
     vkDestroyCommandPool(logicalDevice, subCommandPool, nullptr);
     vkDestroyCommandPool(logicalDevice, commandPool, nullptr);
     vmaDestroyAllocator(allocator);
@@ -1304,6 +1305,32 @@ void Device::EndSingleTimeCommandsSubmit(VkFence& fence)
     }
     subCommandPostProcesses.clear();
     subCommandMutex.unlock();
+}
+
+void Device::DumpGarbage(const Garbage& garbage)
+{
+    std::unique_lock lock(garbageStationDoor);
+    garbageStation.push_back(garbage);
+}
+
+void Device::CleanupGarbage(const uint64_t& timePoint)
+{
+    std::unique_lock lock(garbageStationDoor);
+    std::erase_if(garbageStation, [&](const Garbage& garbage)
+    {
+        if (timePoint >= garbage.cleanTime)
+        {
+            std::visit([&](auto&& res)
+            {
+                using T = std::decay_t<decltype(res)>;
+
+                if constexpr (std::is_same_v<T, BufferResourceInfo>)
+                    DestroyBuffer(res.buffer, res.allocation);
+            }, garbage.info);
+            return true;
+        }
+        return false;
+    });
 }
 
 VmaAllocator Device::GetAllocator()
