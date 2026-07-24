@@ -1,6 +1,7 @@
 #pragma once
 
 #include <volk.h>
+#include "../../Headers/Buffer.hpp"
 #include "Animation.hpp"
 
 #include <functional>
@@ -17,14 +18,14 @@
 
 namespace AnA
 {
-    struct Model
+    struct Mesh
     {
         struct Vertex
         {
             glm::vec3 position{};
             uint16_t pitch{};
             uint16_t yaw{};
-            uint32_t textureId;
+            uint32_t textureId{};
             glm::u8vec3 color{};
             glm::vec2 uv{};
 
@@ -71,19 +72,28 @@ namespace AnA
                 return a.z < b.z;
             }
         };
-        struct Meshlet
+        struct MeshletData
         {
             uint32_t vertices[64];
             uint8_t indices[128 * 3];
-            uint32_t indexCount;
-            uint32_t vertexCount;
-            float radius;
-            glm::vec3 center;
-            glm::vec3 normal;
-            glm::vec3 coneApex;
-            float cutoff;
         };
-
+        struct BoundingSphere
+        {
+            glm::vec3 center;
+            float radius;
+            glm::vec3 normal;
+            float cutoff;
+            glm::vec3 coneApex;
+            float padding;
+        };
+        struct Meshlet
+        {
+            uint32_t vertexOffset;
+            uint32_t indexOffset;
+            uint32_t vertexCount;
+            uint32_t indexCount;
+            BoundingSphere bounding;
+        };
         struct BSPNode
         {
             BSPNode* left = nullptr;
@@ -98,49 +108,45 @@ namespace AnA
             glm::mat4 transform{};
         };
 
-        struct ModelInfo
+        struct MeshData
         {
             std::vector<Node> nodes;
             std::vector<Vertex> vertices;
             glm::vec3 minBounding;
             glm::vec3 maxBounding;
-            Index indexStep;
             std::vector<Index> indices;
-            std::string texturePath;
+            uint32_t textureId;
         };
 
-        struct ModelStorageBufferObject
-        {
-            glm::mat4 model;
-            static VkDescriptorSetLayoutBinding GetBindingDescriptionSet();
-        };
+        Mesh(const MeshData& meshData);
+        ~Mesh();
 
-        Model(const ModelInfo& modelInfo);
-        ~Model();
-
-        ModelInfo info{};
+        MeshData data{};
         glm::vec3 center{};
         float radius{};
         std::vector<Animation> Animations;
         std::string Path = "";
 
         std::vector<Meshlet> meshlets;
-        uint32_t meshletVertexCount = 0;
-        uint32_t meshletIndexCount = 0;
-        uint32_t vertexOffset = 0;
-        uint32_t indexOffset = 0;
+        std::vector<uint32_t> meshletVertices;
+        std::vector<uint8_t> meshletIndices;
+
         uint32_t meshletOffset = 0;
+        Buffer vertexBuffer;
+        Buffer meshletVertexBuffer;
+        Buffer meshletIndexBuffer;
+        bool loaded = false;
+        void Load(Device* device);
+        void Unload();
 
-
-        static void CreateModelFromFile(const char* filePath, std::shared_ptr<Model>& model);
-        static void CreateMeshFromFile(const char *filePath, ModelInfo& modelInfo);
+        static void CreateMesh(MeshData& meshData, std::shared_ptr<Mesh>& mesh);
+        static void CreateMeshesFromFile(const char *filePath, std::vector<MeshData>& meshDatas);
         static void CreateVerticesFromFile(const char* filePath, std::vector<Vertex>& vertices);
         static bool CreateQuad(std::vector<Vertex> &vertices, std::vector<Index> &indices, Index a, Index b, Index c, Index d);
-        static void CreateTerrainFromVertices(std::vector<Vertex>& vertices, std::vector<Index> &terrainVertices, size_t period);
 
         static void ExtractPitchYaw(glm::vec3& normal, uint16_t& pitch, uint16_t& yaw);
     private:
-        void buildMeshlets();
+        size_t verticesSize = 0;
         void buildMeshletsWithOptimizer();
     };
 }

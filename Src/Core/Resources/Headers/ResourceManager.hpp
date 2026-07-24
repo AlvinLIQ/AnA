@@ -56,6 +56,7 @@ namespace AnA
         uint32_t collidedCount;
         uint32_t meshletCount;
         uint32_t meshletIDCount;
+        glm::mat4 viewProj;
         glm::vec4 planes[6];
         glm::vec2 resolution;
         glm::vec3 cameraPosition;
@@ -149,6 +150,7 @@ namespace AnA
             uint32_t AppendTexture(const std::string& path, uint32_t* index = nullptr);
             uint32_t AppendTexture(VkImage image, VmaAllocation allocation,
                 VkImageView imageView, uint32_t* index = nullptr, const std::string& name = "");
+
 
             MeshShaderOutput MeshShaderOutputData;
         private:

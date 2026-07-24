@@ -8,8 +8,10 @@
 #include <unordered_map>
 #include <mutex>
 #include <functional>
+#include <variant>
 #include <glm/glm.hpp>
 #include "Utils.hpp"
+#include "../ShaderCodes/bindings.h"
 #include "../../3rdParty/VulkanMemoryAllocator/include/vk_mem_alloc.h"
 
 #define INCLUDE_STB_IMAGE
@@ -93,6 +95,19 @@ namespace AnA
     typedef void(*NormalCallBack)();
     typedef void(*ViewportCallBack)(VkOffset2D& offset, VkExtent2D& extent);
     enum RenderPassType {RENDER_PASS_TYPE_ONSCREEN, RENDER_PASS_TYPE_OFFSCREEN, RENDER_PASS_TYPE_SIZE};
+
+    struct BufferResourceInfo
+    {
+        VkBuffer buffer;
+        VmaAllocation allocation;
+    };
+
+    typedef std::variant<BufferResourceInfo> ResourceInfo;
+    struct Garbage
+    {
+        uint64_t cleanTime;
+        ResourceInfo info;
+    };
 
     class Device
     {
@@ -246,6 +261,12 @@ namespace AnA
         bool SingleTimeCommandsSubmitBegan();
         VkCommandBuffer BeginSingleTimeCommandsSubmit();
         void EndSingleTimeCommandsSubmit(VkFence& fence);
+
+        void DumpGarbage(const Garbage& garbage);
+        void CleanupGarbage(const uint64_t& timePoint);
+
+        uint32_t FrameIndex = 0;
+        uint64_t CompletedFrameCount = 0;
     private:
         VkInstance& instance;
         VkSurfaceKHR& surface;
@@ -259,6 +280,7 @@ namespace AnA
             VK_EXT_SHADER_OBJECT_EXTENSION_NAME,
             VK_EXT_PRIMITIVE_TOPOLOGY_LIST_RESTART_EXTENSION_NAME,
             VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME,
+            VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME,
             VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME
         };
         std::vector<VkSampleCountFlagBits> usableSamples{};
@@ -294,6 +316,9 @@ namespace AnA
 
         VmaAllocator allocator{nullptr};
         void createVmaAllocator();
+
+        std::mutex garbageStationDoor;
+        std::vector<Garbage> garbageStation;
     };
 
     namespace Resources

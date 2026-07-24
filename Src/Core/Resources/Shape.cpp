@@ -27,6 +27,7 @@ Shapes::~Shapes()
 
 void Shapes::PrepareDraw(Controls::Control* control)
 {
+    std::lock_guard<std::mutex> lock(_mutex);
     uint32_t newShapeCount = 0;
     control->PrepareDraw((Shape*)shapeBuffer.GetMappedData(), newShapeCount);
     ((VkDrawIndirectCommand*)indirectBuffer.GetMappedData())->vertexCount = (shapeCount = newShapeCount) * 6;

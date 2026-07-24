@@ -140,6 +140,7 @@ namespace AnA
 
         std::vector<VkSemaphore> imageAvailableSemaphores;
         std::vector<VkSemaphore> renderFinishedSemaphores;
+        VkSemaphore timelineSemaphore;
         std::vector<VkFence> inFlightFences;
         void createSyncObjects();
 

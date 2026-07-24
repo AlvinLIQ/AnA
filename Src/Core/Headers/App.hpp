@@ -25,8 +25,8 @@ namespace AnA
         void Cleanup();
         void Exit();
 
-        static std::shared_ptr<Model> &Get2DModel();
-        static void CreateModel(const Model::ModelInfo &modelInfo, std::shared_ptr<Model> &model);
+        static std::shared_ptr<Mesh> &Get2DModel();
+        static void CreateModel(const Mesh::MeshData &meshData, std::shared_ptr<Mesh> &model);
 
         static App* GetCurrent();
         Input::InputManager& GetInputManager()

@@ -147,9 +147,9 @@ void App::Cleanup()
 {
 }
 
-void App::CreateModel(const Model::ModelInfo &modelInfo, std::shared_ptr<Model> &model)
+void App::CreateModel(const Mesh::MeshData &meshData, std::shared_ptr<Mesh> &mesh)
 {
-    model = std::make_shared<Model>(modelInfo);
+    mesh = std::make_shared<Mesh>(meshData);
 }
 
 void App::startUILoop(std::thread &loopThread)
@@ -207,13 +207,13 @@ void App::onCommandBufferRecording(CommandBuffer& commandBuffer)
 
     swapChain.SetViewport(commandBuffer);
     aRenderer.RenderIndirect(commandBuffer, aResourceManager.MainScene,
-        aResourceManager.Shaders[0]);
+        aResourceManager.Shaders[MESH_PIPELINE_ID]);
 
     aRenderer.RenderIndirect(commandBuffer, aResourceManager.TextContext,
-        aResourceManager.Shaders[1]);
+        aResourceManager.Shaders[TEXT_PIPELINE_ID]);
 
     aRenderer.RenderIndirect(commandBuffer, aResourceManager.Shapes,
-        aResourceManager.Shaders[2]);
+        aResourceManager.Shaders[SHAPE_PIPELINE_ID]);
 
     aRenderer.EndRendering(commandBuffer);
 }

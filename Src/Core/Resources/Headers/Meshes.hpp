@@ -2,7 +2,7 @@
 
 #include "../../Headers/Device.hpp"
 #include "../../Headers/Buffer.hpp"
-#include "Model.hpp"
+#include "Mesh.hpp"
 
 #include <array>
 #include <set>
@@ -17,33 +17,10 @@ namespace AnA
         class Meshes
         {
         public:
-            struct MeshletInfo
-            {
-                uint32_t vertexOffset;
-                uint32_t indexOffset;
-                uint32_t vertexCount;
-                uint32_t indexCount;
-            };
-            struct BoundingSphere
-            {
-                glm::vec3 center;
-                float radius;
-                glm::vec3 normal;
-                float cutoff;
-                glm::vec3 coneApex;
-                float padding;
-            };
-
             struct MeshFrameResource
             {
-                Buffer vertexBuffer;
-                Buffer indexBuffer;
-                //Buffer objectBuffer;
                 Buffer meshletBuffer;
-                Buffer meshletVertexBuffer;
-                Buffer meshletIndexBuffer;
-                Buffer meshletCullingBuffer;
-                //Buffer meshletIDBuffer;
+                Buffer meshBuffer;
             };
 
             Meshes(Device* mDevice);
@@ -51,13 +28,13 @@ namespace AnA
 
             void Init();
 
-            bool Create(const char* filePath, uint32_t& id);
-            bool Create(std::shared_ptr<Model> model, uint32_t& id);
-            void Load(const char* filePath, uint32_t& id);
-            void Load(std::shared_ptr<Model> model, uint32_t& id);
+            bool Create(const char* filePath, uint32_t& id, uint32_t& count);
+            bool Create(std::shared_ptr<Mesh> model, uint32_t& id);
+            void Load(const char* filePath, uint32_t& id, uint32_t& count);
+            void Load(std::shared_ptr<Mesh> model, uint32_t& id);
             void Load(const uint32_t id);
 
-            void Append(uint32_t id, std::vector<AnA::Model::Vertex>& vertices);
+            void Append(uint32_t id, std::vector<AnA::Mesh::Vertex>& vertices);
 
             bool NeedUpdate()
             {
@@ -80,7 +57,7 @@ namespace AnA
                 return meshletCount;
             }
 
-            std::unordered_map<uint32_t, std::shared_ptr<Model>> MeshMap{};
+            std::unordered_map<uint32_t, std::shared_ptr<Mesh>> MeshMap{};
             std::unordered_map<std::string, uint32_t> MeshPathIndexMap{};
         private:
             Device* aDevice;
@@ -97,8 +74,6 @@ namespace AnA
 
             size_t vertexCount = 0;
             size_t indexCount = 0;
-            uint32_t meshletVertexCount = 0;
-            uint32_t meshletIndexCount = 0;
             uint32_t meshletCount = 0;
         };
     }

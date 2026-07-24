@@ -60,6 +60,10 @@ void Buffer::cleanup()
     if (aDevice)
     {
         Unmap();
-        aDevice->DestroyBuffer(buffer, allocation);
+        BufferResourceInfo info{buffer, allocation};
+        Garbage garbage;
+        garbage.info = info;
+        garbage.cleanTime = aDevice->FrameIndex + MAX_FRAMES_IN_FLIGHT;
+        aDevice->DumpGarbage(garbage);
     }
 }

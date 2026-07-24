@@ -1,6 +1,9 @@
 #include "Headers/Meshes.hpp"
 #include "Headers/Buffer.hpp"
 #include "Headers/SwapChain.hpp"
+#include "vulkan/vulkan_core.h"
+#include <memory>
+#include <mutex>
 
 using namespace AnA;
 using namespace Resources;
@@ -23,41 +26,52 @@ void Meshes::Init()
 
 }
 
-bool Meshes::Create(const char* filePath, uint32_t& id)
+bool Meshes::Create(const char* filePath, uint32_t& id, uint32_t& count)
 {
+    std::lock_guard<std::mutex> lock(_mutex);
     auto iter = MeshPathIndexMap.find(filePath);
     if (iter != MeshPathIndexMap.end())
     {
         id = iter->second;
+        count = 1;
         return false;
     }
-    std::shared_ptr<Model> mesh;
-    Model::CreateModelFromFile(filePath, mesh);
+    std::vector<Mesh::MeshData> meshDatas;
+    Mesh::CreateMeshesFromFile(filePath, meshDatas);
+    count = uint32_t(meshDatas.size());
     MeshPathIndexMap.emplace(filePath, meshId);
     id = meshId;
+
+    for (auto& meshData : meshDatas)
+    {
+        auto mesh = MeshMap.emplace(meshId++, std::make_shared<Mesh>(std::move(meshData))).first->second->Path = filePath;
+    }
+
+    return true;
+}
+
+bool Meshes::Create(std::shared_ptr<AnA::Mesh> mesh, uint32_t& id)
+{
+    std::lock_guard<std::mutex> lock(_mutex);
+    id = meshId;
     MeshMap.emplace(meshId++, mesh);
 
     return true;
 }
 
-bool Meshes::Create(std::shared_ptr<AnA::Model> model, uint32_t& id)
+void Meshes::Load(const char* filePath, uint32_t& id, uint32_t& count)
 {
-    id = meshId;
-    MeshMap.emplace(meshId++, model);
-
-    return true;
+    Create(filePath, id, count);
+    for (uint32_t i = 0; i < count; i++)
+        Load(id + i);
 }
 
-void Meshes::Load(const char* filePath, uint32_t& id)
+void Meshes::Load(std::shared_ptr<Mesh> mesh, uint32_t& id)
 {
-    Create(filePath, id);
-    Load(id);
-}
-
-void Meshes::Load(std::shared_ptr<Model> mesh, uint32_t& id)
-{
+    _mutex.lock();
     id = meshId;
     MeshMap.emplace(meshId++, mesh);
+    _mutex.unlock();
     Load(id);
 }
 
@@ -67,175 +81,71 @@ void Meshes::Load(const uint32_t id)
     {
         return;
     }
+    std::lock_guard<std::mutex> lock(_mutex);
+
     loadedSet.emplace(id);
     auto mesh = MeshMap[id];
-    mesh->vertexOffset = uint32_t(vertexCount);
-    mesh->indexOffset = uint32_t(indexCount);
-    mesh->meshletOffset = meshletCount;
-    vertexCount += (mesh->info.vertices.size());
-    indexCount += (mesh->info.indices.size());
+    vertexCount += (mesh->data.vertices.size());
+    indexCount += (mesh->data.indices.size());
     meshletCount += uint32_t(mesh->meshlets.size());
-    meshletVertexCount += uint32_t(mesh->meshletVertexCount);
-    meshletIndexCount += uint32_t(mesh->meshletIndexCount);
     needUpdate = true;
 }
 
-void Meshes::Append(uint32_t id, std::vector<AnA::Model::Vertex>& vertices)
+void Meshes::Append(uint32_t id, std::vector<AnA::Mesh::Vertex>& vertices)
 {
-    std::unique_lock<std::mutex> lock(_mutex);
+    std::lock_guard<std::mutex> lock(_mutex);
     if (MeshMap.find(id) == MeshMap.end())
         return;
 
     auto mesh = MeshMap[id];
-    bool isLastMesh = mesh->vertexOffset + uint32_t(mesh->info.vertices.size()) == vertexCount;
-    mesh->info.vertices.insert(mesh->info.vertices.end(), vertices.begin(), vertices.end());
+    mesh->data.vertices.insert(mesh->data.vertices.end(), vertices.begin(), vertices.end());
     if (loadedSet.find(id) == loadedSet.end())
         return;
 
-    if (isLastMesh &&
-        frameResources[currentBufferIndex].vertexBuffer.GetSize() >
-        (vertexCount + uint32_t(vertices.size())) * sizeof(Model::Vertex))
-    {
-        auto vertexBufferData =
-            reinterpret_cast<Model::Vertex*>(frameResources[currentBufferIndex].vertexBuffer.GetMappedData());
-        for (uint32_t i = 0; i < uint32_t(vertices.size()); i++)
-        {
-            vertexBufferData[i + vertexCount] = vertices[i];
-        }
-    }
-    else
-    {
-        needUpdate = true;
-    }
+    mesh->Load(aDevice);
     vertexCount += uint32_t(vertices.size());
 }
 
 void Meshes::Update()
 {
-    std::unique_lock<std::mutex> lock(_mutex);
+    std::lock_guard<std::mutex> lock(_mutex);
     currentBufferIndex = prepareFrameResources();
     needUpdate = false;
 }
 
 void Meshes::initFrameResource(MeshFrameResource& frameResource)
 {
-    if (frameResource.vertexBuffer.GetSize() <= vertexCount * sizeof(Model::Vertex))
+    if (frameResource.meshletBuffer.GetSize() <= meshletCount * sizeof(Mesh::Meshlet))
     {
-        frameResource.vertexBuffer = Buffer(aDevice, (vertexCount + 1000) * sizeof(Model::Vertex),
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-        frameResource.vertexBuffer.Map();
-    }
-
-    if (frameResource.indexBuffer.GetSize() <= indexCount * sizeof(Model::Index))
-    {
-        frameResource.indexBuffer = Buffer(aDevice, (indexCount + 1000) * sizeof(Model::Index),
-            VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-        frameResource.indexBuffer.Map();
-    }
-
-    if (frameResource.meshletBuffer.GetSize() <= meshletCount * sizeof(MeshletInfo))
-    {
-        frameResource.meshletBuffer = Buffer(aDevice, (meshletCount + 100) * sizeof(MeshletInfo),
+        frameResource.meshletBuffer = Buffer(aDevice, (meshletCount + 100) * sizeof(Mesh::Meshlet),
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
 
         frameResource.meshletBuffer.Map();
     }
-
-    if (frameResource.meshletVertexBuffer.GetSize() <= meshletVertexCount * sizeof(uint32_t))
-    {
-        frameResource.meshletVertexBuffer = Buffer(aDevice, (meshletVertexCount + 500) * sizeof(uint32_t),
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-
-        frameResource.meshletVertexBuffer.Map();
-    }
-
-    if (frameResource.meshletIndexBuffer.GetSize() <= meshletIndexCount)
-    {
-        frameResource.meshletIndexBuffer = Buffer(aDevice, meshletIndexCount + 1000,
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-
-        frameResource.meshletIndexBuffer.Map();
-    }
-
-    if (frameResource.meshletCullingBuffer.GetSize() <= meshletCount * sizeof(BoundingSphere))
-    {
-        frameResource.meshletCullingBuffer = Buffer(aDevice, (meshletCount + 100) * sizeof(BoundingSphere),
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-        frameResource.meshletCullingBuffer.Map();
-    }
 }
 
 void Meshes::rebuildFrameResource(MeshFrameResource& frameResource)
 {
-    size_t vertexOffset = 0, indexOffset = 0, meshletOffset = 0;
-    uint32_t meshletVertexOffset = 0, meshletIndexOffset = 0;
-    auto vertexBufferData = reinterpret_cast<Model::Vertex*>(frameResource.vertexBuffer.GetMappedData());
-    auto indexBufferData = reinterpret_cast<Model::Index*>(frameResource.indexBuffer.GetMappedData());
-    auto meshletBufferData = reinterpret_cast<MeshletInfo*>(frameResource.meshletBuffer.GetMappedData());
-    auto meshletVertexBufferData = reinterpret_cast<uint32_t*>(frameResource.meshletVertexBuffer.GetMappedData());
-    auto meshletIndexBufferData = reinterpret_cast<uint8_t*>(frameResource.meshletIndexBuffer.GetMappedData());
-    auto meshletCullingBufferData = reinterpret_cast<BoundingSphere*>(frameResource.meshletCullingBuffer.GetMappedData());
+    uint32_t meshletOffset = 0;
+    auto meshletBufferData = reinterpret_cast<Mesh::Meshlet*>(frameResource.meshletBuffer.GetMappedData());
 
     for (auto& id : loadedSet)
     {
         auto mesh = MeshMap[id];
+        mesh->Load(aDevice);
 
-        for (size_t i = 0; i < mesh->info.vertices.size(); i++)
-            vertexBufferData[vertexOffset + i] = mesh->info.vertices[i];
-        for (size_t i = 0; i < mesh->info.indices.size(); i++)
-            indexBufferData[indexOffset + i] = mesh->info.indices[i] + Model::Index(vertexOffset);
-
-        mesh->meshletOffset = uint32_t(meshletOffset);
-        for (auto& meshlet : mesh->meshlets)
-        {
-            meshletBufferData[meshletOffset] =
-                {uint32_t(meshletVertexOffset), uint32_t(meshletIndexOffset),
-                    meshlet.vertexCount, meshlet.indexCount};
-            for (uint32_t j = 0; j < meshlet.vertexCount; j++)
-                meshletVertexBufferData[meshletVertexOffset + j] = meshlet.vertices[j] + uint32_t(vertexOffset);
-            for (uint32_t j = 0; j < meshlet.indexCount; j++)
-                meshletIndexBufferData[meshletIndexOffset + j] = meshlet.indices[j];
-
-            meshletVertexOffset += meshlet.vertexCount;
-            meshletIndexOffset += meshlet.indexCount;
-
-            meshletCullingBufferData[meshletOffset++] = {meshlet.center, meshlet.radius,
-                meshlet.normal, meshlet.cutoff,
-                meshlet.coneApex, 0.0f};
-        }
-        mesh->vertexOffset = uint32_t(vertexOffset);
-        mesh->indexOffset = uint32_t(indexOffset);
-        vertexOffset += mesh->info.vertices.size();
-        indexOffset += mesh->info.indices.size();
+        mesh->meshletOffset = meshletOffset;
+        memcpy(&meshletBufferData[meshletOffset], mesh->meshlets.data(), mesh->meshlets.size() * sizeof(mesh->meshlets[0]));
+        meshletOffset += uint32_t(mesh->meshlets.size());
     }
 }
 
 uint32_t Meshes::prepareFrameResources()
 {
     uint32_t bufferIndex = currentBufferIndex;
-    if (vertexCount * sizeof(Model::Vertex) >
-        frameResources[currentBufferIndex].vertexBuffer.GetSize() ||
-
-        indexCount * sizeof(Model::Index) >
-        frameResources[currentBufferIndex].indexBuffer.GetSize() ||
-
-        meshletVertexCount * sizeof(uint32_t) >
-        frameResources[currentBufferIndex].meshletVertexBuffer.GetSize() ||
-
-        indexCount >
-        frameResources[currentBufferIndex].meshletIndexBuffer.GetSize() ||
-
-        meshletCount * sizeof(MeshFrameResource) >
-        frameResources[currentBufferIndex].meshletBuffer.GetSize() ||
-
-        meshletCount * sizeof(BoundingSphere) >
-        frameResources[currentBufferIndex].meshletCullingBuffer.GetSize()
+    if (meshletCount * sizeof(Mesh::Meshlet) >
+        frameResources[currentBufferIndex].meshletBuffer.GetSize()
     )
     {
         bufferIndex = NextFrameIndex(bufferIndex);

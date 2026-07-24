@@ -16,37 +16,6 @@ layout(scalar, buffer_reference) buffer VertexRef
     Vertex vertices[];
 };
 
-layout(scalar, buffer_reference) buffer ObjectRef
-{
-    Object objects[];
-};
-
-layout(scalar, buffer_reference) buffer MiscRef
-{
-    uint objectCount;
-    uint collidedCount;
-    uint meshletCount;
-    uint meshletIDCount;
-    vec4 planes[6];
-    vec2 resolution;
-    vec3 cameraPosition;
-};
-
-layout(scalar, buffer_reference) buffer CollisionRef
-{
-    CollisionData collisions[];
-};
-
-layout(scalar, buffer_reference) buffer MeshletIDRef
-{
-    MeshletID meshletIDs[];
-};
-
-layout(scalar, buffer_reference) buffer MeshletRef
-{
-    Meshlet meshlets[];
-};
-
 layout(scalar, buffer_reference) buffer MeshletVertexRef
 {
     uint vertices[];
@@ -57,46 +26,88 @@ layout(scalar, buffer_reference) buffer MeshletIndexRef
     uint8_t indices[];
 };
 
-layout(scalar, buffer_reference) buffer MeshletCullingRef
+struct Meshlet2
 {
-    BoundingSphere boundings[];
+    uint vertexOffset;
+    uint indexOffset;
+    uint vertexCount;
+    uint indexCount;
+    BoundingSphere bounding;
+};
+
+layout(scalar, buffer_reference) buffer MeshletRef
+{
+    Meshlet2 meshlets[];
+};
+
+struct Mesh
+{
+    vec3 center;
+    float radius;
+    vec4 halfVolume;
+    mat4 transform;
+    uint textureId;
+    VertexRef vertexPtr;
+    MeshletVertexRef meshletVertexPtr;
+    MeshletIndexRef meshletIndexPtr;
+};
+
+layout(scalar, buffer_reference) buffer MeshRef
+{
+    Mesh meshes[];
+};
+
+struct MeshletID2
+{
+    uint meshletID;
+    uint meshID;
+};
+
+layout(scalar, buffer_reference) buffer MeshletIDRef
+{
+    MeshletID2 ids[];
+};
+
+layout(scalar, buffer_reference) buffer MiscRef
+{
+    uint objectCount;
+    uint collidedCount;
+    uint meshletCount;
+    uint meshletIDCount;
+    mat4 viewProj;
+    vec4 planes[6];
+    vec2 resolution;
+    vec3 cameraPosition;
 };
 
 layout(push_constant) uniform PushConstants
 {
-    mat4 viewProj;
-    VertexRef vertexPtr;
-    ObjectRef objectPtr;
-    MiscRef miscPtr;
-    MeshletIDRef meshletIDPtr;
+    MeshRef meshPtr;
     MeshletRef meshletPtr;
-    MeshletVertexRef meshVertexPtr;
-    MeshletIndexRef meshIndexPtr;
-    MeshletCullingRef meshletCullingPtr;
+    MeshletIDRef meshletIDPtr;
+    MiscRef miscPtr;
 };
 
 taskPayloadSharedEXT MeshPayload taskData;
 shared uint visibleCount;
 
-bool isMeshletVisible(uint meshletID, uint objectID)
+bool isMeshletVisible(uint globalID)
 {
-    if (meshletID > miscPtr.meshletCount || objectID > miscPtr.objectCount)
-        return false;
-    Meshlet meshlet = meshletPtr.meshlets[meshletID];
-    BoundingSphere boundingSphere = meshletCullingPtr.boundings[meshletID];
-    mat4 transform = objectPtr.objects[objectID].transform;
-    vec3 center = (transform * vec4(boundingSphere.center, 1.0)).xyz;
-    float scale = max(length(transform[0].xyz), max(length(transform[1].xyz), length(transform[2].xyz)));
-    float radius = boundingSphere.radius * scale;
+    MeshletID2 mid = meshletIDPtr.ids[globalID];
+    Mesh mesh = meshPtr.meshes[mid.meshID];
+    Meshlet2 meshlet = meshletPtr.meshlets[mid.meshletID];
+    vec3 center = (mesh.transform * vec4(meshlet.bounding.center, 1.0)).xyz;
+    float scale = max(length(mesh.transform[0].xyz), max(length(mesh.transform[1].xyz), length(mesh.transform[2].xyz)));
+    float radius = meshlet.bounding.radius * scale;
 
-    vec3 normal = mat3(transform) * boundingSphere.normal;
+    vec3 normal = mat3(mesh.transform) * meshlet.bounding.normal;
     float len = length(normal);
     if (len != 0.)
         normal /= len;
-    vec3 coneApex = (transform * vec4(boundingSphere.coneApex, 1.0)).xyz;
+    vec3 coneApex = (mesh.transform * vec4(meshlet.bounding.coneApex, 1.0)).xyz;
 
     if (((CullMode & CULL_FRUSTUM) != 0 && !isSphereInsideFrustum(center, radius, miscPtr.planes)) ||
-            ((CullMode & CULL_BACKFACE) != 0 && !isMeshletFacingCamera(miscPtr.cameraPosition, coneApex, normal, boundingSphere.cutoff)))
+            ((CullMode & CULL_BACKFACE) != 0 && !isMeshletFacingCamera(miscPtr.cameraPosition, coneApex, normal, meshlet.bounding.cutoff)))
         return false;
 
     return true;
@@ -105,22 +116,24 @@ bool isMeshletVisible(uint meshletID, uint objectID)
 void main()
 {
     uint globalID = gl_GlobalInvocationID.x;
-    visibleCount = 0;
+    if (gl_LocalInvocationIndex == 0)
+        visibleCount = 0;
+
     barrier();
 
     if (globalID < miscPtr.meshletIDCount)
     {
-        bool visible = isMeshletVisible(meshletIDPtr.meshletIDs[globalID].meshletID,
-                meshletIDPtr.meshletIDs[globalID].objectID); //meshletIDs[globalID << 1], meshletIDs[(globalID << 1) ^ 1]);
+        bool visible = isMeshletVisible(globalID); //meshletIDs[globalID << 1], meshletIDs[(globalID << 1) ^ 1]);
 
         if (visible)
         {
             uint index = atomicAdd(visibleCount, 1);
             taskData.visibleIndices[index] = globalID;
         }
-
-        taskData.visibleCount = visibleCount;
     }
     barrier();
-    EmitMeshTasksEXT(visibleCount, 1, 1);
+    if (gl_LocalInvocationIndex == 0)
+        EmitMeshTasksEXT(visibleCount, 1, 1);
+    else
+        EmitMeshTasksEXT(0, 0, 0);
 }

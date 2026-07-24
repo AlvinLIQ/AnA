@@ -258,7 +258,7 @@ void EditorApp::saveSceneButton_Click(void* , PointerEventArgs& )
     {
         auto& mesh = meshes[i];
         MeshInfo info{};
-        auto& model = resourceManager->Meshes.MeshMap[mesh.modelID];
+        auto& model = resourceManager->Meshes.MeshMap[mesh.meshId];
         memcpy(info.filePath, model->Path.data(), model->Path.size());
         info.textureId = mesh.textureId;
         info.transform = mesh.transform;
@@ -282,8 +282,10 @@ void EditorApp::pageTabs_SelectionChanged(void* )
 
 void EditorApp::mainScene_MeshAppend(std::string name, uint32_t id)
 {
+    auto editorApp = static_cast<EditorApp*>(App::GetCurrent());
+    std::lock_guard<std::mutex> lock(editorApp->aResourceManager.Shapes.GetMutex());
     auto panel =
-            static_cast<Controls::ObjectView*>(static_cast<EditorApp*>(App::GetCurrent())->controlMap["modelList"]);
+            static_cast<Controls::ObjectView*>(editorApp->controlMap["modelList"]);
     ObjectViewItemData itemData;
     itemData.id = id;
     itemData.name = name.substr(name.find_last_of('/') + 1).c_str();

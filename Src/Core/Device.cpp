@@ -35,6 +35,7 @@ Device::Device(VkInstance &mInstance, VkSurfaceKHR &mSurface) : instance {mInsta
 
 Device::~Device()
 {
+    CleanupGarbage(UINT64_MAX);
     vkDestroyCommandPool(logicalDevice, subCommandPool, nullptr);
     vkDestroyCommandPool(logicalDevice, commandPool, nullptr);
     vmaDestroyAllocator(allocator);
@@ -971,6 +972,7 @@ void Device::createLogicalDevice()
     vulkan12Features.scalarBlockLayout = VK_TRUE;
     vulkan12Features.shaderInt8 = VK_TRUE;
     vulkan12Features.storageBuffer8BitAccess = VK_TRUE;
+    vulkan12Features.timelineSemaphore = VK_TRUE;
     vulkan12Features.pNext = &dynamicState3Features;
 
     VkPhysicalDeviceVulkan11Features vulkan11Features{};
@@ -1306,6 +1308,32 @@ void Device::EndSingleTimeCommandsSubmit(VkFence& fence)
     subCommandMutex.unlock();
 }
 
+void Device::DumpGarbage(const Garbage& garbage)
+{
+    std::unique_lock lock(garbageStationDoor);
+    garbageStation.push_back(garbage);
+}
+
+void Device::CleanupGarbage(const uint64_t& timePoint)
+{
+    std::unique_lock lock(garbageStationDoor);
+    std::erase_if(garbageStation, [&](const Garbage& garbage)
+    {
+        if (timePoint >= garbage.cleanTime)
+        {
+            std::visit([&](auto&& res)
+            {
+                using T = std::decay_t<decltype(res)>;
+
+                if constexpr (std::is_same_v<T, BufferResourceInfo>)
+                    DestroyBuffer(res.buffer, res.allocation);
+            }, garbage.info);
+            return true;
+        }
+        return false;
+    });
+}
+
 VmaAllocator Device::GetAllocator()
 {
     return allocator;
@@ -1334,10 +1362,9 @@ void Device::createVmaAllocator()
     vulkanFunctions.vkGetDeviceProcAddr = vkGetDeviceProcAddr;
 
     VmaAllocatorCreateInfo allocatorCreateInfo = {};
+    allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT;
     if (deviceFeatures.bufferDeviceAddressSupport)
-        allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
-    else
-        allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT;
+        allocatorCreateInfo.flags |= VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
     allocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_4;
     allocatorCreateInfo.physicalDevice = physicalDevice;
     allocatorCreateInfo.device = logicalDevice;

@@ -1,0 +1,62 @@
+layout(scalar, buffer_reference) buffer VertexRef
+{
+	Vertex vertices[];
+};
+
+layout(scalar, buffer_reference) buffer VerticesRef
+{
+	VertexRef verticesPtr[];
+}
+
+layout(scalar, buffer_reference) buffer MeshletVertexRef
+{
+	uint vertices[];
+};
+
+layout(scalar, buffer_reference) buffer MeshletIndexRef
+{
+	uint8_t indices[];
+};
+
+struct Meshlet
+{
+	MeshletVertexRef meshletVertexPtr;
+	MeshletIndexRef meshletIndexPtr;
+};
+
+layout(scalar, buffer_reference) buffer MeshletRef
+{
+	Meshlet meshlets[];
+};
+
+struct Mesh
+{
+	mat4 transform;
+	uint textureId;
+	uint vertexId;
+	uint meshletId;
+};
+
+layout(scalar, buffer_reference) buffer MeshRef
+{
+	Mesh meshes[];
+};
+
+struct MeshletID
+{
+	uint meshletID;
+	uint meshID;
+};
+
+layout(push_constant) uniform PushConstants
+{
+	mat4 viewProj;
+	uint meshletCount;
+	VerticesRef verticesPtr;
+	MeshletRef meshletPtr;
+};
+
+
+MeshletID mesh = MesheletIDs[gl_GlobalInvocation_ID.x];
+
+
