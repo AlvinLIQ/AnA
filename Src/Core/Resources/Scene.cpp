@@ -118,7 +118,7 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
             auto mesh = resourceManager->Meshes.MeshMap[meshObj.meshId];
             meshObj.vertexCount = uint32_t(mesh->data.vertices.size());
             meshObj.indexCount = uint32_t(mesh->data.indices.size());
-            meshObj.textureId = mesh->data.textureId;
+            meshObj.textureId = meshInfo.textureId ? meshInfo.textureId : mesh->data.textureId;
 
             meshletIDCount += uint32_t(mesh->meshlets.size());
 

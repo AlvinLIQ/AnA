@@ -38,7 +38,7 @@
                 <TextBlock Text=" Off "/>
                 <TextBlock Text=" On "/>
             </ListView>
-            <ComboBox Text="Test" Color="DefaultControlBackgroundColor"
+            <TextBox Text="Test" Color="DefaultControlBackgroundColor"
                 HorizontalAlignment="Stretch">
             </ComboBox>
             <Button HorizontalAlignment="Start" Click="exitButton_Click">

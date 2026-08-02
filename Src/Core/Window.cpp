@@ -63,6 +63,11 @@ void Window::PollEvents()
                     ScrollCallback(event.wheel.x, event.wheel.y);
             }
                 break;
+            case SDL_EVENT_TEXT_INPUT:
+            {
+                printf("%s\n", event.text.text);
+                break;
+            }
             case SDL_EVENT_WINDOW_RESIZED:
                 Width = event.window.data1;
                 Height = event.window.data2;
