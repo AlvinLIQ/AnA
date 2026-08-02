@@ -126,7 +126,7 @@ void Scene::Append(const MeshInfo* meshInfos, size_t count)
 
             if (MeshAppend)
             {
-                MeshAppend(meshInfo.filePath + std::to_string(m), uint32_t(meshes.size() - 1));
+                MeshAppend(meshInfo.filePath, uint32_t(meshes.size() - 1));
             }
         }
 
