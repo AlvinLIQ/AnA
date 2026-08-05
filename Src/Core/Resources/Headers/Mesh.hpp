@@ -137,6 +137,7 @@ namespace AnA
         bool loaded = false;
         void Load(Device* device);
         void Unload();
+        uint32_t GetLoadedVertexCount();
 
         static void CreateMesh(MeshData& meshData, std::shared_ptr<Mesh>& mesh);
         static void CreateMeshesFromFile(const char *filePath, std::vector<MeshData>& meshDatas);

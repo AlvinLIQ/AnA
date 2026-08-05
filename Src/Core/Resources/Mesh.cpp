@@ -82,6 +82,11 @@ void Mesh::Unload()
     }
 }
 
+uint32_t Mesh::GetLoadedVertexCount()
+{
+    return verticesSize / sizeof(Vertex);
+}
+
 void Mesh::CreateMesh(MeshData& meshData, std::shared_ptr<Mesh>& mesh)
 {
     mesh = std::make_shared<Mesh>(std::move(meshData));
