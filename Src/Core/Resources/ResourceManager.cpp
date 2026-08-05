@@ -88,7 +88,7 @@ void ResourceManager::UpdateMiscBuffer()
 
     //printf("x: %f y: %f\r", curPos.x.value, curPos.y.value);
     //cbo.invView = MainCamera.GetInverseView();
-    auto& mbo = reinterpret_cast<MiscBufferObject*>(miscBuffer.GetMappedData())[bufferIndex];
+    auto& mbo = *reinterpret_cast<MiscBufferObject*>(miscBuffers[bufferIndex].GetMappedData());
     mbo.objectCount = uint32_t(MainScene.GetMeshCount());
     mbo.meshletCount = MainScene.GetMeshletCount();
     mbo.meshletIDCount = MainScene.GetMeshletIDCount();
@@ -249,11 +249,15 @@ uint32_t ResourceManager::AppendTexture(VkImage image, VmaAllocation allocation,
 void ResourceManager::createMiscBuffers()
 {
     uint32_t imageCount = SwapChain::GetCurrent()->GetImageCount();
-    miscBuffer = Buffer(aDevice,
-        imageCount * sizeof(MiscBufferObject),
-        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-        VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-    miscBuffer.Map();
+    miscBuffers.resize(imageCount);
+    for (auto& miscBuffer : miscBuffers)
+    {
+        miscBuffer = Buffer(aDevice,
+            sizeof(MiscBufferObject),
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        miscBuffer.Map();
+    }
     //MainCamera.SetRotateSpeed(float(imageCount) * 1.5f);
 
 }

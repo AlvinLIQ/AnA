@@ -120,7 +120,7 @@ namespace AnA
             }
             VkDeviceAddress GetMiscBufferAddress()
             {
-                return miscBuffer.GetAddress() + SwapChain::GetCurrent()->CurrentImage * sizeof(MiscBufferObject);
+                return miscBuffers[SwapChain::GetCurrent()->CurrentImage].GetAddress();
             }
             DescriptorResources& GetSampledImageResources()
             {
@@ -155,7 +155,7 @@ namespace AnA
             MeshShaderOutput MeshShaderOutputData;
         private:
             Device* aDevice;
-            Buffer miscBuffer;
+            std::vector<Buffer> miscBuffers;
             void createMiscBuffers();
 
             DescriptorResources sampledImageDescriptor;
