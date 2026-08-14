@@ -884,7 +884,7 @@ bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device, DeviceFeatures
 #ifdef ENABLE_MESH_SHADER
     if (meshShaderFeatures.meshShader == VK_TRUE)
     {
-        _deviceFeatures.meshShaderSupport = false;
+        _deviceFeatures.meshShaderSupport = true;
         deviceExtensions.push_back(VK_EXT_MESH_SHADER_EXTENSION_NAME);
     }
 #endif

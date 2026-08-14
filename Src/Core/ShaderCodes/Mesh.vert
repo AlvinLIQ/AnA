@@ -71,9 +71,12 @@ void main()
 {
     Mesh mesh = meshPtr.meshes[gl_DrawID];
     Vertex vertex = mesh.vertexPtr.vertices[mesh.indexPtr.indices[gl_VertexIndex]];
-    vec4 vertexPos = miscPtr.viewProj * vec4(vertex.position, 1.0);
-    gl_Position = vertexPos;
-    color = vertex.color;
+    vec4 vertexPos = mesh.transform * vec4(vertex.position, 1.0);
+    gl_Position = miscPtr.viewProj * vertexPos;
+    color = vec3(
+        float(vertex.color.r) / 255.0,
+        float(vertex.color.g) / 255.0,
+        float(vertex.color.b) / 255.0);
     texCoord = vertex.uv;
     texID = mesh.textureId;
     vertexPosition = vertexPos.xyz / vertexPos.w;

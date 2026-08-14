@@ -228,7 +228,7 @@ void Scene::DrawIndirect(CommandBuffer& commandBuffer)
     {
         vkCmdDrawIndirectCount(commandBuffer, drawCommandBuffers[currentBufferIndex].GetBuffer(), 0,
             drawCountBuffers[currentBufferIndex].GetBuffer(),
-            0, 1, sizeof(VkDrawIndirectCommand));
+            0, uint32_t(meshes.size()), sizeof(VkDrawIndirectCommand));
     }
 }
 
