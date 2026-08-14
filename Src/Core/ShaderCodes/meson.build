@@ -1,7 +1,7 @@
 fs = import('fs')
 shader_sources = files(
-    'Mesh.mesh', 'Mesh.task', 'Mesh.frag',
-    'Text.task', 'Text.mesh', 'Text.frag',
+    'Mesh.mesh', 'Mesh.task', 'Mesh.frag', 'Mesh.vert',
+    'Text.task', 'Text.mesh', 'Text.frag', 'Text.vert',
     'Shape.vert', 'Shape.frag'
     )
 shader_outputs = []

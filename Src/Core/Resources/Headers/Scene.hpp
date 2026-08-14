@@ -33,12 +33,13 @@ namespace AnA
     {
         glm::vec3 center;
         float radius;
-        glm::vec4 halfVolume;
-        glm::mat4 transform;
+        glm::vec3 halfVolume;
         uint32_t textureId;
+        glm::mat4 transform;
         VkDeviceAddress vertexPtr;
         VkDeviceAddress meshletVertexPtr;
         VkDeviceAddress meshletIndexPtr;
+        VkDeviceAddress indexPtr;
     };
 
     struct MeshletID

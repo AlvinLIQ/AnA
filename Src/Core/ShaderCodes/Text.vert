@@ -1,6 +1,5 @@
-#version 450
+#version 460
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
-#extension GL_EXT_mesh_shader: require
 #extension GL_EXT_shader_8bit_storage: require
 #extension GL_EXT_scalar_block_layout: require
 #extension GL_EXT_buffer_reference: require
@@ -8,7 +7,8 @@
 
 #include "mesh.h"
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout(location = 0) out vec3 outColor;
+layout(location = 1) flat out vec4 scissor;
 
 layout(scalar, buffer_reference) buffer VertexRef
 {
@@ -61,20 +61,19 @@ layout(push_constant) uniform PushConstants
     vec2 resolution;
 };
 
-taskPayloadSharedEXT struct
-{
-    uint textIndex;
-} taskData;
+const vec2 charSize = vec2(0.836363613, 0.99999994);
 
 void main()
 {
-    if (textDataPtr.textInfos[gl_WorkGroupID.x].size == 0.)
-    {
-        EmitMeshTasksEXT(0, 0, 0);
-        return;
-    }
+    TextData textInfo = textDataPtr.textInfos[gl_InstanceIndex];
+    CharacterInfo chInfo = charInfoPtr.charInfos[gl_DrawID];
+    Meshlet meshlet = meshletPtr.meshlets[uint(chInfo.ch)];
+    vec2 scale = vec2(textInfo.size / resolution.x, textInfo.size / resolution.y);
+    vec2 pos = scale * charSize * vertexPtr.vertices[meshlet.vertexOffset + gl_VertexIndex];
+    pos.x += scale.x * charSize.x * float(chInfo.index) - 1.;
+    pos.y = -pos.y - charSize.y + scale.y;
 
-    taskData.textIndex = gl_WorkGroupID.x;
-    barrier();
-    EmitMeshTasksEXT(textDataPtr.textInfos[gl_WorkGroupID.x].count, 1, 1);
+    gl_Position = vec4(pos + textInfo.offset, 0.0, 1.0);
+    outColor = textInfo.color;
+    scissor = textInfo.scissor;
 }

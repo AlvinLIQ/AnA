@@ -971,6 +971,7 @@ void Device::createLogicalDevice()
     vulkan12Features.bufferDeviceAddress = deviceFeatures.bufferDeviceAddressSupport;
     vulkan12Features.scalarBlockLayout = VK_TRUE;
     vulkan12Features.shaderInt8 = VK_TRUE;
+    vulkan12Features.shaderBufferInt64Atomics = VK_TRUE;
     vulkan12Features.storageBuffer8BitAccess = VK_TRUE;
     vulkan12Features.timelineSemaphore = VK_TRUE;
     vulkan12Features.pNext = &dynamicState3Features;

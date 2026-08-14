@@ -226,7 +226,7 @@ void Scene::CommitBufferUpdate(Buffer* newObjectBuffer, size_t meshOffset)
     {
         transform = meshes[i].transform.mat4();
         auto& model = modelMap[meshes[i].meshId];
-        bufferObjects[i].halfVolume = glm::vec4(glm::mat3(transform) * ((model->data.maxBounding - model->data.minBounding) * 0.5f), 1.0f);
+        bufferObjects[i].halfVolume = glm::mat3(transform) * ((model->data.maxBounding - model->data.minBounding) * 0.5f);
         bufferObjects[i].center = transform * glm::vec4(model->center, 1.0f);
         auto& scale = meshes[i].transform.scale;
         bufferObjects[i].radius = model->radius * std::max(scale.x, std::max(scale.y, scale.z));
@@ -286,7 +286,7 @@ void Scene::UpdateMeshTransform(uint32_t meshIndex)
     auto objectBufferData = static_cast<MeshBufferObject*>(meshBuffers[currentBufferIndex].GetMappedData());
     glm::mat4 transform = meshes[meshIndex].transform.mat4();
     auto& model = Resources::ResourceManager::GetCurrent()->Meshes.MeshMap[meshes[meshIndex].meshId];
-    objectBufferData[meshIndex].halfVolume = glm::vec4(glm::mat3(transform) * ((model->data.maxBounding - model->data.minBounding) * 0.5f), 1.0f);
+    objectBufferData[meshIndex].halfVolume = glm::mat3(transform) * ((model->data.maxBounding - model->data.minBounding) * 0.5f);
     objectBufferData[meshIndex].center = transform * glm::vec4(model->center, 1.0f);
     auto& scale = meshes[meshIndex].transform.scale;
     objectBufferData[meshIndex].radius = model->radius * std::max(scale.x, std::max(scale.y, scale.z));

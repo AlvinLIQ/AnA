@@ -1,6 +1,6 @@
 #version 450
-#extension GL_EXT_scalar_block_layout: enable
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+#extension GL_EXT_scalar_block_layout: enable
 
 layout(push_constant) uniform PushConstants
 {
