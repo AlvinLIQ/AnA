@@ -7,24 +7,19 @@
 #include "mesh.h"
 
 #ifdef PER_PRIMITIVE_NORMAL
-struct VertexOutput {
-    vec2 texCoord;
-    uint texID;
-    vec3 vertexPosition;
-    vec3 color;
-};
-layout(location = 4) perprimitiveEXT out vec3 primitiveNormal;
+layout(location = 0) out vec2 texCoord;
+layout(location = 1) out uint texID;
+layout(location = 2) out vec3 vertexPosition;
+layout(location = 3) out vec3 color;
+layout(location = 4) out vec3 primitiveNormal;
 #else
-struct VertexOutput {
-    vec2 texCoord;
-    uint texID;
-    vec3 normalSpace;
-    vec3 vertexPosition;
-    vec3 color;
-};
-#endif
+layout(location = 0) out vec2 texCoord;
+layout(location = 1) out uint texID;
+layout(location = 2) out vec3 normalSpace;
+layout(location = 3) out vec3 vertexPosition;
+layout(location = 4) out vec3 color;
 
-layout(location = 0) out VertexOutput vertexOutput;
+#endif
 
 layout(scalar, buffer_reference) buffer VertexRef
 {
@@ -78,15 +73,15 @@ void main()
     Vertex vertex = mesh.vertexPtr.vertices[mesh.indexPtr.indices[gl_VertexIndex]];
     vec4 vertexPos = miscPtr.viewProj * vec4(vertex.position, 1.0);
     gl_Position = vertexPos;
-    vertexOutput.color = vertex.color;
-    vertexOutput.texCoord = vertex.uv;
-    vertexOutput.texID = mesh.textureId;
-    vertexOutput.vertexPosition = vertexPos.xyz / vertexPos.w;
-    vec3 normalSpace =
+    color = vertex.color;
+    texCoord = vertex.uv;
+    texID = mesh.textureId;
+    vertexPosition = vertexPos.xyz / vertexPos.w;
+    vec3 normal =
         normalize(transpose(mat3(mesh.transform)) * CalculateNormal(vertex.pitch, vertex.yaw));
 #ifdef PER_PRIMITIVE_NORMAL
-    primitiveNormal = normalSpace;
+    primitiveNormal = normal;
 #else
-    vertexOutput.normalSpace = normalSpace;
+    normalSpace = normal;
 #endif
 }

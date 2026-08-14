@@ -361,10 +361,7 @@ void Scene::updateAll()
     if (aDevice->MeshShaderSupport())
         UpdateMeshlets();
     else
-    {
-        auto& drawCountBufferData = *(uint32_t*)drawCountBuffers[nextIndex].GetMappedData();
-        drawCountBufferData = uint32_t(meshes.size());
-    }
+        *static_cast<uint32_t*>(drawCountBuffers[nextIndex].GetMappedData()) = uint32_t(meshes.size());
 
     meshletCount = Resources::ResourceManager::GetCurrent()->Meshes.GetMeshletCount();
 
