@@ -102,6 +102,7 @@ void Shader::createPipelineLayout(VkDeviceSize pushConstantSize)
         range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
         if (aDevice->MeshShaderSupport())
             range.stageFlags |= VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT;
+        StageFlags = range.stageFlags;
         range.offset = 0;
         range.size = uint32_t(pushConstantSize);
         pipelineLayoutInfo.pushConstantRangeCount = 1;

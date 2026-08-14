@@ -107,13 +107,10 @@ void App::Run()
             aResourceManager.MainControl->Aspect = static_cast<float>(controlExtent.width) / static_cast<float>(controlExtent.height);
             aResourceManager.MainControl->Extent = controlExtent;
             aResourceManager.Shapes.Extent = controlExtent;
-            if (aDevice.MeshShaderSupport())
+            if (Controls::Control::TextLayoutNeedReset())
             {
-                if (Controls::Control::TextLayoutNeedReset())
-                {
-                    aResourceManager.TextContext.ResetLayout();
-                    Controls::Control::EndTextLayoutReset();
-                }
+                aResourceManager.TextContext.ResetLayout();
+                Controls::Control::EndTextLayoutReset();
             }
             aResourceManager.Shapes.PrepareDraw(aResourceManager.MainControl);
             aResourceManager.MainControl->EndUpdate();

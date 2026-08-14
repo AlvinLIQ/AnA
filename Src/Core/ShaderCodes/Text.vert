@@ -69,7 +69,8 @@ void main()
     CharacterInfo chInfo = charInfoPtr.charInfos[gl_DrawID];
     Meshlet meshlet = meshletPtr.meshlets[uint(chInfo.ch)];
     vec2 scale = vec2(textInfo.size / resolution.x, textInfo.size / resolution.y);
-    vec2 pos = scale * charSize * vertexPtr.vertices[meshlet.vertexOffset + gl_VertexIndex];
+    vec2 pos = scale * charSize * vertexPtr.vertices[meshlet.vertexOffset +
+        uint(meshIndexPtr.indices[meshlet.indexOffset + gl_VertexIndex])];
     pos.x += scale.x * charSize.x * float(chInfo.index) - 1.;
     pos.y = -pos.y - charSize.y + scale.y;
 

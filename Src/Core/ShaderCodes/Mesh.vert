@@ -75,11 +75,13 @@ layout(push_constant) uniform PushConstants
 void main()
 {
     Mesh mesh = meshPtr.meshes[gl_DrawID];
-    Vertex vertex = mesh.vertexPtr.vertices[gl_VertexIndex];
-    gl_Position = miscPtr.viewProj * vec4(vertex.position, 1.0);
+    Vertex vertex = mesh.vertexPtr.vertices[mesh.indexPtr.indices[gl_VertexIndex]];
+    vec4 vertexPos = miscPtr.viewProj * vec4(vertex.position, 1.0);
+    gl_Position = vertexPos;
     vertexOutput.color = vertex.color;
     vertexOutput.texCoord = vertex.uv;
     vertexOutput.texID = mesh.textureId;
+    vertexOutput.vertexPosition = vertexPos.xyz / vertexPos.w;
     vec3 normalSpace =
         normalize(transpose(mat3(mesh.transform)) * CalculateNormal(vertex.pitch, vertex.yaw));
 #ifdef PER_PRIMITIVE_NORMAL

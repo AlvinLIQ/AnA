@@ -31,8 +31,7 @@ ResourceManager::ResourceManager(Device* mDevice) :
     createDefaultShaders();
     Meshes.Init();
     MainScene.Init();
-    if (aDevice->MeshShaderSupport())
-        TextContext.Init();
+    TextContext.Init();
     //Points.Init();
     //Points.Topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
     Shapes = AnA::Shapes(mDevice);
@@ -314,12 +313,16 @@ std::initializer_list<int> shaderConstants{DEFAULT_CULL};
 std::vector<ShaderInfo> meshShaderStageInfos{{Mesh_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT, false, shaderConstants},
                                   {Mesh_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT, false, shaderConstants},
                                       {Mesh_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
+std::vector<ShaderInfo> meshVertexShaderStageInfos{{Mesh_vert, 0, VK_SHADER_STAGE_VERTEX_BIT, false, {}},
+                                  {Mesh_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
 /*
 std::vector<ShaderInfo> lightShaderStageInfos{{Light_vert, 0, VK_SHADER_STAGE_VERTEX_BIT, false, {}},
                                 {Light_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};*/
 std::vector<ShaderInfo> textShaderStageInfos{{Text_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT, false, {}},
                                         {Text_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT, false, {}},
                                             {Text_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
+std::vector<ShaderInfo> textVertexShaderStageInfos{{Text_vert, 0, VK_SHADER_STAGE_VERTEX_BIT, false, {}},
+                                  {Text_frag, 0, VK_SHADER_STAGE_FRAGMENT_BIT, false, {}}};
 /*
 std::vector<ShaderInfo> terrainShaderStageInfos{{Terrain_task, 0, VK_SHADER_STAGE_TASK_BIT_EXT, false, {}},
                                         {Terrain_mesh, 0, VK_SHADER_STAGE_MESH_BIT_EXT, false, {}},
@@ -329,8 +332,16 @@ std::vector<ShaderInfo> collisionShaderStageInfos{{CollisionDetect_comp, 0, VK_S
 void ResourceManager::createDefaultShaders()
 {
     Shaders.reserve(10);
-    Shaders.emplace_back(aDevice, meshShaderStageInfos, sampledImageDescriptor.setLayout, sizeof(MeshPushConstant));
-    Shaders.emplace_back(aDevice, textShaderStageInfos, VK_NULL_HANDLE, sizeof(TextPushConstant));
+    if (aDevice->MeshShaderSupport())
+    {
+        Shaders.emplace_back(aDevice, meshShaderStageInfos, sampledImageDescriptor.setLayout, sizeof(MeshPushConstant));
+        Shaders.emplace_back(aDevice, textShaderStageInfos, VK_NULL_HANDLE, sizeof(TextPushConstant));
+    }
+    else
+    {
+        Shaders.emplace_back(aDevice, meshVertexShaderStageInfos, sampledImageDescriptor.setLayout, sizeof(MeshVertexPushConstant));
+        Shaders.emplace_back(aDevice, textVertexShaderStageInfos, VK_NULL_HANDLE, sizeof(TextPushConstant));
+    }
     Shaders.emplace_back(aDevice, shapeShaderStageInfos, sampledImageDescriptor.setLayout, sizeof(ShapePushConstant));
 }
 

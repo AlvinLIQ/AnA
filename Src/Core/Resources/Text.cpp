@@ -18,26 +18,26 @@ Text::~Text()
 
 void Text::Init()
 {
-    drawCommandBuffer = Buffer(aDevice, sizeof(VkDrawMeshTasksIndirectCommandEXT), VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-    drawCommandBuffer.Map();
     vertexBuffer = Buffer(aDevice, sizeof(glm::vec2) * 6000, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
     vertexBuffer.Map();
-    if (aDevice->MeshShaderSupport())
-    {
-        meshletBuffer = Buffer(aDevice, 128 * sizeof(MeshletInfo),
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+    meshletBuffer = Buffer(aDevice, 128 * sizeof(MeshletInfo),
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+        VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
 
-        meshletBuffer.Map();
+    meshletBuffer.Map();
 
-        meshletIndexBuffer = Buffer(aDevice, 6000,
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+    meshletIndexBuffer = Buffer(aDevice, 6000,
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+        VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
 
-        meshletIndexBuffer.Map();
-    }
+    meshletIndexBuffer.Map();
     for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
+        if (aDevice->MeshShaderSupport())
+        {
+            drawCommandBuffers[i] = Buffer(aDevice, sizeof(VkDrawMeshTasksIndirectCommandEXT), VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+            drawCommandBuffers[i].Map();
+        }
         charInfoBuffers[i] = Buffer(aDevice, sizeof(CharacterInfo) * 1000, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         charInfoBuffers[i].Map();
 
@@ -62,8 +62,7 @@ void Text::Bind(CommandBuffer& commandBuffer, Shader& shader)
     textPushConstant.meshIndexPtr = meshletIndexBuffer.GetAddress();
     textPushConstant.resolution = {float(commandBuffer.Extent.width), float(commandBuffer.Extent.height)};
     vkCmdPushConstants(commandBuffer, shader.GetPipelineLayout(),
-        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT |
-        VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, 0, sizeof(textPushConstant),
+        shader.StageFlags, 0, sizeof(textPushConstant),
         &textPushConstant);
 }
 
@@ -74,19 +73,27 @@ void Text::Draw(CommandBuffer& commandBuffer)
 
 void Text::DrawIndirect(CommandBuffer& commandBuffer)
 {
-    aDevice->vkCmdDrawMeshTasksIndirectCountEXT(commandBuffer, drawCommandBuffer.GetBuffer(), 0,
-        countBuffers[currentBufferIndex].GetBuffer(), 0,
-        1,
-        sizeof(VkDrawMeshTasksIndirectCommandEXT));
+    if (!meshlets.size())
+        return;
+
+    if (aDevice->MeshShaderSupport())
+    {
+        aDevice->vkCmdDrawMeshTasksIndirectCountEXT(commandBuffer, drawCommandBuffers[currentBufferIndex].GetBuffer(), 0,
+            countBuffers[currentBufferIndex].GetBuffer(), 0,
+            1,
+            sizeof(VkDrawMeshTasksIndirectCommandEXT));
+    }
+    else if (drawCommandBuffers[currentBufferIndex].GetBuffer())
+    {
+        vkCmdDrawIndirectCount(commandBuffer, drawCommandBuffers[currentBufferIndex].GetBuffer(), 0,
+            countBuffers[currentBufferIndex].GetBuffer(), 0,
+            uint32_t(drawCommandBuffers[currentBufferIndex].GetSize() / sizeof(VkDrawIndirectCommand)), sizeof(VkDrawIndirectCommand));
+    }
 }
 
 void Text::Update()
 {
     needUpdate = false;
-    if (!aDevice->MeshShaderSupport())
-    {
-        return;
-    }
     Resources::ResourceManager::GetCurrent()->TaskPool.Enqueue([this]()
     {
         this->updateAll();
@@ -122,8 +129,6 @@ void Text::Remove(uint32_t id)
 
 void Text::UpdateLayout(uint32_t id)
 {
-    if (!aDevice->MeshShaderSupport())
-        return;
     _mutex.lock();
     auto& textMapData = textMap[id];
     TextData* textBuffer = reinterpret_cast<TextData*>(textBuffers[currentBufferIndex].GetMappedData());
@@ -134,9 +139,11 @@ void Text::UpdateLayout(uint32_t id)
     _mutex.unlock();
 }
 
-void Text::updateTextInfo(TextInfo& textInfo, uint32_t& chIndex, uint32_t& index, CharacterInfo* chInfoBuffer)
+void Text::updateTextInfo(TextInfo& textInfo, uint32_t& chIndex, uint32_t& index, const uint32_t& textIndex,
+    CharacterInfo* chInfoBuffer)
 {
     int realChar = 0;
+    auto characters = Resources::ResourceManager::GetCurrent()->Characters;
     for (size_t i = 0; i < textInfo.text.length(); i++)
     {
         //assert(ch < char(resourceManager->Characters.size()));
@@ -176,6 +183,15 @@ void Text::updateTextInfo(TextInfo& textInfo, uint32_t& chIndex, uint32_t& index
         }
         chInfo.ch = iter->second;
         chInfo.index = chIndex;
+        if (!aDevice->MeshShaderSupport())
+        {
+            VkDrawIndirectCommand& drawCmd =
+                ((VkDrawIndirectCommand*)drawCommandBuffers[nextIndex].GetMappedData())[index + chIndex];
+            drawCmd.firstInstance = textIndex;
+            drawCmd.firstVertex = 0;
+            drawCmd.instanceCount = 1;
+            drawCmd.vertexCount = uint32_t(characters[ch].indices.size());
+        }
         chIndex++;
     }
     textInfo.length = chIndex;
@@ -199,7 +215,7 @@ void Text::UpdateText(uint32_t id, const std::string& text)
         size_t meshletOffset = meshlets.size();
         uint32_t index = 0;
 
-        updateTextInfo(textMapData.textInfo, index, chOffset, chInfoBuffer);
+        updateTextInfo(textMapData.textInfo, index, chOffset, textMapData.index, chInfoBuffer);
         textBuffer[textMapData.index].count = index;
         updateMeshlets(meshletOffset);
         _mutex.unlock();
@@ -242,6 +258,17 @@ void Text::updateAll()
     {
         textBuffers[nextIndex].Resize(textMap.size() * sizeof(TextData));
     }
+    if (aDevice->MeshShaderSupport())
+    {
+        glm::uvec3* drawCommand = reinterpret_cast<glm::uvec3*>(drawCommandBuffers[nextIndex].GetMappedData());
+        *drawCommand = glm::uvec3(uint32_t(textMap.size()), 1, 1);
+    }
+    else if (drawCommandBuffers[nextIndex].GetSize() < totalCharCount * sizeof(VkDrawIndirectCommand))
+    {
+        drawCommandBuffers[nextIndex] =
+            Buffer(aDevice, totalCharCount * sizeof(VkDrawIndirectCommand), VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        drawCommandBuffers[nextIndex].Map();
+    }
 
     CharacterInfo* chInfoBuffer = reinterpret_cast<CharacterInfo*>(charInfoBuffers[nextIndex].GetMappedData());
     TextData* textBuffer = reinterpret_cast<TextData*>(textBuffers[nextIndex].GetMappedData());
@@ -256,16 +283,20 @@ void Text::updateAll()
         textBuffer[textIndex].color = textInfo.color;
         textBuffer[textIndex].scissor = textInfo.scissor;
         textBuffer[textIndex].chOffset = index;
-        updateTextInfo(textInfo, chIndex, index, chInfoBuffer);
+        updateTextInfo(textInfo, chIndex, index, textIndex, chInfoBuffer);
 
         textBuffer[textIndex].count = chIndex;
         index += iter.second.capacity;
         textIndex++;
     }
     updateMeshlets(meshletOffset);
-    glm::uvec3* drawCommand = reinterpret_cast<glm::uvec3*>(drawCommandBuffer.GetMappedData());
-    *drawCommand = glm::uvec3(uint32_t(textMap.size()), 1, 1);
-    *reinterpret_cast<uint32_t*>(countBuffers[nextIndex].GetMappedData()) = textIndex ? 1u : 0u;
+
+    uint32_t drawCount = 0;
+    if (textIndex)
+    {
+       drawCount = aDevice->MeshShaderSupport() ? 1u : uint32_t(totalCharCount);
+    }
+    *reinterpret_cast<uint32_t*>(countBuffers[nextIndex].GetMappedData()) = drawCount;
 
     currentBufferIndex = nextIndex;
     nextIndex = NextFrameIndex(nextIndex);

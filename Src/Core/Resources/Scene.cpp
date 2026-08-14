@@ -70,10 +70,6 @@ Scene::~Scene()
 
 void Scene::Init()
 {
-    meshBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-    collisionBuffer.resize(meshBuffers.size());
-
-    meshletIDBuffers.resize(meshBuffers.size());
     for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
         meshBuffers[i] = Buffer(aDevice, 1000 * sizeof(MeshBufferObject),
@@ -188,14 +184,25 @@ void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader)
 
     auto& frameResource = aResourceManager->Meshes.GetCurrentFrameResource();
 
-    meshPushConstant.meshPtr = meshBuffers[currentBufferIndex].GetAddress();
-    meshPushConstant.miscPtr = aResourceManager->GetMiscBufferAddress();
-    meshPushConstant.meshletIDPtr = meshletIDBuffers[currentBufferIndex].GetAddress();
-    meshPushConstant.meshletPtr = frameResource.meshletBuffer.GetAddress();
-    vkCmdPushConstants(commandBuffer, shader.GetPipelineLayout(),
-        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT |
-        VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, 0, sizeof(meshPushConstant),
-        &meshPushConstant);
+    if (aDevice->MeshShaderSupport())
+    {
+        meshPushConstant.meshPtr = meshBuffers[currentBufferIndex].GetAddress();
+        meshPushConstant.miscPtr = aResourceManager->GetMiscBufferAddress();
+        meshPushConstant.meshletIDPtr = meshletIDBuffers[currentBufferIndex].GetAddress();
+        meshPushConstant.meshletPtr = frameResource.meshletBuffer.GetAddress();
+        vkCmdPushConstants(commandBuffer, shader.GetPipelineLayout(),
+            shader.StageFlags, 0, sizeof(meshPushConstant),
+            &meshPushConstant);
+    }
+    else
+    {
+        meshVertexPushConstant.meshPtr = meshBuffers[currentBufferIndex].GetAddress();
+        meshVertexPushConstant.miscPtr = aResourceManager->GetMiscBufferAddress();
+        vkCmdPushConstants(commandBuffer, shader.GetPipelineLayout(),
+            shader.StageFlags, 0, sizeof(meshVertexPushConstant),
+            &meshVertexPushConstant);
+        vkCmdSetPrimitiveTopology(commandBuffer, Topology);
+    }
 
     aDevice->vkCmdSetPolygonModeEXT(commandBuffer, PolygonMode);
 }
@@ -211,12 +218,21 @@ void Scene::Draw(CommandBuffer& commandBuffer)
 
 void Scene::DrawIndirect(CommandBuffer& commandBuffer)
 {
-    aDevice->vkCmdDrawMeshTasksIndirectCountEXT(commandBuffer, drawMeshIndirectBuffers[currentBufferIndex].GetBuffer(), 0,
-        drawMeshCountBuffer.GetBuffer(),
-        0, 1, sizeof(VkDrawMeshTasksIndirectCommandEXT));
+    if (aDevice->MeshShaderSupport())
+    {
+        aDevice->vkCmdDrawMeshTasksIndirectCountEXT(commandBuffer, drawCommandBuffers[currentBufferIndex].GetBuffer(), 0,
+            drawCountBuffers[currentBufferIndex].GetBuffer(),
+            0, 1, sizeof(VkDrawMeshTasksIndirectCommandEXT));
+    }
+    else if (drawCommandBuffers[currentBufferIndex].GetBuffer())
+    {
+        vkCmdDrawIndirectCount(commandBuffer, drawCommandBuffers[currentBufferIndex].GetBuffer(), 0,
+            drawCountBuffers[currentBufferIndex].GetBuffer(),
+            0, 1, sizeof(VkDrawIndirectCommand));
+    }
 }
 
-void Scene::CommitBufferUpdate(Buffer* newObjectBuffer, size_t meshOffset)
+void Scene::CommitBufferUpdate(Buffer* newObjectBuffer, Buffer* newCommandBuffer, size_t meshOffset)
 {
     auto bufferObjects = static_cast<MeshBufferObject*>(newObjectBuffer->GetMappedData());
 
@@ -235,6 +251,15 @@ void Scene::CommitBufferUpdate(Buffer* newObjectBuffer, size_t meshOffset)
         bufferObjects[i].vertexPtr = model->vertexBuffer.GetAddress();
         bufferObjects[i].meshletVertexPtr = model->meshletVertexBuffer.GetAddress();
         bufferObjects[i].meshletIndexPtr = model->meshletIndexBuffer.GetAddress();
+        if (!aDevice->MeshShaderSupport())
+        {
+            auto& drawCmd = static_cast<VkDrawIndirectCommand*>(newCommandBuffer->GetMappedData())[i];
+            drawCmd.firstInstance = 0;
+            drawCmd.vertexCount = uint32_t(model->data.indices.size());
+            drawCmd.instanceCount = 1;
+            drawCmd.firstVertex = 0;
+            bufferObjects[i].indexPtr = model->indexBuffer.GetAddress();
+        }
     }
 }
 
@@ -274,10 +299,9 @@ void Scene::UpdateMeshlets()
     }
     meshletIDCount = i;
 
-    auto drawMeshTaskCommand = static_cast<VkDrawMeshTasksIndirectCommandEXT*>(drawMeshIndirectBuffers[nextIndex].GetMappedData());
+    auto drawMeshTaskCommand = static_cast<VkDrawMeshTasksIndirectCommandEXT*>(drawCommandBuffers[nextIndex].GetMappedData());
     uint32_t numofGroup = (meshletIDCount + numOfGroup - 1) / numOfGroup;
     drawMeshTaskCommand->groupCountX = numofGroup;
-
     //meshletBuffers[nextIndex].Flush();
 }
 
@@ -292,27 +316,29 @@ void Scene::UpdateMeshTransform(uint32_t meshIndex)
     objectBufferData[meshIndex].radius = model->radius * std::max(scale.x, std::max(scale.y, scale.z));
     objectBufferData[meshIndex].transform = transform;
     objectBufferData[meshIndex].vertexPtr = model->vertexBuffer.GetAddress();
+    objectBufferData[meshIndex].indexPtr = model->indexBuffer.GetAddress();
 }
 
 void Scene::createIndirectBuffers()
 {
-    drawMeshIndirectBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-    for (auto& drawMeshIndirectBuffer : drawMeshIndirectBuffers)
+    for (uint32_t i = 0; i < numsof(drawCommandBuffers); i++)
     {
-        drawMeshIndirectBuffer = Buffer(aDevice, sizeof(VkDrawMeshTasksIndirectCommandEXT),
-            VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-        drawMeshIndirectBuffer.Map();
-        auto drawMeshIndirectCommand = static_cast<VkDrawMeshTasksIndirectCommandEXT*>(drawMeshIndirectBuffer.GetMappedData());
-        drawMeshIndirectCommand->groupCountX = 0;
-        drawMeshIndirectCommand->groupCountY = 1;
-        drawMeshIndirectCommand->groupCountZ = 1;
-    }
+        if (aDevice->MeshShaderSupport())
+        {
+            drawCommandBuffers[i] = Buffer(aDevice, sizeof(VkDrawMeshTasksIndirectCommandEXT),
+                VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+            drawCommandBuffers[i].Map();
+            auto drawMeshIndirectCommand = static_cast<VkDrawMeshTasksIndirectCommandEXT*>(drawCommandBuffers[i].GetMappedData());
+            drawMeshIndirectCommand->groupCountX = 0;
+            drawMeshIndirectCommand->groupCountY = 1;
+            drawMeshIndirectCommand->groupCountZ = 1;
+        }
 
-    drawMeshCountBuffer = Buffer(aDevice, 4,
-    VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-    drawMeshCountBuffer.Map();
-    *static_cast<uint32_t*>(drawMeshCountBuffer.GetMappedData()) = 1;
-    drawMeshCountBuffer.Unmap();
+        drawCountBuffers[i] = Buffer(aDevice, 4,
+        VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        drawCountBuffers[i].Map();
+        *static_cast<uint32_t*>(drawCountBuffers[i].GetMappedData()) = 1;
+    }
 }
 
 void Scene::updateAll()
@@ -323,9 +349,22 @@ void Scene::updateAll()
         meshBuffers[nextIndex].Resize((meshes.size() + 1000) * sizeof(MeshBufferObject));
         meshBuffers[nextIndex].Map();
     }
+    size_t minDrawCommandBufferSize = meshes.size() * sizeof(VkDrawIndirectCommand);
+    if (!aDevice->MeshShaderSupport() && drawCommandBuffers[nextIndex].GetSize() < minDrawCommandBufferSize)
+    {
+        drawCommandBuffers[nextIndex] = Buffer(aDevice, minDrawCommandBufferSize,
+                        VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        drawCommandBuffers[nextIndex].Map();
+    }
     //Resources::ResourceManager::GetCurrent()->Meshes.Update();
-    CommitBufferUpdate(&meshBuffers[nextIndex]);
-    UpdateMeshlets();
+    CommitBufferUpdate(&meshBuffers[nextIndex], &drawCommandBuffers[nextIndex]);
+    if (aDevice->MeshShaderSupport())
+        UpdateMeshlets();
+    else
+    {
+        auto& drawCountBufferData = *(uint32_t*)drawCountBuffers[nextIndex].GetMappedData();
+        drawCountBufferData = uint32_t(meshes.size());
+    }
 
     meshletCount = Resources::ResourceManager::GetCurrent()->Meshes.GetMeshletCount();
 

@@ -62,6 +62,7 @@ namespace AnA
             return hasMeshShader;
         }
         VkPrimitiveTopology Topology{};
+        VkShaderStageFlags StageFlags;
     private:
         Device* aDevice{nullptr};
         Pipeline pipeline{};

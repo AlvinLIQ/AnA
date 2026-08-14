@@ -132,8 +132,11 @@ namespace AnA
 
         uint32_t meshletOffset = 0;
         Buffer vertexBuffer;
+        //for mesh shader pipeline
         Buffer meshletVertexBuffer;
         Buffer meshletIndexBuffer;
+        //for vertex pipeline
+        Buffer indexBuffer;
         bool loaded = false;
         void Load(Device* device);
         void Unload();

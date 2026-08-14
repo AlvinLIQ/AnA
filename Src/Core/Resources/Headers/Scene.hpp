@@ -83,6 +83,12 @@ namespace AnA
         VkDeviceAddress miscPtr;
     };
 
+    struct MeshVertexPushConstant
+    {
+        VkDeviceAddress meshPtr;
+        VkDeviceAddress miscPtr;
+    };
+
     class Scene : public Renderable
     {
     public:
@@ -116,7 +122,7 @@ namespace AnA
         {
             commandBufferNeedUpdate = false;
         }
-        void CommitBufferUpdate(Buffer* newObjectBuffer, size_t meshOffset = 0);
+        void CommitBufferUpdate(Buffer* newObjectBuffer, Buffer* newCommandBuffer, size_t meshOffset = 0);
         void Update() override;
         void UpdateBuffers(Range updateRange);
         void UpdateMeshlets();
@@ -162,10 +168,10 @@ namespace AnA
         void (*MeshAppend)(std::string, uint32_t) = nullptr;
     private:
         Device* aDevice;
-        std::vector<Buffer> meshBuffers{};
-        std::vector<Buffer> collisionBuffer{};
-        std::vector<Buffer> drawMeshIndirectBuffers{};
-        Buffer drawMeshCountBuffer{};
+        Buffer meshBuffers[MAX_FRAMES_IN_FLIGHT]{};
+        Buffer collisionBuffer[MAX_FRAMES_IN_FLIGHT]{};
+        Buffer drawCommandBuffers[MAX_FRAMES_IN_FLIGHT]{};
+        Buffer drawCountBuffers[MAX_FRAMES_IN_FLIGHT]{};
         void createIndirectBuffers();
         std::vector<MeshObject> meshes{};
         std::vector<VkDrawIndexedIndirectCommand> drawIndexedCommands{};
@@ -176,13 +182,14 @@ namespace AnA
         std::mutex _mutex;
         uint32_t meshletCount = 0;
         uint32_t meshletIDCount = 0;
-        std::vector<Buffer> meshletIDBuffers{};
+        Buffer meshletIDBuffers[MAX_FRAMES_IN_FLIGHT]{};
 
         uint32_t numOfGroup = 64;
         uint8_t currentBufferIndex = 0;
         uint8_t nextIndex = 1 % MAX_FRAMES_IN_FLIGHT;
 
         MeshPushConstant meshPushConstant;
+        MeshVertexPushConstant meshVertexPushConstant;
         void updateAll();
 
         friend class Animations;

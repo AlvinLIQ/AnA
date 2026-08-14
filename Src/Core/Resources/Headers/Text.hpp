@@ -71,8 +71,10 @@ namespace AnA
         std::unordered_map<uint32_t, TextMapData> textMap{};
         std::unordered_map<int, int> characterMap{};
         std::vector<int> meshlets;
+        std::vector<VkDrawIndirectCommand> drawCommands;
         std::mutex _mutex;
-        void updateTextInfo(TextInfo& textInfo, uint32_t& chIndex, uint32_t& index, CharacterInfo* chInfoBuffer);
+        void updateTextInfo(TextInfo& textInfo, uint32_t& chIndex, uint32_t& index, const uint32_t& textIndex,
+            CharacterInfo* chInfoBuffer);
         void updateMeshlets(size_t meshletOffset);
         void updateAll();
         Buffer vertexBuffer;
@@ -80,7 +82,7 @@ namespace AnA
         Buffer charInfoBuffers[MAX_FRAMES_IN_FLIGHT];
         uint32_t currentBufferIndex = 0;
         uint32_t nextIndex = 1 % MAX_FRAMES_IN_FLIGHT;
-        Buffer drawCommandBuffer;
+        Buffer drawCommandBuffers[MAX_FRAMES_IN_FLIGHT];
         uint32_t meshletVertexCount = 0;
         uint32_t meshletIndexCount = 0;
         Buffer meshletBuffer;
