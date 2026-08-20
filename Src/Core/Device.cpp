@@ -938,8 +938,8 @@ bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device, DeviceFeatures
     _deviceFeatures.bufferDeviceAddressSupport = bufferDeviceAddressFeatures.bufferDeviceAddress == VK_TRUE;
     if ((_deviceFeatures.descriptorBufferSupport = descriptorBufferFeatures.descriptorBuffer == VK_TRUE))
         deviceExtensions.push_back(VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME);
-    //if ((_deviceFeatures.descriptorHeapSupport = descriptorHeapFeatures.descriptorHeap == VK_TRUE))
-    //    deviceExtensions.push_back(VK_EXT_DESCRIPTOR_HEAP_EXTENSION_NAME);
+    if ((_deviceFeatures.descriptorHeapSupport = descriptorHeapFeatures.descriptorHeap == VK_TRUE))
+        deviceExtensions.push_back(VK_EXT_DESCRIPTOR_HEAP_EXTENSION_NAME);
 
     return requiredExtensions.empty();
 }

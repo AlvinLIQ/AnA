@@ -1,6 +1,7 @@
 #include "Headers/Shape.hpp"
 #include "Headers/Shader.hpp"
 #include "../GUI/Controls/Headers/Control.hpp"
+#include "Resources/Headers/ResourceManager.hpp"
 
 using namespace AnA;
 
@@ -54,6 +55,10 @@ void Shapes::Bind(CommandBuffer& commandBuffer, Shader& shader)
         VkDeviceSize offsets[] = {0, 0};
         vkCmdSetDescriptorBufferOffsetsEXT(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
             shader.GetPipelineLayout(), 0, 2, bufferIndices, offsets);
+    }
+    else
+    {
+        Resources::ResourceManager::GetCurrent()->BindDescriptors(commandBuffer, shader.GetPipelineLayout());
     }
 
     shapePushConstant.shapePtr = shapeBuffer.GetAddress();

@@ -188,6 +188,10 @@ void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader)
         vkCmdSetDescriptorBufferOffsetsEXT(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
             shader.GetPipelineLayout(), 0, 2, bufferIndices, offsets);
     }
+    else
+    {
+        aResourceManager->BindDescriptors(commandBuffer, shader.GetPipelineLayout());
+    }
 
     auto& frameResource = aResourceManager->Meshes.GetCurrentFrameResource();
 

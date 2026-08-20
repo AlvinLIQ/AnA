@@ -9,6 +9,8 @@
 #include "Text.hpp"
 #include "Texture.hpp"
 #include "ShadowMap.hpp"
+#include "video/khronos/vulkan/vulkan_core.h"
+#include "vulkan/vulkan_core.h"
 #include <mutex>
 #include <string>
 #include <unordered_map>
@@ -66,9 +68,12 @@ namespace AnA
         struct DescriptorResources
         {
             VkDescriptorSetLayout setLayout;
+            VkDescriptorSet set;
+            VkDescriptorPool pool;
             Buffer buffer;
             void cleanup(VkDevice device)
             {
+                vkDestroyDescriptorPool(device, pool, VK_NULL_HANDLE);
                 vkDestroyDescriptorSetLayout(device, setLayout, VK_NULL_HANDLE);
             }
         };
@@ -106,6 +111,7 @@ namespace AnA
             void Resize();
 
             void BindDescriptors(VkCommandBuffer commandBuffer);
+            void BindDescriptors(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout);
 
             Resources::Meshes Meshes;
             Scene MainScene;

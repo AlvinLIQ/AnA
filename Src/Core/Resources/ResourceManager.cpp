@@ -3,6 +3,8 @@
 #include "../Headers/ShaderCodes.hpp"
 #include "Headers/Device.hpp"
 #include "Resources/Headers/Animation.hpp"
+#include "vulkan/vulkan_core.h"
+#include <stdexcept>
 
 using namespace AnA;
 using namespace Resources;
@@ -208,6 +210,13 @@ void ResourceManager::BindDescriptors(VkCommandBuffer commandBuffer)
     }
 }
 
+void ResourceManager::BindDescriptors(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
+{
+    VkDescriptorSet sets[] = {samplerDescriptor.set, sampledImageDescriptor.set};
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout,
+        0, numsof(sets), sets, 0, VK_NULL_HANDLE);
+}
+
 void ResourceManager::RecreateResources()
 {
     //cleanupShadowResources();
@@ -325,6 +334,39 @@ void ResourceManager::createSampledImageResources()
         else
         {
             //create descriptor set here for traditional device
+            VkDescriptorPoolSize poolSizes[2];
+            poolSizes[0].type = VK_DESCRIPTOR_TYPE_SAMPLER;
+            poolSizes[0].descriptorCount = 1;
+            poolSizes[1].type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+            poolSizes[1].descriptorCount = MaxBatchSize;
+            VkDescriptorPoolCreateInfo poolInfo{};
+            poolInfo.pPoolSizes = poolSizes;
+            poolInfo.poolSizeCount = numsof(poolSizes);
+            if (vkCreateDescriptorPool(aDevice->GetLogicalDevice(), &poolInfo, VK_NULL_HANDLE, &samplerDescriptor.pool) != VK_SUCCESS)
+                throw std::runtime_error("failed to create descriptor pool");
+
+            VkDescriptorSetLayout setLayouts[] = {samplerDescriptor.setLayout, sampledImageDescriptor.setLayout};
+            VkDescriptorSet sets[2];
+            VkDescriptorSetAllocateInfo allocInfo;
+            allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+            allocInfo.pSetLayouts = setLayouts;
+            allocInfo.descriptorPool = samplerDescriptor.pool;
+            allocInfo.descriptorSetCount = 2;
+            if (vkAllocateDescriptorSets(aDevice->GetLogicalDevice(), &allocInfo, sets) != VK_SUCCESS)
+                throw std::runtime_error("failed to allocate descriptor sets");
+            samplerDescriptor.set = sets[0];
+            sampledImageDescriptor.set = sets[1];
+
+            VkWriteDescriptorSet write{};
+            write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            write.descriptorCount = 1;
+            write.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+            write.dstSet = sets[0];
+
+            VkDescriptorImageInfo samplerInfo{};
+            samplerInfo.sampler = SwapChain::GetCurrent()->GetColorSampler();
+            write.pImageInfo = &samplerInfo;
+            vkUpdateDescriptorSets(aDevice->GetLogicalDevice(), 1, &write, 0, VK_NULL_HANDLE);
         }
     }
 }
