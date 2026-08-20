@@ -58,7 +58,7 @@ void Shapes::Bind(CommandBuffer& commandBuffer, Shader& shader)
 
     shapePushConstant.shapePtr = shapeBuffer.GetAddress();
     shapePushConstant.resolution = {float(commandBuffer.Extent.width), float(commandBuffer.Extent.height)};
-    aDevice->PushData(commandBuffer, &shader, &shapePushConstant, sizeof(shapeBuffer));
+    aDevice->PushData(commandBuffer, &shader, &shapePushConstant, sizeof(shapePushConstant));
 }
 
 void Shapes::Draw(CommandBuffer& commandBuffer)
