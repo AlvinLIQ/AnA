@@ -865,6 +865,13 @@ void Device::pickPhysicalDevice()
     if (physicalDevice == VK_NULL_HANDLE)
         throw std::runtime_error("Failed to find a suitable GPU!");
 
+    if (deviceFeatures.descriptorHeapSupport)
+        deviceExtensions.push_back(VK_EXT_DESCRIPTOR_HEAP_EXTENSION_NAME);
+    if (deviceFeatures.descriptorBufferSupport)
+        deviceExtensions.push_back(VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME);
+    if (deviceFeatures.meshShaderSupport)
+        deviceExtensions.push_back(VK_EXT_MESH_SHADER_EXTENSION_NAME);
+
     checkUsableSamples();
 }
 
@@ -890,10 +897,12 @@ bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device, DeviceFeatures
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
 
     std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+    std::set<std::string> allExtensions;
 
     for (const auto &extension : availableExtensions)
     {
         requiredExtensions.erase(extension.extensionName);
+        allExtensions.insert(extension.extensionName);
     }
     VkPhysicalDeviceDescriptorHeapFeaturesEXT descriptorHeapFeatures{};
     descriptorHeapFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_HEAP_FEATURES_EXT;
@@ -920,26 +929,22 @@ bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device, DeviceFeatures
     descriptorHeapFeatures.pNext = &meshShaderFeatures;
 #endif
 
-    VkPhysicalDeviceFeatures2 deviceFeatures = {};
-    deviceFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-    deviceFeatures.pNext = &hostImageCopyFeatures;
-    vkGetPhysicalDeviceFeatures2(device, &deviceFeatures);
+    VkPhysicalDeviceFeatures2 deviceFeatures2 = {};
+    deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    deviceFeatures2.pNext = &hostImageCopyFeatures;
+    vkGetPhysicalDeviceFeatures2(device, &deviceFeatures2);
 
 #ifdef ENABLE_MESH_SHADER
     if (meshShaderFeatures.meshShader == VK_TRUE)
-    {
         _deviceFeatures.meshShaderSupport = true;
-        deviceExtensions.push_back(VK_EXT_MESH_SHADER_EXTENSION_NAME);
-    }
 #endif
 
     _deviceFeatures.unifiedLayoutsSupport = unifiedLayoutsFeatures.unifiedImageLayouts == VK_TRUE;
     _deviceFeatures.hostImageCopySupport = hostImageCopyFeatures.hostImageCopy == VK_TRUE;
     _deviceFeatures.bufferDeviceAddressSupport = bufferDeviceAddressFeatures.bufferDeviceAddress == VK_TRUE;
-    if ((_deviceFeatures.descriptorBufferSupport = descriptorBufferFeatures.descriptorBuffer == VK_TRUE))
-        deviceExtensions.push_back(VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME);
-    if ((_deviceFeatures.descriptorHeapSupport = descriptorHeapFeatures.descriptorHeap == VK_TRUE))
-        deviceExtensions.push_back(VK_EXT_DESCRIPTOR_HEAP_EXTENSION_NAME);
+    _deviceFeatures.descriptorBufferSupport = descriptorBufferFeatures.descriptorBuffer == VK_TRUE;
+    if (allExtensions.find(VK_EXT_DESCRIPTOR_HEAP_EXTENSION_NAME) != allExtensions.end())
+        _deviceFeatures.descriptorHeapSupport = true;
 
     return requiredExtensions.empty();
 }
