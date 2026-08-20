@@ -15,7 +15,7 @@
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "../3rdParty/stb/stb_truetype.h"
 
-#include "CDT.h"
+#include "CDT.hpp"
 
 #define VMA_IMPLEMENTATION
 #define VMA_STATIC_VULKAN_FUNCTIONS 0
