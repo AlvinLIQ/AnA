@@ -155,8 +155,8 @@ namespace AnA
             std::vector<Buffer> miscBuffers;
             void createMiscBuffers();
 
-            DescriptorResources samplerDescriptor;
-            DescriptorResources sampledImageDescriptor;
+            DescriptorResources samplerDescriptor{};
+            DescriptorResources sampledImageDescriptor{};
             void createSampledImageResources();
             void appendSampledImage(uint32_t id, Texture& texture);
             void appendSampledImage(VkImageDescriptorInfoEXT& imageInfo);

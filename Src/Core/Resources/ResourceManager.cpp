@@ -265,28 +265,6 @@ void ResourceManager::createMiscBuffers()
 
 void ResourceManager::createSampledImageResources()
 {
-    VkDescriptorSetLayoutBinding binding{};
-    binding.descriptorCount = 1;
-    binding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-    binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    binding.binding = 0;
-
-    VkDescriptorSetLayoutCreateInfo layoutInfo{};
-    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = 1;
-    layoutInfo.pBindings = &binding;
-    layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
-
-    vkCreateDescriptorSetLayout(aDevice->GetLogicalDevice(), &layoutInfo,
-       VK_NULL_HANDLE, &samplerDescriptor.setLayout);
-
-    binding.descriptorCount = MaxBatchSize;
-    binding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-    binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    binding.binding = 0;
-
-    vkCreateDescriptorSetLayout(aDevice->GetLogicalDevice(), &layoutInfo,
-       VK_NULL_HANDLE, &sampledImageDescriptor.setLayout);
     if (aDevice->DescriptorHeapSupport())
     {
         const auto& prop = aDevice->GetDescriptorHeapProperties();
@@ -304,21 +282,50 @@ void ResourceManager::createSampledImageResources()
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         sampledImageDescriptor.buffer.Map();
     }
-    else if(aDevice->DescriptorBufferSupport())
+    else
     {
-        const auto& prop = aDevice->GetDescriptorBufferProperties();
-        samplerDescriptor.buffer = Buffer(aDevice,
-            prop.samplerDescriptorSize,
-            VK_BUFFER_USAGE_SAMPLER_DESCRIPTOR_BUFFER_BIT_EXT,
-            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-        samplerDescriptor.buffer.Map();
+        VkDescriptorSetLayoutBinding binding{};
+        binding.descriptorCount = 1;
+        binding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+        binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+        binding.binding = 0;
 
-        sampledImageDescriptor.buffer = Buffer(aDevice,
-            MaxBatchSize * prop.sampledImageDescriptorSize,
-            VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT,
-            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-        sampledImageDescriptor.buffer.Map();
+        VkDescriptorSetLayoutCreateInfo layoutInfo{};
+        layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        layoutInfo.bindingCount = 1;
+        layoutInfo.pBindings = &binding;
+        layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
 
+        vkCreateDescriptorSetLayout(aDevice->GetLogicalDevice(), &layoutInfo,
+            VK_NULL_HANDLE, &samplerDescriptor.setLayout);
+
+        binding.descriptorCount = MaxBatchSize;
+        binding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+        binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+        binding.binding = 0;
+
+        vkCreateDescriptorSetLayout(aDevice->GetLogicalDevice(), &layoutInfo,
+            VK_NULL_HANDLE, &sampledImageDescriptor.setLayout);
+
+        if(aDevice->DescriptorBufferSupport())
+        {
+            const auto& prop = aDevice->GetDescriptorBufferProperties();
+            samplerDescriptor.buffer = Buffer(aDevice,
+                prop.samplerDescriptorSize,
+                VK_BUFFER_USAGE_SAMPLER_DESCRIPTOR_BUFFER_BIT_EXT,
+                VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+            samplerDescriptor.buffer.Map();
+
+            sampledImageDescriptor.buffer = Buffer(aDevice,
+                MaxBatchSize * prop.sampledImageDescriptorSize,
+                VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT,
+                VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+            sampledImageDescriptor.buffer.Map();
+        }
+        else
+        {
+            //create descriptor set here for traditional device
+        }
     }
 }
 
