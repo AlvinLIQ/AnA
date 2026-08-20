@@ -158,12 +158,15 @@ namespace AnA
             std::vector<Buffer> miscBuffers;
             void createMiscBuffers();
 
+            DescriptorResources samplerDescriptor;
             DescriptorResources sampledImageDescriptor;
             void createSampledImageResources();
+            void appendSampledImage(VkImageDescriptorInfoEXT& imageInfo);
             void appendSampledImage(VkDescriptorImageInfo& imageInfo);
 
             std::vector<NormalCallBack> callbacks{};
             std::mutex callbacksMutex{};
+            std::vector<VkImageDescriptorInfoEXT> textureHeapInfos;
             std::vector<VkDescriptorImageInfo> textureInfos;
 
             uint32_t selectedVertexIndex = 0;

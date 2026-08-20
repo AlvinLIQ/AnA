@@ -8,13 +8,13 @@ namespace AnA
     public:
         Shader(Device* mDevice);
         Shader(Device* mDevice, std::vector<ShaderInfo>& shaderInfos,
-            VkDescriptorSetLayout _setLayout,
+            const std::vector<VkDescriptorSetLayout>& _setLayouts,
             VkDeviceSize pushConstantSize = 0,
             VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
 
         Shader(const Shader&) = delete;
         Shader& operator=(const Shader&) = delete;
-        Shader(Shader& shader) noexcept : Topology{shader.Topology}, aDevice{shader.aDevice}, pipeline{shader.pipeline}, pipelineLayout{shader.pipelineLayout}, setLayout{shader.setLayout}
+        Shader(Shader& shader) noexcept : Topology{shader.Topology}, aDevice{shader.aDevice}, pipeline{shader.pipeline}, pipelineLayout{shader.pipelineLayout}, setLayouts{shader.setLayouts}
         {
         }
         Shader& operator=(Shader& shader) noexcept
@@ -25,12 +25,12 @@ namespace AnA
                 aDevice = shader.aDevice;
                 pipeline = shader.pipeline;
                 pipelineLayout = shader.pipelineLayout;
-                setLayout = shader.setLayout;
+                setLayouts = shader.setLayouts;
                 Topology = shader.Topology;
             }
             return *this;
         }
-        Shader(Shader&& shader) noexcept : aDevice{shader.aDevice}, pipeline{shader.pipeline}, pipelineLayout{shader.pipelineLayout}, setLayout{shader.setLayout}
+        Shader(Shader&& shader) noexcept : aDevice{shader.aDevice}, pipeline{shader.pipeline}, pipelineLayout{shader.pipelineLayout}, setLayouts{shader.setLayouts}
         {
             shader.pipelineLayout = VK_NULL_HANDLE;
         }
@@ -42,12 +42,11 @@ namespace AnA
                 aDevice = shader.aDevice;
                 pipeline = shader.pipeline;
                 pipelineLayout = shader.pipelineLayout;
-                setLayout = shader.setLayout;
+                setLayouts = shader.setLayouts;
                 Topology = shader.Topology;
                 hasMeshShader = shader.hasMeshShader;
 
                 shader.pipelineLayout = VK_NULL_HANDLE;
-                shader.setLayout = VK_NULL_HANDLE;
             }
             return *this;
         }
@@ -68,7 +67,7 @@ namespace AnA
         Pipeline pipeline{};
         VkPipelineLayout pipelineLayout{VK_NULL_HANDLE};
         void createPipelineLayout(VkDeviceSize pushConstantSize = 0);
-        VkDescriptorSetLayout setLayout{VK_NULL_HANDLE};
+        std::vector<VkDescriptorSetLayout> setLayouts;
         bool hasMeshShader = false;
     };
 }

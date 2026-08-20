@@ -145,6 +145,7 @@ namespace AnA
         static void Triangulation(std::vector<glm::vec2>& vertices, std::vector<glm::uvec2>& edges,
             std::vector<uint32_t>& indices);
 
+        VkSamplerCreateInfo SamplerInfo(enum VkSamplerAddressMode samplerAddressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT, VkBorderColor borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK, VkCompareOp compareOp = VK_COMPARE_OP_ALWAYS);
         void CreateSampler(VkSampler* pSampler, enum VkSamplerAddressMode samplerAddressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT, VkBorderColor borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK, VkCompareOp compareOp = VK_COMPARE_OP_ALWAYS);
         void CreateCommandPool(VkCommandPoolCreateFlags flags, VkCommandPool* pool);
 
@@ -195,6 +196,8 @@ namespace AnA
             bool unifiedLayoutsSupport;
             bool hostImageCopySupport;
             bool bufferDeviceAddressSupport;
+            bool descriptorHeapSupport;
+            bool descriptorBufferSupport;
         };
         VkDevice GetLogicalDevice();
         VkPhysicalDevice GetPhysicalDevice();
@@ -205,6 +208,10 @@ namespace AnA
         const VkPhysicalDeviceDescriptorBufferPropertiesEXT& GetDescriptorBufferProperties() const
         {
             return descriptorBufferProperties;
+        }
+        const VkPhysicalDeviceDescriptorHeapPropertiesEXT& GetDescriptorHeapProperties() const
+        {
+            return descriptorHeapProperties;
         }
 
         bool MeshShaderSupport() const
@@ -220,6 +227,14 @@ namespace AnA
         bool HostImageCopySupport() const
         {
            return deviceFeatures.hostImageCopySupport;
+        }
+        bool DescriptorBufferSupport() const
+        {
+            return deviceFeatures.descriptorBufferSupport;
+        }
+        bool DescriptorHeapSupport() const
+        {
+            return deviceFeatures.descriptorHeapSupport;
         }
         VmaAllocator GetAllocator();
 
@@ -279,7 +294,6 @@ namespace AnA
             VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME,
             VK_EXT_SHADER_OBJECT_EXTENSION_NAME,
             VK_EXT_PRIMITIVE_TOPOLOGY_LIST_RESTART_EXTENSION_NAME,
-            VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME,
             VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME,
             VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME
         };
@@ -313,6 +327,7 @@ namespace AnA
         VkPhysicalDeviceProperties physicalDeviceProperties{};
         VkPhysicalDeviceMeshShaderPropertiesEXT meshShaderProperties{};
         VkPhysicalDeviceDescriptorBufferPropertiesEXT descriptorBufferProperties{};
+        VkPhysicalDeviceDescriptorHeapPropertiesEXT descriptorHeapProperties{};
 
         VmaAllocator allocator{nullptr};
         void createVmaAllocator();

@@ -46,6 +46,7 @@ namespace AnA
 
         VkImageView& GetImageView();
         VkSampler& GetSampler();
+        VkImageDescriptorInfoEXT& GetImageHeapInfo();
         VkDescriptorImageInfo& GetImageInfo();
 
         Device* GetDevice();
@@ -57,6 +58,7 @@ namespace AnA
 
         VkImage textureImage{VK_NULL_HANDLE};
         VmaAllocation allocation{VK_NULL_HANDLE};
-        VkDescriptorImageInfo imageInfo;
+        VkImageDescriptorInfoEXT imageHeapInfo{};
+        VkDescriptorImageInfo imageInfo{};
     };
 }

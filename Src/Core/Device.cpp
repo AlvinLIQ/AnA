@@ -564,10 +564,9 @@ void Device::Triangulation(std::vector<glm::vec2>& vertices, std::vector<glm::uv
     }
 }
 
-void Device::CreateSampler(VkSampler* pSampler, enum VkSamplerAddressMode samplerAddressMode, VkBorderColor borderColor, VkCompareOp compareOp)
+VkSamplerCreateInfo Device::SamplerInfo(enum VkSamplerAddressMode samplerAddressMode, VkBorderColor borderColor, VkCompareOp compareOp)
 {
     vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
-
     VkSamplerCreateInfo samplerInfo{};
     samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
     samplerInfo.magFilter = VK_FILTER_LINEAR;
@@ -584,6 +583,12 @@ void Device::CreateSampler(VkSampler* pSampler, enum VkSamplerAddressMode sample
     samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
     samplerInfo.maxLod = 0.0f;
 
+    return samplerInfo;
+}
+
+void Device::CreateSampler(VkSampler* pSampler, enum VkSamplerAddressMode samplerAddressMode, VkBorderColor borderColor, VkCompareOp compareOp)
+{
+    VkSamplerCreateInfo samplerInfo = SamplerInfo(samplerAddressMode, borderColor, compareOp);
     if (vkCreateSampler(logicalDevice, &samplerInfo, nullptr, pSampler) != VK_SUCCESS)
         throw std::runtime_error("Failed to create sampler");
 }
@@ -770,8 +775,12 @@ void Device::pickPhysicalDevice()
     std::vector<VkPhysicalDevice> devices(deviceCount);
     vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
     int currentScore, bestScore = 0;
+    VkPhysicalDeviceDescriptorHeapPropertiesEXT _descriptorHeapProperties{};
+    _descriptorHeapProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_HEAP_PROPERTIES_EXT;
+
     VkPhysicalDeviceDescriptorBufferPropertiesEXT _descriptorBufferProperties{};
     _descriptorBufferProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_PROPERTIES_EXT;
+    _descriptorBufferProperties.pNext = &_descriptorHeapProperties;
 
     VkPhysicalDeviceMeshShaderPropertiesEXT _meshShaderProperties{};
     _meshShaderProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_PROPERTIES_EXT;
@@ -821,6 +830,7 @@ void Device::pickPhysicalDevice()
                 physicalDeviceProperties = deviceProperties2.properties;
                 meshShaderProperties = _meshShaderProperties;
                 descriptorBufferProperties = _descriptorBufferProperties;
+                descriptorHeapProperties = _descriptorHeapProperties;
                 queueFamilyIndices = indices;
                 bestScore = currentScore;
             }
@@ -859,8 +869,16 @@ bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device, DeviceFeatures
     {
         requiredExtensions.erase(extension.extensionName);
     }
+    VkPhysicalDeviceDescriptorHeapFeaturesEXT descriptorHeapFeatures{};
+    descriptorHeapFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_HEAP_FEATURES_EXT;
+
+    VkPhysicalDeviceDescriptorBufferFeaturesEXT descriptorBufferFeatures{};
+    descriptorBufferFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_FEATURES_EXT;
+    descriptorBufferFeatures.pNext = &descriptorHeapFeatures;
+
     VkPhysicalDeviceBufferDeviceAddressFeatures bufferDeviceAddressFeatures{};
     bufferDeviceAddressFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
+    bufferDeviceAddressFeatures.pNext = &descriptorBufferFeatures;
 
     VkPhysicalDeviceUnifiedImageLayoutsFeaturesKHR unifiedLayoutsFeatures{};
     unifiedLayoutsFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFIED_IMAGE_LAYOUTS_FEATURES_KHR;
@@ -873,7 +891,7 @@ bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device, DeviceFeatures
 #ifdef ENABLE_MESH_SHADER
     VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures = {};
     meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
-    unifiedLayoutsFeatures.pNext = &meshShaderFeatures;
+    descriptorBufferFeatures.pNext = &meshShaderFeatures;
 #endif
 
     VkPhysicalDeviceFeatures2 deviceFeatures = {};
@@ -891,7 +909,11 @@ bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device, DeviceFeatures
 
     _deviceFeatures.unifiedLayoutsSupport = unifiedLayoutsFeatures.unifiedImageLayouts == VK_TRUE;
     _deviceFeatures.hostImageCopySupport = hostImageCopyFeatures.hostImageCopy == VK_TRUE;
-    _deviceFeatures.bufferDeviceAddressSupport = true;//bufferDeviceAddressFeatures.bufferDeviceAddress == VK_TRUE;
+    _deviceFeatures.bufferDeviceAddressSupport = bufferDeviceAddressFeatures.bufferDeviceAddress == VK_TRUE;
+    if ((_deviceFeatures.descriptorBufferSupport = descriptorBufferFeatures.descriptorBuffer == VK_TRUE))
+        deviceExtensions.push_back(VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME);
+    //if ((_deviceFeatures.descriptorHeapSupport = descriptorHeapFeatures.descriptorHeap == VK_TRUE))
+    //    deviceExtensions.push_back(VK_EXT_DESCRIPTOR_HEAP_EXTENSION_NAME);
 
     return requiredExtensions.empty();
 }
@@ -929,9 +951,15 @@ void Device::createLogicalDevice()
         queueCreateInfo.pQueuePriorities = &queuePriority;
         queueCreateInfos.push_back(queueCreateInfo);
     }
+
+    VkPhysicalDeviceDescriptorHeapFeaturesEXT descriptorHeapFeatures{};
+    descriptorHeapFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_HEAP_FEATURES_EXT;
+    descriptorHeapFeatures.descriptorHeap = deviceFeatures.descriptorHeapSupport;
+
     VkPhysicalDeviceVulkan14Features vulkan14Features{};
     vulkan14Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_4_FEATURES;
     vulkan14Features.hostImageCopy = deviceFeatures.hostImageCopySupport;
+    vulkan14Features.pNext = &descriptorHeapFeatures;
     //vulkan14Features.dynamicRenderingLocalRead = VK_TRUE;
 
     VkPhysicalDeviceVulkan13Features vulkan13Features{};
@@ -944,7 +972,7 @@ void Device::createLogicalDevice()
 
     VkPhysicalDeviceDescriptorBufferFeaturesEXT descriptorBufferFeatures{};
     descriptorBufferFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_FEATURES_EXT;
-    descriptorBufferFeatures.descriptorBuffer = VK_TRUE;
+    descriptorBufferFeatures.descriptorBuffer = deviceFeatures.descriptorBufferSupport;
     descriptorBufferFeatures.pNext = &vulkan13Features;
 
     VkPhysicalDevicePrimitiveTopologyListRestartFeaturesEXT primitiveRestartFeatures{};

@@ -24,7 +24,8 @@ layout(location = 2) out vec4 outAlbedo;
 layout(location = 0) out vec4 outColor;
 #endif
 
-layout(binding = 0) uniform sampler2D texSampler[];
+layout(set = 0, binding = 0) uniform sampler _sampler;
+layout(set = 1, binding = 0) uniform texture2D textures[];
 
 const vec3 LIGHT_POS = vec3(4., 2., 1.);
 const vec3 LIGHT_COLOR = vec3(1.0, 1.0, 1.0);
@@ -32,7 +33,7 @@ const vec3 AMBIENT = vec3(0.13);
 
 void main()
 {
-    vec4 texColor = texture(texSampler[nonuniformEXT(texIndex)], texCoord);
+    vec4 texColor = texture(sampler2D(textures[nonuniformEXT(texIndex)], _sampler), texCoord);
     if (texColor.a < 0.8)
         discard;
 

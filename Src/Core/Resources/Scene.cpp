@@ -177,10 +177,13 @@ void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader)
     auto aResourceManager = Resources::ResourceManager::GetCurrent();
     shader.GetPipeline().Bind(commandBuffer);
 
-    uint32_t bufferIndex = 0;
-    VkDeviceSize offset = 0;
-    vkCmdSetDescriptorBufferOffsetsEXT(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-        shader.GetPipelineLayout(), 0, 1, &bufferIndex, &offset);
+    if (aDevice->DescriptorBufferSupport())
+    {
+        uint32_t bufferIndices[] = {0, 1};
+        VkDeviceSize offsets[] = {0, 0};
+        vkCmdSetDescriptorBufferOffsetsEXT(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+            shader.GetPipelineLayout(), 0, 2, bufferIndices, offsets);
+    }
 
     auto& frameResource = aResourceManager->Meshes.GetCurrentFrameResource();
 

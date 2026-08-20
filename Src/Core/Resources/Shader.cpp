@@ -11,9 +11,9 @@ Shader::Shader(Device* mDevice) : aDevice{mDevice}
 }
 
 Shader::Shader(Device* mDevice, std::vector<ShaderInfo>& shaderInfos,
-            VkDescriptorSetLayout _setLayout, VkDeviceSize pushConstantSize, VkPrimitiveTopology topology) :
+            const std::vector<VkDescriptorSetLayout>& _setLayouts, VkDeviceSize pushConstantSize, VkPrimitiveTopology topology) :
     Topology{topology}, aDevice{mDevice},
-    setLayout{_setLayout}
+    setLayouts{_setLayouts}
 {
     createPipelineLayout(pushConstantSize);
     auto swapChain = SwapChain::GetCurrent();
@@ -90,10 +90,10 @@ void Shader::createPipelineLayout(VkDeviceSize pushConstantSize)
 {
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    if (setLayout)
+    if (setLayouts.size())
     {
-        pipelineLayoutInfo.setLayoutCount = 1;
-        pipelineLayoutInfo.pSetLayouts = &setLayout;
+        pipelineLayoutInfo.setLayoutCount = uint32_t(setLayouts.size());
+        pipelineLayoutInfo.pSetLayouts = setLayouts.data();
     }
 
     VkPushConstantRange range;

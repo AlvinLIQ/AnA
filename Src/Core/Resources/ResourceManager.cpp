@@ -45,6 +45,7 @@ ResourceManager::ResourceManager(Device* mDevice) :
 ResourceManager::~ResourceManager()
 {
     sampledImageDescriptor.cleanup(aDevice->GetLogicalDevice());
+    samplerDescriptor.cleanup(aDevice->GetLogicalDevice());
     TextureMap.clear();
     //for (auto& shader : Shaders)
     //    delete shader;
@@ -176,11 +177,33 @@ void ResourceManager::Resize()
 
 void ResourceManager::BindDescriptors(VkCommandBuffer commandBuffer)
 {
-    VkDescriptorBufferBindingInfoEXT bindInfo{};
-    bindInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_BUFFER_BINDING_INFO_EXT;
-    bindInfo.address = sampledImageDescriptor.buffer.GetAddress();
-    bindInfo.usage = sampledImageDescriptor.buffer.GetUsage();
-    vkCmdBindDescriptorBuffersEXT(commandBuffer, 1, &bindInfo);
+    if (aDevice->DescriptorHeapSupport())
+    {
+        auto& prop = aDevice->GetDescriptorHeapProperties();
+        VkBindHeapInfoEXT bindInfo{};
+        bindInfo.sType = VK_STRUCTURE_TYPE_BIND_HEAP_INFO_EXT;
+        bindInfo.heapRange.address = samplerDescriptor.buffer.GetAddress();
+        bindInfo.reservedRangeOffset = 0;
+        bindInfo.reservedRangeSize = prop.minSamplerHeapReservedRange;
+        vkCmdBindSamplerHeapEXT(commandBuffer, &bindInfo);
+
+        bindInfo.reservedRangeOffset = prop.minSamplerHeapReservedRange + prop.samplerDescriptorSize;
+        bindInfo.reservedRangeSize = prop.minResourceHeapReservedRange;
+        bindInfo.heapRange.size = sampledImageDescriptor.buffer.GetSize();
+        vkCmdBindResourceHeapEXT(commandBuffer, &bindInfo);
+    }
+    else if (aDevice->DescriptorBufferSupport())
+    {
+        VkDescriptorBufferBindingInfoEXT bindInfos[2]{};
+        bindInfos[0].sType = VK_STRUCTURE_TYPE_DESCRIPTOR_BUFFER_BINDING_INFO_EXT;
+        bindInfos[0].address = samplerDescriptor.buffer.GetAddress();
+        bindInfos[0].usage = samplerDescriptor.buffer.GetUsage();
+
+        bindInfos[1].sType = VK_STRUCTURE_TYPE_DESCRIPTOR_BUFFER_BINDING_INFO_EXT;
+        bindInfos[1].address = sampledImageDescriptor.buffer.GetAddress();
+        bindInfos[1].usage = sampledImageDescriptor.buffer.GetUsage();
+        vkCmdBindDescriptorBuffersEXT(commandBuffer, numsof(bindInfos), bindInfos);
+    }
 }
 
 void ResourceManager::RecreateResources()
@@ -198,9 +221,16 @@ uint32_t ResourceManager::AppendTexture(const uint32_t color, uint32_t* index, c
     if (!name.empty())
         TexturePathMap.try_emplace(name, texId);
 
-    TextureIdMap.emplace(result.first->first, uint32_t(textureInfos.size()));
-    appendSampledImage(result.first->second.GetImageInfo());
-
+    if (aDevice->DescriptorHeapSupport())
+    {
+        TextureIdMap.emplace(result.first->first, uint32_t(textureHeapInfos.size()));
+        appendSampledImage(result.first->second.GetImageHeapInfo());
+    }
+    else
+    {
+        TextureIdMap.emplace(result.first->first, uint32_t(textureInfos.size()));
+        appendSampledImage(result.first->second.GetImageInfo());
+    }
     texId++;
     return result.first->first;
 }
@@ -263,17 +293,11 @@ void ResourceManager::createMiscBuffers()
 
 void ResourceManager::createSampledImageResources()
 {
-    const auto& prop = aDevice->GetDescriptorBufferProperties();
-    sampledImageDescriptor.buffer = Buffer(aDevice,
-        MaxBatchSize * prop.combinedImageSamplerDescriptorSize,
-        VK_BUFFER_USAGE_SAMPLER_DESCRIPTOR_BUFFER_BIT_EXT | VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT,
-        VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-    sampledImageDescriptor.buffer.Map();
-
     VkDescriptorSetLayoutBinding binding{};
-    binding.descriptorCount = MaxBatchSize;
-    binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    binding.descriptorCount = 1;
+    binding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
     binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    binding.binding = 0;
 
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -282,20 +306,91 @@ void ResourceManager::createSampledImageResources()
     layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
 
     vkCreateDescriptorSetLayout(aDevice->GetLogicalDevice(), &layoutInfo,
+       VK_NULL_HANDLE, &samplerDescriptor.setLayout);
+
+    binding.descriptorCount = MaxBatchSize;
+    binding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+    binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    binding.binding = 0;
+
+    vkCreateDescriptorSetLayout(aDevice->GetLogicalDevice(), &layoutInfo,
        VK_NULL_HANDLE, &sampledImageDescriptor.setLayout);
+    if (aDevice->DescriptorHeapSupport())
+    {
+        const auto& prop = aDevice->GetDescriptorHeapProperties();
+        sampledImageDescriptor.buffer = Buffer(aDevice,
+            MaxBatchSize * prop.imageDescriptorSize + prop.samplerDescriptorSize +
+            prop.minSamplerHeapReservedRange + prop.minResourceHeapReservedRange,
+            VK_BUFFER_USAGE_DESCRIPTOR_HEAP_BIT_EXT,
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        sampledImageDescriptor.buffer.Map();
+
+        auto samplerInfo = aDevice->SamplerInfo();
+        VkHostAddressRangeEXT descriptorRange;
+        descriptorRange.address = sampledImageDescriptor.buffer.GetMappedData();
+        descriptorRange.size = prop.samplerDescriptorSize;
+
+        vkWriteSamplerDescriptorsEXT(aDevice->GetLogicalDevice(), 1, &samplerInfo,
+            &descriptorRange);
+    }
+    else if(aDevice->DescriptorBufferSupport())
+    {
+        const auto& prop = aDevice->GetDescriptorBufferProperties();
+        samplerDescriptor.buffer = Buffer(aDevice,
+            prop.samplerDescriptorSize,
+            VK_BUFFER_USAGE_SAMPLER_DESCRIPTOR_BUFFER_BIT_EXT,
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        samplerDescriptor.buffer.Map();
+
+        sampledImageDescriptor.buffer = Buffer(aDevice,
+            MaxBatchSize * prop.sampledImageDescriptorSize,
+            VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT,
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        sampledImageDescriptor.buffer.Map();
+
+    }
+}
+
+void ResourceManager::appendSampledImage(VkImageDescriptorInfoEXT& imageInfo)
+{
+    const auto& prop = aDevice->GetDescriptorHeapProperties();
+
+    VkResourceDescriptorInfoEXT resourceDescriptor{};
+    resourceDescriptor.sType = VK_STRUCTURE_TYPE_RESOURCE_DESCRIPTOR_INFO_EXT;
+    resourceDescriptor.type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+    resourceDescriptor.data.pImage = &imageInfo;
+
+    VkHostAddressRangeEXT descriptorRange{};
+    descriptorRange.address = reinterpret_cast<uint8_t*>(sampledImageDescriptor.buffer.GetMappedData()) +
+        textureHeapInfos.size() * prop.imageDescriptorSize + prop.samplerDescriptorSize;
+    descriptorRange.size = prop.imageDescriptorSize;
+
+    vkWriteResourceDescriptorsEXT(aDevice->GetLogicalDevice(),
+        1,
+        &resourceDescriptor,
+        &descriptorRange);
+
+    textureHeapInfos.push_back(imageInfo);
 }
 
 void ResourceManager::appendSampledImage(VkDescriptorImageInfo& imageInfo)
 {
-    const auto& prop = aDevice->GetDescriptorBufferProperties();
-    uint8_t* dst = reinterpret_cast<uint8_t*>(sampledImageDescriptor.buffer.GetMappedData()) +
-        (textureInfos.size()) * prop.combinedImageSamplerDescriptorSize;
+    if (aDevice->DescriptorBufferSupport())
+    {
+        const auto& prop = aDevice->GetDescriptorBufferProperties();
+        uint8_t* dst = reinterpret_cast<uint8_t*>(sampledImageDescriptor.buffer.GetMappedData()) +
+            (textureInfos.size()) * prop.sampledImageDescriptorSize;
 
-    VkDescriptorGetInfoEXT getInfo{};
-    getInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_GET_INFO_EXT;
-    getInfo.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    getInfo.data.pCombinedImageSampler = &imageInfo;
-    vkGetDescriptorEXT(aDevice->GetLogicalDevice(), &getInfo, prop.combinedImageSamplerDescriptorSize, dst);
+        VkDescriptorGetInfoEXT getInfo{};
+        getInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_GET_INFO_EXT;
+        getInfo.type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+        getInfo.data.pSampledImage = &imageInfo;
+        vkGetDescriptorEXT(aDevice->GetLogicalDevice(), &getInfo, prop.sampledImageDescriptorSize, dst);
+    }
+    else
+    {
+
+    }
 
     textureInfos.push_back(imageInfo);
 }
@@ -332,17 +427,20 @@ std::vector<ShaderInfo> collisionShaderStageInfos{{CollisionDetect_comp, 0, VK_S
 void ResourceManager::createDefaultShaders()
 {
     Shaders.reserve(10);
+    std::vector<VkDescriptorSetLayout> emptyLayout{};
+    std::vector<VkDescriptorSetLayout> textureLayouts{samplerDescriptor.setLayout, sampledImageDescriptor.setLayout};
+
     if (aDevice->MeshShaderSupport())
     {
-        Shaders.emplace_back(aDevice, meshShaderStageInfos, sampledImageDescriptor.setLayout, sizeof(MeshPushConstant));
-        Shaders.emplace_back(aDevice, textShaderStageInfos, VK_NULL_HANDLE, sizeof(TextPushConstant));
+        Shaders.emplace_back(aDevice, meshShaderStageInfos, textureLayouts, sizeof(MeshPushConstant));
+        Shaders.emplace_back(aDevice, textShaderStageInfos, emptyLayout, sizeof(TextPushConstant));
     }
     else
     {
-        Shaders.emplace_back(aDevice, meshVertexShaderStageInfos, sampledImageDescriptor.setLayout, sizeof(MeshVertexPushConstant));
-        Shaders.emplace_back(aDevice, textVertexShaderStageInfos, VK_NULL_HANDLE, sizeof(TextPushConstant));
+        Shaders.emplace_back(aDevice, meshVertexShaderStageInfos, textureLayouts, sizeof(MeshVertexPushConstant));
+        Shaders.emplace_back(aDevice, textVertexShaderStageInfos, emptyLayout, sizeof(TextPushConstant));
     }
-    Shaders.emplace_back(aDevice, shapeShaderStageInfos, sampledImageDescriptor.setLayout, sizeof(ShapePushConstant));
+    Shaders.emplace_back(aDevice, shapeShaderStageInfos, textureLayouts, sizeof(ShapePushConstant));
 }
 
 const uint32_t defaultTextureColors[] =
@@ -355,6 +453,25 @@ const uint32_t defaultTextureColors[] =
 };
 void ResourceManager::initTextures()
 {
+    if (aDevice->DescriptorHeapSupport())
+    {
+        auto& prop = aDevice->GetDescriptorHeapProperties();
+        auto samplerInfo = aDevice->SamplerInfo();
+        VkHostAddressRangeEXT descriptorRange;
+        descriptorRange.address = sampledImageDescriptor.buffer.GetMappedData();
+        descriptorRange.size = prop.samplerDescriptorSize;
+        vkWriteSamplerDescriptorsEXT(aDevice->GetLogicalDevice(), 1, &samplerInfo, &descriptorRange);
+    }
+    else if (aDevice->DescriptorBufferSupport())
+    {
+        auto& prop = aDevice->GetDescriptorBufferProperties();
+        uint8_t* dst = reinterpret_cast<uint8_t*>(samplerDescriptor.buffer.GetMappedData());
+        VkDescriptorGetInfoEXT getInfo{};
+        getInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_GET_INFO_EXT;
+        getInfo.type = VK_DESCRIPTOR_TYPE_SAMPLER;
+        getInfo.data.pSampler = &SwapChain::GetCurrent()->GetColorSampler();
+        vkGetDescriptorEXT(aDevice->GetLogicalDevice(), &getInfo, prop.samplerDescriptorSize, dst);
+    }
     for (auto& color : defaultTextureColors)
     {
         AppendTexture(color);

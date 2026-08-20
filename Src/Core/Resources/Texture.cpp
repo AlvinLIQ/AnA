@@ -1,5 +1,4 @@
 #include "Headers/Texture.hpp"
-#include "../Headers/SwapChain.hpp"
 
 #define DEFAULT_FONT_SIZE 32.0f
 
@@ -41,7 +40,7 @@ Texture::Texture(VkImage _image, VmaAllocation _allocation, VkImageView imageVie
     allocation = _allocation;
     imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     imageInfo.imageView = imageView;
-    imageInfo.sampler = SwapChain::GetCurrent()->GetColorSampler();
+    //imageInfo.sampler = SwapChain::GetCurrent()->GetColorSampler();
 }
 
 Texture::~Texture()
@@ -58,6 +57,11 @@ VkSampler& Texture::GetSampler()
     return imageInfo.sampler;
 }
 
+VkImageDescriptorInfoEXT& Texture::GetImageHeapInfo()
+{
+    return imageHeapInfo;
+}
+
 VkDescriptorImageInfo& Texture::GetImageInfo()
 {
     return imageInfo;
@@ -72,7 +76,8 @@ void Texture::init()
 {
     imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     imageInfo.imageView = aDevice->CreateImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
-    imageInfo.sampler = SwapChain::GetCurrent()->GetColorSampler();
+
+    //imageInfo.sampler = SwapChain::GetCurrent()->GetColorSampler();
     //auto descriptors = Resources::ResourceManager::GetCurrent()->Shaders[0]->GetDescriptors();
     //descriptor = new Descriptor(aDevice, textureSampler, textureImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
     //     0, 1, Resources::ResourceManager::GetCurrent()->Shaders[0]->GetDescriptors()[DEFAULT_SAMPLER_LAYOUT]->GetLayout(),
