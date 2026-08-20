@@ -34,15 +34,6 @@ Texture::Texture(VkImage _image, VmaAllocation _allocation, Device* mDevice) : a
     init();
 }
 
-Texture::Texture(VkImage _image, VmaAllocation _allocation, VkImageView imageView, Device* mDevice) : aDevice{mDevice}
-{
-    textureImage = _image;
-    allocation = _allocation;
-    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageInfo.imageView = imageView;
-    //imageInfo.sampler = SwapChain::GetCurrent()->GetColorSampler();
-}
-
 Texture::~Texture()
 {
     cleanup();
@@ -74,8 +65,18 @@ Device* Texture::GetDevice()
 
 void Texture::init()
 {
-    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageInfo.imageView = aDevice->CreateImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
+    imageViewInfo = aDevice->ImageViewInfo(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
+    if (aDevice->DescriptorHeapSupport())
+    {
+        imageHeapInfo.sType = VK_STRUCTURE_TYPE_IMAGE_DESCRIPTOR_INFO_EXT;
+        imageHeapInfo.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        imageHeapInfo.pView = &imageViewInfo;
+    }
+    else
+    {
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        vkCreateImageView(aDevice->GetLogicalDevice(), &imageViewInfo, VK_NULL_HANDLE, &imageInfo.imageView);
+    }
 
     //imageInfo.sampler = SwapChain::GetCurrent()->GetColorSampler();
     //auto descriptors = Resources::ResourceManager::GetCurrent()->Shaders[0]->GetDescriptors();
@@ -91,7 +92,8 @@ void Texture::cleanup()
         return;
     auto device = aDevice->GetLogicalDevice();
 
-    vkDestroyImageView(device, imageInfo.imageView, nullptr);
+    if (imageInfo.imageView)
+        vkDestroyImageView(device, imageInfo.imageView, nullptr);
 
     aDevice->DestroyImage(textureImage, allocation);
 }

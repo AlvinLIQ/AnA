@@ -128,6 +128,10 @@ namespace AnA
 
         void CreateImage(VkImageCreateInfo* pCreateInfo, VkImage* pImage, VmaAllocation& allocation);
         void DestroyImage(VkImage image, VmaAllocation allocation);
+        VkImageViewCreateInfo ImageViewInfo(VkImage& image, VkFormat format, VkImageViewType viewType = VK_IMAGE_VIEW_TYPE_2D,
+                    VkImageSubresourceRange subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0,
+                    1, 0,
+                    1});
         VkImageView CreateImageView(VkImage& image, VkFormat format, VkImageViewType viewType = VK_IMAGE_VIEW_TYPE_2D,
             VkImageSubresourceRange subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0,
             1, 0,
@@ -140,6 +144,8 @@ namespace AnA
         void CreateTextImage(const char* text, int& width, int& height, float lineHeight, VkImage* pTextImage, VmaAllocation& allocation, float scaleX = 1.0f, float scaleY = 1.0f);
         void CreateTextImage(const String& text, int& width, int& height, float lineHeight, VkImage* pTextImage, VmaAllocation& allocation);
         #endif
+
+        void PushData(VkCommandBuffer commandBuffer, Shader* shader, void* data, size_t size);
 
         void BuildFontVertices(std::unordered_map<int, Character>& characters, int offset = 0, int range = 128);
         static void Triangulation(std::vector<glm::vec2>& vertices, std::vector<glm::uvec2>& edges,

@@ -61,9 +61,7 @@ void Text::Bind(CommandBuffer& commandBuffer, Shader& shader)
     textPushConstant.meshletPtr = meshletBuffer.GetAddress();
     textPushConstant.meshIndexPtr = meshletIndexBuffer.GetAddress();
     textPushConstant.resolution = {float(commandBuffer.Extent.width), float(commandBuffer.Extent.height)};
-    vkCmdPushConstants(commandBuffer, shader.GetPipelineLayout(),
-        shader.StageFlags, 0, sizeof(textPushConstant),
-        &textPushConstant);
+    aDevice->PushData(commandBuffer, &shader, &textPushConstant, sizeof(textPushConstant));
 }
 
 void Text::Draw(CommandBuffer& commandBuffer)

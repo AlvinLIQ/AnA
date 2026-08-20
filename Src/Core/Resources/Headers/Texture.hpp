@@ -12,7 +12,6 @@ namespace AnA
         Texture(const uint32_t color, Device* mDevice);
         Texture(const char* text, int& width, int& height, float lineHeight, Device* mDevice, float scaleX = 1.0f, float scaleY = 1.0f);
         Texture(VkImage _image, VmaAllocation _allocation, Device* mDevice);
-        Texture(VkImage _image, VmaAllocation _allocation, VkImageView imageView, Device* mDevice);
         Texture(Texture& texture) noexcept
         {
             cleanup();
@@ -59,6 +58,7 @@ namespace AnA
         VkImage textureImage{VK_NULL_HANDLE};
         VmaAllocation allocation{VK_NULL_HANDLE};
         VkImageDescriptorInfoEXT imageHeapInfo{};
+        VkImageViewCreateInfo imageViewInfo{};
         VkDescriptorImageInfo imageInfo{};
     };
 }

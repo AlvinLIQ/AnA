@@ -177,7 +177,11 @@ void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader)
     auto aResourceManager = Resources::ResourceManager::GetCurrent();
     shader.GetPipeline().Bind(commandBuffer);
 
-    if (aDevice->DescriptorBufferSupport())
+    if (aDevice->DescriptorHeapSupport())
+    {
+
+    }
+    else if (aDevice->DescriptorBufferSupport())
     {
         uint32_t bufferIndices[] = {0, 1};
         VkDeviceSize offsets[] = {0, 0};
@@ -193,17 +197,13 @@ void Scene::Bind(CommandBuffer& commandBuffer, Shader& shader)
         meshPushConstant.miscPtr = aResourceManager->GetMiscBufferAddress();
         meshPushConstant.meshletIDPtr = meshletIDBuffers[currentBufferIndex].GetAddress();
         meshPushConstant.meshletPtr = frameResource.meshletBuffer.GetAddress();
-        vkCmdPushConstants(commandBuffer, shader.GetPipelineLayout(),
-            shader.StageFlags, 0, sizeof(meshPushConstant),
-            &meshPushConstant);
+        aDevice->PushData(commandBuffer, &shader, &meshPushConstant, sizeof(meshPushConstant));
     }
     else
     {
         meshVertexPushConstant.meshPtr = meshBuffers[currentBufferIndex].GetAddress();
         meshVertexPushConstant.miscPtr = aResourceManager->GetMiscBufferAddress();
-        vkCmdPushConstants(commandBuffer, shader.GetPipelineLayout(),
-            shader.StageFlags, 0, sizeof(meshVertexPushConstant),
-            &meshVertexPushConstant);
+        aDevice->PushData(commandBuffer, &shader, &meshVertexPushConstant, sizeof(meshVertexPushConstant));
         vkCmdSetPrimitiveTopology(commandBuffer, Topology);
     }
 

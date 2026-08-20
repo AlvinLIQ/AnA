@@ -22,6 +22,8 @@
 #define VMA_DYNAMIC_VULKAN_FUNCTIONS 1
 #include "vk_mem_alloc.h"
 
+#include "Resources/Headers/Shader.hpp"
+
 using namespace AnA;
 
 Device::Device(VkInstance &mInstance, VkSurfaceKHR &mSurface) : instance {mInstance}, surface {mSurface}
@@ -150,7 +152,8 @@ void Device::DestroyImage(VkImage image, VmaAllocation allocation)
     vmaDestroyImage(allocator, image, allocation);
 }
 
-VkImageView Device::CreateImageView(VkImage& image, VkFormat format, VkImageViewType viewType, VkImageSubresourceRange subresourceRange)
+
+VkImageViewCreateInfo Device::ImageViewInfo(VkImage& image, VkFormat format, VkImageViewType viewType, VkImageSubresourceRange subresourceRange)
 {
     VkImageViewCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -165,7 +168,12 @@ VkImageView Device::CreateImageView(VkImage& image, VkFormat format, VkImageView
     createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
 
     createInfo.subresourceRange = subresourceRange;
+    return createInfo;
+}
 
+VkImageView Device::CreateImageView(VkImage& image, VkFormat format, VkImageViewType viewType, VkImageSubresourceRange subresourceRange)
+{
+    VkImageViewCreateInfo createInfo = ImageViewInfo(image, format, viewType, subresourceRange);
     VkImageView imageView;
     if (vkCreateImageView(logicalDevice, &createInfo, nullptr, &imageView) != VK_SUCCESS)
     {
@@ -387,6 +395,24 @@ void Device::CreateTextImage(const char* text, int& width, int& height, float li
 }
 
 #endif
+
+void Device::PushData(VkCommandBuffer commandBuffer, Shader* shader, void* data, size_t size)
+{
+    if (shader->GetPipelineLayout())
+    {
+        vkCmdPushConstants(commandBuffer, shader->GetPipelineLayout(),
+                    shader->StageFlags, 0, size,
+                    data);
+    }
+    else
+    {
+        VkPushDataInfoEXT pushDataInfo{};
+        pushDataInfo.sType = VK_STRUCTURE_TYPE_PUSH_DATA_INFO_EXT;
+        pushDataInfo.data.address = data;
+        pushDataInfo.data.size = size;
+        vkCmdPushDataEXT(commandBuffer, &pushDataInfo);
+    }
+}
 
 void Device::BuildFontVertices(std::unordered_map<int, Character>& characters, int offset, int range)
 {
@@ -891,7 +917,7 @@ bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device, DeviceFeatures
 #ifdef ENABLE_MESH_SHADER
     VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures = {};
     meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
-    descriptorBufferFeatures.pNext = &meshShaderFeatures;
+    descriptorHeapFeatures.pNext = &meshShaderFeatures;
 #endif
 
     VkPhysicalDeviceFeatures2 deviceFeatures = {};
@@ -912,8 +938,8 @@ bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device, DeviceFeatures
     _deviceFeatures.bufferDeviceAddressSupport = bufferDeviceAddressFeatures.bufferDeviceAddress == VK_TRUE;
     if ((_deviceFeatures.descriptorBufferSupport = descriptorBufferFeatures.descriptorBuffer == VK_TRUE))
         deviceExtensions.push_back(VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME);
-    //if ((_deviceFeatures.descriptorHeapSupport = descriptorHeapFeatures.descriptorHeap == VK_TRUE))
-    //    deviceExtensions.push_back(VK_EXT_DESCRIPTOR_HEAP_EXTENSION_NAME);
+    if ((_deviceFeatures.descriptorHeapSupport = descriptorHeapFeatures.descriptorHeap == VK_TRUE))
+        deviceExtensions.push_back(VK_EXT_DESCRIPTOR_HEAP_EXTENSION_NAME);
 
     return requiredExtensions.empty();
 }

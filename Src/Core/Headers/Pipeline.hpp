@@ -63,9 +63,11 @@ namespace AnA
             std::vector<VkDynamicState> dynamicStates = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR, VK_DYNAMIC_STATE_POLYGON_MODE_EXT, VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY };
             std::vector<VkSpecializationInfo> specializationInfos{};
             std::vector<std::vector<VkSpecializationMapEntry>> specializationMapEntries{};
+            VkPipelineCreateFlags2CreateInfo flags2;
 
             static PipelineConfig GetForDynamicRendering(Device* aDevice, std::vector<ShaderInfo> shaderInfos,
                 VkPipelineLayout &pipelineLayout, VkFormat colorFormat, VkFormat depthFormat, VkSampleCountFlagBits msaaSamplers,
+                VkShaderDescriptorSetAndBindingMappingInfoEXT* pDescriptorSetMappingInfo,
                 const VkPrimitiveTopology vertexTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
             {
                 PipelineConfig dConfig;
@@ -98,6 +100,10 @@ namespace AnA
                         dConfig.specializationInfos[i].mapEntryCount = uint32_t(dConfig.specializationMapEntries[i].size());
                         dConfig.specializationInfos[i].pMapEntries = dConfig.specializationMapEntries[i].data();
                         dConfig.shaderStages[i].pSpecializationInfo = &dConfig.specializationInfos[i];
+                    }
+                    if (aDevice->DescriptorHeapSupport() && pDescriptorSetMappingInfo)
+                    {
+                        dConfig.shaderStages[i].pNext = pDescriptorSetMappingInfo;
                     }
                     dConfig.hasMeshShader = isMeshShader = isMeshShader || (shaderInfos[i].stage &
                         (VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_TASK_BIT_EXT |
@@ -222,6 +228,16 @@ namespace AnA
                 dConfig.pipelineRenderingInfo.pColorAttachmentFormats = dConfig.colorAttachmentFormats;
                 dConfig.pipelineRenderingInfo.depthAttachmentFormat = dConfig.depthAttachmentFormat;
                 dConfig.pipelineRenderingInfo.stencilAttachmentFormat = VK_FORMAT_UNDEFINED;
+
+                if (aDevice->DescriptorHeapSupport() && pDescriptorSetMappingInfo)
+                {
+                    dConfig.flags2 = {
+                        .sType = VK_STRUCTURE_TYPE_PIPELINE_CREATE_FLAGS_2_CREATE_INFO,
+                        .pNext = nullptr,
+                        .flags = VK_PIPELINE_CREATE_2_DESCRIPTOR_HEAP_BIT_EXT,
+                    };
+                    dConfig.pipelineRenderingInfo.pNext = &dConfig.flags2;
+                }
 
                 dConfig.pipelineInfo.subpass = 0;
                 return dConfig;

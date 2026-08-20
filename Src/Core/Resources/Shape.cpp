@@ -44,8 +44,11 @@ void Shapes::Bind(CommandBuffer& commandBuffer, Shader& shader)
     shader.GetPipeline().Bind(commandBuffer);
     aDevice->vkCmdSetPolygonModeEXT(commandBuffer, PolygonMode);
     vkCmdSetPrimitiveTopology(commandBuffer, Topology);
+    if (aDevice->DescriptorHeapSupport())
+    {
 
-    if (aDevice->DescriptorBufferSupport())
+    }
+    else if (aDevice->DescriptorBufferSupport())
     {
         uint32_t bufferIndices[] = {0, 1};
         VkDeviceSize offsets[] = {0, 0};
@@ -55,9 +58,7 @@ void Shapes::Bind(CommandBuffer& commandBuffer, Shader& shader)
 
     shapePushConstant.shapePtr = shapeBuffer.GetAddress();
     shapePushConstant.resolution = {float(commandBuffer.Extent.width), float(commandBuffer.Extent.height)};
-    vkCmdPushConstants(commandBuffer, shader.GetPipelineLayout(),
-        shader.StageFlags, 0, sizeof(shapePushConstant),
-        &shapePushConstant);
+    aDevice->PushData(commandBuffer, &shader, &shapePushConstant, sizeof(shapeBuffer));
 }
 
 void Shapes::Draw(CommandBuffer& commandBuffer)
