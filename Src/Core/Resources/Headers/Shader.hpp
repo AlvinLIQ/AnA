@@ -10,6 +10,7 @@ namespace AnA
         Shader(Device* mDevice, std::vector<ShaderInfo>& shaderInfos,
             const std::vector<VkDescriptorSetLayout>& _setLayouts,
             VkDeviceSize pushConstantSize = 0,
+            VkShaderDescriptorSetAndBindingMappingInfoEXT* pDescriptorSetMappingInfo = nullptr,
             VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
 
         Shader(const Shader&) = delete;

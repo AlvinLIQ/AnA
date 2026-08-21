@@ -9,6 +9,8 @@
 #include "Text.hpp"
 #include "Texture.hpp"
 #include "ShadowMap.hpp"
+#include "video/khronos/vulkan/vulkan_core.h"
+#include "vulkan/vulkan_core.h"
 #include <mutex>
 #include <string>
 #include <unordered_map>
@@ -66,9 +68,12 @@ namespace AnA
         struct DescriptorResources
         {
             VkDescriptorSetLayout setLayout;
+            VkDescriptorSet set;
+            VkDescriptorPool pool;
             Buffer buffer;
             void cleanup(VkDevice device)
             {
+                vkDestroyDescriptorPool(device, pool, VK_NULL_HANDLE);
                 vkDestroyDescriptorSetLayout(device, setLayout, VK_NULL_HANDLE);
             }
         };
@@ -106,6 +111,7 @@ namespace AnA
             void Resize();
 
             void BindDescriptors(VkCommandBuffer commandBuffer);
+            void BindDescriptors(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout);
 
             Resources::Meshes Meshes;
             Scene MainScene;
@@ -148,9 +154,6 @@ namespace AnA
             }
             uint32_t AppendTexture(const uint32_t color, uint32_t* index = nullptr, const std::string& name = "");
             uint32_t AppendTexture(const std::string& path, uint32_t* index = nullptr);
-            uint32_t AppendTexture(VkImage image, VmaAllocation allocation,
-                VkImageView imageView, uint32_t* index = nullptr, const std::string& name = "");
-
 
             MeshShaderOutput MeshShaderOutputData;
         private:
@@ -158,9 +161,10 @@ namespace AnA
             std::vector<Buffer> miscBuffers;
             void createMiscBuffers();
 
-            DescriptorResources samplerDescriptor;
-            DescriptorResources sampledImageDescriptor;
+            DescriptorResources samplerDescriptor{};
+            DescriptorResources sampledImageDescriptor{};
             void createSampledImageResources();
+            void appendSampledImage(uint32_t id, Texture& texture);
             void appendSampledImage(VkImageDescriptorInfoEXT& imageInfo);
             void appendSampledImage(VkDescriptorImageInfo& imageInfo);
 

@@ -1,6 +1,7 @@
 #include "Headers/Shape.hpp"
 #include "Headers/Shader.hpp"
 #include "../GUI/Controls/Headers/Control.hpp"
+#include "Resources/Headers/ResourceManager.hpp"
 
 using namespace AnA;
 
@@ -44,20 +45,25 @@ void Shapes::Bind(CommandBuffer& commandBuffer, Shader& shader)
     shader.GetPipeline().Bind(commandBuffer);
     aDevice->vkCmdSetPolygonModeEXT(commandBuffer, PolygonMode);
     vkCmdSetPrimitiveTopology(commandBuffer, Topology);
+    if (aDevice->DescriptorHeapSupport())
+    {
 
-    if (aDevice->DescriptorBufferSupport())
+    }
+    else if (aDevice->DescriptorBufferSupport())
     {
         uint32_t bufferIndices[] = {0, 1};
         VkDeviceSize offsets[] = {0, 0};
         vkCmdSetDescriptorBufferOffsetsEXT(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
             shader.GetPipelineLayout(), 0, 2, bufferIndices, offsets);
     }
+    else
+    {
+        Resources::ResourceManager::GetCurrent()->BindDescriptors(commandBuffer, shader.GetPipelineLayout());
+    }
 
     shapePushConstant.shapePtr = shapeBuffer.GetAddress();
     shapePushConstant.resolution = {float(commandBuffer.Extent.width), float(commandBuffer.Extent.height)};
-    vkCmdPushConstants(commandBuffer, shader.GetPipelineLayout(),
-        shader.StageFlags, 0, sizeof(shapePushConstant),
-        &shapePushConstant);
+    aDevice->PushData(commandBuffer, &shader, &shapePushConstant, sizeof(shapePushConstant));
 }
 
 void Shapes::Draw(CommandBuffer& commandBuffer)

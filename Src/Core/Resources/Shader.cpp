@@ -11,15 +11,20 @@ Shader::Shader(Device* mDevice) : aDevice{mDevice}
 }
 
 Shader::Shader(Device* mDevice, std::vector<ShaderInfo>& shaderInfos,
-            const std::vector<VkDescriptorSetLayout>& _setLayouts, VkDeviceSize pushConstantSize, VkPrimitiveTopology topology) :
+            const std::vector<VkDescriptorSetLayout>& _setLayouts,
+            VkDeviceSize pushConstantSize,
+            VkShaderDescriptorSetAndBindingMappingInfoEXT* pDescriptorSetMappingInfo,
+            VkPrimitiveTopology topology) :
     Topology{topology}, aDevice{mDevice},
     setLayouts{_setLayouts}
 {
-    createPipelineLayout(pushConstantSize);
+    if (!(aDevice->DescriptorHeapSupport() && pDescriptorSetMappingInfo))
+        createPipelineLayout(pushConstantSize);
     auto swapChain = SwapChain::GetCurrent();
     Pipeline::PipelineConfig pipelineConfig =
         Pipeline::PipelineConfig::GetForDynamicRendering(mDevice, shaderInfos, pipelineLayout,
         swapChain->GetFormat(), swapChain->GetDepthFormat(), aDevice->GetMaxUsableSampleCount(),
+        pDescriptorSetMappingInfo,
         Topology);
     hasMeshShader= pipelineConfig.hasMeshShader;
     pipeline = Pipeline(mDevice, pipelineConfig);
