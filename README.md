@@ -1,6 +1,6 @@
 # AnA Game Engine
 
-![Logo](https://github.com/AlvinLIQ/AnA_Docs/blob/main/Img/AnA_Logo.png "AnA")
+![Logo](Icons/AnA.png "AnA")
 
 ## Currently working on
 
