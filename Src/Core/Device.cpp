@@ -864,6 +864,8 @@ void Device::pickPhysicalDevice()
     }
     if (physicalDevice == VK_NULL_HANDLE)
         throw std::runtime_error("Failed to find a suitable GPU!");
+    deviceFeatures.descriptorBufferSupport = false;
+    deviceFeatures.descriptorHeapSupport = false;
 
     if (deviceFeatures.descriptorHeapSupport)
         deviceExtensions.push_back(VK_EXT_DESCRIPTOR_HEAP_EXTENSION_NAME);

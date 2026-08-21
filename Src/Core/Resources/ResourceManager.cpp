@@ -303,7 +303,8 @@ void ResourceManager::createSampledImageResources()
         layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
         layoutInfo.bindingCount = 1;
         layoutInfo.pBindings = &binding;
-        layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
+        if(aDevice->DescriptorBufferSupport())
+            layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
 
         vkCreateDescriptorSetLayout(aDevice->GetLogicalDevice(), &layoutInfo,
             VK_NULL_HANDLE, &samplerDescriptor.setLayout);
@@ -340,7 +341,9 @@ void ResourceManager::createSampledImageResources()
             poolSizes[1].type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
             poolSizes[1].descriptorCount = MaxBatchSize;
             VkDescriptorPoolCreateInfo poolInfo{};
+            poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
             poolInfo.pPoolSizes = poolSizes;
+            poolInfo.maxSets = 2;
             poolInfo.poolSizeCount = numsof(poolSizes);
             if (vkCreateDescriptorPool(aDevice->GetLogicalDevice(), &poolInfo, VK_NULL_HANDLE, &samplerDescriptor.pool) != VK_SUCCESS)
                 throw std::runtime_error("failed to create descriptor pool");
@@ -349,6 +352,7 @@ void ResourceManager::createSampledImageResources()
             VkDescriptorSet sets[2];
             VkDescriptorSetAllocateInfo allocInfo;
             allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+            allocInfo.pNext = VK_NULL_HANDLE;
             allocInfo.pSetLayouts = setLayouts;
             allocInfo.descriptorPool = samplerDescriptor.pool;
             allocInfo.descriptorSetCount = 2;
@@ -423,7 +427,16 @@ void ResourceManager::appendSampledImage(VkDescriptorImageInfo& imageInfo)
     }
     else
     {
+        VkWriteDescriptorSet write{};
+        write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        write.descriptorCount = 1;
+        write.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+        write.pImageInfo = &imageInfo;
+        write.dstBinding = 0;
+        write.dstSet = sampledImageDescriptor.set;
+        write.dstArrayElement = uint32_t(textureInfos.size());
 
+        vkUpdateDescriptorSets(aDevice->GetLogicalDevice(), 1, &write, 0, VK_NULL_HANDLE);
     }
 
     textureInfos.push_back(imageInfo);
