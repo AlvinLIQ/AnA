@@ -1,6 +1,6 @@
 # AnA Game Engine
 
-![Logo](https://github.com/AlvinLIQ/AnA_Docs/blob/main/Img/AnA_Logo.png "AnA")
+![Logo](Icons/AnA.png "AnA")
 
 ## Currently working on
 
@@ -11,9 +11,9 @@
 * [x] separate shared mesh buffers from Scene
 * [x] create submit info queue and only do single submit call every frame
 * [ ] optimize resource management before scaling
-  * [ ] resource deletion queue
+  * [x] resource deletion queue
   * [x] rewrite scene buffers with lazy buffer rebuild
-  * [ ] use descriptor heap for textures (until mesa 26.2)
+  * [x] use descriptor heap for textures (until mesa 26.2)
   * [x] use device memory address for buffers
   * [ ] make resource manager a facade, real logic in specialized classes.
     * [x] meshes
