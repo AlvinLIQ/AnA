@@ -243,7 +243,8 @@ void Scene::CommitBufferUpdate(Buffer* newObjectBuffer, Buffer* newCommandBuffer
 {
     auto bufferObjects = static_cast<MeshBufferObject*>(newObjectBuffer->GetMappedData());
 
-    auto& modelMap = Resources::ResourceManager::GetCurrent()->Meshes.MeshMap;
+    auto aResourceManager = Resources::ResourceManager::GetCurrent();
+    auto& modelMap = aResourceManager->Meshes.MeshMap;
     glm::mat4 transform;
     for (size_t i = meshOffset; i < meshes.size(); i++)
     {
@@ -254,7 +255,7 @@ void Scene::CommitBufferUpdate(Buffer* newObjectBuffer, Buffer* newCommandBuffer
         auto& scale = meshes[i].transform.scale;
         bufferObjects[i].radius = model->radius * std::max(scale.x, std::max(scale.y, scale.z));
         bufferObjects[i].transform = transform;
-        bufferObjects[i].textureId = meshes[i].textureId;
+        bufferObjects[i].textureId = aResourceManager->TextureIdMap[meshes[i].textureId];
         bufferObjects[i].vertexPtr = model->vertexBuffer.GetAddress();
         bufferObjects[i].meshletVertexPtr = model->meshletVertexBuffer.GetAddress();
         bufferObjects[i].meshletIndexPtr = model->meshletIndexBuffer.GetAddress();

@@ -105,6 +105,7 @@ namespace AnA
         bool FramebufferResized = false;
         void (*KeyCallback)(int scancode, int action) = nullptr;
         void (*ScrollCallback)(float dx, float dy) = nullptr;
+        void (*TextCallback)(const char* text) = nullptr;
         //static void FramebufferResizeCallback(GLFWwindow* window, int width, int height);
     private:
         SDL_Window* window;

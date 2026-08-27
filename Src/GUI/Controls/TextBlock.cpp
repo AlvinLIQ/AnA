@@ -119,13 +119,13 @@ const char* TextBlock::Text()
     return info ? info->text.c_str() : "";
 }
 
-void TextBlock::Insert(size_t index, uint32_t ch)
+void TextBlock::Insert(size_t index, const char* text)
 {
     auto& textContext = Resources::ResourceManager::GetCurrent()->TextContext;
     auto info = textContext.GetInfoById(id);
     if (info)
     {
-        info->text.insert(info->text.begin() + index, ch);
+        info->text.insert(index, text);
         textContext.UpdateText(id, info->text);
     }
 }

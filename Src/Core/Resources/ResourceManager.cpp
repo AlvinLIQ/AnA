@@ -247,7 +247,10 @@ uint32_t ResourceManager::AppendTexture(const std::string& path, uint32_t* index
     auto result = TextureMap.try_emplace(texId, path.c_str(), aDevice);
 
     if (index)
-        *index = uint32_t(textureInfos.size());
+    {
+        *index = aDevice->DescriptorHeapSupport() ? uint32_t(textureHeapInfos.size()) :
+            uint32_t(textureInfos.size());
+    }
     TexturePathMap.emplace(path, texId);
 
     appendSampledImage(result.first->first, result.first->second);

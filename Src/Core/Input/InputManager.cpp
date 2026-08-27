@@ -11,6 +11,7 @@ InputManager::InputManager(Window& mWindow) : aWindow {mWindow}
 
     aWindow.KeyCallback = keyCallback;
     aWindow.ScrollCallback = scrollCallback;
+    aWindow.TextCallback = textCallback;
     //glfwSetKeyCallback(window, InputManager::keyCallback);
     //glfwSetCharCallback(window, InputManager::characterCallback);
     //glfwSetScrollCallback(window, InputManager::scrollCallback);
@@ -84,6 +85,15 @@ void InputManager::scrollCallback(float dx, float dy)
     for (auto& scrollConfig : scrollConfigs)
     {
         scrollConfig.callback(dx, dy);
+    }
+}
+
+void InputManager::textCallback(const char* text)
+{
+    auto &textConfigs = _aInputManager->GetActiveProfile().textConfigs;
+    for (auto& textConfig : textConfigs)
+    {
+        textConfig.callback(text);
     }
 }
 

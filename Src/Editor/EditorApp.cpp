@@ -23,7 +23,7 @@ EditorApp::~EditorApp()
 void EditorApp::Init()
 {
     aResourceManager.MainControl = InitControl();
-    aResourceManager.MainScene.MeshAppend = EditorApp::mainScene_MeshAppend;
+//    aResourceManager.MainScene.MeshAppend = EditorApp::mainScene_MeshAppend;
     sceneOffset.x = EDITOR_LEFT_PANEL_WIDTH;
     aInputManager.GlobalProfile.flag = Input::InputProfileFlags::None;
     Input::KeyMapConfig keyMapConfig;

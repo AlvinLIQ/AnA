@@ -10,7 +10,9 @@ namespace AnA
         {
         public:
             TextBox();
-            void CharacterRecevied(uint32_t ch) override;
+            void TextReceived(const char* text) override;
+            void Focus() override;
+            void Unfocus() override;
         protected:
             size_t cursor = 0;
         };

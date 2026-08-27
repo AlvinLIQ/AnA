@@ -65,7 +65,8 @@ void Window::PollEvents()
                 break;
             case SDL_EVENT_TEXT_INPUT:
             {
-                printf("%s\n", event.text.text);
+                if (TextCallback)
+                    TextCallback(event.text.text);
                 break;
             }
             case SDL_EVENT_WINDOW_RESIZED:

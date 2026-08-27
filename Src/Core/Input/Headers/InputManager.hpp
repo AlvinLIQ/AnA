@@ -27,10 +27,10 @@ namespace AnA
             CursorCallBack callback;
             int action;
         };
-        typedef void(*CharacterCallBack)(uint32_t ch);
-        struct CharacterConfig
+        typedef void(*TextCallBack)(const char* text);
+        struct TextConfig
         {
-            CharacterCallBack callback;
+            TextCallBack callback;
         };
         typedef void(*ScrollConfigCallBack)(float dx, float dy);
         struct ScrollConfig
@@ -48,7 +48,7 @@ namespace AnA
             std::vector<KeyMapConfig> opKeyMapConfigs;
             std::vector<CursorConfig> cursorConfigs;
             std::vector<ScrollConfig> scrollConfigs;
-            std::vector<CharacterConfig> characterConfigs;
+            std::vector<TextConfig> textConfigs;
             void* param;
             //only call when there's a config
             void(*callback)(void* param) = nullptr;
@@ -92,6 +92,7 @@ namespace AnA
             static void keyCallback(int scancode, int action);
             //static void characterCallback(GLFWwindow* window, uint32_t ch);
             static void scrollCallback(float dx, float dy);
+            static void textCallback(const char* text);
             int activeProfileIndex = 0;
             std::vector<InputProfile> inputProfiles{1};
             CursorArgs curArgs;

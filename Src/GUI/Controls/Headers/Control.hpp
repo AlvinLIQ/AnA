@@ -53,7 +53,7 @@ namespace AnA
             virtual void PrepareDraw(Shape* shapeBuffer, uint32_t& shapeCount);
             bool ProcessEventArgs(PointerEventArgs& args, PointerEventType& actualEventType);
             virtual void PointerEventTrigger(PointerEventArgs& args);
-            virtual void CharacterRecevied(uint32_t ch);
+            virtual void TextReceived(const char* text);
             static void InitControl(SwapChain* swapChain);
             static Float* GetScale();
             static VkExtent2D GetSwapChainExtent();
@@ -89,8 +89,8 @@ namespace AnA
             std::vector<PointerEventHandler> PointerEvents[PointerEventType::PointerEventTypeCount] = {};
 
             bool IsFocused();
-            void Focus();
-            void Unfocus();
+            virtual void Focus();
+            virtual void Unfocus();
             short FocusType = 0;
             bool IsPressed() const
             {

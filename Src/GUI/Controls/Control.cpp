@@ -106,7 +106,12 @@ bool Control::IsFocused()
 
 void Control::Focus()
 {
-    focusedControl = this;
+    if (focusedControl != this)
+    {
+        if (focusedControl)
+            focusedControl->Unfocus();
+        focusedControl = this;
+    }
 }
 
 void Control::Unfocus()
@@ -117,7 +122,8 @@ void Control::Unfocus()
 
 void Control::ClearFocus()
 {
-    focusedControl = nullptr;
+    if (focusedControl)
+        focusedControl->Unfocus();
 }
 
 Control* Control::GetFocused()
@@ -285,9 +291,9 @@ void Control::PointerEventTrigger(PointerEventArgs& args)
         RunPointerEvents(PointerEvents[actualEventType], this, args);
 }
 
-void Control::CharacterRecevied(uint32_t ch)
+void Control::TextReceived(const char* text)
 {
-    printf("%c", ch);
+    printf("%s\n", text);
 }
 
 PointerEventType GetPointerEventType(int buttonAction, const Input::CursorArgs& args)
@@ -339,10 +345,10 @@ PointerEventType GetPointerEventType(int buttonAction, const Input::CursorArgs& 
     return eventType;
 }
 
-void _characterReceived(uint32_t ch)
+void _textRecevied(const char* text)
 {
     if (focusedControl != nullptr)
-        focusedControl->CharacterRecevied(ch);
+        focusedControl->TextReceived(text);
 }
 
 void _scrolled(float dx, float dy)
@@ -384,7 +390,7 @@ void Controls::Control::GetInputProfile(Control* mainControl, std::vector<Input:
             control->PointerEventTrigger(args);
     };
     profile.cursorConfigs.push_back(cursorConfig);
-    profile.characterConfigs.push_back({_characterReceived});
+    profile.textConfigs.push_back({_textRecevied});
     profile.scrollConfigs.push_back({_scrolled});
     profiles.push_back(profile);
 }

@@ -1,0 +1,18 @@
+// Project-local debug tasks
+//
+// For more documentation on how to configure debug tasks,
+// see: https://zed.dev/docs/debugger
+[
+  {
+    "label": "debug",
+    "adapter": "CodeLLDB",
+    "program": "AnA",
+    "request": "launch",
+  },
+  {
+    "label": "gdb",
+    "adapter": "GDB",
+    "program": "AnA",
+    "request": "launch",
+  },
+]

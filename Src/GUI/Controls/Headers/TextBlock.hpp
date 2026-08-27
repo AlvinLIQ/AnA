@@ -18,7 +18,7 @@ namespace AnA
             void Text(const char* newText);
             const char* Text();
 
-            void Insert(size_t index, uint32_t ch);
+            void Insert(size_t index, const char* text);
 
             bool IsWrapping;
             Float FontSize = 14.0f;
