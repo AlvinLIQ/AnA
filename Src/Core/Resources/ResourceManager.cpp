@@ -284,14 +284,16 @@ void ResourceManager::createSampledImageResources()
             prop.samplerDescriptorSize +
             prop.minSamplerHeapReservedRange,
             VK_BUFFER_USAGE_DESCRIPTOR_HEAP_BIT_EXT,
-            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE,
+            prop.samplerDescriptorAlignment);
         samplerDescriptor.buffer.Map();
 
         sampledImageDescriptor.buffer = Buffer(aDevice,
             MaxBatchSize * prop.imageDescriptorSize +
             prop.minResourceHeapReservedRange,
             VK_BUFFER_USAGE_DESCRIPTOR_HEAP_BIT_EXT,
-            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE,
+            prop.resourceHeapAlignment);
         sampledImageDescriptor.buffer.Map();
     }
     else

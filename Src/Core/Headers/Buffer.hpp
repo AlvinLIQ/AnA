@@ -13,7 +13,8 @@ namespace AnA
         {
 
         }
-        Buffer(Device* mDevice, VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memUsage);
+        Buffer(Device* mDevice, VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memUsage,
+            VkDeviceSize alignment = 0);
         ~Buffer();
 //        Buffer(const Buffer&) = delete;
 //        Buffer &operator=(const Buffer&) = delete;
@@ -25,6 +26,7 @@ namespace AnA
             buffer = buf.buffer;
             bufferSize = buf.bufferSize;
             bufferUsage = buf.bufferUsage;
+            bufferAlignment = buf.bufferAlignment;
             memoryUsage = buf.memoryUsage;
             address = buf.address;
             allocation = buf.allocation;
@@ -44,6 +46,7 @@ namespace AnA
                 buffer = buf.buffer;
                 bufferSize = buf.bufferSize;
                 bufferUsage = buf.bufferUsage;
+                bufferAlignment = buf.bufferAlignment;
                 memoryUsage = buf.memoryUsage;
                 address = buf.address;
                 allocation = buf.allocation;
@@ -81,7 +84,7 @@ namespace AnA
             if (newSize != bufferSize)
             {
                 bool isMapped = mappedData;
-                *this = Buffer(aDevice, newSize, bufferUsage, memoryUsage);
+                *this = Buffer(aDevice, newSize, bufferUsage, memoryUsage, bufferAlignment);
                 if (isMapped)
                     Map();
 
@@ -111,6 +114,7 @@ namespace AnA
         VkBuffer buffer = VK_NULL_HANDLE;
         VkDeviceAddress address = 0;
         VkDeviceSize bufferSize = 0;
+        VkDeviceSize bufferAlignment = 0;
         VkBufferUsageFlags bufferUsage;
         VmaMemoryUsage memoryUsage;
         VmaAllocation allocation;

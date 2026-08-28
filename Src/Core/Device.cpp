@@ -44,7 +44,7 @@ Device::~Device()
     vkDestroyDevice(logicalDevice, nullptr);
 }
 
-void Device::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memUsage, VkBuffer& buffer, VmaAllocation& allocation)
+void Device::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memUsage, VkDeviceSize alignment, VkBuffer& buffer, VmaAllocation& allocation)
 {
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -57,6 +57,7 @@ void Device::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VmaMemory
     VmaAllocationCreateInfo allocInfo{};
     allocInfo.usage = memUsage;
     allocInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT;
+    allocInfo.minAlignment = alignment;
     if (usage == VK_BUFFER_USAGE_TRANSFER_DST_BIT || usage == VK_BUFFER_USAGE_TRANSFER_SRC_BIT)
         allocInfo.flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_ALLOW_TRANSFER_INSTEAD_BIT;
 

@@ -5,12 +5,13 @@ using namespace AnA;
 
 std::vector<Buffer*> replaceList{};
 
-Buffer::Buffer(Device* mDevice, VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memUsage) : aDevice{mDevice},
+Buffer::Buffer(Device* mDevice, VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memUsage,
+    VkDeviceSize alignment) : aDevice{mDevice},
  bufferSize {size}, bufferUsage{usage}, memoryUsage{memUsage}
 {
-    if (bufferSize)
+    if (size)
     {
-        aDevice->CreateBuffer(size, usage, memUsage, buffer, allocation);
+        aDevice->CreateBuffer(bufferSize, usage, memUsage, alignment, buffer, allocation);
 
         VkBufferDeviceAddressInfo addressInfo{};
         addressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
