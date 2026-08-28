@@ -27,6 +27,7 @@ namespace AnA
             bufferSize = buf.bufferSize;
             bufferUsage = buf.bufferUsage;
             bufferAlignment = buf.bufferAlignment;
+            bufferOffset = buf.bufferOffset;
             memoryUsage = buf.memoryUsage;
             address = buf.address;
             allocation = buf.allocation;
@@ -47,6 +48,7 @@ namespace AnA
                 bufferSize = buf.bufferSize;
                 bufferUsage = buf.bufferUsage;
                 bufferAlignment = buf.bufferAlignment;
+                bufferOffset = buf.bufferOffset;
                 memoryUsage = buf.memoryUsage;
                 address = buf.address;
                 allocation = buf.allocation;
@@ -68,7 +70,7 @@ namespace AnA
         VkDeviceAddress GetAddress();
         void* GetMappedData()
         {
-            return mappedData;
+            return static_cast<uint8_t*>(mappedData) + bufferOffset;
         }
         VkDeviceSize GetSize() const
         {
@@ -115,6 +117,7 @@ namespace AnA
         VkDeviceAddress address = 0;
         VkDeviceSize bufferSize = 0;
         VkDeviceSize bufferAlignment = 0;
+        VkDeviceSize bufferOffset = 0;
         VkBufferUsageFlags bufferUsage;
         VmaMemoryUsage memoryUsage;
         VmaAllocation allocation;

@@ -65,6 +65,10 @@ namespace AnA
         file.close();
         return buffer;
     }
+    inline VkDeviceSize AlignTo(VkDeviceSize size, VkDeviceSize alignment)
+    {
+        return (size + alignment - 1) & ~(alignment - 1);
+    }
     class Buffer;
     class CommandBuffer;
     namespace Cameras
@@ -115,7 +119,7 @@ namespace AnA
         Device(VkInstance &mInstance, VkSurfaceKHR &mSurface);
         ~Device();
 
-        void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memUsage, VkDeviceSize alignment, VkBuffer& buffer, VmaAllocation& allocation);
+        void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memUsage, VkBuffer& buffer, VmaAllocation& allocation);
         void DestroyBuffer(VkBuffer buffer, VmaAllocation allocation);
         void MapBuffer(void** data, VmaAllocation allocation);
         void UnmapBuffer(VmaAllocation);

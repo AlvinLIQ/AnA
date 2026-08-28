@@ -1,4 +1,5 @@
 #include "Headers/Buffer.hpp"
+#include "Headers/Device.hpp"
 #include <cassert>
 
 using namespace AnA;
@@ -11,13 +12,15 @@ Buffer::Buffer(Device* mDevice, VkDeviceSize size, VkBufferUsageFlags usage, Vma
 {
     if (size)
     {
-        aDevice->CreateBuffer(bufferSize, usage, memUsage, alignment, buffer, allocation);
+        aDevice->CreateBuffer(bufferSize + alignment, usage, memUsage, buffer, allocation);
 
         VkBufferDeviceAddressInfo addressInfo{};
         addressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
         addressInfo.buffer = buffer;
 
         address = vkGetBufferDeviceAddress(aDevice->GetLogicalDevice(), &addressInfo);
+        if (alignment > 1)
+            bufferOffset = AlignTo(address, alignment) - address;
     }
 }
 
@@ -53,7 +56,7 @@ VkBuffer Buffer::GetBuffer()
 
 VkDeviceAddress Buffer::GetAddress()
 {
-    return address;
+    return address + bufferOffset;
 }
 
 void Buffer::cleanup()

@@ -184,13 +184,13 @@ void ResourceManager::BindDescriptors(VkCommandBuffer commandBuffer)
         auto& prop = aDevice->GetDescriptorHeapProperties();
         VkBindHeapInfoEXT bindInfo{};
         bindInfo.sType = VK_STRUCTURE_TYPE_BIND_HEAP_INFO_EXT;
-        bindInfo.reservedRangeOffset = 0;
+        bindInfo.reservedRangeOffset = samplerDescriptor.buffer.GetSize() - prop.minSamplerHeapReservedRange;
         bindInfo.reservedRangeSize = prop.minSamplerHeapReservedRange;
         bindInfo.heapRange.address = samplerDescriptor.buffer.GetAddress();
         bindInfo.heapRange.size = samplerDescriptor.buffer.GetSize();
         vkCmdBindSamplerHeapEXT(commandBuffer, &bindInfo);
 
-        bindInfo.reservedRangeOffset = 0;
+        bindInfo.reservedRangeOffset = sampledImageDescriptor.buffer.GetSize() - prop.minResourceHeapReservedRange;
         bindInfo.reservedRangeSize = prop.minResourceHeapReservedRange;
         bindInfo.heapRange.address = sampledImageDescriptor.buffer.GetAddress();
         bindInfo.heapRange.size = sampledImageDescriptor.buffer.GetSize();
@@ -293,7 +293,7 @@ void ResourceManager::createSampledImageResources()
             prop.minResourceHeapReservedRange,
             VK_BUFFER_USAGE_DESCRIPTOR_HEAP_BIT_EXT,
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE,
-            prop.resourceHeapAlignment);
+            prop.imageDescriptorAlignment);
         sampledImageDescriptor.buffer.Map();
     }
     else
@@ -490,6 +490,7 @@ void ResourceManager::createDefaultShaders()
     mappings[0].descriptorSet = 0;
     mappings[0].resourceMask = VK_SPIRV_RESOURCE_TYPE_SAMPLER_BIT_EXT;
     mappings[0].source = VK_DESCRIPTOR_MAPPING_SOURCE_HEAP_WITH_CONSTANT_OFFSET_EXT;
+    mappings[0].sourceData.constantOffset.heapArrayStride = prop.samplerDescriptorSize;
 
     mappings[1].sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_AND_BINDING_MAPPING_EXT;
     mappings[1].firstBinding = 0;
