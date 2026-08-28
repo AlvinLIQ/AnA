@@ -10,6 +10,12 @@
     "request": "launch",
   },
   {
+    "label": "debug windows",
+    "adapter": "CodeLLDB",
+    "program": "AnA.exe",
+    "request": "launch",
+  },
+  {
     "label": "gdb",
     "adapter": "GDB",
     "program": "AnA",

@@ -18,7 +18,7 @@ Shader::Shader(Device* mDevice, std::vector<ShaderInfo>& shaderInfos,
     Topology{topology}, aDevice{mDevice},
     setLayouts{_setLayouts}
 {
-    if (!(aDevice->DescriptorHeapSupport() && pDescriptorSetMappingInfo))
+    if (!aDevice->DescriptorHeapSupport())
         createPipelineLayout(pushConstantSize);
     auto swapChain = SwapChain::GetCurrent();
     Pipeline::PipelineConfig pipelineConfig =

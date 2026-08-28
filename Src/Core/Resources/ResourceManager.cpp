@@ -405,7 +405,7 @@ void ResourceManager::appendSampledImage(VkImageDescriptorInfoEXT& imageInfo)
 
     VkHostAddressRangeEXT descriptorRange{};
     descriptorRange.address = reinterpret_cast<uint8_t*>(sampledImageDescriptor.buffer.GetMappedData()) +
-        textureHeapInfos.size() * prop.imageDescriptorSize + prop.minResourceHeapReservedRange;
+        textureHeapInfos.size() * prop.imageDescriptorSize;// + prop.minResourceHeapReservedRange;
     descriptorRange.size = prop.imageDescriptorSize;
 
     vkWriteResourceDescriptorsEXT(aDevice->GetLogicalDevice(),
@@ -532,8 +532,8 @@ void ResourceManager::initTextures()
         auto& prop = aDevice->GetDescriptorHeapProperties();
         auto samplerInfo = aDevice->SamplerInfo();
         VkHostAddressRangeEXT descriptorRange;
-        descriptorRange.address = reinterpret_cast<uint8_t*>(samplerDescriptor.buffer.GetMappedData()) +
-            prop.minSamplerHeapReservedRange;
+        descriptorRange.address = reinterpret_cast<uint8_t*>(samplerDescriptor.buffer.GetMappedData());// +
+            //prop.minSamplerHeapReservedRange;
         descriptorRange.size = prop.samplerDescriptorSize;
         vkWriteSamplerDescriptorsEXT(aDevice->GetLogicalDevice(), 1, &samplerInfo, &descriptorRange);
     }

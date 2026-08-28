@@ -230,7 +230,7 @@ namespace AnA
                 dConfig.pipelineRenderingInfo.depthAttachmentFormat = dConfig.depthAttachmentFormat;
                 dConfig.pipelineRenderingInfo.stencilAttachmentFormat = VK_FORMAT_UNDEFINED;
 
-                if (aDevice->DescriptorHeapSupport() && pDescriptorSetMappingInfo)
+                if (aDevice->DescriptorHeapSupport())
                 {
                     dConfig.flags2 = {
                         .sType = VK_STRUCTURE_TYPE_PIPELINE_CREATE_FLAGS_2_CREATE_INFO,
