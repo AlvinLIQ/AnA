@@ -4,6 +4,7 @@
 #include "Headers/Device.hpp"
 #include "Resources/Headers/Animation.hpp"
 #include "vulkan/vulkan_core.h"
+#include <filesystem>
 #include <stdexcept>
 
 using namespace AnA;
@@ -240,6 +241,12 @@ uint32_t ResourceManager::AppendTexture(const uint32_t color, uint32_t* index, c
 
 uint32_t ResourceManager::AppendTexture(const std::string& path, uint32_t* index)
 {
+    if (!std::filesystem::is_regular_file(path))
+    {
+        if (index)
+            *index = 0;
+        return 0;
+    }
     auto iter = TexturePathMap.find(path);
     if (iter != TexturePathMap.end())
         return iter->second;

@@ -121,7 +121,7 @@ void Mesh::CreateMeshesFromFile(const char *filePath, std::vector<MeshData>& mes
     for (uint32_t t = 0; t < mesh->texture_count; t++)
         if (mesh->textures[t].path)
         {
-            auto path = std::string(mesh->textures[t].path + parentPath.length() + 1);
+            auto path = std::string(mesh->textures[t].path);// + parentPath.length() + 1);
             textures[t] = resourceManager->AppendTexture(path);
         }
         else

@@ -270,7 +270,7 @@ void EditorApp::saveSceneButton_Click(void* , PointerEventArgs& )
 
 void EditorApp::exitButton_Click(void* , PointerEventArgs& )
 {
-    exit(0);
+    App::GetCurrent()->Exit();
 }
 
 void EditorApp::pageTabs_SelectionChanged(void* )

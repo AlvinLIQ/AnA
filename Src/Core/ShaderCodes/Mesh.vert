@@ -77,7 +77,7 @@ void main()
         float(vertex.color.r) / 255.0,
         float(vertex.color.g) / 255.0,
         float(vertex.color.b) / 255.0);
-    texCoord = vertex.uv;
+    texCoord = vec2(vertex.uv.x, 1. - vertex.uv.y);
     texID = mesh.textureId;
     vertexPosition = vertexPos.xyz / vertexPos.w;
     vec3 normal =
