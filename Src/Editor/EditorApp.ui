@@ -20,7 +20,7 @@
                 <TextBlock Text="Load Model" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Button>
             <Button HorizontalAlignment="Start" Click="saveSceneButton_Click">
-                <TextBlock Text="Save Scene"/>
+                <TextBlock Text="Export Scene"/>
             </Button>
             <TextBlock Text="Meshes"/>
             <ObjectView Name="modelList" Orientation="Vertical" HorizontalAlignment="Stretch" Color="DefaultControlBackgroundColor"/>

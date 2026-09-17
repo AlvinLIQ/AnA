@@ -162,18 +162,6 @@ void ShadowMap::createShadowResources()
         imageViewInfo.subresourceRange = { VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, SHADOW_MAP_CASCADE_COUNT };
 
         vkCreateImageView(aDevice->GetLogicalDevice(), &imageViewInfo, nullptr, &shadowImage.imageView);
-        /*
-        VkFramebufferCreateInfo framebufferInfo{};
-        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = SwapChain::GetCurrent()->GetOffscreenRenderPass();
-        framebufferInfo.attachmentCount = 1;
-        framebufferInfo.pAttachments = &shadowImage.imageView;
-
-        framebufferInfo.width = imageInfo.extent.width;
-        framebufferInfo.height = imageInfo.extent.height;
-        framebufferInfo.layers = SHADOW_MAP_CASCADE_COUNT;
-        vkCreateFramebuffer(aDevice->GetLogicalDevice(), &framebufferInfo, nullptr, &framebuffers[i]);
-*/
         if (samplersNotCreated)
             aDevice->CreateSampler(&samplers[i], VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE);
 		cascadeBuffers.emplace_back(aDevice, SHADOW_MAP_CASCADE_COUNT * sizeof(CascadeBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
