@@ -10,7 +10,7 @@ namespace AnA
         class KDTree
         {
         public:
-            KDTree(std::vector<P>& _points) : root(), points(_points) {}
+            KDTree(const std::vector<P>* _points) : root(), points(_points) {}
             ~KDTree()
             {
                 freeNode(root);
@@ -25,7 +25,7 @@ namespace AnA
             };
 
             Node* root;
-            std::vector<P>& points;
+            const std::vector<P>* points;
 
             Node* insert(Node* node, uint32_t index, uint32_t depth)
             {
@@ -33,8 +33,8 @@ namespace AnA
                     return new Node(index);
 
                 uint32_t cd = depth % K;
-                if (reinterpret_cast<T*>(&points[index] + offset)[cd] <
-                    reinterpret_cast<T*>(&points[node->index] + offset)[cd])
+                if (reinterpret_cast<T*>(&(*points)[index] + offset)[cd] <
+                    reinterpret_cast<T*>(&(*points)[node->index] + offset)[cd])
                     node->left = insert(node->left, index, depth + 1);
                 else
                     node->right = insert(node->right, index, depth + 1);
@@ -50,8 +50,8 @@ namespace AnA
                     return true;
 
                 int cd = depth % K;
-                if (reinterpret_cast<T*>(&points[index] + offset)[cd] <
-                    reinterpret_cast<T*>(&points[node->index] + offset)[cd])
+                if (reinterpret_cast<T*>(&(*points)[index] + offset)[cd] <
+                    reinterpret_cast<T*>(&(*points)[node->index] + offset)[cd])
                     return search(node->left, index, depth);
                 else
                     return search(node->right, index, depth);
