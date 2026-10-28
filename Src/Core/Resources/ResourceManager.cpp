@@ -76,6 +76,7 @@ void ResourceManager::UpdateCamera(float aspect)
 {
     MainCameraInfo.aspect = aspect;
     MainCameraInfo.UpdateCameraPerspective(MainCamera);
+    MainCamera.UpdateViewMatrix();
     LightCameraInfo.aspect = aspect;
     //LightCameraInfo.UpdateCameraPerspective(LightCamera);
     //const float scale = 10.5f;
