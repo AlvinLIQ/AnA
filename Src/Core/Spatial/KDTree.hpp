@@ -10,6 +10,10 @@ namespace AnA
         class KDTree
         {
         public:
+            KDTree() : root(), points(NULL)
+            {
+
+            }
             KDTree(const std::vector<P>* _points) : root(), points(_points) {}
             ~KDTree()
             {
