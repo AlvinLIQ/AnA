@@ -182,7 +182,7 @@ void Renderer::BeginRendering(CommandBuffer& commandBuffer)
     colorAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
     colorAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     colorAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    colorAttachmentInfo.clearValue = clearValues[0];
+    colorAttachmentInfo.clearValue = ClearValues[0];
     colorAttachmentInfo.resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT;
     colorAttachmentInfo.resolveImageView = aSwapChain->swapChainImageViews[aSwapChain->CurrentImage];
     colorAttachmentInfo.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -193,7 +193,7 @@ void Renderer::BeginRendering(CommandBuffer& commandBuffer)
     depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     depthAttachment.imageView = aSwapChain->depthImageViews[aSwapChain->CurrentImage];
-    depthAttachment.clearValue = clearValues[1];
+    depthAttachment.clearValue = ClearValues[1];
 
     VkRenderingInfo renderingInfo{};
     renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
@@ -274,7 +274,7 @@ void Renderer::BeginOffscreenRendering(CommandBuffer& commandBuffer)
         colorAttachments[i].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         colorAttachments[i].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         colorAttachments[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        colorAttachments[i].clearValue = clearValues[0];
+        colorAttachments[i].clearValue = ClearValues[0];
     }
 	colorAttachments[0].imageView = framebuffer.position.imageView;
 	colorAttachments[1].imageView = framebuffer.normal.imageView;
@@ -286,7 +286,7 @@ void Renderer::BeginOffscreenRendering(CommandBuffer& commandBuffer)
     depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     depthAttachment.imageView = framebuffer.depth.imageView;
-    depthAttachment.clearValue = clearValues[1];
+    depthAttachment.clearValue = ClearValues[1];
 
     VkRenderingInfo renderingInfo{};
     renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;

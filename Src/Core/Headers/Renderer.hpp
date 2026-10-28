@@ -74,6 +74,7 @@ namespace AnA
         void EndRenderPass(CommandBuffer& commandBuffer);
         void BeginOffscreenRendering(CommandBuffer& commandBuffer);
         void EndOffscreenRendering(CommandBuffer& commandBuffer);
+        VkClearValue ClearValues[2] = {{.color = {{1.0f, 1.0f, 1.0f, 1.0f}}}, {.depthStencil = {1.0f, 0}}};
     private:
         Window& aWindow;
         Device* aDevice;
@@ -92,7 +93,6 @@ namespace AnA
         bool isFrameStarted = false;
 
         bool needUpdate = false;
-        VkClearValue clearValues[2] = {{.color = {{1.0f, 1.0f, 1.0f, 1.0f}}}, {.depthStencil = {1.0f, 0}}};
         VkCommandBufferInheritanceInfo inheritanceInfos[RENDER_PASS_TYPE_SIZE]{};
     };
 }
