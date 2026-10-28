@@ -51,6 +51,7 @@ void InputManager::Check()
     checkProfile(inputProfiles[activeProfileIndex]);
     checkCursorConfigs(GlobalProfile);
     //checkProfile(GlobalProfile);
+    prevPos = curPos;
     prevRelPos = curRelPos;
 }
 
@@ -105,7 +106,7 @@ void InputManager::checkCursorConfigs(Input::InputProfile& inputProfile)
 
     curPos = aWindow.GetCursorPos();
 
-    curRelPos = aWindow.GetCursorRelativePos();
+    curRelPos = {curPos.x - prevPos.x, curPos.y - prevPos.y};
     curArgs.duration = {(curRelPos.x) / aWindow.Width.As<double>(), (curRelPos.y) / aWindow.Height.As<double>()};
     curArgs.pos = {curPos.x / (double)aWindow.Width, curPos.y / (double)aWindow.Height};
     auto &cursorConfigs = inputProfile.cursorConfigs;

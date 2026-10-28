@@ -74,7 +74,7 @@ namespace AnA
                 assert(shaderInfos.size() <= 3);
                 bool isMeshShader = false, hasFragmentShader = false, hasGBuffer = false;
                 dConfig.pipelineInfo.layout = pipelineLayout;
-                if (aDevice->DescriptorBufferSupport())
+                if (!aDevice->DescriptorHeapSupport() && aDevice->DescriptorBufferSupport())
                     dConfig.pipelineInfo.flags = VK_PIPELINE_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
                 dConfig.specializationInfos.resize(shaderInfos.size());
                 dConfig.specializationMapEntries.resize(shaderInfos.size());

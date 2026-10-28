@@ -96,7 +96,7 @@ namespace AnA
             int activeProfileIndex = 0;
             std::vector<InputProfile> inputProfiles{1};
             CursorArgs curArgs;
-            CursorPosition curPos, curRelPos, prevRelPos;
+            CursorPosition curPos, prevPos, curRelPos, prevRelPos;
             void checkCursorConfigs(Input::InputProfile& inputProfile);
             void checkProfile(Input::InputProfile& inputProfile);
         };

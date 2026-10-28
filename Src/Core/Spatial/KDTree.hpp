@@ -15,6 +15,10 @@ namespace AnA
             {
                 freeNode(root);
             }
+            void Insert(uint32_t index)
+            {
+                root = insert(root, index);
+            }
         private:
             struct Node
             {
